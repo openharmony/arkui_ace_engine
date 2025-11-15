@@ -65,11 +65,11 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -121,23 +121,23 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Length
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof double) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as double
                     thisSerializer.writeFloat64(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof Bindable<Length>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<Length>
                 Bindable_Arkui_Component_Units_Length_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -153,15 +153,15 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -177,15 +177,15 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -237,15 +237,15 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -517,29 +517,29 @@ export class ButtonIconOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForShown  = value.shown
         if (valueHolderForShown instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForShownForIdx0  = valueHolderForShown as string
             valueSerializer.writeString(valueHolderForShownForIdx0)
         } else if (valueHolderForShown instanceof image.PixelMap) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForShownForIdx1  = valueHolderForShown as image.PixelMap
             image_PixelMap_serializer.write(valueSerializer, valueHolderForShownForIdx1)
         } else if (valueHolderForShown instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForShownForIdx2  = valueHolderForShown as Resource
             Resource_serializer.write(valueSerializer, valueHolderForShownForIdx2)
         }
         const valueHolderForHidden  = value.hidden
         if (valueHolderForHidden instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForHiddenForIdx0  = valueHolderForHidden as string
             valueSerializer.writeString(valueHolderForHiddenForIdx0)
         } else if (valueHolderForHidden instanceof image.PixelMap) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForHiddenForIdx1  = valueHolderForHidden as image.PixelMap
             image_PixelMap_serializer.write(valueSerializer, valueHolderForHiddenForIdx1)
         } else if (valueHolderForHidden instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForHiddenForIdx2  = valueHolderForHidden as Resource
             Resource_serializer.write(valueSerializer, valueHolderForHiddenForIdx2)
         }
@@ -548,15 +548,15 @@ export class ButtonIconOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSwitchingTmpValue  = valueHolderForSwitching!
             if (valueHolderForSwitchingTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSwitchingTmpValueForIdx0  = valueHolderForSwitchingTmpValue as string
                 valueSerializer.writeString(valueHolderForSwitchingTmpValueForIdx0)
             } else if (valueHolderForSwitchingTmpValue instanceof image.PixelMap) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSwitchingTmpValueForIdx1  = valueHolderForSwitchingTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(valueSerializer, valueHolderForSwitchingTmpValueForIdx1)
             } else if (valueHolderForSwitchingTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSwitchingTmpValueForIdx2  = valueHolderForSwitchingTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSwitchingTmpValueForIdx2)
             }

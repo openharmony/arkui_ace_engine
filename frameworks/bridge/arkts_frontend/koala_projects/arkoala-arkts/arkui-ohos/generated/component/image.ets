@@ -95,27 +95,27 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
     setImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src instanceof image.PixelMap) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const srcForIdx0  = src as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, srcForIdx0)
         } else if (src instanceof ResourceStr) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const srcForIdx1  = src as ResourceStr
             if (srcForIdx1 instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const srcForIdx1ForIdx0  = srcForIdx1 as string
                 thisSerializer.writeString(srcForIdx1ForIdx0)
             } else if (srcForIdx1 instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const srcForIdx1ForIdx1  = srcForIdx1 as Resource
                 Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
             }
         } else if (src instanceof DrawableDescriptor) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const srcForIdx2  = src as DrawableDescriptor
             DrawableDescriptor_serializer.write(thisSerializer, srcForIdx2)
         } else if (src instanceof ImageContent) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const srcForIdx3  = src as ImageContent
             thisSerializer.writeInt32(srcForIdx3.valueOf())
         }
@@ -135,15 +135,15 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof image.PixelMap) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -183,31 +183,31 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof int32) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof ColorContent) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as ColorContent
                 ColorContent_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof ColorMetrics) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as ColorMetrics
                 ColorMetrics_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -331,11 +331,11 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ColorFilter) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ColorFilter
                 ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof drawing.ColorFilter) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as drawing.ColorFilter
                 drawing_ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }

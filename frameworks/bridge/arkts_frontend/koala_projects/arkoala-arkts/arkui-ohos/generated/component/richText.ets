@@ -47,11 +47,11 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
     setRichTextOptionsAttribute(content: string | Resource): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const contentForIdx0  = content as string
             thisSerializer.writeString(contentForIdx0)
         } else if (content instanceof Resource) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const contentForIdx1  = content as Resource
             Resource_serializer.write(thisSerializer, contentForIdx1)
         }

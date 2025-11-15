@@ -70,19 +70,19 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -134,19 +134,19 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -162,19 +162,19 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -190,15 +190,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -226,15 +226,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -250,11 +250,11 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -282,15 +282,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -318,19 +318,19 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -514,15 +514,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -538,15 +538,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -562,11 +562,11 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -582,11 +582,11 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -662,15 +662,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -698,15 +698,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -926,11 +926,11 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -1986,11 +1986,11 @@ export class TextAreaOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
             if (valueHolderForPlaceholderTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPlaceholderTmpValueForIdx0  = valueHolderForPlaceholderTmpValue as string
                 valueSerializer.writeString(valueHolderForPlaceholderTmpValueForIdx0)
             } else if (valueHolderForPlaceholderTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPlaceholderTmpValueForIdx1  = valueHolderForPlaceholderTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValueForIdx1)
             }
@@ -2002,27 +2002,27 @@ export class TextAreaOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextTmpValue  = valueHolderForText!
             if (valueHolderForTextTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextTmpValueForIdx0  = valueHolderForTextTmpValue as ResourceStr
                 if (valueHolderForTextTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForTextTmpValueForIdx0ForIdx0  = valueHolderForTextTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForTextTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForTextTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForTextTmpValueForIdx0ForIdx1  = valueHolderForTextTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx0ForIdx1)
                 }
             } else if (valueHolderForTextTmpValue instanceof Bindable<ResourceStr>) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
             } else if (valueHolderForTextTmpValue instanceof Bindable<Resource>) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTextTmpValueForIdx2  = valueHolderForTextTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx2)
             } else if (valueHolderForTextTmpValue instanceof Bindable<string>) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForTextTmpValueForIdx3  = valueHolderForTextTmpValue as Bindable<string>
                 Bindable_String_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx3)
             }

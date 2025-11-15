@@ -91,11 +91,11 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -219,11 +219,11 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (TypeChecker.isArray_Int32(valueTmpValue)) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Array<int32>
                 thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
                 for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
@@ -255,15 +255,15 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -668,11 +668,11 @@ export class TextCascadePickerRangeContent_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForText  = value.text
         if (valueHolderForText instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForTextForIdx0  = valueHolderForText as string
             valueSerializer.writeString(valueHolderForTextForIdx0)
         } else if (valueHolderForText instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForTextForIdx1  = valueHolderForText as Resource
             Resource_serializer.write(valueSerializer, valueHolderForTextForIdx1)
         }
@@ -721,11 +721,11 @@ export class TextPickerRangeContent_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForIcon  = value.icon
         if (valueHolderForIcon instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForIconForIdx0  = valueHolderForIcon as string
             valueSerializer.writeString(valueHolderForIconForIdx0)
         } else if (valueHolderForIcon instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForIconForIdx1  = valueHolderForIcon as Resource
             Resource_serializer.write(valueSerializer, valueHolderForIconForIdx1)
         }
@@ -734,11 +734,11 @@ export class TextPickerRangeContent_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextTmpValue  = valueHolderForText!
             if (valueHolderForTextTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextTmpValueForIdx0  = valueHolderForTextTmpValue as string
                 valueSerializer.writeString(valueHolderForTextTmpValueForIdx0)
             } else if (valueHolderForTextTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
             }
@@ -782,11 +782,11 @@ export class TextPickerResult_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (TypeChecker.isArray_String(valueHolderForValue)) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Array<string>
             valueSerializer.writeInt32((valueHolderForValueForIdx1.length).toInt())
             for (let valueHolderForValueForIdx1CounterI = 0; valueHolderForValueForIdx1CounterI < valueHolderForValueForIdx1.length; valueHolderForValueForIdx1CounterI++) {
@@ -796,11 +796,11 @@ export class TextPickerResult_serializer {
         }
         const valueHolderForIndex  = value.index
         if (valueHolderForIndex instanceof int32) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForIndexForIdx0  = valueHolderForIndex as int32
             valueSerializer.writeInt32(valueHolderForIndexForIdx0)
         } else if (TypeChecker.isArray_Int32(valueHolderForIndex)) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForIndexForIdx1  = valueHolderForIndex as Array<int32>
             valueSerializer.writeInt32((valueHolderForIndexForIdx1.length).toInt())
             for (let valueHolderForIndexForIdx1CounterI = 0; valueHolderForIndexForIdx1CounterI < valueHolderForIndexForIdx1.length; valueHolderForIndexForIdx1CounterI++) {
@@ -853,15 +853,15 @@ export class DividerOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
             if (valueHolderForStrokeWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeWidthTmpValueForIdx0)
             } else if (valueHolderForStrokeWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStrokeWidthTmpValueForIdx1)
             } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
             }
@@ -873,19 +873,19 @@ export class DividerOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -897,15 +897,15 @@ export class DividerOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartMarginTmpValue  = valueHolderForStartMargin!
             if (valueHolderForStartMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartMarginTmpValueForIdx0  = valueHolderForStartMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForStartMarginTmpValueForIdx0)
             } else if (valueHolderForStartMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStartMarginTmpValueForIdx1)
             } else if (valueHolderForStartMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStartMarginTmpValueForIdx2  = valueHolderForStartMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStartMarginTmpValueForIdx2)
             }
@@ -917,15 +917,15 @@ export class DividerOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndMarginTmpValue  = valueHolderForEndMargin!
             if (valueHolderForEndMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndMarginTmpValueForIdx0  = valueHolderForEndMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForEndMarginTmpValueForIdx0)
             } else if (valueHolderForEndMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForEndMarginTmpValueForIdx1)
             } else if (valueHolderForEndMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForEndMarginTmpValueForIdx2  = valueHolderForEndMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForEndMarginTmpValueForIdx2)
             }
@@ -1014,7 +1014,7 @@ export class TextPickerOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRange  = value.range
         if (TypeChecker.isArray_String(valueHolderForRange)) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForRangeForIdx0  = valueHolderForRange as Array<string>
             valueSerializer.writeInt32((valueHolderForRangeForIdx0.length).toInt())
             for (let valueHolderForRangeForIdx0CounterI = 0; valueHolderForRangeForIdx0CounterI < valueHolderForRangeForIdx0.length; valueHolderForRangeForIdx0CounterI++) {
@@ -1022,7 +1022,7 @@ export class TextPickerOptions_serializer {
                 valueSerializer.writeString(valueHolderForRangeForIdx0TmpElement)
             }
         } else if (TypeChecker.isArray_Array_String(valueHolderForRange)) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForRangeForIdx1  = valueHolderForRange as Array<Array<string>>
             valueSerializer.writeInt32((valueHolderForRangeForIdx1.length).toInt())
             for (let valueHolderForRangeForIdx1CounterI = 0; valueHolderForRangeForIdx1CounterI < valueHolderForRangeForIdx1.length; valueHolderForRangeForIdx1CounterI++) {
@@ -1034,11 +1034,11 @@ export class TextPickerOptions_serializer {
                 }
             }
         } else if (valueHolderForRange instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForRangeForIdx2  = valueHolderForRange as Resource
             Resource_serializer.write(valueSerializer, valueHolderForRangeForIdx2)
         } else if (TypeChecker.isArray_TextPickerRangeContent(valueHolderForRange)) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForRangeForIdx3  = valueHolderForRange as Array<TextPickerRangeContent>
             valueSerializer.writeInt32((valueHolderForRangeForIdx3.length).toInt())
             for (let valueHolderForRangeForIdx3CounterI = 0; valueHolderForRangeForIdx3CounterI < valueHolderForRangeForIdx3.length; valueHolderForRangeForIdx3CounterI++) {
@@ -1046,7 +1046,7 @@ export class TextPickerOptions_serializer {
                 TextPickerRangeContent_serializer.write(valueSerializer, valueHolderForRangeForIdx3TmpElement)
             }
         } else if (TypeChecker.isArray_TextCascadePickerRangeContent(valueHolderForRange)) {
-            valueSerializer.writeInt8((4).toChar())
+            valueSerializer.writeInt8((4).toByte())
             const valueHolderForRangeForIdx4  = valueHolderForRange as Array<TextCascadePickerRangeContent>
             valueSerializer.writeInt32((valueHolderForRangeForIdx4.length).toInt())
             for (let valueHolderForRangeForIdx4CounterI = 0; valueHolderForRangeForIdx4CounterI < valueHolderForRangeForIdx4.length; valueHolderForRangeForIdx4CounterI++) {
@@ -1059,39 +1059,39 @@ export class TextPickerOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForValueTmpValue  = valueHolderForValue!
             if (valueHolderForValueTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as ResourceStr
                 if (valueHolderForValueTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForValueTmpValueForIdx0ForIdx0  = valueHolderForValueTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForValueTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForValueTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForValueTmpValueForIdx0ForIdx1  = valueHolderForValueTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx0ForIdx1)
                 }
             } else if (TypeChecker.isArray_ResourceStr(valueHolderForValueTmpValue)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Array<ResourceStr>
                 valueSerializer.writeInt32((valueHolderForValueTmpValueForIdx1.length).toInt())
                 for (let valueHolderForValueTmpValueForIdx1CounterI = 0; valueHolderForValueTmpValueForIdx1CounterI < valueHolderForValueTmpValueForIdx1.length; valueHolderForValueTmpValueForIdx1CounterI++) {
                     const valueHolderForValueTmpValueForIdx1TmpElement : ResourceStr = valueHolderForValueTmpValueForIdx1[valueHolderForValueTmpValueForIdx1CounterI]
                     if (valueHolderForValueTmpValueForIdx1TmpElement instanceof string) {
-                        valueSerializer.writeInt8((0).toChar())
+                        valueSerializer.writeInt8((0).toByte())
                         const valueHolderForValueTmpValueForIdx1TmpElementForIdx0  = valueHolderForValueTmpValueForIdx1TmpElement as string
                         valueSerializer.writeString(valueHolderForValueTmpValueForIdx1TmpElementForIdx0)
                     } else if (valueHolderForValueTmpValueForIdx1TmpElement instanceof Resource) {
-                        valueSerializer.writeInt8((1).toChar())
+                        valueSerializer.writeInt8((1).toByte())
                         const valueHolderForValueTmpValueForIdx1TmpElementForIdx1  = valueHolderForValueTmpValueForIdx1TmpElement as Resource
                         Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1TmpElementForIdx1)
                     }
                 }
             } else if (valueHolderForValueTmpValue instanceof Bindable && valueHolderForValueTmpValue.value instanceof ResourceStr) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForValueTmpValueForIdx2  = valueHolderForValueTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx2)
             } else if (valueHolderForValueTmpValue instanceof Bindable<Array<ResourceStr>>) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForValueTmpValueForIdx3  = valueHolderForValueTmpValue as Bindable<Array<ResourceStr>>
                 Bindable_Array_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx3)
             }
@@ -1103,11 +1103,11 @@ export class TextPickerOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedTmpValue  = valueHolderForSelected!
             if (valueHolderForSelectedTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForSelectedTmpValueForIdx0)
             } else if (TypeChecker.isArray_Int32(valueHolderForSelectedTmpValue)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Array<int32>
                 valueSerializer.writeInt32((valueHolderForSelectedTmpValueForIdx1.length).toInt())
                 for (let valueHolderForSelectedTmpValueForIdx1CounterI = 0; valueHolderForSelectedTmpValueForIdx1CounterI < valueHolderForSelectedTmpValueForIdx1.length; valueHolderForSelectedTmpValueForIdx1CounterI++) {
@@ -1115,11 +1115,11 @@ export class TextPickerOptions_serializer {
                     valueSerializer.writeInt32(valueHolderForSelectedTmpValueForIdx1TmpElement)
                 }
             } else if (valueHolderForSelectedTmpValue instanceof Bindable && valueHolderForSelectedTmpValue.value instanceof int32) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
             } else if (valueHolderForSelectedTmpValue instanceof Bindable<Array<int32>>) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedTmpValueForIdx3  = valueHolderForSelectedTmpValue as Bindable<Array<int32>>
                 Bindable_Array_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx3)
             }
@@ -1271,19 +1271,19 @@ export class TextPickerTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -1303,15 +1303,15 @@ export class TextPickerTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinFontSizeTmpValue  = valueHolderForMinFontSize!
             if (valueHolderForMinFontSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMinFontSizeTmpValueForIdx0)
             } else if (valueHolderForMinFontSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForMinFontSizeTmpValueForIdx1)
             } else if (valueHolderForMinFontSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx2  = valueHolderForMinFontSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMinFontSizeTmpValueForIdx2)
             }
@@ -1323,15 +1323,15 @@ export class TextPickerTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxFontSizeTmpValue  = valueHolderForMaxFontSize!
             if (valueHolderForMaxFontSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMaxFontSizeTmpValueForIdx0)
             } else if (valueHolderForMaxFontSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForMaxFontSizeTmpValueForIdx1)
             } else if (valueHolderForMaxFontSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx2  = valueHolderForMaxFontSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMaxFontSizeTmpValueForIdx2)
             }
@@ -1423,7 +1423,7 @@ export class TextPickerDialogOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRange  = value.range
         if (TypeChecker.isArray_String(valueHolderForRange)) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForRangeForIdx0  = valueHolderForRange as Array<string>
             valueSerializer.writeInt32((valueHolderForRangeForIdx0.length).toInt())
             for (let valueHolderForRangeForIdx0CounterI = 0; valueHolderForRangeForIdx0CounterI < valueHolderForRangeForIdx0.length; valueHolderForRangeForIdx0CounterI++) {
@@ -1431,7 +1431,7 @@ export class TextPickerDialogOptions_serializer {
                 valueSerializer.writeString(valueHolderForRangeForIdx0TmpElement)
             }
         } else if (TypeChecker.isArray_Array_String(valueHolderForRange)) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForRangeForIdx1  = valueHolderForRange as Array<Array<string>>
             valueSerializer.writeInt32((valueHolderForRangeForIdx1.length).toInt())
             for (let valueHolderForRangeForIdx1CounterI = 0; valueHolderForRangeForIdx1CounterI < valueHolderForRangeForIdx1.length; valueHolderForRangeForIdx1CounterI++) {
@@ -1443,11 +1443,11 @@ export class TextPickerDialogOptions_serializer {
                 }
             }
         } else if (valueHolderForRange instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForRangeForIdx2  = valueHolderForRange as Resource
             Resource_serializer.write(valueSerializer, valueHolderForRangeForIdx2)
         } else if (TypeChecker.isArray_TextPickerRangeContent(valueHolderForRange)) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForRangeForIdx3  = valueHolderForRange as Array<TextPickerRangeContent>
             valueSerializer.writeInt32((valueHolderForRangeForIdx3.length).toInt())
             for (let valueHolderForRangeForIdx3CounterI = 0; valueHolderForRangeForIdx3CounterI < valueHolderForRangeForIdx3.length; valueHolderForRangeForIdx3CounterI++) {
@@ -1455,7 +1455,7 @@ export class TextPickerDialogOptions_serializer {
                 TextPickerRangeContent_serializer.write(valueSerializer, valueHolderForRangeForIdx3TmpElement)
             }
         } else if (TypeChecker.isArray_TextCascadePickerRangeContent(valueHolderForRange)) {
-            valueSerializer.writeInt8((4).toChar())
+            valueSerializer.writeInt8((4).toByte())
             const valueHolderForRangeForIdx4  = valueHolderForRange as Array<TextCascadePickerRangeContent>
             valueSerializer.writeInt32((valueHolderForRangeForIdx4.length).toInt())
             for (let valueHolderForRangeForIdx4CounterI = 0; valueHolderForRangeForIdx4CounterI < valueHolderForRangeForIdx4.length; valueHolderForRangeForIdx4CounterI++) {
@@ -1468,39 +1468,39 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForValueTmpValue  = valueHolderForValue!
             if (valueHolderForValueTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as ResourceStr
                 if (valueHolderForValueTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForValueTmpValueForIdx0ForIdx0  = valueHolderForValueTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForValueTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForValueTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForValueTmpValueForIdx0ForIdx1  = valueHolderForValueTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx0ForIdx1)
                 }
             } else if (TypeChecker.isArray_ResourceStr(valueHolderForValueTmpValue)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Array<ResourceStr>
                 valueSerializer.writeInt32((valueHolderForValueTmpValueForIdx1.length).toInt())
                 for (let valueHolderForValueTmpValueForIdx1CounterI = 0; valueHolderForValueTmpValueForIdx1CounterI < valueHolderForValueTmpValueForIdx1.length; valueHolderForValueTmpValueForIdx1CounterI++) {
                     const valueHolderForValueTmpValueForIdx1TmpElement : ResourceStr = valueHolderForValueTmpValueForIdx1[valueHolderForValueTmpValueForIdx1CounterI]
                     if (valueHolderForValueTmpValueForIdx1TmpElement instanceof string) {
-                        valueSerializer.writeInt8((0).toChar())
+                        valueSerializer.writeInt8((0).toByte())
                         const valueHolderForValueTmpValueForIdx1TmpElementForIdx0  = valueHolderForValueTmpValueForIdx1TmpElement as string
                         valueSerializer.writeString(valueHolderForValueTmpValueForIdx1TmpElementForIdx0)
                     } else if (valueHolderForValueTmpValueForIdx1TmpElement instanceof Resource) {
-                        valueSerializer.writeInt8((1).toChar())
+                        valueSerializer.writeInt8((1).toByte())
                         const valueHolderForValueTmpValueForIdx1TmpElementForIdx1  = valueHolderForValueTmpValueForIdx1TmpElement as Resource
                         Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1TmpElementForIdx1)
                     }
                 }
             } else if (valueHolderForValueTmpValue instanceof Bindable && valueHolderForValueTmpValue.value instanceof ResourceStr) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForValueTmpValueForIdx2  = valueHolderForValueTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx2)
             } else if (valueHolderForValueTmpValue instanceof Bindable<Array<ResourceStr>>) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForValueTmpValueForIdx3  = valueHolderForValueTmpValue as Bindable<Array<ResourceStr>>
                 Bindable_Array_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx3)
             }
@@ -1512,11 +1512,11 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedTmpValue  = valueHolderForSelected!
             if (valueHolderForSelectedTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForSelectedTmpValueForIdx0)
             } else if (TypeChecker.isArray_Int32(valueHolderForSelectedTmpValue)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Array<int32>
                 valueSerializer.writeInt32((valueHolderForSelectedTmpValueForIdx1.length).toInt())
                 for (let valueHolderForSelectedTmpValueForIdx1CounterI = 0; valueHolderForSelectedTmpValueForIdx1CounterI < valueHolderForSelectedTmpValueForIdx1.length; valueHolderForSelectedTmpValueForIdx1CounterI++) {
@@ -1524,11 +1524,11 @@ export class TextPickerDialogOptions_serializer {
                     valueSerializer.writeInt32(valueHolderForSelectedTmpValueForIdx1TmpElement)
                 }
             } else if (valueHolderForSelectedTmpValue instanceof Bindable && valueHolderForSelectedTmpValue.value instanceof int32) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
             } else if (valueHolderForSelectedTmpValue instanceof Bindable<Array<int32>>) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedTmpValueForIdx3  = valueHolderForSelectedTmpValue as Bindable<Array<int32>>
                 Bindable_Array_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx3)
             }
@@ -1552,11 +1552,11 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDefaultPickerItemHeightTmpValue  = valueHolderForDefaultPickerItemHeight!
             if (valueHolderForDefaultPickerItemHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDefaultPickerItemHeightTmpValueForIdx0  = valueHolderForDefaultPickerItemHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForDefaultPickerItemHeightTmpValueForIdx0)
             } else if (valueHolderForDefaultPickerItemHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForDefaultPickerItemHeightTmpValueForIdx1  = valueHolderForDefaultPickerItemHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForDefaultPickerItemHeightTmpValueForIdx1)
             }
@@ -1696,19 +1696,19 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -1776,11 +1776,11 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }

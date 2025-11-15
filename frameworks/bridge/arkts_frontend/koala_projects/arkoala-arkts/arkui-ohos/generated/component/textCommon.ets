@@ -279,11 +279,11 @@ export class TextMenuItemId implements MaterializedBase {
     static of_serialize(id: ResourceStr): TextMenuItemId {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (id instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const idForIdx0  = id as string
             thisSerializer.writeString(idForIdx0)
         } else if (id instanceof Resource) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const idForIdx1  = id as Resource
             Resource_serializer.write(thisSerializer, idForIdx1)
         }
@@ -857,19 +857,19 @@ export class DecorationStyleResult_serializer {
         valueSerializer.writeInt32(valueHolderForType.valueOf())
         const valueHolderForColor  = value.color
         if (valueHolderForColor instanceof Color) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
             valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
         } else if (valueHolderForColor instanceof int32) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForColorForIdx1  = valueHolderForColor as int32
             valueSerializer.writeInt32(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForColorForIdx2  = valueHolderForColor as string
             valueSerializer.writeString(valueHolderForColorForIdx2)
         } else if (valueHolderForColor instanceof Resource) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForColorForIdx3  = valueHolderForColor as Resource
             Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
@@ -966,11 +966,11 @@ export class TextMenuItem_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForContent  = value.content
         if (valueHolderForContent instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForContentForIdx0  = valueHolderForContent as string
             valueSerializer.writeString(valueHolderForContentForIdx0)
         } else if (valueHolderForContent instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForContentForIdx1  = valueHolderForContent as Resource
             Resource_serializer.write(valueSerializer, valueHolderForContentForIdx1)
         }
@@ -979,11 +979,11 @@ export class TextMenuItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -997,11 +997,11 @@ export class TextMenuItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLabelInfoTmpValue  = valueHolderForLabelInfo!
             if (valueHolderForLabelInfoTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLabelInfoTmpValueForIdx0  = valueHolderForLabelInfoTmpValue as string
                 valueSerializer.writeString(valueHolderForLabelInfoTmpValueForIdx0)
             } else if (valueHolderForLabelInfoTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLabelInfoTmpValueForIdx1  = valueHolderForLabelInfoTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForLabelInfoTmpValueForIdx1)
             }
@@ -1064,15 +1064,15 @@ export class CaretStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -1084,19 +1084,19 @@ export class CaretStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -1215,19 +1215,19 @@ export class TextDataDetectorConfig_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }

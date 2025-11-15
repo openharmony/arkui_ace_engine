@@ -53,27 +53,27 @@ export class ArkMediaCachedImagePeer extends ArkImagePeer {
     setMediaCachedImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src instanceof image.PixelMap) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const srcForIdx0  = src as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, srcForIdx0)
         } else if (src instanceof ResourceStr) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const srcForIdx1  = src as ResourceStr
             if (srcForIdx1 instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const srcForIdx1ForIdx0  = srcForIdx1 as string
                 thisSerializer.writeString(srcForIdx1ForIdx0)
             } else if (srcForIdx1 instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const srcForIdx1ForIdx1  = srcForIdx1 as Resource
                 Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
             }
         } else if (src instanceof DrawableDescriptor) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const srcForIdx2  = src as DrawableDescriptor
             DrawableDescriptor_serializer.write(thisSerializer, srcForIdx2)
         } else if (src instanceof ASTCResource) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const srcForIdx3  = src as ASTCResource
             ASTCResource_serializer.write(thisSerializer, srcForIdx3)
         }

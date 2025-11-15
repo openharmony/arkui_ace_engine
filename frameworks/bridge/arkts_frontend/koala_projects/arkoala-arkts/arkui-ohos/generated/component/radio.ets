@@ -59,11 +59,11 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -345,19 +345,19 @@ export class RadioStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCheckedBackgroundColorTmpValue  = valueHolderForCheckedBackgroundColor!
             if (valueHolderForCheckedBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx0  = valueHolderForCheckedBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx1  = valueHolderForCheckedBackgroundColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx2  = valueHolderForCheckedBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForCheckedBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx3  = valueHolderForCheckedBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForCheckedBackgroundColorTmpValueForIdx3)
             }
@@ -369,19 +369,19 @@ export class RadioStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUncheckedBorderColorTmpValue  = valueHolderForUncheckedBorderColor!
             if (valueHolderForUncheckedBorderColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx0  = valueHolderForUncheckedBorderColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUncheckedBorderColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx1  = valueHolderForUncheckedBorderColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx1)
             } else if (valueHolderForUncheckedBorderColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx2  = valueHolderForUncheckedBorderColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUncheckedBorderColorTmpValueForIdx2)
             } else if (valueHolderForUncheckedBorderColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx3  = valueHolderForUncheckedBorderColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForUncheckedBorderColorTmpValueForIdx3)
             }
@@ -393,19 +393,19 @@ export class RadioStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIndicatorColorTmpValue  = valueHolderForIndicatorColor!
             if (valueHolderForIndicatorColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx0  = valueHolderForIndicatorColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForIndicatorColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx1  = valueHolderForIndicatorColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx1)
             } else if (valueHolderForIndicatorColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx2  = valueHolderForIndicatorColorTmpValue as string
                 valueSerializer.writeString(valueHolderForIndicatorColorTmpValueForIdx2)
             } else if (valueHolderForIndicatorColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForIndicatorColorTmpValueForIdx3  = valueHolderForIndicatorColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIndicatorColorTmpValueForIdx3)
             }

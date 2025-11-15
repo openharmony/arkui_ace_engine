@@ -71,7 +71,7 @@ export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (TypeChecker.isArray_BarrierStyle(valueTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Array<BarrierStyle>
                 thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
                 for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
@@ -79,7 +79,7 @@ export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
                     BarrierStyle_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
                 }
             } else if (TypeChecker.isArray_LocalizedBarrierStyle(valueTmpValue)) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Array<LocalizedBarrierStyle>
                 thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
                 for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
@@ -287,15 +287,15 @@ export class GuideLinePosition_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
             if (valueHolderForStartTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as string
                 valueSerializer.writeString(valueHolderForStartTmpValueForIdx0)
             } else if (valueHolderForStartTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStartTmpValueForIdx1)
             } else if (valueHolderForStartTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStartTmpValueForIdx2  = valueHolderForStartTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStartTmpValueForIdx2)
             }
@@ -307,15 +307,15 @@ export class GuideLinePosition_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
             if (valueHolderForEndTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as string
                 valueSerializer.writeString(valueHolderForEndTmpValueForIdx0)
             } else if (valueHolderForEndTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as number
                 valueSerializer.writeNumber(valueHolderForEndTmpValueForIdx1)
             } else if (valueHolderForEndTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForEndTmpValueForIdx2  = valueHolderForEndTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForEndTmpValueForIdx2)
             }

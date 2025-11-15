@@ -103,11 +103,11 @@ export class ImageAIOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAiControllerTmpValue  = valueHolderForAiController!
             if (valueHolderForAiControllerTmpValue instanceof ImageAnalyzerController) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForAiControllerTmpValueForIdx0  = valueHolderForAiControllerTmpValue as ImageAnalyzerController
                 ImageAnalyzerController_serializer.write(valueSerializer, valueHolderForAiControllerTmpValueForIdx0)
             } else if (valueHolderForAiControllerTmpValue instanceof object) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForAiControllerTmpValueForIdx1  = valueHolderForAiControllerTmpValue as object
                 valueSerializer.holdAndWriteObject(valueHolderForAiControllerTmpValueForIdx1)
             }

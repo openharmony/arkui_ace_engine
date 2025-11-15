@@ -78,19 +78,19 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -106,19 +106,19 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -134,11 +134,11 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -157,15 +157,15 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
                 const valueTmpValueTmpElement : Length = valueTmpValue[valueTmpValueCounterI]
                 if (valueTmpValueTmpElement instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as string
                     thisSerializer.writeString(valueTmpValueTmpElementForIdx0)
                 } else if (valueTmpValueTmpElement instanceof double) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as double
                     thisSerializer.writeFloat64(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx2)
                 }
@@ -206,11 +206,11 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -226,15 +226,15 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -250,15 +250,15 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -274,11 +274,11 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -608,11 +608,11 @@ export class ViewportRect_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
             if (valueHolderForXTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForXTmpValueForIdx0)
             } else if (valueHolderForXTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as string
                 valueSerializer.writeString(valueHolderForXTmpValueForIdx1)
             }
@@ -624,11 +624,11 @@ export class ViewportRect_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
             if (valueHolderForYTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForYTmpValueForIdx0)
             } else if (valueHolderForYTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as string
                 valueSerializer.writeString(valueHolderForYTmpValueForIdx1)
             }
@@ -640,11 +640,11 @@ export class ViewportRect_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
             }
@@ -656,11 +656,11 @@ export class ViewportRect_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
             }

@@ -148,11 +148,11 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof DotIndicator) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as DotIndicator
                 DotIndicator_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof DigitIndicator) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as DigitIndicator
                 DigitIndicator_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }

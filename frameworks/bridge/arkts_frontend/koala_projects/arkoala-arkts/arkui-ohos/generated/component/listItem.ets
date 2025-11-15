@@ -78,11 +78,11 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -306,15 +306,15 @@ export class SwipeActionItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForActionAreaDistanceTmpValue  = valueHolderForActionAreaDistance!
             if (valueHolderForActionAreaDistanceTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx0  = valueHolderForActionAreaDistanceTmpValue as string
                 valueSerializer.writeString(valueHolderForActionAreaDistanceTmpValueForIdx0)
             } else if (valueHolderForActionAreaDistanceTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx1  = valueHolderForActionAreaDistanceTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForActionAreaDistanceTmpValueForIdx1)
             } else if (valueHolderForActionAreaDistanceTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForActionAreaDistanceTmpValueForIdx2  = valueHolderForActionAreaDistanceTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForActionAreaDistanceTmpValueForIdx2)
             }
@@ -477,11 +477,11 @@ export class SwipeActionOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
             if (valueHolderForStartTmpValue instanceof CustomBuilder) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForStartTmpValueForIdx0))
             } else if (valueHolderForStartTmpValue instanceof SwipeActionItem) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as SwipeActionItem
                 SwipeActionItem_serializer.write(valueSerializer, valueHolderForStartTmpValueForIdx1)
             }
@@ -493,11 +493,11 @@ export class SwipeActionOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
             if (valueHolderForEndTmpValue instanceof CustomBuilder) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForEndTmpValueForIdx0))
             } else if (valueHolderForEndTmpValue instanceof SwipeActionItem) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as SwipeActionItem
                 SwipeActionItem_serializer.write(valueSerializer, valueHolderForEndTmpValueForIdx1)
             }

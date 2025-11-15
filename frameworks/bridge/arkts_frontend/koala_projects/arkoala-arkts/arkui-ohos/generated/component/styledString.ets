@@ -346,11 +346,11 @@ export class ImageAttachment implements MaterializedBase {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ImageAttachmentInterface) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ImageAttachmentInterface
                 ImageAttachmentInterface_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof ResourceImageAttachmentOptions) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as ResourceImageAttachmentOptions
                 ResourceImageAttachmentOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -703,15 +703,15 @@ export class StyledString implements MaterializedBase {
     static construct(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as string
             thisSerializer.writeString(valueForIdx0)
         } else if (value instanceof ImageAttachment) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as ImageAttachment
             ImageAttachment_serializer.write(thisSerializer, valueForIdx1)
         } else if (value instanceof CustomSpan) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const valueForIdx2  = value as CustomSpan
             CustomSpan_serializer.write(thisSerializer, valueForIdx2)
         }
@@ -920,11 +920,11 @@ export class TextShadowStyle implements MaterializedBase {
     static construct(value: ShadowOptions | Array<ShadowOptions>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof ShadowOptions) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as ShadowOptions
             ShadowOptions_serializer.write(thisSerializer, valueForIdx0)
         } else if (TypeChecker.isArray_ShadowOptions(value)) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as Array<ShadowOptions>
             thisSerializer.writeInt32((valueForIdx1.length).toInt())
             for (let valueForIdx1CounterI = 0; valueForIdx1CounterI < valueForIdx1.length; valueForIdx1CounterI++) {
@@ -1458,19 +1458,19 @@ export class DecorationStyleInterface_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -1542,19 +1542,19 @@ export class TextStyleInterface_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
             if (valueHolderForFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
             } else if (valueHolderForFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
@@ -1566,11 +1566,11 @@ export class TextStyleInterface_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontFamilyTmpValue  = valueHolderForFontFamily!
             if (valueHolderForFontFamilyTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx0  = valueHolderForFontFamilyTmpValue as string
                 valueSerializer.writeString(valueHolderForFontFamilyTmpValueForIdx0)
             } else if (valueHolderForFontFamilyTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx1  = valueHolderForFontFamilyTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontFamilyTmpValueForIdx1)
             }
@@ -1590,15 +1590,15 @@ export class TextStyleInterface_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
             if (valueHolderForFontWeightTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.valueOf())
             } else if (valueHolderForFontWeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as string
                 valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2)
             }
@@ -1691,11 +1691,11 @@ export class ImageAttachmentLayoutStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMarginTmpValue  = valueHolderForMargin!
             if (valueHolderForMarginTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as LengthMetrics
                 LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx0)
             } else if (valueHolderForMarginTmpValue instanceof Padding) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as Padding
                 Padding_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx1)
             }
@@ -1707,11 +1707,11 @@ export class ImageAttachmentLayoutStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPaddingTmpValue  = valueHolderForPadding!
             if (valueHolderForPaddingTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPaddingTmpValueForIdx0  = valueHolderForPaddingTmpValue as LengthMetrics
                 LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx0)
             } else if (valueHolderForPaddingTmpValue instanceof Padding) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPaddingTmpValueForIdx1  = valueHolderForPaddingTmpValue as Padding
                 Padding_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx1)
             }
@@ -1723,11 +1723,11 @@ export class ImageAttachmentLayoutStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
             if (valueHolderForBorderRadiusTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as LengthMetrics
                 LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0)
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx1)
             }
@@ -1845,11 +1845,11 @@ export class ParagraphStyleInterface_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeadingMarginTmpValue  = valueHolderForLeadingMargin!
             if (valueHolderForLeadingMarginTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLeadingMarginTmpValueForIdx0  = valueHolderForLeadingMarginTmpValue as LengthMetrics
                 LengthMetrics_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0)
             } else if (valueHolderForLeadingMarginTmpValue instanceof LeadingMarginPlaceholder) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLeadingMarginTmpValueForIdx1  = valueHolderForLeadingMarginTmpValue as LeadingMarginPlaceholder
                 LeadingMarginPlaceholder_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx1)
             }
@@ -1986,11 +1986,11 @@ export class ImageAttachmentInterface_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorFilterTmpValue  = valueHolderForColorFilter!
             if (valueHolderForColorFilterTmpValue instanceof ColorFilter) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorFilterTmpValueForIdx0  = valueHolderForColorFilterTmpValue as ColorFilter
                 ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx0)
             } else if (valueHolderForColorFilterTmpValue instanceof drawing.ColorFilter) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorFilterTmpValueForIdx1  = valueHolderForColorFilterTmpValue as drawing.ColorFilter
                 drawing_ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx1)
             }
@@ -2052,11 +2052,11 @@ export class ResourceImageAttachmentOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForResourceValueTmpValue  = valueHolderForResourceValue!
             if (valueHolderForResourceValueTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForResourceValueTmpValueForIdx0  = valueHolderForResourceValueTmpValue as string
                 valueSerializer.writeString(valueHolderForResourceValueTmpValueForIdx0)
             } else if (valueHolderForResourceValueTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForResourceValueTmpValueForIdx1  = valueHolderForResourceValueTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForResourceValueTmpValueForIdx1)
             }
@@ -2100,11 +2100,11 @@ export class ResourceImageAttachmentOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorFilterTmpValue  = valueHolderForColorFilter!
             if (valueHolderForColorFilterTmpValue instanceof ColorFilter) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorFilterTmpValueForIdx0  = valueHolderForColorFilterTmpValue as ColorFilter
                 ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx0)
             } else if (valueHolderForColorFilterTmpValue instanceof drawing.ColorFilter) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorFilterTmpValueForIdx1  = valueHolderForColorFilterTmpValue as drawing.ColorFilter
                 drawing_ColorFilter_serializer.write(valueSerializer, valueHolderForColorFilterTmpValueForIdx1)
             }
@@ -2209,55 +2209,55 @@ export class StyleOptions_serializer {
         valueSerializer.writeInt32(valueHolderForStyledKey.valueOf())
         const valueHolderForStyledValue  = value.styledValue
         if (valueHolderForStyledValue instanceof TextStyle) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForStyledValueForIdx0  = valueHolderForStyledValue as TextStyle
             TextStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx0)
         } else if (valueHolderForStyledValue instanceof DecorationStyle) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForStyledValueForIdx1  = valueHolderForStyledValue as DecorationStyle
             DecorationStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx1)
         } else if (valueHolderForStyledValue instanceof BaselineOffsetStyle) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForStyledValueForIdx2  = valueHolderForStyledValue as BaselineOffsetStyle
             BaselineOffsetStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx2)
         } else if (valueHolderForStyledValue instanceof LetterSpacingStyle) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForStyledValueForIdx3  = valueHolderForStyledValue as LetterSpacingStyle
             LetterSpacingStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx3)
         } else if (valueHolderForStyledValue instanceof TextShadowStyle) {
-            valueSerializer.writeInt8((4).toChar())
+            valueSerializer.writeInt8((4).toByte())
             const valueHolderForStyledValueForIdx4  = valueHolderForStyledValue as TextShadowStyle
             TextShadowStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx4)
         } else if (valueHolderForStyledValue instanceof GestureStyle) {
-            valueSerializer.writeInt8((5).toChar())
+            valueSerializer.writeInt8((5).toByte())
             const valueHolderForStyledValueForIdx5  = valueHolderForStyledValue as GestureStyle
             GestureStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx5)
         } else if (valueHolderForStyledValue instanceof ImageAttachment) {
-            valueSerializer.writeInt8((6).toChar())
+            valueSerializer.writeInt8((6).toByte())
             const valueHolderForStyledValueForIdx6  = valueHolderForStyledValue as ImageAttachment
             ImageAttachment_serializer.write(valueSerializer, valueHolderForStyledValueForIdx6)
         } else if (valueHolderForStyledValue instanceof ParagraphStyle) {
-            valueSerializer.writeInt8((7).toChar())
+            valueSerializer.writeInt8((7).toByte())
             const valueHolderForStyledValueForIdx7  = valueHolderForStyledValue as ParagraphStyle
             ParagraphStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx7)
         } else if (valueHolderForStyledValue instanceof LineHeightStyle) {
-            valueSerializer.writeInt8((8).toChar())
+            valueSerializer.writeInt8((8).toByte())
             const valueHolderForStyledValueForIdx8  = valueHolderForStyledValue as LineHeightStyle
             LineHeightStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx8)
         } else if (valueHolderForStyledValue instanceof UrlStyle) {
-            valueSerializer.writeInt8((9).toChar())
+            valueSerializer.writeInt8((9).toByte())
             const valueHolderForStyledValueForIdx9  = valueHolderForStyledValue as UrlStyle
             UrlStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx9)
         } else if (valueHolderForStyledValue instanceof CustomSpan) {
-            valueSerializer.writeInt8((10).toChar())
+            valueSerializer.writeInt8((10).toByte())
             const valueHolderForStyledValueForIdx10  = valueHolderForStyledValue as CustomSpan
             CustomSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx10)
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
-            valueSerializer.writeInt8((11).toChar())
+            valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11  = valueHolderForStyledValue as UserDataSpan
             valueSerializer.holdAndWriteObject(valueHolderForStyledValueForIdx11)
         } else if (valueHolderForStyledValue instanceof BackgroundColorStyle) {
-            valueSerializer.writeInt8((12).toChar())
+            valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12  = valueHolderForStyledValue as BackgroundColorStyle
             BackgroundColorStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx12)
         }
@@ -2324,55 +2324,55 @@ export class SpanStyle_serializer {
         valueSerializer.writeInt32(valueHolderForStyledKey.valueOf())
         const valueHolderForStyledValue  = value.styledValue
         if (valueHolderForStyledValue instanceof TextStyle) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForStyledValueForIdx0  = valueHolderForStyledValue as TextStyle
             TextStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx0)
         } else if (valueHolderForStyledValue instanceof DecorationStyle) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForStyledValueForIdx1  = valueHolderForStyledValue as DecorationStyle
             DecorationStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx1)
         } else if (valueHolderForStyledValue instanceof BaselineOffsetStyle) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForStyledValueForIdx2  = valueHolderForStyledValue as BaselineOffsetStyle
             BaselineOffsetStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx2)
         } else if (valueHolderForStyledValue instanceof LetterSpacingStyle) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForStyledValueForIdx3  = valueHolderForStyledValue as LetterSpacingStyle
             LetterSpacingStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx3)
         } else if (valueHolderForStyledValue instanceof TextShadowStyle) {
-            valueSerializer.writeInt8((4).toChar())
+            valueSerializer.writeInt8((4).toByte())
             const valueHolderForStyledValueForIdx4  = valueHolderForStyledValue as TextShadowStyle
             TextShadowStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx4)
         } else if (valueHolderForStyledValue instanceof GestureStyle) {
-            valueSerializer.writeInt8((5).toChar())
+            valueSerializer.writeInt8((5).toByte())
             const valueHolderForStyledValueForIdx5  = valueHolderForStyledValue as GestureStyle
             GestureStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx5)
         } else if (valueHolderForStyledValue instanceof ImageAttachment) {
-            valueSerializer.writeInt8((6).toChar())
+            valueSerializer.writeInt8((6).toByte())
             const valueHolderForStyledValueForIdx6  = valueHolderForStyledValue as ImageAttachment
             ImageAttachment_serializer.write(valueSerializer, valueHolderForStyledValueForIdx6)
         } else if (valueHolderForStyledValue instanceof ParagraphStyle) {
-            valueSerializer.writeInt8((7).toChar())
+            valueSerializer.writeInt8((7).toByte())
             const valueHolderForStyledValueForIdx7  = valueHolderForStyledValue as ParagraphStyle
             ParagraphStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx7)
         } else if (valueHolderForStyledValue instanceof LineHeightStyle) {
-            valueSerializer.writeInt8((8).toChar())
+            valueSerializer.writeInt8((8).toByte())
             const valueHolderForStyledValueForIdx8  = valueHolderForStyledValue as LineHeightStyle
             LineHeightStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx8)
         } else if (valueHolderForStyledValue instanceof UrlStyle) {
-            valueSerializer.writeInt8((9).toChar())
+            valueSerializer.writeInt8((9).toByte())
             const valueHolderForStyledValueForIdx9  = valueHolderForStyledValue as UrlStyle
             UrlStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx9)
         } else if (valueHolderForStyledValue instanceof CustomSpan) {
-            valueSerializer.writeInt8((10).toChar())
+            valueSerializer.writeInt8((10).toByte())
             const valueHolderForStyledValueForIdx10  = valueHolderForStyledValue as CustomSpan
             CustomSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx10)
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
-            valueSerializer.writeInt8((11).toChar())
+            valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11  = valueHolderForStyledValue as UserDataSpan
             valueSerializer.holdAndWriteObject(valueHolderForStyledValueForIdx11)
         } else if (valueHolderForStyledValue instanceof BackgroundColorStyle) {
-            valueSerializer.writeInt8((12).toChar())
+            valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12  = valueHolderForStyledValue as BackgroundColorStyle
             BackgroundColorStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx12)
         }
@@ -2433,15 +2433,15 @@ export class MutableStyledString extends StyledString implements MaterializedBas
     static construct(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as string
             thisSerializer.writeString(valueForIdx0)
         } else if (value instanceof ImageAttachment) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as ImageAttachment
             ImageAttachment_serializer.write(thisSerializer, valueForIdx1)
         } else if (value instanceof CustomSpan) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const valueForIdx2  = value as CustomSpan
             CustomSpan_serializer.write(thisSerializer, valueForIdx2)
         }

@@ -120,11 +120,11 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }

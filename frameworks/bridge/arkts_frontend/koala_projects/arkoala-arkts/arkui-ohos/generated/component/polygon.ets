@@ -68,29 +68,29 @@ export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
                 const valueTmpValueTmpElement : ShapePoint = valueTmpValue[valueTmpValueCounterI]
                 const valueTmpValueTmpElement_0  = valueTmpValueTmpElement[0]
                 if (valueTmpValueTmpElement_0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElement_0ForIdx0  = valueTmpValueTmpElement_0 as string
                     thisSerializer.writeString(valueTmpValueTmpElement_0ForIdx0)
                 } else if (valueTmpValueTmpElement_0 instanceof double) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElement_0ForIdx1  = valueTmpValueTmpElement_0 as double
                     thisSerializer.writeFloat64(valueTmpValueTmpElement_0ForIdx1)
                 } else if (valueTmpValueTmpElement_0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElement_0ForIdx2  = valueTmpValueTmpElement_0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_0ForIdx2)
                 }
                 const valueTmpValueTmpElement_1  = valueTmpValueTmpElement[1]
                 if (valueTmpValueTmpElement_1 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElement_1ForIdx0  = valueTmpValueTmpElement_1 as string
                     thisSerializer.writeString(valueTmpValueTmpElement_1ForIdx0)
                 } else if (valueTmpValueTmpElement_1 instanceof double) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElement_1ForIdx1  = valueTmpValueTmpElement_1 as double
                     thisSerializer.writeFloat64(valueTmpValueTmpElement_1ForIdx1)
                 } else if (valueTmpValueTmpElement_1 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElement_1ForIdx2  = valueTmpValueTmpElement_1 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_1ForIdx2)
                 }
@@ -196,11 +196,11 @@ export class PolygonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
             }
@@ -212,11 +212,11 @@ export class PolygonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
             }

@@ -49,11 +49,11 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
     setButtonOptions0Attribute(label: ResourceStr, options?: ButtonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (label instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const labelForIdx0  = label as string
             thisSerializer.writeString(labelForIdx0)
         } else if (label instanceof Resource) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const labelForIdx1  = label as Resource
             Resource_serializer.write(thisSerializer, labelForIdx1)
         }
@@ -145,19 +145,19 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -173,15 +173,15 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -197,15 +197,15 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -233,11 +233,11 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -265,11 +265,11 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -285,11 +285,11 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -776,18 +776,18 @@ export class ButtonLabelStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinFontSizeTmpValue  = valueHolderForMinFontSize!
             if (valueHolderForMinFontSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMinFontSizeTmpValueForIdx0)
             } else if (valueHolderForMinFontSizeTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as ResourceStr
                 if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForMinFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMinFontSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForMinFontSizeTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForMinFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMinFontSizeTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForMinFontSizeTmpValueForIdx1ForIdx1)
                 }
@@ -800,18 +800,18 @@ export class ButtonLabelStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxFontSizeTmpValue  = valueHolderForMaxFontSize!
             if (valueHolderForMaxFontSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMaxFontSizeTmpValueForIdx0)
             } else if (valueHolderForMaxFontSizeTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as ResourceStr
                 if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMaxFontSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMaxFontSizeTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1)
                 }

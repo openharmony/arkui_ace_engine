@@ -195,15 +195,15 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
     setXComponentOptionsAttribute(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (params instanceof XComponentParameters) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const paramsForIdx0  = params as XComponentParameters
             XComponentParameters_serializer.write(thisSerializer, paramsForIdx0)
         } else if (params instanceof XComponentOptions) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const paramsForIdx1  = params as XComponentOptions
             XComponentOptions_serializer.write(thisSerializer, paramsForIdx1)
         } else if (params instanceof NativeXComponentParameters) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const paramsForIdx2  = params as NativeXComponentParameters
             NativeXComponentParameters_serializer.write(thisSerializer, paramsForIdx2)
         }

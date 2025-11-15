@@ -49,11 +49,11 @@ export class ArkBadgePeer extends ArkCommonMethodPeer {
     setBadgeOptionsAttribute(value: BadgeParamWithNumber | BadgeParamWithString): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof BadgeParamWithNumber) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as BadgeParamWithNumber
             BadgeParamWithNumber_serializer.write(thisSerializer, valueForIdx0)
         } else if (value instanceof BadgeParamWithString) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as BadgeParamWithString
             BadgeParamWithString_serializer.write(thisSerializer, valueForIdx1)
         }
@@ -146,19 +146,19 @@ export class BadgeStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -170,18 +170,18 @@ export class BadgeStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
             if (valueHolderForFontSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForFontSizeTmpValueForIdx0)
             } else if (valueHolderForFontSizeTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as ResourceStr
                 if (valueHolderForFontSizeTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForFontSizeTmpValueForIdx1ForIdx0  = valueHolderForFontSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForFontSizeTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForFontSizeTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForFontSizeTmpValueForIdx1ForIdx1  = valueHolderForFontSizeTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx1ForIdx1)
                 }
@@ -194,18 +194,18 @@ export class BadgeStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBadgeSizeTmpValue  = valueHolderForBadgeSize!
             if (valueHolderForBadgeSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBadgeSizeTmpValueForIdx0  = valueHolderForBadgeSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBadgeSizeTmpValueForIdx0)
             } else if (valueHolderForBadgeSizeTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBadgeSizeTmpValueForIdx1  = valueHolderForBadgeSizeTmpValue as ResourceStr
                 if (valueHolderForBadgeSizeTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBadgeSizeTmpValueForIdx1ForIdx0  = valueHolderForBadgeSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForBadgeSizeTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForBadgeSizeTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBadgeSizeTmpValueForIdx1ForIdx1  = valueHolderForBadgeSizeTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBadgeSizeTmpValueForIdx1ForIdx1)
                 }
@@ -218,19 +218,19 @@ export class BadgeStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBadgeColorTmpValue  = valueHolderForBadgeColor!
             if (valueHolderForBadgeColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBadgeColorTmpValueForIdx0  = valueHolderForBadgeColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBadgeColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBadgeColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBadgeColorTmpValueForIdx1  = valueHolderForBadgeColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForBadgeColorTmpValueForIdx1)
             } else if (valueHolderForBadgeColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBadgeColorTmpValueForIdx2  = valueHolderForBadgeColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBadgeColorTmpValueForIdx2)
             } else if (valueHolderForBadgeColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBadgeColorTmpValueForIdx3  = valueHolderForBadgeColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBadgeColorTmpValueForIdx3)
             }
@@ -242,19 +242,19 @@ export class BadgeStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
             if (valueHolderForBorderColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBorderColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx1)
             } else if (valueHolderForBorderColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx2)
             } else if (valueHolderForBorderColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBorderColorTmpValueForIdx3  = valueHolderForBorderColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx3)
             }
@@ -266,15 +266,15 @@ export class BadgeStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
             if (valueHolderForBorderWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0)
             } else if (valueHolderForBorderWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBorderWidthTmpValueForIdx1)
             } else if (valueHolderForBorderWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
@@ -286,22 +286,22 @@ export class BadgeStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
             if (valueHolderForFontWeightTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.valueOf())
             } else if (valueHolderForFontWeightTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as ResourceStr
                 if (valueHolderForFontWeightTmpValueForIdx2 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForFontWeightTmpValueForIdx2ForIdx0  = valueHolderForFontWeightTmpValueForIdx2 as string
                     valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2ForIdx0)
                 } else if (valueHolderForFontWeightTmpValueForIdx2 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForFontWeightTmpValueForIdx2ForIdx1  = valueHolderForFontWeightTmpValueForIdx2 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForFontWeightTmpValueForIdx2ForIdx1)
                 }
@@ -472,11 +472,11 @@ export class BadgeParamWithNumber_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPositionTmpValue  = valueHolderForPosition!
             if (valueHolderForPositionTmpValue instanceof BadgePosition) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPositionTmpValueForIdx0  = valueHolderForPositionTmpValue as BadgePosition
                 valueSerializer.writeInt32(valueHolderForPositionTmpValueForIdx0.valueOf())
             } else if (valueHolderForPositionTmpValue instanceof Position) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPositionTmpValueForIdx1  = valueHolderForPositionTmpValue as Position
                 Position_serializer.write(valueSerializer, valueHolderForPositionTmpValueForIdx1)
             }
@@ -533,11 +533,11 @@ export class BadgeParamWithString_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPositionTmpValue  = valueHolderForPosition!
             if (valueHolderForPositionTmpValue instanceof BadgePosition) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPositionTmpValueForIdx0  = valueHolderForPositionTmpValue as BadgePosition
                 valueSerializer.writeInt32(valueHolderForPositionTmpValueForIdx0.valueOf())
             } else if (valueHolderForPositionTmpValue instanceof Position) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPositionTmpValueForIdx1  = valueHolderForPositionTmpValue as Position
                 Position_serializer.write(valueSerializer, valueHolderForPositionTmpValueForIdx1)
             }
@@ -548,11 +548,11 @@ export class BadgeParamWithString_serializer {
         BadgeStyle_serializer.write(valueSerializer, valueHolderForStyle)
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }

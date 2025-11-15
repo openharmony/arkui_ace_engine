@@ -1161,23 +1161,23 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Length
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof double) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as double
                     thisSerializer.writeFloat64(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof Bindable<Length>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<Length>
                 Bindable_Arkui_Component_Units_Length_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -1206,29 +1206,29 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             const valueTmpValue  = value!
             const valueTmpValue_0  = valueTmpValue[0]
             if (valueTmpValue_0 instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
                 thisSerializer.writeString(valueTmpValue_0ForIdx0)
             } else if (valueTmpValue_0 instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
                 thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
             } else if (valueTmpValue_0 instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
             }
             const valueTmpValue_1  = valueTmpValue[1]
             if (valueTmpValue_1 instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
                 thisSerializer.writeString(valueTmpValue_1ForIdx0)
             } else if (valueTmpValue_1 instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
                 thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
             } else if (valueTmpValue_1 instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
             }
@@ -1244,15 +1244,15 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -1448,19 +1448,19 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const iconTmpValue  = icon!
             if (iconTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const iconTmpValueForIdx0  = iconTmpValue as string
                 thisSerializer.writeString(iconTmpValueForIdx0)
             } else if (iconTmpValue instanceof image.PixelMap) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const iconTmpValueForIdx1  = iconTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, iconTmpValueForIdx1)
             } else if (iconTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const iconTmpValueForIdx2  = iconTmpValue as Resource
                 Resource_serializer.write(thisSerializer, iconTmpValueForIdx2)
             } else if (iconTmpValue instanceof SymbolGlyphModifier) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const iconTmpValueForIdx3  = iconTmpValue as SymbolGlyphModifier
                 SymbolGlyphModifier_serializer.write(thisSerializer, iconTmpValueForIdx3)
             }
@@ -1471,11 +1471,11 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const accessibilityTextTmpValue  = accessibilityText!
             if (accessibilityTextTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const accessibilityTextTmpValueForIdx0  = accessibilityTextTmpValue as string
                 thisSerializer.writeString(accessibilityTextTmpValueForIdx0)
             } else if (accessibilityTextTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const accessibilityTextTmpValueForIdx1  = accessibilityTextTmpValue as Resource
                 Resource_serializer.write(thisSerializer, accessibilityTextTmpValueForIdx1)
             }
@@ -1491,27 +1491,27 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceStr) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceStr
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
             } else if (valueTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
             } else if (valueTmpValue instanceof NavigationCommonTitle) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as NavigationCommonTitle
                 NavigationCommonTitle_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof NavigationCustomTitle) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as NavigationCustomTitle
                 NavigationCustomTitle_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -1553,7 +1553,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const itemsTmpValue  = items!
             if (TypeChecker.isArray_NavigationMenuItem(itemsTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const itemsTmpValueForIdx0  = itemsTmpValue as Array<NavigationMenuItem>
                 thisSerializer.writeInt32((itemsTmpValueForIdx0.length).toInt())
                 for (let itemsTmpValueForIdx0CounterI = 0; itemsTmpValueForIdx0CounterI < itemsTmpValueForIdx0.length; itemsTmpValueForIdx0CounterI++) {
@@ -1561,7 +1561,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
                     NavigationMenuItem_serializer.write(thisSerializer, itemsTmpValueForIdx0TmpElement)
                 }
             } else if (itemsTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const itemsTmpValueForIdx1  = itemsTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(itemsTmpValueForIdx1))
             }
@@ -1584,7 +1584,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (TypeChecker.isArray_ToolbarItem(valueTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Array<ToolbarItem>
                 thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
                 for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
@@ -1592,7 +1592,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
                     ToolbarItem_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
                 }
             } else if (valueTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
             }
@@ -2474,20 +2474,20 @@ export class NavigationInterception_serializer {
                 willShowTmpBuf_BufArgsSerializer.writePointer(willShowTmpBuf_BufCall);
                 willShowTmpBuf_BufArgsSerializer.writePointer(willShowTmpBuf_BufCallSync);
                 if (from instanceof NavDestinationContext) {
-                    willShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((0).toByte());
                     const fromForIdx0  = from as NavDestinationContext;
                     NavDestinationContext_serializer.write(willShowTmpBuf_BufArgsSerializer, fromForIdx0);
                 } else if (from instanceof NavBar) {
-                    willShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((1).toByte());
                     const fromForIdx1  = from as NavBar;
                     willShowTmpBuf_BufArgsSerializer.writeString(fromForIdx1);
                 }
                 if (to instanceof NavDestinationContext) {
-                    willShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((0).toByte());
                     const toForIdx0  = to as NavDestinationContext;
                     NavDestinationContext_serializer.write(willShowTmpBuf_BufArgsSerializer, toForIdx0);
                 } else if (to instanceof NavBar) {
-                    willShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((1).toByte());
                     const toForIdx1  = to as NavBar;
                     willShowTmpBuf_BufArgsSerializer.writeString(toForIdx1);
                 }
@@ -2511,20 +2511,20 @@ export class NavigationInterception_serializer {
                 didShowTmpBuf_BufArgsSerializer.writePointer(didShowTmpBuf_BufCall);
                 didShowTmpBuf_BufArgsSerializer.writePointer(didShowTmpBuf_BufCallSync);
                 if (from instanceof NavDestinationContext) {
-                    didShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((0).toByte());
                     const fromForIdx0  = from as NavDestinationContext;
                     NavDestinationContext_serializer.write(didShowTmpBuf_BufArgsSerializer, fromForIdx0);
                 } else if (from instanceof NavBar) {
-                    didShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((1).toByte());
                     const fromForIdx1  = from as NavBar;
                     didShowTmpBuf_BufArgsSerializer.writeString(fromForIdx1);
                 }
                 if (to instanceof NavDestinationContext) {
-                    didShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((0).toByte());
                     const toForIdx0  = to as NavDestinationContext;
                     NavDestinationContext_serializer.write(didShowTmpBuf_BufArgsSerializer, toForIdx0);
                 } else if (to instanceof NavBar) {
-                    didShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((1).toByte());
                     const toForIdx1  = to as NavBar;
                     didShowTmpBuf_BufArgsSerializer.writeString(toForIdx1);
                 }
@@ -2631,11 +2631,11 @@ export class NavigationCommonTitle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMainTmpValue  = valueHolderForMain!
             if (valueHolderForMainTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMainTmpValueForIdx0  = valueHolderForMainTmpValue as string
                 valueSerializer.writeString(valueHolderForMainTmpValueForIdx0)
             } else if (valueHolderForMainTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMainTmpValueForIdx1  = valueHolderForMainTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMainTmpValueForIdx1)
             }
@@ -2647,11 +2647,11 @@ export class NavigationCommonTitle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSubTmpValue  = valueHolderForSub!
             if (valueHolderForSubTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSubTmpValueForIdx0  = valueHolderForSubTmpValue as string
                 valueSerializer.writeString(valueHolderForSubTmpValueForIdx0)
             } else if (valueHolderForSubTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSubTmpValueForIdx1  = valueHolderForSubTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSubTmpValueForIdx1)
             }
@@ -2700,11 +2700,11 @@ export class NavigationMenuItem_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
@@ -2713,11 +2713,11 @@ export class NavigationMenuItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -2828,11 +2828,11 @@ export class ToolbarItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForValueTmpValue  = valueHolderForValue!
             if (valueHolderForValueTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as string
                 valueSerializer.writeString(valueHolderForValueTmpValueForIdx0)
             } else if (valueHolderForValueTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)
             }
@@ -2844,11 +2844,11 @@ export class ToolbarItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -2884,11 +2884,11 @@ export class ToolbarItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForActiveIconTmpValue  = valueHolderForActiveIcon!
             if (valueHolderForActiveIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForActiveIconTmpValueForIdx0  = valueHolderForActiveIconTmpValue as string
                 valueSerializer.writeString(valueHolderForActiveIconTmpValueForIdx0)
             } else if (valueHolderForActiveIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForActiveIconTmpValueForIdx1  = valueHolderForActiveIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForActiveIconTmpValueForIdx1)
             }
@@ -3049,22 +3049,22 @@ export class NavigationCustomTitle_serializer {
         valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForBuilder))
         const valueHolderForHeight  = value.height
         if (valueHolderForHeight instanceof TitleHeight) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForHeightForIdx0  = valueHolderForHeight as TitleHeight
             valueSerializer.writeInt32(valueHolderForHeightForIdx0.valueOf())
         } else if (valueHolderForHeight instanceof Length) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForHeightForIdx1  = valueHolderForHeight as Length
             if (valueHolderForHeightForIdx1 instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightForIdx1ForIdx0  = valueHolderForHeightForIdx1 as string
                 valueSerializer.writeString(valueHolderForHeightForIdx1ForIdx0)
             } else if (valueHolderForHeightForIdx1 instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as double
                 valueSerializer.writeFloat64(valueHolderForHeightForIdx1ForIdx1)
             } else if (valueHolderForHeightForIdx1 instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightForIdx1ForIdx2  = valueHolderForHeightForIdx1 as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightForIdx1ForIdx2)
             }
@@ -3117,19 +3117,19 @@ export class NavigationTitleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -3320,19 +3320,19 @@ export class NavigationToolbarOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }

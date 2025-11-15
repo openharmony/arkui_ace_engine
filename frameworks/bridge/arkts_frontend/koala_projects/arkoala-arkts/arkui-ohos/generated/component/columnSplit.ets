@@ -182,15 +182,15 @@ export class ColumnSplitDividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartMarginTmpValue  = valueHolderForStartMargin!
             if (valueHolderForStartMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartMarginTmpValueForIdx0  = valueHolderForStartMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForStartMarginTmpValueForIdx0)
             } else if (valueHolderForStartMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStartMarginTmpValueForIdx1)
             } else if (valueHolderForStartMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStartMarginTmpValueForIdx2  = valueHolderForStartMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStartMarginTmpValueForIdx2)
             }
@@ -202,15 +202,15 @@ export class ColumnSplitDividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndMarginTmpValue  = valueHolderForEndMargin!
             if (valueHolderForEndMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndMarginTmpValueForIdx0  = valueHolderForEndMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForEndMarginTmpValueForIdx0)
             } else if (valueHolderForEndMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForEndMarginTmpValueForIdx1)
             } else if (valueHolderForEndMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForEndMarginTmpValueForIdx2  = valueHolderForEndMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForEndMarginTmpValueForIdx2)
             }

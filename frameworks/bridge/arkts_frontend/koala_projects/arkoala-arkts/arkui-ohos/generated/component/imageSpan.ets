@@ -55,19 +55,19 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     setImageSpanOptionsAttribute(value: ResourceStr | image.PixelMap): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof ResourceStr) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as ResourceStr
             if (valueForIdx0 instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueForIdx0ForIdx0  = valueForIdx0 as string
                 thisSerializer.writeString(valueForIdx0ForIdx0)
             } else if (valueForIdx0 instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueForIdx0ForIdx1  = valueForIdx0 as Resource
                 Resource_serializer.write(thisSerializer, valueForIdx0ForIdx1)
             }
         } else if (value instanceof image.PixelMap) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, valueForIdx1)
         }
@@ -92,11 +92,11 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ColorFilter) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ColorFilter
                 ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof drawing.ColorFilter) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as drawing.ColorFilter
                 drawing_ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
