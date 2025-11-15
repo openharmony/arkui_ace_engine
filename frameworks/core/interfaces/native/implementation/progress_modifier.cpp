@@ -67,6 +67,11 @@ auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions&
     ProgressModelStatic::SetBorderWidth(frameNode, borderWidth);
     // borderColor
     ProgressModelStatic::SetBorderColor(frameNode, Converter::OptConvert<Color>(options.borderColor));
+    // borderRadius
+    auto borderRadius = Converter::OptConvert<Dimension>(options.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    ProgressModelStatic::SetBorderRadius(frameNode, borderRadius);
     // enableScanEffect
     ProgressModelStatic::SetSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
     // showDefaultPercentage

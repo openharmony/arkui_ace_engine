@@ -20,14 +20,15 @@ group("advanced_ui_component_static") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [
-#      "composeListItem:composeListItem",
-       "foldsplitcontainer:foldSplitContainer",
-#      "fullscreenlaunchcomponent:fullScreenLaunch",
-#      "segmentbutton:segmentButton",
-#      "selectionmenu:selectionMenu",
-#      "splitlayout:splitLayout",
-#      "swiperefresher:swipeRefresher",
-       "subheaderv2:subHeaderV2",
+      "composeListItem:composeListItem",
+      "foldsplitcontainer:foldSplitContainer",
+      "fullscreenlaunchcomponent:fullScreenLaunch",
+      "segmentbutton:segmentButton",
+      "segmentbuttonv2:SegmentButtonV2",
+      "selectionmenu:selectionMenu",
+      "splitlayout:splitLayout",
+      "swiperefresher:swipeRefresher",
+      "subheaderv2:subHeaderV2",
     ]
   }
 }

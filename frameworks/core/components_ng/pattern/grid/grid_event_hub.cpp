@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,6 +162,8 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     OHOS::Ace::ItemDragInfo itemDragInfo;
     itemDragInfo.SetX(globalX);
     itemDragInfo.SetY(globalY);
+    itemDragInfo.SetFrameNode(gridItem);
+
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
     auto dragDropManager = pipeline->GetDragDropManager();

@@ -2217,16 +2217,15 @@ void SetSafeAreaPaddingImpl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Padding& value) {
             auto convValue = Converter::Convert<PaddingProperty>(value);
-            // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LocalizedPadding& value) {
-             LOGE("ARKOALA: CommonMethod::SafeAreaPaddingImpl: Ark_LocalizedPadding is not supported.\n");
             auto convValue = Converter::Convert<PaddingProperty>(value);
-             // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LengthMetrics& value) {
             auto convValue = Converter::Convert<CalcLength>(value);
-             // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         []() {}
     );

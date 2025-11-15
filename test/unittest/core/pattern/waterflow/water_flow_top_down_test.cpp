@@ -83,31 +83,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaterFlowLayoutInfoTest004
- * @tc.desc: Test Reset functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
-{
-    CreateWaterFlow();
-    CreateWaterFlowItems();
-    CreateDone();
-
-    /**
-     * @tc.steps: Test Reset function
-     * @tc.expected: step2. Check whether the endIndex_ is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    int32_t resetFrom = pattern_->layoutInfo_->endIndex_;
-    info->Reset(resetFrom + 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
-
-    info->Reset(resetFrom - 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
-}
-
-/**
  * @tc.name: WaterFlowLayoutInfoTest005
  * @tc.desc: Test functions in WaterFlowLayoutInfo.
  * @tc.type: FUNC

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
  * @brief Defines the return value structure for the <b>onGetIrregularSizeByIndex</b> callback
  * in <b>Grid</b> layout options.
  *
- * @since 21
+ * @since 22
  */
 typedef struct {
     /** Number of rows occupied by the <b>GridItem</b> component. */
@@ -105,7 +105,7 @@ typedef struct {
 /**
  * @brief Defines the return value structure for the <b>onGetRectByIndex</b> callback in <b>Grid</b> layout options.
  *
- * @since 21
+ * @since 22
  */
 typedef struct {
     /** Starting row position of the <b>GridItem</b> component. */
@@ -2894,7 +2894,7 @@ typedef struct {
 /**
  * @brief Enumerates the grid item alignment modes.
  *
- * @since 21
+ * @since 22
  */
 typedef enum {
     /** Use the default alignment mode of the grid. */
@@ -2906,7 +2906,7 @@ typedef enum {
 /**
  * @brief Enumerates styles of grid items.
  *
- * @since 21
+ * @since 22
  */
 typedef enum {
     /** No style. */
@@ -3091,7 +3091,7 @@ ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
  * @brief Creates <b>Grid</b> layout options.
  *
  * @return <b>Grid</b> layout options created.
- * @since 21
+ * @since 22
  */
 ArkUI_GridLayoutOptions* OH_ArkUI_GridLayoutOptions_Create();
 
@@ -3099,7 +3099,7 @@ ArkUI_GridLayoutOptions* OH_ArkUI_GridLayoutOptions_Create();
  * @brief Disposes of <b>Grid</b> layout options.
  *
  * @param option <b>Grid</b> layout options.
- * @since 21
+ * @since 22
  */
 void OH_ArkUI_GridLayoutOptions_Dispose(ArkUI_GridLayoutOptions* option);
 
@@ -3114,7 +3114,7 @@ void OH_ArkUI_GridLayoutOptions_Dispose(ArkUI_GridLayoutOptions* option);
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         If an error code is returned, it may be due to a failure in parameter validation;
  *         the parameter must not be null.
- * @since 21
+ * @since 22
  */
 int32_t OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(
     ArkUI_GridLayoutOptions* option, uint32_t* irregularIndexes, int32_t size);
@@ -3134,7 +3134,7 @@ int32_t OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(
  *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
  *         If an error code is returned, it may be due to a failure in parameter validation;
  *         the parameter must not be null.
- * @since 21
+ * @since 22
  */
 int32_t OH_ArkUI_GridLayoutOptions_GetIrregularIndexes(
     ArkUI_GridLayoutOptions* option, uint32_t* irregularIndexes, int32_t* size);
@@ -3147,7 +3147,7 @@ int32_t OH_ArkUI_GridLayoutOptions_GetIrregularIndexes(
  * @param callback Callback that returns the row and column span for the grid item at the specified index.
  *        itemIndex: grid item index, which must be within the range set by
  *        {@link OH_ArkUI_GridLayoutOptions_SetIrregularIndexes}.
- * @since 21
+ * @since 22
  */
 void OH_ArkUI_GridLayoutOptions_RegisterGetIrregularSizeByIndexCallback(
     ArkUI_GridLayoutOptions* option, void* userData, ArkUI_GridItemSize (*callback)(int32_t itemIndex, void* userData));
@@ -3161,7 +3161,7 @@ void OH_ArkUI_GridLayoutOptions_RegisterGetIrregularSizeByIndexCallback(
  * @param callback Callback that returns the starting row, starting column, row span,
  *        and column span for the grid item at the specified index.
  *        itemIndex: grid item index.
- * @since 21
+ * @since 22
  */
 void OH_ArkUI_GridLayoutOptions_RegisterGetRectByIndexCallback(
     ArkUI_GridLayoutOptions* option, void* userData, ArkUI_GridItemRect (*callback)(int32_t itemIndex, void* userData));

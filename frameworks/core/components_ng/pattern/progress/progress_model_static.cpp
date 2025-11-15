@@ -146,6 +146,16 @@ void ProgressModelStatic::SetBorderColor(FrameNode* frameNode, const std::option
     }
 }
 
+void ProgressModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER,
+            frameNode);
+    }
+}
+
 void ProgressModelStatic::SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
 {
     if (value) {
