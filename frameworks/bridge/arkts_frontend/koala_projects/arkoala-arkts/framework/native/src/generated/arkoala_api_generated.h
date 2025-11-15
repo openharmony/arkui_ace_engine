@@ -25045,6 +25045,8 @@ typedef struct GENERATED_ArkUIXComponentModifier {
                               const Opt_Boolean* value);
     void (*setEnableSecure)(Ark_NativePointer node,
                             const Opt_Boolean* value);
+    void (*setEnableTransparentLayer)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
     void (*setHdrBrightness)(Ark_NativePointer node,
                              const Opt_Float64* value);
 } GENERATED_ArkUIXComponentModifier;
