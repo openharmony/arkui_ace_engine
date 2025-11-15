@@ -1463,10 +1463,9 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     }
 }
 
-ArkUITouchTestInfoItemHandle CreateTouchTestInfoItem(const TouchTestInfo& info)
+std::shared_ptr<ArkUITouchTestInfoItem> CreateTouchTestInfoItem(const TouchTestInfo& info)
 {
-    ArkUITouchTestInfoItem* touchTestInfo = nullptr;
-    touchTestInfo = new ArkUITouchTestInfoItem();
+    auto touchTestInfo = std::make_shared<ArkUITouchTestInfoItem>();
     CHECK_NULL_RETURN(touchTestInfo, nullptr);
     touchTestInfo->nodeX = info.subCmpPoint.GetX();
     touchTestInfo->nodeY = info.subCmpPoint.GetY();
@@ -1483,6 +1482,5 @@ ArkUITouchTestInfoItemHandle CreateTouchTestInfoItem(const TouchTestInfo& info)
     touchTestInfo->id = info.id.c_str();
     return touchTestInfo;
 }
-
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

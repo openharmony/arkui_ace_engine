@@ -31,6 +31,6 @@ namespace {
     void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
         ArkUI_UIInputEvent& inputEvent, const std::shared_ptr<BaseGestureEvent>& info,
         std::array<ArkUITouchPoint, MAX_POINTS>& points);
-    ArkUITouchTestInfoItemHandle CreateTouchTestInfoItem(const NG::TouchTestInfo& info);
+    std::shared_ptr<ArkUITouchTestInfoItem> CreateTouchTestInfoItem(const NG::TouchTestInfo& info);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif
