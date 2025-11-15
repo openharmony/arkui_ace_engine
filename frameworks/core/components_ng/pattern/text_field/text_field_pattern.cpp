@@ -11047,7 +11047,13 @@ bool TextFieldPattern::IsNeedProcessAutoFill()
 std::vector<RectF> TextFieldPattern::GetTextBoxesForSelect()
 {
     auto selectedRects = GetTextBoxes();
-    CHECK_NULL_RETURN(paragraph_, selectedRects);
+    GetSelectRectWithBlank(selectedRects);
+    return selectedRects;
+}
+
+void TextFieldPattern::GetSelectRectWithBlank(std::vector<RectF>& selectedRects)
+{
+    CHECK_NULL_VOID(paragraph_);
     auto paragraphStyle = paragraph_->GetParagraphStyle();
     auto textAlign = TextBase::CheckTextAlignByDirection(paragraphStyle.align, paragraphStyle.direction);
     const float blankWidth = TextBase::GetSelectedBlankLineWidth();
@@ -11056,7 +11062,6 @@ std::vector<RectF> TextFieldPattern::GetTextBoxesForSelect()
     for (auto& rect : selectedRects) {
         TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);
     }
-    return selectedRects;
 }
 
 void TextFieldPattern::AdjustSelectedBlankLineWidth(RectF& rect)
@@ -12693,5 +12698,83 @@ uint32_t TextFieldPattern::GetWindowIdFromPipeline()
     CHECK_NULL_RETURN(pipeline, 0);
     auto systemWindowId = pipeline->GetFocusWindowId();
     return systemWindowId;
+}
+
+void TextFieldPattern::ScheduleTaskWithLayoutDeferral(std::function<void()>&& task)
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    if (layoutProperty && (!inputOperations_.empty() || CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag()))) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterLayoutTask([deferralTask = std::move(task)]() {
+            if (deferralTask) {
+                deferralTask();
+            }
+        });
+    } else {
+        task();
+    }
+}
+
+void TextFieldPattern::OnScrollToVisible(const TextScrollOptions& options)
+{
+    ScheduleTaskWithLayoutDeferral([weak = WeakClaim(this), options]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ScrollToVisible(options);
+    });
+}
+
+void TextFieldPattern::ScrollToVisible(const TextScrollOptions& options)
+{
+    auto maxLen = GetContentWideTextLength();
+    int32_t start = std::clamp(options.start.value_or(0), 0, maxLen);
+    int32_t end = std::clamp(options.end.value_or(maxLen), 0, maxLen);
+    if (start > end) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    float destX;
+    float destY;
+    if (start == end) {
+        auto caretRect = selectController_->GetCaretRectByIndex(start, TextAffinity::DOWNSTREAM);
+        destX = caretRect.Left() - textRect_.Left();
+        destY = caretRect.Top() - textRect_.Top();
+    } else {
+        auto textBoxes = selectController_->GetSelectedRects(start, end);
+        GetSelectRectWithBlank(textBoxes);
+        if (textBoxes.empty()) {
+            return;
+        }
+        destX = isRTL ? textBoxes[0].Right() : textBoxes[0].Left();
+        destY = textBoxes[0].Top();
+        for (const auto& rect : textBoxes) {
+            destX = isRTL ? std::max(destX, rect.Right()) : std::min(destX, rect.Left());
+            destY = std::min(destY, rect.GetY());
+        }
+    }
+    StopScrollable();
+    if (IsTextArea()) {
+        OnScrollCallback(contentRect_.Top() - (textRect_.Top() + destY), SCROLL_FROM_NONE);
+    } else {
+        auto contentEdge = isRTL ? contentRect_.Right() : contentRect_.Left();
+        OnScrollCallback(contentEdge - (textRect_.Left() + destX), SCROLL_FROM_NONE);
+    }
+    OnScrollEndCallback();
+    if (selectOverlay_->SelectOverlayIsCreating()) {
+        selectOverlay_->AddTaskAfterShowOverlay([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->selectController_->CalculateHandleOffset();
+            if (pattern->IsSelected()) {
+                pattern->selectOverlay_->UpdateAllHandlesOffset();
+            } else {
+                pattern->selectOverlay_->UpdateSecondHandleOffset();
+            }
+        });
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -2526,6 +2526,13 @@ void ResetTextAreaScrollBarColor(ArkUINodeHandle node)
     TextFieldModelNG::ResetTextAreaScrollBarColor(frameNode);
 }
 
+void ScrollToVisible(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ScrollToVisible(frameNode, start, end);
+}
+
 void SetTextAreaCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2775,6 +2782,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaScrollBarColor = SetTextAreaScrollBarColor,
         .getTextAreaScrollBarColor = GetTextAreaScrollBarColor,
         .resetTextAreaScrollBarColor = ResetTextAreaScrollBarColor,
+        .scrollToVisible = ScrollToVisible,
         .setTextAreaCustomKeyboard = SetTextAreaCustomKeyboard,
         .getTextAreaCustomKeyboard = GetTextAreaCustomKeyboard,
         .getTextAreaCustomKeyboardOption = GetTextAreaCustomKeyboardOption,

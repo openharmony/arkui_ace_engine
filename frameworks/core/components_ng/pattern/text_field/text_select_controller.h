@@ -224,6 +224,8 @@ public:
     static int32_t GetGraphemeClusterLength(const std::u16string& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
+    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) const;
+    RectF GetCaretRectByIndex(int32_t index, TextAffinity textAffinity);
     RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
     bool IsTouchAtLineEnd(const Offset& localOffset) const;

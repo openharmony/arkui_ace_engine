@@ -31,6 +31,7 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::CustomMethod(
         "getTextContentLineCount", &JSTextEditableController::GetTextContentLinesNum);
     JSClass<JSTextEditableController>::CustomMethod("addText", &JSTextEditableController::AddText);
+    JSClass<JSTextEditableController>::CustomMethod("scrollToVisible", &JSTextEditableController::ScrollToVisible);
     JSClass<JSTextEditableController>::CustomMethod(
         "setStyledPlaceholder", &JSTextEditableController::SetPlaceholderStyledString);
     JSClass<JSTextEditableController>::CustomMethod("deleteText", &JSTextEditableController::DeleteText);
@@ -296,6 +297,32 @@ void JSTextEditableController::GetText(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(returnValue));
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "GetText: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::ScrollToVisible(const JSCallbackInfo& info)
+{
+    std::optional<int32_t> start;
+    std::optional<int32_t> end;
+    if (info.Length() == 1) {
+        const auto& optionVal = info[0];
+        if (optionVal->IsObject()) {
+            JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(optionVal);
+            JSRef<JSVal> startVal = optionObj->GetProperty("start");
+            if (startVal->IsNumber()) {
+                start = startVal->ToNumber<int32_t>();
+            }
+            JSRef<JSVal> endVal = optionObj->GetProperty("end");
+            if (endVal->IsNumber()) {
+                end = endVal->ToNumber<int32_t>();
+            }
+        }
+    }
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->ScrollToVisible({ .start = start, .end = end });
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "ScrollToVisible: The JSTextEditableController is NULL");
     }
 }
 

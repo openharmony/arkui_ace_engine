@@ -136,6 +136,7 @@ bool BaseTextSelectOverlay::SelectOverlayIsCreating()
 
 void BaseTextSelectOverlay::CloseOverlay(bool animation, CloseReason reason)
 {
+    afterShowTasks_.clear();
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->Close(GetOwnerId(), false, reason);
@@ -1655,5 +1656,20 @@ void BaseTextSelectOverlay::UpdateAIMenu()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_SELECT_AI_MENU);
+}
+
+void BaseTextSelectOverlay::AddTaskAfterShowOverlay(std::function<void()>&& task)
+{
+    afterShowTasks_.emplace_back(std::move(task));
+}
+
+void BaseTextSelectOverlay::FlushAfterOverlayShowTask()
+{
+    std::vector<std::function<void()>> runingTasks = std::move(afterShowTasks_);
+    for (const auto& task : runingTasks) {
+        if (task) {
+            task();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

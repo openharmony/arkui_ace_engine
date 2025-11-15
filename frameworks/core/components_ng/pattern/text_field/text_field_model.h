@@ -182,6 +182,11 @@ enum class PreviewTextStyle {
 
 class SpanStringBase;
 
+struct TextScrollOptions {
+    std::optional<int32_t> start;
+    std::optional<int32_t> end;
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -213,6 +218,7 @@ public:
     {
         return {};
     }
+    virtual void ScrollToVisible(const TextScrollOptions& options) {};
     virtual void StopEditing() {}
 
     virtual int32_t AddText(std::u16string text, int32_t offset) { return 0; }

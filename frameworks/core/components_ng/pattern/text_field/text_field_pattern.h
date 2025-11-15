@@ -1186,6 +1186,8 @@ public:
                static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
 
+    void ScheduleTaskWithLayoutDeferral(std::function<void()>&& task);
+    void OnScrollToVisible(const TextScrollOptions& options);
     void StopEditing();
     void StopEditingMultiThread();
 
@@ -2136,6 +2138,8 @@ private:
     void UpdateMagnifierWithFloatingCaretPos();
     bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
     void ApplyInnerBorderColor();
+    void GetSelectRectWithBlank(std::vector<RectF>& selectedRects);
+    void ScrollToVisible(const TextScrollOptions& options);
     void InitTextRect();
     void HandleInputOperations();
     void ReprocessAllRelatedToLPX();
