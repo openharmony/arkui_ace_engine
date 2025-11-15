@@ -53,15 +53,82 @@ const AppInfo KOALA_APP_INFO = {
     ":",
 };
 
+class KoalaApp {
+public:
+    KoalaApp(const KoalaApp&) = delete;
+    KoalaApp& operator=(const KoalaApp&) = delete;
+    
+    static KoalaApp& GetInstance()
+    {
+        static KoalaApp instance;
+        return instance;
+    }
+    
+    ani_class GetKoalaAppCls(ani_env* env)
+    {
+        std::call_once(clsOnceFlag_, [this, env]() {
+            ani_class appClass;
+            ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
+            if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(appClass), &globalClsRef)) {
+                LOGE("ArktsPluginFrontend Create Global reference failed!");
+            }
+        });
+        if (globalClsRef == nullptr) {
+            LOGE("ArktsPluginFrontend get Global reference failed!");
+            return nullptr;
+        }
+        auto cls = static_cast<ani_class>(globalClsRef);
+        return cls;
+    }
+    ani_method GetEnterMethod(ani_env* env)
+    {
+        std::call_once(enterOnceFlag_, [this, env]() {
+            auto cls = GetKoalaAppCls(env);
+            if (cls == nullptr) {
+                LOGE("ArktsPluginFrontend get Global reference failed!");
+                return;
+            }
+            ANI_CALL(env, Class_FindMethod(cls, KOALA_APP_INFO.enterMethodName,
+                KOALA_APP_INFO.enterMethodSig, &enter), return);
+        });
+        if (enter == nullptr) {
+            LOGE("ArktsPluginFrontend get Global enter method failed!");
+            return nullptr;
+        }
+        return enter;
+    }
+    ani_method GetCheckCallbacksMethod(ani_env* env)
+    {
+        std::call_once(checkCallbacksOnceFlag_, [this, env]() {
+            auto cls = GetKoalaAppCls(env);
+            if (cls == nullptr) {
+                LOGE("ArktsPluginFrontend get Global reference failed!");
+                return;
+            }
+            ANI_CALL(env, Class_FindMethod(cls, KOALA_APP_INFO.checkCallbackMethodName,
+                KOALA_APP_INFO.checkCallbackEventMethodSig, &checkCallbacks), return);
+        });
+        if (checkCallbacks == nullptr) {
+            LOGE("ArktsPluginFrontend get Global checkCallbacks method failed!");
+            return nullptr;
+        }
+        return checkCallbacks;
+    }
+private:
+    KoalaApp() = default;
+    ~KoalaApp() = default;
+    ani_ref globalClsRef {};
+    ani_method enter {};
+    ani_method checkCallbacks {};
+    std::once_flag clsOnceFlag_;
+    std::once_flag enterOnceFlag_;
+    std::once_flag checkCallbacksOnceFlag_;
+};
+
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
-    ani_class appClass;
-    ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
-
-    ani_method enter = nullptr;
-    ANI_CALL(env, Class_FindMethod(
-        appClass, KOALA_APP_INFO.enterMethodName, KOALA_APP_INFO.enterMethodSig, &enter), return);
-
+    ani_method enter = KoalaApp::GetInstance().GetEnterMethod(env);
+    CHECK_NULL_VOID(enter);
     ani_int arg0 = 0;
     ani_int arg1 = 0;
     ani_boolean result;
@@ -72,15 +139,8 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 // fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
 void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
 {
-    ani_class appClass;
-    ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
-
-    ani_method checkCallbacks = nullptr;
-    ANI_CALL(env,
-        Class_FindMethod(appClass, KOALA_APP_INFO.checkCallbackMethodName, KOALA_APP_INFO.checkCallbackEventMethodSig,
-            &checkCallbacks),
-        return);
-
+    ani_method checkCallbacks = KoalaApp::GetInstance().GetCheckCallbacksMethod(env);
+    CHECK_NULL_VOID(checkCallbacks);
     ANI_CALL(env, Object_CallMethod_Void(static_cast<ani_object>(app), checkCallbacks), return);
 }
 } // namespace
