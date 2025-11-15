@@ -39,6 +39,7 @@ import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
 import { TextPickerDialogOptions } from 'arkui/framework';
 import { DatePickerDialogOptions } from 'arkui/framework';
+import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
 import { ComponentContent } from 'arkui/ComponentContent';
@@ -699,6 +700,18 @@ export class UIContext {
 
     public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
         throw Error("requireDynamicSyncScene not implemented in UIContext!");
+    }
+
+    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+        throw Error("openBindSheet not implemented in UIContext!")
+    }
+
+    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updateBindSheet not implemented in UIContext!")
+    }
+
+    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+        throw Error("closeBindSheet not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {

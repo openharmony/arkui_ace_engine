@@ -1678,6 +1678,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
     record.afterCaretPosition = start;
     AddOperationRecord(record);
     UndoRedoRecord styledRecord;
+    styledRecord.deleteDirection = RichEditorDeleteDirection::FORWARD;
     undoManager_->UpdateRecordBeforeChange(start, end - start, styledRecord);
     DeleteSpansOperation(start, end);
     undoManager_->RecordOperationAfterChange(start, 0, styledRecord);
@@ -6552,6 +6553,7 @@ bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length,
         ResetSelection();
         DeleteByDeleteValueInfo(info);
         IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
+        styledRecord.deleteDirection = info.GetRichEditorDeleteDirection();
         undoManager_->RecordOperationAfterChange(currentPosition, 0, styledRecord);
         eventHub->FireOnDeleteComplete();
         OnReportRichEditorEvent("OnDeleteComplete");
@@ -6653,7 +6655,7 @@ void RichEditorPattern::DeleteBackward(int32_t oriLength, TextChangeReason reaso
     }
 }
 
-std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
+std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isIME)
 {
     length = CalculateDeleteLength(length, true);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete length=%{public}d", length);
@@ -6671,7 +6673,7 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     if (caretPosition_ == 0) {
         info.SetLength(0);
-        DoDeleteActions(0, 0, info);
+        DoDeleteActions(0, 0, info, isIME);
         return deleteText;
     }
     info.SetOffset(caretPosition_ - length);
@@ -6679,7 +6681,7 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
-        bool doDelete = DoDeleteActions(currentPosition, length, info);
+        bool doDelete = DoDeleteActions(currentPosition, length, info, isIME);
         if (!doDelete) {
             return u"";
         }

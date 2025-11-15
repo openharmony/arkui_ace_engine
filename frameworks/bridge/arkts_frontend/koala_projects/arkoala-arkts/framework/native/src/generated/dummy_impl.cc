@@ -32678,6 +32678,66 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    void OpenBindSheetImpl(Ark_VMContext vmContext,
+                           Ark_AsyncWorkerPtr asyncWorker,
+                           Ark_NativePointer bindSheetContent,
+                           const Opt_SheetOptions* sheetOptions,
+                           const Opt_Int32* targetId,
+                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("openBindSheet(");
+        WriteToString(&out, bindSheetContent);
+        out.append(", ");
+        WriteToString(&out, sheetOptions);
+        out.append(", ");
+        WriteToString(&out, targetId);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UpdateBindSheetImpl(Ark_VMContext vmContext,
+                             Ark_AsyncWorkerPtr asyncWorker,
+                             Ark_NativePointer bindSheetContent,
+                             const Ark_SheetOptions* sheetOptions,
+                             const Opt_Boolean* partialUpdate,
+                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("updateBindSheet(");
+        WriteToString(&out, bindSheetContent);
+        out.append(", ");
+        WriteToString(&out, sheetOptions);
+        out.append(", ");
+        WriteToString(&out, partialUpdate);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CloseBindSheetImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_NativePointer bindSheetContent,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("closeBindSheet(");
+        WriteToString(&out, bindSheetContent);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)

@@ -359,8 +359,13 @@ namespace Converter {
     // Implementation is in cpp
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
-    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
         const GradientDirection &direction);
+    // if src is not string or number, return directly. If src is invalid string, use defaultValue.
+    void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Opt_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
 
     template<>
     inline uint32_t Convert(const Ark_Number& src)

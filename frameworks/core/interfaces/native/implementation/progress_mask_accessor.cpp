@@ -56,14 +56,14 @@ void DestroyPeerImpl(Ark_ProgressMask peer)
 {
     delete peer;
 }
-Ark_ProgressMask ConstructImpl(const Ark_Float64* value,
-                               const Ark_Float64* total,
+Ark_ProgressMask ConstructImpl(Ark_Float64 value,
+                               Ark_Float64 total,
                                const Ark_ResourceColor* color)
 {
     auto peer = new ProgressMaskPeer();
     const auto& property = peer->GetProperty();
-    SetProgressMaskValue(property, value);
-    SetProgressMaskMaxValue(property, total);
+    SetProgressMaskValue(property, &value);
+    SetProgressMaskMaxValue(property, &total);
     SetProgressMaskColor(property, color);
     return peer;
 }
@@ -72,10 +72,10 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void UpdateProgressImpl(Ark_ProgressMask peer,
-                        const Ark_Float64* value)
+                        Ark_Float64 value)
 {
     CHECK_NULL_VOID(peer);
-    SetProgressMaskValue(peer->GetProperty(), value);
+    SetProgressMaskValue(peer->GetProperty(), &value);
 }
 void UpdateColorImpl(Ark_ProgressMask peer,
                      const Ark_ResourceColor* value)

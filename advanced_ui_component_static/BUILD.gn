@@ -30,6 +30,10 @@ group("advanced_ui_component_static") {
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
       "subheaderv2:subHeaderV2",
+      "composetitlebar:composeTitleBar",
+      "editabletitlebar:editableTitleBar",
+      "subheader:subHeader",
+      "toolbarv2:toolBarV2",
     ]
   }
 }
