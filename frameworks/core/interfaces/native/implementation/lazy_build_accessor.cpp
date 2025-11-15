@@ -15,6 +15,7 @@
 
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_item_model_static.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/implementation/lazy_build_accessor.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -29,7 +30,22 @@ void ApplyLazyBuilderImpl()
 void SetListItemLazyBuilderImpl(Ark_NativePointer node,
                                 const CustomNodeBuilder* builder)
 {
-    LOGE("ARKOALA: LazyBuildAccessor::SetListItemLazyBuilder is not supported");
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto deepRender = [arkBuilder = CallbackHelper(*builder),
+                          weak = AceType::WeakClaim(frameNode)]() -> RefPtr<FrameNode> {
+        auto refPtr = weak.Upgrade();
+        CHECK_NULL_RETURN(refPtr, nullptr);
+        arkBuilder.BuildAsync(
+            [refPtr](const RefPtr<UINode>& uiNode) mutable {
+                uiNode->MountToParent(refPtr);
+                refPtr->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            },
+            Referenced::RawPtr(refPtr));
+        return nullptr;
+    };
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender));
+    ListItemModelStatic::SetShallowBuilder(frameNode, shallowBuilder);
 }
 void SetTabContentLazyBuilderImpl(Ark_NativePointer node,
                                   const CustomNodeBuilder* builder)
