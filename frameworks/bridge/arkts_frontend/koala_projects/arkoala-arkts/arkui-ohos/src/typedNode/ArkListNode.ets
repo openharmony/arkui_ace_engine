@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { int32 } from '@koalaui/common';
 import { RuntimeType, runtimeType } from '@koalaui/interop';
 import { ArkScrollableNode } from './ArkScrollableNode';
 import {
@@ -86,14 +87,14 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
 }
-    contentStartOffset(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    contentStartOffset(value: double | undefined): this {
+        const value_casted = value as (double | undefined)
         this.getPeer()?.setContentStartOffsetAttribute(value_casted)
         this.markDirty()
         return this
     }
-    contentEndOffset(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    contentEndOffset(value: double | undefined): this {
+        const value_casted = value as (double | undefined)
         this.getPeer()?.setContentEndOffsetAttribute(value_casted)
         this.markDirty()
         return this
@@ -110,19 +111,19 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         const count_type = runtimeType(count)
         const show_type = runtimeType(show)
         if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
             (RuntimeType.UNDEFINED == show_type)) {
-            const value_casted = count as (number | undefined)
+            const value_casted = count as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             this.markDirty()
             return this
         }
         if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
             ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
-            const count_casted = count as (number | undefined)
+            const count_casted = count as (int32 | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
             this.markDirty()
@@ -130,10 +131,10 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         }
         throw new Error('Can not select appropriate overload')
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         const count_type = runtimeType(value)
         if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type))) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             this.markDirty()
             return this
@@ -176,8 +177,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    friction(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    friction(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setFrictionAttribute(value_casted)
         this.markDirty()
         return this
@@ -200,8 +201,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    onScrollIndex(value: ((start: number, end: number, center: number) => void) | undefined): this {
-        const value_casted = value as (((start: number, end: number, center: number) => void) | undefined)
+    onScrollIndex(value: ((start: int32, end: int32, center: int32) => void) | undefined): this {
+        const value_casted = value as (((start: int32, end: int32, center: int32) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
         this.markDirty()
         return this
@@ -236,14 +237,14 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    onItemMove(value: ((from: number, to: number) => boolean) | undefined): this {
-        const value_casted = value as (((from: number, to: number) => boolean) | undefined)
+    onItemMove(value: ((from: int32, to: int32) => boolean) | undefined): this {
+        const value_casted = value as (((from: int32, to: int32) => boolean) | undefined)
         this.getPeer()?.setOnItemMoveAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onItemDragStart(value: ((event: ItemDragInfo, itemIndex: number) => CustomBuilder) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo, itemIndex: number) => CustomBuilder) | undefined)
+    onItemDragStart(value: ((event: ItemDragInfo, itemIndex: int32) => CustomBuilder) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: int32) => CustomBuilder) | undefined)
         this.getPeer()?.setOnItemDragStartAttribute(value_casted)
         this.markDirty()
         return this
@@ -254,20 +255,20 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    onItemDragMove(value: ((event: ItemDragInfo, itemIndex: number, insertIndex: number) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo, itemIndex: number, insertIndex: number) => void) | undefined)
+    onItemDragMove(value: ((event: ItemDragInfo, itemIndex: int32, insertIndex: int32) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: int32, insertIndex: int32) => void) | undefined)
         this.getPeer()?.setOnItemDragMoveAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onItemDragLeave(value: ((event: ItemDragInfo, itemIndex: number) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo, itemIndex: number) => void) | undefined)
+    onItemDragLeave(value: ((event: ItemDragInfo, itemIndex: int32) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: int32) => void) | undefined)
         this.getPeer()?.setOnItemDragLeaveAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onItemDrop(value: ((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void) | undefined)
+    onItemDrop(value: ((event: ItemDragInfo, itemIndex: int32, insertIndex: int32, isSuccess: boolean) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: int32, insertIndex: int32, isSuccess: boolean) => void) | undefined)
         this.getPeer()?.setOnItemDropAttribute(value_casted)
         this.markDirty()
         return this
@@ -290,8 +291,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
-        const value_casted = value as (number | LengthConstrain | undefined)
+    lanes(value: int32 | LengthConstrain | undefined, gutter?: Dimension): this {
+        const value_casted = value as (int32 | LengthConstrain | undefined)
         const gutter_casted = gutter as (Dimension | undefined)
         this.getPeer()?.setLanesAttribute(value_casted, gutter_casted)
         this.markDirty()

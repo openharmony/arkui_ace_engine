@@ -1075,6 +1075,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IndicatorComponentAttribute_setOnChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _LazyGridLayoutAttribute_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _LazyGridLayoutAttribute_setRowsGap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _LazyGridLayoutAttribute_setColumnsGap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _LazyVGridLayout_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _LazyVGridLayoutInterface_setLazyVGridLayoutOptions(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _LazyVGridLayoutAttribute_setColumnsTemplate(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Line_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _LineInterface_setLineOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3649,18 +3661,18 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderingContext2D_getCanvas(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_setCanvas(ptr: KPointer, canvas: KPointer): void
-    @ani.unsafe.Direct
-    native static _ChildrenMainSize_construct(childDefaultSize: number): KPointer
+    @ani.unsafe.Quick
+    native static _ChildrenMainSize_construct(childDefaultSize: KDouble): KPointer
     @ani.unsafe.Direct
     native static _ChildrenMainSize_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _ChildrenMainSize_splice(ptr: KPointer, start: number, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _ChildrenMainSize_update(ptr: KPointer, index: number, childSize: number): void
-    @ani.unsafe.Direct
-    native static _ChildrenMainSize_getChildDefaultSize(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _ChildrenMainSize_setChildDefaultSize(ptr: KPointer, childDefaultSize: number): void
+    native static _ChildrenMainSize_splice(ptr: KPointer, start: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _ChildrenMainSize_update(ptr: KPointer, index: KInt, childSize: KDouble): void
+    @ani.unsafe.Quick
+    native static _ChildrenMainSize_getChildDefaultSize(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _ChildrenMainSize_setChildDefaultSize(ptr: KPointer, childDefaultSize: KDouble): void
     @ani.unsafe.Direct
     native static _ClickEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -4614,14 +4626,10 @@ export class ArkUIGeneratedNativeModule {
     native static _ListScroller_construct(): KPointer
     @ani.unsafe.Direct
     native static _ListScroller_getFinalizer(): KPointer
-    @ani.unsafe.Quick
-    native static _ListScroller_getItemRectInGroup(ptr: KPointer, index: number, indexInGroup: number): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _ListScroller_scrollToItemInGroup(ptr: KPointer, index: number, indexInGroup: number, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
+    native static _ListScroller_getItemRectInGroup(ptr: KPointer, index: KInt, indexInGroup: KInt): KInteropReturnBuffer
+    native static _ListScroller_scrollToItemInGroup(ptr: KPointer, index: KInt, indexInGroup: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _ListScroller_closeAllSwipeActions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
-    native static _ListScroller_getVisibleListContentInfo(ptr: KPointer, x: number, y: number): KInteropReturnBuffer
+    native static _ListScroller_getVisibleListContentInfo(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _LongPressGestureEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -5431,26 +5439,16 @@ export class ArkUIGeneratedNativeModule {
     native static _Scroller_construct(): KPointer
     @ani.unsafe.Direct
     native static _Scroller_getFinalizer(): KPointer
-    @ani.unsafe.Direct
     native static _Scroller_scrollTo(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _Scroller_scrollEdge(ptr: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _Scroller_fling(ptr: KPointer, velocity: number): void
-    @ani.unsafe.Direct
+    native static _Scroller_fling(ptr: KPointer, velocity: KDouble): void
     native static _Scroller_scrollPage(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _Scroller_currentOffset(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _Scroller_scrollToIndex(ptr: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
+    native static _Scroller_scrollToIndex(ptr: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _Scroller_scrollBy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _Scroller_isAtEnd(ptr: KPointer): boolean
-    @ani.unsafe.Quick
-    native static _Scroller_getItemRect(ptr: KPointer, index: number): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _Scroller_getItemIndex(ptr: KPointer, x: number, y: number): number
+    native static _Scroller_getItemRect(ptr: KPointer, index: KInt): KInteropReturnBuffer
+    native static _Scroller_getItemIndex(ptr: KPointer, x: KDouble, y: KDouble): int32
     @ani.unsafe.Direct
     native static _ScrollMotion_construct(position: number, velocity: number, min: number, max: number, prop: KPointer): KPointer
     @ani.unsafe.Direct
@@ -5459,10 +5457,10 @@ export class ArkUIGeneratedNativeModule {
     native static _ScrollResult_construct(): KPointer
     @ani.unsafe.Direct
     native static _ScrollResult_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _ScrollResult_getOffsetRemain(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _ScrollResult_setOffsetRemain(ptr: KPointer, offsetRemain: number): void
+    @ani.unsafe.Quick
+    native static _ScrollResult_getOffsetRemain(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _ScrollResult_setOffsetRemain(ptr: KPointer, offsetRemain: KDouble): void
     @ani.unsafe.Direct
     native static _SearchController_construct(): KPointer
     @ani.unsafe.Direct
@@ -6005,15 +6003,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WaterFlowSections_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _WaterFlowSections_splice(ptr: KPointer, start: number, thisArray: KSerializerBuffer, thisLength: int32): boolean
+    native static _WaterFlowSections_splice(ptr: KPointer, start: KInt, thisArray: KSerializerBuffer, thisLength: int32): boolean
     @ani.unsafe.Direct
     native static _WaterFlowSections_push(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): boolean
     @ani.unsafe.Direct
-    native static _WaterFlowSections_update(ptr: KPointer, sectionIndex: number, thisArray: KSerializerBuffer, thisLength: int32): boolean
+    native static _WaterFlowSections_update(ptr: KPointer, sectionIndex: KInt, thisArray: KSerializerBuffer, thisLength: int32): boolean
     @ani.unsafe.Quick
     native static _WaterFlowSections_values(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _WaterFlowSections_length(ptr: KPointer): number
+    native static _WaterFlowSections_length(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _WebContextMenuParam_construct(): KPointer
     @ani.unsafe.Direct

@@ -195,10 +195,10 @@ void SetSwipeActionImpl(Ark_NativePointer node,
 
     using OnOffsetChangeType = std::function<void(int32_t)>;
     OnOffsetChangeType onOffsetChangeCallback;
-    auto arkOnOffsetChange = Converter::OptConvert<Callback_Number_Void>(optValue->onOffsetChange);
+    auto arkOnOffsetChange = Converter::OptConvert<Callback_F64_Void>(optValue->onOffsetChange);
     if (arkOnOffsetChange) {
         onOffsetChangeCallback = [arkCallback = CallbackHelper(*arkOnOffsetChange)](int32_t offset) {
-            auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
+            auto arkOffset = Converter::ArkValue<Ark_Float64>(offset);
             arkCallback.Invoke(arkOffset);
         };
     }

@@ -54,30 +54,30 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     _layoutDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _layoutDirection_0_0value?: FlexDirection | undefined
     _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_0_0value?: number | undefined
+    _cachedCount_0_0value?: int32 | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollIndex_0_0value?: ((first: number,last: number) => void) | undefined
+    _onScrollIndex_0_0value?: ((first: int32,last: int32) => void) | undefined
     _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onWillScroll_0_0value?: OnWillScrollCallback | undefined
     _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDidScroll_0_0value?: OnScrollCallback | undefined
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_1_0value?: number | undefined
+    _cachedCount_1_0value?: int32 | undefined
     _cachedCount_1_1value?: boolean | undefined
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | number | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | undefined
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarWidth_0_0value?: number | string | undefined
+    _scrollBarWidth_0_0value?: double | string | undefined
     _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nestedScroll_0_0value?: NestedScrollOptions | undefined
     _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableScrollInteraction_0_0value?: boolean | undefined
     _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _friction_0_0value?: number | Resource | undefined
+    _friction_0_0value?: double | Resource | undefined
     _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachStart_0_0value?: (() => void) | undefined
     _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -87,7 +87,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     _onScrollStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollStop_0_0value?: (() => void) | undefined
     _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _flingSpeedLimit_0_0value?: number | undefined
+    _flingSpeedLimit_0_0value?: double | undefined
     _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _clipContent_0_0value?: ContentClipMode | RectShape | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -215,7 +215,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._cachedCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as number | undefined));
+                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as int32 | undefined));
                     this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -225,7 +225,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount0Attribute((undefined as number | undefined));
+                    peer.setCachedCount0Attribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -251,7 +251,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._onScrollIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((first: number,last: number) => void) | undefined));
+                    peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((first: int32,last: int32) => void) | undefined));
                     this._onScrollIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -261,7 +261,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._onScrollIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnScrollIndexAttribute((undefined as ((first: number,last: number) => void) | undefined));
+                    peer.setOnScrollIndexAttribute((undefined as ((first: int32,last: int32) => void) | undefined));
                 }
             }
         }
@@ -305,7 +305,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._cachedCount_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as number | undefined), (this._cachedCount_1_1value as boolean | undefined));
+                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as int32 | undefined), (this._cachedCount_1_1value as boolean | undefined));
                     this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -315,7 +315,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount1Attribute((undefined as number | undefined), (undefined as boolean | undefined));
+                    peer.setCachedCount1Attribute((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -341,7 +341,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -351,7 +351,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | number | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -359,7 +359,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._scrollBarWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as double | string | undefined));
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -369,7 +369,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarWidthAttribute((undefined as number | string | undefined));
+                    peer.setScrollBarWidthAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -413,7 +413,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._friction_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFrictionAttribute((this._friction_0_0value as number | Resource | undefined));
+                    peer.setFrictionAttribute((this._friction_0_0value as double | Resource | undefined));
                     this._friction_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -423,7 +423,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFrictionAttribute((undefined as number | Resource | undefined));
+                    peer.setFrictionAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -503,7 +503,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._flingSpeedLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -513,7 +513,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFlingSpeedLimitAttribute((undefined as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -697,7 +697,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined));
+                    this.cachedCount((undefined as int32 | undefined));
                 }
             }
         }
@@ -723,7 +723,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.onScrollIndex((undefined as ((first: number,last: number) => void) | undefined));
+                    this.onScrollIndex((undefined as ((first: int32,last: int32) => void) | undefined));
                 }
             }
         }
@@ -762,7 +762,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as number | undefined), (undefined as boolean | undefined));
+                    this.cachedCount((undefined as int32 | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -788,7 +788,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | number | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
                 }
             }
         }
@@ -801,7 +801,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.scrollBarWidth((undefined as number | string | undefined));
+                    this.scrollBarWidth((undefined as double | string | undefined));
                 }
             }
         }
@@ -840,7 +840,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.friction((undefined as number | Resource | undefined));
+                    this.friction((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -905,7 +905,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.flingSpeedLimit((undefined as number | undefined));
+                    this.flingSpeedLimit((undefined as double | undefined));
                 }
             }
         }
@@ -1041,7 +1041,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         if (((this._cachedCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_0_0value) !== (value)))
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1063,7 +1063,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         if (((this._onScrollIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1096,7 +1096,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (show)))
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
@@ -1119,7 +1119,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1130,7 +1130,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         if (((this._scrollBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarWidth_0_0value) !== (value)))
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1163,7 +1163,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         if (((this._friction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1218,7 +1218,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE

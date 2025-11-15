@@ -90,7 +90,7 @@ export interface ListItemGroupOptions {
     headerComponent?: ComponentContent;
     footer?: CustomBuilder;
     footerComponent?: ComponentContent;
-    space?: number | string;
+    space?: double | string;
     style?: ListItemGroupStyle;
 }
 export interface ListItemGroupAttribute extends CommonMethod {
@@ -227,10 +227,10 @@ export class ListItemGroupOptions_serializer {
         if (valueHolderForSpace !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpaceTmpValue  = valueHolderForSpace!
-            if (valueHolderForSpaceTmpValue instanceof number) {
+            if (valueHolderForSpaceTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSpaceTmpValueForIdx0)
+                const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSpaceTmpValueForIdx0)
             } else if (valueHolderForSpaceTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as string
@@ -297,20 +297,20 @@ export class ListItemGroupOptions_serializer {
         }
         const footerComponentTmpResult : ComponentContent | undefined = footerComponentTmpBuf
         const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let spaceTmpBuf : number | string | undefined = undefined
+        let spaceTmpBuf : double | string | undefined = undefined
         if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const spaceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let spaceTmpBuf_ : number | string | undefined
-            if (spaceTmpBuf_UnionSelector == (0).toChar()) {
-                spaceTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (spaceTmpBuf_UnionSelector == (1).toChar()) {
+            let spaceTmpBuf_ : double | string | undefined
+            if (spaceTmpBuf_UnionSelector == (0).toByte()) {
+                spaceTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (spaceTmpBuf_UnionSelector == (1).toByte()) {
                 spaceTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for spaceTmpBuf_ has to be chosen through deserialisation.")
             }
-            spaceTmpBuf = (spaceTmpBuf_ as number | string)
+            spaceTmpBuf = (spaceTmpBuf_ as double | string)
         }
-        const spaceTmpResult : number | string | undefined = spaceTmpBuf
+        const spaceTmpResult : double | string | undefined = spaceTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let styleTmpBuf : ListItemGroupStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

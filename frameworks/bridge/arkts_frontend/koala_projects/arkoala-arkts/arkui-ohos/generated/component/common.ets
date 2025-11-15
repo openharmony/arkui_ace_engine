@@ -529,52 +529,52 @@ export class ChildrenMainSize implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get childDefaultSize(): number {
+    get childDefaultSize(): double {
         return this.getChildDefaultSize()
     }
-    set childDefaultSize(childDefaultSize: number) {
+    set childDefaultSize(childDefaultSize: double) {
         this.setChildDefaultSize(childDefaultSize)
     }
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ChildrenMainSize.getFinalizer())
     }
-    constructor(childDefaultSize: number) {
+    constructor(childDefaultSize: double) {
         this(false, ChildrenMainSize.construct(childDefaultSize))
     }
-    static construct(childDefaultSize: number): KPointer {
+    static construct(childDefaultSize: double): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_construct(childDefaultSize)
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
     }
-    public splice(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
-        const start_casted = start as (number)
-        const deleteCount_casted = deleteCount as (number | undefined)
-        const childrenSize_casted = childrenSize as (Array<number> | undefined)
+    public splice(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
+        const start_casted = start as (int32)
+        const deleteCount_casted = deleteCount as (int32 | undefined)
+        const childrenSize_casted = childrenSize as (Array<double> | undefined)
         this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
         return
     }
-    public update(index: number, childSize: number): void {
-        const index_casted = index as (number)
-        const childSize_casted = childSize as (number)
+    public update(index: int32, childSize: double): void {
+        const index_casted = index as (int32)
+        const childSize_casted = childSize as (double)
         this.update_serialize(index_casted, childSize_casted)
         return
     }
-    private getChildDefaultSize(): number {
+    private getChildDefaultSize(): double {
         return this.getChildDefaultSize_serialize()
     }
-    private setChildDefaultSize(childDefaultSize: number): void {
-        const childDefaultSize_casted = childDefaultSize as (number)
+    private setChildDefaultSize(childDefaultSize: double): void {
+        const childDefaultSize_casted = childDefaultSize as (double)
         this.setChildDefaultSize_serialize(childDefaultSize_casted)
         return
     }
-    splice_serialize(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
+    splice_serialize(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (deleteCount !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const deleteCountTmpValue  = deleteCount!
-            thisSerializer.writeNumber(deleteCountTmpValue)
+            thisSerializer.writeInt32(deleteCountTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -583,8 +583,8 @@ export class ChildrenMainSize implements MaterializedBase {
             const childrenSizeTmpValue  = childrenSize!
             thisSerializer.writeInt32((childrenSizeTmpValue.length).toInt())
             for (let childrenSizeTmpValueCounterI = 0; childrenSizeTmpValueCounterI < childrenSizeTmpValue.length; childrenSizeTmpValueCounterI++) {
-                const childrenSizeTmpValueTmpElement : number = childrenSizeTmpValue[childrenSizeTmpValueCounterI]
-                thisSerializer.writeNumber(childrenSizeTmpValueTmpElement)
+                const childrenSizeTmpValueTmpElement : double = childrenSizeTmpValue[childrenSizeTmpValueCounterI]
+                thisSerializer.writeFloat64(childrenSizeTmpValueTmpElement)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -592,14 +592,14 @@ export class ChildrenMainSize implements MaterializedBase {
         ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    update_serialize(index: number, childSize: number): void {
+    update_serialize(index: int32, childSize: double): void {
         ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
     }
-    private getChildDefaultSize_serialize(): number {
+    private getChildDefaultSize_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
         return retval
     }
-    private setChildDefaultSize_serialize(childDefaultSize: number): void {
+    private setChildDefaultSize_serialize(childDefaultSize: double): void {
         ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
     }
 }
@@ -1666,10 +1666,10 @@ export class ScrollResult implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get offsetRemain(): number {
+    get offsetRemain(): double {
         return this.getOffsetRemain()
     }
-    set offsetRemain(offsetRemain: number) {
+    set offsetRemain(offsetRemain: double) {
         this.setOffsetRemain(offsetRemain)
     }
     constructor(peerPtr: KPointer) {
@@ -1685,19 +1685,19 @@ export class ScrollResult implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ScrollResult_getFinalizer()
     }
-    private getOffsetRemain(): number {
+    private getOffsetRemain(): double {
         return this.getOffsetRemain_serialize()
     }
-    private setOffsetRemain(offsetRemain: number): void {
-        const offsetRemain_casted = offsetRemain as (number)
+    private setOffsetRemain(offsetRemain: double): void {
+        const offsetRemain_casted = offsetRemain as (double)
         this.setOffsetRemain_serialize(offsetRemain_casted)
         return
     }
-    private getOffsetRemain_serialize(): number {
+    private getOffsetRemain_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ScrollResult_getOffsetRemain(this.peer!.ptr)
         return retval
     }
-    private setOffsetRemain_serialize(offsetRemain: number): void {
+    private setOffsetRemain_serialize(offsetRemain: double): void {
         ArkUIGeneratedNativeModule._ScrollResult_setOffsetRemain(this.peer!.ptr, offsetRemain)
     }
 }
@@ -5913,7 +5913,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | number | string | undefined): void {
+    setScrollBarColorAttribute(value: Color | int32 | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -5922,10 +5922,10 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -5937,15 +5937,15 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarWidthAttribute(value: number | string | undefined): void {
+    setScrollBarWidthAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -5981,15 +5981,15 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setEnableScrollInteraction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFrictionAttribute(value: number | Resource | undefined): void {
+    setFrictionAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -6049,12 +6049,12 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnScrollStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFlingSpeedLimitAttribute(value: number | undefined): void {
+    setFlingSpeedLimitAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -8718,10 +8718,10 @@ export interface ScrollableCommonMethod extends CommonMethod {
     scrollBar(value: BarState | undefined): this {
         throw new Error("Unimplemented method scrollBar")
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         throw new Error("Unimplemented method scrollBarColor")
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         throw new Error("Unimplemented method scrollBarWidth")
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
@@ -8730,7 +8730,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     enableScrollInteraction(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableScrollInteraction")
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method friction")
     }
     onReachStart(value: (() => void) | undefined): this {
@@ -8745,7 +8745,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     onScrollStop(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onScrollStop")
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         throw new Error("Unimplemented method flingSpeedLimit")
     }
     clipContent(value: ContentClipMode | RectShape | undefined): this {
@@ -8771,10 +8771,10 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     scrollBar(value: BarState | undefined): this {
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         return this
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
@@ -8783,7 +8783,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     enableScrollInteraction(value: boolean | undefined): this {
         return this
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         return this
     }
     onReachStart(value: (() => void) | undefined): this {
@@ -8798,7 +8798,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     onScrollStop(value: (() => void) | undefined): this {
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         return this
     }
     clipContent(value: ContentClipMode | RectShape | undefined): this {
@@ -8820,21 +8820,21 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
         throw new Error("Not implemented")
     }
 }
-export type OnWillScrollCallback = (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;
-export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
-export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: number) => CustomBuilder | undefined;
-export type OnMoveHandler = (from: number, to: number) => void;
+export type OnWillScrollCallback = (scrollOffset: double, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;
+export type OnScrollCallback = (scrollOffset: double, scrollState: ScrollState) => void;
+export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: int32) => CustomBuilder | undefined;
+export type OnMoveHandler = (from: int32, to: int32) => void;
 export interface ItemDragEventHandler {
-    onLongPress?: ((value0: number) => void);
-    onDragStart?: ((value0: number) => void);
+    onLongPress?: ((value0: int32) => void);
+    onDragStart?: ((value0: int32) => void);
     onMoveThrough?: OnMoveHandler;
-    onDrop?: ((value0: number) => void);
+    onDrop?: ((value0: int32) => void);
 }
 export interface DynamicNode {
 }
 export interface EdgeEffectOptions {
     alwaysEnabled: boolean;
-    effectEdge?: number;
+    effectEdge?: int32;
 }
 export enum EffectEdge {
     START = 1,
@@ -10772,17 +10772,17 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public scrollBarColor(value: Color | number | string | undefined): this {
+    public scrollBarColor(value: Color | int32 | string | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | number | string | undefined)
+            const value_casted = value as (Color | int32 | string | undefined)
             this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
         return this
     }
-    public scrollBarWidth(value: number | string | undefined): this {
+    public scrollBarWidth(value: double | string | undefined): this {
         if (this.checkPriority("scrollBarWidth")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setScrollBarWidthAttribute(value_casted)
             return this
         }
@@ -10804,9 +10804,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public friction(value: number | Resource | undefined): this {
+    public friction(value: double | Resource | undefined): this {
         if (this.checkPriority("friction")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setFrictionAttribute(value_casted)
             return this
         }
@@ -10844,9 +10844,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public flingSpeedLimit(value: number | undefined): this {
+    public flingSpeedLimit(value: double | undefined): this {
         if (this.checkPriority("flingSpeedLimit")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setFlingSpeedLimitAttribute(value_casted)
             return this
         }
@@ -11946,7 +11946,7 @@ export class EdgeEffectOptions_serializer {
         if (valueHolderForEffectEdge !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEffectEdgeTmpValue  = valueHolderForEffectEdge!
-            valueSerializer.writeNumber(valueHolderForEffectEdgeTmpValue)
+            valueSerializer.writeInt32(valueHolderForEffectEdgeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -11955,11 +11955,11 @@ export class EdgeEffectOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const alwaysEnabledTmpResult : boolean = valueDeserializer.readBoolean()
         const effectEdgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let effectEdgeTmpBuf : number | undefined = undefined
+        let effectEdgeTmpBuf : int32 | undefined = undefined
         if ((effectEdgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            effectEdgeTmpBuf = (valueDeserializer.readNumber() as number)
+            effectEdgeTmpBuf = valueDeserializer.readInt32()
         }
-        const effectEdgeTmpResult : number | undefined = effectEdgeTmpBuf
+        const effectEdgeTmpResult : int32 | undefined = effectEdgeTmpBuf
         let value : EdgeEffectOptions = ({alwaysEnabled: alwaysEnabledTmpResult, effectEdge: effectEdgeTmpResult} as EdgeEffectOptions)
         return value
     }
@@ -12208,54 +12208,54 @@ export class ItemDragEventHandler_serializer {
     public static read(buffer: DeserializerBase): ItemDragEventHandler {
         let valueDeserializer : DeserializerBase = buffer
         const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onLongPressTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onLongPressTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onLongPressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onLongPressTmpBuf = (value0: number):void => {
+            onLongPressTmpBuf = (value0: int32):void => {
                 const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
-                onLongPressTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                onLongPressTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
                 onLongPressTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onLongPressTmpResult : ((value0: number) => void) | undefined = onLongPressTmpBuf
+        const onLongPressTmpResult : ((value0: int32) => void) | undefined = onLongPressTmpBuf
         const onDragStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDragStartTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onDragStartTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onDragStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDragStartTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDragStartTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDragStartTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDragStartTmpBuf = (value0: number):void => {
+            onDragStartTmpBuf = (value0: int32):void => {
                 const onDragStartTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDragStartTmpBuf_BufArgsSerializer.writeInt32(onDragStartTmpBuf_BufResource.resourceId);
                 onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCall);
                 onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCallSync);
-                onDragStartTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
+                onDragStartTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
                 onDragStartTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDragStartTmpResult : ((value0: number) => void) | undefined = onDragStartTmpBuf
+        const onDragStartTmpResult : ((value0: int32) => void) | undefined = onDragStartTmpBuf
         const onMoveThroughTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onMoveThroughTmpBuf : OnMoveHandler | undefined = undefined
         if ((onMoveThroughTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onMoveThroughTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMoveThroughTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onMoveThroughTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onMoveThroughTmpBuf = (from: number, to: number):void => {
+            onMoveThroughTmpBuf = (from: int32, to: int32):void => {
                 const onMoveThroughTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(onMoveThroughTmpBuf_BufResource.resourceId);
                 onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCall);
                 onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCallSync);
-                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(from);
-                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(to);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(from);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(to);
                 InteropNativeModule._CallCallbackSync(10, -1200281222, onMoveThroughTmpBuf_BufArgsSerializer.asBuffer(), onMoveThroughTmpBuf_BufArgsSerializer.length());
                 onMoveThroughTmpBuf_BufArgsSerializer.release();
                 return;
@@ -12263,23 +12263,23 @@ export class ItemDragEventHandler_serializer {
         }
         const onMoveThroughTmpResult : OnMoveHandler | undefined = onMoveThroughTmpBuf
         const onDropTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDropTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onDropTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onDropTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDropTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDropTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDropTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDropTmpBuf = (value0: number):void => {
+            onDropTmpBuf = (value0: int32):void => {
                 const onDropTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDropTmpBuf_BufArgsSerializer.writeInt32(onDropTmpBuf_BufResource.resourceId);
                 onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCall);
                 onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCallSync);
-                onDropTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
+                onDropTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
                 onDropTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDropTmpResult : ((value0: number) => void) | undefined = onDropTmpBuf
+        const onDropTmpResult : ((value0: int32) => void) | undefined = onDropTmpBuf
         let value : ItemDragEventHandler = ({onLongPress: onLongPressTmpResult, onDragStart: onDragStartTmpResult, onMoveThrough: onMoveThroughTmpResult, onDrop: onDropTmpResult} as ItemDragEventHandler)
         return value
     }

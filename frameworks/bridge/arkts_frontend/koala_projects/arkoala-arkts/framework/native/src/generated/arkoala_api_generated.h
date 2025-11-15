@@ -741,10 +741,12 @@ typedef struct TransitionEffectPeer* Ark_TransitionEffect;
 typedef struct Opt_TransitionEffect Opt_TransitionEffect;
 typedef struct Ark_TranslateResult Ark_TranslateResult;
 typedef struct Opt_TranslateResult Opt_TranslateResult;
+typedef struct Ark_Tuple_I32_I32 Ark_Tuple_I32_I32;
+typedef struct Opt_Tuple_I32_I32 Opt_Tuple_I32_I32;
+typedef struct Ark_Tuple_I32_I32_I32_I32 Ark_Tuple_I32_I32_I32_I32;
+typedef struct Opt_Tuple_I32_I32_I32_I32 Opt_Tuple_I32_I32_I32_I32;
 typedef struct Ark_Tuple_Number_Number Ark_Tuple_Number_Number;
 typedef struct Opt_Tuple_Number_Number Opt_Tuple_Number_Number;
-typedef struct Ark_Tuple_Number_Number_Number_Number Ark_Tuple_Number_Number_Number_Number;
-typedef struct Opt_Tuple_Number_Number_Number_Number Opt_Tuple_Number_Number_Number_Number;
 typedef struct UICommonEventPeer UICommonEventPeer;
 typedef struct UICommonEventPeer* Ark_UICommonEvent;
 typedef struct Opt_UICommonEvent Opt_UICommonEvent;
@@ -773,6 +775,8 @@ typedef struct Ark_Union_Boolean_I64 Ark_Union_Boolean_I64;
 typedef struct Opt_Union_Boolean_I64 Opt_Union_Boolean_I64;
 typedef struct Ark_Union_CircleShape_EllipseShape_PathShape_RectShape Ark_Union_CircleShape_EllipseShape_PathShape_RectShape;
 typedef struct Opt_Union_CircleShape_EllipseShape_PathShape_RectShape Opt_Union_CircleShape_EllipseShape_PathShape_RectShape;
+typedef struct Ark_Union_Color_I32_String Ark_Union_Color_I32_String;
+typedef struct Opt_Union_Color_I32_String Opt_Union_Color_I32_String;
 typedef struct Ark_Union_Color_Number_String Ark_Union_Color_Number_String;
 typedef struct Opt_Union_Color_Number_String Opt_Union_Color_Number_String;
 typedef struct Ark_Union_ColorFilter_DrawingColorFilter Ark_Union_ColorFilter_DrawingColorFilter;
@@ -1191,21 +1195,28 @@ typedef struct Callback_HitTestMode_Void Callback_HitTestMode_Void;
 typedef struct Opt_Callback_HitTestMode_Void Opt_Callback_HitTestMode_Void;
 typedef struct Callback_HoverEvent_Void Callback_HoverEvent_Void;
 typedef struct Opt_Callback_HoverEvent_Void Opt_Callback_HoverEvent_Void;
+typedef struct Callback_I32_F64_ComputedBarAttribute Callback_I32_F64_ComputedBarAttribute;
+typedef struct Opt_Callback_I32_F64_ComputedBarAttribute Opt_Callback_I32_F64_ComputedBarAttribute;
+typedef struct Callback_I32_I32_Boolean Callback_I32_I32_Boolean;
+typedef struct Opt_Callback_I32_I32_Boolean Opt_Callback_I32_I32_Boolean;
+typedef struct Callback_I32_I32_I32_Void Callback_I32_I32_I32_Void;
+typedef struct Opt_Callback_I32_I32_I32_Void Opt_Callback_I32_I32_I32_Void;
 typedef struct Callback_I32_I32_Void Callback_I32_I32_Void;
 typedef struct Opt_Callback_I32_I32_Void Opt_Callback_I32_I32_Void;
-typedef struct Callback_I32_Void Callback_I32_Void;
-typedef struct Opt_Callback_I32_Void Opt_Callback_I32_Void;
+typedef struct Callback_I32_Tuple_I32_I32 Callback_I32_Tuple_I32_I32;
+typedef struct Opt_Callback_I32_Tuple_I32_I32 Opt_Callback_I32_Tuple_I32_I32;
+typedef struct Callback_I32_Tuple_I32_I32_I32_I32 Callback_I32_Tuple_I32_I32_I32_I32;
+typedef struct Opt_Callback_I32_Tuple_I32_I32_I32_I32 Opt_Callback_I32_Tuple_I32_I32_I32_I32;
 typedef struct Callback_InsertValue_Boolean Callback_InsertValue_Boolean;
 typedef struct Opt_Callback_InsertValue_Boolean Opt_Callback_InsertValue_Boolean;
 typedef struct Callback_InsertValue_Void Callback_InsertValue_Void;
 typedef struct Opt_Callback_InsertValue_Void Opt_Callback_InsertValue_Void;
-typedef struct Callback_ItemDragInfo_Number_Number_Boolean_Void Callback_ItemDragInfo_Number_Number_Boolean_Void;
-typedef struct Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void;
-typedef struct Callback_ItemDragInfo_Number_Number_Void Callback_ItemDragInfo_Number_Number_Void;
-typedef struct Opt_Callback_ItemDragInfo_Number_Number_Void Opt_Callback_ItemDragInfo_Number_Number_Void;
-typedef struct Callback_ItemDragInfo_Number_Void Callback_ItemDragInfo_Number_Void;
-typedef struct Opt_Callback_ItemDragInfo_Number_Void Opt_Callback_ItemDragInfo_Number_Void;
-typedef struct Callback_ItemDragInfo_Void Callback_ItemDragInfo_Void;
+typedef struct Callback_ItemDragInfo_I32_I32_Boolean_Void Callback_ItemDragInfo_I32_I32_Boolean_Void;
+typedef struct Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void;
+typedef struct Callback_ItemDragInfo_I32_I32_Void Callback_ItemDragInfo_I32_I32_Void;
+typedef struct Opt_Callback_ItemDragInfo_I32_I32_Void Opt_Callback_ItemDragInfo_I32_I32_Void;
+typedef struct Callback_ItemDragInfo_I32_Void Callback_ItemDragInfo_I32_Void;
+typedef struct Opt_Callback_ItemDragInfo_I32_Void Opt_Callback_ItemDragInfo_I32_Void;typedef struct Callback_ItemDragInfo_Void Callback_ItemDragInfo_Void;
 typedef struct Opt_Callback_ItemDragInfo_Void Opt_Callback_ItemDragInfo_Void;
 typedef struct Callback_KeyEvent_Boolean Callback_KeyEvent_Boolean;
 typedef struct Opt_Callback_KeyEvent_Boolean Opt_Callback_KeyEvent_Boolean;
@@ -1233,18 +1244,8 @@ typedef struct Callback_NavigationTitleMode_Void Callback_NavigationTitleMode_Vo
 typedef struct Opt_Callback_NavigationTitleMode_Void Opt_Callback_NavigationTitleMode_Void;
 typedef struct Callback_NavigationTransitionProxy_Void Callback_NavigationTransitionProxy_Void;
 typedef struct Opt_Callback_NavigationTransitionProxy_Void Opt_Callback_NavigationTransitionProxy_Void;
-typedef struct Callback_Number_Number_Boolean Callback_Number_Number_Boolean;
-typedef struct Opt_Callback_Number_Number_Boolean Opt_Callback_Number_Number_Boolean;
-typedef struct Callback_Number_Number_ComputedBarAttribute Callback_Number_Number_ComputedBarAttribute;
-typedef struct Opt_Callback_Number_Number_ComputedBarAttribute Opt_Callback_Number_Number_ComputedBarAttribute;
-typedef struct Callback_Number_Number_Number_Void Callback_Number_Number_Number_Void;
-typedef struct Opt_Callback_Number_Number_Number_Void Opt_Callback_Number_Number_Number_Void;
 typedef struct Callback_Number_Number_Void Callback_Number_Number_Void;
 typedef struct Opt_Callback_Number_Number_Void Opt_Callback_Number_Number_Void;
-typedef struct Callback_Number_Tuple_Number_Number Callback_Number_Tuple_Number_Number;
-typedef struct Opt_Callback_Number_Tuple_Number_Number Opt_Callback_Number_Tuple_Number_Number;
-typedef struct Callback_Number_Tuple_Number_Number_Number_Number Callback_Number_Tuple_Number_Number_Number_Number;
-typedef struct Opt_Callback_Number_Tuple_Number_Number_Number_Number Opt_Callback_Number_Tuple_Number_Number_Number_Number;
 typedef struct Callback_Number_Void Callback_Number_Void;
 typedef struct Opt_Callback_Number_Void Opt_Callback_Number_Void;
 typedef struct Callback_Object_Void Callback_Object_Void;
@@ -1453,10 +1454,10 @@ typedef struct Callback_TouchEvent_Void Callback_TouchEvent_Void;
 typedef struct Opt_Callback_TouchEvent_Void Opt_Callback_TouchEvent_Void;
 typedef struct Callback_TouchResult_Void Callback_TouchResult_Void;
 typedef struct Opt_Callback_TouchResult_Void Opt_Callback_TouchResult_Void;
-typedef struct Callback_Tuple_Number_Number_Number_Number_Void Callback_Tuple_Number_Number_Number_Number_Void;
-typedef struct Opt_Callback_Tuple_Number_Number_Number_Number_Void Opt_Callback_Tuple_Number_Number_Number_Number_Void;
-typedef struct Callback_Tuple_Number_Number_Void Callback_Tuple_Number_Number_Void;
-typedef struct Opt_Callback_Tuple_Number_Number_Void Opt_Callback_Tuple_Number_Number_Void;
+typedef struct Callback_Tuple_I32_I32_I32_I32_Void Callback_Tuple_I32_I32_I32_I32_Void;
+typedef struct Opt_Callback_Tuple_I32_I32_I32_I32_Void Opt_Callback_Tuple_I32_I32_I32_I32_Void;
+typedef struct Callback_Tuple_I32_I32_Void Callback_Tuple_I32_I32_Void;
+typedef struct Opt_Callback_Tuple_I32_I32_Void Opt_Callback_Tuple_I32_I32_Void;
 typedef struct Callback_UIExtensionProxy_Void Callback_UIExtensionProxy_Void;
 typedef struct Opt_Callback_UIExtensionProxy_Void Opt_Callback_UIExtensionProxy_Void;
 typedef struct Callback_Union_CustomBuilder_DragItemInfo_Void Callback_Union_CustomBuilder_DragItemInfo_Void;
@@ -2859,6 +2860,8 @@ typedef struct Ark_Union_Dimension_OptionWidthMode Ark_Union_Dimension_OptionWid
 typedef struct Opt_Union_Dimension_OptionWidthMode Opt_Union_Dimension_OptionWidthMode;
 typedef struct Ark_Union_EdgeColors_ResourceColor_LocalizedEdgeColors Ark_Union_EdgeColors_ResourceColor_LocalizedEdgeColors;
 typedef struct Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors;
+typedef struct Ark_Union_I32_LengthConstrain Ark_Union_I32_LengthConstrain;
+typedef struct Opt_Union_I32_LengthConstrain Opt_Union_I32_LengthConstrain;
 typedef struct Ark_Union_I32_Resource_Bindable_Bindable Ark_Union_I32_Resource_Bindable_Bindable;
 typedef struct Opt_Union_I32_Resource_Bindable_Bindable Opt_Union_I32_Resource_Bindable_Bindable;
 typedef struct Ark_Union_Length_Array_RadiusItem Ark_Union_Length_Array_RadiusItem;
@@ -2871,8 +2874,6 @@ typedef struct Ark_Union_MenuItemOptions_CustomBuilder Ark_Union_MenuItemOptions
 typedef struct Opt_Union_MenuItemOptions_CustomBuilder Opt_Union_MenuItemOptions_CustomBuilder;
 typedef struct Ark_Union_NavDestinationContext_NavBar Ark_Union_NavDestinationContext_NavBar;
 typedef struct Opt_Union_NavDestinationContext_NavBar Opt_Union_NavDestinationContext_NavBar;
-typedef struct Ark_Union_Number_LengthConstrain Ark_Union_Number_LengthConstrain;
-typedef struct Opt_Union_Number_LengthConstrain Opt_Union_Number_LengthConstrain;
 typedef struct Ark_Union_ResourceColor_EdgeColors Ark_Union_ResourceColor_EdgeColors;
 typedef struct Opt_Union_ResourceColor_EdgeColors Opt_Union_ResourceColor_EdgeColors;
 typedef struct Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors;
@@ -7532,8 +7533,8 @@ typedef struct Opt_Offset_componentutils {
 } Opt_Offset_componentutils;
 typedef struct Ark_OffsetResult {
     /* kind: Interface */
-    Ark_Number xOffset;
-    Ark_Number yOffset;
+    Ark_Float64 xOffset;
+    Ark_Float64 yOffset;
 } Ark_OffsetResult;
 typedef struct Opt_OffsetResult {
     Ark_Tag tag;
@@ -7625,7 +7626,7 @@ typedef struct Opt_OnScrollEvent {
 } Opt_OnScrollEvent;
 typedef struct Ark_OnScrollFrameBeginHandlerResult {
     /* kind: Interface */
-    Ark_Number offsetRemain;
+    Ark_Float64 offsetRemain;
 } Ark_OnScrollFrameBeginHandlerResult;
 typedef struct Opt_OnScrollFrameBeginHandlerResult {
     Ark_Tag tag;
@@ -8153,6 +8154,21 @@ typedef struct Ark_Tuple_I32_I32 {
     Ark_Int32 value0;
     Ark_Int32 value1;
 } Ark_Tuple_I32_I32;
+typedef struct Opt_Tuple_I32_I32 {
+    Ark_Tag tag;
+    Ark_Tuple_I32_I32 value;
+} Opt_Tuple_I32_I32;
+typedef struct Ark_Tuple_I32_I32_I32_I32 {
+    /* kind: Interface */
+    Ark_Int32 value0;
+    Ark_Int32 value1;
+    Ark_Int32 value2;
+    Ark_Int32 value3;
+} Ark_Tuple_I32_I32_I32_I32;
+typedef struct Opt_Tuple_I32_I32_I32_I32 {
+    Ark_Tag tag;
+    Ark_Tuple_I32_I32_I32_I32 value;
+} Opt_Tuple_I32_I32_I32_I32;
 typedef struct Ark_Tuple_Number_Number {
     /* kind: Interface */
     Ark_Number value0;
@@ -8162,17 +8178,6 @@ typedef struct Opt_Tuple_Number_Number {
     Ark_Tag tag;
     Ark_Tuple_Number_Number value;
 } Opt_Tuple_Number_Number;
-typedef struct Ark_Tuple_Number_Number_Number_Number {
-    /* kind: Interface */
-    Ark_Number value0;
-    Ark_Number value1;
-    Ark_Number value2;
-    Ark_Number value3;
-} Ark_Tuple_Number_Number_Number_Number;
-typedef struct Opt_Tuple_Number_Number_Number_Number {
-    Ark_Tag tag;
-    Ark_Tuple_Number_Number_Number_Number value;
-} Opt_Tuple_Number_Number_Number_Number;
 typedef struct Opt_UICommonEvent {
     Ark_Tag tag;
     Ark_UICommonEvent value;
@@ -8251,6 +8256,19 @@ typedef struct Opt_Union_CircleShape_EllipseShape_PathShape_RectShape {
     Ark_Tag tag;
     Ark_Union_CircleShape_EllipseShape_PathShape_RectShape value;
 } Opt_Union_CircleShape_EllipseShape_PathShape_RectShape;
+typedef struct Ark_Union_Color_I32_String {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Color value0;
+        Ark_Int32 value1;
+        Ark_String value2;
+    };
+} Ark_Union_Color_I32_String;
+typedef struct Opt_Union_Color_I32_String {
+    Ark_Tag tag;
+    Ark_Union_Color_I32_String value;
+} Opt_Union_Color_I32_String;
 typedef struct Ark_Union_Color_Number_String {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -10160,16 +10178,66 @@ typedef struct Opt_Callback_HoverEvent_Void {
     Ark_Tag tag;
     Callback_HoverEvent_Void value;
 } Opt_Callback_HoverEvent_Void;
+typedef struct Callback_I32_F64_ComputedBarAttribute {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_Float64 offset, const Callback_ComputedBarAttribute_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_Float64 offset, const Callback_ComputedBarAttribute_Void continuation);
+} Callback_I32_F64_ComputedBarAttribute;
+typedef struct Opt_Callback_I32_F64_ComputedBarAttribute {
+    Ark_Tag tag;
+    Callback_I32_F64_ComputedBarAttribute value;
+} Opt_Callback_I32_F64_ComputedBarAttribute;
+typedef struct Callback_I32_I32_Boolean {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to, const Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to, const Callback_Boolean_Void continuation);
+} Callback_I32_I32_Boolean;
+typedef struct Opt_Callback_I32_I32_Boolean {
+    Ark_Tag tag;
+    Callback_I32_I32_Boolean value;
+} Opt_Callback_I32_I32_Boolean;
+typedef struct Callback_I32_I32_I32_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center);
+} Callback_I32_I32_I32_Void;
+typedef struct Opt_Callback_I32_I32_I32_Void {
+    Ark_Tag tag;
+    Callback_I32_I32_I32_Void value;
+} Opt_Callback_I32_I32_I32_Void;
 typedef struct Callback_I32_I32_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 selectionStart, const Ark_Int32 selectionEnd);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectionStart, const Ark_Int32 selectionEnd);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 first, const Ark_Int32 last);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 first, const Ark_Int32 last);
 } Callback_I32_I32_Void;
 typedef struct Opt_Callback_I32_I32_Void {
     Ark_Tag tag;
     Callback_I32_I32_Void value;
 } Opt_Callback_I32_I32_Void;
+typedef struct Callback_I32_Tuple_I32_I32 {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Tuple_I32_I32_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Tuple_I32_I32_Void continuation);
+} Callback_I32_Tuple_I32_I32;
+typedef struct Opt_Callback_I32_Tuple_I32_I32 {
+    Ark_Tag tag;
+    Callback_I32_Tuple_I32_I32 value;
+} Opt_Callback_I32_Tuple_I32_I32;
+typedef struct Callback_I32_Tuple_I32_I32_I32_I32 {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Tuple_I32_I32_I32_I32_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Tuple_I32_I32_I32_I32_Void continuation);
+} Callback_I32_Tuple_I32_I32_I32_I32;
+typedef struct Opt_Callback_I32_Tuple_I32_I32_I32_I32 {
+    Ark_Tag tag;
+    Callback_I32_Tuple_I32_I32_I32_I32 value;
+} Opt_Callback_I32_Tuple_I32_I32_I32_I32;
 typedef struct Callback_I32_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -10200,36 +10268,36 @@ typedef struct Opt_Callback_InsertValue_Void {
     Ark_Tag tag;
     Callback_InsertValue_Void value;
 } Opt_Callback_InsertValue_Void;
-typedef struct Callback_ItemDragInfo_Number_Number_Boolean_Void {
+typedef struct Callback_ItemDragInfo_I32_I32_Boolean_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex, const Ark_Boolean isSuccess);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex, const Ark_Boolean isSuccess);
-} Callback_ItemDragInfo_Number_Number_Boolean_Void;
-typedef struct Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void {
+    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex, const Ark_Int32 insertIndex, const Ark_Boolean isSuccess);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex, const Ark_Int32 insertIndex, const Ark_Boolean isSuccess);
+} Callback_ItemDragInfo_I32_I32_Boolean_Void;
+typedef struct Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void {
     Ark_Tag tag;
-    Callback_ItemDragInfo_Number_Number_Boolean_Void value;
-} Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void;
-typedef struct Callback_ItemDragInfo_Number_Number_Void {
+    Callback_ItemDragInfo_I32_I32_Boolean_Void value;
+} Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void;
+typedef struct Callback_ItemDragInfo_I32_I32_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex);
-} Callback_ItemDragInfo_Number_Number_Void;
-typedef struct Opt_Callback_ItemDragInfo_Number_Number_Void {
+    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex, const Ark_Int32 insertIndex);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex, const Ark_Int32 insertIndex);
+} Callback_ItemDragInfo_I32_I32_Void;
+typedef struct Opt_Callback_ItemDragInfo_I32_I32_Void {
     Ark_Tag tag;
-    Callback_ItemDragInfo_Number_Number_Void value;
-} Opt_Callback_ItemDragInfo_Number_Number_Void;
-typedef struct Callback_ItemDragInfo_Number_Void {
+    Callback_ItemDragInfo_I32_I32_Void value;
+} Opt_Callback_ItemDragInfo_I32_I32_Void;
+typedef struct Callback_ItemDragInfo_I32_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex);
-} Callback_ItemDragInfo_Number_Void;
-typedef struct Opt_Callback_ItemDragInfo_Number_Void {
+    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex);
+} Callback_ItemDragInfo_I32_Void;
+typedef struct Opt_Callback_ItemDragInfo_I32_Void {
     Ark_Tag tag;
-    Callback_ItemDragInfo_Number_Void value;
-} Opt_Callback_ItemDragInfo_Number_Void;
+    Callback_ItemDragInfo_I32_Void value;
+} Opt_Callback_ItemDragInfo_I32_Void;
 typedef struct Callback_ItemDragInfo_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -10370,66 +10438,16 @@ typedef struct Opt_Callback_NavigationTransitionProxy_Void {
     Ark_Tag tag;
     Callback_NavigationTransitionProxy_Void value;
 } Opt_Callback_NavigationTransitionProxy_Void;
-typedef struct Callback_Number_Number_Boolean {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to, const Callback_Boolean_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to, const Callback_Boolean_Void continuation);
-} Callback_Number_Number_Boolean;
-typedef struct Opt_Callback_Number_Number_Boolean {
-    Ark_Tag tag;
-    Callback_Number_Number_Boolean value;
-} Opt_Callback_Number_Number_Boolean;
-typedef struct Callback_Number_Number_ComputedBarAttribute {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number index, const Ark_Number offset, const Callback_ComputedBarAttribute_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index, const Ark_Number offset, const Callback_ComputedBarAttribute_Void continuation);
-} Callback_Number_Number_ComputedBarAttribute;
-typedef struct Opt_Callback_Number_Number_ComputedBarAttribute {
-    Ark_Tag tag;
-    Callback_Number_Number_ComputedBarAttribute value;
-} Opt_Callback_Number_Number_ComputedBarAttribute;
-typedef struct Callback_Number_Number_Number_Void {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end, const Ark_Number center);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end, const Ark_Number center);
-} Callback_Number_Number_Number_Void;
-typedef struct Opt_Callback_Number_Number_Number_Void {
-    Ark_Tag tag;
-    Callback_Number_Number_Number_Void value;
-} Opt_Callback_Number_Number_Number_Void;
 typedef struct Callback_Number_Number_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number prevIndex, const Ark_Number index);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number prevIndex, const Ark_Number index);
 } Callback_Number_Number_Void;
 typedef struct Opt_Callback_Number_Number_Void {
     Ark_Tag tag;
     Callback_Number_Number_Void value;
 } Opt_Callback_Number_Number_Void;
-typedef struct Callback_Number_Tuple_Number_Number {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number index, const Callback_Tuple_Number_Number_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index, const Callback_Tuple_Number_Number_Void continuation);
-} Callback_Number_Tuple_Number_Number;
-typedef struct Opt_Callback_Number_Tuple_Number_Number {
-    Ark_Tag tag;
-    Callback_Number_Tuple_Number_Number value;
-} Opt_Callback_Number_Tuple_Number_Number;
-typedef struct Callback_Number_Tuple_Number_Number_Number_Number {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number index, const Callback_Tuple_Number_Number_Number_Number_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index, const Callback_Tuple_Number_Number_Number_Number_Void continuation);
-} Callback_Number_Tuple_Number_Number_Number_Number;
-typedef struct Opt_Callback_Number_Tuple_Number_Number_Number_Number {
-    Ark_Tag tag;
-    Callback_Number_Tuple_Number_Number_Number_Number value;
-} Opt_Callback_Number_Tuple_Number_Number_Number_Number;
 typedef struct Callback_Number_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11470,26 +11488,26 @@ typedef struct Opt_Callback_TouchResult_Void {
     Ark_Tag tag;
     Callback_TouchResult_Void value;
 } Opt_Callback_TouchResult_Void;
-typedef struct Callback_Tuple_Number_Number_Number_Number_Void {
+typedef struct Callback_Tuple_I32_I32_I32_I32_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Tuple_Number_Number_Number_Number value);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Tuple_Number_Number_Number_Number value);
-} Callback_Tuple_Number_Number_Number_Number_Void;
-typedef struct Opt_Callback_Tuple_Number_Number_Number_Number_Void {
+    void (*call)(const Ark_Int32 resourceId, const Ark_Tuple_I32_I32_I32_I32 value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Tuple_I32_I32_I32_I32 value);
+} Callback_Tuple_I32_I32_I32_I32_Void;
+typedef struct Opt_Callback_Tuple_I32_I32_I32_I32_Void {
     Ark_Tag tag;
-    Callback_Tuple_Number_Number_Number_Number_Void value;
-} Opt_Callback_Tuple_Number_Number_Number_Number_Void;
-typedef struct Callback_Tuple_Number_Number_Void {
+    Callback_Tuple_I32_I32_I32_I32_Void value;
+} Opt_Callback_Tuple_I32_I32_I32_I32_Void;
+typedef struct Callback_Tuple_I32_I32_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Tuple_Number_Number value);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Tuple_Number_Number value);
-} Callback_Tuple_Number_Number_Void;
-typedef struct Opt_Callback_Tuple_Number_Number_Void {
+    void (*call)(const Ark_Int32 resourceId, const Ark_Tuple_I32_I32 value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Tuple_I32_I32 value);
+} Callback_Tuple_I32_I32_Void;
+typedef struct Opt_Callback_Tuple_I32_I32_Void {
     Ark_Tag tag;
-    Callback_Tuple_Number_Number_Void value;
-} Opt_Callback_Tuple_Number_Number_Void;
+    Callback_Tuple_I32_I32_Void value;
+} Opt_Callback_Tuple_I32_I32_Void;
 typedef struct Callback_UIExtensionProxy_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11653,8 +11671,8 @@ typedef struct Opt_GestureRecognizerJudgeBeginCallback {
 typedef struct GetItemMainSizeByIndex {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number index, const Callback_Number_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index, const Callback_Number_Void continuation);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_F64_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_F64_Void continuation);
 } GetItemMainSizeByIndex;
 typedef struct Opt_GetItemMainSizeByIndex {
     Ark_Tag tag;
@@ -12073,8 +12091,8 @@ typedef struct Opt_OnIntelligentTrackingPreventionCallback {
 typedef struct OnItemDragStartCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_Opt_CustomBuilder_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_Opt_CustomBuilder_Void continuation);
+    void (*call)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex, const Callback_Opt_CustomBuilder_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex, const Callback_Opt_CustomBuilder_Void continuation);
 } OnItemDragStartCallback;
 typedef struct Opt_OnItemDragStartCallback {
     Ark_Tag tag;
@@ -12113,8 +12131,8 @@ typedef struct Opt_OnMenuItemClickCallback {
 typedef struct OnMoveHandler {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to);
 } OnMoveHandler;
 typedef struct Opt_OnMoveHandler {
     Ark_Tag tag;
@@ -12233,8 +12251,8 @@ typedef struct Opt_OnSafeBrowsingCheckResultCallback {
 typedef struct OnScrollCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Float64 scrollOffset, Ark_ScrollState scrollState);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 scrollOffset, Ark_ScrollState scrollState);
 } OnScrollCallback;
 typedef struct Opt_OnScrollCallback {
     Ark_Tag tag;
@@ -12253,8 +12271,8 @@ typedef struct Opt_OnScrollEdgeCallback {
 typedef struct OnScrollFrameBeginCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Float64 offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation);
 } OnScrollFrameBeginCallback;
 typedef struct Opt_OnScrollFrameBeginCallback {
     Ark_Tag tag;
@@ -12423,8 +12441,8 @@ typedef struct Opt_OnViewportFitChangedCallback {
 typedef struct OnWillScrollCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_ScrollResult_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_ScrollResult_Void continuation);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Float64 scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_ScrollResult_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_ScrollResult_Void continuation);
 } OnWillScrollCallback;
 typedef struct Opt_OnWillScrollCallback {
     Ark_Tag tag;
@@ -12593,8 +12611,8 @@ typedef struct Opt_SaveButtonCallback {
 typedef struct ScrollOnScrollCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Float64 xOffset, const Ark_Float64 yOffset, Ark_ScrollState scrollState);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 xOffset, const Ark_Float64 yOffset, Ark_ScrollState scrollState);
 } ScrollOnScrollCallback;
 typedef struct Opt_ScrollOnScrollCallback {
     Ark_Tag tag;
@@ -12603,8 +12621,8 @@ typedef struct Opt_ScrollOnScrollCallback {
 typedef struct ScrollOnWillScrollCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_OffsetResult_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_OffsetResult_Void continuation);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Float64 xOffset, const Ark_Float64 yOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_OffsetResult_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Float64 xOffset, const Ark_Float64 yOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_Opt_OffsetResult_Void continuation);
 } ScrollOnWillScrollCallback;
 typedef struct Opt_ScrollOnWillScrollCallback {
     Ark_Tag tag;
@@ -13339,8 +13357,8 @@ typedef struct Opt_common2D_Rect {
 } Opt_common2D_Rect;
 typedef struct Ark_ComputedBarAttribute {
     /* kind: Interface */
-    Ark_Number totalOffset;
-    Ark_Number totalLength;
+    Ark_Float64 totalOffset;
+    Ark_Float64 totalLength;
 } Ark_ComputedBarAttribute;
 typedef struct Opt_ComputedBarAttribute {
     Ark_Tag tag;
@@ -13597,7 +13615,7 @@ typedef struct Opt_DropOptions {
 typedef struct Ark_EdgeEffectOptions {
     /* kind: Interface */
     Ark_Boolean alwaysEnabled;
-    Opt_Number effectEdge;
+    Opt_Int32 effectEdge;
 } Ark_EdgeEffectOptions;
 typedef struct Opt_EdgeEffectOptions {
     Ark_Tag tag;
@@ -13956,10 +13974,10 @@ typedef struct Opt_GridItemOptions {
 } Opt_GridItemOptions;
 typedef struct Ark_GridLayoutOptions {
     /* kind: Interface */
-    Ark_Tuple_Number_Number regularSize;
-    Opt_Array_Number irregularIndexes;
-    Opt_Callback_Number_Tuple_Number_Number onGetIrregularSizeByIndex;
-    Opt_Callback_Number_Tuple_Number_Number_Number_Number onGetRectByIndex;
+    Ark_Tuple_I32_I32 regularSize;
+    Opt_Array_Int32 irregularIndexes;
+    Opt_Callback_I32_Tuple_I32_I32 onGetIrregularSizeByIndex;
+    Opt_Callback_I32_Tuple_I32_I32_I32_I32 onGetRectByIndex;
 } Ark_GridLayoutOptions;
 typedef struct Opt_GridLayoutOptions {
     Ark_Tag tag;
@@ -14120,10 +14138,10 @@ typedef struct Opt_intl_DateTimeOptions {
 } Opt_intl_DateTimeOptions;
 typedef struct Ark_ItemDragEventHandler {
     /* kind: Interface */
-    Opt_Callback_Number_Void onLongPress;
-    Opt_Callback_Number_Void onDragStart;
+    Opt_Callback_I32_Void onLongPress;
+    Opt_Callback_I32_Void onDragStart;
     Opt_OnMoveHandler onMoveThrough;
-    Opt_Callback_Number_Void onDrop;
+    Opt_Callback_I32_Void onDrop;
 } Ark_ItemDragEventHandler;
 typedef struct Opt_ItemDragEventHandler {
     Ark_Tag tag;
@@ -14258,7 +14276,7 @@ typedef struct Ark_ListItemGroupOptions {
     Opt_ComponentContent headerComponent;
     Opt_CustomNodeBuilder footer;
     Opt_ComponentContent footerComponent;
-    Opt_Union_Number_String space;
+    Opt_Union_F64_String space;
     Opt_ListItemGroupStyle style;
 } Ark_ListItemGroupOptions;
 typedef struct Opt_ListItemGroupOptions {
@@ -14275,8 +14293,8 @@ typedef struct Opt_ListItemOptions {
 } Opt_ListItemOptions;
 typedef struct Ark_ListOptions {
     /* kind: Interface */
-    Opt_Number initialIndex;
-    Opt_Union_Number_String space;
+    Opt_Int32 initialIndex;
+    Opt_Union_F64_String space;
     Opt_Scroller scroller;
 } Ark_ListOptions;
 typedef struct Opt_ListOptions {
@@ -15313,7 +15331,7 @@ typedef struct Opt_ScriptItem {
 } Opt_ScriptItem;
 typedef struct Ark_ScrollAnimationOptions {
     /* kind: Interface */
-    Opt_Number duration;
+    Opt_Int32 duration;
     Opt_Union_Curve_ICurve curve;
     Opt_Boolean canOverScroll;
 } Ark_ScrollAnimationOptions;
@@ -15333,7 +15351,7 @@ typedef struct Opt_ScrollBarOptions {
 } Opt_ScrollBarOptions;
 typedef struct Ark_ScrollEdgeOptions {
     /* kind: Interface */
-    Opt_Number velocity;
+    Opt_Float64 velocity;
 } Ark_ScrollEdgeOptions;
 typedef struct Opt_ScrollEdgeOptions {
     Ark_Tag tag;
@@ -16773,9 +16791,9 @@ typedef struct Opt_VisibleAreaEventOptions {
 } Opt_VisibleAreaEventOptions;
 typedef struct Ark_VisibleListContentInfo {
     /* kind: Interface */
-    Ark_Number index;
+    Ark_Int32 index;
     Opt_ListItemGroupArea itemGroupArea;
-    Opt_Number itemIndexInGroup;
+    Opt_Int32 itemIndexInGroup;
 } Ark_VisibleListContentInfo;
 typedef struct Opt_VisibleListContentInfo {
     Ark_Tag tag;
@@ -17819,8 +17837,8 @@ typedef struct Opt_SceneOptions {
 } Opt_SceneOptions;
 typedef struct Ark_ScrollOptions {
     /* kind: Interface */
-    Ark_Union_Number_String xOffset;
-    Ark_Union_Number_String yOffset;
+    Ark_Union_F64_String xOffset;
+    Ark_Union_F64_String yOffset;
     Opt_Union_ScrollAnimationOptions_Boolean animation;
 } Ark_ScrollOptions;
 typedef struct Opt_ScrollOptions {
@@ -18271,6 +18289,18 @@ typedef struct Opt_Union_I32_Resource_Bindable_Bindable {
     Ark_Tag tag;
     Ark_Union_I32_Resource_Bindable_Bindable value;
 } Opt_Union_I32_Resource_Bindable_Bindable;
+typedef struct Ark_Union_I32_LengthConstrain {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Int32 value0;
+        Ark_LengthConstrain value1;
+    };
+} Ark_Union_I32_LengthConstrain;
+typedef struct Opt_Union_I32_LengthConstrain {
+    Ark_Tag tag;
+    Ark_Union_I32_LengthConstrain value;
+} Opt_Union_I32_LengthConstrain;
 typedef struct Ark_Union_Length_Array_RadiusItem {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18331,18 +18361,6 @@ typedef struct Opt_Union_NavDestinationContext_NavBar {
     Ark_Tag tag;
     Ark_Union_NavDestinationContext_NavBar value;
 } Opt_Union_NavDestinationContext_NavBar;
-typedef struct Ark_Union_Number_LengthConstrain {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_Number value0;
-        Ark_LengthConstrain value1;
-    };
-} Ark_Union_Number_LengthConstrain;
-typedef struct Opt_Union_Number_LengthConstrain {
-    Ark_Tag tag;
-    Ark_Union_Number_LengthConstrain value;
-} Opt_Union_Number_LengthConstrain;
 typedef struct Ark_Union_ResourceColor_EdgeColors {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18634,11 +18652,11 @@ typedef struct Ark_ChainAnimationOptions {
     /* kind: Interface */
     Ark_Length minSpace;
     Ark_Length maxSpace;
-    Opt_Number conductivity;
-    Opt_Number intensity;
+    Opt_Float64 conductivity;
+    Opt_Float64 intensity;
     Opt_ChainEdgeEffect edgeEffect;
-    Opt_Number stiffness;
-    Opt_Number damping;
+    Opt_Float64 stiffness;
+    Opt_Float64 damping;
 } Ark_ChainAnimationOptions;
 typedef struct Opt_ChainAnimationOptions {
     Ark_Tag tag;
@@ -20606,8 +20624,8 @@ typedef struct Opt_RotationGestureEvent {
 } Opt_RotationGestureEvent;
 typedef struct Ark_SectionOptions {
     /* kind: Interface */
-    Ark_Number itemsCount;
-    Opt_Number crossCount;
+    Ark_Int32 itemsCount;
+    Opt_Int32 crossCount;
     Opt_GetItemMainSizeByIndex onGetItemMainSizeByIndex;
     Opt_Dimension columnsGap;
     Opt_Dimension rowsGap;
@@ -20670,7 +20688,7 @@ typedef struct Ark_SwipeActionOptions {
     Opt_Union_CustomBuilder_SwipeActionItem start;
     Opt_Union_CustomBuilder_SwipeActionItem end;
     Opt_SwipeEdgeEffect edgeEffect;
-    Opt_Callback_Number_Void onOffsetChange;
+    Opt_Callback_F64_Void onOffsetChange;
 } Ark_SwipeActionOptions;
 typedef struct Opt_SwipeActionOptions {
     Ark_Tag tag;
@@ -22409,27 +22427,27 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setRowsGap)(Ark_NativePointer node,
                        const Opt_Length* value);
     void (*setScrollBarWidth)(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value);
+                              const Opt_Union_F64_String* value);
     void (*setScrollBarColor)(Ark_NativePointer node,
-                              const Opt_Union_Color_Number_String* value);
+                              const Opt_Union_Color_I32_String* value);
     void (*setScrollBar)(Ark_NativePointer node,
                          const Opt_BarState* value);
     void (*setOnScrollBarUpdate)(Ark_NativePointer node,
-                                 const Opt_Callback_Number_Number_ComputedBarAttribute* value);
+                                 const Opt_Callback_I32_F64_ComputedBarAttribute* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
-                             const Opt_Callback_Number_Number_Void* value);
+                             const Opt_Callback_I32_I32_Void* value);
     void (*setCachedCount0)(Ark_NativePointer node,
-                            const Opt_Number* value);
+                            const Opt_Int32* value);
     void (*setEditMode)(Ark_NativePointer node,
                         const Opt_Boolean* value);
     void (*setMultiSelectable)(Ark_NativePointer node,
                                const Opt_Boolean* value);
     void (*setMaxCount)(Ark_NativePointer node,
-                        const Opt_Number* value);
+                        const Opt_Int32* value);
     void (*setMinCount)(Ark_NativePointer node,
-                        const Opt_Number* value);
+                        const Opt_Int32* value);
     void (*setCellLength)(Ark_NativePointer node,
-                          const Opt_Number* value);
+                          const Opt_Float64* value);
     void (*setLayoutDirection)(Ark_NativePointer node,
                                const Opt_GridDirection* value);
     void (*setSupportAnimation)(Ark_NativePointer node,
@@ -22439,17 +22457,17 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setOnItemDragEnter)(Ark_NativePointer node,
                                const Opt_Callback_ItemDragInfo_Void* value);
     void (*setOnItemDragMove)(Ark_NativePointer node,
-                              const Opt_Callback_ItemDragInfo_Number_Number_Void* value);
+                              const Opt_Callback_ItemDragInfo_I32_I32_Void* value);
     void (*setOnItemDragLeave)(Ark_NativePointer node,
-                               const Opt_Callback_ItemDragInfo_Number_Void* value);
+                               const Opt_Callback_ItemDragInfo_I32_Void* value);
     void (*setOnItemDrop)(Ark_NativePointer node,
-                          const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value);
+                          const Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void* value);
     void (*setNestedScroll)(Ark_NativePointer node,
                             const Opt_NestedScrollOptions* value);
     void (*setEnableScrollInteraction)(Ark_NativePointer node,
                                        const Opt_Boolean* value);
     void (*setFriction)(Ark_NativePointer node,
-                        const Opt_Union_Number_Resource* value);
+                        const Opt_Union_F64_Resource* value);
     void (*setAlignItems)(Ark_NativePointer node,
                           const Opt_GridItemAlignment* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
@@ -22459,7 +22477,7 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const Opt_OnScrollCallback* value);
     void (*setCachedCount1)(Ark_NativePointer node,
-                            const Opt_Number* count,
+                            const Opt_Int32* count,
                             const Opt_Boolean* show);
     void (*setEdgeEffect)(Ark_NativePointer node,
                           const Opt_EdgeEffect* value,
@@ -22485,13 +22503,13 @@ typedef struct GENERATED_ArkUIGridItemModifier {
     void (*setGridItemOptions)(Ark_NativePointer node,
                                const Opt_GridItemOptions* value);
     void (*setRowStart)(Ark_NativePointer node,
-                        const Opt_Number* value);
+                        const Opt_Int32* value);
     void (*setRowEnd)(Ark_NativePointer node,
-                      const Opt_Number* value);
+                      const Opt_Int32* value);
     void (*setColumnStart)(Ark_NativePointer node,
-                           const Opt_Number* value);
+                           const Opt_Int32* value);
     void (*setColumnEnd)(Ark_NativePointer node,
-                         const Opt_Number* value);
+                         const Opt_Int32* value);
     void (*setSelectable)(Ark_NativePointer node,
                           const Opt_Boolean* value);
     void (*setSelected)(Ark_NativePointer node,
@@ -22653,6 +22671,23 @@ typedef struct GENERATED_ArkUIIndicatorComponentModifier {
                         const Opt_Callback_I32_Void* value);
 } GENERATED_ArkUIIndicatorComponentModifier;
 
+typedef struct GENERATED_ArkUILazyGridLayoutAttributeModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setRowsGap)(Ark_NativePointer node,
+                       const Opt_LengthMetrics* value);
+    void (*setColumnsGap)(Ark_NativePointer node,
+                          const Opt_LengthMetrics* value);
+} GENERATED_ArkUILazyGridLayoutAttributeModifier;
+
+typedef struct GENERATED_ArkUILazyVGridLayoutModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setLazyVGridLayoutOptions)(Ark_NativePointer node);
+    void (*setColumnsTemplate)(Ark_NativePointer node,
+                               const Opt_String* value);
+} GENERATED_ArkUILazyVGridLayoutModifier;
+
 typedef struct GENERATED_ArkUILineModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
@@ -22688,15 +22723,15 @@ typedef struct GENERATED_ArkUIListModifier {
     void (*setListDirection)(Ark_NativePointer node,
                              const Opt_Axis* value);
     void (*setContentStartOffset)(Ark_NativePointer node,
-                                  const Opt_Number* value);
+                                  const Opt_Float64* value);
     void (*setContentEndOffset)(Ark_NativePointer node,
-                                const Opt_Number* value);
+                                const Opt_Float64* value);
     void (*setDivider)(Ark_NativePointer node,
                        const Opt_ListDividerOptions* value);
     void (*setMultiSelectable)(Ark_NativePointer node,
                                const Opt_Boolean* value);
     void (*setCachedCount0)(Ark_NativePointer node,
-                            const Opt_Number* value);
+                            const Opt_Int32* value);
     void (*setChainAnimation)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setChainAnimationOptions)(Ark_NativePointer node,
@@ -22712,21 +22747,21 @@ typedef struct GENERATED_ArkUIListModifier {
     void (*setStackFromEnd)(Ark_NativePointer node,
                             const Opt_Boolean* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
-                             const Opt_Callback_Number_Number_Number_Void* value);
+                             const Opt_Callback_I32_I32_I32_Void* value);
     void (*setOnScrollVisibleContentChange)(Ark_NativePointer node,
                                             const Opt_OnScrollVisibleContentChangeCallback* value);
     void (*setOnItemMove)(Ark_NativePointer node,
-                          const Opt_Callback_Number_Number_Boolean* value);
+                          const Opt_Callback_I32_I32_Boolean* value);
     void (*setOnItemDragStart)(Ark_NativePointer node,
                                const Opt_OnItemDragStartCallback* value);
     void (*setOnItemDragEnter)(Ark_NativePointer node,
                                const Opt_Callback_ItemDragInfo_Void* value);
     void (*setOnItemDragMove)(Ark_NativePointer node,
-                              const Opt_Callback_ItemDragInfo_Number_Number_Void* value);
+                              const Opt_Callback_ItemDragInfo_I32_I32_Void* value);
     void (*setOnItemDragLeave)(Ark_NativePointer node,
-                               const Opt_Callback_ItemDragInfo_Number_Void* value);
+                               const Opt_Callback_ItemDragInfo_I32_Void* value);
     void (*setOnItemDrop)(Ark_NativePointer node,
-                          const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value);
+                          const Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnWillScroll)(Ark_NativePointer node,
@@ -22734,10 +22769,10 @@ typedef struct GENERATED_ArkUIListModifier {
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const Opt_OnScrollCallback* value);
     void (*setLanes)(Ark_NativePointer node,
-                     const Opt_Union_Number_LengthConstrain* value,
+                     const Opt_Union_I32_LengthConstrain* value,
                      const Opt_Dimension* gutter);
     void (*setCachedCount1)(Ark_NativePointer node,
-                            const Opt_Number* count,
+                            const Opt_Int32* count,
                             const Opt_Boolean* show);
 } GENERATED_ArkUIListModifier;
 
@@ -23165,13 +23200,13 @@ typedef struct GENERATED_ArkUIRefreshModifier {
     void (*setOnRefreshing)(Ark_NativePointer node,
                             const Opt_Callback_Void* value);
     void (*setRefreshOffset)(Ark_NativePointer node,
-                             const Opt_Number* value);
+                             const Opt_Float64* value);
     void (*setPullToRefresh)(Ark_NativePointer node,
                              const Opt_Boolean* value);
     void (*setOnOffsetChange)(Ark_NativePointer node,
-                              const Opt_Callback_Number_Void* value);
+                              const Opt_Callback_F64_Void* value);
     void (*setPullDownRatio)(Ark_NativePointer node,
-                             const Opt_Number* value);
+                             const Opt_Float64* value);
 } GENERATED_ArkUIRefreshModifier;
 
 typedef struct GENERATED_ArkUIRelativeContainerModifier {
@@ -23361,9 +23396,9 @@ typedef struct GENERATED_ArkUIScrollModifier {
     void (*setScrollBar)(Ark_NativePointer node,
                          const Opt_BarState* value);
     void (*setScrollBarColor)(Ark_NativePointer node,
-                              const Opt_Union_Color_Number_String* value);
+                              const Opt_Union_Color_I32_String* value);
     void (*setScrollBarWidth)(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value);
+                              const Opt_Union_F64_String* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setNestedScroll)(Ark_NativePointer node,
@@ -23371,7 +23406,7 @@ typedef struct GENERATED_ArkUIScrollModifier {
     void (*setEnableScrollInteraction)(Ark_NativePointer node,
                                        const Opt_Boolean* value);
     void (*setFriction)(Ark_NativePointer node,
-                        const Opt_Union_Number_Resource* value);
+                        const Opt_Union_F64_Resource* value);
     void (*setScrollSnap)(Ark_NativePointer node,
                           const Opt_ScrollSnapOptions* value);
     void (*setEnablePaging)(Ark_NativePointer node,
@@ -23389,15 +23424,15 @@ typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
     void (*setScrollBar)(Ark_NativePointer node,
                          const Opt_BarState* value);
     void (*setScrollBarColor)(Ark_NativePointer node,
-                              const Opt_Union_Color_Number_String* value);
+                              const Opt_Union_Color_I32_String* value);
     void (*setScrollBarWidth)(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value);
+                              const Opt_Union_F64_String* value);
     void (*setNestedScroll)(Ark_NativePointer node,
                             const Opt_NestedScrollOptions* value);
     void (*setEnableScrollInteraction)(Ark_NativePointer node,
                                        const Opt_Boolean* value);
     void (*setFriction)(Ark_NativePointer node,
-                        const Opt_Union_Number_Resource* value);
+                        const Opt_Union_F64_Resource* value);
     void (*setOnReachStart)(Ark_NativePointer node,
                             const Opt_Callback_Void* value);
     void (*setOnReachEnd)(Ark_NativePointer node,
@@ -23407,7 +23442,7 @@ typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
     void (*setOnScrollStop)(Ark_NativePointer node,
                             const Opt_Callback_Void* value);
     void (*setFlingSpeedLimit)(Ark_NativePointer node,
-                               const Opt_Number* value);
+                               const Opt_Float64* value);
     void (*setClipContent)(Ark_NativePointer node,
                            const Opt_Union_ContentClipMode_RectShape* value);
     void (*setDigitalCrownSensitivity)(Ark_NativePointer node,
@@ -24678,17 +24713,17 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
     void (*setLayoutDirection)(Ark_NativePointer node,
                                const Opt_FlexDirection* value);
     void (*setCachedCount0)(Ark_NativePointer node,
-                            const Opt_Number* value);
+                            const Opt_Int32* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
-                             const Opt_Callback_Number_Number_Void* value);
+                             const Opt_Callback_I32_I32_Void* value);
     void (*setOnWillScroll)(Ark_NativePointer node,
                             const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const Opt_OnScrollCallback* value);
     void (*setCachedCount1)(Ark_NativePointer node,
-                            const Opt_Number* count,
+                            const Opt_Int32* count,
                             const Opt_Boolean* show);
 } GENERATED_ArkUIWaterFlowModifier;
 
@@ -25610,18 +25645,18 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
 
 typedef struct GENERATED_ArkUIChildrenMainSizeAccessor {
     void (*destroyPeer)(Ark_ChildrenMainSize peer);
-    Ark_ChildrenMainSize (*construct)(const Ark_Number* childDefaultSize);
+    Ark_ChildrenMainSize (*construct)(Ark_Float64 childDefaultSize);
     Ark_NativePointer (*getFinalizer)();
     void (*splice)(Ark_ChildrenMainSize peer,
-                   const Ark_Number* start,
-                   const Opt_Number* deleteCount,
-                   const Opt_Array_Number* childrenSize);
+                   Ark_Int32 start,
+                   const Opt_Int32* deleteCount,
+                   const Opt_Array_Float64* childrenSize);
     void (*update)(Ark_ChildrenMainSize peer,
-                   const Ark_Number* index,
-                   const Ark_Number* childSize);
-    Ark_Number (*getChildDefaultSize)(Ark_ChildrenMainSize peer);
+                   Ark_Int32 index,
+                   Ark_Float64 childSize);
+    Ark_Float64 (*getChildDefaultSize)(Ark_ChildrenMainSize peer);
     void (*setChildDefaultSize)(Ark_ChildrenMainSize peer,
-                                const Ark_Number* childDefaultSize);
+                                Ark_Float64 childDefaultSize);
 } GENERATED_ArkUIChildrenMainSizeAccessor;
 
 typedef struct GENERATED_ArkUIClickEventAccessor {
@@ -26570,19 +26605,23 @@ typedef struct GENERATED_ArkUIListScrollerAccessor {
     void (*destroyPeer)(Ark_ListScroller peer);
     Ark_ListScroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_RectResult (*getItemRectInGroup)(Ark_ListScroller peer,
-                                         const Ark_Number* index,
-                                         const Ark_Number* indexInGroup);
-    void (*scrollToItemInGroup)(Ark_ListScroller peer,
-                                const Ark_Number* index,
-                                const Ark_Number* indexInGroup,
+    Ark_RectResult (*getItemRectInGroup)(Ark_VMContext vmContext,
+                                         Ark_ListScroller peer,
+                                         Ark_Int32 index,
+                                         Ark_Int32 indexInGroup);
+    void (*scrollToItemInGroup)(Ark_VMContext vmContext,
+                                Ark_ListScroller peer,
+                                Ark_Int32 index,
+                                Ark_Int32 indexInGroup,
                                 const Opt_Boolean* smooth,
                                 const Opt_ScrollAlign* align);
-    void (*closeAllSwipeActions)(Ark_ListScroller peer,
+    void (*closeAllSwipeActions)(Ark_VMContext vmContext,
+                                 Ark_ListScroller peer,
                                  const Opt_CloseSwipeActionOptions* options);
-    Ark_VisibleListContentInfo (*getVisibleListContentInfo)(Ark_ListScroller peer,
-                                                            const Ark_Number* x,
-                                                            const Ark_Number* y);
+    Ark_VisibleListContentInfo (*getVisibleListContentInfo)(Ark_VMContext vmContext,
+                                                            Ark_ListScroller peer,
+                                                            Ark_Float64 x,
+                                                            Ark_Float64 y);
 } GENERATED_ArkUIListScrollerAccessor;
 
 typedef struct GENERATED_ArkUILongPressGestureEventAccessor {
@@ -27569,30 +27608,40 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
     void (*destroyPeer)(Ark_Scroller peer);
     Ark_Scroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    void (*scrollTo)(Ark_Scroller peer,
+    void (*scrollTo)(Ark_VMContext vmContext,
+                     Ark_Scroller peer,
                      const Ark_ScrollOptions* options);
-    void (*scrollEdge)(Ark_Scroller peer,
+    void (*scrollEdge)(Ark_VMContext vmContext,
+                       Ark_Scroller peer,
                        Ark_Edge value,
                        const Opt_ScrollEdgeOptions* options);
-    void (*fling)(Ark_Scroller peer,
-                  const Ark_Number* velocity);
-    void (*scrollPage)(Ark_Scroller peer,
+    void (*fling)(Ark_VMContext vmContext,
+                  Ark_Scroller peer,
+                  Ark_Float64 velocity);
+    void (*scrollPage)(Ark_VMContext vmContext,
+                       Ark_Scroller peer,
                        const Ark_ScrollPageOptions* value);
-    Ark_OffsetResult (*currentOffset)(Ark_Scroller peer);
-    void (*scrollToIndex)(Ark_Scroller peer,
-                          const Ark_Number* value,
+    Ark_OffsetResult (*currentOffset)(Ark_VMContext vmContext,
+                                      Ark_Scroller peer);
+    void (*scrollToIndex)(Ark_VMContext vmContext,
+                          Ark_Scroller peer,
+                          Ark_Int32 value,
                           const Opt_Boolean* smooth,
                           const Opt_ScrollAlign* align,
                           const Opt_ScrollToIndexOptions* options);
-    void (*scrollBy)(Ark_Scroller peer,
+    void (*scrollBy)(Ark_VMContext vmContext,
+                     Ark_Scroller peer,
                      const Ark_Length* dx,
                      const Ark_Length* dy);
-    Ark_Boolean (*isAtEnd)(Ark_Scroller peer);
-    Ark_RectResult (*getItemRect)(Ark_Scroller peer,
-                                  const Ark_Number* index);
-    Ark_Number (*getItemIndex)(Ark_Scroller peer,
-                               const Ark_Number* x,
-                               const Ark_Number* y);
+    Ark_Boolean (*isAtEnd)(Ark_VMContext vmContext,
+                           Ark_Scroller peer);
+    Ark_RectResult (*getItemRect)(Ark_VMContext vmContext,
+                                  Ark_Scroller peer,
+                                  Ark_Int32 index);
+    Ark_Int32 (*getItemIndex)(Ark_VMContext vmContext,
+                              Ark_Scroller peer,
+                              Ark_Float64 x,
+                              Ark_Float64 y);
 } GENERATED_ArkUIScrollerAccessor;
 
 typedef struct GENERATED_ArkUIScrollMotionAccessor {
@@ -27609,9 +27658,9 @@ typedef struct GENERATED_ArkUIScrollResultAccessor {
     void (*destroyPeer)(Ark_ScrollResult peer);
     Ark_ScrollResult (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getOffsetRemain)(Ark_ScrollResult peer);
+    Ark_Float64 (*getOffsetRemain)(Ark_ScrollResult peer);
     void (*setOffsetRemain)(Ark_ScrollResult peer,
-                            const Ark_Number* offsetRemain);
+                            Ark_Float64 offsetRemain);
 } GENERATED_ArkUIScrollResultAccessor;
 
 typedef struct GENERATED_ArkUISearchControllerAccessor {
@@ -28199,16 +28248,16 @@ typedef struct GENERATED_ArkUIWaterFlowSectionsAccessor {
     Ark_WaterFlowSections (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*splice)(Ark_WaterFlowSections peer,
-                          const Ark_Number* start,
-                          const Opt_Number* deleteCount,
+                          Ark_Int32 start,
+                          const Opt_Int32* deleteCount,
                           const Opt_Array_SectionOptions* sections);
     Ark_Boolean (*push)(Ark_WaterFlowSections peer,
                         const Ark_SectionOptions* section);
     Ark_Boolean (*update)(Ark_WaterFlowSections peer,
-                          const Ark_Number* sectionIndex,
+                          Ark_Int32 sectionIndex,
                           const Ark_SectionOptions* section);
     Array_SectionOptions (*values)(Ark_WaterFlowSections peer);
-    Ark_Number (*length)(Ark_WaterFlowSections peer);
+    Ark_Int32 (*length)(Ark_WaterFlowSections peer);
 } GENERATED_ArkUIWaterFlowSectionsAccessor;
 
 typedef struct GENERATED_ArkUIWebContextMenuParamAccessor {
@@ -28408,6 +28457,8 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIImageAnimatorModifier* (*getImageAnimatorModifier)();
     const GENERATED_ArkUIImageSpanModifier* (*getImageSpanModifier)();
     const GENERATED_ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
+    const GENERATED_ArkUILazyGridLayoutAttributeModifier* (*getLazyGridLayoutAttributeModifier)();
+    const GENERATED_ArkUILazyVGridLayoutModifier* (*getLazyVGridLayoutModifier)();
     const GENERATED_ArkUILineModifier* (*getLineModifier)();
     const GENERATED_ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
     const GENERATED_ArkUIListModifier* (*getListModifier)();
@@ -28728,6 +28779,8 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_IMAGE_ANIMATOR,
     GENERATED_ARKUI_IMAGE_SPAN,
     GENERATED_ARKUI_INDICATOR_COMPONENT,
+    GENERATED_ARKUI_LAZY_GRID_LAYOUT_ATTRIBUTE,
+    GENERATED_ARKUI_LAZY_VGRID_LAYOUT,
     GENERATED_ARKUI_LINE,
     GENERATED_ARKUI_LINEAR_INDICATOR,
     GENERATED_ARKUI_LIST,
