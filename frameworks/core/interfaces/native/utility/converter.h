@@ -82,6 +82,7 @@
 
 namespace OHOS::Ace {
 struct TextDetectConfig;
+class ResponseRegion;
 }
 
 namespace OHOS::Ace::NG {
@@ -558,6 +559,7 @@ namespace Converter {
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
+    template<> ResponseRegion Convert(const Ark_ResponseRegion &src);
     template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EdgesParam Convert(const Ark_Edges& src);
     template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
@@ -767,6 +769,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
+    template<> void AssignCast(std::optional<ResponseRegionSupportedTool>& dst,
+        const Ark_ResponseRegionSupportedTool& src);
     template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);
     template<> void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src);
     template<> void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src);

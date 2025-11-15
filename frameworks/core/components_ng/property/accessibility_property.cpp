@@ -302,7 +302,8 @@ bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibil
     RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     origRect = renderContext->GetPaintRectWithoutTransform();
-    auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+    auto responseRegionList = host->GetResponseRegionList(origRect,
+        static_cast<int32_t>(SourceType::TOUCH), static_cast<int32_t>(SourceTool::FINGER));
     if (responseRegionList.size() != 1) {
         return false;
     }
@@ -327,7 +328,8 @@ NG::RectT<int32_t> AccessibilityProperty::GetAccessibilityResponseRegionRect(boo
     CHECK_NULL_RETURN(host, rectInt);
     if (isAccessibilityVirtualNode) {
         origRect = host->GetTransformRectRelativeToWindow();
-        auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        auto responseRegionList = host->GetResponseRegionList(origRect,
+            static_cast<int32_t>(SourceType::TOUCH), static_cast<int32_t>(SourceTool::FINGER));
         CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
         auto& rect = responseRegionList.back();
         rectInt = { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
@@ -336,7 +338,8 @@ NG::RectT<int32_t> AccessibilityProperty::GetAccessibilityResponseRegionRect(boo
         RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, rectInt);
         origRect = renderContext->GetPaintRectWithoutTransform();
-        auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        auto responseRegionList = host->GetResponseRegionList(origRect,
+            static_cast<int32_t>(SourceType::TOUCH), static_cast<int32_t>(SourceTool::FINGER));
         CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
         auto& rect = responseRegionList.back();
         rectInt = { static_cast<int32_t>(rect.GetX() - origRect.GetX()),
@@ -359,7 +362,8 @@ NG::RectF AccessibilityProperty::UpdateHoverTestRect(const RefPtr<FrameNode>& no
     origRect = renderContext->GetPaintRectWithoutTransform();
     CHECK_EQUAL_RETURN(IsAccessibilityVirtualNode, true, origRect); // virtual node not use response region
     if (accessibilityProperty->IsMatchAccessibilityResponseRegion(IsAccessibilityVirtualNode)) {
-        auto responseRegionList = node->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        auto responseRegionList = node->GetResponseRegionList(origRect,
+            static_cast<int32_t>(SourceType::TOUCH), static_cast<int32_t>(SourceTool::FINGER));
         CHECK_EQUAL_RETURN(responseRegionList.size(), 0, origRect);
         return responseRegionList.back();
     } else {

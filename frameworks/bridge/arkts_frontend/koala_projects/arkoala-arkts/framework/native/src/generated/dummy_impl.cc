@@ -1232,6 +1232,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetResponseRegionListImpl(Ark_NativePointer node,
+                                   const Opt_Array_ResponseRegion* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setResponseRegionList(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetItemSizeImpl(Ark_NativePointer node,
                          const Opt_Union_String_Number* value)
     {
@@ -21580,6 +21592,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetHeightImpl,
             CommonMethodModifier::SetResponseRegionImpl,
             CommonMethodModifier::SetMouseResponseRegionImpl,
+            CommonMethodModifier::SetResponseRegionListImpl,
             CommonMethodModifier::SetSizeImpl,
             CommonMethodModifier::SetConstraintSizeImpl,
             CommonMethodModifier::SetHitTestBehaviorImpl,

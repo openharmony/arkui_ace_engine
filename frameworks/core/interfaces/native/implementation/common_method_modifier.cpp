@@ -17,6 +17,7 @@
 #include <variant>
 #include "arkoala_api_generated.h"
 
+#include "base/geometry/response_region.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/accessibility/accessibility_utils.h"
@@ -946,6 +947,14 @@ std::vector<DimensionRect> Convert(const Ark_Rectangle &src)
 {
     return { Convert<DimensionRect>(src) };
 }
+
+template<>
+std::vector<ResponseRegion> Convert(const Ark_ResponseRegion &src)
+{
+    return { Convert<ResponseRegion>(src) };
+}
+
+using PixelRoundPolicyOneRule = bool; // let rule 'Ceil' is false, rool 'FLoor' is true
 
 template<>
 void AssignCast(std::optional<PixelroundRule>& dst, const Ark_PixelRoundCalcPolicy& src)
@@ -2109,6 +2118,16 @@ void SetMouseResponseRegionImpl(Ark_NativePointer node,
         ViewAbstract::SetMouseResponseRegion(frameNode, {});
     }
 }
+void SetResponseRegionListImpl(Ark_NativePointer node,
+                               const Opt_Array_ResponseRegion* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (auto convArray = Converter::OptConvertPtr<std::vector<ResponseRegion>>(value); convArray) {
+        ViewAbstract::SetResponseRegionList(frameNode, *convArray);
+    }
+}
+
 void SetSizeImpl(Ark_NativePointer node,
                  const Opt_SizeOptions* value)
 {
@@ -5833,6 +5852,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetHeightImpl,
         CommonMethodModifier::SetResponseRegionImpl,
         CommonMethodModifier::SetMouseResponseRegionImpl,
+        CommonMethodModifier::SetResponseRegionListImpl,
         CommonMethodModifier::SetSizeImpl,
         CommonMethodModifier::SetConstraintSizeImpl,
         CommonMethodModifier::SetHitTestBehaviorImpl,

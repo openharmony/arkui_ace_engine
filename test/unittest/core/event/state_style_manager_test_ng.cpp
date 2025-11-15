@@ -657,20 +657,20 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest021, TestSize.Level1)
 
     int32_t sourceType = 1;
     Offset location = {1, 1};
-    bool ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, location);
+    bool ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, 0, location);
     EXPECT_TRUE(ret);
 
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
     renderContext->rect_ = RectF(0, 0, 10, 10);
     renderContext->paintRect_ = RectF(0, 0, 10, 10);
     stateStyleMgr->GetFrameNode()->renderContext_ = renderContext;
-    ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, location);
+    ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, 0, location);
     EXPECT_FALSE(ret);
 
     auto testFrameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     testFrameNode->renderContext_ = renderContext;
     stateStyleMgr->GetFrameNode()->SetParent(testFrameNode);
-    ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, location);
+    ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, 0, location);
     EXPECT_FALSE(ret);
 }
 
@@ -686,7 +686,7 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest022, TestSize.Level1)
 
     int32_t sourceType = 1;
     Offset location = { 1, 1 };
-    bool ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, location);
+    bool ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, 0, location);
     EXPECT_TRUE(ret);
 
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
@@ -697,7 +697,7 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest022, TestSize.Level1)
     auto testFrameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     testFrameNode->renderContext_ = nullptr;
     stateStyleMgr->GetFrameNode()->SetParent(testFrameNode);
-    ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, location);
+    ret = stateStyleMgr->IsOutOfPressedRegion(sourceType, 0, location);
     EXPECT_FALSE(ret);
 }
 

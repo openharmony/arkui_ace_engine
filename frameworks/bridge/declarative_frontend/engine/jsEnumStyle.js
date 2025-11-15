@@ -1920,6 +1920,14 @@ let TouchTestStrategy;
   TouchTestStrategy.FORWARD = 2;
 })(TouchTestStrategy || (TouchTestStrategy = {}));
 
+let ResponseRegionSupportedTool;
+(function (ResponseRegionSupportedTool) {
+  ResponseRegionSupportedTool.ALL = 0;
+  ResponseRegionSupportedTool.FINGER = 1;
+  ResponseRegionSupportedTool.PEN = 2;
+  ResponseRegionSupportedTool.MOUSE = 3;
+})(ResponseRegionSupportedTool || (ResponseRegionSupportedTool = {}));
+
 let EffectLayer;
 (function (EffectLayer) {
   EffectLayer.NONE = 0;

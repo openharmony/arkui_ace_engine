@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
@@ -50,6 +50,8 @@ export class CommonMethodModifier implements CommonMethod {
     _responseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
     _mouseResponseRegion_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _mouseResponseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
+    _responseRegionList_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _responseRegionList_0_0value?: Array<ResponseRegion> | undefined
     _size_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _size_0_0value?: SizeOptions | undefined
     _constraintSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -554,6 +556,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._mouseResponseRegion_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setMouseResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
+                }
+            }
+        }
+        if (this._responseRegionList_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._responseRegionList_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setResponseRegionListAttribute((this._responseRegionList_0_0value as Array<ResponseRegion> | undefined));
+                    this._responseRegionList_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._responseRegionList_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._responseRegionList_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setResponseRegionListAttribute((undefined as Array<ResponseRegion> | undefined));
                 }
             }
         }
@@ -4049,6 +4069,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._responseRegionList_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._responseRegionList_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.responseRegionList(modifier._responseRegionList_0_0value);
+                    break;
+                }
+                default: {
+                    this.responseRegionList((undefined as Array<ResponseRegion> | undefined));
+                }
+            }
+        }
         if (modifier._size_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._size_0_flag) {
@@ -6574,6 +6607,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._mouseResponseRegion_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        if (((this._responseRegionList_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._responseRegionList_0_flag = AttributeUpdaterFlag.UPDATE
+            this._responseRegionList_0_0value = value
+        } else
+        {
+            this._responseRegionList_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace {
 class SpanString;
+class CalcDimensionRect;
 }
 
 namespace OHOS::Ace::Framework {
@@ -253,6 +254,9 @@ public:
     void SetOnSizeChanged(
         std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 
+    void SetResponseRegionList(
+        const std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+        override {};
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
     void SetTouchable(bool touchable) override;

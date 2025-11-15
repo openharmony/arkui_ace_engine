@@ -24,6 +24,8 @@
 #include "ui/base/ace_type.h"
 
 #include "base/error/error_code.h"
+#include "base/geometry/calc_dimension_rect.h"
+#include "base/geometry/response_region.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
@@ -2823,6 +2825,15 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     CHECK_NULL_VOID(eventHub);
     auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
     visibleAreaUserCallback.measureFromViewport = measureFromViewport;
+}
+
+void ViewAbstract::SetResponseRegionList(
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap,
+    bool isResponseRegionSupported)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetResponseRegionMap(responseRegionMap);
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -7865,6 +7876,26 @@ void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& drag
     frameNode->SetDragPreview(dragDropInfo);
 }
 
+void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetResponseRegionMap(responseRegionMap);
+}
+
+void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
+    const std::vector<ResponseRegion>& responseRegions)
+{
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap;
+    for (auto responseRegion : responseRegions) {
+        CalcDimensionRect responseRect(responseRegion.GetWidth(), responseRegion.GetHeight(), responseRegion.GetX(), responseRegion.GetY());
+        responseRegionMap[responseRegion.GetTool()].emplace_back(responseRect);
+    }
+    SetResponseRegionList(frameNode, responseRegionMap);
+}
+
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
 {
     CHECK_NULL_VOID(frameNode);
@@ -8205,6 +8236,16 @@ bool ViewAbstract::GetDefaultFocus(FrameNode* frameNode)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsDefaultFocus();
+}
+
+std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> ViewAbstract::GetResponseRegionList(
+    FrameNode* frameNode)
+{
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> defaultRect;
+    CHECK_NULL_RETURN(frameNode, defaultRect);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, defaultRect);
+    return gestureHub->GetResponseRegionMap();
 }
 
 std::vector<DimensionRect> ViewAbstract::GetResponseRegion(FrameNode* frameNode)

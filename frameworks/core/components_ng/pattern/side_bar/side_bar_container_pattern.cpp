@@ -1260,7 +1260,7 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(dividerFrameNode);
     auto defaultRect = RectF();
     auto responseMouseRegionList = dividerFrameNode->GetResponseRegionList(defaultRect,
-        static_cast<int32_t>(SourceType::MOUSE));
+        static_cast<int32_t>(SourceType::MOUSE), static_cast<int32_t>(SourceTool::MOUSE));
     auto localParentPoint = PointF(static_cast<float>(info.GetLocalLocation().GetX()),
         static_cast<float>(info.GetLocalLocation().GetY()));
 

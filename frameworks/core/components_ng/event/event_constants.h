@@ -79,6 +79,8 @@ enum class HitTestMode {
 
 enum class TouchTestStrategy { DEFAULT = 0, FORWARD_COMPETITION, FORWARD };
 
+enum class ResponseRegionSupportedTool { ALL = 0, FINGER, PEN, MOUSE, TOOLCNT };
+
 enum class HitTestResult {
     // The touch point is located outside the current component area;
     OUT_OF_REGION,

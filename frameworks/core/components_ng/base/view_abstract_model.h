@@ -51,6 +51,7 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
+class CalcDimensionRect;
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
@@ -400,6 +401,9 @@ public:
 #endif
 
     // interact
+    virtual void SetResponseRegionList(
+        const std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>&
+            responseRegionMap) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
     virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
     virtual void SetEnabled(bool enabled) = 0;

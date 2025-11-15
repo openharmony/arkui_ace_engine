@@ -27,6 +27,7 @@
 #include <unordered_map>
 
 #include "base/geometry/calc_dimension.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -2390,6 +2391,101 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->SetHeight(value);
     }
     return true;
+}
+
+void JSViewAbstract::ParseResponseRegionTool(const JSRef<JSVal>& jsValue, NG::ResponseRegionSupportedTool& tool)
+{
+    if (!jsValue->IsNumber()) {
+        return ;
+    }
+    auto typeNum = jsValue->ToNumber<int32_t>();
+    if (0 <= typeNum && typeNum < static_cast<int32_t>(NG::ResponseRegionSupportedTool::TOOLCNT)) {
+        tool = static_cast<NG::ResponseRegionSupportedTool>(typeNum);
+    } else {
+        tool = NG::ResponseRegionSupportedTool::ALL;
+    }
+}
+
+bool JSViewAbstract::ParseJsResponseRegionListRect(const JSRef<JSVal>& jsValue, NG::ResponseRegionSupportedTool& type, CalcDimensionRect& result)
+{
+    type = NG::ResponseRegionSupportedTool::ALL;
+    result.SetWidth(CalcDimension(1, DimensionUnit::PERCENT));
+    result.SetHeight(CalcDimension(1, DimensionUnit::PERCENT));
+    result.SetX(CalcDimension(0, DimensionUnit::VP));
+    result.SetY(CalcDimension(0, DimensionUnit::VP));
+
+    if (!jsValue->IsObject()) {
+        return true;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
+
+    CalcDimension xDimen = result.GetX();
+    CalcDimension yDimen = result.GetY();
+    CalcDimension widthDimen = result.GetWidth();
+    CalcDimension heightDimen = result.GetHeight();
+
+    if (obj->HasProperty("tool")) {
+        JSRef<JSVal> tool = obj->GetProperty("tool");
+        ParseResponseRegionTool(tool, type);
+    }
+    if (obj->HasProperty("x")) {
+        JSRef<JSVal> x = obj->GetProperty("x");
+        if (ParseLengthMetricsToDimension(x, xDimen)) {
+            result.SetX(xDimen);
+        }
+    }
+    if (obj->HasProperty("y")) {
+        JSRef<JSVal> y = obj->GetProperty("y");
+        if (ParseLengthMetricsToDimension(y, yDimen)) {
+            result.SetY(yDimen);
+        }
+    }
+    if (obj->HasProperty("width")) {
+        JSRef<JSVal> width = obj->GetProperty("width");
+        if (ParseLengthMetricsToDimension(width, widthDimen, DimensionUnit::VP)) {
+            result.SetWidth(widthDimen);
+        }
+    }
+    if (obj->HasProperty("height")) {
+        JSRef<JSVal> height = obj->GetProperty("height");
+        if (ParseLengthMetricsToDimension(height, heightDimen, DimensionUnit::VP)) {
+            result.SetHeight(heightDimen);
+        }
+    }
+    return true;
+}
+
+bool JSViewAbstract::ParseJsResponseRegionListArray(const JSRef<JSVal>& jsValue,
+    std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& result)
+{
+    if (!jsValue->IsArray() && !jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        auto type = NG::ResponseRegionSupportedTool::ALL;
+        CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+        if (ParseJsResponseRegionListRect(array->GetValueAt(i), type, dimenRect)) {
+            result[type].emplace_back(dimenRect);
+        }
+    }
+    return true;
+}
+
+
+void JSViewAbstract::JsResponseRegionList(const JSCallbackInfo& info)
+{
+    std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> result;
+    if (!JSViewAbstract::ParseJsResponseRegionListArray(info[0], result)) {
+        ViewAbstractModel::GetInstance()->SetResponseRegionList({});
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetResponseRegionList(result);
 }
 
 void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
@@ -6446,22 +6542,22 @@ bool JSViewAbstract::ParseColorMetricsToColor(
     return false;
 }
 
-bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit unit)
 {
     RefPtr<ResourceObject> resObj;
-    return ParseLengthMetricsToDimension(jsValue, result, resObj);
+    return ParseLengthMetricsToDimension(jsValue, result, resObj, unit);
 }
 
 bool JSViewAbstract::ParseLengthMetricsToDimension(
-    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj)
+    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj, DimensionUnit unit)
 {
     if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
+        result = CalcDimension(jsValue->ToNumber<double>(), unit);
         return true;
     }
     if (jsValue->IsString()) {
         auto value = jsValue->ToString();
-        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
+        return StringUtils::StringToCalcDimensionNG(value, result, false, unit);
     }
     if (jsValue->IsObject()) {
         auto jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -9350,6 +9446,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSViewAbstract>::StaticMethod("height", &JSViewAbstract::JsHeight);
     JSClass<JSViewAbstract>::StaticMethod("toolbar", &JSViewAbstract::JsToolbar);
+    JSClass<JSViewAbstract>::StaticMethod("responseRegionList", &JSViewAbstract::JsResponseRegionList);
     JSClass<JSViewAbstract>::StaticMethod("responseRegion", &JSViewAbstract::JsResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("mouseResponseRegion", &JSViewAbstract::JsMouseResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);

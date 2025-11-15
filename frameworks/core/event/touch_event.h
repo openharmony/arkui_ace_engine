@@ -219,6 +219,7 @@ struct TouchRestrict final {
     TouchEvent touchEvent = {};
     std::list<std::string> childTouchTestList = {};
     SourceType sourceType = SourceType::NONE;
+    SourceTool sourceTool = SourceTool::UNKNOWN;
     SourceType hitTestType = SourceType::TOUCH;
     MouseAction mouseAction = MouseAction::NONE;
     InputEventType inputEventType = InputEventType::TOUCH_SCREEN;

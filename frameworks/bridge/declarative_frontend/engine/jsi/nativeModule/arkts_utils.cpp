@@ -1385,6 +1385,21 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(const EcmaVM *vm, const Local<J
     return true;
 }
 
+bool ArkTSUtils::ParseResponseRegionTool(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, ResponseRegionSupportedTool& toolType)
+{
+    if (!jsValue->IsNumber()) {
+        return false;
+    }
+    auto typeNum = jsValue->ToNumber(vm)->Value();
+    if (0 <= typeNum && typeNum < static_cast<int32_t>(NG::ResponseRegionSupportedTool::TOOLCNT)) {
+        toolType = static_cast<NG::ResponseRegionSupportedTool>(typeNum);
+    } else {
+        toolType = NG::ResponseRegionSupportedTool::ALL;
+    }
+    return true;
+}
+
 bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result)
 {
     RefPtr<ResourceObject> resourceObj;

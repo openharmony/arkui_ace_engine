@@ -20,6 +20,7 @@
 #include "converter.h"
 
 #include "base/utils/string_utils.h"
+#include "base/geometry/response_region.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
@@ -2384,6 +2385,48 @@ DimensionRect Convert(const Ark_Rectangle &src)
         offset.SetY(*dim);
     }
     dst.SetOffset(offset);
+    return dst;
+}
+
+template<>
+ResponseRegion Convert(const Ark_ResponseRegion &src)
+{
+    ResponseRegion dst;
+    if (auto dim = OptConvert<CalcDimension>(src.width); dim) {
+        if (dim.has_value()) {
+            dst.SetWidth(*dim);
+        } else {
+            dst.SetWidth(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
+        }
+    }
+    if (auto dim = OptConvert<CalcDimension>(src.height); dim) {
+        if (dim.has_value()) {
+            dst.SetHeight(*dim);
+        } else {
+            dst.SetHeight(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
+        }
+    }
+    if (auto dim = OptConvert<CalcDimension>(src.x); dim) {
+        if (dim.has_value()) {
+            dst.SetX(*dim);
+        } else {
+            dst.SetX(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
+        }
+    }
+    if (auto dim = OptConvert<CalcDimension>(src.y); dim) {
+        if (dim.has_value()) {
+            dst.SetY(*dim);
+        } else {
+            dst.SetY(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
+        }
+    }
+    if (auto dim = OptConvert<ResponseRegionSupportedTool>(src.tool); dim) {
+        if (dim.has_value()) {
+            dst.SetTool(*dim);
+        } else {
+            dst.SetTool(ResponseRegionSupportedTool::FINGER);
+        }
+    }
     return dst;
 }
 

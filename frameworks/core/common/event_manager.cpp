@@ -1947,6 +1947,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
+    touchRestrict.sourceTool = touchRestrict.touchEvent.sourceTool;
     frameNode->AxisTest(point, point, point, touchRestrict, axisTestResultsMap_[event.id]);
     auto item = axisTestResultsMap_.find(event.id);
     passThroughResult_ = (item != axisTestResultsMap_.end() && !item->second.empty());

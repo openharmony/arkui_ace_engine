@@ -43,6 +43,10 @@
 #include "core/components_ng/property/transition_property.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
+namespace OHOS::Ace {
+class CalcDimensionRect;
+}
+
 namespace OHOS::Ace::Framework {
 
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
@@ -362,6 +366,13 @@ public:
     static void ParseEdgeOutlineWidthBottom(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth);
 
     // response region
+    static void JsResponseRegionList(const JSCallbackInfo& info);
+    static bool ParseJsResponseRegionListArray(const JSRef<JSVal>& jsValue,
+        std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& result);
+    static bool ParseJsResponseRegionListRect(const JSRef<JSVal>& jsValue,
+        NG::ResponseRegionSupportedTool& type, CalcDimensionRect& result);
+    static void ParseResponseRegionTool(const JSRef<JSVal>& jsValue, NG::ResponseRegionSupportedTool& tool);
+
     static void JsResponseRegion(const JSCallbackInfo& info);
     static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
     static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
@@ -399,9 +410,11 @@ public:
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj);
-    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        DimensionUnit defaultUnit = DimensionUnit::FP);
     static bool ParseLengthMetricsToDimension(
-        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
+        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj,
+        DimensionUnit defaultUnit = DimensionUnit::FP);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseLengthMetricsToPositiveDimension(
         const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
