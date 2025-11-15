@@ -15,7 +15,9 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("advanced_ui_component_static") {
-  deps = []
+  deps = [
+    "dialog:dialog"
+  ]
   if (!ace_engine_feature_wearable) {
     deps += [
       "composeListItem:composeListItem",
@@ -26,6 +28,10 @@ group("advanced_ui_component_static") {
       "selectionmenu:selectionMenu",
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
+      "composetitlebar:composeTitleBar",
+      "editabletitlebar:editableTitleBar",
+      "subheader:subHeader",
+      "toolbarv2:toolBarV2",
     ]
   }
 }
