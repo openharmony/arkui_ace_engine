@@ -54,8 +54,6 @@ namespace {
     constexpr double NUM_DOUBLE_100 = 100.;
     constexpr int32_t NUM_PERCENT_100 = 100;
     constexpr int32_t DEFAULT_MULTIPLE = 100;
-    constexpr float GRADIENT_MIN_POSITION = 0.0f;
-    constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
     constexpr uint16_t UTF16_BOM = 0xFEFF;
     constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
@@ -212,11 +210,9 @@ void AssignGradientColors(Gradient *gradient,
     for (int32_t i = 0; i < colors->length; i++) {
         auto color = OptConvert<Color>(colors->array[i].value0);
         auto position = Convert<float>(colors->array[i].value1);
-        if (LessOrEqual(position, GRADIENT_MIN_POSITION)) {
-            position = GRADIENT_DEFAULT_MIN_POSITION;
-        }
         if (color.has_value()) {
             NG::GradientColor gradientColor;
+            position = std::clamp(position, 0.0f, 1.0f);
             gradientColor.SetColor(color.value());
             gradientColor.SetHasValue(true);
             gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
@@ -231,11 +227,9 @@ void AssignGradientColors(Gradient *gradient,
     for (int32_t i = 0; i < colors->length; i++) {
         auto color = OptConvert<Color>(colors->array[i].value0);
         auto position = Convert<float>(colors->array[i].value1);
-        if (LessOrEqual(position, GRADIENT_MIN_POSITION)) {
-            position = GRADIENT_DEFAULT_MIN_POSITION;
-        }
         if (color.has_value()) {
             NG::GradientColor gradientColor;
+            position = std::clamp(position, 0.0f, 1.0f);
             gradientColor.SetColor(color.value());
             gradientColor.SetHasValue(true);
             gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
@@ -244,7 +238,7 @@ void AssignGradientColors(Gradient *gradient,
     }
 }
 
-void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
     const GradientDirection &direction)
 {
     switch (direction) {
@@ -3637,6 +3631,60 @@ void AssignCast(std::optional<Orientation>& dst, const Ark_window_Orientation& s
             dst = Orientation::USER_ROTATION_LANDSCAPE_INVERTED; break;
         case ARK_WINDOW_ORIENTATION_FOLLOW_DESKTOP: dst = Orientation::FOLLOW_DESKTOP; break;
         default: LOGE("Unexpected enum value in Ark_window_Orientation: %{public}d", src);
+    }
+}
+
+void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<float>& angle,
+    float defaultValue)
+{
+    if (src.tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    ConvertAngleWithDefault(src.value, angle, defaultValue);
+}
+
+void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle,
+    float defaultValue)
+{
+    if (src.selector == 0) {
+        angle = Converter::Convert<float>(src.value0);
+    } else if (src.selector == 1) {
+        auto str = Converter::Convert<std::string>(src.value1);
+        double temp = static_cast<double>(defaultValue);
+        if (StringUtils::StringToDegree(str, temp)) {
+            angle = static_cast<float>(temp);
+        } else {
+            angle = defaultValue;
+        }
+    } else {
+        LOGW("unknown branch in %{public}s, %{public}d", __func__, src.selector);
+    }
+}
+
+// Note: These two overloads can be removed if Ark_LinearGradientOptions::angle type changes from
+// Opt_Union_Number_String to Opt_Union_F64_String
+void ConvertAngleWithDefault(const Opt_Union_Number_String& src, std::optional<float>& angle, float defaultValue)
+{
+    if (src.tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    ConvertAngleWithDefault(src.value, angle, defaultValue);
+}
+
+void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<float>& angle, float defaultValue)
+{
+    if (src.selector == 0) {
+        angle = Converter::Convert<float>(src.value0);
+    } else if (src.selector == 1) {
+        auto str = Converter::Convert<std::string>(src.value1);
+        double temp = static_cast<double>(defaultValue);
+        if (StringUtils::StringToDegree(str, temp)) {
+            angle = static_cast<float>(temp);
+        } else {
+            angle = defaultValue;
+        }
+    } else {
+        LOGW("unknown branch in %{public}s, %{public}d", __func__, src.selector);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
