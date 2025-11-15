@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,9 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier();
 const CJUIGridItemModifier* GetCJUIGridItemModifier();
+
+void SetOnGridItemSelect(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridItemSelect(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H

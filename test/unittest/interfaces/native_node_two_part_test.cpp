@@ -996,4 +996,299 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeEdgeEffectTest003, TestSize.Level1)
 
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: EditModeTest
+ * @tc.desc: Test editMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, EditModeTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(rootNode, nullptr);
+
+     //set get
+    ArkUI_NumberValue value[] = {{ .i32 = 1 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_EDIT_MODE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_GRID_EDIT_MODE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value
+    value[0].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_EDIT_MODE, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_EDIT_MODE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    ArkUI_NumberValue zeroSizeValue[] = {};
+    ArkUI_AttributeItem zeroSizeItem = {zeroSizeValue, sizeof(zeroSizeValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_EDIT_MODE, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    //test reset
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_EDIT_MODE), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_EDIT_MODE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 0);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: MultiSelectableTest
+ * @tc.desc: Test multiSelectable function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, MultiSelectableTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(rootNode, nullptr);
+
+     //set get
+    ArkUI_NumberValue value[] = {{ .i32 = 1 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value
+    value[0].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    ArkUI_NumberValue zeroSizeValue[] = {};
+    ArkUI_AttributeItem zeroSizeItem = {zeroSizeValue, sizeof(zeroSizeValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    //test reset
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 0);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: SelectableTest
+ * @tc.desc: Test selectable function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, SelectableTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID_ITEM);
+    ASSERT_NE(rootNode, nullptr);
+
+    // set get
+    ArkUI_NumberValue value[] = { { .i32 = 0 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), "test" };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_ITEM_SELECTABLE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_GRID_ITEM_SELECTABLE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 0);
+
+    // set invalid value
+    value[0].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_ITEM_SELECTABLE, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_ITEM_SELECTABLE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 0);
+
+    ArkUI_NumberValue zeroSizeValue[] = {};
+    ArkUI_AttributeItem zeroSizeItem = { zeroSizeValue, sizeof(zeroSizeValue) / sizeof(ArkUI_NumberValue), "test" };
+    EXPECT_EQ(
+        nodeAPI->setAttribute(rootNode, NODE_GRID_ITEM_SELECTABLE, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    // test reset
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_ITEM_SELECTABLE), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: SelectedTest
+ * @tc.desc: Test selected function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, SelectedTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID_ITEM);
+    ASSERT_NE(rootNode, nullptr);
+
+     //set get
+    ArkUI_NumberValue value[] = {{ .i32 = 1 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_ITEM_SELECTED, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_GRID_ITEM_SELECTED);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value
+    value[0].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_ITEM_SELECTED, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_ITEM_SELECTED);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    ArkUI_NumberValue zeroSizeValue[] = {};
+    ArkUI_AttributeItem zeroSizeItem = {zeroSizeValue, sizeof(zeroSizeValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_ITEM_SELECTED, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    //test reset
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_ITEM_SELECTED), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_ITEM_SELECTED);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 0);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: SupportAnimationTest
+ * @tc.desc: Test supportAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, SupportAnimationTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(rootNode, nullptr);
+
+    //set get
+    ArkUI_NumberValue value[] = {{ .i32 = 1 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_DRAG_ANIMATION, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_GRID_DRAG_ANIMATION);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value
+    value[0].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_DRAG_ANIMATION, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_DRAG_ANIMATION);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    ArkUI_NumberValue zeroSizeValue[] = {};
+    ArkUI_AttributeItem zeroSizeItem = {zeroSizeValue, sizeof(zeroSizeValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_DRAG_ANIMATION, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    //test reset
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_DRAG_ANIMATION), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_DRAG_ANIMATION);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 0);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeOnItemDragEnterTest
+ * @tc.desc: Test Grid onItemDragEnter event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragEnterTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_ENTER, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_ENTER);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeOnItemDragLeaveTest
+ * @tc.desc: Test Grid onItemDragLeave event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragLeaveTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_LEAVE, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_LEAVE);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeOnItemDragMoveTest
+ * @tc.desc: Test Grid onItemDragMove event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragMoveTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_MOVE, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_MOVE);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeOnItemDragStartTest
+ * @tc.desc: Test Grid onItemDragStart event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragStartTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_START, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_START);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeOnItemDragDropTest
+ * @tc.desc: Test Grid onItemDragDrop event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragDropTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DROP, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DROP);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeOnSelectTest
+ * @tc.desc: Test Grid onItemSelect event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnSelectTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID_ITEM);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ITEM_ON_SELECT, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ITEM_ON_SELECT);
+    nodeAPI->disposeNode(scroll);
+}
 } // namespace OHOS::Ace

@@ -249,6 +249,13 @@ void ResetGridEditMode(ArkUINodeHandle node)
     GridModelNG::SetEditable(frameNode, DEFAULT_EDIT_MODE);
 }
 
+ArkUI_Bool GetGridEditMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return GridModelNG::GetEditable(frameNode);
+}
+
 void SetGridMultiSelectable(ArkUINodeHandle node, ArkUI_Bool multiSelectable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -261,6 +268,13 @@ void ResetGridMultiSelectable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetMultiSelectable(frameNode, DEFAULT_MULTI_SELECTABLE);
+}
+
+ArkUI_Bool GetGridMultiSelectable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return GridModelNG::GetMultiSelectable(frameNode);
 }
 
 void SetGridMaxCount(ArkUINodeHandle node, int32_t maxCount)
@@ -332,6 +346,13 @@ void ResetGridSupportAnimation(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetSupportAnimation(frameNode, DEFAULT_SUPPORT_ANIMATION);
+}
+
+ArkUI_Bool GetGridSupportAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return GridModelNG::GetSupportAnimation(frameNode);
 }
 
 void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
@@ -720,8 +741,10 @@ const ArkUIGridModifier* GetGridModifier()
         .getShowCached = GetShowCached,
         .setGridEditMode = SetGridEditMode,
         .resetGridEditMode = ResetGridEditMode,
+        .getGridEditMode = GetGridEditMode,
         .setGridMultiSelectable = SetGridMultiSelectable,
         .resetGridMultiSelectable = ResetGridMultiSelectable,
+        .getGridMultiSelectable = GetGridMultiSelectable,
         .setGridMaxCount = SetGridMaxCount,
         .resetGridMaxCount = ResetGridMaxCount,
         .setGridMinCount = SetGridMinCount,
@@ -732,6 +755,7 @@ const ArkUIGridModifier* GetGridModifier()
         .resetGridLayoutDirection = ResetGridLayoutDirection,
         .setGridSupportAnimation = SetGridSupportAnimation,
         .resetGridSupportAnimation = ResetGridSupportAnimation,
+        .getGridSupportAnimation = GetGridSupportAnimation,
         .setEdgeEffect = SetEdgeEffect,
         .resetEdgeEffect = ResetEdgeEffect,
         .setNestedScroll = SetNestedScroll,
@@ -908,6 +932,29 @@ void ResetOnGridScrollBarUpdate(ArkUINodeHandle node)
     GridModelNG::SetOnScrollBarUpdate(frameNode, nullptr);
 }
 
+void SetGridOnItemDragStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [extraParam](const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<UINode> {
+        ArkUINodeEvent event;
+        event.kind = MIXED_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.mixedEvent.subKind = ON_GRID_ITEM_DRAG_START;
+        event.mixedEvent.numberDataLength = 3;
+        event.mixedEvent.numberData[0].f32 = dragInfo.GetX();
+        event.mixedEvent.numberData[1].f32 = dragInfo.GetY();
+        event.mixedEvent.numberData[2].i32 = itemIndex;
+        SendArkUISyncEvent(&event);
+        if (event.mixedEvent.numberReturnData[0].i32 == 1) {
+            return dragInfo.GetFrameNode().Upgrade();
+        } else {
+            return nullptr;
+        }
+    };
+    GridModelNG::SetOnGridItemDragStart(frameNode, std::move(onEvent));
+}
+
 void SetOnGridItemDragStart(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -925,6 +972,22 @@ void ResetOnGridItemDragStart(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetOnItemDragStart(frameNode, nullptr);
+}
+
+void SetGridOnItemDragEnter(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [extraParam](const ItemDragInfo& dragInfo) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_ITEM_DRAG_ENTER;
+        event.componentAsyncEvent.data[0].f32 = dragInfo.GetX();
+        event.componentAsyncEvent.data[1].f32 = dragInfo.GetY();
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetOnItemDragEnter(frameNode, std::move(onEvent));
 }
 
 void SetOnGridItemDragEnter(ArkUINodeHandle node, void* extraParam)
@@ -946,6 +1009,24 @@ void ResetOnGridItemDragEnter(ArkUINodeHandle node)
     GridModelNG::SetOnItemDragEnter(frameNode, nullptr);
 }
 
+void SetGridOnItemDragMove(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [extraParam](const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_ITEM_DRAG_MOVE;
+        event.componentAsyncEvent.data[0].f32 = dragInfo.GetX();
+        event.componentAsyncEvent.data[1].f32 = dragInfo.GetY();
+        event.componentAsyncEvent.data[2].i32 = itemIndex;
+        event.componentAsyncEvent.data[3].i32 = insertIndex;
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetOnItemDragMove(frameNode, std::move(onEvent));
+}
+
 void SetOnGridItemDragMove(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -965,6 +1046,23 @@ void ResetOnGridItemDragMove(ArkUINodeHandle node)
     GridModelNG::SetOnItemDragMove(frameNode, nullptr);
 }
 
+void SetGridOnItemDragLeave(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [extraParam](const ItemDragInfo& dragInfo, int32_t itemIndex) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_ITEM_DRAG_LEAVE;
+        event.componentAsyncEvent.data[0].f32 = dragInfo.GetX();
+        event.componentAsyncEvent.data[1].f32 = dragInfo.GetY();
+        event.componentAsyncEvent.data[2].i32 = itemIndex;
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetOnItemDragLeave(frameNode, std::move(onEvent));
+}
+
 void SetOnGridItemDragLeave(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -982,6 +1080,26 @@ void ResetOnGridItemDragLeave(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetOnItemDragLeave(frameNode, nullptr);
+}
+
+void SetGridOnItemDrop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [extraParam](
+        const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_ITEM_DROP;
+        event.componentAsyncEvent.data[0].f32 = dragInfo.GetX();
+        event.componentAsyncEvent.data[1].f32 = dragInfo.GetY();
+        event.componentAsyncEvent.data[2].i32 = itemIndex;
+        event.componentAsyncEvent.data[3].i32 = insertIndex;
+        event.componentAsyncEvent.data[4].i32 = isSuccess;
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetOnItemDrop(frameNode, std::move(onEvent));
 }
 
 void SetOnGridItemDrop(ArkUINodeHandle node, void* extraParam)
