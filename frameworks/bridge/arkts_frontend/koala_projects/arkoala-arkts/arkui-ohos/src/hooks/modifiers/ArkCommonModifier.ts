@@ -16,7 +16,7 @@
 
 import { AttributeUpdater } from '../../AttributeUpdater';
 import { CommonModifier } from '../../CommonModifier';
-import {CommonMethod, ArkCommonMethodComponent, AttributeModifier, ModifierEventType , ArkCommonMethodPeer } from  '#generated';
+import {CommonMethod, ArkCommonMethodComponent, AttributeModifier, ArkCommonMethodPeer } from  '#generated';
 import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 import { CommonMethodModifier } from '../../CommonMethodModifier';
@@ -100,10 +100,10 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
     }
     let stateValue = 0;
     let currentState = node.getStateStyleMutable();
-    let isNormal: boolean = ModifierEventType.UI_STATE_NORMAL === modifier.monitorEventType();
+    let isNormal: boolean = modifier.monitoredStates() === 0;
     if (!isNormal) {
         if (currentState === undefined) {
-            currentState = node.getOrCreateStateStyleMutable(Number.toInt(modifier.monitorEventType()))!;
+            currentState = node.getOrCreateStateStyleMutable(modifier.monitoredStates())!;
         }
         stateValue = currentState.value;
     }
