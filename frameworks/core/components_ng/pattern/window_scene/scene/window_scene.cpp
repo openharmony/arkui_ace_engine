@@ -543,7 +543,9 @@ void WindowScene::SetSubSessionVisible()
 void WindowScene::BufferAvailableCallbackForSnapshot()
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "BufferAvailableCallbackForSnapshot id:%{public}d", session_->GetPersistentId());
+        "BufferAvailableCallbackForSnapshot id:%{public}d, isAppLockControl:%{public}d",
+        session_->GetPersistentId(), session_->GetAppLockControl());
+    CHECK_EQUAL_VOID(session_->GetAppLockControl(), true);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForSnapshot");
         auto self = weakThis.Upgrade();
@@ -667,7 +669,9 @@ void WindowScene::OnActivation()
 void WindowScene::DisposeSnapshotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "DisposeSnapshotAndBlankWindow id: %{public}d", session_->GetPersistentId());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "DisposeSnapshotAndBlankWindow id: %{public}d, isAppLockControl:%{public}d",
+        session_->GetPersistentId(), session_->GetAppLockControl());
+    CHECK_EQUAL_VOID(session_->GetAppLockControl(), true);
     if (session_->GetBlank()) {
         return;
     }

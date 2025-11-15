@@ -875,6 +875,38 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
     session->scenePersistence_->isSavingSnapshot_[key] = true;
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(session->GetShowRecent(), true);
+
+    session->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    session->SetShowRecent(false);
+    session->isAppLockControl_.store(false);
+    session->scenePersistence_->hasSnapshot_[key] = true;
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
+
+    session->SetShowRecent(false);
+    session->isAppLockControl_.store(true);
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
+
+    session->SetShowRecent(true);
+    session->isAppLockControl_.store(false);
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
+
+    session->SetShowRecent(true);
+    session->isAppLockControl_.store(true);
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
+
+    session->state_ = Rosen::SessionState::STATE_ACTIVE;
+    session->SetShowRecent(false);
+    session->isAppLockControl_.store(false);
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
+
+    session->isAppLockControl_.store(true);
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
 }
 
 /**
