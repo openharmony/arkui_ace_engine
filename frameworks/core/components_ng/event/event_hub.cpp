@@ -78,22 +78,23 @@ void EventHub::SetSupportedStates(UIState state)
     stateStyleMgr_->SetSupportedStates(state);
 }
 
-void EventHub::AddSupportedUIStateWithCallback(
+bool EventHub::AddSupportedUIStateWithCallback(
     UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
 {
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
-    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
+    auto result = stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
     AddPressedListener();
+    return result;
 }
 
-void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
+bool EventHub::RemoveSupportedUIState(UIState state, bool isInner)
 {
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
-    stateStyleMgr_->RemoveSupportedUIState(state, isInner);
+    return stateStyleMgr_->RemoveSupportedUIState(state, isInner);
 }
 
 bool EventHub::GetUserSetStateStyle()

@@ -159,11 +159,11 @@ bool StateStyleManager::IsExcludeInner(UIState handlingState)
     return (userSubscribersExcludeConfigs_ & handlingState) == handlingState;
 }
 
-void StateStyleManager::AddSupportedUIStateWithCallback(
+bool StateStyleManager::AddSupportedUIStateWithCallback(
     UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
 {
     if (state == UI_STATE_NORMAL) {
-        return;
+        return false;
     }
     if (!HasStateStyle(state)) {
         supportedStates_ = supportedStates_ | state;
@@ -171,7 +171,7 @@ void StateStyleManager::AddSupportedUIStateWithCallback(
     if (isInner) {
         innerStateStyleSubscribers_.first |= state;
         innerStateStyleSubscribers_.second = callback;
-        return;
+        return true;
     }
     userStateStyleSubscribers_.first |= state;
     userStateStyleSubscribers_.second = callback;
@@ -180,12 +180,13 @@ void StateStyleManager::AddSupportedUIStateWithCallback(
     } else {
         userSubscribersExcludeConfigs_ &= ~state;
     }
+    return true;
 }
 
-void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
+bool StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
 {
     if (state == UI_STATE_NORMAL) {
-        return;
+        return false;
     }
     if (isInner) {
         innerStateStyleSubscribers_.first &= ~state;
@@ -203,6 +204,7 @@ void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
     if ((temp & state) != state) {
         supportedStates_ = supportedStates_ & ~state;
     }
+    return true;
 }
 
 void StateStyleManager::HandleStateChangeInternal(

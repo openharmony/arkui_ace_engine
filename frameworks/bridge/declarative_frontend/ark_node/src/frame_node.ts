@@ -63,6 +63,7 @@ errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the no
 errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
+declare type UIStatesChangeHandlerCallback = (currentUIStates: number) => void;
 
 function getFrameNodeRawPtr(frameNode: FrameNode): number {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
@@ -84,6 +85,8 @@ class FrameNode extends Disposable {
   public nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
+  protected statesChangeHandler_: UIStatesChangeHandlerCallback | undefined;
+  protected supportedStates_: number;
   constructor(uiContext: UIContext, type: string, options?: object) {
     super();
     if (uiContext === undefined) {
@@ -735,16 +738,33 @@ class FrameNode extends Disposable {
   recycle(): void {
     this.triggerOnRecycle();
   }
-  addSupportedUIStates(uistates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
+  addSupportedUIStates(uiStates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates: number)=>{
-      statesChangeHandler(this, currentUIStates);
-    }, excludeInner);
+    this.statesChangeHandler_ = (currentUIStates: number)=>{
+      if (statesChangeHandler !== undefined && statesChangeHandler !== null) {
+        statesChangeHandler(this, currentUIStates);
+      }
+    }
+    let result = getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uiStates,
+      this.statesChangeHandler_, excludeInner);
+    if (result === true) {
+      this.supportedStates_ |= uiStates;
+    } else {
+      JSXNodeLogConsole.warn('add supported uistates fail');
+    }
     __JSScopeUtil__.restoreInstanceId();
   }
   removeSupportedUIStates(uiStates: number): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    let result = getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    if (result === true) {
+      this.supportedStates_ &= ~uiStates;
+      if (this.supportedStates_ === UIState.NORMAL) {
+        this.statesChangeHandler_ = undefined;
+      }
+    } else {
+      JSXNodeLogConsole.warn('remove supported uistates fail');
+    }
     __JSScopeUtil__.restoreInstanceId();
   }
   invalidateAttributes(): void {
