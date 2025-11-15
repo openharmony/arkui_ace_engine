@@ -13,10 +13,63 @@
  * limitations under the License.
  */
 
-#include "base/geometry/calc_dimension.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/json/json_util.h"
 
 namespace OHOS::Ace {
+CalcDimensionRect::CalcDimensionRect(
+    const CalcDimension& width, const CalcDimension& height, const CalcDimension& x, const CalcDimension& y)
+    : width_(width), height_(height), x_(x), y_(y)
+{}
+
+CalcDimensionRect::CalcDimensionRect(const DimensionRect& dimensionRect)
+{
+    width_ = dimensionRect.GetWidth();
+    height_ = dimensionRect.GetHeight();
+    x_ = dimensionRect.GetOffset().GetX();
+    y_ = dimensionRect.GetOffset().GetY();
+}
+
+const CalcDimension& CalcDimensionRect::GetWidth() const
+{
+    return width_;
+}
+
+const CalcDimension& CalcDimensionRect::GetHeight() const
+{
+    return height_;
+}
+
+const CalcDimension& CalcDimensionRect::GetX() const
+{
+    return x_;
+}
+
+const CalcDimension& CalcDimensionRect::GetY() const
+{
+    return y_;
+}
+
+void CalcDimensionRect::SetWidth(const CalcDimension& width)
+{
+    width_ = width;
+}
+
+void CalcDimensionRect::SetHeight(const CalcDimension& height)
+{
+    height_ = height;
+}
+
+void CalcDimensionRect::SetX(const CalcDimension& x)
+{
+    x_ = x;
+}
+
+void CalcDimensionRect::SetY(const CalcDimension& y)
+{
+    y_ = y;
+}
+
 std::string CalcDimensionRect::ToString() const
 {
     static const int32_t precision = 2;
@@ -41,4 +94,12 @@ std::string CalcDimensionRect::ToJsonString() const
     return jsonValue->ToString();
 }
 
+CalcDimensionRect& CalcDimensionRect::operator=(const DimensionRect& newDimension)
+{
+    SetWidth(newDimension.GetWidth());
+    SetHeight(newDimension.GetHeight());
+    SetX(newDimension.GetOffset().GetX());
+    SetY(newDimension.GetOffset().GetY());
+    return *this;
+}
 } // namespace OHOS::Ace

@@ -82,6 +82,7 @@
 
 namespace OHOS::Ace {
 struct TextDetectConfig;
+class ResponseRegion;
 }
 
 namespace OHOS::Ace::NG {

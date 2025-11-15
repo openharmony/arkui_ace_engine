@@ -20,6 +20,7 @@
 #include "converter.h"
 
 #include "base/utils/string_utils.h"
+#include "base/geometry/response_region.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"

@@ -55,6 +55,7 @@ template("ace_base_source_set") {
       "geometry/matrix3.cpp",
       "geometry/matrix4.cpp",
       "geometry/quaternion.cpp",
+      "geometry/response_region.cpp",
       "geometry/transform_util.cpp",
       "image/controlled_animator.cpp",
       "image/pixel_map.cpp",

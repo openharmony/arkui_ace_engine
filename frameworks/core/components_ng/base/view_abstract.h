@@ -26,7 +26,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/geometry/response_region.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_layout_info.h"
@@ -68,6 +67,7 @@ class ImageSourceInfo;
 class BasicShape;
 class SpanString;
 class CalcDimensionRect;
+class ResponseRegion;
 }
 
 namespace OHOS::Ace::NG {

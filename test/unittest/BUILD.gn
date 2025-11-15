@@ -521,6 +521,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/geometry/matrix3.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/geometry/quaternion.cpp",
+    "$ace_root/frameworks/base/geometry/response_region.cpp",
     "$ace_root/frameworks/base/geometry/transform_util.cpp",
     "$ace_root/frameworks/base/i18n/date_time_sequence.cpp",
     "$ace_root/frameworks/base/image/controlled_animator.cpp",

@@ -21,7 +21,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
-#include "base/geometry/calc_dimension_rect.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"

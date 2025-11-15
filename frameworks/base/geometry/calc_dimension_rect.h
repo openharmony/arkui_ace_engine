@@ -30,70 +30,31 @@ public:
     ~CalcDimensionRect() = default;
 
     CalcDimensionRect(
-        const CalcDimension& width, const CalcDimension& height, const CalcDimension& x, const CalcDimension& y)
-        : width_(width), height_(height), x_(x), y_(y)
-    {}
+        const CalcDimension& width, const CalcDimension& height, const CalcDimension& x, const CalcDimension& y);
 
-    CalcDimensionRect(const DimensionRect& dimensionRect)
-    {
-        width_ = dimensionRect.GetWidth();
-        height_ = dimensionRect.GetHeight();
-        x_ = dimensionRect.GetOffset().GetX();
-        y_ = dimensionRect.GetOffset().GetY();
-    }
+    CalcDimensionRect(const DimensionRect& dimensionRect);
 
-    const CalcDimension& GetWidth() const
-    {
-        return width_;
-    }
+    const CalcDimension& GetWidth() const;
 
-    const CalcDimension& GetHeight() const
-    {
-        return height_;
-    }
+    const CalcDimension& GetHeight() const;
 
-    const CalcDimension& GetX() const
-    {
-        return x_;
-    }
+    const CalcDimension& GetX() const;
 
-    const CalcDimension& GetY() const
-    {
-        return y_;
-    }
+    const CalcDimension& GetY() const;
 
-    void SetWidth(const CalcDimension& width)
-    {
-        width_ = width;
-    }
+    void SetWidth(const CalcDimension& width);
 
-    void SetHeight(const CalcDimension& height)
-    {
-        height_ = height;
-    }
+    void SetHeight(const CalcDimension& height);
 
-    void SetX(const CalcDimension& x)
-    {
-        x_ = x;
-    }
+    void SetX(const CalcDimension& x);
 
-    void SetY(const CalcDimension& y)
-    {
-        y_ = y;
-    }
+    void SetY(const CalcDimension& y);
 
     std::string ToString() const;
 
     std::string ToJsonString() const;
 
-    CalcDimensionRect& operator=(const DimensionRect& newDimension)
-    {
-        SetWidth(newDimension.GetWidth());
-        SetHeight(newDimension.GetHeight());
-        SetX(newDimension.GetOffset().GetX());
-        SetY(newDimension.GetOffset().GetY());
-        return *this;
-    }
+    CalcDimensionRect& operator=(const DimensionRect& newDimension);
 
 private:
     CalcDimension width_ = 0.0_vp;

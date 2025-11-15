@@ -33,78 +33,31 @@ public:
     ~ResponseRegion() = default;
 
     ResponseRegion(const NG::ResponseRegionSupportedTool& tool, const CalcDimension& x,
-        const CalcDimension& y, const CalcDimension& width, const CalcDimension& height)
-        : tool_(tool), width_(width), height_(height), x_(x), y_(y)
-    {}
+        const CalcDimension& y, const CalcDimension& width, const CalcDimension& height);
 
-    ResponseRegion(const ResponseRegion& responseRegion)
-    {
-        tool_ = responseRegion.GetTool();
-        width_ = responseRegion.GetWidth();
-        height_ = responseRegion.GetHeight();
-        x_ = responseRegion.GetX();
-        y_ = responseRegion.GetY();
-    }
+    ResponseRegion(const ResponseRegion& responseRegion);
 
-    const NG::ResponseRegionSupportedTool& GetTool() const
-    {
-        return tool_;
-    }
+    const NG::ResponseRegionSupportedTool& GetTool() const;
 
-    const CalcDimension& GetWidth() const
-    {
-        return width_;
-    }
+    const CalcDimension& GetWidth() const;
 
-    const CalcDimension& GetHeight() const
-    {
-        return height_;
-    }
+    const CalcDimension& GetHeight() const;
 
-    const CalcDimension& GetX() const
-    {
-        return x_;
-    }
+    const CalcDimension& GetX() const;
 
-    const CalcDimension& GetY() const
-    {
-        return y_;
-    }
+    const CalcDimension& GetY() const;
 
-    void SetWidth(const CalcDimension& width)
-    {
-        width_ = width;
-    }
+    void SetWidth(const CalcDimension& width);
 
-    void SetHeight(const CalcDimension& height)
-    {
-        height_ = height;
-    }
+    void SetHeight(const CalcDimension& height);
 
-    void SetX(const CalcDimension& x)
-    {
-        x_ = x;
-    }
+    void SetX(const CalcDimension& x);
 
-    void SetY(const CalcDimension& y)
-    {
-        y_ = y;
-    }
+    void SetY(const CalcDimension& y);
 
-    void SetTool(const NG::ResponseRegionSupportedTool& tool)
-    {
-        tool_ = tool;
-    }
+    void SetTool(const NG::ResponseRegionSupportedTool& tool);
 
-    ResponseRegion& operator=(const ResponseRegion& responseRegion)
-    {
-        SetWidth(responseRegion.GetWidth());
-        SetHeight(responseRegion.GetHeight());
-        SetX(responseRegion.GetX());
-        SetY(responseRegion.GetY());
-        SetTool(responseRegion.GetTool());
-        return *this;
-    }
+    ResponseRegion& operator=(const ResponseRegion& responseRegion);
 
 private:
     NG::ResponseRegionSupportedTool tool_ = NG::ResponseRegionSupportedTool::ALL;
