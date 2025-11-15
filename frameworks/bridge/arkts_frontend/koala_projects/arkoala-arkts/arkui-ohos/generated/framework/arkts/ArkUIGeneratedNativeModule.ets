@@ -4449,6 +4449,9 @@ export class ArkUIGeneratedNativeModule {
     native static _IUIContext_freezeUINode1(id: number, isFrozen: KInt): void
     @ani.unsafe.Direct
     native static _IUIContext_dispatchKeyEvent(thisArray: KSerializerBuffer, thisLength: int32, event: KPointer): boolean
+    native static _IUIContext_openBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _IUIContext_updateBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _IUIContext_closeBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
     @ani.unsafe.Direct

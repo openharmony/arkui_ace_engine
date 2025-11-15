@@ -26385,6 +26385,22 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                           Ark_Boolean isFrozen);
     Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
                                     Ark_KeyEvent event);
+    void (*openBindSheet)(Ark_VMContext vmContext,
+                          Ark_AsyncWorkerPtr asyncWorker,
+                          Ark_NativePointer bindSheetContent,
+                          const Opt_SheetOptions* sheetOptions,
+                          const Opt_Int32* targetId,
+                          const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*updateBindSheet)(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_NativePointer bindSheetContent,
+                            const Ark_SheetOptions* sheetOptions,
+                            const Opt_Boolean* partialUpdate,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*closeBindSheet)(Ark_VMContext vmContext,
+                           Ark_AsyncWorkerPtr asyncWorker,
+                           Ark_NativePointer bindSheetContent,
+                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
