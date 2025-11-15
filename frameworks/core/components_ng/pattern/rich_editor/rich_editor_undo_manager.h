@@ -70,6 +70,7 @@ struct UndoRedoRecord {
     bool isOnlyStyleChange = false;
     bool restoreBuilderSpan = false;
     std::unordered_set<SpanType> updateSpanTypes;
+    RichEditorDeleteDirection deleteDirection = RichEditorDeleteDirection::BACKWARD;
 
     void SetOperationBefore(TextRange range, const RefPtr<SpanString>& styledString, TextRange selection,
         CaretAffinityPolicy caretAffinity)
@@ -199,6 +200,7 @@ struct UndoRedoRecord {
         JSON_STRING_PUT_STRINGABLE(jsonValue, rangeAfter);
         JSON_STRING_PUT_STRINGABLE(jsonValue, selectionBefore);
         JSON_STRING_PUT_INT(jsonValue, caretAffinityBefore);
+        JSON_STRING_PUT_INT(jsonValue, deleteDirection);
         JSON_STRING_PUT_BOOL(jsonValue, isOnlyStyleChange);
         JSON_STRING_PUT_BOOL(jsonValue, restoreBuilderSpan);
         return jsonValue->ToString();

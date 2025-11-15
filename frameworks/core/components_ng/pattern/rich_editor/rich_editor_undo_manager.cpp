@@ -404,9 +404,6 @@ void RichEditorUndoManager::ProcessStringUndo(const UndoRedoRecord& record)
     auto undoRecord = record;
     undoRecord.Reverse();
     ApplyRecord(undoRecord, true);
-    pattern->SetCaretPosition(undoRecord.selectionBefore.end);
-    pattern->caretAffinityPolicy_ = undoRecord.caretAffinityBefore;
-    IF_TRUE(pattern->isEditing_, pattern->StartTwinkling());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
 }
@@ -418,8 +415,6 @@ void RichEditorUndoManager::ProcessStringRedo(const UndoRedoRecord& record)
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     ApplyRecord(record, false);
-    pattern->SetCaretPosition(record.rangeAfter.end);
-    IF_TRUE(pattern->isEditing_, pattern->StartTwinkling());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
 }
@@ -762,18 +757,24 @@ void StringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
     CHECK_NULL_VOID(pattern);
     pattern->CloseSelectOverlay();
     pattern->ResetSelection();
-    pattern->StopTwinkling();
     if (record.restoreBuilderSpan) {
+        // Handle undo drag
         isUndo ? ProcessDragUndo(record) : ProcessDragRedo(record);
         return;
     }
-    if (record.rangeBefore.GetLength() > 0) {
-        pattern->DeleteForward(record.rangeBefore.start, record.rangeBefore.GetLength());
-        auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
-        IF_PRESENT(eventHub, FireOnDeleteComplete());
+    auto delLength = record.rangeBefore.GetLength();
+    auto insertLength = record.rangeAfter.GetLength();
+    bool hasSelection = record.selectionBefore.GetLength() > 0;
+    bool isOnlyDelete = delLength > 0 && insertLength == 0;
+    // Historical Operation Specifications: process delete forward when redo delete forward without selection
+    bool isDeleteForward =
+        !isUndo && !hasSelection && isOnlyDelete && record.deleteDirection == RichEditorDeleteDirection::FORWARD;
+    pattern->SetCaretPosition(isDeleteForward ? record.rangeBefore.start : record.rangeBefore.end);
+    if (delLength > 0) {
+        isDeleteForward ? pattern->DeleteForwardOperation(delLength, false)
+            : pattern->DeleteBackwardOperation(delLength, false);
     }
-    pattern->caretPosition_ = record.rangeBefore.start;
-    pattern->InsertValueOperation(record.GetStringAfter());
+    IF_TRUE(record.rangeAfter.GetLength() > 0, pattern->InsertValueOperation(record.GetStringAfter()));
 }
 
 void StringUndoManager::ProcessDragUndo(const UndoRedoRecord& record)
@@ -851,24 +852,15 @@ bool StringUndoManager::BeforeStringChange(const UndoRedoRecord& record, bool is
     auto rangeBefore = isUndo ? record.rangeAfter : record.rangeBefore;
     auto rangeAfter = isUndo ? record.rangeBefore : record.rangeAfter;
     auto deleteLength = rangeBefore.GetLength();
-    if (eventHub->HasOnWillChange()) {
-        auto insertStart = rangeAfter.start;
-        auto deleteEnd = rangeBefore.end;
-        RichEditorChangeValue changeValue(isUndo ? TextChangeReason::UNDO : TextChangeReason::REDO);
-        pattern->GetDeletedSpan(changeValue, deleteEnd, deleteLength, RichEditorDeleteDirection::BACKWARD);
-        auto replaceStr = isUndo ? record.GetStringBefore() : record.GetStringAfter();
-        IF_TRUE(!replaceStr.empty(), pattern->GetReplacedSpan(changeValue, insertStart, replaceStr, insertStart,
-            std::nullopt, std::nullopt));
-        CHECK_NULL_RETURN(eventHub->FireOnWillChange(changeValue), false);
-    }
-    CHECK_NULL_RETURN(deleteLength > 0, true);
-    RichEditorDeleteValue info;
-    auto deleteStart = rangeBefore.start;
-    info.SetOffset(deleteStart);
-    info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
-    info.SetLength(deleteLength);
-    pattern->CalcDeleteValueObj(deleteStart, deleteLength, info);
-    return eventHub->FireAboutToDelete(info);
+    CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
+    auto insertStart = rangeAfter.start;
+    auto deleteEnd = rangeBefore.end;
+    RichEditorChangeValue changeValue(isUndo ? TextChangeReason::UNDO : TextChangeReason::REDO);
+    pattern->GetDeletedSpan(changeValue, deleteEnd, deleteLength, RichEditorDeleteDirection::BACKWARD);
+    auto replaceStr = isUndo ? record.GetStringBefore() : record.GetStringAfter();
+    IF_TRUE(!replaceStr.empty(), pattern->GetReplacedSpan(changeValue, insertStart, replaceStr, insertStart,
+        std::nullopt, std::nullopt));
+    return eventHub->FireOnWillChange(changeValue);
 }
 
 bool StringUndoManager::BeforeUndoDrag(const UndoRedoRecord& record)
