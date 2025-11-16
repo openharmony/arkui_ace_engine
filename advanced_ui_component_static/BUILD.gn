@@ -21,6 +21,7 @@ group("advanced_ui_component_static") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [
+      "counter:counter",
       "composeListItem:composeListItem",
       "foldsplitcontainer:foldSplitContainer",
       "fullscreenlaunchcomponent:fullScreenLaunch",
