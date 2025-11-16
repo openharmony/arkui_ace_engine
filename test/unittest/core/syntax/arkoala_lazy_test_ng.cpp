@@ -411,15 +411,6 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest015)
     EXPECT_TRUE(lazyNode->postUpdateTaskHasBeenScheduled_);
 }
 
-TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
-{
-    auto lazyNode = CreateLazyForEachNode(GetNextId());
-    int32_t totalCount = 50;
-    CreateChildren(lazyNode, totalCount);
-    lazyNode->BuildAllChildren();
-    EXPECT_EQ(lazyNode->children_.size(), totalCount);
-}
-
 /**
  * @tc.name: ArkoalaLazyNodeTest016
  * @tc.desc: Test ArkoalaLazyNode BuildAllChildren.
@@ -560,5 +551,247 @@ TEST_F(ArkoalaLazyNodeTest, ConvertFromToIndex002)
     EXPECT_EQ(mappedIndex, 5);
     mappedIndex = lazyNode->ConvertFromToIndexRevert(6);
     EXPECT_EQ(mappedIndex, 6);
+}
+
+/**
+ * @tc.name: IsInActiveRange001
+ * @tc.desc: Test ArkoalaLazyNode IsInActiveRange.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInActiveRange001)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    lazyNode->totalCount_ = 10;
+    lazyNode->isLoop_ = false;
+    int32_t cachedCount = 2;
+    int32_t activeStart = 3;
+    int32_t activeEnd = 5;
+    ActiveRangeParam activeRangeParam = {activeStart, activeEnd, cachedCount, cachedCount};
+    bool isInRange;
+
+    /**
+     * @tc.steps: step1. Test index in active range
+     * @tc.expected: index [3,5] should be in active range
+     */
+    isInRange = lazyNode->IsInActiveRange(3, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(5, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+
+    /**
+     * @tc.steps: step2. Test index out of active range
+     * @tc.expected: index [0,2] & [6,9] should be out of active range
+     */
+    isInRange = lazyNode->IsInActiveRange(0, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(2, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(6, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(9, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+}
+
+/**
+ * @tc.name: IsInActiveRange002
+ * @tc.desc: Test ArkoalaLazyNode IsInActiveRange with isLoop = true.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInActiveRange002)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    lazyNode->totalCount_ = 10;
+    lazyNode->isLoop_ = true;
+    int32_t cachedCount = 2;
+    int32_t activeStart = 7;
+    int32_t activeEnd = 1;
+    ActiveRangeParam activeRangeParam = {activeStart, activeEnd, cachedCount, cachedCount};
+    bool isInRange;
+
+    /**
+     * @tc.steps: step1. Test index in active range
+     * @tc.expected: index [7,9] & [0,1] should be in active range
+     */
+    isInRange = lazyNode->IsInActiveRange(7, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(9, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(0, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(1, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+
+    /**
+     * @tc.steps: step2. Test index out of active range
+     * @tc.expected: index [2,6] should be out of active range
+     */
+    isInRange = lazyNode->IsInActiveRange(2, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(6, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+}
+
+/**
+ * @tc.name: IsInCacheRange001
+ * @tc.desc: Test ArkoalaLazyNode IsInCacheRange.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInCacheRange001)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    lazyNode->totalCount_ = 10;
+    lazyNode->isLoop_ = false;
+    int32_t cachedCount = 2;
+    bool isInRange;
+    ActiveRangeParam activeRangeParam;
+
+    /**
+     * @tc.steps: step1. Test linear container boundary scenario
+     * @tc.expected: (0,2,2,2) -> [0,4]
+     */
+    activeRangeParam = {0, 2, cachedCount, cachedCount};
+    isInRange = lazyNode->IsInCacheRange(0, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(4, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(-1, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(5, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    /**
+     * @tc.steps: step2. Test linear container normal scenario
+     * @tc.expected: (3,5,2,2) -> [1,7]
+     */
+    activeRangeParam = {3, 5, cachedCount, cachedCount};
+    isInRange = lazyNode->IsInCacheRange(1, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(7, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(0, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(8, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    /**
+     * @tc.steps: step3. Test linear container boundary scenario
+     * @tc.expected: (7,9,2,2) -> [5,9]
+     */
+    activeRangeParam = {7, 9, cachedCount, cachedCount};
+    isInRange = lazyNode->IsInCacheRange(5, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(9, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(4, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(10, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+}
+
+/**
+ * @tc.name: IsInCacheRange002
+ * @tc.desc: Test ArkoalaLazyNode IsInCacheRange with isLoop = true.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInCacheRange002)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    lazyNode->totalCount_ = 10;
+    lazyNode->isLoop_ = true;
+    int32_t cachedCount = 2;
+    bool isInRange;
+    ActiveRangeParam activeRangeParam;
+
+    /**
+     * @tc.steps: step1. Test loop container normal scenario
+     * @tc.expected: (3,5,2,2,true) -> [1,7]
+     */
+    activeRangeParam = {3, 5, cachedCount, cachedCount};
+    isInRange = lazyNode->IsInCacheRange(1, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(7, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(0, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(8, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    /**
+     * @tc.steps: step2. Test loop container boundary scenario
+     * @tc.expected: (0,2,2,2,true) -> [0,4] & [8,9]
+     */
+    activeRangeParam = {0, 2, cachedCount, cachedCount};
+    isInRange = lazyNode->IsInCacheRange(0, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(4, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(8, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(9, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(5, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(7, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    /**
+     * @tc.steps: step3. Test loop container boundary scenario
+     * @tc.expected: (7,9,2,2,true) -> [0,1] & [5,9]
+     */
+    activeRangeParam = {7, 9, cachedCount, cachedCount};
+    isInRange = lazyNode->IsInCacheRange(0, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(1, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(5, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(9, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(2, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(4, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+}
+
+/**
+ * @tc.name: IsInCacheRange003
+ * @tc.desc: Test ArkoalaLazyNode IsInCacheRange with isLoop = true.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInCacheRange003)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    lazyNode->totalCount_ = 10;
+    lazyNode->isLoop_ = true;
+    int32_t cachedCount = 2;
+    bool isInRange;
+    ActiveRangeParam activeRangeParam;
+
+    /**
+     * @tc.steps: step1. Test loop container end to end connected scenario
+     * @tc.expected: (9,1,2,2,true) -> [0,3] & [7,9]
+     */
+    activeRangeParam = {9, 1, cachedCount, cachedCount};
+    isInRange = lazyNode->IsInCacheRange(0, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(3, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(7, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(9, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(4, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(6, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    /**
+     * @tc.steps: step2. Test loop container full scenario
+     * @tc.expected: (5,2,2,2,true) -> all in range
+     */
+    activeRangeParam = {5, 2, cachedCount, cachedCount};
+    for (int32_t i = 0; i < lazyNode->totalCount_; ++i) {
+        isInRange = lazyNode->IsInCacheRange(i, activeRangeParam);
+        EXPECT_TRUE(isInRange);
+    }
+    isInRange = lazyNode->IsInCacheRange(-1, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInCacheRange(10, activeRangeParam);
+    EXPECT_FALSE(isInRange);
 }
 } // namespace OHOS::Ace::NG
