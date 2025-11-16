@@ -710,6 +710,8 @@ struct ArkUIAniCanvasModifier {
         ani_double dirtyHeight);
     void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
     ani_int (*getCanvasId)(ArkUICanvasRenderingContext peer);
+    void (*setAttachCallbackId)(ArkUICanvasRenderingContext peer, ani_int attachCallbackId);
+    void (*setDetachCallbackId)(ArkUICanvasRenderingContext peer, ani_int detachCallbackId);
 };
 
 struct ArkUIAniTraceModifier {

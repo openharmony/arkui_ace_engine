@@ -343,6 +343,8 @@ export class ArkUIAniModule {
         dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
     native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
     native static _CanvasRenderingContext_GetCanvasId(peerPtr: KPointer): KInt
+    native static _CanvasRenderingContext_setAttachCallbackId(peerPtr: KPointer, attachCallbackId: KInt): void
+    native static _CanvasRenderingContext_setDetachCallbackId(peerPtr: KPointer, detachCallbackId: KInt): void
     native static _Extractors_ToDrawingCanvasPtr(value: drawing.Canvas): KPointer
     native static _Extractors_FromDrawingCanvasPtr(ptr: KPointer): drawing.Canvas
 

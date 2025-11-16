@@ -1162,6 +1162,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetCanvasId)
         },
         ani_native_function {
+            "_CanvasRenderingContext_setAttachCallbackId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetAttachCallbackId)
+        },
+        ani_native_function {
+            "_CanvasRenderingContext_setDetachCallbackId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetDetachCallbackId)
+        },
+        ani_native_function {
             "_FrameNode_MarkDirtyNode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
