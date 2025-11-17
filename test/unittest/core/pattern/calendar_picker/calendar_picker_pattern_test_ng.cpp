@@ -1210,4 +1210,32 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPatternTest057, TestSize.Lev
     calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 2000, 1, 1);
     calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 0, 0, 0);
 }
+
+/**
+ * @tc.name: UpdateEdgeAlign001
+ * @tc.desc: UpdateEdgeAlign Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, UpdateEdgeAlign001, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    DimensionOffset offset(Dimension(NAN), Dimension(NAN));
+    pickerPattern->SetCalendarDialogOffset(offset);
+    pickerPattern->UpdateEdgeAlign();
+
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    DimensionOffset offset1(Dimension(0.0f), Dimension(0.0f));
+    EXPECT_EQ(offset1, layoutProperty->GetDialogOffset().value());
+}
 } // namespace OHOS::Ace::NG

@@ -1038,7 +1038,8 @@ double TextPickerPattern::CalculateHeight()
     CHECK_NULL_RETURN(pickerTheme, height);
     if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
         auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
-        if (LessOrEqual(context->NormalizeToPx(defaultPickerItemHeightValue), 0.0f)) {
+        if (LessOrEqual(context->NormalizeToPx(defaultPickerItemHeightValue), 0.0f) ||
+            !std::isfinite(defaultPickerItemHeightValue.ConvertToPx())) {
             height = pickerTheme->GetDividerSpacing().ConvertToPx();
             if (!NearEqual(defaultPickerItemHeight_, height)) {
                 defaultPickerItemHeight_ = height;
