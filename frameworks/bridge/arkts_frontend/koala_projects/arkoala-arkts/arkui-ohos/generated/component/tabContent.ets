@@ -362,7 +362,11 @@ export class SubTabBarStyle {
         this._labelStyle = style
         return this
     }
-    public padding(value: Padding | Dimension | LocalizedPadding): this {
+    public padding(value: Padding | Dimension): this {
+        this._padding = value
+        return this
+    }
+    public padding(value: LocalizedPadding): this {
         this._padding = value
         return this
     }
