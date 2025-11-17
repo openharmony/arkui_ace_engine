@@ -865,7 +865,8 @@ void WaterFlowModelNG::SetItemFillPolicy(FrameNode* frameNode, PresetFillType fi
 
 void WaterFlowModelNG::ResetItemFillPolicy(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        WaterFlowLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
 int32_t WaterFlowModelNG::GetItemFillPolicy(FrameNode* frameNode)
