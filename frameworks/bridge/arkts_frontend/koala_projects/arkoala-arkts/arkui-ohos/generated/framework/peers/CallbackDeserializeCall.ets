@@ -3309,11 +3309,11 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         if (value instanceof CustomBuilder) {
-            continuationBufferBufArgsSerializer.writeInt8((0).toChar());
+            continuationBufferBufArgsSerializer.writeInt8((0).toByte());
             const valueForIdx0  = value as CustomBuilder;
             continuationBufferBufArgsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueForIdx0));
         } else if (value instanceof DragItemInfo) {
-            continuationBufferBufArgsSerializer.writeInt8((1).toChar());
+            continuationBufferBufArgsSerializer.writeInt8((1).toByte());
             const valueForIdx1  = value as DragItemInfo;
             DragItemInfo_serializer.write(continuationBufferBufArgsSerializer, valueForIdx1);
         }

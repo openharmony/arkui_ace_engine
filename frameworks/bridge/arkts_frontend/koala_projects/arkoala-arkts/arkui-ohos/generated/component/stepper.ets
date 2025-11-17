@@ -267,11 +267,11 @@ export class StepperOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIndexTmpValue  = valueHolderForIndex!
             if (valueHolderForIndexTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForIndexTmpValueForIdx0)
             } else if (valueHolderForIndexTmpValue instanceof Bindable<int32>) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
             }

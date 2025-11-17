@@ -305,11 +305,11 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof VoidCallback) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as VoidCallback
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof ErrorCallback) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as ErrorCallback
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
             }
@@ -856,11 +856,11 @@ export class VideoOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSrcTmpValue  = valueHolderForSrc!
             if (valueHolderForSrcTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSrcTmpValueForIdx0  = valueHolderForSrcTmpValue as string
                 valueSerializer.writeString(valueHolderForSrcTmpValueForIdx0)
             } else if (valueHolderForSrcTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSrcTmpValueForIdx1  = valueHolderForSrcTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSrcTmpValueForIdx1)
             }
@@ -872,15 +872,15 @@ export class VideoOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCurrentProgressRateTmpValue  = valueHolderForCurrentProgressRate!
             if (valueHolderForCurrentProgressRateTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCurrentProgressRateTmpValueForIdx0  = valueHolderForCurrentProgressRateTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForCurrentProgressRateTmpValueForIdx0)
             } else if (valueHolderForCurrentProgressRateTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCurrentProgressRateTmpValueForIdx1  = valueHolderForCurrentProgressRateTmpValue as string
                 valueSerializer.writeString(valueHolderForCurrentProgressRateTmpValueForIdx1)
             } else if (valueHolderForCurrentProgressRateTmpValue instanceof PlaybackSpeed) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCurrentProgressRateTmpValueForIdx2  = valueHolderForCurrentProgressRateTmpValue as PlaybackSpeed
                 valueSerializer.writeInt32(valueHolderForCurrentProgressRateTmpValueForIdx2.valueOf())
             }
@@ -892,15 +892,15 @@ export class VideoOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPreviewUriTmpValue  = valueHolderForPreviewUri!
             if (valueHolderForPreviewUriTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewUriTmpValueForIdx0  = valueHolderForPreviewUriTmpValue as string
                 valueSerializer.writeString(valueHolderForPreviewUriTmpValueForIdx0)
             } else if (valueHolderForPreviewUriTmpValue instanceof image.PixelMap) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewUriTmpValueForIdx1  = valueHolderForPreviewUriTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(valueSerializer, valueHolderForPreviewUriTmpValueForIdx1)
             } else if (valueHolderForPreviewUriTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPreviewUriTmpValueForIdx2  = valueHolderForPreviewUriTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPreviewUriTmpValueForIdx2)
             }

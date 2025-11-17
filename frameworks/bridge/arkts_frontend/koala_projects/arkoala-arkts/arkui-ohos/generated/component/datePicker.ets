@@ -429,11 +429,11 @@ export class DatePickerOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedTmpValue  = valueHolderForSelected!
             if (valueHolderForSelectedTmpValue instanceof Date) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as Date
                 valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime().toLong())
             } else if (valueHolderForSelectedTmpValue instanceof Bindable<Date>) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Bindable<Date>
                 Bindable_Date_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx1)
             }
@@ -496,19 +496,19 @@ export class LunarSwitchStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
             if (valueHolderForSelectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForSelectedColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
             } else if (valueHolderForSelectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
             } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
@@ -520,19 +520,19 @@ export class LunarSwitchStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
             if (valueHolderForUnselectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
             } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
@@ -544,19 +544,19 @@ export class LunarSwitchStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeColorTmpValue  = valueHolderForStrokeColor!
             if (valueHolderForStrokeColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForStrokeColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStrokeColorTmpValueForIdx1)
             } else if (valueHolderForStrokeColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStrokeColorTmpValueForIdx2  = valueHolderForStrokeColorTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeColorTmpValueForIdx2)
             } else if (valueHolderForStrokeColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForStrokeColorTmpValueForIdx3  = valueHolderForStrokeColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValueForIdx3)
             }
@@ -651,11 +651,11 @@ export class DatePickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedTmpValue  = valueHolderForSelected!
             if (valueHolderForSelectedTmpValue instanceof Date) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as Date
                 valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime().toLong())
             } else if (valueHolderForSelectedTmpValue instanceof Bindable<Date>) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Bindable<Date>
                 Bindable_Date_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx1)
             }
@@ -803,19 +803,19 @@ export class DatePickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -883,11 +883,11 @@ export class DatePickerDialogOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }

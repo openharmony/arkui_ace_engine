@@ -138,19 +138,19 @@ export class MenuItemGroupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeaderTmpValue  = valueHolderForHeader!
             if (valueHolderForHeaderTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeaderTmpValueForIdx0  = valueHolderForHeaderTmpValue as ResourceStr
                 if (valueHolderForHeaderTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForHeaderTmpValueForIdx0ForIdx0  = valueHolderForHeaderTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForHeaderTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForHeaderTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForHeaderTmpValueForIdx0ForIdx1  = valueHolderForHeaderTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForHeaderTmpValueForIdx0ForIdx1)
                 }
             } else if (valueHolderForHeaderTmpValue instanceof CustomBuilder) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeaderTmpValueForIdx1  = valueHolderForHeaderTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForHeaderTmpValueForIdx1))
             }
@@ -162,19 +162,19 @@ export class MenuItemGroupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFooterTmpValue  = valueHolderForFooter!
             if (valueHolderForFooterTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFooterTmpValueForIdx0  = valueHolderForFooterTmpValue as ResourceStr
                 if (valueHolderForFooterTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForFooterTmpValueForIdx0ForIdx0  = valueHolderForFooterTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForFooterTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForFooterTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForFooterTmpValueForIdx0ForIdx1  = valueHolderForFooterTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForFooterTmpValueForIdx0ForIdx1)
                 }
             } else if (valueHolderForFooterTmpValue instanceof CustomBuilder) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFooterTmpValueForIdx1  = valueHolderForFooterTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForFooterTmpValueForIdx1))
             }

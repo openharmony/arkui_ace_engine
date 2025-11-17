@@ -224,11 +224,11 @@ export class SwiperController implements MaterializedBase {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const animationModeTmpValue  = animationMode!
             if (animationModeTmpValue instanceof SwiperAnimationMode) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const animationModeTmpValueForIdx0  = animationModeTmpValue as SwiperAnimationMode
                 thisSerializer.writeInt32(animationModeTmpValueForIdx0.valueOf())
             } else if (animationModeTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const animationModeTmpValueForIdx1  = animationModeTmpValue as boolean
                 thisSerializer.writeBoolean(animationModeTmpValueForIdx1)
             }
@@ -299,11 +299,11 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable<int32>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -343,19 +343,19 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof IndicatorComponentController) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as IndicatorComponentController
                 IndicatorComponentController_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof DotIndicator) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as DotIndicator
                 DotIndicator_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof DigitIndicator) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as DigitIndicator
                 DigitIndicator_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx3)
             }
@@ -407,11 +407,11 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -475,15 +475,15 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof curves.Curve) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as curves.Curve
                 thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof curves.ICurve) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as curves.ICurve
                 curves_ICurve_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -662,11 +662,11 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ArrowStyle) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ArrowStyle
                 ArrowStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx1)
             }
@@ -708,15 +708,15 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof SwiperAutoFill) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as SwiperAutoFill
                 SwiperAutoFill_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -739,15 +739,15 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -770,15 +770,15 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -1636,11 +1636,11 @@ export class SwiperAutoFill_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForMinSize  = value.minSize
         if (valueHolderForMinSize instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForMinSizeForIdx0  = valueHolderForMinSize as string
             valueSerializer.writeString(valueHolderForMinSizeForIdx0)
         } else if (valueHolderForMinSize instanceof double) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForMinSizeForIdx1  = valueHolderForMinSize as double
             valueSerializer.writeFloat64(valueHolderForMinSizeForIdx1)
         }
@@ -1724,15 +1724,15 @@ export class ArrowStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundSizeTmpValue  = valueHolderForBackgroundSize!
             if (valueHolderForBackgroundSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundSizeTmpValueForIdx0  = valueHolderForBackgroundSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundSizeTmpValueForIdx0)
             } else if (valueHolderForBackgroundSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundSizeTmpValueForIdx1  = valueHolderForBackgroundSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBackgroundSizeTmpValueForIdx1)
             } else if (valueHolderForBackgroundSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundSizeTmpValueForIdx2  = valueHolderForBackgroundSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundSizeTmpValueForIdx2)
             }
@@ -1744,19 +1744,19 @@ export class ArrowStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -1768,15 +1768,15 @@ export class ArrowStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowSizeTmpValue  = valueHolderForArrowSize!
             if (valueHolderForArrowSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowSizeTmpValueForIdx0  = valueHolderForArrowSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowSizeTmpValueForIdx0)
             } else if (valueHolderForArrowSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowSizeTmpValueForIdx1  = valueHolderForArrowSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForArrowSizeTmpValueForIdx1)
             } else if (valueHolderForArrowSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowSizeTmpValueForIdx2  = valueHolderForArrowSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowSizeTmpValueForIdx2)
             }
@@ -1788,19 +1788,19 @@ export class ArrowStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowColorTmpValue  = valueHolderForArrowColor!
             if (valueHolderForArrowColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowColorTmpValueForIdx0  = valueHolderForArrowColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForArrowColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForArrowColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowColorTmpValueForIdx1  = valueHolderForArrowColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForArrowColorTmpValueForIdx1)
             } else if (valueHolderForArrowColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowColorTmpValueForIdx2  = valueHolderForArrowColorTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowColorTmpValueForIdx2)
             } else if (valueHolderForArrowColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForArrowColorTmpValueForIdx3  = valueHolderForArrowColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowColorTmpValueForIdx3)
             }
@@ -1906,15 +1906,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_leftTmpValue  = valueHolderFor_left!
             if (valueHolderFor_leftTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_leftTmpValueForIdx0  = valueHolderFor_leftTmpValue as string
                 valueSerializer.writeString(valueHolderFor_leftTmpValueForIdx0)
             } else if (valueHolderFor_leftTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_leftTmpValueForIdx1  = valueHolderFor_leftTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_leftTmpValueForIdx1)
             } else if (valueHolderFor_leftTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_leftTmpValueForIdx2  = valueHolderFor_leftTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_leftTmpValueForIdx2)
             }
@@ -1926,15 +1926,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_topTmpValue  = valueHolderFor_top!
             if (valueHolderFor_topTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_topTmpValueForIdx0  = valueHolderFor_topTmpValue as string
                 valueSerializer.writeString(valueHolderFor_topTmpValueForIdx0)
             } else if (valueHolderFor_topTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_topTmpValueForIdx1  = valueHolderFor_topTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_topTmpValueForIdx1)
             } else if (valueHolderFor_topTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_topTmpValueForIdx2  = valueHolderFor_topTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_topTmpValueForIdx2)
             }
@@ -1946,15 +1946,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_rightTmpValue  = valueHolderFor_right!
             if (valueHolderFor_rightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_rightTmpValueForIdx0  = valueHolderFor_rightTmpValue as string
                 valueSerializer.writeString(valueHolderFor_rightTmpValueForIdx0)
             } else if (valueHolderFor_rightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_rightTmpValueForIdx1  = valueHolderFor_rightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_rightTmpValueForIdx1)
             } else if (valueHolderFor_rightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_rightTmpValueForIdx2  = valueHolderFor_rightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_rightTmpValueForIdx2)
             }
@@ -1966,15 +1966,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_bottomTmpValue  = valueHolderFor_bottom!
             if (valueHolderFor_bottomTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_bottomTmpValueForIdx0  = valueHolderFor_bottomTmpValue as string
                 valueSerializer.writeString(valueHolderFor_bottomTmpValueForIdx0)
             } else if (valueHolderFor_bottomTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_bottomTmpValueForIdx1  = valueHolderFor_bottomTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_bottomTmpValueForIdx1)
             } else if (valueHolderFor_bottomTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_bottomTmpValueForIdx2  = valueHolderFor_bottomTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_bottomTmpValueForIdx2)
             }
@@ -2002,15 +2002,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_itemWidthTmpValue  = valueHolderFor_itemWidth!
             if (valueHolderFor_itemWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_itemWidthTmpValueForIdx0  = valueHolderFor_itemWidthTmpValue as string
                 valueSerializer.writeString(valueHolderFor_itemWidthTmpValueForIdx0)
             } else if (valueHolderFor_itemWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_itemWidthTmpValueForIdx1  = valueHolderFor_itemWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_itemWidthTmpValueForIdx1)
             } else if (valueHolderFor_itemWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_itemWidthTmpValueForIdx2  = valueHolderFor_itemWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_itemWidthTmpValueForIdx2)
             }
@@ -2022,15 +2022,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_itemHeightTmpValue  = valueHolderFor_itemHeight!
             if (valueHolderFor_itemHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_itemHeightTmpValueForIdx0  = valueHolderFor_itemHeightTmpValue as string
                 valueSerializer.writeString(valueHolderFor_itemHeightTmpValueForIdx0)
             } else if (valueHolderFor_itemHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_itemHeightTmpValueForIdx1  = valueHolderFor_itemHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_itemHeightTmpValueForIdx1)
             } else if (valueHolderFor_itemHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_itemHeightTmpValueForIdx2  = valueHolderFor_itemHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_itemHeightTmpValueForIdx2)
             }
@@ -2042,15 +2042,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_selectedItemWidthTmpValue  = valueHolderFor_selectedItemWidth!
             if (valueHolderFor_selectedItemWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_selectedItemWidthTmpValueForIdx0  = valueHolderFor_selectedItemWidthTmpValue as string
                 valueSerializer.writeString(valueHolderFor_selectedItemWidthTmpValueForIdx0)
             } else if (valueHolderFor_selectedItemWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_selectedItemWidthTmpValueForIdx1  = valueHolderFor_selectedItemWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_selectedItemWidthTmpValueForIdx1)
             } else if (valueHolderFor_selectedItemWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_selectedItemWidthTmpValueForIdx2  = valueHolderFor_selectedItemWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_selectedItemWidthTmpValueForIdx2)
             }
@@ -2062,15 +2062,15 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_selectedItemHeightTmpValue  = valueHolderFor_selectedItemHeight!
             if (valueHolderFor_selectedItemHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_selectedItemHeightTmpValueForIdx0  = valueHolderFor_selectedItemHeightTmpValue as string
                 valueSerializer.writeString(valueHolderFor_selectedItemHeightTmpValueForIdx0)
             } else if (valueHolderFor_selectedItemHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_selectedItemHeightTmpValueForIdx1  = valueHolderFor_selectedItemHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_selectedItemHeightTmpValueForIdx1)
             } else if (valueHolderFor_selectedItemHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_selectedItemHeightTmpValueForIdx2  = valueHolderFor_selectedItemHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_selectedItemHeightTmpValueForIdx2)
             }
@@ -2090,19 +2090,19 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_colorTmpValue  = valueHolderFor_color!
             if (valueHolderFor_colorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_colorTmpValueForIdx0  = valueHolderFor_colorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderFor_colorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_colorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_colorTmpValueForIdx1  = valueHolderFor_colorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderFor_colorTmpValueForIdx1)
             } else if (valueHolderFor_colorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_colorTmpValueForIdx2  = valueHolderFor_colorTmpValue as string
                 valueSerializer.writeString(valueHolderFor_colorTmpValueForIdx2)
             } else if (valueHolderFor_colorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderFor_colorTmpValueForIdx3  = valueHolderFor_colorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_colorTmpValueForIdx3)
             }
@@ -2114,19 +2114,19 @@ export class DotIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_selectedColorTmpValue  = valueHolderFor_selectedColor!
             if (valueHolderFor_selectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_selectedColorTmpValueForIdx0  = valueHolderFor_selectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderFor_selectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_selectedColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_selectedColorTmpValueForIdx1  = valueHolderFor_selectedColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderFor_selectedColorTmpValueForIdx1)
             } else if (valueHolderFor_selectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_selectedColorTmpValueForIdx2  = valueHolderFor_selectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderFor_selectedColorTmpValueForIdx2)
             } else if (valueHolderFor_selectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderFor_selectedColorTmpValueForIdx3  = valueHolderFor_selectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_selectedColorTmpValueForIdx3)
             }
@@ -2162,15 +2162,15 @@ export class DigitIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_leftTmpValue  = valueHolderFor_left!
             if (valueHolderFor_leftTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_leftTmpValueForIdx0  = valueHolderFor_leftTmpValue as string
                 valueSerializer.writeString(valueHolderFor_leftTmpValueForIdx0)
             } else if (valueHolderFor_leftTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_leftTmpValueForIdx1  = valueHolderFor_leftTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_leftTmpValueForIdx1)
             } else if (valueHolderFor_leftTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_leftTmpValueForIdx2  = valueHolderFor_leftTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_leftTmpValueForIdx2)
             }
@@ -2182,15 +2182,15 @@ export class DigitIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_topTmpValue  = valueHolderFor_top!
             if (valueHolderFor_topTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_topTmpValueForIdx0  = valueHolderFor_topTmpValue as string
                 valueSerializer.writeString(valueHolderFor_topTmpValueForIdx0)
             } else if (valueHolderFor_topTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_topTmpValueForIdx1  = valueHolderFor_topTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_topTmpValueForIdx1)
             } else if (valueHolderFor_topTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_topTmpValueForIdx2  = valueHolderFor_topTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_topTmpValueForIdx2)
             }
@@ -2202,15 +2202,15 @@ export class DigitIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_rightTmpValue  = valueHolderFor_right!
             if (valueHolderFor_rightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_rightTmpValueForIdx0  = valueHolderFor_rightTmpValue as string
                 valueSerializer.writeString(valueHolderFor_rightTmpValueForIdx0)
             } else if (valueHolderFor_rightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_rightTmpValueForIdx1  = valueHolderFor_rightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_rightTmpValueForIdx1)
             } else if (valueHolderFor_rightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_rightTmpValueForIdx2  = valueHolderFor_rightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_rightTmpValueForIdx2)
             }
@@ -2222,15 +2222,15 @@ export class DigitIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_bottomTmpValue  = valueHolderFor_bottom!
             if (valueHolderFor_bottomTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_bottomTmpValueForIdx0  = valueHolderFor_bottomTmpValue as string
                 valueSerializer.writeString(valueHolderFor_bottomTmpValueForIdx0)
             } else if (valueHolderFor_bottomTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_bottomTmpValueForIdx1  = valueHolderFor_bottomTmpValue as double
                 valueSerializer.writeFloat64(valueHolderFor_bottomTmpValueForIdx1)
             } else if (valueHolderFor_bottomTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_bottomTmpValueForIdx2  = valueHolderFor_bottomTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_bottomTmpValueForIdx2)
             }
@@ -2258,19 +2258,19 @@ export class DigitIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_fontColorTmpValue  = valueHolderFor_fontColor!
             if (valueHolderFor_fontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_fontColorTmpValueForIdx0  = valueHolderFor_fontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderFor_fontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_fontColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_fontColorTmpValueForIdx1  = valueHolderFor_fontColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderFor_fontColorTmpValueForIdx1)
             } else if (valueHolderFor_fontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_fontColorTmpValueForIdx2  = valueHolderFor_fontColorTmpValue as string
                 valueSerializer.writeString(valueHolderFor_fontColorTmpValueForIdx2)
             } else if (valueHolderFor_fontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderFor_fontColorTmpValueForIdx3  = valueHolderFor_fontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_fontColorTmpValueForIdx3)
             }
@@ -2282,19 +2282,19 @@ export class DigitIndicator_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_selectedFontColorTmpValue  = valueHolderFor_selectedFontColor!
             if (valueHolderFor_selectedFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_selectedFontColorTmpValueForIdx0  = valueHolderFor_selectedFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderFor_selectedFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderFor_selectedFontColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_selectedFontColorTmpValueForIdx1  = valueHolderFor_selectedFontColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderFor_selectedFontColorTmpValueForIdx1)
             } else if (valueHolderFor_selectedFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_selectedFontColorTmpValueForIdx2  = valueHolderFor_selectedFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderFor_selectedFontColorTmpValueForIdx2)
             } else if (valueHolderFor_selectedFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderFor_selectedFontColorTmpValueForIdx3  = valueHolderFor_selectedFontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_selectedFontColorTmpValueForIdx3)
             }

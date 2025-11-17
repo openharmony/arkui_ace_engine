@@ -70,19 +70,19 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -98,19 +98,19 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -341,11 +341,11 @@ export class SwitchStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPointRadiusTmpValue  = valueHolderForPointRadius!
             if (valueHolderForPointRadiusTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPointRadiusTmpValueForIdx0  = valueHolderForPointRadiusTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForPointRadiusTmpValueForIdx0)
             } else if (valueHolderForPointRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPointRadiusTmpValueForIdx1  = valueHolderForPointRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPointRadiusTmpValueForIdx1)
             }
@@ -357,19 +357,19 @@ export class SwitchStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
             if (valueHolderForUnselectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
             } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
@@ -381,19 +381,19 @@ export class SwitchStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPointColorTmpValue  = valueHolderForPointColor!
             if (valueHolderForPointColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPointColorTmpValueForIdx0  = valueHolderForPointColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPointColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPointColorTmpValueForIdx1  = valueHolderForPointColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx1)
             } else if (valueHolderForPointColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPointColorTmpValueForIdx2  = valueHolderForPointColorTmpValue as string
                 valueSerializer.writeString(valueHolderForPointColorTmpValueForIdx2)
             } else if (valueHolderForPointColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForPointColorTmpValueForIdx3  = valueHolderForPointColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPointColorTmpValueForIdx3)
             }
@@ -405,11 +405,11 @@ export class SwitchStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTrackBorderRadiusTmpValue  = valueHolderForTrackBorderRadius!
             if (valueHolderForTrackBorderRadiusTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTrackBorderRadiusTmpValueForIdx0  = valueHolderForTrackBorderRadiusTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForTrackBorderRadiusTmpValueForIdx0)
             } else if (valueHolderForTrackBorderRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTrackBorderRadiusTmpValueForIdx1  = valueHolderForTrackBorderRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTrackBorderRadiusTmpValueForIdx1)
             }
@@ -501,11 +501,11 @@ export class ToggleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIsOnTmpValue  = valueHolderForIsOn!
             if (valueHolderForIsOnTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIsOnTmpValueForIdx0  = valueHolderForIsOnTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForIsOnTmpValueForIdx0)
             } else if (valueHolderForIsOnTmpValue instanceof Bindable<boolean>) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIsOnTmpValueForIdx1  = valueHolderForIsOnTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(valueSerializer, valueHolderForIsOnTmpValueForIdx1)
             }

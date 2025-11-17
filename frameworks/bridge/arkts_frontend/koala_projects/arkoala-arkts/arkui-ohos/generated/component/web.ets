@@ -1193,19 +1193,19 @@ export class WebResourceResponse implements MaterializedBase {
     setResponseData_serialize(data: string | int32 | Resource | ArrayBuffer): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (data instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const dataForIdx0  = data as string
             thisSerializer.writeString(dataForIdx0)
         } else if (data instanceof int32) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const dataForIdx1  = data as int32
             thisSerializer.writeInt32(dataForIdx1)
         } else if (data instanceof Resource) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const dataForIdx2  = data as Resource
             Resource_serializer.write(thisSerializer, dataForIdx2)
         } else if (data instanceof ArrayBuffer) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const dataForIdx3  = data as ArrayBuffer
             thisSerializer.writeBuffer(dataForIdx3)
         }
@@ -2402,11 +2402,11 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof NestedScrollOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as NestedScrollOptions
                 NestedScrollOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof NestedScrollOptionsExt) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as NestedScrollOptionsExt
                 NestedScrollOptionsExt_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -6683,11 +6683,11 @@ export class WebOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForSrc  = value.src
         if (valueHolderForSrc instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSrcForIdx0  = valueHolderForSrc as string
             valueSerializer.writeString(valueHolderForSrcForIdx0)
         } else if (valueHolderForSrc instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSrcForIdx1  = valueHolderForSrc as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
         }

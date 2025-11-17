@@ -179,28 +179,28 @@ export class Scroller implements MaterializedBase {
     scrollBy_serialize(dx: Length, dy: Length): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (dx instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const dxForIdx0  = dx as string
             thisSerializer.writeString(dxForIdx0)
         } else if (dx instanceof double) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const dxForIdx1  = dx as double
             thisSerializer.writeFloat64(dxForIdx1)
         } else if (dx instanceof Resource) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const dxForIdx2  = dx as Resource
             Resource_serializer.write(thisSerializer, dxForIdx2)
         }
         if (dy instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const dyForIdx0  = dy as string
             thisSerializer.writeString(dyForIdx0)
         } else if (dy instanceof double) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const dyForIdx1  = dy as double
             thisSerializer.writeFloat64(dyForIdx1)
         } else if (dy instanceof Resource) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const dyForIdx2  = dy as Resource
             Resource_serializer.write(thisSerializer, dyForIdx2)
         }
@@ -336,15 +336,15 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -360,11 +360,11 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -416,11 +416,11 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -903,11 +903,11 @@ export class ScrollAnimationOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCurveTmpValue  = valueHolderForCurve!
             if (valueHolderForCurveTmpValue instanceof curves.Curve) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
                 valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
             } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as curves.ICurve
                 curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx1)
             }
@@ -1012,21 +1012,21 @@ export class ScrollOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForXOffset  = value.xOffset
         if (valueHolderForXOffset instanceof double) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForXOffsetForIdx0  = valueHolderForXOffset as double
             valueSerializer.writeFloat64(valueHolderForXOffsetForIdx0)
         } else if (valueHolderForXOffset instanceof string) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForXOffsetForIdx1  = valueHolderForXOffset as string
             valueSerializer.writeString(valueHolderForXOffsetForIdx1)
         }
         const valueHolderForYOffset  = value.yOffset
         if (valueHolderForYOffset instanceof double) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForYOffsetForIdx0  = valueHolderForYOffset as double
             valueSerializer.writeFloat64(valueHolderForYOffsetForIdx0)
         } else if (valueHolderForYOffset instanceof string) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForYOffsetForIdx1  = valueHolderForYOffset as string
             valueSerializer.writeString(valueHolderForYOffsetForIdx1)
         }
@@ -1035,11 +1035,11 @@ export class ScrollOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAnimationTmpValue  = valueHolderForAnimation!
             if (valueHolderForAnimationTmpValue instanceof ScrollAnimationOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForAnimationTmpValueForIdx0  = valueHolderForAnimationTmpValue as ScrollAnimationOptions
                 ScrollAnimationOptions_serializer.write(valueSerializer, valueHolderForAnimationTmpValueForIdx0)
             } else if (valueHolderForAnimationTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForAnimationTmpValueForIdx1  = valueHolderForAnimationTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForAnimationTmpValueForIdx1)
             }
@@ -1120,15 +1120,15 @@ export class OffsetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXOffsetTmpValue  = valueHolderForXOffset!
             if (valueHolderForXOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXOffsetTmpValueForIdx0  = valueHolderForXOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForXOffsetTmpValueForIdx0)
             } else if (valueHolderForXOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXOffsetTmpValueForIdx1  = valueHolderForXOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForXOffsetTmpValueForIdx1)
             } else if (valueHolderForXOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXOffsetTmpValueForIdx2  = valueHolderForXOffsetTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForXOffsetTmpValueForIdx2)
             }
@@ -1140,15 +1140,15 @@ export class OffsetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYOffsetTmpValue  = valueHolderForYOffset!
             if (valueHolderForYOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForYOffsetTmpValueForIdx0  = valueHolderForYOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForYOffsetTmpValueForIdx0)
             } else if (valueHolderForYOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForYOffsetTmpValueForIdx1  = valueHolderForYOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForYOffsetTmpValueForIdx1)
             } else if (valueHolderForYOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForYOffsetTmpValueForIdx2  = valueHolderForYOffsetTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForYOffsetTmpValueForIdx2)
             }
@@ -1206,37 +1206,37 @@ export class ScrollSnapOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSnapPaginationTmpValue  = valueHolderForSnapPagination!
             if (valueHolderForSnapPaginationTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSnapPaginationTmpValueForIdx0  = valueHolderForSnapPaginationTmpValue as Dimension
                 if (valueHolderForSnapPaginationTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForSnapPaginationTmpValueForIdx0ForIdx0  = valueHolderForSnapPaginationTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForSnapPaginationTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForSnapPaginationTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForSnapPaginationTmpValueForIdx0ForIdx1  = valueHolderForSnapPaginationTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForSnapPaginationTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForSnapPaginationTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForSnapPaginationTmpValueForIdx0ForIdx2  = valueHolderForSnapPaginationTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForSnapPaginationTmpValueForIdx0ForIdx2)
                 }
             } else if (TypeChecker.isArray_Dimension(valueHolderForSnapPaginationTmpValue)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSnapPaginationTmpValueForIdx1  = valueHolderForSnapPaginationTmpValue as Array<Dimension>
                 valueSerializer.writeInt32((valueHolderForSnapPaginationTmpValueForIdx1.length).toInt())
                 for (let valueHolderForSnapPaginationTmpValueForIdx1CounterI = 0; valueHolderForSnapPaginationTmpValueForIdx1CounterI < valueHolderForSnapPaginationTmpValueForIdx1.length; valueHolderForSnapPaginationTmpValueForIdx1CounterI++) {
                     const valueHolderForSnapPaginationTmpValueForIdx1TmpElement : Dimension = valueHolderForSnapPaginationTmpValueForIdx1[valueHolderForSnapPaginationTmpValueForIdx1CounterI]
                     if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof string) {
-                        valueSerializer.writeInt8((0).toChar())
+                        valueSerializer.writeInt8((0).toByte())
                         const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx0  = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as string
                         valueSerializer.writeString(valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx0)
                     } else if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof number) {
-                        valueSerializer.writeInt8((1).toChar())
+                        valueSerializer.writeInt8((1).toByte())
                         const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx1  = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as number
                         valueSerializer.writeNumber(valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx1)
                     } else if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof Resource) {
-                        valueSerializer.writeInt8((2).toChar())
+                        valueSerializer.writeInt8((2).toByte())
                         const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx2  = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as Resource
                         Resource_serializer.write(valueSerializer, valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx2)
                     }

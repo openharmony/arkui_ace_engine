@@ -233,15 +233,15 @@ export class ArkAnimatorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof SpringMotion) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as SpringMotion
                 SpringMotion_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FrictionMotion) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FrictionMotion
                 FrictionMotion_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof ScrollMotion) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as ScrollMotion
                 ScrollMotion_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }

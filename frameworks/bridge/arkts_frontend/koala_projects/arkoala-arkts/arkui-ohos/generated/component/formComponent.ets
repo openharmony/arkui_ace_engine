@@ -512,11 +512,11 @@ export class FormInfo_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForId  = value.id
         if (valueHolderForId instanceof int64) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForIdForIdx0  = valueHolderForId as int64
             valueSerializer.writeInt64(valueHolderForIdForIdx0)
         } else if (valueHolderForId instanceof string) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForIdForIdx1  = valueHolderForId as string
             valueSerializer.writeString(valueHolderForIdForIdx1)
         }

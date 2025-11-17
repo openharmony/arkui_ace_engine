@@ -50,11 +50,11 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const optionsTmpValue  = options!
             if (optionsTmpValue instanceof ColumnOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const optionsTmpValueForIdx0  = optionsTmpValue as ColumnOptions
                 ColumnOptions_serializer.write(thisSerializer, optionsTmpValueForIdx0)
             } else if (optionsTmpValue instanceof ColumnOptionsV2) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const optionsTmpValueForIdx1  = optionsTmpValue as ColumnOptionsV2
                 ColumnOptionsV2_serializer.write(thisSerializer, optionsTmpValueForIdx1)
             }
@@ -228,11 +228,11 @@ export class ColumnOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpaceTmpValue  = valueHolderForSpace!
             if (valueHolderForSpaceTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as string
                 valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx0)
             } else if (valueHolderForSpaceTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as number
                 valueSerializer.writeNumber(valueHolderForSpaceTmpValueForIdx1)
             }

@@ -73,11 +73,11 @@ export class CanvasGradient implements MaterializedBase {
     addColorStop_serialize(offset: double, color: string | ColorMetrics): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (color instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const colorForIdx0  = color as string
             thisSerializer.writeString(colorForIdx0)
         } else if (color instanceof ColorMetrics) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const colorForIdx1  = color as ColorMetrics
             ColorMetrics_serializer.write(thisSerializer, colorForIdx1)
         }
@@ -403,11 +403,11 @@ export class ImageBitmap implements MaterializedBase {
     static construct(src: image.PixelMap | string, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src instanceof image.PixelMap) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const srcForIdx0  = src as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, srcForIdx0)
         } else if (src instanceof string) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const srcForIdx1  = src as string
             thisSerializer.writeString(srcForIdx1)
         }
@@ -655,11 +655,11 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contextTmpValue  = context!
             if (contextTmpValue instanceof CanvasRenderingContext2D) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const contextTmpValueForIdx0  = contextTmpValue as CanvasRenderingContext2D
                 CanvasRenderingContext2D_serializer.write(thisSerializer, contextTmpValueForIdx0)
             } else if (contextTmpValue instanceof DrawingRenderingContext) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const contextTmpValueForIdx1  = contextTmpValue as DrawingRenderingContext
                 DrawingRenderingContext_serializer.write(thisSerializer, contextTmpValueForIdx1)
             }
@@ -1547,11 +1547,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     drawImage0_serialize(image: ImageBitmap | image.PixelMap, dx: number, dy: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (image instanceof ImageBitmap) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const imageForIdx0  = image as ImageBitmap
             ImageBitmap_serializer.write(thisSerializer, imageForIdx0)
         } else if (image instanceof image.PixelMap) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const imageForIdx1  = image as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, imageForIdx1)
         }
@@ -1561,11 +1561,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     drawImage1_serialize(image: ImageBitmap | image.PixelMap, dx: number, dy: number, dw: number, dh: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (image instanceof ImageBitmap) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const imageForIdx0  = image as ImageBitmap
             ImageBitmap_serializer.write(thisSerializer, imageForIdx0)
         } else if (image instanceof image.PixelMap) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const imageForIdx1  = image as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, imageForIdx1)
         }
@@ -1575,11 +1575,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     drawImage2_serialize(image: ImageBitmap | image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (image instanceof ImageBitmap) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const imageForIdx0  = image as ImageBitmap
             ImageBitmap_serializer.write(thisSerializer, imageForIdx0)
         } else if (image instanceof image.PixelMap) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const imageForIdx1  = image as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, imageForIdx1)
         }
@@ -1832,11 +1832,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setLetterSpacing_serialize(letterSpacing: LengthMetrics | string): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (letterSpacing instanceof LengthMetrics) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const letterSpacingForIdx0  = letterSpacing as LengthMetrics
             LengthMetrics_serializer.write(thisSerializer, letterSpacingForIdx0)
         } else if (letterSpacing instanceof string) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const letterSpacingForIdx1  = letterSpacing as string
             thisSerializer.writeString(letterSpacingForIdx1)
         }
@@ -1881,23 +1881,23 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setFillStyle_serialize(fillStyle: string | Color | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (fillStyle instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const fillStyleForIdx0  = fillStyle as string
             thisSerializer.writeString(fillStyleForIdx0)
         } else if (fillStyle instanceof Color) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const fillStyleForIdx1  = fillStyle as Color
             thisSerializer.writeInt32(fillStyleForIdx1.getOrdinal())
         } else if (fillStyle instanceof int32) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const fillStyleForIdx2  = fillStyle as int32
             thisSerializer.writeInt32(fillStyleForIdx2)
         } else if (fillStyle instanceof CanvasGradient) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const fillStyleForIdx3  = fillStyle as CanvasGradient
             CanvasGradient_serializer.write(thisSerializer, fillStyleForIdx3)
         } else if (fillStyle instanceof CanvasPattern) {
-            thisSerializer.writeInt8((4).toChar())
+            thisSerializer.writeInt8((4).toByte())
             const fillStyleForIdx4  = fillStyle as CanvasPattern
             CanvasPattern_serializer.write(thisSerializer, fillStyleForIdx4)
         }
@@ -1928,23 +1928,23 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setStrokeStyle_serialize(strokeStyle: string | Color | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (strokeStyle instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const strokeStyleForIdx0  = strokeStyle as string
             thisSerializer.writeString(strokeStyleForIdx0)
         } else if (strokeStyle instanceof Color) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const strokeStyleForIdx1  = strokeStyle as Color
             thisSerializer.writeInt32(strokeStyleForIdx1.getOrdinal())
         } else if (strokeStyle instanceof int32) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const strokeStyleForIdx2  = strokeStyle as int32
             thisSerializer.writeInt32(strokeStyleForIdx2)
         } else if (strokeStyle instanceof CanvasGradient) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const strokeStyleForIdx3  = strokeStyle as CanvasGradient
             CanvasGradient_serializer.write(thisSerializer, strokeStyleForIdx3)
         } else if (strokeStyle instanceof CanvasPattern) {
-            thisSerializer.writeInt8((4).toChar())
+            thisSerializer.writeInt8((4).toByte())
             const strokeStyleForIdx4  = strokeStyle as CanvasPattern
             CanvasPattern_serializer.write(thisSerializer, strokeStyleForIdx4)
         }
