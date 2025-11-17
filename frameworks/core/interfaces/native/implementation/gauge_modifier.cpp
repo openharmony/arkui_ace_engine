@@ -23,22 +23,25 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+using LinearGradientColorSteps = GaugeModelStatic::LinearGradientColorSteps;
+
 constexpr double DEFAULT_GAUGE_VALUE = 0;
 constexpr double DEFAULT_GAUGE_MIN = 0;
 constexpr double DEFAULT_GAUGE_MAX = 100;
-constexpr Color ERROR_COLOR = Color(0xFFE84026);
 constexpr double DEFAULT_GAUGE_STARTANGLE = 0;
 constexpr double DEFAULT_GAUGE_ENDANGLE = 360;
-void SortColorStopOffset(std::vector<ColorStopArray>& colors)
+void SortColorStopOffset(std::vector<LinearGradientColorSteps>& colors)
 {
     for (auto& colorStopArray : colors) {
         std::sort(colorStopArray.begin(), colorStopArray.end(),
-            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+            [](const std::pair<std::optional<Color>, Dimension>& left,
+                const std::pair<std::optional<Color>, Dimension>& right) {
                 return left.second.Value() < right.second.Value();
             });
 
         auto iter = std::unique(colorStopArray.begin(), colorStopArray.end(),
-            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+            [](const std::pair<std::optional<Color>, Dimension>& left,
+                const std::pair<std::optional<Color>, Dimension>& right) {
                 return left.second.Value() == right.second.Value();
             });
         colorStopArray.erase(iter, colorStopArray.end());
@@ -49,40 +52,29 @@ void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-ColorStopArray Convert(const Ark_ResourceColor& src)
+LinearGradientColorSteps Convert(const Ark_ResourceColor& src)
 {
-    auto colorStop = ColorStopArray();
+    auto colorStop = LinearGradientColorSteps();
     const auto color = OptConvert<Color>(src);
-    if (color) {
-        colorStop.emplace_back(std::make_pair(*color, Dimension(0.0)));
-    } else {
-        colorStop.emplace_back(std::make_pair(ERROR_COLOR, Dimension(0.0)));
-    }
+    colorStop.emplace_back(std::make_pair(color, Dimension(0.0)));
     return colorStop;
 }
 
 template<>
-ColorStopArray Convert(const Ark_LinearGradient& src)
+LinearGradientColorSteps Convert(const Ark_LinearGradient& src)
 {
-    ColorStopArray result;
-    CHECK_NULL_RETURN(src, result);
-    result.reserve(src->colorStops.size());
-    for (const auto& color : src->colorStops) {
-        if (color.first.has_value()) {
-            result.emplace_back(std::make_pair(color.first.value(), color.second));
-        }
-    }
-    return result;
+    CHECK_NULL_RETURN(src, {});
+    return src->colorStops;
 }
 
-using ColorWithWeight = std::tuple<ColorStopArray, float>;
+using ColorWithWeight = std::tuple<LinearGradientColorSteps, float>;
 template<>
 ColorWithWeight Convert(const Ark_Tuple_Union_ResourceColor_LinearGradient_Number& src)
 {
-    ColorStopArray colors;
+    LinearGradientColorSteps colors;
     Converter::VisitUnion(src.value0,
         [&colors](const auto& value) {
-            colors = Convert<ColorStopArray>(value);
+            colors = Convert<LinearGradientColorSteps>(value);
         },
         []() {}
     );
@@ -211,7 +203,7 @@ void SetColorsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     struct GaugeColors {
-        std::vector<ColorStopArray> gradient;
+        std::vector<LinearGradientColorSteps> gradient;
         std::vector<float> weights;
         GaugeType type;
     };
@@ -219,13 +211,13 @@ void SetColorsImpl(Ark_NativePointer node,
     Converter::VisitUnion(*value,
         [&gaugeColors](const Ark_ResourceColor& color) {
             gaugeColors = GaugeColors {
-                .gradient = std::vector<ColorStopArray> {Converter::Convert<ColorStopArray>(color)},
+                .gradient = {Converter::Convert<LinearGradientColorSteps>(color)},
                 .type = GaugeType::TYPE_CIRCULAR_MONOCHROME
             };
         },
         [&gaugeColors](const Ark_LinearGradient& color) {
             gaugeColors = GaugeColors {
-                .gradient = std::vector<ColorStopArray> {Converter::Convert<ColorStopArray>(color)},
+                .gradient = {Converter::Convert<LinearGradientColorSteps>(color)},
                 .type = GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT
             };
         },
@@ -247,7 +239,8 @@ void SetColorsImpl(Ark_NativePointer node,
         });
     if (gaugeColors.has_value()) {
         SortColorStopOffset(gaugeColors->gradient);
-        GaugeModelNG::SetGradientColors(frameNode, gaugeColors->gradient, gaugeColors->weights, gaugeColors->type);
+        GaugeModelStatic::SetGradientColors(frameNode, gaugeColors->gradient, gaugeColors->weights,
+            gaugeColors->type);
     } else {
         GaugeModelNG::ResetGradientColors(frameNode);
     }
