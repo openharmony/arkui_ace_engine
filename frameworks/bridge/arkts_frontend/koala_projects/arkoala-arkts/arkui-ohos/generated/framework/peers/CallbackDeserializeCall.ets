@@ -2183,8 +2183,8 @@ export function deserializeAndCallLoadingProgressModifierBuilder(thisDeserialize
 export function deserializeAndCallMenuCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as MenuCallback)
-    let start : number = (thisDeserializer.readNumber() as number)
-    let end : number = (thisDeserializer.readNumber() as number)
+    let start : int32 = (thisDeserializer.readInt32() as int32)
+    let end : int32 = (thisDeserializer.readInt32() as int32)
     _call(start, end)
 }
 export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: DeserializerBase): void {
@@ -2211,8 +2211,8 @@ export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: Dese
 export function deserializeAndCallMenuOnAppearCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as MenuOnAppearCallback)
-    let start : number = (thisDeserializer.readNumber() as number)
-    let end : number = (thisDeserializer.readNumber() as number)
+    let start : int32 = (thisDeserializer.readInt32() as int32)
+    let end : int32 = (thisDeserializer.readInt32() as int32)
     _call(start, end)
 }
 export function deserializeAndCallModifierKeyStateGetter(thisDeserializer: DeserializerBase): void {

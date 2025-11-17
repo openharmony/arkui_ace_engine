@@ -3274,7 +3274,7 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     if (optOnAppear.has_value()) {
         selectMenuParam.onAppear =
             [arkCallback = CallbackHelper(optOnAppear.value())](int32_t start, int32_t end) {
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
         };
     }
     auto optOnDisappear = Converter::GetOpt(src.onDisappear);
@@ -3288,14 +3288,14 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     if (optOnMenuShow.has_value()) {
         selectMenuParam.onMenuShow =
             [arkCallback = CallbackHelper(optOnMenuShow.value())](int32_t start, int32_t end) {
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
         };
     }
     auto optOnMenuHide = Converter::OptConvert<MenuCallback>(src.onMenuHide);
     if (optOnMenuHide.has_value()) {
         selectMenuParam.onMenuHide =
             [arkCallback = CallbackHelper(optOnMenuHide.value())](int32_t start, int32_t end) {
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
         };
     }
     auto previewMenuOptions = Converter::OptConvert<NG::PreviewMenuOptions>(src.previewMenuOptions);

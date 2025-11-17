@@ -5307,9 +5307,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorBaseController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _RichEditorBaseController_getCaretOffset(ptr: KPointer): number
+    native static _RichEditorBaseController_getCaretOffset(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _RichEditorBaseController_setCaretOffset(ptr: KPointer, offset: number): boolean
+    native static _RichEditorBaseController_setCaretOffset(ptr: KPointer, offset: KInt): boolean
     @ani.unsafe.Direct
     native static _RichEditorBaseController_closeSelectionMenu(ptr: KPointer): void
     @ani.unsafe.Quick
@@ -5317,7 +5317,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorBaseController_setTypingStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RichEditorBaseController_setSelection(ptr: KPointer, selectionStart: number, selectionEnd: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _RichEditorBaseController_setSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorBaseController_isEditing(ptr: KPointer): boolean
     @ani.unsafe.Direct
@@ -5333,13 +5333,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _RichEditorController_addTextSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addTextSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
-    native static _RichEditorController_addImageSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addImageSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
-    native static _RichEditorController_addBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
-    native static _RichEditorController_addSymbolSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addSymbolSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
     native static _RichEditorController_updateSpanStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

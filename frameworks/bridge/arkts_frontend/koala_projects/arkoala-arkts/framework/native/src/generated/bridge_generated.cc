@@ -13213,26 +13213,26 @@ void impl_RichEditorAttribute_setMaxLength(Ark_NativePointer thisPtr, KSerialize
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Int32 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getRichEditorModifier()->setMaxLength(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Int32 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getRichEditorModifier()->setMaxLength(self, static_cast<Opt_Int32*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RichEditorAttribute_setMaxLength, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RichEditorAttribute_setMaxLines(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Int32 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getRichEditorModifier()->setMaxLines(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Int32 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getRichEditorModifier()->setMaxLines(self, static_cast<Opt_Int32*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RichEditorAttribute_setMaxLines, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RichEditorAttribute_setKeyboardAppearance(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -34459,16 +34459,16 @@ Ark_NativePointer impl_RichEditorBaseController_getFinalizer() {
         return GetAccessors()->getRichEditorBaseControllerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(RichEditorBaseController_getFinalizer, Ark_NativePointer)
-Ark_Number impl_RichEditorBaseController_getCaretOffset(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_RichEditorBaseController_getCaretOffset(Ark_NativePointer thisPtr) {
         Ark_RichEditorBaseController self = reinterpret_cast<Ark_RichEditorBaseController>(thisPtr);
         return GetAccessors()->getRichEditorBaseControllerAccessor()->getCaretOffset(self);
 }
-KOALA_INTEROP_DIRECT_1(RichEditorBaseController_getCaretOffset, KInteropNumber, Ark_NativePointer)
-Ark_Boolean impl_RichEditorBaseController_setCaretOffset(Ark_NativePointer thisPtr, KInteropNumber offset) {
+KOALA_INTEROP_DIRECT_1(RichEditorBaseController_getCaretOffset, Ark_Int32, Ark_NativePointer)
+Ark_Boolean impl_RichEditorBaseController_setCaretOffset(Ark_NativePointer thisPtr, Ark_Int32 offset) {
         Ark_RichEditorBaseController self = reinterpret_cast<Ark_RichEditorBaseController>(thisPtr);
-        return GetAccessors()->getRichEditorBaseControllerAccessor()->setCaretOffset(self, (const Ark_Number*) (&offset));
+        return GetAccessors()->getRichEditorBaseControllerAccessor()->setCaretOffset(self, (const Ark_Int32*) (&offset));
 }
-KOALA_INTEROP_DIRECT_2(RichEditorBaseController_setCaretOffset, Ark_Boolean, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_2(RichEditorBaseController_setCaretOffset, Ark_Boolean, Ark_NativePointer, Ark_Int32)
 void impl_RichEditorBaseController_closeSelectionMenu(Ark_NativePointer thisPtr) {
         Ark_RichEditorBaseController self = reinterpret_cast<Ark_RichEditorBaseController>(thisPtr);
         GetAccessors()->getRichEditorBaseControllerAccessor()->closeSelectionMenu(self);
@@ -34489,7 +34489,7 @@ void impl_RichEditorBaseController_setTypingStyle(Ark_NativePointer thisPtr, KSe
         GetAccessors()->getRichEditorBaseControllerAccessor()->setTypingStyle(self, static_cast<Ark_RichEditorTextStyle*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RichEditorBaseController_setTypingStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_RichEditorBaseController_setSelection(Ark_NativePointer thisPtr, KInteropNumber selectionStart, KInteropNumber selectionEnd, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_RichEditorBaseController_setSelection(Ark_NativePointer thisPtr, Ark_Int32 selectionStart, Ark_Int32 selectionEnd, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RichEditorBaseController self = reinterpret_cast<Ark_RichEditorBaseController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -34499,9 +34499,9 @@ void impl_RichEditorBaseController_setSelection(Ark_NativePointer thisPtr, KInte
             optionsValueTempTmpBuf.value = SelectionOptions_serializer::read(thisDeserializer);
         }
         Opt_SelectionOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetAccessors()->getRichEditorBaseControllerAccessor()->setSelection(self, (const Ark_Number*) (&selectionStart), (const Ark_Number*) (&selectionEnd), static_cast<Opt_SelectionOptions*>(&optionsValueTemp));
+        GetAccessors()->getRichEditorBaseControllerAccessor()->setSelection(self, (const Ark_Int32*) (&selectionStart), (const Ark_Int32*) (&selectionEnd), static_cast<Opt_SelectionOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V5(RichEditorBaseController_setSelection, Ark_NativePointer, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V5(RichEditorBaseController_setSelection, Ark_NativePointer, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
 Ark_Boolean impl_RichEditorBaseController_isEditing(Ark_NativePointer thisPtr) {
         Ark_RichEditorBaseController self = reinterpret_cast<Ark_RichEditorBaseController>(thisPtr);
         return GetAccessors()->getRichEditorBaseControllerAccessor()->isEditing(self);
@@ -34547,7 +34547,7 @@ Ark_NativePointer impl_RichEditorController_getFinalizer() {
         return GetAccessors()->getRichEditorControllerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(RichEditorController_getFinalizer, Ark_NativePointer)
-Ark_Number impl_RichEditorController_addTextSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+Ark_Int32 impl_RichEditorController_addTextSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RichEditorController self = reinterpret_cast<Ark_RichEditorController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 contentValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
@@ -34572,8 +34572,8 @@ Ark_Number impl_RichEditorController_addTextSpan(Ark_NativePointer thisPtr, KSer
         Opt_RichEditorTextSpanOptions optionsValueTemp = optionsValueTempTmpBuf;;
         return GetAccessors()->getRichEditorControllerAccessor()->addTextSpan(self, static_cast<Ark_ResourceStr*>(&contentValueTemp), static_cast<Opt_RichEditorTextSpanOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_3(RichEditorController_addTextSpan, KInteropNumber, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Number impl_RichEditorController_addImageSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_3(RichEditorController_addTextSpan, Ark_Int32, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_RichEditorController_addImageSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RichEditorController self = reinterpret_cast<Ark_RichEditorController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 valueValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
@@ -34610,8 +34610,8 @@ Ark_Number impl_RichEditorController_addImageSpan(Ark_NativePointer thisPtr, KSe
         Opt_RichEditorImageSpanOptions optionsValueTemp = optionsValueTempTmpBuf;;
         return GetAccessors()->getRichEditorControllerAccessor()->addImageSpan(self, static_cast<Ark_Union_PixelMap_ResourceStr*>(&valueValueTemp), static_cast<Opt_RichEditorImageSpanOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_3(RichEditorController_addImageSpan, KInteropNumber, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Number impl_RichEditorController_addBuilderSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_3(RichEditorController_addImageSpan, Ark_Int32, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_RichEditorController_addBuilderSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RichEditorController self = reinterpret_cast<Ark_RichEditorController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         CustomNodeBuilder valueValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};;
@@ -34624,8 +34624,8 @@ Ark_Number impl_RichEditorController_addBuilderSpan(Ark_NativePointer thisPtr, K
         Opt_RichEditorBuilderSpanOptions optionsValueTemp = optionsValueTempTmpBuf;;
         return GetAccessors()->getRichEditorControllerAccessor()->addBuilderSpan(self, static_cast<CustomNodeBuilder*>(&valueValueTemp), static_cast<Opt_RichEditorBuilderSpanOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_3(RichEditorController_addBuilderSpan, KInteropNumber, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Number impl_RichEditorController_addSymbolSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_3(RichEditorController_addBuilderSpan, Ark_Int32, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_RichEditorController_addSymbolSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RichEditorController self = reinterpret_cast<Ark_RichEditorController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Resource valueValueTemp = Resource_serializer::read(thisDeserializer);;
@@ -34638,7 +34638,7 @@ Ark_Number impl_RichEditorController_addSymbolSpan(Ark_NativePointer thisPtr, KS
         Opt_RichEditorSymbolSpanOptions optionsValueTemp = optionsValueTempTmpBuf;;
         return GetAccessors()->getRichEditorControllerAccessor()->addSymbolSpan(self, static_cast<Ark_Resource*>(&valueValueTemp), static_cast<Opt_RichEditorSymbolSpanOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_3(RichEditorController_addSymbolSpan, KInteropNumber, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_3(RichEditorController_addSymbolSpan, Ark_Int32, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RichEditorController_updateSpanStyle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RichEditorController self = reinterpret_cast<Ark_RichEditorController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
