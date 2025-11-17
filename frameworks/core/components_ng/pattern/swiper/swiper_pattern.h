@@ -1334,6 +1334,8 @@ private:
     void UpdateDefaultColor();
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
