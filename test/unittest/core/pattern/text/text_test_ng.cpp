@@ -98,31 +98,24 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
     textModelNG.SetFontWeight(FontWeight::LIGHTER);
     textStyle.SetFontWeight(FontWeight::W100);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W100);
-
     textModelNG.SetFontWeight(FontWeight::REGULAR);
     textStyle.SetFontWeight(FontWeight::W400);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
-
     textModelNG.SetFontWeight(FontWeight::NORMAL);
     textStyle.SetFontWeight(FontWeight::W400);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
-
     textModelNG.SetFontWeight(FontWeight::MEDIUM);
     textStyle.SetFontWeight(FontWeight::W500);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W500);
-
     textModelNG.SetFontWeight(FontWeight::BOLD);
     textStyle.SetFontWeight(FontWeight::W700);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W700);
-
     textModelNG.SetFontWeight(FontWeight::BOLDER);
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
-
     textModelNG.SetFontWeight(FontWeight::W900);
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
-
     textModelNG.SetOnClick(onClickFunc, std::numeric_limits<double>::infinity());
     textModelNG.SetRemoteMessage(onRemoteMessage);
     textModelNG.SetCopyOption(copyOption);
@@ -157,18 +150,24 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     EXPECT_EQ(textModelNG.GetTextDetectConfig(frameNode), TEXT_DETECT_TYPES);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     textModelNG.SetOnDetectResultUpdate(frameNode, std::move(textDetectConfig.onResult));
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_NE(textPattern->dataDetectorAdapter_->onResult_, nullptr);
+
     FONT_FEATURES_LIST value;
     ASSERT_EQ(textModelNG.GetFontFeature(frameNode), value);
     ASSERT_EQ(textModelNG.GetLineBreakStrategy(frameNode), TEXT_LINE_BREAK_STRATEGY);
+
     textModelNG.SetCaretColor(frameNode, Color::BLACK);
     ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
+
     textModelNG.ResetCaretColor(frameNode);
     ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
+
     textModelNG.SetSelectedBackgroundColor(frameNode, Color::BLACK);
     ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
+
     textModelNG.ResetSelectedBackgroundColor(frameNode);
     ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);

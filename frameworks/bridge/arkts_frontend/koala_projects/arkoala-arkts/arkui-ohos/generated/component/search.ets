@@ -22,6 +22,7 @@ import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./textCommon"
 import { Font_serializer, ResourceColor, Dimension, Font, ResourceStr, Length } from "./units"
 import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ColorMetrics_serializer } from "./../Graphics"
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from "./richEditor"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -32,6 +33,7 @@ import { Resource } from "global.resource"
 import { extractors, AttributeModifier, hookSearchAttributeModifier, AttributeUpdater } from "#handwritten"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
+import { ColorMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -731,6 +733,18 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setKeyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDividerColorAttribute(value: ColorMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setDividerColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSearchButtonAttribute(value: string | undefined, option?: SearchButtonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -971,6 +985,9 @@ export interface SearchAttribute extends CommonMethod {
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         throw new Error("Unimplemented method keyboardAppearance")
     }
+    dividerColor(value: ColorMetrics | undefined): this {
+        throw new Error("Unimplemented method dividerColor")
+    }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         throw new Error("Unimplemented method searchButton")
     }
@@ -1029,6 +1046,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
+    dividerColor_value?: ColorMetrics | undefined
     attributeModifier_value?: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined
     setSearchOptions(options?: SearchOptions): this {
         return this
@@ -1163,6 +1181,9 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
         return this
     }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
+        return this
+    }
+    dividerColor(value: ColorMetrics | undefined): this {
         return this
     }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
@@ -1543,6 +1564,14 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         if (this.checkPriority("keyboardAppearance")) {
             const value_casted = value as (KeyboardAppearance | undefined)
             this.getPeer()?.setKeyboardAppearanceAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public dividerColor(value: ColorMetrics | undefined): this {
+        if (this.checkPriority("dividerColor")) {
+            const value_casted = value as (ColorMetrics | undefined)
+            this.getPeer()?.setDividerColorAttribute(value_casted)
             return this
         }
         return this
