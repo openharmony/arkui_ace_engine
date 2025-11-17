@@ -57,6 +57,7 @@ enum class ColorPlaceholder : uint8_t {
     SURFACE_CONTRAST = 2,
     TEXT_CONTRAST = 3,
     ACCENT = 4,
+    FOREGROUND = 5,
 };
 
 // Strategy used by dynamic color picker extraction.
@@ -193,7 +194,6 @@ public:
     // Construct a placeholder Color. Underlying ARGB value initialized to transparent and marked with placeholder.
     explicit Color(ColorPlaceholder ph)
     {
-        colorValue_.value = Color::TRANSPARENT.GetValue();
         placeholder_ = ph;
     }
 

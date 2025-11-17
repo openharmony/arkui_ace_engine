@@ -241,6 +241,7 @@ std::string Color::ToString() const
             case ColorPlaceholder::SURFACE_CONTRAST: oss << "Surface_Contrast"; break;
             case ColorPlaceholder::TEXT_CONTRAST: oss << "Text_Contrast"; break;
             case ColorPlaceholder::ACCENT: oss << "Accent"; break;
+            case ColorPlaceholder::FOREGROUND: oss << "Foreground"; break;
             case ColorPlaceholder::NONE: oss << "None"; break;
             default: oss << "Unknown"; break;
         }
@@ -348,13 +349,11 @@ Color Color::ChangeAlpha(uint8_t alpha) const
 Color Color::operator+(const Color& color) const
 {
     // Placeholder pass-through semantics: prefer concrete color if one side is placeholder.
-    if (IsPlaceholder() || color.IsPlaceholder()) {
-        if (IsPlaceholder() && color.IsPlaceholder()) {
-            // Both placeholders: return left (arbitrary) to avoid undefined math.
-            return *this;
-        }
-        // One placeholder: return the concrete side.
-        return IsPlaceholder() ? color : *this;
+    if (IsPlaceholder()) {
+        return *this;
+    }
+    if (color.IsPlaceholder()) {
+        return color;
     }
     // convert first color from ARGB to linear
     double firstLinearRed = 0.0;
@@ -375,8 +374,10 @@ Color Color::operator+(const Color& color) const
 
 Color Color::operator-(const Color& color) const
 {
-    if (IsPlaceholder() || color.IsPlaceholder()) {
-        // Subtraction undefined for placeholders; return left unchanged.
+    if (IsPlaceholder()) {
+        return *this;
+    }
+    if (color.IsPlaceholder()) {
         return *this;
     }
     // convert first color from ARGB to linear
@@ -635,6 +636,7 @@ bool Color::MatchPlaceholderString(const std::string& colorStr, ColorPlaceholder
 {
     static const LinearMapNode<ColorPlaceholder> placeholderTable[] = {
         { "ACCENT", ColorPlaceholder::ACCENT },
+        { "FOREGROUND", ColorPlaceholder::FOREGROUND },
         { "NONE", ColorPlaceholder::NONE },
         { "SURFACE", ColorPlaceholder::SURFACE },
         { "SURFACE_CONTRAST", ColorPlaceholder::SURFACE_CONTRAST },

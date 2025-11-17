@@ -698,8 +698,10 @@ void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyTextColorInTextStyle(Color& textColor)
 {
     if (textColor_.has_value() && animatableTextColor_) {
+        const auto ph = textColor.GetPlaceholder();
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
         textColor = Color(animatableTextColor_->Get().GetValue());
+        textColor.SetPlaceholder(ph);
     }
 }
 

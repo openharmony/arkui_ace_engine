@@ -4161,6 +4161,7 @@ const ColorPlaceholder = {
   SURFACE_CONTRAST: 'SURFACE_CONTRAST',
   TEXT_CONTRAST: 'TEXT_CONTRAST',
   ACCENT: 'ACCENT',
+  FOREGROUND: 'FOREGROUND',
 };
 let ColorPickStrategy;
 (function (ColorPickStrategy) {
