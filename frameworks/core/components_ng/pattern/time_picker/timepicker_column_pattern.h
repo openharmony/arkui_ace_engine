@@ -139,10 +139,7 @@ public:
         enterSelectedAreaEventCallback_ = value;
     }
 
-    const Color& GetButtonHoverColor() const override
-    {
-        return hoverColor_;
-    }
+    const Color& GetButtonHoverColor() const override;
 
     const Color& GetButtonBgColor() const override
     {
@@ -155,6 +152,8 @@ public:
     }
 
     std::string GetCurrentOption() const override;
+    
+    void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
 
     bool GetCanLoopFromLayoutProperty() const override;
 
@@ -168,6 +167,8 @@ private:
         const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
     void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme) override;
@@ -180,10 +181,23 @@ private:
         uint32_t showCount, bool isDown, double scale) override;
     void InitTextFontFamily() override;
     void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, PickerScrollDirection dir) override;
+    void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<PickerLayoutProperty>& pickerLayoutProperty) override;
+    void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<PickerLayoutProperty>& pickerLayoutProperty) override;
+    void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<PickerLayoutProperty>& pickerLayoutProperty) override;
+    void UpdateTextAreaPadding(
+        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void UpdateOptionProperties(uint32_t showCount, const RefPtr<PickerTheme>& theme);
 
     Color pressColor_;
     Color hoverColor_;
     Color buttonBgColor_ = Color::TRANSPARENT;
+    Color buttonFocusBgColor_ = Color::TRANSPARENT;
     bool hour24_ = SystemProperties::Is24HourClock();
     // column options number
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
@@ -200,6 +214,15 @@ private:
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isTossReadyToStop_ = false;
+    Color buttonDefaultBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBorderColor_ = Color::TRANSPARENT;
+    Color buttonFocusBorderColor_ = Color::TRANSPARENT;
+    Color selectorTextFocusColor_ = Color::WHITE;
+    Dimension buttonDefaultBorderWidth_ = 0.0_vp;
+    Dimension buttonFocusBorderWidth_ = 0.0_vp;
+    bool isFirstTimeUpdateButtonProps_ = true;
+    bool useButtonFocusArea_ = false;
+    bool isFocusColumn_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
     friend class PickerColumnPatternCircleUtils<TimePickerColumnPattern>;
 };

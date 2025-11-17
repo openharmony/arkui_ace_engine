@@ -49,9 +49,11 @@ constexpr size_t FORWAED_BUTTON_INDEX = 3;
 WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 uint32_t dialogNodePage = 0;
 uint32_t totalPageNum_ = 0;
+bool TextPickerDialogView::useButtonFocusArea_ = false;
 Dimension TextPickerDialogView::selectedTextStyleFont_ = 40.0_fp;
 Dimension TextPickerDialogView::normalTextStyleFont_ = 32.0_fp;
 Dimension TextPickerDialogView::disappearTextStyleFont_ = 28.0_fp;
+Color TextPickerDialogView::buttonColor_ = Color::TRANSPARENT;
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties,
     const TextPickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -558,7 +560,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     buttonConfirmEventHub->SetStateEffect(true);
     UpdateButtonConfirmLayoutProperty(buttonConfirmNode, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
-    buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
@@ -595,7 +597,11 @@ void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (useButtonFocusArea_) {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    } else {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -610,7 +616,11 @@ void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
-    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (useButtonFocusArea_) {
+        textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    } else {
+        textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -849,7 +859,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     UpdateButtonCancelLayoutProperty(buttonCancelNode, pipeline);
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
-    buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
@@ -1716,6 +1726,8 @@ void TextPickerDialogView::GetUserSettingLimit()
     selectedTextStyleFont_ = pickerTheme->GetUseSetSelectedTextStyle();
     normalTextStyleFont_ = pickerTheme->GetUserSetNormalTextStyle();
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
+    buttonColor_ = pickerTheme->GetButtonColor();
+    useButtonFocusArea_ = pickerTheme->NeedButtonFocusAreaType();
 }
 
 std::string TextPickerDialogView::GetDialogAgingButtonText(bool isNext)

@@ -162,6 +162,8 @@ private:
     static Dimension selectedTextStyleFont_;
     static Dimension normalTextStyleFont_;
     static Dimension disappearTextStyleFont_;
+    static Color buttonColor_;
+    static bool useButtonFocusArea_;
 
 };
 } // namespace OHOS::Ace::NG

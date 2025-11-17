@@ -1440,4 +1440,162 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPatternScrollOption001, TestSi
     columnPattern_->ScrollOption(10.0f);
     EXPECT_EQ(columnPattern_->GetEnterIndex(), 1);
 }
+
+/**
+ * @tc.name: TimePickerInitSelectorButtonProperties001
+ * @tc.desc: Test TimePickerColumnPattern InitSelectorButtonProperties
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerInitSelectorButtonProperties001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumnNode = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumnNode, nullptr);
+    auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    minuteColumnPattern->useButtonFocusArea_ = true;
+
+    minuteColumnPattern->InitSelectorButtonProperties(theme);
+    EXPECT_EQ(minuteColumnPattern->buttonDefaultBgColor_, theme->GetSelectorItemNormalBgColor());
+}
+
+/**
+ * @tc.name: TimePickerInitFocusEvent001
+ * @tc.desc: Test TimePickerColumnPattern InitFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerInitFocusEvent001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumnNode = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumnNode, nullptr);
+    auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    EXPECT_NE(focusManager, nullptr);
+    focusManager->SetIsFocusActive(true);
+    RefPtr<FocusHub> focusHub_;
+    focusHub_ = frameNode->GetFocusHub();
+    ASSERT_TRUE(focusHub_);
+    frameNode->focusHub_ = NULL;
+    focusHub_->RequestFocusImmediately();
+    timePickerRowPattern->useButtonFocusArea_ = true;
+    timePickerRowPattern->InitFocusEvent();
+    EXPECT_EQ(minuteColumnPattern->buttonBgColor_, Color::TRANSPARENT);
+    focusHub_->LostFocus();
+    timePickerRowPattern->useButtonFocusArea_ = true;
+    timePickerRowPattern->InitFocusEvent();
+    EXPECT_EQ(minuteColumnPattern->buttonBgColor_, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: TimePickerInitFocusEvent002
+ * @tc.desc: Test TimePickerColumnPattern InitFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerInitFocusEvent002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumnNode = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumnNode, nullptr);
+    auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    EXPECT_NE(focusManager, nullptr);
+    focusManager->SetIsFocusActive(true);
+
+    RefPtr<FocusHub> focusHub_;
+    focusHub_ = frameNode->GetFocusHub();
+    ASSERT_TRUE(focusHub_);
+    frameNode->focusHub_ = NULL;
+    focusHub_->RequestFocusImmediately();
+    timePickerRowPattern->useButtonFocusArea_ = true;
+    timePickerRowPattern->InitFocusEvent();
+    EXPECT_EQ(minuteColumnPattern->buttonBgColor_, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: TimePickerInitFocusEvent003
+ * @tc.desc: Test TimePickerColumnPattern InitFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerInitFocusEvent003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumnNode = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumnNode, nullptr);
+    auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+
+    timePickerRowPattern->AddIsFocusActiveUpdateEvent();
+    timePickerRowPattern->isFocusActiveUpdateEvent_(true);
+
+    EXPECT_EQ(minuteColumnPattern->buttonBgColor_, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: TimePickerUpdateColumnButtonFocusState001
+ * @tc.desc: Test TimePickerColumnPattern UpdateColumnButtonFocusState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerUpdateColumnButtonFocusState001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumnNode = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumnNode, nullptr);
+    auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    minuteColumnPattern->UpdateColumnButtonFocusState(true, false);
+    EXPECT_EQ(minuteColumnPattern->buttonBgColor_, Color::TRANSPARENT);
+}
 } // namespace OHOS::Ace::NG

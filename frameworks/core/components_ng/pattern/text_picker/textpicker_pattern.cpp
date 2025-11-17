@@ -40,6 +40,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 // Datepicker style modification
+const int32_t CHILD_COLUMN_NODE_INDEX = 0;
+const int32_t NEXT_COLUMN_NODE_INDEX = 1;
+const int32_t TEXT_NODE_INDEX = 2;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;
@@ -49,12 +52,14 @@ constexpr uint32_t HALF = 2;
 const Dimension FOCUS_WIDTH = 2.0_vp;
 const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
+const Dimension DIALOG_MARGIN_TOP = 24.0_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
 const int32_t INVISIBLE_OPTIONS_COUNT = 2;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr uint32_t PRECISION_TWO = 2;
 constexpr float DEFAULT_SIZE_ZERO = 0.0f;
+const Dimension PICKER_BUTTON_PADDING = 6.0_vp;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -269,11 +274,26 @@ void TextPickerPattern::CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<Pick
     }
 
     auto buttonSpace = useButtonFocusArea_ ? pickerTheme->GetSelectorItemSpace() : PRESS_INTERVAL * RATE;
-    if (children.size() == 1 && useButtonFocusArea_) {
-        buttonSpace = PRESS_INTERVAL * RATE;
+    if (useButtonFocusArea_) {
+        auto columnNode = DynamicCast<FrameNode>(child->GetChildAtIndex(NEXT_COLUMN_NODE_INDEX));
+        CHECK_NULL_VOID(columnNode);
+        auto columnChildNode = DynamicCast<FrameNode>(columnNode->GetChildAtIndex(CHILD_COLUMN_NODE_INDEX));
+        CHECK_NULL_VOID(columnChildNode);
+        auto selectedTextNode = DynamicCast<FrameNode>(columnChildNode->GetChildAtIndex(TEXT_NODE_INDEX));
+        CHECK_NULL_VOID(selectedTextNode);
+        width = selectedTextNode->GetGeometryNode()->GetFrameSize().Width();
+        buttonSpace = PICKER_BUTTON_PADDING * RATE;
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(CalculateHeight() - buttonSpace.ConvertToPx())));
+        if (GetIsShowInDialog()) {
+            MarginProperty margin;
+            margin.top = CalcLength(DIALOG_MARGIN_TOP);
+            layoutProperty->UpdateMargin(margin);
+        }
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
     }
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
 }
 
 void TextPickerPattern::InitSelectorProps()

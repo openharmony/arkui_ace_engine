@@ -1075,6 +1075,36 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Test TextPickerPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    DirtySwapConfig config;
+    auto isShowInDialog = textPickerPattern->GetIsShowInDialog();
+    textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->useButtonFocusArea_ = true;
+    EXPECT_FALSE(textPickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    textPickerPattern->SetIsShowInDialog(false);
+    textPickerPattern->useButtonFocusArea_ = true;
+    EXPECT_TRUE(textPickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    textPickerPattern->SetIsShowInDialog(isShowInDialog);
+}
+
+/**
  * @tc.name: TextPickerPatternTest018
  * @tc.desc: test OnKeyEvent
  * @tc.type: FUNC

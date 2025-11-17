@@ -327,7 +327,7 @@ void TextPickerColumnPattern::UpdateTextAreaPadding(const RefPtr<PickerTheme>& p
     const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     if (useButtonFocusArea_) {
-        auto padding = pickerTheme->GetSelectorItemSpace();
+        auto padding = pickerTheme->GetPickerTextPadding();
         PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
             CalcLength(0.0_vp), CalcLength(0.0_vp) };
         textLayoutProperty->UpdatePadding(defaultPadding);
