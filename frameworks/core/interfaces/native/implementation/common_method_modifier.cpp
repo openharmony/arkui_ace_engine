@@ -2929,6 +2929,25 @@ void SetOnAccessibilityHoverImpl(Ark_NativePointer node,
     };
     ViewAbstractModelStatic::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
+void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                            const Opt_AccessibilityTransparentCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHoverTransparentFunc = [arkCallback = CallbackHelper(*optValue), node = weakNode](
+        TouchEventInfo& info) {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkTouchEventSync(info);
+        arkCallback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, std::move(onHoverTransparentFunc));
+}
 void SetHoverEffectImpl(Ark_NativePointer node,
                         const Opt_HoverEffect* value)
 {
@@ -5890,6 +5909,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnHoverImpl,
         CommonMethodModifier::SetOnHoverMoveImpl,
         CommonMethodModifier::SetOnAccessibilityHoverImpl,
+        CommonMethodModifier::SetOnAccessibilityHoverTransparentImpl,
         CommonMethodModifier::SetHoverEffectImpl,
         CommonMethodModifier::SetOnMouseImpl,
         CommonMethodModifier::SetOnTouchImpl,

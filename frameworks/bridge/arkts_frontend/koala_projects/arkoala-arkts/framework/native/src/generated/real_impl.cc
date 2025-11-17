@@ -1735,6 +1735,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                      const Opt_AccessibilityCallback* value)
     {
     }
+    void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                                const Opt_AccessibilityTransparentCallback* value)
+    {
+    }
     void SetHoverEffectImpl(Ark_NativePointer node,
                             const Opt_HoverEffect* value)
     {
@@ -8441,6 +8445,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnHoverImpl,
             CommonMethodModifier::SetOnHoverMoveImpl,
             CommonMethodModifier::SetOnAccessibilityHoverImpl,
+            CommonMethodModifier::SetOnAccessibilityHoverTransparentImpl,
             CommonMethodModifier::SetHoverEffectImpl,
             CommonMethodModifier::SetOnMouseImpl,
             CommonMethodModifier::SetOnTouchImpl,
