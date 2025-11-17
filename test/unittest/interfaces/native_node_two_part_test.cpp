@@ -1065,7 +1065,8 @@ HWTEST_F(NativeNodeTwoPartTest, MultiSelectableTest, TestSize.Level1)
 
     ArkUI_NumberValue zeroSizeValue[] = {};
     ArkUI_AttributeItem zeroSizeItem = {zeroSizeValue, sizeof(zeroSizeValue) / sizeof(ArkUI_NumberValue), "test"};
-    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(
+        nodeAPI->setAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     //test reset
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_MULTI_SELECTABLE), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1199,12 +1200,12 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragEnterTest, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
 
-    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_ENTER, 1, nullptr);
+    auto ret = nodeAPI->registerNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_ENTER, 1, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_ENTER);
-    nodeAPI->disposeNode(scroll);
+    nodeAPI->unregisterNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_ENTER);
+    nodeAPI->disposeNode(grid);
 }
 
 /**
@@ -1216,12 +1217,12 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragLeaveTest, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
 
-    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_LEAVE, 1, nullptr);
+    auto ret = nodeAPI->registerNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_LEAVE, 1, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_LEAVE);
-    nodeAPI->disposeNode(scroll);
+    nodeAPI->unregisterNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_LEAVE);
+    nodeAPI->disposeNode(grid);
 }
 
 /**
@@ -1233,12 +1234,12 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragMoveTest, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
 
-    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_MOVE, 1, nullptr);
+    auto ret = nodeAPI->registerNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_MOVE, 1, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_MOVE);
-    nodeAPI->disposeNode(scroll);
+    nodeAPI->unregisterNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_MOVE);
+    nodeAPI->disposeNode(grid);
 }
 
 /**
@@ -1250,12 +1251,12 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragStartTest, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
 
-    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_START, 1, nullptr);
+    auto ret = nodeAPI->registerNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_START, 1, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DRAG_START);
-    nodeAPI->disposeNode(scroll);
+    nodeAPI->unregisterNodeEvent(grid, NODE_GRID_ON_ITEM_DRAG_START);
+    nodeAPI->disposeNode(grid);
 }
 
 /**
@@ -1267,12 +1268,12 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnItemDragDropTest, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID);
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
 
-    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ON_ITEM_DROP, 1, nullptr);
+    auto ret = nodeAPI->registerNodeEvent(grid, NODE_GRID_ON_ITEM_DROP, 1, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_ITEM_DROP);
-    nodeAPI->disposeNode(scroll);
+    nodeAPI->unregisterNodeEvent(grid, NODE_GRID_ON_ITEM_DROP);
+    nodeAPI->disposeNode(grid);
 }
 
 /**
@@ -1284,11 +1285,11 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeOnSelectTest, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto scroll = nodeAPI->createNode(ARKUI_NODE_GRID_ITEM);
+    auto gridItem = nodeAPI->createNode(ARKUI_NODE_GRID_ITEM);
 
-    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_GRID_ITEM_ON_SELECT, 1, nullptr);
+    auto ret = nodeAPI->registerNodeEvent(gridItem, NODE_GRID_ITEM_ON_SELECT, 1, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ITEM_ON_SELECT);
-    nodeAPI->disposeNode(scroll);
+    nodeAPI->unregisterNodeEvent(gridItem, NODE_GRID_ITEM_ON_SELECT);
+    nodeAPI->disposeNode(gridItem);
 }
 } // namespace OHOS::Ace
