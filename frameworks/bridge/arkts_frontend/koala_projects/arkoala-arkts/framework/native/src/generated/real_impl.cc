@@ -15022,6 +15022,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                              const NavExtender_CreateNavDestination* callback)
     {
     }
+    Array_String GetRouteMapInConfigImpl(Ark_NativePointer context)
+    {
+        return {};
+    }
     } // NavExtenderAccessor
     namespace NavigationTransitionProxyAccessor {
     void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
@@ -20500,6 +20504,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::PopToIndexImpl,
             NavExtenderAccessor::PopToNameImpl,
             NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
+            NavExtenderAccessor::GetRouteMapInConfigImpl,
         };
         return &NavExtenderAccessorImpl;
     }

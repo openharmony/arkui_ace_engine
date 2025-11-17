@@ -26875,6 +26875,7 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                             Ark_Boolean animated);
     void (*setCreateNavDestinationCallback)(Ark_NavPathStack peer,
                                             const NavExtender_CreateNavDestination* callback);
+    Array_String (*getRouteMapInConfig)(Ark_NativePointer context);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {

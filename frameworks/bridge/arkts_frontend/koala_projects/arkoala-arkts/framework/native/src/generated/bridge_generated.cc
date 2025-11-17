@@ -32328,6 +32328,17 @@ void impl_NavExtender_setCreateNavDestinationCallback(Ark_NativePointer peer, KS
         GetAccessors()->getNavExtenderAccessor()->setCreateNavDestinationCallback(static_cast<Ark_NavPathStack>(peer), static_cast<NavExtender_CreateNavDestination*>(&callbackValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavExtender_setCreateNavDestinationCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_NavExtender_getRouteMapInConfig(Ark_NativePointer context) {
+        const auto &retValue = GetAccessors()->getNavExtenderAccessor()->getRouteMapInConfig(context);
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_String retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeString(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(NavExtender_getRouteMapInConfig, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_NavigationTransitionProxy_construct() {
         return GetAccessors()->getNavigationTransitionProxyAccessor()->construct();
 }

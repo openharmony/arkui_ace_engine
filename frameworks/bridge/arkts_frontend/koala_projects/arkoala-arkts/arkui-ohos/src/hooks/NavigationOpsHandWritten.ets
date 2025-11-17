@@ -16,6 +16,7 @@
 import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule, KPointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, NavPathStack_serializer, NavigationModuleInfo_serializer } from "../component/navigation"
+import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { NavExtender } from "../component/idlize"
 import { int32 } from "@koalaui/common"
 import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
@@ -141,5 +142,31 @@ export class NavigationOpsHandWritten {
         if (value !== undefined) {
             component.updateNavDestination(value);
         }
+    }
+    static hookGetRouteConfigImpl(context: NavDestinationContextInternal): RouteMapConfig | undefined {
+        let info: Array<string> = NavExtender.getRouteMapInConfig(context.getPeer()!.ptr);
+        if (info.length === 0) {
+            return undefined;
+        }
+        let config: RouteMapConfig = {
+            name: info[0],
+            pageSourceFile: info[1],
+            data: {}
+        };
+        const dataIndex = 2;
+        if (info.length <= dataIndex) {
+            return config;
+        }
+        let jsonStr: JSONValue = JSONParser.parse(info[dataIndex]);
+        if (jsonStr instanceof JSONObject) {
+            let keys: Array<JSONString> = jsonStr.keys_;
+            let values: Array<JSONValue> = jsonStr.values;
+            let result: Record<string, string> = new Record<string, string>();
+            for (let i: int = 0; i < keys.length; i++) {
+                result[keys[i].value] = (values[i] as JSONString).value;
+            }
+            config.data = result;
+        }
+        return config;
     }
 }
