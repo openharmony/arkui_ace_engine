@@ -180,7 +180,6 @@ export function ParallelizeUI<T>(
         content_(paramCompute());
         return;
     }
-    SerializerBase.setMultithreadMode();
     const receiver = rememberDisposable<ParallelNode<T>>(() => {
         return new ParallelNode<T>(options);
     }, (parallelNode: ParallelNode<T> | undefined) => {
@@ -205,7 +204,6 @@ export function ParallelizeUI(
         return;
     }
 
-    SerializerBase.setMultithreadMode();
     const receiver = rememberDisposable<ParallelNode<undefined>>(() => {
         return new ParallelNode<undefined>(options);
     }, (parallelNode: ParallelNode<undefined> | undefined) => {
