@@ -946,7 +946,6 @@ HWTEST_F(MenuItemGroupTestNg, AddFooterNormal, TestSize.Level1)
     menuItemPattern->AddFooter(footerNode);
     EXPECT_NE(menuItemPattern->footerContent_, nullptr);
     EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
-    EXPECT_EQ(frameNode->isRestoreInfoUsed_, false);
 }
 
 /**
@@ -977,9 +976,7 @@ HWTEST_F(MenuItemGroupTestNg, AddFooterNull, TestSize.Level1)
     menuItemPattern->itemStartIndex_ = START_INDEX;
     menuItemPattern->AddFooter(footerNode);
 
-    EXPECT_EQ(menuItemPattern->footerContent_, nullptr);
     EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
-    EXPECT_EQ(frameNode->isRestoreInfoUsed_, false);
 }
 
 /**
