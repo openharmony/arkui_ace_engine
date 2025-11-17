@@ -564,6 +564,11 @@ void SetMenusImpl(Ark_NativePointer node,
                 NavDestinationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
             }, node);
         }
+    } else {
+        CallbackHelper(items->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+            NavDestinationModelStatic::SetCustomMenu(frameNode, nullptr);
+        }, node);
+        NavDestinationModelStatic::SetMenuItems(frameNode, std::vector<NG::BarItem>());
     }
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
         options->value.moreButtonOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
