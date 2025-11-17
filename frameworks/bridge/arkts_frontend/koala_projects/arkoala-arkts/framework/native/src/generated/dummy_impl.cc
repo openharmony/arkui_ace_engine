@@ -35468,6 +35468,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Array_String GetRouteMapInConfigImpl(Ark_NativePointer context)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("setCreateNavDestinationCallback(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // NavExtenderAccessor
     namespace NavigationTransitionProxyAccessor {
     void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
@@ -46926,6 +46940,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::PopToIndexImpl,
             NavExtenderAccessor::PopToNameImpl,
             NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
+            NavExtenderAccessor::GetRouteMapInConfigImpl,
         };
         return &NavExtenderAccessorImpl;
     }

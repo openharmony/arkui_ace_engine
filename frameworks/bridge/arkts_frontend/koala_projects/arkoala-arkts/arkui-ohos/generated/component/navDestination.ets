@@ -31,7 +31,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceStr, Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater, hookGetConfigInRouteMap } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CustomBuilder } from "./builder"
@@ -96,7 +96,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
         return new NavDestinationContextInternal(ptr)
     }
     public getConfigInRouteMap(): RouteMapConfig | undefined {
-        return this.getConfigInRouteMap_serialize()
+        return hookGetConfigInRouteMap(this)
     }
     private getPathInfo(): NavPathInfo {
         return this.getPathInfo_serialize()

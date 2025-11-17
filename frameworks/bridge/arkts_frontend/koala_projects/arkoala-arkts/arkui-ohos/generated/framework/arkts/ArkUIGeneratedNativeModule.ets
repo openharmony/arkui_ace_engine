@@ -4836,6 +4836,8 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): int32
     @ani.unsafe.Direct
     native static _NavExtender_setCreateNavDestinationCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavExtender_getRouteMapInConfig(context: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _NavigationTransitionProxy_construct(): KPointer
     @ani.unsafe.Direct
