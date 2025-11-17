@@ -12,6 +12,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal_ng.h"
@@ -401,6 +402,9 @@ bool JsAccessibilityManager::NeedChangeToReadableNode(const RefPtr<NG::FrameNode
     CHECK_EQUAL_RETURN(accessibilityManager->GetTreeId(), 0, true);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(ngPipeline, true);
+    auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, true);
+    CHECK_EQUAL_RETURN(container->IsSubWindow(), true, true);
     readableNode = ngPipeline->GetRootElement();
     return true;
 }
