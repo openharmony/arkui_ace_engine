@@ -140,7 +140,7 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
             [frameNode, surfaceType](const Ark_ResourceStr& value0) {
                 std::string bundleName = Converter::Convert<std::string>(value0.value1.bundleName);
                 std::string moduleName = Converter::Convert<std::string>(value0.value1.moduleName);
-                ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, nullptr });
+                ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType });
                 if (auto srcPath = Converter::OptConvert<std::string>(value0)) {
                     std::string ohosPath("");
                     SetOhosPath(srcPath.value(), ohosPath);
@@ -157,7 +157,7 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
 #endif
             },
             [frameNode, surfaceType]() {
-                ModelViewNG::SetModelViewContext(frameNode, { "", "", surfaceType, nullptr });
+                ModelViewNG::SetModelViewContext(frameNode, { "", "", surfaceType });
             });
     }
 #endif

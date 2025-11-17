@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+import("capi/capi_common.gni")
 
 group("unittest") {
   testonly = true
@@ -36,8 +37,30 @@ group("linux_unittest") {
   testonly = true
   deps = [
     "base:linux_base_unittest(${host_toolchain})",
+    "capi:linux_capi_unittest(${host_toolchain})",
     "core:linux_core_unittest(${host_toolchain})",
   ]
+}
+
+group("linux_unittest_capi") {
+  testonly = true
+  deps = [ "capi:linux_capi_unittest(${host_toolchain})" ]
+}
+
+action("run_linux_unittest_capi") {
+  testonly = true
+  script = "scripts/run.py"
+  args = [
+    "--path",
+    "capi",
+    "--output",
+    rebase_path("$root_out_dir/tests/test_result.json", root_build_dir),
+  ]
+  if (capi_asan || capi_theme_debug) {
+    args += [ "--debug" ]
+  }
+  outputs = [ "$root_out_dir/tests/test_result.json" ]
+  deps = [ ":linux_unittest_capi" ]
 }
 
 config("ace_circle_config") {
@@ -108,6 +131,11 @@ config("ace_unittest_config") {
 
   if (ace_engine_feature_enable_digital_crown) {
     defines += [ "SUPPORT_DIGITAL_CROWN" ]
+  }
+
+  if (capi_asan) {
+    cflags_cc += [ "-fsanitize=address" ]
+    ldflags += [ "-fsanitize=address" ]
   }
 }
 

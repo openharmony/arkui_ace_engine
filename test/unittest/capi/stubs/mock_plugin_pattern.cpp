@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/components_ng/pattern/plugin/plugin_pattern.h"
+#include "mock_plugin_sub_container.h"
+#include "mock_plugin_manager_delegate.h"
+
+namespace OHOS::Ace::NG {
+PluginPattern::~PluginPattern()
+{
+}
+void PluginPattern::OnAttachToFrameNode()
+{
+}
+
+bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    return false;
+}
+
+void PluginPattern::DumpInfo()
+{
+}
+
+void PluginPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+}
+
+#ifdef WRONG_DEF
+void PluginPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pluginLayoutProperty = host->GetLayoutProperty<PluginLayoutProperty>();
+    auto requestPluginInfo = pluginLayoutProperty->GetRequestPluginInfo();
+    auto templateJSON = JsonUtil::Create(true);
+
+    templateJSON->Put("source", requestPluginInfo ? requestPluginInfo->source.c_str() : "");
+    templateJSON->Put("bundleName", requestPluginInfo ? requestPluginInfo->bundleName.c_str() : "");
+    json->PutExtAttr("template", templateJSON, filter);
+    auto data = pluginLayoutProperty->GetData();
+    json->PutExtAttr("data", data ? data->c_str() : "", filter);
+}
+#endif
+
+void PluginPattern::FlushReload() const
+{
+}
+}
