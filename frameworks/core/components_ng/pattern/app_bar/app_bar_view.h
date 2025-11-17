@@ -61,6 +61,7 @@ public:
     static int32_t AddRectChangeListener(
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
+    void SetMenuBarVisible(bool visible);
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
@@ -72,6 +73,7 @@ private:
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
     void CreateServicePanel(bool firstTry);
     void DestroyServicePanel();
+    void FireExtensionHostParams();
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
     int32_t sessionId_ = 0;

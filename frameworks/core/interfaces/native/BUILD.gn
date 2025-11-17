@@ -32,6 +32,7 @@ template("ace_core_interfaces_native_node") {
     # add common source file needed by all product platform here
     sources = [
       "node/alphabet_indexer_modifier.cpp",
+      "node/atomic_service_modifier.cpp",
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",

@@ -4272,6 +4272,10 @@
         "name": "OH_ArkUI_Swiper_FinishAnimation"
     },
     {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible"
+    },
+    {
         "first_introduced": "22",
         "name": "OH_ArkUI_DrawableDescriptor_SetAnimationFrameDurations"
     },

@@ -163,6 +163,7 @@ const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 const std::string ACTION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
 const std::string ABILITYNAME_CALENDAR = "MainAbility";
 const std::string ACTION_PARAM = "action";
+const std::string UIEXTENSION_CONFIG_MENUBAR = "ohos.system.atomicservice.menubar.params";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
@@ -2347,6 +2348,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
+        auto hostWantParams = hostWindowInfo_.hostWantParams;
+        if (hostWantParams) {
+            auto extensionParams = hostWantParams->GetParams().GetWantParams(UIEXTENSION_CONFIG_MENUBAR);
+            container->SetExtensionHostParams(extensionParams.ToString());
+        }
         container->SetSharePanelCallback(
             [context = context_](const std::string& bundleName, const std::string& abilityName) {
                 auto sharedContext = context.lock();

@@ -635,6 +635,7 @@ public:
     {
         return UIContentErrorCode::NO_ERRORS;
     }
+
 };
 
 } // namespace OHOS::Ace

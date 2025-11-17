@@ -803,6 +803,16 @@ public:
         return srcEntrance_;
     }
 
+    void SetExtensionHostParams(const std::string& params)
+    {
+        extensionHostParams_ = params;
+    }
+
+    std::string GetExtensionHostParams() const
+    {
+        return extensionHostParams_;
+    }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);
@@ -844,6 +854,7 @@ private:
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     uint64_t currentDisplayId_ = 0;
     ColorMode colorMode_ = ColorMode::LIGHT;
+    std::string extensionHostParams_ = "";
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

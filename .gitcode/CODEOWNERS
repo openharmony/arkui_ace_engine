@@ -2824,6 +2824,8 @@ frameworks/core/interfaces/native/common/ @arkui_framework_xnode
 frameworks/core/interfaces/native/BUILD.gn @arkui_architecture
 frameworks/core/interfaces/native/node/alphabet_indexer_modifier.cpp @arkuicodepulse
 frameworks/core/interfaces/native/node/alphabet_indexer_modifier.h @arkuicodepulse
+frameworks/core/interfaces/native/node/atomic_service_modifier.cpp @ArkUI_ability_group
+frameworks/core/interfaces/native/node/atomic_service_modifier.h @ArkUI_ability_group
 frameworks/core/interfaces/native/node/blank_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/blank_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/button_modifier.cpp @arkuipopupwindow_all

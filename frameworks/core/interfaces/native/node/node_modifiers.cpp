@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/atomic_service_modifier.h"
 #include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/blank_modifier.h"
 #include "core/interfaces/native/node/button_modifier.h"
@@ -299,6 +300,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getStepperModifier = NodeModifier::GetStepperModifier,
         .getNDKRenderNodeModifier = NodeModifier::GetNDKRenderNodeModifier,
         .getContainerPickerModifier = NodeModifier::GetContainerPickerModifier,
+        .getAtomicServiceModifier = NodeModifier::GetAtomicServiceModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

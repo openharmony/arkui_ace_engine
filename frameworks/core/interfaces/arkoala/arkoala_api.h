@@ -7691,6 +7691,10 @@ struct ArkUIThemeModifier {
     ArkUI_Int32 (*getThemeScopeId)(ArkUINodeHandle node);
 };
 
+struct ArkUIAtomicServiceModifier {
+    ArkUI_Int32 (*setMenuBarVisible)(ArkUIContext* context, ArkUI_Bool visible);
+};
+
 struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*addRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle child);
     ArkUI_Int32 (*removeRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle child);
@@ -7926,6 +7930,7 @@ struct ArkUINodeModifiers {
     const ArkUIStepperModifier* (*getStepperModifier)();
     const ArkUINDKRenderNodeModifier* (*getNDKRenderNodeModifier)();
     const ArkUIContainerPickerModifier* (*getContainerPickerModifier)();
+    const ArkUIAtomicServiceModifier* (*getAtomicServiceModifier)();
 };
 
 // same as inner defines in property.h
