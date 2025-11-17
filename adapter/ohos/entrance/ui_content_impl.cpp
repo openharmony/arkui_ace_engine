@@ -3323,14 +3323,14 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
 }
 
 void UIContentImpl::AddKeyFrameNodeCallback(const std::function<
-    void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
+    void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback)
 {
     TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameNodeCallback");
     addNodeCallback_ = callback;
 }
 
-void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode)
+void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
