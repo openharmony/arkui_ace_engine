@@ -5225,7 +5225,7 @@ void callManagedLoadingProgressModifierBuilderSync(Ark_VMContext vmContext, Ark_
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedMenuCallback(Ark_Int32 resourceId, Ark_Number start, Ark_Number end)
+void callManagedMenuCallback(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -5233,19 +5233,19 @@ void callManagedMenuCallback(Ark_Int32 resourceId, Ark_Number start, Ark_Number 
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_MenuCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(start);
-    argsSerializer.writeNumber(end);
+    argsSerializer.writeInt32(start);
+    argsSerializer.writeInt32(end);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedMenuCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number start, Ark_Number end)
+void callManagedMenuCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_MenuCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(start);
-    argsSerializer.writeNumber(end);
+    argsSerializer.writeInt32(start);
+    argsSerializer.writeInt32(end);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedMenuItemModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_MenuItemConfiguration config, Callback_Pointer_Void continuation)
@@ -5277,7 +5277,7 @@ void callManagedMenuItemModifierBuilderSync(Ark_VMContext vmContext, Ark_Int32 r
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedMenuOnAppearCallback(Ark_Int32 resourceId, Ark_Number start, Ark_Number end)
+void callManagedMenuOnAppearCallback(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -5285,19 +5285,19 @@ void callManagedMenuOnAppearCallback(Ark_Int32 resourceId, Ark_Number start, Ark
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_MenuOnAppearCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(start);
-    argsSerializer.writeNumber(end);
+    argsSerializer.writeInt32(start);
+    argsSerializer.writeInt32(end);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedMenuOnAppearCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number start, Ark_Number end)
+void callManagedMenuOnAppearCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_MenuOnAppearCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(start);
-    argsSerializer.writeNumber(end);
+    argsSerializer.writeInt32(start);
+    argsSerializer.writeInt32(end);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedModifierKeyStateGetter(Ark_Int32 resourceId, Array_String keys, Callback_Boolean_Void continuation)

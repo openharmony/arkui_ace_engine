@@ -4558,10 +4558,10 @@ void deserializeAndCallMenuCallback(KSerializerBuffer thisArray, Ark_Int32 thisL
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuCallback))));
     thisDeserializer.readPointer();
-    Ark_Number start = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_Number end = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Int32 start = static_cast<Ark_Int32>(thisDeserializer.readInt32());
+    Ark_Int32 end = static_cast<Ark_Int32>(thisDeserializer.readInt32());
     _call(_resourceId, start, end);
 }
 void deserializeAndCallSyncMenuCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -4569,9 +4569,9 @@ void deserializeAndCallSyncMenuCallback(Ark_VMContext vmContext, KSerializerBuff
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuCallback))));
-    Ark_Number start = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_Number end = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuCallback))));
+    Ark_Int32 start = static_cast<Ark_Int32>(thisDeserializer.readInt32());
+    Ark_Int32 end = static_cast<Ark_Int32>(thisDeserializer.readInt32());
     callSyncMethod(vmContext, resourceId, start, end);
 }
 void deserializeAndCallMenuItemModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -4600,10 +4600,10 @@ void deserializeAndCallMenuOnAppearCallback(KSerializerBuffer thisArray, Ark_Int
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuOnAppearCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuOnAppearCallback))));
     thisDeserializer.readPointer();
-    Ark_Number start = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_Number end = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Int32 start = static_cast<Ark_Int32>(thisDeserializer.readInt32());
+    Ark_Int32 end = static_cast<Ark_Int32>(thisDeserializer.readInt32());
     _call(_resourceId, start, end);
 }
 void deserializeAndCallSyncMenuOnAppearCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -4611,9 +4611,9 @@ void deserializeAndCallSyncMenuOnAppearCallback(Ark_VMContext vmContext, KSerial
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuOnAppearCallback))));
-    Ark_Number start = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Ark_Number end = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuOnAppearCallback))));
+    Ark_Int32 start = static_cast<Ark_Int32>(thisDeserializer.readInt32());
+    Ark_Int32 end = static_cast<Ark_Int32>(thisDeserializer.readInt32());
     callSyncMethod(vmContext, resourceId, start, end);
 }
 void deserializeAndCallModifierKeyStateGetter(KSerializerBuffer thisArray, Ark_Int32 thisLength)
