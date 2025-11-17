@@ -59,7 +59,7 @@ void LoadCompleteManager::ResetManagerStatus()
 
 void LoadCompleteManager::StartCollect(const std::string& pageUrl)
 {
-    if (collectStatus_ != CollectStatus::INIT) {
+    if (collectStatus_ == CollectStatus::COLLECTING || collectStatus_ == CollectStatus::ANALYSIS) {
         return;
     }
     ResetManagerStatus();
@@ -93,6 +93,9 @@ void LoadCompleteManager::TryStopCollect()
 
 void LoadCompleteManager::StopCollect()
 {
+    if (collectStatus_ == CollectStatus::COMPLETE) {
+        return;
+    }
     nodeNum_ = 0;
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -109,7 +112,7 @@ void LoadCompleteManager::StopCollect()
 
 void LoadCompleteManager::ForceFinishCollectTask()
 {
-    if (collectStatus_ != CollectStatus::INIT) {
+    if (collectStatus_ != CollectStatus::INIT && collectStatus_ != CollectStatus::COMPLETE) {
         collectStatus_ = CollectStatus::ANALYSIS;
         FinishCollectTask();
     }
@@ -140,6 +143,7 @@ void LoadCompleteManager::FinishCollectTask()
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "LoadCompleteTimeoutTask");
     taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "TryStopCollectTask");
+    collectStatus_ = CollectStatus::COMPLETE;
 }
 
 void LoadCompleteManager::AddLoadComponent(int32_t nodeId)
@@ -153,7 +157,7 @@ void LoadCompleteManager::AddLoadComponent(int32_t nodeId)
 
 void LoadCompleteManager::DeleteLoadComponent(int32_t nodeId)
 {
-    if (collectStatus_ == CollectStatus::INIT) {
+    if (collectStatus_ == CollectStatus::COMPLETE) {
         return;
     }
     nodeSet_.erase(nodeId);
@@ -162,7 +166,7 @@ void LoadCompleteManager::DeleteLoadComponent(int32_t nodeId)
 
 void LoadCompleteManager::CompleteLoadComponent(int32_t nodeId)
 {
-    if (collectStatus_ == CollectStatus::INIT) {
+    if (collectStatus_ == CollectStatus::COMPLETE) {
         return;
     }
     nodeSet_.erase(nodeId);

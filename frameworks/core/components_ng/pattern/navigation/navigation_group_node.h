@@ -414,6 +414,8 @@ private:
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
     bool HandleBackForHomeDestination();
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
 
     std::optional<bool> useHomeDestination_;
     RefPtr<UINode> customHomeNode_;

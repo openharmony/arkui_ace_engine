@@ -29,6 +29,7 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
@@ -1077,6 +1078,14 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     UpdateNavPathList();
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto replaceValue = navigationStack_->GetReplaceValue();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        std::string pageUrl = "";
+        if (newTopNavPath.has_value()) {
+            pageUrl = newTopNavPath->first;
+        }
+        pipeline->GetLoadCompleteManager()->StartCollect(pageUrl);
+    }
     if (preTopNavPath_ != newTopNavPath || replaceValue == 1) {
         isReplace_ = replaceValue != 0;
         UpdateIsAnimation(preTopNavPath_);
@@ -2824,6 +2833,7 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             // this flag will be update in cancelTransition or finishTransition
             ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE, true);
+            pattern->LoadCompleteManagerStopCollect();
             if (proxy->GetIsSuccess()) {
                 pattern->ClearRecoveryList();
                 pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
@@ -2858,6 +2868,7 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         proxy->StartAnimation();
     } else {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+        LoadCompleteManagerStartCollect();
         ClearRecoveryList();
         OnStartOneTransitionAnimation();
         navigationTransition.transition(proxy);
@@ -3722,6 +3733,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
                 CHECK_NULL_VOID(navigationPattern);
                 auto topDestination = weakTopDestination.Upgrade();
                 navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
+                navigationPattern->LoadCompleteManagerStopCollect();
             });
         return;
     }
@@ -3742,6 +3754,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
             (topDestination && topDestination->GetNavDestinationType() == NavDestinationType::HOME))) {
             navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
             navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
+            navigationPattern->LoadCompleteManagerStopCollect();
             navigationPattern->TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
             navigationPattern->prePrimaryNodes_.clear();
             navigationPattern->primaryNodesToBeRemoved_.clear();
@@ -3751,6 +3764,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
 
         navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, true);
         navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
+        navigationPattern->LoadCompleteManagerStopCollect();
         navigationPattern->TransitionWithAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         navigationPattern->prePrimaryNodes_.clear();
         navigationPattern->primaryNodesToBeRemoved_.clear();
@@ -4193,6 +4207,7 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         // update pre navigation stack
         ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+        pattern->LoadCompleteManagerStopCollect();
         pattern->ClearRecoveryList();
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
         pattern->RemoveProxyById(proxyId);
@@ -5955,5 +5970,21 @@ void NavigationPattern::UpdateCanForceSplitLayout(const SizeF& frameSize)
         "canForceSplitLayout_:%{public}d", isMainWindow,
         isInAppMainPage, isInSplitScreenMode, ignoreOrientation,
         DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), canForceSplitLayout_);
+}
+
+void NavigationPattern::LoadCompleteManagerStartCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StartCollect("");
+    }
+}
+
+void NavigationPattern::LoadCompleteManagerStopCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StopCollect();
+    }
 }
 } // namespace OHOS::Ace::NG

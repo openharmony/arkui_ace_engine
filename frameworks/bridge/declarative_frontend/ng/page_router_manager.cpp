@@ -26,6 +26,7 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -1503,6 +1504,10 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pageRouterStack_.empty() && pipelineContext) {
+        pipelineContext->GetLoadCompleteManager()->StartCollect(target.url);
+    }
     auto pageNode = CreatePage(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
