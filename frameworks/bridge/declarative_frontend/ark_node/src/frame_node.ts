@@ -212,10 +212,10 @@ class FrameNode extends Disposable {
     this._nativeRef = null;
     this.nodePtr_ = null;
   }
-  
+
   isDisposed(): boolean {
-    return super.isDisposed() && (this._nativeRef === undefined ||
-     this._nativeRef === null || this._nativeRef instanceof NativeWeakRef && this._nativeRef.invalid());
+    let node = this.getNodePtr();
+    return super.isDisposed() && (node === undefined || node === null);
   }
 
   static disposeTreeRecursively(node: FrameNode | null): void {
