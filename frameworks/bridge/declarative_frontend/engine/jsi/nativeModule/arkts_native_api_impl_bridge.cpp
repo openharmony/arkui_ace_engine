@@ -1189,6 +1189,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ClearGestures));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "getWindowName"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::GetWindowName));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "getWindowId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::GetWindowId));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "getWindowWidthBreakpoint"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::GetWindowWidthBreakpoint));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "getWindowHeightBreakpoint"),

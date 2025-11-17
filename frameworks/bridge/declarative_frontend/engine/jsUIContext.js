@@ -825,6 +825,13 @@ class UIContext {
         return windowName;
     }
 
+    getWindowId() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let id = getUINativeModule().common.getWindowId();
+        __JSScopeUtil__.restoreInstanceId();
+        return id;
+    }
+    
     getWindowWidthBreakpoint() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const breakpoint = getUINativeModule().common.getWindowWidthBreakpoint();

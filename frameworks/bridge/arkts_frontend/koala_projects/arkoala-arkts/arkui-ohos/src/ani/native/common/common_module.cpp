@@ -974,6 +974,19 @@ ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
     return nullptr;
 }
 
+ani_int getWindowId(ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    auto ret = modifier->getCommonAniModifier()->getWindowId(instanceId);
+    if (ret.has_value()) {
+        return ret.value();
+    }
+    return -1;
+}
+
 ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();

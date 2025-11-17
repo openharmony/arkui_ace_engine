@@ -503,6 +503,7 @@ struct ArkUIAniCommonModifier {
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
     std::optional<std::string> (*getWindowName)(ani_int instanceId);
+    std::optional<std::uint32_t> (*getWindowId)(ani_int instanceId);
     ani_int (*getWindowWidthBreakpoint)();
     ani_int (*getWindowHeightBreakpoint)();
     void* (*transferKeyEventPointer)(ani_long nativePtr);
