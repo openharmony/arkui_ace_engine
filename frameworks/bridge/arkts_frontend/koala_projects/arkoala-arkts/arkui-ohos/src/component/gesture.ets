@@ -33,6 +33,7 @@ export class TapGestureHandler extends GestureHandler {
         super();
         this.finger = options?.fingers;
         this.count = options?.count;
+        this.distanceThreshold = options?.distanceThreshold;
         this.isFingerCountLimited = options?.isFingerCountLimited;
     }
     onAction(event: (event: GestureEvent) => void): this {
