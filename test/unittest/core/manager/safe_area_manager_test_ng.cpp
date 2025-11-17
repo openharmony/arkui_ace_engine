@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
+
 constexpr double DISPLAY_HEIGHT = 1280;
 
 constexpr double SYSTEM_LEFT_START = 0.0f;
@@ -79,10 +80,13 @@ constexpr double KEYBOARD_HEIGHT = 420.0f;
 
 class SafeAreaManagerTest : public testing::Test {
 public:
+
     static void SetUpTestCase();
+
     static void TearDownTestCase();
-    
+
     void SetUp() override;
+
     void TearDown() override;
 
     struct Rect {
@@ -95,6 +99,7 @@ public:
     void CommonExpectEQ(const Rect& s1, const Rect& s2);
 
     RefPtr<SafeAreaManager> safeAreaManager_;
+    
     NG::SafeAreaInsets cutoutArea =
         NG::SafeAreaInsets({ CUTOUT_LEFT_START, CUTOUT_LEFT_END }, { CUTOUT_TOP_START, CUTOUT_TOP_END },
             { CUTOUT_RIGHT_START, CUTOUT_RIGHT_END }, { CUTOUT_BOTTOM_START, CUTOUT_BOTTOM_END });
