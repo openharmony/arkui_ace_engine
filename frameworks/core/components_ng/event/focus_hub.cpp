@@ -1351,6 +1351,8 @@ void FocusHub::OnBlurNode()
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " blur by %{public}d",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()), blurReason_);
     if (onBlurInternal_) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) "trigger onBlurInternal by %{public}d",
+            GetFrameName().c_str(), SEC_PARAM(GetFrameId()), blurReason_);
         ACE_EVENT_SCOPED_TRACE("HandleBlurEventInternal Node[%s][%d]", GetFrameName().c_str(), GetFrameId());
         onBlurInternal_();
     }
@@ -1489,6 +1491,9 @@ void FocusHub::OnBlurScope()
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode) {
         lastFocusNode->LostFocus(blurReason_);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Scope(%{public}s/%{public}d) has no last focusNode.",
+            GetFrameName().c_str(), GetFrameId());
     }
 }
 
