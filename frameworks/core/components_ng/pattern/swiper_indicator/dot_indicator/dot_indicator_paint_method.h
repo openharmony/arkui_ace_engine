@@ -262,6 +262,7 @@ protected:
     bool longPointIsHover_ = false;
     bool IsCustomSizeValue_ = false;
     bool isSwipeByGroup_ = false;
+    bool isInBottomTranslate_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointCenterX_ = {};
     std::pair<float, float> longPointCenterX_ = { 0, 0 };
