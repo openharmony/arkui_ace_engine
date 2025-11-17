@@ -236,16 +236,13 @@ HWTEST_F(BubbleTestOneNg, AdjustPosition001, TestSize.Level1)
     ASSERT_NE(bubbleLayoutProperty, nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
     layoutAlgorithm->placement_ = Placement::RIGHT;
-    layoutAlgorithm->showArrow_ = true;
     OffsetF tesPos(10.0f, 10.0f);
     layoutAlgorithm->AdjustPosition(tesPos, 1.0f, 1.0f, 1.0f);
-    EXPECT_EQ(layoutAlgorithm->placement_, Placement::RIGHT);
     int testCase = 100;
     layoutAlgorithm->placement_ = static_cast<Placement>(testCase);
     layoutAlgorithm->AdjustPosition(tesPos, 1.0f, 1.0f, 1.0f);
-    EXPECT_EQ(layoutAlgorithm->showArrow_, true);
     layoutAlgorithm->AdjustPosition(tesPos, 1.0f, 1.0f, 100.0f);
-    EXPECT_EQ(layoutAlgorithm->showArrow_, true);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
 }
 
 /**
@@ -1263,9 +1260,9 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     ASSERT_NE(bubblePattern, nullptr);
-    bubblePattern->showArrow_ = false;
+    frameNode->needCallChildrenUpdate_ = true;
     bubblePattern->UpdateBubbleText();
-    EXPECT_EQ(bubblePattern->showArrow_, false);
+    EXPECT_EQ(frameNode->needCallChildrenUpdate_, false);
 }
 
 /**

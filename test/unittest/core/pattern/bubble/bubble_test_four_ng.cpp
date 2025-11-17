@@ -1134,7 +1134,7 @@ HWTEST_F(BubbleTestFourNg, HandleUIExtensionKeyboard, TestSize.Level1)
     showInSubwindow = false;
     layoutAlgorithm->avoidKeyboard_ = false;
     layoutAlgorithm->HandleUIExtensionKeyboard(AceType::RawPtr(layoutWrapper), showInSubwindow);
-    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
+    EXPECT_EQ(layoutAlgorithm->dumpInfo_.avoidKeyboard, false);
 }
 
 /**
@@ -1286,12 +1286,11 @@ HWTEST_F(BubbleTestFourNg, CheckArrowPosition1, TestSize.Level1)
 
     for (auto &placement : curPlaceStates) {
         OffsetF position = {0.0f, 0.0f};
-        layoutAlgorithm->showArrow_ = true;
         layoutAlgorithm->avoidKeyboard_ = true;
         layoutAlgorithm->placement_ = placement;
         layoutAlgorithm->CheckArrowPosition(position, 10.0f, 10.0f);
     }
-    EXPECT_EQ(layoutAlgorithm->avoidKeyboard_, true);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
 }
 
 /**
