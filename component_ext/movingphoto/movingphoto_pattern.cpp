@@ -2563,4 +2563,32 @@ MovingPhotoPattern::~MovingPhotoPattern()
         DestroyAnalyzerOverlay();
     }
 }
+
+void MovingPhotoPattern::SetMovingPhotoController(const RefPtr<MovingPhotoController>& movingPhotoController)
+{
+    if (controller_) {
+        return;
+    }
+    controller_ = movingPhotoController;
+    CHECK_NULL_VOID(controller_);
+    ContainerScope scope(instanceId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    SetStartPlaybackImpl(uiTaskExecutor);
+    SetStopPlaybackImpl(uiTaskExecutor);
+    SetRefreshMovingPhotoImpl(uiTaskExecutor);
+    SetPauseImpl(uiTaskExecutor);
+    SetResetImpl(uiTaskExecutor);
+    SetRestartImpl(uiTaskExecutor);
+    SetEnableTransitionImpl(uiTaskExecutor);
+    SetPlaybackPeriodImpl(uiTaskExecutor);
+    SetEnableAutoPlayImpl(uiTaskExecutor);
+    RegisterVisibleAreaChange();
+}
+
+RefPtr<MovingPhotoController> MovingPhotoPattern::GetMovingPhotoController()
+{
+    return controller_;
+}
 } // namespace OHOS::Ace::NG
