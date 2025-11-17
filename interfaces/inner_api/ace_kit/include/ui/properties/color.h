@@ -191,7 +191,7 @@ public:
     static bool MatchColorSpecialString(const std::string& colorStr, Color& color);
     static bool MatchPlaceholderString(const std::string& colorStr, ColorPlaceholder& placeholder);
 
-    // Construct a placeholder Color. Underlying ARGB value initialized to transparent and marked with placeholder.
+    /* color placeholder interfaces */
     explicit Color(ColorPlaceholder ph)
     {
         placeholder_ = ph;
@@ -205,6 +205,11 @@ public:
     ColorPlaceholder GetPlaceholder() const
     {
         return placeholder_;
+    }
+
+    void SetPlaceholder(ColorPlaceholder ph)
+    {
+        placeholder_ = ph;
     }
 
     std::string ToString() const;
