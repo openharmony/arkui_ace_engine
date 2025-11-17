@@ -226,7 +226,9 @@ void SetOnTitleModeChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnTitleModeChange(nullptr);
         return;
     }
     auto titleChange = [titleCallback = CallbackHelper(*optValue)](NavigationTitleMode titleMode) {
