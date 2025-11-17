@@ -134,6 +134,20 @@ void GridModelNG::SetGridHeight(const Dimension& value)
     ViewAbstract::SetHeight(NG::CalcLength(value));
 }
 
+void GridModelNG::ReSetGridHeightLayoutPolicy()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        if (!layoutPolicy->IsHeightNoMatch()) {
+            layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+        }
+    }
+}
+
 void GridModelNG::SetScrollBarMode(DisplayMode value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, value);
