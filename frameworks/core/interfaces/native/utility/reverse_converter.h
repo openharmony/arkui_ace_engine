@@ -165,6 +165,11 @@ namespace OHOS::Ace::NG::Converter {
         dst = static_cast<Ark_Float64>(src);
     }
 
+    inline void AssignArkValue(Ark_Int64& dst, const int32_t& src)
+    {
+        dst = static_cast<Ark_Int64>(src);
+    }
+
     inline void AssignArkValue(Ark_String& dst, const std::string_view& src, ConvContext *ctx)
     {
         if (ctx) {

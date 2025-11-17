@@ -62,7 +62,7 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     QRCodeModelStatic::SetQRBackgroundColor(frameNode, convValue);
 }
 void SetContentOpacityImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_Resource* value)
+                           const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

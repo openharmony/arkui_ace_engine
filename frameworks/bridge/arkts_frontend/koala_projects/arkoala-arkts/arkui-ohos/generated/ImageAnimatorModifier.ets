@@ -40,7 +40,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _state_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _state_0_0value?: AnimationStatus | undefined
     _duration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _duration_0_0value?: number | undefined
+    _duration_0_0value?: int32 | undefined
     _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _reverse_0_0value?: boolean | undefined
     _fixedSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -48,7 +48,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _fillMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fillMode_0_0value?: FillMode | undefined
     _iterations_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _iterations_0_0value?: number | undefined
+    _iterations_0_0value?: int32 | undefined
     _monitorInvisibleArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _monitorInvisibleArea_0_0value?: boolean | undefined
     _onStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -104,7 +104,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             switch (this._duration_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDurationAttribute((this._duration_0_0value as number | undefined));
+                    peer.setDurationAttribute((this._duration_0_0value as int32 | undefined));
                     this._duration_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -114,7 +114,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                 }
                 default: {
                     this._duration_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDurationAttribute((undefined as number | undefined));
+                    peer.setDurationAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -176,7 +176,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             switch (this._iterations_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIterationsAttribute((this._iterations_0_0value as number | undefined));
+                    peer.setIterationsAttribute((this._iterations_0_0value as int32 | undefined));
                     this._iterations_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -186,7 +186,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                 }
                 default: {
                     this._iterations_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setIterationsAttribute((undefined as number | undefined));
+                    peer.setIterationsAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -336,7 +336,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                     break;
                 }
                 default: {
-                    this.duration((undefined as number | undefined));
+                    this.duration((undefined as int32 | undefined));
                 }
             }
         }
@@ -388,7 +388,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
                     break;
                 }
                 default: {
-                    this.iterations((undefined as number | undefined));
+                    this.iterations((undefined as int32 | undefined));
                 }
             }
         }
@@ -493,7 +493,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         }
         return this
     }
-    duration(value: number | undefined): this {
+    duration(value: int32 | undefined): this {
         if (((this._duration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._duration_0_0value) !== (value)))
         {
             this._duration_0_flag = AttributeUpdaterFlag.UPDATE
@@ -537,7 +537,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         }
         return this
     }
-    iterations(value: number | undefined): this {
+    iterations(value: int32 | undefined): this {
         if (((this._iterations_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._iterations_0_0value) !== (value)))
         {
             this._iterations_0_flag = AttributeUpdaterFlag.UPDATE

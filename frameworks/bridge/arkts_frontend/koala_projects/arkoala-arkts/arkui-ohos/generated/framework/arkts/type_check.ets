@@ -76,6 +76,7 @@ import { default as uiObserver } from "@ohos.arkui.observer"
 import { FormDimension, FormRenderingMode, FormShape, FormSize, ErrorInformation, FormCallbackInfo, FormInfo, RouterCallbackInfo } from "./../../component/formComponent"
 import { FrictionMotion, ScrollMotion, SpringProp, SpringMotion } from "./../../component/animator"
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, PosterOptions, VideoOptions } from "./../../component/video"
+import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOptions } from "./../../component/gauge"
 import { GridDirection, GridItemAlignment, ComputedBarAttribute, GridLayoutOptions } from "./../../component/grid"
 import { GridItemStyle, GridItemOptions } from "./../../component/gridItem"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -159,7 +160,6 @@ import { EllipseOptions } from "./../../component/ellipse"
 import { default as font } from "@ohos.font"
 import { FormLinkOptions } from "./../../component/formLink"
 import { RenderNode } from "arkui.RenderNode"
-import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOptions } from "./../../component/gauge"
 import { GridColColumnOption, GridColOptions } from "./../../component/gridCol"
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo"
 import { Metadata } from "bundleManager.Metadata"
@@ -575,7 +575,7 @@ export class TypeChecker {
     static isCanvasRenderingContext2D(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof CanvasRenderingContext2D
     }
-    static isCapsuleStyleOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+    static isCapsuleStyleOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof CapsuleStyleOptions
     }
     static isCaretOffset(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
@@ -5681,7 +5681,7 @@ export class TypeChecker {
     static isArray_FractionStop(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
-    static isArray_Tuple_ResourceColor_Number(value: Object | string | number | undefined): boolean {
+    static isArray_Tuple_ResourceColor_F64(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_NativeEmbedParamItem(value: Object | string | number | undefined): boolean {
@@ -5747,6 +5747,9 @@ export class TypeChecker {
     static isArray_Skill(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+static isArray_Tuple_ResourceColor_Number(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_RadiusItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5792,7 +5795,7 @@ export class TypeChecker {
     static isArray_Resource(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
-    static isArray_Tuple_Union_ResourceColor_LinearGradient_Number(value: Object | string | number | undefined): boolean {
+    static isArray_Tuple_Union_ResourceColor_LinearGradient_F64(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_ImageFrameInfo(value: Object | string | number | undefined): boolean {

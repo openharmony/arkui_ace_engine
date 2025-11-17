@@ -213,13 +213,13 @@ export interface DataPanelShadowOptions extends MultiShadowOptions {
     colors?: Array<ResourceColor | LinearGradient>;
 }
 export interface DataPanelOptions {
-    values: Array<number>;
-    max?: number;
+    values: Array<double>;
+    max?: double;
     type?: DataPanelType;
 }
 export interface DataPanelConfiguration extends CommonConfiguration<DataPanelConfiguration> {
-    values: Array<number>;
-    maxValue: number;
+    values: Array<double>;
+    maxValue: double;
 }
 export interface DataPanelAttribute extends CommonMethod {
     setDataPanelOptions(options: DataPanelOptions): this {
@@ -395,23 +395,23 @@ export class DataPanelConfiguration_serializer {
         const valueHolderForValues  = value.values
         valueSerializer.writeInt32((valueHolderForValues.length).toInt())
         for (let valueHolderForValuesCounterI = 0; valueHolderForValuesCounterI < valueHolderForValues.length; valueHolderForValuesCounterI++) {
-            const valueHolderForValuesTmpElement : number = valueHolderForValues[valueHolderForValuesCounterI]
-            valueSerializer.writeNumber(valueHolderForValuesTmpElement)
+            const valueHolderForValuesTmpElement : double = valueHolderForValues[valueHolderForValuesCounterI]
+            valueSerializer.writeFloat64(valueHolderForValuesTmpElement)
         }
         const valueHolderForMaxValue  = value.maxValue
-        valueSerializer.writeNumber(valueHolderForMaxValue)
+        valueSerializer.writeFloat64(valueHolderForMaxValue)
     }
     public static read(buffer: DeserializerBase): DataPanelConfiguration {
         let valueDeserializer : DeserializerBase = buffer
         const enabledTmpResult : boolean = valueDeserializer.readBoolean()
         const contentModifierTmpResult : ContentModifier<DataPanelConfiguration> = (valueDeserializer.readObject() as ContentModifier<DataPanelConfiguration>)
         const valuesTmpBufLength : int32 = valueDeserializer.readInt32()
-        let valuesTmpBuf : Array<number> = new Array<number>(valuesTmpBufLength)
+        let valuesTmpBuf : Array<double> = new Array<double>(valuesTmpBufLength)
         for (let valuesTmpBufBufCounterI = 0; valuesTmpBufBufCounterI < valuesTmpBufLength; valuesTmpBufBufCounterI++) {
-            valuesTmpBuf[valuesTmpBufBufCounterI] = (valueDeserializer.readNumber() as number)
+            valuesTmpBuf[valuesTmpBufBufCounterI] = valueDeserializer.readFloat64()
         }
-        const valuesTmpResult : Array<number> = valuesTmpBuf
-        const maxValueTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valuesTmpResult : Array<double> = valuesTmpBuf
+        const maxValueTmpResult : double = valueDeserializer.readFloat64()
         let value : DataPanelConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, values: valuesTmpResult, maxValue: maxValueTmpResult} as DataPanelConfiguration)
         return value
     }
@@ -422,14 +422,14 @@ export class DataPanelOptions_serializer {
         const valueHolderForValues  = value.values
         valueSerializer.writeInt32((valueHolderForValues.length).toInt())
         for (let valueHolderForValuesCounterI = 0; valueHolderForValuesCounterI < valueHolderForValues.length; valueHolderForValuesCounterI++) {
-            const valueHolderForValuesTmpElement : number = valueHolderForValues[valueHolderForValuesCounterI]
-            valueSerializer.writeNumber(valueHolderForValuesTmpElement)
+            const valueHolderForValuesTmpElement : double = valueHolderForValues[valueHolderForValuesCounterI]
+            valueSerializer.writeFloat64(valueHolderForValuesTmpElement)
         }
         const valueHolderForMax  = value.max
         if (valueHolderForMax !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxTmpValue  = valueHolderForMax!
-            valueSerializer.writeNumber(valueHolderForMaxTmpValue)
+            valueSerializer.writeFloat64(valueHolderForMaxTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -445,17 +445,17 @@ export class DataPanelOptions_serializer {
     public static read(buffer: DeserializerBase): DataPanelOptions {
         let valueDeserializer : DeserializerBase = buffer
         const valuesTmpBufLength : int32 = valueDeserializer.readInt32()
-        let valuesTmpBuf : Array<number> = new Array<number>(valuesTmpBufLength)
+        let valuesTmpBuf : Array<double> = new Array<double>(valuesTmpBufLength)
         for (let valuesTmpBufBufCounterI = 0; valuesTmpBufBufCounterI < valuesTmpBufLength; valuesTmpBufBufCounterI++) {
-            valuesTmpBuf[valuesTmpBufBufCounterI] = (valueDeserializer.readNumber() as number)
+            valuesTmpBuf[valuesTmpBufBufCounterI] = valueDeserializer.readFloat64()
         }
-        const valuesTmpResult : Array<number> = valuesTmpBuf
+        const valuesTmpResult : Array<double> = valuesTmpBuf
         const maxTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxTmpBuf : number | undefined = undefined
+        let maxTmpBuf : double | undefined = undefined
         if ((maxTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxTmpBuf = (valueDeserializer.readNumber() as number)
+            maxTmpBuf = valueDeserializer.readFloat64()
         }
-        const maxTmpResult : number | undefined = maxTmpBuf
+        const maxTmpResult : double | undefined = maxTmpBuf
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : DataPanelType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -473,10 +473,10 @@ export class DataPanelShadowOptions_serializer {
         if (valueHolderForRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
-            if (valueHolderForRadiusTmpValue instanceof number) {
+            if (valueHolderForRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0)
+                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
@@ -557,20 +557,20 @@ export class DataPanelShadowOptions_serializer {
     public static read(buffer: DeserializerBase): DataPanelShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radiusTmpBuf : number | Resource | undefined = undefined
+        let radiusTmpBuf : double | Resource | undefined = undefined
         if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let radiusTmpBuf_ : number | Resource | undefined
+            let radiusTmpBuf_ : double | Resource | undefined
             if (radiusTmpBuf_UnionSelector == (0).toChar()) {
-                radiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                radiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
                 radiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for radiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            radiusTmpBuf = (radiusTmpBuf_ as number | Resource)
+            radiusTmpBuf = (radiusTmpBuf_ as double | Resource)
         }
-        const radiusTmpResult : number | Resource | undefined = radiusTmpBuf
+        const radiusTmpResult : double | Resource | undefined = radiusTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

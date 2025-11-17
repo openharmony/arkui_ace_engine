@@ -6378,9 +6378,9 @@ export interface GeometryTransitionOptions {
     hierarchyStrategy?: TransitionHierarchyStrategy;
 }
 export interface LinearGradientOptions {
-    angle?: number | string;
+    angle?: double | string;
     direction?: GradientDirection;
-    colors: Array<[ ResourceColor, number ]>;
+    colors: Array<[ ResourceColor, double ]>;
     repeating?: boolean;
 }
 export enum TransitionHierarchyStrategy {
@@ -6618,7 +6618,7 @@ export interface PickerDialogButtonStyle {
     role?: ButtonRole;
     fontSize?: Length;
     fontColor?: ResourceColor;
-    fontWeight?: FontWeight | number | string;
+    fontWeight?: FontWeight | int32 | string;
     fontStyle?: FontStyle;
     fontFamily?: Resource | string;
     backgroundColor?: ResourceColor;
@@ -6646,7 +6646,7 @@ export enum ShadowStyle {
     OUTER_FLOATING_MD = 5
 }
 export interface MultiShadowOptions {
-    radius?: number | Resource;
+    radius?: double | Resource;
     offsetX?: double | Resource;
     offsetY?: double | Resource;
 }
@@ -11368,44 +11368,44 @@ export class Bindable_Array_Arkui_Component_Units_ResourceStr_serializer {
         return value
     }
 }
-export class Bindable_Array_Number_serializer {
-    public static write(buffer: SerializerBase, value: Bindable<Array<number>>): void {
+export class Bindable_Array_I32_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<Array<int32>>): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
         valueSerializer.writeInt32((valueHolderForValue.length).toInt())
         for (let valueHolderForValueCounterI = 0; valueHolderForValueCounterI < valueHolderForValue.length; valueHolderForValueCounterI++) {
-            const valueHolderForValueTmpElement : number = valueHolderForValue[valueHolderForValueCounterI]
-            valueSerializer.writeNumber(valueHolderForValueTmpElement)
+            const valueHolderForValueTmpElement : int32 = valueHolderForValue[valueHolderForValueCounterI]
+            valueSerializer.writeInt32(valueHolderForValueTmpElement)
         }
         const valueHolderForOnChange  = value.onChange
         valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
     }
-    public static read(buffer: DeserializerBase): Bindable<Array<number>> {
+    public static read(buffer: DeserializerBase): Bindable<Array<int32>> {
         let valueDeserializer : DeserializerBase = buffer
         const valueTmpBufLength : int32 = valueDeserializer.readInt32()
-        let valueTmpBuf : Array<number> = new Array<number>(valueTmpBufLength)
+        let valueTmpBuf : Array<int32> = new int32[valueTmpBufLength]
         for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-            valueTmpBuf[valueTmpBufBufCounterI] = (valueDeserializer.readNumber() as number)
+            valueTmpBuf[valueTmpBufBufCounterI] = valueDeserializer.readInt32()
         }
-        const valueTmpResult : Array<number> = valueTmpBuf
+        const valueTmpResult : Array<int32> = valueTmpBuf
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: Array<number>) => void) = (value0: Array<number>):void => {
+        const onChangeTmpResult : ((value0: Array<int32>) => void) = (value0: Array<int32>):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             onChangeTmpBufBufArgsSerializer.writeInt32((value0.length).toInt());
             for (let value0CounterI = 0; value0CounterI < value0.length; value0CounterI++) {
-                const value0TmpElement : number = value0[value0CounterI];
-                onChangeTmpBufBufArgsSerializer.writeNumber(value0TmpElement);
+                const value0TmpElement : int32 = value0[value0CounterI];
+                onChangeTmpBufBufArgsSerializer.writeInt32(value0TmpElement);
             }
-            InteropNativeModule._CallCallbackSync(10, 1442979681, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 552547050, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
-        let value : Bindable<Array<number>> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Array<number>>)
+        let value : Bindable<Array<int32>> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Array<int32>>)
         return value
     }
 }
@@ -12444,10 +12444,10 @@ export class LinearGradientOptions_serializer {
         if (valueHolderForAngle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAngleTmpValue  = valueHolderForAngle!
-            if (valueHolderForAngleTmpValue instanceof number) {
+            if (valueHolderForAngleTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForAngleTmpValueForIdx0  = valueHolderForAngleTmpValue as number
-                valueSerializer.writeNumber(valueHolderForAngleTmpValueForIdx0)
+                const valueHolderForAngleTmpValueForIdx0  = valueHolderForAngleTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForAngleTmpValueForIdx0)
             } else if (valueHolderForAngleTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForAngleTmpValueForIdx1  = valueHolderForAngleTmpValue as string
@@ -12467,7 +12467,7 @@ export class LinearGradientOptions_serializer {
         const valueHolderForColors  = value.colors
         valueSerializer.writeInt32((valueHolderForColors.length).toInt())
         for (let valueHolderForColorsCounterI = 0; valueHolderForColorsCounterI < valueHolderForColors.length; valueHolderForColorsCounterI++) {
-            const valueHolderForColorsTmpElement : [ ResourceColor, number ] = valueHolderForColors[valueHolderForColorsCounterI]
+            const valueHolderForColorsTmpElement : [ ResourceColor, double ] = valueHolderForColors[valueHolderForColorsCounterI]
             const valueHolderForColorsTmpElement_0  = valueHolderForColorsTmpElement[0]
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
                 valueSerializer.writeInt8((0).toByte())
@@ -12487,7 +12487,7 @@ export class LinearGradientOptions_serializer {
                 Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0ForIdx3)
             }
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForColorsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
@@ -12501,20 +12501,20 @@ export class LinearGradientOptions_serializer {
     public static read(buffer: DeserializerBase): LinearGradientOptions {
         let valueDeserializer : DeserializerBase = buffer
         const angleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let angleTmpBuf : number | string | undefined = undefined
+        let angleTmpBuf : double | string | undefined = undefined
         if ((angleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const angleTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let angleTmpBuf_ : number | string | undefined
+            let angleTmpBuf_ : double | string | undefined
             if (angleTmpBuf_UnionSelector == (0).toChar()) {
-                angleTmpBuf_ = (valueDeserializer.readNumber() as number)
+                angleTmpBuf_ = valueDeserializer.readFloat64()
             } else if (angleTmpBuf_UnionSelector == (1).toChar()) {
                 angleTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for angleTmpBuf_ has to be chosen through deserialisation.")
             }
-            angleTmpBuf = (angleTmpBuf_ as number | string)
+            angleTmpBuf = (angleTmpBuf_ as double | string)
         }
-        const angleTmpResult : number | string | undefined = angleTmpBuf
+        const angleTmpResult : double | string | undefined = angleTmpBuf
         const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let directionTmpBuf : GradientDirection | undefined = undefined
         if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -12522,7 +12522,7 @@ export class LinearGradientOptions_serializer {
         }
         const directionTmpResult : GradientDirection | undefined = directionTmpBuf
         const colorsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
+        let colorsTmpBuf : Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
@@ -12538,10 +12538,10 @@ export class LinearGradientOptions_serializer {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
             const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
-            const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
+            const colorsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
+            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
-        const colorsTmpResult : Array<[ ResourceColor, number ]> = colorsTmpBuf
+        const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -19364,10 +19364,10 @@ export class PickerDialogButtonStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0.valueOf())
-            } else if (valueHolderForFontWeightTmpValue instanceof number) {
+            } else if (valueHolderForFontWeightTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx1)
+                const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1)
             } else if (valueHolderForFontWeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as string
@@ -19518,22 +19518,22 @@ export class PickerDialogButtonStyle_serializer {
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
         const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeightTmpBuf : FontWeight | number | string | undefined = undefined
+        let fontWeightTmpBuf : FontWeight | int32 | string | undefined = undefined
         if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontWeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontWeightTmpBuf_ : FontWeight | number | string | undefined
+            let fontWeightTmpBuf_ : FontWeight | int32 | string | undefined
             if (fontWeightTmpBuf_UnionSelector == (0).toChar()) {
                 fontWeightTmpBuf_ = FontWeight.fromValue(valueDeserializer.readInt32())
             } else if (fontWeightTmpBuf_UnionSelector == (1).toChar()) {
-                fontWeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontWeightTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontWeightTmpBuf_UnionSelector == (2).toChar()) {
                 fontWeightTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for fontWeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontWeightTmpBuf = (fontWeightTmpBuf_ as FontWeight | number | string)
+            fontWeightTmpBuf = (fontWeightTmpBuf_ as FontWeight | int32 | string)
         }
-        const fontWeightTmpResult : FontWeight | number | string | undefined = fontWeightTmpBuf
+        const fontWeightTmpResult : FontWeight | int32 | string | undefined = fontWeightTmpBuf
         const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontStyleTmpBuf : FontStyle | undefined = undefined
         if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

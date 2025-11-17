@@ -148,13 +148,13 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
 }
 
 export interface AnimationOptions {
-  duration?: number;
-  iterations?: number;
+  duration?: int;
+  iterations?: int;
 }
 
 class AnimationOptionsImpl implements AnimationOptions {
-  duration?: number;
-  iterations?: number;
+  duration?: int;
+  iterations?: int;
   constructor() { }
 }
 

@@ -77,7 +77,7 @@ ColorStopArray Convert(const Ark_LinearGradient& src)
 
 using ColorWithWeight = std::tuple<ColorStopArray, float>;
 template<>
-ColorWithWeight Convert(const Ark_Tuple_Union_ResourceColor_LinearGradient_Number& src)
+ColorWithWeight Convert(const Ark_Tuple_Union_ResourceColor_LinearGradient_F64& src)
 {
     ColorStopArray colors;
     Converter::VisitUnion(src.value0,
@@ -170,7 +170,7 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
 void SetValueImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+                  const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -182,7 +182,7 @@ void SetValueImpl(Ark_NativePointer node,
     GaugeModelStatic::SetValue(frameNode, convValue);
 }
 void SetStartAngleImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -194,7 +194,7 @@ void SetStartAngleImpl(Ark_NativePointer node,
     GaugeModelNG::SetStartAngle(frameNode, *convValue);
 }
 void SetEndAngleImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -206,7 +206,7 @@ void SetEndAngleImpl(Ark_NativePointer node,
     GaugeModelNG::SetEndAngle(frameNode, *convValue);
 }
 void SetColorsImpl(Ark_NativePointer node,
-                   const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
+                   const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -229,7 +229,7 @@ void SetColorsImpl(Ark_NativePointer node,
                 .type = GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT
             };
         },
-        [&gaugeColors](const Array_Tuple_Union_ResourceColor_LinearGradient_Number& colorsArray) {
+        [&gaugeColors](const Array_Tuple_Union_ResourceColor_LinearGradient_F64& colorsArray) {
             gaugeColors = GaugeColors {
                 .type = GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT
             };

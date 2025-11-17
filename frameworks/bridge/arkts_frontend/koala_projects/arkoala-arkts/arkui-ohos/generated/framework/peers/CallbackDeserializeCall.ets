@@ -59,7 +59,7 @@ import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfigura
 import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
-import { TextTimerConfiguration_serializer, TextTimerConfiguration } from "./../../component/textTimer"
+import { TextTimerConfiguration_serializer, TextTimerConfiguration, TimerCallback } from "./../../component/textTimer"
 import { ToggleConfiguration_serializer, ToggleConfiguration } from "./../../component/toggle"
 import { registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer, runtimeType } from "@koalaui/interop"
 import { int32, float32, int64 } from "@koalaui/common"
@@ -194,15 +194,15 @@ export function deserializeAndCallCallback_Area_Area_Void(thisDeserializer: Dese
     let newValue : Area = Area_serializer.read(thisDeserializer)
     _call(oldValue, newValue)
 }
-export function deserializeAndCallCallback_Array_Number_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_Array_I32_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((input: Array<number>) => void))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((input: Array<int32>) => void))
     const inputTmpBufLength : int32 = thisDeserializer.readInt32()
-    let inputTmpBuf : Array<number> = new Array<number>(inputTmpBufLength)
+    let inputTmpBuf : Array<int32> = new int32[inputTmpBufLength]
     for (let inputTmpBufBufCounterI = 0; inputTmpBufBufCounterI < inputTmpBufLength; inputTmpBufBufCounterI++) {
-        inputTmpBuf[inputTmpBufBufCounterI] = (thisDeserializer.readNumber() as number)
+        inputTmpBuf[inputTmpBufBufCounterI] = thisDeserializer.readInt32()
     }
-    let input : Array<number> = inputTmpBuf
+    let input : Array<int32> = inputTmpBuf
     _call(input)
 }
 export function deserializeAndCallCallback_Array_String_Void(thisDeserializer: DeserializerBase): void {
@@ -691,6 +691,12 @@ export function deserializeAndCallCallback_I32_Void(thisDeserializer: Deserializ
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: int32) => void))
     let value0 : int32 = thisDeserializer.readInt32()
     _call(value0)
+}
+export function deserializeAndCallCallback_I64_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: int64) => void))
+    let value : int64 = thisDeserializer.readInt64()
+    _call(value)
 }
 export function deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1709,15 +1715,15 @@ export function deserializeAndCallCallback_T_Void_Array_Global_Resource_Resource
     let value0 : Array<Resource> = value0TmpBuf
     _call(value0)
 }
-export function deserializeAndCallCallback_T_Void_Array_Number(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_T_Void_Array_I32(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Array<number>) => void))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Array<int32>) => void))
     const value0TmpBufLength : int32 = thisDeserializer.readInt32()
-    let value0TmpBuf : Array<number> = new Array<number>(value0TmpBufLength)
+    let value0TmpBuf : Array<int32> = new int32[value0TmpBufLength]
     for (let value0TmpBufBufCounterI = 0; value0TmpBufBufCounterI < value0TmpBufLength; value0TmpBufBufCounterI++) {
-        value0TmpBuf[value0TmpBufBufCounterI] = (thisDeserializer.readNumber() as number)
+        value0TmpBuf[value0TmpBufBufCounterI] = thisDeserializer.readInt32()
     }
-    let value0 : Array<number> = value0TmpBuf
+    let value0 : Array<int32> = value0TmpBuf
     _call(value0)
 }
 export function deserializeAndCallCallback_T_Void_Array_String(thisDeserializer: DeserializerBase): void {
@@ -2775,20 +2781,20 @@ export function deserializeAndCallOnTextPickerChangeCallback(thisDeserializer: D
     }
     let selectItem : string | Array<string> = (selectItemTmpBuf as string | Array<string>)
     const indexTmpBufUnionSelector : int32 = thisDeserializer.readInt8()
-    let indexTmpBuf : number | Array<number> | undefined
+    let indexTmpBuf : int32 | Array<int32> | undefined
     if (indexTmpBufUnionSelector == (0).toChar()) {
-        indexTmpBuf = (thisDeserializer.readNumber() as number)
+        indexTmpBuf = thisDeserializer.readInt32()
     } else if (indexTmpBufUnionSelector == (1).toChar()) {
         const indexTmpBufBufULength : int32 = thisDeserializer.readInt32()
-        let indexTmpBufBufU : Array<number> = new Array<number>(indexTmpBufBufULength)
+        let indexTmpBufBufU : Array<int32> = new int32[indexTmpBufBufULength]
         for (let indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = (thisDeserializer.readNumber() as number)
+            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32()
         }
         indexTmpBuf = indexTmpBufBufU
     } else {
         throw new Error("One of the branches for indexTmpBuf has to be chosen through deserialisation.")
     }
-    let index : number | Array<number> = (indexTmpBuf as number | Array<number>)
+    let index : int32 | Array<int32> = (indexTmpBuf as int32 | Array<int32>)
     _call(selectItem, index)
 }
 export function deserializeAndCallOnTextSelectionChangeCallback(thisDeserializer: DeserializerBase): void {
@@ -3269,20 +3275,20 @@ export function deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeseri
     }
     let value : string | Array<string> = (valueTmpBuf as string | Array<string>)
     const indexTmpBufUnionSelector : int32 = thisDeserializer.readInt8()
-    let indexTmpBuf : number | Array<number> | undefined
+    let indexTmpBuf : int32 | Array<int32> | undefined
     if (indexTmpBufUnionSelector == (0).toChar()) {
-        indexTmpBuf = (thisDeserializer.readNumber() as number)
+        indexTmpBuf = thisDeserializer.readInt32()
     } else if (indexTmpBufUnionSelector == (1).toChar()) {
         const indexTmpBufBufULength : int32 = thisDeserializer.readInt32()
-        let indexTmpBufBufU : Array<number> = new Array<number>(indexTmpBufBufULength)
+        let indexTmpBufBufU : Array<int32> = new int32[indexTmpBufBufULength]
         for (let indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = (thisDeserializer.readNumber() as number)
+            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32()
         }
         indexTmpBuf = indexTmpBufBufU
     } else {
         throw new Error("One of the branches for indexTmpBuf has to be chosen through deserialisation.")
     }
-    let index : number | Array<number> = (indexTmpBuf as number | Array<number>)
+    let index : int32 | Array<int32> = (indexTmpBuf as int32 | Array<int32>)
     _call(value, index)
 }
 export function deserializeAndCallTextPickerScrollStopCallback(thisDeserializer: DeserializerBase): void {
@@ -3304,20 +3310,20 @@ export function deserializeAndCallTextPickerScrollStopCallback(thisDeserializer:
     }
     let value : string | Array<string> = (valueTmpBuf as string | Array<string>)
     const indexTmpBufUnionSelector : int32 = thisDeserializer.readInt8()
-    let indexTmpBuf : number | Array<number> | undefined
+    let indexTmpBuf : int32 | Array<int32> | undefined
     if (indexTmpBufUnionSelector == (0).toChar()) {
-        indexTmpBuf = (thisDeserializer.readNumber() as number)
+        indexTmpBuf = thisDeserializer.readInt32()
     } else if (indexTmpBufUnionSelector == (1).toChar()) {
         const indexTmpBufBufULength : int32 = thisDeserializer.readInt32()
-        let indexTmpBufBufU : Array<number> = new Array<number>(indexTmpBufBufULength)
+        let indexTmpBufBufU : Array<int32> = new int32[indexTmpBufBufULength]
         for (let indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = (thisDeserializer.readNumber() as number)
+            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32()
         }
         indexTmpBuf = indexTmpBufBufU
     } else {
         throw new Error("One of the branches for indexTmpBuf has to be chosen through deserialisation.")
     }
-    let index : number | Array<number> = (indexTmpBuf as number | Array<number>)
+    let index : int32 | Array<int32> = (indexTmpBuf as int32 | Array<int32>)
     _call(value, index)
 }
 export function deserializeAndCallTextTimerModifierBuilder(thisDeserializer: DeserializerBase): void {
@@ -3340,6 +3346,13 @@ export function deserializeAndCallTextTimerModifierBuilder(thisDeserializer: Des
     }
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
+}
+export function deserializeAndCallTimerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as TimerCallback)
+    let utc : int64 = thisDeserializer.readInt64()
+    let elapsedTime : int64 = thisDeserializer.readInt64()
+    _call(utc, elapsedTime)
 }
 export function deserializeAndCallToggleModifierBuilder(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3513,7 +3526,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisDeserializer);
         case CallbackKind.Kind_Callback_AccessibilityActionInterceptResult_Void: return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Array_Number_Void: return deserializeAndCallCallback_Array_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Array_I32_Void: return deserializeAndCallCallback_Array_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Array_String_Void: return deserializeAndCallCallback_Array_String_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Array_TextMenuItem_Void: return deserializeAndCallCallback_Array_TextMenuItem_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Array_TouchTestInfo_TouchResult: return deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisDeserializer);
@@ -3562,6 +3575,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_I32_I32_Void: return deserializeAndCallCallback_I32_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_I32_Tuple_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32(thisDeserializer);
         case CallbackKind.Kind_Callback_I32_Tuple_I32_I32_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32_I32_I32(thisDeserializer);
+        case CallbackKind.Kind_Callback_I64_Void: return deserializeAndCallCallback_I64_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_I32_Void: return deserializeAndCallCallback_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_InsertValue_Boolean: return deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_InsertValue_Void: return deserializeAndCallCallback_InsertValue_Void(thisDeserializer);
@@ -3669,7 +3683,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_T_Void_Arkui_Component_Units_ResourceStr: return deserializeAndCallCallback_T_Void_Arkui_Component_Units_ResourceStr(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Array_Arkui_Component_Units_ResourceStr: return deserializeAndCallCallback_T_Void_Array_Arkui_Component_Units_ResourceStr(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Array_Global_Resource_Resource: return deserializeAndCallCallback_T_Void_Array_Global_Resource_Resource(thisDeserializer);
-        case CallbackKind.Kind_Callback_T_Void_Array_Number: return deserializeAndCallCallback_T_Void_Array_Number(thisDeserializer);
+        case CallbackKind.Kind_Callback_T_Void_Array_I32: return deserializeAndCallCallback_T_Void_Array_I32(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Array_String: return deserializeAndCallCallback_T_Void_Array_String(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Boolean: return deserializeAndCallCallback_T_Void_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Date: return deserializeAndCallCallback_T_Void_Date(thisDeserializer);
@@ -3806,6 +3820,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer);
         case CallbackKind.Kind_TextPickerScrollStopCallback: return deserializeAndCallTextPickerScrollStopCallback(thisDeserializer);
         case CallbackKind.Kind_TextTimerModifierBuilder: return deserializeAndCallTextTimerModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_TimerCallback: return deserializeAndCallTimerCallback(thisDeserializer);
         case CallbackKind.Kind_ToggleModifierBuilder: return deserializeAndCallToggleModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_TransitionFinishCallback: return deserializeAndCallTransitionFinishCallback(thisDeserializer);
         case CallbackKind.Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer);

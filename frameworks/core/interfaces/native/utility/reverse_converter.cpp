@@ -122,9 +122,9 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     auto minute = data->GetValue(MINUTE)->GetInt();
     auto second = data->GetValue(SECOND)->GetInt();
     dst = {
-        .hour = ArkValue<Ark_Number>(hour),
-        .minute = ArkValue<Ark_Number>(minute),
-        .second = ArkValue<Ark_Number>(second),
+        .hour = ArkValue<Ark_Int32>(hour),
+        .minute = ArkValue<Ark_Int32>(minute),
+        .second = ArkValue<Ark_Int32>(second),
     };
 }
 
@@ -678,8 +678,8 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {
-    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
-    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Int32>(src.GetComponentHeight());
     dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
 }
 

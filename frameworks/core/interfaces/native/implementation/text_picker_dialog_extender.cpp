@@ -53,17 +53,17 @@ std::optional<Converter::PickerValueType> ProcessBindableTextValue(
 }
 
 std::optional<Converter::PickerSelectedType> ProcessBindableTextSelected(
-    const Opt_Union_Number_Array_Number_Bindable_Bindable& value)
+    const Opt_Union_I32_Array_I32_Bindable_Bindable& value)
 {
     std::optional<Converter::PickerSelectedType> result;
     Converter::VisitUnion(
-        value, [&result](const Ark_Number& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
-        [&result](const Array_Number& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
-        [&result](const Ark_Bindable_Number& src) {
+        value, [&result](const Ark_Int32& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
+        [&result](const Array_Int32& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
+        [&result](const Ark_Bindable_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             // Implement callback functionality
         },
-        [&result](const Ark_Bindable_Array_Number& src) {
+        [&result](const Ark_Bindable_Array_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             // Implement callback functionality
         },
@@ -224,13 +224,13 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
         } else {
             indexes.push_back(jsonIndex->GetUInt());
         }
-        Converter::ArkArrayHolder<Array_Number> indexesHolder(indexes);
+        Converter::ArkArrayHolder<Array_Int32> indexesHolder(indexes);
         if (isIndexesArray) {
-            Array_Number arkValues = indexesHolder.ArkValue();
-            textPickerRes.index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arkValues);
+            Array_Int32 arkValues = indexesHolder.ArkValue();
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(arkValues);
         } else if (static_cast<int32_t>(indexes.size()) > 0) {
-            // textPickerRes.index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(
-            //     Converter::ArkValue<Ark_Number>(indexes.at(0)));
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Ark_Int32>(
+                Converter::ArkValue<Ark_Int32>(indexes.at(0)));
         }
 
         std::vector<std::string> values;
