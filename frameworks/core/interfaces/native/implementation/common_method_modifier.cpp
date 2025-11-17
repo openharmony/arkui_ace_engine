@@ -5384,7 +5384,7 @@ void BindMenuBase(Ark_NativePointer node,
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
-            }, node);
+                }, node);
         },
         []() {});
 }
