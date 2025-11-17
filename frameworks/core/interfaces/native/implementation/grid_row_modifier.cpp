@@ -178,7 +178,7 @@ namespace OHOS::Ace::NG::Converter {
         return toValue;
     }
     template<>
-    V2::GridContainerSize Convert(const Ark_Number& value);
+    V2::GridContainerSize Convert(const Ark_Int32& value);
 
     void InheritGridColumns(V2::GridContainerSize& gridContainerSize,
         std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])

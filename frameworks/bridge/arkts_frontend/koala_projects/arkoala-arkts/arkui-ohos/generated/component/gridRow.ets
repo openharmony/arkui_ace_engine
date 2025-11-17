@@ -91,12 +91,12 @@ export interface GridRowSizeOption {
     xxl?: Length;
 }
 export interface GridRowColumnOption {
-    xs?: number;
-    sm?: number;
-    md?: number;
-    lg?: number;
-    xl?: number;
-    xxl?: number;
+    xs?: int32;
+    sm?: int32;
+    md?: int32;
+    lg?: int32;
+    xl?: int32;
+    xxl?: int32;
 }
 export interface GutterOption {
     x?: Length | GridRowSizeOption;
@@ -120,7 +120,7 @@ export interface BreakPoints {
 }
 export interface GridRowOptions {
     gutter?: Length | GutterOption;
-    columns?: number | GridRowColumnOption;
+    columns?: int32 | GridRowColumnOption;
     breakpoints?: BreakPoints;
     direction?: GridRowDirection;
 }
@@ -273,7 +273,7 @@ export class GridRowColumnOption_serializer {
         if (valueHolderForXs !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXsTmpValue  = valueHolderForXs!
-            valueSerializer.writeNumber(valueHolderForXsTmpValue)
+            valueSerializer.writeInt32(valueHolderForXsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -281,7 +281,7 @@ export class GridRowColumnOption_serializer {
         if (valueHolderForSm !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSmTmpValue  = valueHolderForSm!
-            valueSerializer.writeNumber(valueHolderForSmTmpValue)
+            valueSerializer.writeInt32(valueHolderForSmTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -289,7 +289,7 @@ export class GridRowColumnOption_serializer {
         if (valueHolderForMd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMdTmpValue  = valueHolderForMd!
-            valueSerializer.writeNumber(valueHolderForMdTmpValue)
+            valueSerializer.writeInt32(valueHolderForMdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -297,7 +297,7 @@ export class GridRowColumnOption_serializer {
         if (valueHolderForLg !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLgTmpValue  = valueHolderForLg!
-            valueSerializer.writeNumber(valueHolderForLgTmpValue)
+            valueSerializer.writeInt32(valueHolderForLgTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -305,7 +305,7 @@ export class GridRowColumnOption_serializer {
         if (valueHolderForXl !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXlTmpValue  = valueHolderForXl!
-            valueSerializer.writeNumber(valueHolderForXlTmpValue)
+            valueSerializer.writeInt32(valueHolderForXlTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -313,7 +313,7 @@ export class GridRowColumnOption_serializer {
         if (valueHolderForXxl !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXxlTmpValue  = valueHolderForXxl!
-            valueSerializer.writeNumber(valueHolderForXxlTmpValue)
+            valueSerializer.writeInt32(valueHolderForXxlTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -321,41 +321,41 @@ export class GridRowColumnOption_serializer {
     public static read(buffer: DeserializerBase): GridRowColumnOption {
         let valueDeserializer : DeserializerBase = buffer
         const xsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xsTmpBuf : number | undefined = undefined
+        let xsTmpBuf : int32 | undefined = undefined
         if ((xsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xsTmpBuf = (valueDeserializer.readNumber() as number)
+            xsTmpBuf = valueDeserializer.readInt32()
         }
-        const xsTmpResult : number | undefined = xsTmpBuf
+        const xsTmpResult : int32 | undefined = xsTmpBuf
         const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let smTmpBuf : number | undefined = undefined
+        let smTmpBuf : int32 | undefined = undefined
         if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            smTmpBuf = (valueDeserializer.readNumber() as number)
+            smTmpBuf = valueDeserializer.readInt32()
         }
-        const smTmpResult : number | undefined = smTmpBuf
+        const smTmpResult : int32 | undefined = smTmpBuf
         const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mdTmpBuf : number | undefined = undefined
+        let mdTmpBuf : int32 | undefined = undefined
         if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            mdTmpBuf = (valueDeserializer.readNumber() as number)
+            mdTmpBuf = valueDeserializer.readInt32()
         }
-        const mdTmpResult : number | undefined = mdTmpBuf
+        const mdTmpResult : int32 | undefined = mdTmpBuf
         const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lgTmpBuf : number | undefined = undefined
+        let lgTmpBuf : int32 | undefined = undefined
         if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lgTmpBuf = (valueDeserializer.readNumber() as number)
+            lgTmpBuf = valueDeserializer.readInt32()
         }
-        const lgTmpResult : number | undefined = lgTmpBuf
+        const lgTmpResult : int32 | undefined = lgTmpBuf
         const xlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xlTmpBuf : number | undefined = undefined
+        let xlTmpBuf : int32 | undefined = undefined
         if ((xlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xlTmpBuf = (valueDeserializer.readNumber() as number)
+            xlTmpBuf = valueDeserializer.readInt32()
         }
-        const xlTmpResult : number | undefined = xlTmpBuf
+        const xlTmpResult : int32 | undefined = xlTmpBuf
         const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xxlTmpBuf : number | undefined = undefined
+        let xxlTmpBuf : int32 | undefined = undefined
         if ((xxlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xxlTmpBuf = (valueDeserializer.readNumber() as number)
+            xxlTmpBuf = valueDeserializer.readInt32()
         }
-        const xxlTmpResult : number | undefined = xxlTmpBuf
+        const xxlTmpResult : int32 | undefined = xxlTmpBuf
         let value : GridRowColumnOption = ({xs: xsTmpResult, sm: smTmpResult, md: mdTmpResult, lg: lgTmpResult, xl: xlTmpResult, xxl: xxlTmpResult} as GridRowColumnOption)
         return value
     }
@@ -745,10 +745,10 @@ export class GridRowOptions_serializer {
         if (valueHolderForColumns !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColumnsTmpValue  = valueHolderForColumns!
-            if (valueHolderForColumnsTmpValue instanceof number) {
+            if (valueHolderForColumnsTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColumnsTmpValueForIdx0  = valueHolderForColumnsTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColumnsTmpValueForIdx0)
+                const valueHolderForColumnsTmpValueForIdx0  = valueHolderForColumnsTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColumnsTmpValueForIdx0)
             } else if (valueHolderForColumnsTmpValue instanceof GridRowColumnOption) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColumnsTmpValueForIdx1  = valueHolderForColumnsTmpValue as GridRowColumnOption
@@ -803,20 +803,20 @@ export class GridRowOptions_serializer {
         }
         const gutterTmpResult : Length | GutterOption | undefined = gutterTmpBuf
         const columnsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let columnsTmpBuf : number | GridRowColumnOption | undefined = undefined
+        let columnsTmpBuf : int32 | GridRowColumnOption | undefined = undefined
         if ((columnsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnsTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let columnsTmpBuf_ : number | GridRowColumnOption | undefined
+            let columnsTmpBuf_ : int32 | GridRowColumnOption | undefined
             if (columnsTmpBuf_UnionSelector == (0).toChar()) {
-                columnsTmpBuf_ = (valueDeserializer.readNumber() as number)
+                columnsTmpBuf_ = valueDeserializer.readInt32()
             } else if (columnsTmpBuf_UnionSelector == (1).toChar()) {
                 columnsTmpBuf_ = GridRowColumnOption_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for columnsTmpBuf_ has to be chosen through deserialisation.")
             }
-            columnsTmpBuf = (columnsTmpBuf_ as number | GridRowColumnOption)
+            columnsTmpBuf = (columnsTmpBuf_ as int32 | GridRowColumnOption)
         }
-        const columnsTmpResult : number | GridRowColumnOption | undefined = columnsTmpBuf
+        const columnsTmpResult : int32 | GridRowColumnOption | undefined = columnsTmpBuf
         const breakpointsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let breakpointsTmpBuf : BreakPoints | undefined = undefined
         if ((breakpointsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

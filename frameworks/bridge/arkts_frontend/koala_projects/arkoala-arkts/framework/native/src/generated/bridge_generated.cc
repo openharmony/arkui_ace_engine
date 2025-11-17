@@ -7797,75 +7797,75 @@ void impl_GridColAttribute_setSpan(Ark_NativePointer thisPtr, KSerializerBuffer 
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_GridColColumnOption valueValueTempTmpBuf = {};
+        Opt_Union_I32_GridColColumnOption valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_GridColColumnOption valueValueTempTmpBuf_ = {};
+            Ark_Union_I32_GridColColumnOption valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readInt32();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = GridColColumnOption_serializer::read(thisDeserializer);
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_GridColColumnOption>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_GridColColumnOption>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_GridColColumnOption valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGridColModifier()->setSpan(self, static_cast<Opt_Union_Number_GridColColumnOption*>(&valueValueTemp));
+        Opt_Union_I32_GridColColumnOption valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGridColModifier()->setSpan(self, static_cast<Opt_Union_I32_GridColColumnOption*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GridColAttribute_setSpan, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GridColAttribute_setGridColOffset(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_GridColColumnOption valueValueTempTmpBuf = {};
+        Opt_Union_I32_GridColColumnOption valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_GridColColumnOption valueValueTempTmpBuf_ = {};
+            Ark_Union_I32_GridColColumnOption valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readInt32();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = GridColColumnOption_serializer::read(thisDeserializer);
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_GridColColumnOption>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_GridColColumnOption>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_GridColColumnOption valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGridColModifier()->setGridColOffset(self, static_cast<Opt_Union_Number_GridColColumnOption*>(&valueValueTemp));
+        Opt_Union_I32_GridColColumnOption valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGridColModifier()->setGridColOffset(self, static_cast<Opt_Union_I32_GridColColumnOption*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GridColAttribute_setGridColOffset, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GridColAttribute_setOrder(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_GridColColumnOption valueValueTempTmpBuf = {};
+        Opt_Union_I32_GridColColumnOption valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_GridColColumnOption valueValueTempTmpBuf_ = {};
+            Ark_Union_I32_GridColColumnOption valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readInt32();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = GridColColumnOption_serializer::read(thisDeserializer);
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_GridColColumnOption>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_GridColColumnOption>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_GridColColumnOption valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGridColModifier()->setOrder(self, static_cast<Opt_Union_Number_GridColColumnOption*>(&valueValueTemp));
+        Opt_Union_I32_GridColColumnOption valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGridColModifier()->setOrder(self, static_cast<Opt_Union_I32_GridColColumnOption*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GridColAttribute_setOrder, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_GridItem_construct(Ark_Int32 id, Ark_Int32 flags) {
