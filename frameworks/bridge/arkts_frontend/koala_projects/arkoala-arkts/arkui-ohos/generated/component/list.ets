@@ -1462,8 +1462,13 @@ export class ListScroller extends Scroller implements MaterializedBase {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ListScroller_scrollToItemInGroup(this.peer!.ptr, index, indexInGroup, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+        try {
+            ArkUIGeneratedNativeModule._ListScroller_scrollToItemInGroup(this.peer!.ptr, index, indexInGroup, thisSerializer.asBuffer(), thisSerializer.length())
+        } catch (error) {
+            throw error
+        } finally {
+            thisSerializer.release()
+        }
     }
     closeAllSwipeActions_serialize(options?: CloseSwipeActionOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1474,8 +1479,13 @@ export class ListScroller extends Scroller implements MaterializedBase {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ListScroller_closeAllSwipeActions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+        try {
+            ArkUIGeneratedNativeModule._ListScroller_closeAllSwipeActions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        } catch (error) {
+            throw error
+        } finally {
+            thisSerializer.release()
+        }
     }
     getVisibleListContentInfo_serialize(x: double, y: double): VisibleListContentInfo {
         const retval  = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y)
