@@ -36687,6 +36687,7 @@ KInteropReturnBuffer impl_TouchEvent_getHistoricalPoints(Ark_NativePointer thisP
         }
         return _retSerializer.toReturnBuffer();
 }
+KOALA_INTEROP_1(TouchEvent_getHistoricalPoints, KInteropReturnBuffer, Ark_NativePointer)
 Ark_Int32 impl_TouchEvent_getType(Ark_NativePointer thisPtr) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
         return GetAccessors()->getTouchEventAccessor()->getType(self);
