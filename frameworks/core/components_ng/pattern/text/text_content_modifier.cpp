@@ -600,8 +600,10 @@ void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragrap
             ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s]",
                 Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
         }
+        Color c { animatableTextColor_->Get().GetValue() };
+        c.SetPlaceholder(animatableTextColor_->Get().GetPlaceholder());
         auto length = paragraph->GetParagraphText().length();
-        paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
+        paragraph->UpdateColor(0, length, c);
     }
 }
 
@@ -718,6 +720,7 @@ std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<L
     std::vector<Color> colors;
     for (auto color : colorList) {
         colors.emplace_back(Color(color.GetValue()));
+        colors.back().SetPlaceholder(color.GetPlaceholder());
     }
     return colors;
 }
