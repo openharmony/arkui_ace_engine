@@ -237,7 +237,7 @@ void SetOnAcquiredImpl(Ark_NativePointer node,
             char* endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
-            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
+            int64_t result = static_cast<int64_t>(std::strtoul(jsonId.c_str(), &endptr, 10));
             if (*endptr == '\0') {
                 id = result;
             }
@@ -305,7 +305,7 @@ void SetOnUninstallImpl(Ark_NativePointer node,
             char* endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
-            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
+            int64_t result = static_cast<int64_t>(std::strtoul(jsonId.c_str(), &endptr, 10));
             if (*endptr == '\0') {
                 id = result;
             }
@@ -349,7 +349,7 @@ void SetOnUpdateImpl(Ark_NativePointer node,
             char* endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
-            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
+            int64_t result = static_cast<int64_t>(std::strtoul(jsonId.c_str(), &endptr, 10));
             if (*endptr == '\0') {
                 id = result;
             }
