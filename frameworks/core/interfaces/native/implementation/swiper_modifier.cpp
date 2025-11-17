@@ -367,7 +367,14 @@ void SetIndicatorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value, [frameNode](const auto& value) { SetIndicator(frameNode, value); }, []() {});
+    Converter::VisitUnion(*value, [frameNode](const auto& value) { SetIndicator(frameNode, value); },
+        [frameNode]() {
+            SwiperModelStatic::SetIndicatorIsBoolean(frameNode, true);
+            SwiperModelStatic::SetDotIndicatorStyle(frameNode, SwiperParameters());
+            SwiperModelStatic::SetIsIndicatorCustomSize(frameNode, false);
+            SwiperModelStatic::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+            SwiperModelStatic::SetShowIndicator(frameNode, true);
+        });
 }
 void SetLoopImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -616,7 +623,10 @@ void SetCustomContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SwiperContentAnimatedTransition transitionInfo;
     auto optValue = Converter::GetOptPtr(value);
-    CHECK_NULL_VOID(optValue);
+    if (!optValue) {
+        SwiperModelStatic::SetCustomContentTransition(frameNode, transitionInfo);
+        return;
+    }
     auto optTimeout = Converter::OptConvert<Ark_Int32>(optValue->timeout);
     if (optTimeout) {
         transitionInfo.timeout = *optTimeout;
@@ -744,11 +754,7 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convCount = Converter::OptConvertPtr<int32_t>(count);
-    if (!convCount) {
-        SwiperModelStatic::SetCachedCount(frameNode, DEFAULT_CACHED_COUNT);
-        return;
-    }
-    SwiperModelStatic::SetCachedCount(frameNode, *convCount);
+    SwiperModelStatic::SetCachedCount(frameNode, convCount.value_or(DEFAULT_CACHED_COUNT));
     auto convIsShown = Converter::OptConvertPtr<bool>(isShown);
     if (!convIsShown) {
         SwiperModelStatic::SetCachedIsShown(frameNode, false);
