@@ -41,7 +41,7 @@ public:
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
     static void SetDirection(FrameNode* frameNode, Axis axis);
-    static void SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace);
+    static void SetItemSpace(FrameNode* frameNode, const std::optional<Dimension>& itemSpace);
     static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static void SetCachedIsShown(FrameNode* frameNode, bool isShown);

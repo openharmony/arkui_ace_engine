@@ -226,19 +226,35 @@ void SideBarContainerModelStatic::SetDividerStrokeWidth(
     }
 }
 
-void SideBarContainerModelStatic::SetDividerColor(FrameNode* frameNode, const Color& color)
+void SideBarContainerModelStatic::SetDividerColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, color, frameNode);
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, frameNode);
+    }
 }
 
-void SideBarContainerModelStatic::SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin)
+void SideBarContainerModelStatic::SetDividerStartMargin(
+    FrameNode* frameNode, const std::optional<Dimension>& startMargin)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, startMargin, frameNode);
+    if (startMargin.has_value() && !startMargin->IsNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, DividerStartMargin, startMargin.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, frameNode);
+    }
 }
 
-void SideBarContainerModelStatic::SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin)
+void SideBarContainerModelStatic::SetDividerEndMargin(
+    FrameNode* frameNode, const std::optional<Dimension>& endMargin)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
+    if (endMargin.has_value() && !endMargin->IsNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, DividerEndMargin, endMargin.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, frameNode);
+    }
 }
 
 void SideBarContainerModelStatic::SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange)

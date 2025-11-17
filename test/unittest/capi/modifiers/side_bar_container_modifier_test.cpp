@@ -790,14 +790,14 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStro
 
 // Valid values for attribute 'startMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStartMarginValidValues = {
-    {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
+    {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE},
     {EXPECTED_NUM_ZERO_PX, OPT_LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
     {EXPECTED_NUM_VILID_PX, OPT_LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
 };
 
 // Valid values for attribute 'endMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerEndMarginValidValues = {
-    {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
+    {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE},
     {EXPECTED_NUM_ZERO_PX, OPT_LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
     {EXPECTED_NUM_VILID_PX, OPT_LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
 };
