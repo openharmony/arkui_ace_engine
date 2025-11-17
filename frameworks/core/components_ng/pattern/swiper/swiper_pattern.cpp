@@ -7802,13 +7802,32 @@ std::vector<SwiperItemInfoNG> SwiperPattern::GetShownItemInfoFromIndex(int32_t i
     std::vector<SwiperItemInfoNG> infos = {};
     auto host = GetHost();
     CHECK_NULL_RETURN(host, infos);
-    auto displayCount = GetDisplayCount();
-    auto totalCount = TotalCount();
-    for (int32_t count = 0; (count < displayCount) && (count + index < totalCount); count++) {
-        auto swiperItemNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index + count, false));
+    const auto displayCount = GetDisplayCount();
+    const auto totalCount = TotalCount();
+    if (index < 0 || index >= totalCount) {
+        return infos;
+    }
+    int32_t candidateIndex = index;
+    if (IsAutoLinear()) {
+        for (auto item : itemPosition_) {
+            auto swiperItemNode = item.second.node;
+            if (!swiperItemNode) {
+                TAG_LOGW(AceLogTag::ACE_SWIPER, "empty swiper item [startPos: %{public}f] while collecting shownInfos",
+                    item.second.startPos);
+                candidateIndex = IsLoop() ? GetLoopIndex(candidateIndex + 1) : candidateIndex + 1;
+                continue;
+            }
+            infos.push_back(SwiperItemInfoNG(swiperItemNode->GetId(), candidateIndex));
+            candidateIndex = IsLoop() ? GetLoopIndex(candidateIndex + 1) : candidateIndex + 1;
+        }
+        return infos;
+    }
+    for (int32_t count = 0; (count < displayCount) && (candidateIndex < totalCount); count++) {
+        auto swiperItemNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(candidateIndex, false));
         if (!swiperItemNode) {
             TAG_LOGW(AceLogTag::ACE_SWIPER, "empty swiper item [index: %{public}d] while collecting shownInfos",
-                index + count);
+                candidateIndex);
+            candidateIndex = IsLoop() ? GetLoopIndex(candidateIndex + 1) : candidateIndex + 1;
             continue;
         }
         auto tag = swiperItemNode->GetTag();
@@ -7817,7 +7836,8 @@ std::vector<SwiperItemInfoNG> SwiperPattern::GetShownItemInfoFromIndex(int32_t i
             tag == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
             break;
         }
-        infos.push_back(SwiperItemInfoNG(swiperItemNode->GetId(), index + count));
+        infos.push_back(SwiperItemInfoNG(swiperItemNode->GetId(), candidateIndex));
+        candidateIndex = IsLoop() ? GetLoopIndex(candidateIndex + 1) : candidateIndex + 1;
     }
     return infos;
 }
