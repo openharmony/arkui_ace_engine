@@ -243,6 +243,11 @@ class MonitorV2 {
     return this.isSync_;
   }
 
+  // path - path to monitored value separated with dots
+  // apiAdded:
+  //    true if monitor added by AddMonitor call or vai @SyncMonitor decarator
+  //    false if monitor path is injected as LSV path before wildcard
+  // @Monitor does not use addPath method
   public addPath(path: string, apiAdded: boolean): MonitorValueV2<unknown> {
     console.error("### addPath: " + path + " api: " + apiAdded);
     if (!MonitorPathHelper.isValid(path)) {
@@ -260,7 +265,7 @@ class MonitorV2 {
       return monitorPath;
     }
     let monitorValue = new MonitorValueV2<unknown>(path, apiAdded, this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_)
-    if (this.isSync_ && MonitorPathHelper.hasWildcardEnding(path)) {
+    if (apiAdded && MonitorPathHelper.hasWildcardEnding(path)) { // check for this.isSync_ to restrict for sync paths
       let lastSureValuePath = this.addPath(MonitorPathHelper.pathBeforeWildcard(path), false);
       lastSureValuePath.setWildcardPath(monitorValue);
       monitorValue.setLastSureValuePath(lastSureValuePath);
@@ -306,7 +311,7 @@ class MonitorV2 {
     console.log("### doRemovePath, removing " + monitorValue.path);
     const path = monitorValue.path;
     // In case wildcard path was added with AddMonitor API call
-    if (this.isSync_ && monitorValue.isWildcard()) {
+    if (monitorValue.isAddedByAPi() && monitorValue.isWildcard()) { // check this.isSync_ to restrict to sync only
       this.doRemovePath(monitorValue.getLastSureValuePath(), true);
     }
     if (!(this.target_ instanceof PUV2ViewBase)) {
@@ -433,7 +438,7 @@ class MonitorV2 {
   private recordDependenciesForProp(monitoredValue: MonitorValueV2<unknown>, initRun = false): boolean {
     let success: boolean = false;
     let value = undefined;
-    if (this.isSync_ && monitoredValue.isWildcard()) {
+    if (monitoredValue.isWildcard()) { // use this.isSync_ or check for apiAdded
       let sureValue = monitoredValue.getLastSureValuePath()?.now
       if (sureValue === undefined && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
         // For single top level wildcard
