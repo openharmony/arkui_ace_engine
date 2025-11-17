@@ -2965,6 +2965,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableImageAnalyzerAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableImageAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -3972,6 +3984,9 @@ export interface WebAttribute extends CommonMethod {
     enableSelectedDataDetector(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableSelectedDataDetector")
     }
+    enableImageAnalyzer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableImageAnalyzer")
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error("Unimplemented method registerNativeEmbedRule")
     }
@@ -4119,6 +4134,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     blankScreenDetectionConfig_value?: BlankScreenDetectionConfig | undefined
     zoomControlAccess_value?: boolean | undefined
     enableSelectedDataDetector_value?: boolean | undefined
+    enableImageAnalyzer_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
     setWebOptions(value: WebOptions): this {
         return this
@@ -4529,6 +4545,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     enableSelectedDataDetector(value: boolean | undefined): this {
+        return this
+    }
+    enableImageAnalyzer(value: boolean | undefined): this {
         return this
     }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
@@ -5664,6 +5683,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("enableSelectedDataDetector")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableSelectedDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableImageAnalyzer(value: boolean | undefined): this {
+        if (this.checkPriority("enableImageAnalyzer")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableImageAnalyzerAttribute(value_casted)
             return this
         }
         return this

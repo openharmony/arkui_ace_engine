@@ -310,6 +310,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _zoomControlAccess_0_0value?: boolean | undefined
     _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableSelectedDataDetector_0_0value?: boolean | undefined
+    _enableImageAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableImageAnalyzer_0_0value?: boolean | undefined
     _registerNativeEmbedRule_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _registerNativeEmbedRule_0_0value?: string | undefined
     _registerNativeEmbedRule_0_1value?: string | undefined
@@ -2769,6 +2771,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._enableImageAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableImageAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableImageAnalyzerAttribute((this._enableImageAnalyzer_0_0value as boolean | undefined));
+                    this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableImageAnalyzerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._registerNativeEmbedRule_0_flag) {
@@ -4576,6 +4596,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._enableImageAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableImageAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableImageAnalyzer(modifier._enableImageAnalyzer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableImageAnalyzer((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._registerNativeEmbedRule_0_flag) {
@@ -6096,6 +6129,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableImageAnalyzer(value: boolean | undefined): this {
+        if (((this._enableImageAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableImageAnalyzer_0_0value) !== (value)))
+        {
+            this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableImageAnalyzer_0_0value = value
+        } else
+        {
+            this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
