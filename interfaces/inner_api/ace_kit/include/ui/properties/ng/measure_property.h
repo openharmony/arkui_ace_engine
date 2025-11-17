@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_NG_MEASURE_PROPERTY_H
 
 #include <functional>
+#include <unordered_map>
 
 #include "json/json_util.h"
 #include "ui/base/inspector_filter.h"
