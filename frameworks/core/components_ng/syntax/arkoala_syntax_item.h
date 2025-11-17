@@ -36,6 +36,7 @@ public:
         return false;
     }
 
+    void MarkDirtyNode(PropertyChangeFlag extraFlag) override;
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ArkoalaSyntaxItem);
 };
