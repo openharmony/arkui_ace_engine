@@ -930,6 +930,10 @@ void ANIDragActionCancelDataLoading(
         return;
     }
     auto keyStr = AniUtils::ANIStringToStdString(env, key);
+    if (keyStr.empty()) {
+        AniUtils::AniThrow(env, "Invalid input parameter.", ERROR_CODE_PARAM_INVALID);
+        return;
+    }
     modifier->getDragControllerAniModifier()->aniDragActionCancelDataLoading(keyStr.c_str());
 }
 
