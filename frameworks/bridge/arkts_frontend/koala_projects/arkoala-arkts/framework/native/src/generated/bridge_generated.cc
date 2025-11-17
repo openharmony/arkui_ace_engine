@@ -31301,6 +31301,14 @@ Ark_NativePointer impl_LayoutPolicy_getMatchParent() {
         return GetAccessors()->getLayoutPolicyAccessor()->getMatchParent();
 }
 KOALA_INTEROP_DIRECT_0(LayoutPolicy_getMatchParent, Ark_NativePointer)
+Ark_NativePointer impl_LayoutPolicy_getWrapContent() {
+        return GetAccessors()->getLayoutPolicyAccessor()->getWrapContent();
+}
+KOALA_INTEROP_DIRECT_0(LayoutPolicy_getWrapContent, Ark_NativePointer)
+Ark_NativePointer impl_LayoutPolicy_getFixAtIdealSize() {
+        return GetAccessors()->getLayoutPolicyAccessor()->getFixAtIdealSize();
+}
+KOALA_INTEROP_DIRECT_0(LayoutPolicy_getFixAtIdealSize, Ark_NativePointer)
 void impl_LazyBuild_ApplyLazyBuilder() {
         GetAccessors()->getLazyBuildAccessor()->ApplyLazyBuilder();
 }

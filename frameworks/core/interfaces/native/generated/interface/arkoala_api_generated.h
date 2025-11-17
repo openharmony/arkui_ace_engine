@@ -26585,6 +26585,8 @@ typedef struct GENERATED_ArkUILayoutPolicyAccessor {
     Ark_LayoutPolicy (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_LayoutPolicy (*getMatchParent)();
+    Ark_LayoutPolicy (*getWrapContent)();
+    Ark_LayoutPolicy (*getFixAtIdealSize)();
 } GENERATED_ArkUILayoutPolicyAccessor;
 
 typedef struct GENERATED_ArkUILazyBuildAccessor {

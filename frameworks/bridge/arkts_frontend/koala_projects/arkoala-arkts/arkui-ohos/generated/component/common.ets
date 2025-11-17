@@ -1409,6 +1409,8 @@ export class LayoutPolicy implements MaterializedBase {
         return this.peer
     }
     static readonly matchParent: LayoutPolicy = LayoutPolicy.getMatchParent()
+    static readonly wrapContent: LayoutPolicy = LayoutPolicy.getWrapContent()
+    static readonly fixAtIdealSize: LayoutPolicy = LayoutPolicy.getFixAtIdealSize()
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LayoutPolicy.getFinalizer())
     }
@@ -1427,8 +1429,24 @@ export class LayoutPolicy implements MaterializedBase {
         const obj : LayoutPolicy = LayoutPolicyInternal.fromPtr(retval)
         return obj
     }
+    private static getWrapContent_serialize(): LayoutPolicy {
+        const retval  = ArkUIGeneratedNativeModule._LayoutPolicy_getWrapContent()
+        const obj : LayoutPolicy = LayoutPolicyInternal.fromPtr(retval)
+        return obj
+    }
+    private static getFixAtIdealSize_serialize(): LayoutPolicy {
+        const retval  = ArkUIGeneratedNativeModule._LayoutPolicy_getFixAtIdealSize()
+        const obj : LayoutPolicy = LayoutPolicyInternal.fromPtr(retval)
+        return obj
+    }
     private static getMatchParent(): LayoutPolicy {
         return LayoutPolicy.getMatchParent_serialize()
+    }
+    private static getWrapContent(): LayoutPolicy {
+        return LayoutPolicy.getWrapContent_serialize()
+    }
+    private static getFixAtIdealSize(): LayoutPolicy {
+        return LayoutPolicy.getFixAtIdealSize_serialize()
     }
 }
 export interface Measurable {

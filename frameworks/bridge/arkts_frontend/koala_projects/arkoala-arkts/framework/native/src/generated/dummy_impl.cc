@@ -33526,6 +33526,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_LayoutPolicy>(300);
     }
+    Ark_LayoutPolicy GetWrapContentImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_LayoutPolicy>(300);
+        }
+        string out("getWrapContent(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_LayoutPolicy>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_LayoutPolicy>(300);
+    }
+    Ark_LayoutPolicy GetFixAtIdealSizeImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_LayoutPolicy>(300);
+        }
+        string out("getFixAtIdealSize(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_LayoutPolicy>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_LayoutPolicy>(300);
+    }
     } // LayoutPolicyAccessor
     namespace LazyBuildAccessor {
     void ApplyLazyBuilderImpl()
@@ -46600,6 +46624,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LayoutPolicyAccessor::ConstructImpl,
             LayoutPolicyAccessor::GetFinalizerImpl,
             LayoutPolicyAccessor::GetMatchParentImpl,
+            LayoutPolicyAccessor::GetWrapContentImpl,
+            LayoutPolicyAccessor::GetFixAtIdealSizeImpl,
         };
         return &LayoutPolicyAccessorImpl;
     }

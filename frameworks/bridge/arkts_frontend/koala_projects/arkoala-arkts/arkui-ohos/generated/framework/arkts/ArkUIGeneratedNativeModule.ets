@@ -4573,6 +4573,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LayoutPolicy_getMatchParent(): KPointer
     @ani.unsafe.Direct
+    native static _LayoutPolicy_getWrapContent(): KPointer
+    @ani.unsafe.Direct
+    native static _LayoutPolicy_getFixAtIdealSize(): KPointer
+    @ani.unsafe.Direct
     native static _LazyBuild_ApplyLazyBuilder(): void
     @ani.unsafe.Direct
     native static _LazyBuild_SetListItemLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
