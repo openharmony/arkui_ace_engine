@@ -124,19 +124,11 @@ ArkUINativeModuleValue ContainerPickerBridge::ResetContainerPickerCanLoop(ArkUIR
 
 void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool* isHasValue,
     ArkUIPickerIndicatorStyle& pickerIndicatorStyle, RefPtr<ResourceObject>* radiusResObjs,
-    RefPtr<ContainerPickerTheme> pickerTheme)
+    ArkUI_Float32* value, ArkUI_Int32* unit)
 {
-    CHECK_NULL_VOID(pickerTheme);
-    Dimension defaultBgRadius = pickerTheme->GetIndicatorBackgroundRadius();
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(unit);
 
-    ArkUI_Float32 value[VALUE_MAX_SIZE] = { defaultBgRadius.Value(), defaultBgRadius.Value(), defaultBgRadius.Value(),
-        defaultBgRadius.Value() };
-    ArkUI_Int32 unit[VALUE_MAX_SIZE] = {
-        static_cast<int>(defaultBgRadius.Unit()),
-        static_cast<int>(defaultBgRadius.Unit()),
-        static_cast<int>(defaultBgRadius.Unit()),
-        static_cast<int>(defaultBgRadius.Unit())
-     };
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     CalcDimension calcDimension;
     RefPtr<ResourceObject> tmpResObj;
@@ -267,7 +259,6 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
     CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
-    ArkUI_Bool isHasValue[GETVALUE_MAX_SIZE] = { false, false, false, false };
     ArkUIPickerIndicatorStyle pickerIndicatorStyle;
     if (typeArg->IsNumber()) {
         pickerIndicatorStyle.type = typeArg->ToNumber(vm)->Value();
@@ -303,8 +294,18 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
     pickerIndicatorStyle.backgroundColorRawPtr = AceType::RawPtr(bgColorResObj);
 
     RefPtr<ResourceObject> radiusResObjs[VALUE_MAX_SIZE] = { nullptr, nullptr, nullptr, nullptr };
+    ArkUI_Bool isHasValue[GETVALUE_MAX_SIZE] = { false, false, false, false };
+    Dimension defaultBgRadius = pickerTheme->GetIndicatorBackgroundRadius();
+    ArkUI_Float32 value[VALUE_MAX_SIZE] = { defaultBgRadius.Value(), defaultBgRadius.Value(), defaultBgRadius.Value(),
+        defaultBgRadius.Value() };
+    ArkUI_Int32 unit[VALUE_MAX_SIZE] = {
+        static_cast<int>(defaultBgRadius.Unit()),
+        static_cast<int>(defaultBgRadius.Unit()),
+        static_cast<int>(defaultBgRadius.Unit()),
+        static_cast<int>(defaultBgRadius.Unit())
+     };
     ParseSelectionIndicatorStyleRadius(vm, runtimeCallInfo, isHasValue, pickerIndicatorStyle, radiusResObjs,
-        pickerTheme);
+        value, unit);
     pickerIndicatorStyle.topLeftRawPtr = AceType::RawPtr(radiusResObjs[TOPLEFT]);
     pickerIndicatorStyle.topRightRawPtr = AceType::RawPtr(radiusResObjs[TOPRIGHT]);
     pickerIndicatorStyle.bottomLeftRawPtr = AceType::RawPtr(radiusResObjs[BOTTOMLEFT]);
