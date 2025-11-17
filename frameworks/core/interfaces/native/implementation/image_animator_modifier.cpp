@@ -72,10 +72,10 @@ ImageProperties Convert(const Ark_ImageFrameInfo& src)
         []() {}
     );
 
-    options.width =  OptConvert<CalcDimension>(src.width).value_or(CalcDimension(0));
-    options.height = OptConvert<CalcDimension>(src.height).value_or(CalcDimension(0));
-    options.top = OptConvert<CalcDimension>(src.top).value_or(CalcDimension(0));
-    options.left = OptConvert<CalcDimension>(src.left).value_or(CalcDimension(0));
+    options.width =  OptConvert<CalcDimension>(src.width).value_or(CalcDimension(0, DimensionUnit::VP));
+    options.height = OptConvert<CalcDimension>(src.height).value_or(CalcDimension(0, DimensionUnit::VP));
+    options.top = OptConvert<CalcDimension>(src.top).value_or(CalcDimension(0, DimensionUnit::VP));
+    options.left = OptConvert<CalcDimension>(src.left).value_or(CalcDimension(0, DimensionUnit::VP));
     options.duration = Converter::OptConvert<int32_t>(src.duration).value_or(0);
 
     return options;
