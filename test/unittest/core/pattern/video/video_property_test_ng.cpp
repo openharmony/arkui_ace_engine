@@ -1424,4 +1424,59 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest032, TestSize.Level1)
      */
     EXPECT_TRUE(videoPattern->IsEnableMatchParent());
 }
+
+/**
+ * @tc.name: VideoPropertyTest033
+ * @tc.desc: Create Video, and set preview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPropertyTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video.
+     * @tc.expected: step1. Create successfully.
+     */
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNodeTemp);
+    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
+    ASSERT_TRUE(videoPatternTemp);
+
+    /**
+     * @tc.steps: step2. Set an empty string as previewUri.
+     * @tc.expected: step2. showImagePreview_ in  VideoPattern is false.
+     */
+    videoPatternTemp->showImagePreview_ = true;
+    video.SetPosterSourceInfo("", "", "");
+    EXPECT_EQ(videoPatternTemp->showImagePreview_, false);
+
+    /**
+     * @tc.steps: step3. Set VIDEO_POSTER_URL as previewUri.
+     * @tc.expected: step3. showImagePreview_ in  VideoPattern is true.
+     */
+    videoPatternTemp->showImagePreview_ = false;
+    video.SetPosterSourceInfo(VIDEO_POSTER_URL, "", "");
+    EXPECT_EQ(videoPatternTemp->showImagePreview_, true);
+
+    /**
+     * @tc.steps: step4. Set a nullptr pixelmap as previewUri.
+     * @tc.expected: step4. showImagePreview_ in  VideoPattern is false.
+     */
+    videoPatternTemp->showImagePreview_ = true;
+    RefPtr<PixelMap> pixelMap = nullptr;
+    video.SetPosterSourceByPixelMap(pixelMap);
+    EXPECT_EQ(videoPatternTemp->showImagePreview_, false);
+
+    /**
+     * @tc.steps: step5. Set the preview by pixelmap.
+     * @tc.expected: step5. showImagePreview_ in  VideoPattern is true.
+     */
+    videoPatternTemp->showImagePreview_ = false;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    video.SetPosterSourceByPixelMap(pixelMap);
+    EXPECT_EQ(videoPatternTemp->showImagePreview_, true);
+}
 } // namespace OHOS::Ace::NG

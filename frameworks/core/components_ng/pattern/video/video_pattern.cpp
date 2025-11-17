@@ -651,8 +651,7 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
             eventHub->FireStopEvent();
             break;
         case PlaybackStatus::PREPARED: {
-            auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-            if (layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+            if (!showImagePreview_ || showFirstFrame_) {
                 auto host = GetHost();
                 CHECK_NULL_VOID(host);
                 auto pipeline = host->GetContext();
@@ -701,7 +700,9 @@ void VideoPattern::OnError(const std::string& errorId)
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
-
+    if (!isPrepared_ && (!showImagePreview_ || showFirstFrame_)) {
+        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+    }
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireErrorEvent();
@@ -715,7 +716,7 @@ void VideoPattern::OnError(int32_t code, const std::string& message)
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
-    if (!GetIsPrepared()) {
+    if (!isPrepared_ && (!showImagePreview_ || showFirstFrame_)) {
         pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
     }
 
@@ -1038,7 +1039,7 @@ void VideoPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    if (pipeline && layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+    if (pipeline && (!showImagePreview_ || showFirstFrame_)) {
         pipeline->GetLoadCompleteManager()->AddLoadComponent(hostId_);
     }
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
@@ -1057,7 +1058,7 @@ void VideoPattern::OnDetachFromMainTree()
     auto pipeline = host->GetContext();
     auto id = host->GetId();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    if (pipeline && layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+    if (pipeline && (!showImagePreview_ || showFirstFrame_)) {
         pipeline->GetLoadCompleteManager()->DeleteLoadComponent(id);
     }
     if (host->GetNodeStatus() == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
