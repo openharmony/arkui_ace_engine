@@ -2839,6 +2839,22 @@ typedef enum {
 } ArkUI_ItemFillPolicy;
 
 /**
+ * @brief Define the event tool type that support response region settings.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** All source tool type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_ALL = 0,
+    /** The Finger type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_FINGER = 1,
+    /** The pen type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_PEN = 2,
+    /** The mouse type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_MOUSE = 3,
+} ArkUI_ResponseRegionSupportedTool;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12

@@ -2145,6 +2145,30 @@ typedef enum {
     NODE_PIXEL_ROUND = 109,
 
     /**
+     * @brief Defines the response region list attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .data[0].i32：The event tool type applicable to this response region. The parameter type is {@link ArkUI_ResponseRegionSupportedTool}.
+     * The default value is <b>ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_ALL</b>. \n
+     * .data[1].f32: X coordinate of the touch point relative to the upper left corner of the component, in vp. \n
+     * .data[2].f32: Y coordinate of the touch point relative to the upper left corner of the component, in vp. \n
+     * .data[3].f32: width of the touch target, in %. \n
+     * .data[4].f32: height of the touch target, in %. \n
+     * .data[5...].f32: Multiple touch targets can be set. The sequence of the parameters is the same as the preceding.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .data[0].i32：The event tool type applicable to this response region. The parameter type is {@link ArkUI_ResponseRegionSupportedTool}. \n
+     * .data[1].f32: X coordinate of the touch point relative to the upper left corner of the component, in vp. \n
+     * .data[2].f32: Y coordinate of the touch point relative to the upper left corner of the component, in vp. \n
+     * .data[3].f32: width of the touch target, in %. \n
+     * .data[4].f32: height of the touch target, in %. \n
+     * .data[5...].f32: Multiple touch targets can be set. The sequence of the parameters is the same as the preceding.
+     *
+     * @since 23
+     */
+    NODE_RESPONSE_REGION_LIST = 116,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
