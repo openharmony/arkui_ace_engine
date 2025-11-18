@@ -2477,10 +2477,10 @@ typedef struct Ark_Union_Number_Bindable Ark_Union_Number_Bindable;
 typedef struct Opt_Union_Number_Bindable Opt_Union_Number_Bindable;
 typedef struct Ark_Union_Number_FontWeight_ResourceStr Ark_Union_Number_FontWeight_ResourceStr;
 typedef struct Opt_Union_Number_FontWeight_ResourceStr Opt_Union_Number_FontWeight_ResourceStr;
-typedef struct Ark_Union_Number_GridColColumnOption Ark_Union_Number_GridColColumnOption;
-typedef struct Opt_Union_Number_GridColColumnOption Opt_Union_Number_GridColColumnOption;
-typedef struct Ark_Union_Number_GridRowColumnOption Ark_Union_Number_GridRowColumnOption;
-typedef struct Opt_Union_Number_GridRowColumnOption Opt_Union_Number_GridRowColumnOption;
+typedef struct Ark_Union_I32_GridColColumnOption Ark_Union_I32_GridColColumnOption;
+typedef struct Opt_Union_I32_GridColColumnOption Opt_Union_I32_GridColColumnOption;
+typedef struct Ark_Union_I32_GridRowColumnOption Ark_Union_I32_GridRowColumnOption;
+typedef struct Opt_Union_I32_GridRowColumnOption Opt_Union_I32_GridRowColumnOption;
 typedef struct Ark_Union_Number_Resource Ark_Union_Number_Resource;
 typedef struct Opt_Union_Number_Resource Opt_Union_Number_Resource;
 typedef struct Ark_Union_Number_ResourceStr Ark_Union_Number_ResourceStr;
@@ -13998,12 +13998,12 @@ typedef struct Opt_GestureStyleInterface {
 } Opt_GestureStyleInterface;
 typedef struct Ark_GridColColumnOption {
     /* kind: Interface */
-    Opt_Number xs;
-    Opt_Number sm;
-    Opt_Number md;
-    Opt_Number lg;
-    Opt_Number xl;
-    Opt_Number xxl;
+    Opt_Int32 xs;
+    Opt_Int32 sm;
+    Opt_Int32 md;
+    Opt_Int32 lg;
+    Opt_Int32 xl;
+    Opt_Int32 xxl;
 } Ark_GridColColumnOption;
 typedef struct Opt_GridColColumnOption {
     Ark_Tag tag;
@@ -14030,12 +14030,12 @@ typedef struct Opt_GridLayoutOptions {
 } Opt_GridLayoutOptions;
 typedef struct Ark_GridRowColumnOption {
     /* kind: Interface */
-    Opt_Number xs;
-    Opt_Number sm;
-    Opt_Number md;
-    Opt_Number lg;
-    Opt_Number xl;
-    Opt_Number xxl;
+    Opt_Int32 xs;
+    Opt_Int32 sm;
+    Opt_Int32 md;
+    Opt_Int32 lg;
+    Opt_Int32 xl;
+    Opt_Int32 xxl;
 } Ark_GridRowColumnOption;
 typedef struct Opt_GridRowColumnOption {
     Ark_Tag tag;
@@ -16285,30 +16285,30 @@ typedef struct Opt_Union_Number_FontWeight_ResourceStr {
     Ark_Tag tag;
     Ark_Union_Number_FontWeight_ResourceStr value;
 } Opt_Union_Number_FontWeight_ResourceStr;
-typedef struct Ark_Union_Number_GridColColumnOption {
+typedef struct Ark_Union_I32_GridColColumnOption {
     /* kind: UnionType */
     Ark_Int32 selector;
     union {
-        Ark_Number value0;
+        Ark_Int32 value0;
         Ark_GridColColumnOption value1;
     };
-} Ark_Union_Number_GridColColumnOption;
-typedef struct Opt_Union_Number_GridColColumnOption {
+} Ark_Union_I32_GridColColumnOption;
+typedef struct Opt_Union_I32_GridColColumnOption {
     Ark_Tag tag;
-    Ark_Union_Number_GridColColumnOption value;
-} Opt_Union_Number_GridColColumnOption;
-typedef struct Ark_Union_Number_GridRowColumnOption {
+    Ark_Union_I32_GridColColumnOption value;
+} Opt_Union_I32_GridColColumnOption;
+typedef struct Ark_Union_I32_GridRowColumnOption {
     /* kind: UnionType */
     Ark_Int32 selector;
     union {
-        Ark_Number value0;
+        Ark_Int32 value0;
         Ark_GridRowColumnOption value1;
     };
-} Ark_Union_Number_GridRowColumnOption;
-typedef struct Opt_Union_Number_GridRowColumnOption {
+} Ark_Union_I32_GridRowColumnOption;
+typedef struct Opt_Union_I32_GridRowColumnOption {
     Ark_Tag tag;
-    Ark_Union_Number_GridRowColumnOption value;
-} Opt_Union_Number_GridRowColumnOption;
+    Ark_Union_I32_GridRowColumnOption value;
+} Opt_Union_I32_GridRowColumnOption;
 typedef struct Ark_Union_Number_Resource {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -17344,9 +17344,9 @@ typedef struct Opt_GaugeShadowOptions {
 } Opt_GaugeShadowOptions;
 typedef struct Ark_GridColOptions {
     /* kind: Interface */
-    Opt_Union_Number_GridColColumnOption span;
-    Opt_Union_Number_GridColColumnOption offset;
-    Opt_Union_Number_GridColColumnOption order;
+    Opt_Union_I32_GridColColumnOption span;
+    Opt_Union_I32_GridColColumnOption offset;
+    Opt_Union_I32_GridColColumnOption order;
 } Ark_GridColOptions;
 typedef struct Opt_GridColOptions {
     Ark_Tag tag;
@@ -21019,7 +21019,7 @@ typedef struct Opt_EmitterOptionsInner {
 typedef struct Ark_GridRowOptions {
     /* kind: Interface */
     Opt_Union_Length_GutterOption gutter;
-    Opt_Union_Number_GridRowColumnOption columns;
+    Opt_Union_I32_GridRowColumnOption columns;
     Opt_BreakPoints breakpoints;
     Opt_GridRowDirection direction;
 } Ark_GridRowOptions;
@@ -22553,11 +22553,11 @@ typedef struct GENERATED_ArkUIGridColModifier {
     void (*setGridColOptions)(Ark_NativePointer node,
                               const Opt_GridColOptions* option);
     void (*setSpan)(Ark_NativePointer node,
-                    const Opt_Union_Number_GridColColumnOption* value);
+                    const Opt_Union_I32_GridColColumnOption* value);
     void (*setGridColOffset)(Ark_NativePointer node,
-                             const Opt_Union_Number_GridColColumnOption* value);
+                             const Opt_Union_I32_GridColColumnOption* value);
     void (*setOrder)(Ark_NativePointer node,
-                     const Opt_Union_Number_GridColColumnOption* value);
+                     const Opt_Union_I32_GridColColumnOption* value);
 } GENERATED_ArkUIGridColModifier;
 
 typedef struct GENERATED_ArkUIGridItemModifier {

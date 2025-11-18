@@ -78,6 +78,12 @@ void AssignArkValue(Ark_Int32& dst, const uint32_t& src)
     dst = static_cast<Ark_Int32>(src);
 }
 
+void AssignArkValue(Ark_Int32& dst, const Dimension& src)
+{
+    auto value = static_cast<uint32_t>(src.ConvertToVp());
+    AssignArkValue(dst, value);
+}
+
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx)
 {
     CHECK_NULL_VOID(src.size());

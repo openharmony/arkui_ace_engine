@@ -251,6 +251,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
     void AssignArkValue(Ark_Int32& dst, const uint32_t& src);
+    void AssignArkValue(Ark_Int32& dst, const Dimension& src);
     void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src);
     void AssignArkValue(Ark_InteractionHand& dst, const ArkUI_InteractionHand& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);

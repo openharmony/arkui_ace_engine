@@ -35,11 +35,11 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
     applyDisabledAttribute(instance: GridColAttribute): void { }
     applySelectedAttribute(instance: GridColAttribute): void { }
     _span_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _span_0_0value?: number | GridColColumnOption | undefined
+    _span_0_0value?: int32 | GridColColumnOption | undefined
     _gridColOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _gridColOffset_0_0value?: number | GridColColumnOption | undefined
+    _gridColOffset_0_0value?: int32 | GridColColumnOption | undefined
     _order_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _order_0_0value?: number | GridColColumnOption | undefined
+    _order_0_0value?: int32 | GridColColumnOption | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkGridColPeer;
@@ -47,7 +47,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         {
             switch (this._span_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSpanAttribute((this._span_0_0value as number | GridColColumnOption | undefined));
+                    peer.setSpanAttribute((this._span_0_0value as int32 | GridColColumnOption | undefined));
                     this._span_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -57,7 +57,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                 }
                 default: {
                     this._span_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSpanAttribute((undefined as number | GridColColumnOption | undefined));
+                    peer.setSpanAttribute((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
@@ -65,7 +65,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         {
             switch (this._gridColOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setGridColOffsetAttribute((this._gridColOffset_0_0value as number | GridColColumnOption | undefined));
+                    peer.setGridColOffsetAttribute((this._gridColOffset_0_0value as int32 | GridColColumnOption | undefined));
                     this._gridColOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -75,7 +75,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                 }
                 default: {
                     this._gridColOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setGridColOffsetAttribute((undefined as number | GridColColumnOption | undefined));
+                    peer.setGridColOffsetAttribute((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
@@ -83,7 +83,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         {
             switch (this._order_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOrderAttribute((this._order_0_0value as number | GridColColumnOption | undefined));
+                    peer.setOrderAttribute((this._order_0_0value as int32 | GridColColumnOption | undefined));
                     this._order_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -93,7 +93,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                 }
                 default: {
                     this._order_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOrderAttribute((undefined as number | GridColColumnOption | undefined));
+                    peer.setOrderAttribute((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
@@ -109,7 +109,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                     break;
                 }
                 default: {
-                    this.span((undefined as number | GridColColumnOption | undefined));
+                    this.span((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
@@ -122,7 +122,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                     break;
                 }
                 default: {
-                    this.gridColOffset((undefined as number | GridColColumnOption | undefined));
+                    this.gridColOffset((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
@@ -135,12 +135,12 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                     break;
                 }
                 default: {
-                    this.order((undefined as number | GridColColumnOption | undefined));
+                    this.order((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
     }
-    span(value: number | GridColColumnOption | undefined): this {
+    span(value: int32 | GridColColumnOption | undefined): this {
         if (((this._span_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._span_0_flag = AttributeUpdaterFlag.UPDATE
@@ -151,7 +151,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         }
         return this
     }
-    gridColOffset(value: number | GridColColumnOption | undefined): this {
+    gridColOffset(value: int32 | GridColColumnOption | undefined): this {
         if (((this._gridColOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._gridColOffset_0_flag = AttributeUpdaterFlag.UPDATE
@@ -162,7 +162,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         }
         return this
     }
-    order(value: number | GridColColumnOption | undefined): this {
+    order(value: int32 | GridColColumnOption | undefined): this {
         if (((this._order_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._order_0_flag = AttributeUpdaterFlag.UPDATE
