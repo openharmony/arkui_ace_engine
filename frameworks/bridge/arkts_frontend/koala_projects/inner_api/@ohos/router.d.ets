@@ -14,7 +14,7 @@
  */
 
 import { Router } from 'arkui/handwritten/Router';
-import { PeerNode } from 'arkui.PeerNode';
+import { PeerNode } from 'arkui/PeerNode';
 declare namespace router {
     interface RouterOptions {
         url: string;
