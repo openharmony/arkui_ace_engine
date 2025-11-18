@@ -2703,7 +2703,8 @@ typedef struct Ark_MeasureOptions Ark_MeasureOptions;
 typedef struct Opt_MeasureOptions Opt_MeasureOptions;
 typedef struct Ark_MenuElement Ark_MenuElement;
 typedef struct Opt_MenuElement Opt_MenuElement;
-typedef struct Ark_MenuItemConfiguration Ark_MenuItemConfiguration;
+typedef struct MenuItemConfigurationPeer MenuItemConfigurationPeer;
+typedef struct MenuItemConfigurationPeer* Ark_MenuItemConfiguration;
 typedef struct Opt_MenuItemConfiguration Opt_MenuItemConfiguration;
 typedef struct Ark_MenuItemGroupOptions Ark_MenuItemGroupOptions;
 typedef struct Opt_MenuItemGroupOptions Opt_MenuItemGroupOptions;
@@ -17568,16 +17569,6 @@ typedef struct Opt_MenuElement {
     Ark_Tag tag;
     Ark_MenuElement value;
 } Opt_MenuElement;
-typedef struct Ark_MenuItemConfiguration {
-    /* kind: Interface */
-    Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
-    Ark_ResourceStr value;
-    Opt_ResourceStr icon;
-    Opt_SymbolGlyphModifier symbolIcon;
-    Ark_Boolean selected;
-    Ark_Int32 index;
-} Ark_MenuItemConfiguration;
 typedef struct Opt_MenuItemConfiguration {
     Ark_Tag tag;
     Ark_MenuItemConfiguration value;
@@ -26765,6 +26756,36 @@ typedef struct GENERATED_ArkUIMeasurableAccessor {
                         const Opt_Number* uniqueId);
 } GENERATED_ArkUIMeasurableAccessor;
 
+typedef struct GENERATED_ArkUIMenuItemConfigurationAccessor {
+    void (*destroyPeer)(Ark_MenuItemConfiguration peer);
+    Ark_MenuItemConfiguration (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*triggerSelect)(Ark_MenuItemConfiguration peer,
+                          Ark_Int32 index,
+                          const Ark_String* value);
+    Ark_Boolean (*getEnabled)(Ark_MenuItemConfiguration peer);
+    void (*setEnabled)(Ark_MenuItemConfiguration peer,
+                       Ark_Boolean enabled);
+    Ark_ContentModifier (*getContentModifier)(Ark_MenuItemConfiguration peer);
+    void (*setContentModifier)(Ark_MenuItemConfiguration peer,
+                               const Ark_Object* contentModifier);
+    Ark_ResourceStr (*getValue)(Ark_MenuItemConfiguration peer);
+    void (*setValue)(Ark_MenuItemConfiguration peer,
+                     const Ark_ResourceStr* value);
+    Opt_ResourceStr (*getIcon)(Ark_MenuItemConfiguration peer);
+    void (*setIcon)(Ark_MenuItemConfiguration peer,
+                    const Opt_ResourceStr* icon);
+    Opt_SymbolGlyphModifier (*getSymbolIcon)(Ark_MenuItemConfiguration peer);
+    void (*setSymbolIcon)(Ark_MenuItemConfiguration peer,
+                          const Opt_SymbolGlyphModifier* symbolIcon);
+    Ark_Boolean (*getSelected)(Ark_MenuItemConfiguration peer);
+    void (*setSelected)(Ark_MenuItemConfiguration peer,
+                        Ark_Boolean selected);
+    Ark_Int32 (*getIndex)(Ark_MenuItemConfiguration peer);
+    void (*setIndex)(Ark_MenuItemConfiguration peer,
+                     Ark_Int32 index);
+} GENERATED_ArkUIMenuItemConfigurationAccessor;
+
 typedef struct GENERATED_ArkUIMouseEventAccessor {
     void (*destroyPeer)(Ark_MouseEvent peer);
     Ark_MouseEvent (*construct)();
@@ -28701,6 +28722,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILongPressRecognizerAccessor* (*getLongPressRecognizerAccessor)();
     const GENERATED_ArkUIMatrix2DAccessor* (*getMatrix2DAccessor)();
     const GENERATED_ArkUIMeasurableAccessor* (*getMeasurableAccessor)();
+    const GENERATED_ArkUIMenuItemConfigurationAccessor* (*getMenuItemConfigurationAccessor)();
     const GENERATED_ArkUIMouseEventAccessor* (*getMouseEventAccessor)();
     const GENERATED_ArkUIMutableStyledStringAccessor* (*getMutableStyledStringAccessor)();
     const GENERATED_ArkUINavDestinationContextAccessor* (*getNavDestinationContextAccessor)();

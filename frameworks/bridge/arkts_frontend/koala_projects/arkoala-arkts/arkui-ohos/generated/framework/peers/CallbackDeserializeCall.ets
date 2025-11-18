@@ -2197,7 +2197,7 @@ export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: Dese
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: MenuItemConfiguration) => KPointer))
     let parentNode : KPointer = thisDeserializer.readPointer()
-    let config : MenuItemConfiguration = MenuItemConfiguration_serializer.read(thisDeserializer)
+    let config : MenuItemConfiguration = (MenuItemConfiguration_serializer.read(thisDeserializer) as MenuItemConfiguration)
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
