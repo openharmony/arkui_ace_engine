@@ -593,7 +593,8 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
         bool isDefaultPickerItemHeight_ = false;
         if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
             auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
-            isDefaultPickerItemHeight_ = LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0) ? false : true;
+            isDefaultPickerItemHeight_ = !LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0) &&
+                                         std::isfinite(defaultPickerItemHeightValue.ConvertToPx());
         }
         if (isDefaultPickerItemHeight_) {
             auto pickerItemHeight = 0.0;
