@@ -80,9 +80,11 @@ constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0f, 3.0f, 5.0f };
 
-bool HUKS_CRYPTO_EXTENSION_ABILITY = false;
+constexpr int32_t CREDENTIAL_UKEY = 4;
 constexpr int CAPABILITY_NOT_SUPPORTED_ERROR = 801;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
+
+bool huksCryptoExtensionAbility = false;
 
 void EraseSpace(std::string& data)
 {
@@ -533,8 +535,7 @@ public:
         } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsNumber()) {
             std::string identity = args[0]->ToString();
             int32_t type = args[1]->ToNumber<int32_t>();
-            constexpr int32_t credentialUKey = 4;
-            if (type == credentialUKey && !HUKS_CRYPTO_EXTENSION_ABILITY) {
+            if (type == CREDENTIAL_UKEY && !huksCryptoExtensionAbility) {
                 napi_throw_error(GetNapiEnv(), std::to_string(CAPABILITY_NOT_SUPPORTED_ERROR).c_str(), CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
                 result_->HandleCancel();
                 return;
