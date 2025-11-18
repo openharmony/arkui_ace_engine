@@ -35227,7 +35227,13 @@ KInteropReturnBuffer impl_Scroller_currentOffset(KVMContext vmContext, Ark_Nativ
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         const auto &retValue = GetAccessors()->getScrollerAccessor()->currentOffset(reinterpret_cast<Ark_VMContext>(vmContext), self);
         SerializerBase _retSerializer {};
-        OffsetResult_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            OffsetResult_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_CTX_1(Scroller_currentOffset, KInteropReturnBuffer, Ark_NativePointer)

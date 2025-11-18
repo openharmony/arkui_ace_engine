@@ -16647,7 +16647,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_ScrollPageOptions* value)
     {
     }
-    Ark_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+    Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
                                        Ark_Scroller peer)
     {
         return {};

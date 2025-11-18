@@ -541,9 +541,10 @@ void SetOnWillScrollImpl(Ark_NativePointer node,
             auto arkScrollOffset = Converter::ArkValue<Ark_Float64>(scrollOffset);
             auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
             auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
-            auto resultOpt = callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_ScrollResult,
+            auto resultOpt = callback.InvokeWithOptConvertResult<ScrollFrameResult, Opt_ScrollResult,
                 Callback_Opt_ScrollResult_Void>(arkScrollOffset, arkScrollState, arkScrollSource);
-            return resultOpt.value_or(ScrollFrameResult());
+            ScrollFrameResult defaultResult { .offset = scrollOffset };
+            return resultOpt.value_or(defaultResult);
         };
         ScrollableModelStatic::SetOnWillScroll(frameNode, std::move(modelCallback));
     } else {

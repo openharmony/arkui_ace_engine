@@ -23,7 +23,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, hookListItemGroupAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookListItemGroupAttributeModifier, AttributeUpdater, hookListItemGroupChildrenMainSizeImpl } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -152,7 +152,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
             const value_casted = value as (ChildrenMainSize | undefined)
-            this.getPeer()?.setChildrenMainSizeAttribute(value_casted)
+            hookListItemGroupChildrenMainSizeImpl(this, value);
             return this
         }
         return this

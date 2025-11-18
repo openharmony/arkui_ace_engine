@@ -63,10 +63,11 @@ void ScrollPageImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(peer);
     peer->TriggerScrollPage0(vmContext, value);
 }
-Ark_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
                                    Ark_Scroller peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    auto invalid = Converter::ArkValue<Opt_OffsetResult>();
+    CHECK_NULL_RETURN(peer, invalid);
     return peer->TriggerCurrentOffset(vmContext);
 }
 void ScrollToIndexImpl(Ark_VMContext vmContext,

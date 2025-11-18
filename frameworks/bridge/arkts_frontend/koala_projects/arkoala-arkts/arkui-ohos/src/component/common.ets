@@ -1000,6 +1000,109 @@ export class AxisEventTransfer {
     }
 }
 
+export class ChildrenMainSizeInternal {
+    public static fromPtr(ptr: KPointer): ChildrenMainSize {
+        const obj: ChildrenMainSize = new ChildrenMainSize(0)
+        return obj
+    }
+}
+
+interface ChildrenSizeChangeInfo {
+    start: int32;
+    deleteCount?: int32;
+    childrenSize?: Array<double>;
+}
+
+export class ChildrenMainSize {
+    private sizeArray: Array<double> = new Array<double>();
+    private changeArray: Array<ChildrenSizeChangeInfo> = new Array<ChildrenSizeChangeInfo>();
+    private defaultMainSize: double = -1;
+
+    constructor(childDefaultSize: double) {
+        if (this.isDoubleInvalid(childDefaultSize)) {
+            throw new BusinessError(401, 'The parameter check failed.');
+        }
+        this.defaultMainSize = childDefaultSize;
+        this.sizeArray = [];
+        // -1: represent newly created.
+        this.changeArray = [ { start: -1 } ];
+    }
+
+    private isIntInvalid(input: int32 | undefined): boolean {
+        if (input === undefined) {
+            return true;
+        }
+        return !(Number.isFinite(input) && input >= 0);
+    }
+
+    private isDoubleInvalid(input: double | undefined): boolean {
+        if (input === undefined) {
+            return true;
+        }
+        return !(input >= 0);
+    }
+
+    set childDefaultSize(value: double) {
+        if (this.isDoubleInvalid(value)) {
+            throw new BusinessError(401, 'The parameter check failed.');
+        }
+        this.defaultMainSize = value;
+    }
+
+    get childDefaultSize(): double {
+        return this.defaultMainSize;
+    }
+
+    public splice(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
+        if (this.isIntInvalid(start)) {
+            throw new BusinessError(401, 'The parameter check failed.');
+        }
+        const startValue: int32 = start;
+        const deleteCountValue: int32 = deleteCount && !(this.isIntInvalid(deleteCount)) ? deleteCount : 0;
+        if (deleteCount === undefined && childrenSize === undefined) {
+            this.sizeArray.splice(startValue);
+            this.changeArray.push({ start: startValue });
+        } else if (childrenSize === undefined) {
+            this.sizeArray.splice(startValue, deleteCountValue);
+            this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
+        } else {
+            const childrenSizeLength: int32 = childrenSize ? childrenSize.length : 0;
+            if (childrenSizeLength === 0) {
+                childrenSize = [];
+            }
+            for (let i: int32 = 0; i < childrenSizeLength; i++) {
+                if (this.isDoubleInvalid(childrenSize[i])) {
+                    // -1: represent default size.
+                    childrenSize[i] = -1;
+                }
+            }
+            while (startValue >= this.sizeArray.length) {
+                this.sizeArray.push(-1);
+            }
+            this.sizeArray.splice(startValue, deleteCountValue, ...childrenSize);
+            this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+        }
+    }
+
+    public update(index: int32, childSize: double): void {
+        if (this.isIntInvalid(index)) {
+            throw new BusinessError(401, 'The parameter check failed.');
+        } else if (this.isDoubleInvalid(childSize)) {
+            // -1: represent default size.
+            childSize = -1;
+        }
+        const startValue: int32 = index;
+        while (startValue >= this.sizeArray.length) {
+            this.sizeArray.push(-1);
+        }
+        this.sizeArray.splice(startValue, 1, childSize);
+        this.changeArray.push({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
+    }
+
+    public clearChanges(): void {
+        this.changeArray.splice(0);
+    }
+}
 export class ArkCommonPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
