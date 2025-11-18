@@ -73,6 +73,7 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements Fl
     public setFlowItemOptions(): this {
         if (this.checkPriority("setFlowItemOptions")) {
             this.getPeer()?.setFlowItemOptionsAttribute()
+            this.applyOptionsFinish('FlowItemAttribute');
             return this
         }
         return this
@@ -84,6 +85,9 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements Fl
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

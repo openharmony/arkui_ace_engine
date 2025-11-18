@@ -193,15 +193,17 @@ void FormRendererGroup::ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo)
     }
 }
 
-void FormRendererGroup::UpdateFormSizeOfFormRequests(double width, double height, float borderWidth)
+void FormRendererGroup::UpdateFormSizeOfFormRequests(double width, double height, float borderWidth,
+    float formViewScale)
 {
     for (auto iter = formRequests_.begin(); iter != formRequests_.end(); ++iter) {
         iter->want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
         iter->want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
         iter->want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, static_cast<float>(borderWidth));
+        iter->want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_VIEW_SCALE, formViewScale);
     }
     if (formRenderer_ != nullptr) {
-        formRenderer_->UpdateFormSize(width, height, borderWidth);
+        formRenderer_->UpdateFormSize(width, height, borderWidth, formViewScale);
     } else {
         HILOG_WARN("formRenderer is null");
     }

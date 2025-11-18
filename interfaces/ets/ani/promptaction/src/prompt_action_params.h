@@ -54,6 +54,22 @@ enum PromptActionColor {
     PROMPT_ACTION_COLOR_TRANSPARENT
 };
 
+enum PromptActionBlurStyle {
+    THIN = 0,
+    REGULAR = 1,
+    THICK = 2,
+    BACKGROUND_THIN = 3,
+    BACKGROUND_REGULAR = 4,
+    BACKGROUND_THICK = 5,
+    BACKGROUND_ULTRA_THICK = 6,
+    NONE = 7,
+    COMPONENT_ULTRA_THIN = 8,
+    COMPONENT_THIN = 9,
+    COMPONENT_REGULAR = 10,
+    COMPONENT_THICK = 11,
+    COMPONENT_ULTRA_THICK = 12
+};
+
 enum class ResourceType : uint32_t {
     COLOR = 10001,
     FLOAT,
@@ -143,7 +159,7 @@ bool GetResourceStrParam(ani_env *env, ani_object object, std::string& result);
 bool GetResourceStrParam(ani_env *env, ani_object object, const char *name, std::string& result);
 bool GetLengthParam(ani_env *env, ani_ref ref, OHOS::Ace::CalcDimension& result);
 bool GetLengthParam(ani_env *env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result);
-bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result);
+bool GetColorParam(ani_env* env, ani_object object, std::string& result);
 bool GetResourceColorParam(ani_env *env, ani_ref ref, OHOS::Ace::Color& result);
 bool GetResourceColorParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::Color& result);
 bool GetResourceColorParamOpt(ani_env* env, ani_object object, const char *name,

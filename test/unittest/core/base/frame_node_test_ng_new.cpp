@@ -16,7 +16,8 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "frameworks/core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -273,7 +274,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest049, TestSize.Level1)
     gestureEventHub->SetMouseResponseRegion(mouseResponseRegion);
 
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
-    FRAME_NODE2->GetResponseRegionList(paintRect, 1);
+    FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
     EXPECT_FALSE(gestureEventHub->GetMouseResponseRegion().empty());
 }
 
@@ -295,10 +296,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest050, TestSize.Level1)
      */
     std::vector<DimensionRect> responseRegion;
     responseRegion.push_back(DimensionRect());
+
     auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
-    FRAME_NODE2->GetResponseRegionList(paintRect, 1);
+    FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
     EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
 }
 

@@ -20,12 +20,16 @@
 #include <string>
 #include <unordered_set>
 
+#include "ui/accessibility/accessibility_constants.h"
+#include "ui/focus/focus_constants.h"
+
 #include "accessibility_property_function.h"
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Accessibility {
 class ExtraElementInfo;
@@ -78,6 +82,7 @@ using GetWindowScenePositionImpl = std::function<void((WindowSceneInfo& windowSc
 
 using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF& point)>;
 
+class UINode;
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 

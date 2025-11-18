@@ -648,6 +648,13 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     strategy.updateElementInfoResult_ = false;
     finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode1, aceResult, info);
     ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL);
+
+    // aceResult FIND_FAIL, finalNode nullptr
+    std::shared_ptr<FocusRulesCheckNode> targetNode2;
+    aceResult = AceFocusMoveResult::FIND_FAIL_LOST_NODE;
+    strategy.updateElementInfoResult_ = false;
+    finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode1, aceResult, info);
+    ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
 }
 
 /**
@@ -776,7 +783,7 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalTest004, TestSize.Level1)
     finalResult = strategy.ExecuteFocusMoveSearch(elementId, param, info);
     param.direction = FocusMoveDirection::DIRECTION_INVALID;
     finalResult = strategy.ExecuteFocusMoveSearch(elementId, param, info);
-    ASSERT_EQ(finalResult.resultType, FocusMoveResultType::NOT_SUPPORT);
+    ASSERT_EQ(finalResult.resultType, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
 }
 
 /**
@@ -854,7 +861,7 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusMoveSearchWithCondition002, TestSize.L
     int32_t requestId = 1;
     param.direction = FocusMoveDirection::GET_FORWARD_SCROLL_ANCESTOR;
     jsAccessibilityManager->FocusMoveSearchWithCondition(info, param, requestId, operatorCallback, windowId);
-    EXPECT_EQ(operatorCallback.mockResult_.resultType, FocusMoveResultType::SEARCH_FAIL);
+    EXPECT_EQ(operatorCallback.mockResult_.resultType, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
 }
 
 /**
@@ -931,7 +938,7 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusMoveSearchWithCondition004, TestSize.L
     Accessibility::AccessibilityElementInfo info;
     info.SetAccessibilityId(elementId);
     jsAccessibilityManager->FocusMoveSearchWithCondition(info, param, requestId, operatorCallback, windowId);
-    EXPECT_EQ(operatorCallback.mockResult_.resultType, FocusMoveResultType::SEARCH_FAIL);
+    EXPECT_EQ(operatorCallback.mockResult_.resultType, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
 }
 
 } // namespace OHOS::Ace::NG

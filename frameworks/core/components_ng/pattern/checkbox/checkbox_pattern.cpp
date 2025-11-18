@@ -529,7 +529,7 @@ void CheckBoxPattern::UpdateUnSelect()
 
 void CheckBoxPattern::UpdateUIStatus(bool check)
 {
-    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox update status %{public}d", check);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox update status %{public}d", check);
     uiStatus_ = check ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
     auto host = GetHost();
     CHECK_NULL_VOID(host);

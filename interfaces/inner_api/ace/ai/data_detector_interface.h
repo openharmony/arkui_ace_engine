@@ -54,6 +54,7 @@ public:
     virtual bool IsDataDetectorSupported() = 0;
     virtual void GetAIEntityMenu(TextDataDetectResult& textDataDetectResult) = 0;
     virtual void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) = 0;
+    virtual bool IsAskCeliaSupported() { return false; }
 
     virtual int8_t GetCursorPosition(const std::string& text, int8_t offset)
     {

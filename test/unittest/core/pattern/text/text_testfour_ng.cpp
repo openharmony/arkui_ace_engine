@@ -19,6 +19,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/typed_text.h"
 

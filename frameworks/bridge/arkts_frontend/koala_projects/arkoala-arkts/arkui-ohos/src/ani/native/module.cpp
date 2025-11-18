@@ -134,6 +134,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromWebviewWebviewControllerPtr)
         },
         ani_native_function {
+            "_Web_SetJavaScriptProxyController",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetJavaScriptProxyController)
+        },
+        ani_native_function {
             "_TransferScreenCaptureHandlerToStatic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToStatic)
@@ -972,6 +977,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowName)
         },
         ani_native_function {
+            "_Common_getWindowWidthBreakpoint",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowWidthBreakpoint)
+        },
+        ani_native_function {
+            "_Common_getWindowHeightBreakpoint",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowHeightBreakpoint)
+        },
+        ani_native_function {
             "_TransferKeyEventPointer",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferKeyEventPointer)
@@ -1147,9 +1162,24 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetCanvasId)
         },
         ani_native_function {
+            "_CanvasRenderingContext_setAttachCallbackId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetAttachCallbackId)
+        },
+        ani_native_function {
+            "_CanvasRenderingContext_setDetachCallbackId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetDetachCallbackId)
+        },
+        ani_native_function {
             "_FrameNode_MarkDirtyNode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
+        },
+        ani_native_function {
+            "_GetAttributeSetTraceEnabled",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::GetAttributeSetTraceEnabled)
         },
         ani_native_function {
             "_TraceBegin",

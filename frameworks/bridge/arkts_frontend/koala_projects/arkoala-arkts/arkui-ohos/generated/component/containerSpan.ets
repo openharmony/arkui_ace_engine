@@ -92,6 +92,7 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
     public setContainerSpanOptions(): this {
         if (this.checkPriority("setContainerSpanOptions")) {
             this.getPeer()?.setContainerSpanOptionsAttribute()
+            this.applyOptionsFinish('ContainerSpanAttribute');
             return this
         }
         return this
@@ -111,6 +112,9 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

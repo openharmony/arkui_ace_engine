@@ -94,6 +94,7 @@ private:
     void InitAccessibilityText();
     int32_t TotalCount() const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
+    void NotifySwiperTouchState(TouchType touchType) const;
 
     RefPtr<ClickEvent> buttonClickListener_;
     RefPtr<ClickEvent> arrowClickListener_;

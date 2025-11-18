@@ -28,7 +28,7 @@ import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
 import { focusController } from '@ohos/arkui/focusController';
 import { Frame } from 'arkui/Graphics';
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from 'arkui/framework';
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from 'arkui/framework';
 import { TextMenuOptions } from 'arkui/framework';
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
@@ -39,6 +39,7 @@ import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
 import { TextPickerDialogOptions } from 'arkui/framework';
 import { DatePickerDialogOptions } from 'arkui/framework';
+import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
 import { ComponentContent } from 'arkui/ComponentContent';
@@ -51,7 +52,8 @@ import { ComputableState, IncrementalNode } from '@koalaui/runtime';
 import { PeerNode } from 'arkui/PeerNode';
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
-import { int32 } from "@koalaui/common"
+import { int32, int64 } from "@koalaui/common";
+import { KPointer } from '@koalaui/interop';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -508,6 +510,9 @@ export class UIContext {
     getFrameNodeByUniqueId(id: number): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
+    getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
+        throw Error("getNavigationInfoByUniqueId not implemented in UIContext!")
+    }
     getHostContext(): Context | undefined {
         throw Error("getHostContext not implemented in UIContext!")
     }
@@ -640,6 +645,10 @@ export class UIContext {
         throw Error("freezeUINode not implemented in UIContext!")
     }
 
+    public enableSwipeBack(enabled: boolean | undefined): void {
+        throw Error("enableSwipeBack not implemented in UIContext!")
+    }
+
     public getWindowName(): string | undefined {
         throw Error("getWindowName not implemented in UIContext!")
     }
@@ -678,7 +687,7 @@ export class UIContext {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
  
-    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+    public getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string {
         throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
     }
     public setImageCacheCount(value: int): void {
@@ -687,6 +696,22 @@ export class UIContext {
 
     public setImageRawDataCacheSize(value: int): void {
         throw Error("setImageRawDataCacheSize not implemented in UIContext!")
+    }
+
+    public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
+        throw Error("requireDynamicSyncScene not implemented in UIContext!");
+    }
+
+    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+        throw Error("openBindSheet not implemented in UIContext!")
+    }
+
+    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updateBindSheet not implemented in UIContext!")
+    }
+
+    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+        throw Error("closeBindSheet not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
@@ -804,30 +829,123 @@ export class UIObserver {
         }
     }
 
-    public onTabChange(callback: ((param: object) => void)): void {
+    public onTabChange(callback: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.onTabChange(callback);
         }
     }
 
-    public offTabChange(callback?: ((param: object) => void)): void {
+    public offTabChange(callback?: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.offTabChange(callback);
         }
     }
 
-    public onTabChange(options: uiObserver.ObserverOptions, callback: ((param: object) => void)): void {
+    public onTabChange(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.onTabChange(options, callback);
         }
     }
 
-    public offTabChange(options: uiObserver.ObserverOptions, callback?: ((param: object) => void)): void {
+    public offTabChange(options: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TabContentInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.offTabChange(options, callback);
+        }
+    }
+
+    public onTabContentUpdate(callback: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabContentUpdate(callback);
+        }
+    }
+
+    public offTabContentUpdate(callback?: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabContentUpdate(callback);
+        }
+    }
+
+    public onTabContentUpdate(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabContentUpdate(options, callback);
+        }
+    }
+
+    public offTabContentUpdate(options: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabContentUpdate(options, callback);
+        }
+    }
+
+    public onDensityUpdate(callback: Callback<uiObserver.DensityInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onDensityUpdate(callback);
+        }
+    }
+
+    public offDensityUpdate(callback?: Callback<uiObserver.DensityInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offDensityUpdate(callback);
+        }
+    }
+
+    public onWillDraw(callback: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onWillDraw(callback);
+        }
+    }
+
+    public offWillDraw(callback?: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offWillDraw(callback);
+        }
+    }
+
+    public onDidLayout(callback: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onDidLayout(callback);
+        }
+    }
+
+    public offDidLayout(callback?: Callback<void>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offDidLayout(callback);
         }
     }
 }
 export interface PageInfo {}
 export interface ContentCoverController {}
-export declare class DynamicSyncScene {}
+export class DynamicSyncScene {
+    private range: ExpectedFrameRateRange;
+    constructor(range: ExpectedFrameRateRange) {
+        this.range = range;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        this.range = range;
+    }
+
+    getFrameRateRange(): ExpectedFrameRateRange {
+        return this.range;
+    }
+}
+
+export const enum SwiperDynamicSyncSceneType {
+    GESTURE = 0,
+    ANIMATION = 1,
+}
+
+export class SwiperDynamicSyncScene extends DynamicSyncScene {
+    readonly type: SwiperDynamicSyncSceneType;
+    nodePtr: KPointer;
+    constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
+        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
+        this.type = type;
+        this.nodePtr = nodePtr;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        super.setFrameRateRange(range);
+        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
+    }
+}

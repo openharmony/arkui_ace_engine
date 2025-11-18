@@ -61,6 +61,7 @@ public:
     {
         return isUpdateTargetNode_;
     }
+    bool hasNavOrSideBarNodes_ = false;
 
 protected:
     void UpdateTitleAfterRemove();
@@ -132,8 +133,7 @@ private:
     WeakPtr<FrameNode> sideBarNode_;
     WeakPtr<FrameNode> navigationNode_;
     WeakPtr<FrameNode> navDestNode_;
-    bool hasNavOrSideBarNodes_ = false;
-    bool hasSetOnchangeCallback_ = false;
+    bool hasSetOnChangeCallback_ = false;
 
     bool hasSetNavigationModeChangeCallback_ = false;
     bool hasSetUpdateSideTitleBgColor_ = false;

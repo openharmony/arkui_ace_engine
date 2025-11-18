@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,24 +150,26 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
-void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner)
+bool AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, false);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false, isExcludeInner);
+    auto result = eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false, isExcludeInner);
     func = nullptr;
+    return result;
 }
 
-void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+bool RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+    CHECK_NULL_RETURN(eventHub, false);
+    auto result = eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+    return result;
 }
 
 namespace NodeModifier {
@@ -644,6 +646,15 @@ const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnGridWillScroll,
     NodeModifier::SetOnGridDidScroll,
     NodeModifier::SetOnGridScrollBarUpdate,
+    NodeModifier::SetGridOnItemDragStart,
+    NodeModifier::SetGridOnItemDragEnter,
+    NodeModifier::SetGridOnItemDragMove,
+    NodeModifier::SetGridOnItemDragLeave,
+    NodeModifier::SetGridOnItemDrop,
+};
+
+const ComponentAsyncEventHandler GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnGridItemSelect,
 };
 
 const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -875,6 +886,15 @@ const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnGridWillScroll,
     NodeModifier::ResetOnGridDidScroll,
     NodeModifier::ResetOnGridScrollBarUpdate,
+    NodeModifier::ResetOnGridItemDragEnter,
+    NodeModifier::ResetOnGridItemDragLeave,
+    NodeModifier::ResetOnGridItemDragMove,
+    NodeModifier::ResetOnGridItemDragStart,
+    NodeModifier::ResetOnGridItemDrop,
+};
+
+const ResetComponentAsyncEventHandler GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnGridItemSelect,
 };
 
 const ResetComponentAsyncEventHandler ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1101,6 +1121,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = GRID_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_GRID_ITEM: {
+            // grid item event type.
+            if (subKind >= sizeof(GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_ALPHABET_INDEXER: {
@@ -1377,6 +1406,17 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
                 return;
             }
             eventHandle = GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_GRID_ITEM: {
+            // grid item event type.
+            if (subKind >=
+                sizeof(GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_ALPHABET_INDEXER: {

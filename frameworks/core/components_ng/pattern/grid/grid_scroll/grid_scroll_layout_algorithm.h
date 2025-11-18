@@ -204,7 +204,7 @@ private:
 
     virtual std::pair<int32_t, int32_t> CalculateCachedCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
     {
-        return std::make_pair(cachedCount * crossCount_, cachedCount * crossCount_);
+        return std::make_pair(cachedCount * info_.crossCount_, cachedCount * info_.crossCount_);
     }
 
     std::string GetReloadReasonStr(GridReloadReason reason)
@@ -234,7 +234,6 @@ private:
     void UpdateUnlayoutedItems();
 
 protected:
-    uint32_t crossCount_ = 0;
     uint32_t mainCount_ = Infinity<int32_t>();
     int32_t currentItemRowSpan_ = 0;
     int32_t currentItemColSpan_ = 0;
@@ -269,7 +268,6 @@ private:
     SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
-    Axis axis_ = Axis::VERTICAL;
 
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;

@@ -433,6 +433,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_001, TestSize.Level1)
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
+    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(value));
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
@@ -464,6 +465,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_002, TestSize.Level1)
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
+    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(value));
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
@@ -495,6 +497,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_003, TestSize.Level1)
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
+    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(value));
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
@@ -588,6 +591,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_006, TestSize.Level1)
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(false));
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
+    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(value));
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, false);
 #endif

@@ -1136,4 +1136,48 @@ HWTEST_F(TextTwelveTestNg, InitSpanStringTouchEvent, TestSize.Level1)
     EXPECT_TRUE(pattern->spanStringTouchInitialized_);
     EXPECT_TRUE(info.isTouchEventsEnd_);
 }
+
+/**
+ * @tc.name: TextBindSelectionMenu.
+ * @tc.desc: Test TextPattern capi bindSelectionMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTwelveTestNg, TextBindSelectionMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SelectMenuParam menuParam;
+    TextSpanType spanType = TextSpanType::TEXT;
+    TextResponseType responseType = TextResponseType::LONG_PRESS;
+    std::function<void()> buildFunc = []() {};
+    TextModelNG::BindSelectionMenu(AceType::RawPtr(textNode), spanType, responseType, buildFunc, menuParam);
+    auto key = std::make_pair(spanType, responseType);
+    EXPECT_TRUE(pattern->selectionMenuMap_.find(key) != pattern->selectionMenuMap_.end());
+    TextModelNG::ResetBindSelectionMenu(AceType::RawPtr(textNode));
+    EXPECT_TRUE(pattern->selectionMenuMap_.find(key) == pattern->selectionMenuMap_.end());
+}
+
+/**
+ * @tc.name: TextConvertMenuId.
+ * @tc.desc: Test SelectOverlayNode ConvertToIntMenuId、ConvertToStrMenuId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTwelveTestNg, TextConvertMenuId, TestSize.Level1)
+{
+    auto id = SelectOverlayNode::ConvertToIntMenuId("OH_DEFAULT_SELECT_ALL");
+    EXPECT_EQ(id, 3);
+    id = SelectOverlayNode::ConvertToIntMenuId("100");
+    EXPECT_EQ(id, 100);
+    id = SelectOverlayNode::ConvertToIntMenuId("ABC");
+    EXPECT_EQ(id, -1);
+    auto strId = SelectOverlayNode::ConvertToStrMenuId(1);
+    EXPECT_EQ(strId, "OH_DEFAULT_COPY");
+    strId = SelectOverlayNode::ConvertToStrMenuId(200);
+    EXPECT_EQ(strId, "200");
+}
 } // namespace OHOS::Ace::NG

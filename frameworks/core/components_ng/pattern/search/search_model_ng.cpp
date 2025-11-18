@@ -1772,6 +1772,50 @@ void SearchModelNG::SetLetterSpacing(const Dimension& value)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetDividerColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetDividerColor(frameNode, color);
+}
+
+void SearchModelNG::SetDividerColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, DividerColorSetByUser, true, frameNode);
+    dividerRenderProperty->UpdateDividerColor(color);
+    dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchModelNG::ResetDividerColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ResetDividerColor(frameNode);
+}
+
+void SearchModelNG::ResetDividerColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto color = searchTheme->GetSearchDividerColor();
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, DividerColorSetByUser, frameNode);
+    dividerRenderProperty->UpdateDividerColor(color);
+    dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SearchModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

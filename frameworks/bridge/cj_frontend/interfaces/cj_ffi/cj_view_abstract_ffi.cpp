@@ -1009,6 +1009,11 @@ void FfiOHOSAceFrameworkViewAbstractSetAspectRatio(double value)
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }
 
+void FfiOHOSAceFrameworkViewAbstractResetAspectRatio()
+{
+    ViewAbstractModel::GetInstance()->ResetAspectRatio();
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetDisplayPriority(int32_t value)
 {
     ViewAbstractModel::GetInstance()->SetDisplayIndex(value);
@@ -1402,6 +1407,11 @@ void FfiOHOSAceFrameworkViewAbstractSetFlexGrow(double value)
 void FfiOHOSAceFrameworkViewAbstractSetFlexShrink(double value)
 {
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
+}
+
+void FfiOHOSAceFrameworkViewAbstractResetFlexShrink()
+{
+    ViewAbstractModel::GetInstance()->ResetFlexShrink();
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetAlignSelf(int32_t alignValue)

@@ -1133,8 +1133,12 @@ void DialogLayoutAlgorithm::DialogOverflowAdjust(
     auto limitTop = availableTop + limitAreaPadding;
     auto limitBottom = availableBottom  - limitAreaPadding;
     // Adjust allowed area for foldable devices
-    if (alignBottomScreen_) {
-        limitTop = foldCreaseRect.Bottom();
+    if (isHoverMode_) {
+        if (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN) {
+            limitBottom = foldCreaseRect.Top();
+        } else {
+            limitTop = foldCreaseRect.Bottom();
+        }
     }
     if (GreatNotEqual(limitTop, limitBottom)) {
         return;

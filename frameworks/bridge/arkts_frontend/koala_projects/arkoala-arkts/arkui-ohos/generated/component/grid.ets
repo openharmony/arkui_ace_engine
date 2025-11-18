@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KInt32ArrayPtr } from "@koalaui/interop"
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { Resource_serializer } from "./../framework/resource"
 import { NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
@@ -138,15 +138,15 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setRowsGap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarWidthAttribute(value: number | string | undefined): void {
+    setScrollBarWidthAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -158,7 +158,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | number | string | undefined): void {
+    setScrollBarColorAttribute(value: Color | int32 | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -167,10 +167,10 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -194,7 +194,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnScrollBarUpdateAttribute(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): void {
+    setOnScrollBarUpdateAttribute(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -206,7 +206,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setOnScrollBarUpdate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnScrollIndexAttribute(value: ((first: number,last: number) => void) | undefined): void {
+    setOnScrollIndexAttribute(value: ((first: int32,last: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -218,12 +218,12 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setOnScrollIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCachedCount0Attribute(value: number | undefined): void {
+    setCachedCount0Attribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -254,36 +254,36 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setMultiSelectable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxCountAttribute(value: number | undefined): void {
+    setMaxCountAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setMaxCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinCountAttribute(value: number | undefined): void {
+    setMinCountAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setMinCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCellLengthAttribute(value: number | undefined): void {
+    setCellLengthAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -338,7 +338,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDragEnter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnItemDragMoveAttribute(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): void {
+    setOnItemDragMoveAttribute(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -350,7 +350,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDragMove(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnItemDragLeaveAttribute(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): void {
+    setOnItemDragLeaveAttribute(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -362,7 +362,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDragLeave(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnItemDropAttribute(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): void {
+    setOnItemDropAttribute(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -398,15 +398,15 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setEnableScrollInteraction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFrictionAttribute(value: number | Resource | undefined): void {
+    setFrictionAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -466,12 +466,12 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setOnDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCachedCount1Attribute(count: number | undefined, show: boolean | undefined): void {
+    setCachedCount1Attribute(count: int32 | undefined, show: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (count !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const countTmpValue  = count!
-            thisSerializer.writeNumber(countTmpValue)
+            thisSerializer.writeInt32(countTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -506,10 +506,10 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
     }
 }
 export interface GridLayoutOptions {
-    regularSize: [ number, number ];
-    irregularIndexes?: Array<number>;
-    onGetIrregularSizeByIndex?: ((index: number) => [ number, number ]);
-    onGetRectByIndex?: ((index: number) => [ number, number, number, number ]);
+    regularSize: [ int32, int32 ];
+    irregularIndexes?: Array<int32>;
+    onGetIrregularSizeByIndex?: ((index: int32) => [ int32, int32 ]);
+    onGetRectByIndex?: ((index: int32) => [ int32, int32, int32, int32 ]);
 }
 export enum GridDirection {
     ROW = 0,
@@ -526,8 +526,8 @@ export enum GridItemAlignment {
     STRETCH = 1
 }
 export interface ComputedBarAttribute {
-    totalOffset: number;
-    totalLength: number;
+    totalOffset: double;
+    totalLength: double;
 }
 export interface GridAttribute extends ScrollableCommonMethod {
     setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
@@ -545,16 +545,16 @@ export interface GridAttribute extends ScrollableCommonMethod {
     rowsGap(value: Length | undefined): this {
         throw new Error("Unimplemented method rowsGap")
     }
-    scrollBarWidth(value: number | string | undefined): this
-    scrollBarColor(value: Color | number | string | undefined): this
+    scrollBarWidth(value: double | string | undefined): this
+    scrollBarColor(value: Color | int32 | string | undefined): this
     scrollBar(value: BarState | undefined): this
-    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+    onScrollBarUpdate(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): this {
         throw new Error("Unimplemented method onScrollBarUpdate")
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onScrollIndex")
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         throw new Error("Unimplemented method cachedCount")
     }
     editMode(value: boolean | undefined): this {
@@ -563,13 +563,13 @@ export interface GridAttribute extends ScrollableCommonMethod {
     multiSelectable(value: boolean | undefined): this {
         throw new Error("Unimplemented method multiSelectable")
     }
-    maxCount(value: number | undefined): this {
+    maxCount(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxCount")
     }
-    minCount(value: number | undefined): this {
+    minCount(value: int32 | undefined): this {
         throw new Error("Unimplemented method minCount")
     }
-    cellLength(value: number | undefined): this {
+    cellLength(value: double | undefined): this {
         throw new Error("Unimplemented method cellLength")
     }
     layoutDirection(value: GridDirection | undefined): this {
@@ -584,18 +584,18 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
         throw new Error("Unimplemented method onItemDragEnter")
     }
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onItemDragMove")
     }
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onItemDragLeave")
     }
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
         throw new Error("Unimplemented method onItemDrop")
     }
     nestedScroll(value: NestedScrollOptions | undefined): this
     enableScrollInteraction(value: boolean | undefined): this
-    friction(value: number | Resource | undefined): this
+    friction(value: double | Resource | undefined): this
     alignItems(value: GridItemAlignment | undefined): this {
         throw new Error("Unimplemented method alignItems")
     }
@@ -608,7 +608,7 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onDidScroll(value: OnScrollCallback | undefined): this {
         throw new Error("Unimplemented method onDidScroll")
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         throw new Error("Unimplemented method cachedCount")
     }
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
@@ -623,27 +623,27 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     rowsTemplate_value?: string | undefined
     columnsGap_value?: Length | undefined
     rowsGap_value?: Length | undefined
-    scrollBarWidth_value?: number | string | undefined
-    scrollBarColor_value?: Color | number | string | undefined
+    scrollBarWidth_value?: double | string | undefined
+    scrollBarColor_value?: Color | int32 | string | undefined
     scrollBar_value?: BarState | undefined
-    onScrollBarUpdate_value?: ((index: number,offset: number) => ComputedBarAttribute) | undefined
-    onScrollIndex_value?: ((first: number,last: number) => void) | undefined
-    cachedCount_value?: number | undefined
+    onScrollBarUpdate_value?: ((index: int32,offset: double) => ComputedBarAttribute) | undefined
+    onScrollIndex_value?: ((first: int32,last: int32) => void) | undefined
+    cachedCount_value?: int32 | undefined
     editMode_value?: boolean | undefined
     multiSelectable_value?: boolean | undefined
-    maxCount_value?: number | undefined
-    minCount_value?: number | undefined
-    cellLength_value?: number | undefined
+    maxCount_value?: int32 | undefined
+    minCount_value?: int32 | undefined
+    cellLength_value?: double | undefined
     layoutDirection_value?: GridDirection | undefined
     supportAnimation_value?: boolean | undefined
     onItemDragStart_value?: OnItemDragStartCallback | undefined
     onItemDragEnter_value?: ((event: ItemDragInfo) => void) | undefined
-    onItemDragMove_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined
-    onItemDragLeave_value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
-    onItemDrop_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
+    onItemDragMove_value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined
+    onItemDragLeave_value?: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined
+    onItemDrop_value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined
     nestedScroll_value?: NestedScrollOptions | undefined
     enableScrollInteraction_value?: boolean | undefined
-    friction_value?: number | Resource | undefined
+    friction_value?: double | Resource | undefined
     alignItems_value?: GridItemAlignment | undefined
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
@@ -664,22 +664,22 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     rowsGap(value: Length | undefined): this {
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         return this
     }
     scrollBar(value: BarState | undefined): this {
         return this
     }
-    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+    onScrollBarUpdate(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): this {
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         return this
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         return this
     }
     editMode(value: boolean | undefined): this {
@@ -688,13 +688,13 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     multiSelectable(value: boolean | undefined): this {
         return this
     }
-    maxCount(value: number | undefined): this {
+    maxCount(value: int32 | undefined): this {
         return this
     }
-    minCount(value: number | undefined): this {
+    minCount(value: int32 | undefined): this {
         return this
     }
-    cellLength(value: number | undefined): this {
+    cellLength(value: double | undefined): this {
         return this
     }
     layoutDirection(value: GridDirection | undefined): this {
@@ -709,13 +709,13 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
         return this
     }
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
         return this
     }
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
         return this
     }
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
         return this
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
@@ -724,7 +724,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     enableScrollInteraction(value: boolean | undefined): this {
         return this
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         return this
     }
     alignItems(value: GridItemAlignment | undefined): this {
@@ -739,7 +739,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     onDidScroll(value: OnScrollCallback | undefined): this {
         return this
     }
-    cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         return this
     }
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
@@ -762,6 +762,7 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
             const scroller_casted = scroller as (Scroller | undefined)
             const layoutOptions_casted = layoutOptions as (GridLayoutOptions | undefined)
             this.getPeer()?.setGridOptionsAttribute(scroller_casted, layoutOptions_casted)
+            this.applyOptionsFinish('GridAttribute');
             return this
         }
         return this
@@ -798,17 +799,17 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public scrollBarWidth(value: number | string | undefined): this {
+    public scrollBarWidth(value: double | string | undefined): this {
         if (this.checkPriority("scrollBarWidth")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setScrollBarWidthAttribute(value_casted)
             return this
         }
         return this
     }
-    public scrollBarColor(value: Color | number | string | undefined): this {
+    public scrollBarColor(value: Color | int32 | string | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | number | string | undefined)
+            const value_casted = value as (Color | int32 | string | undefined)
             this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
@@ -822,25 +823,25 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+    public onScrollBarUpdate(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): this {
         if (this.checkPriority("onScrollBarUpdate")) {
-            const value_casted = value as (((index: number,offset: number) => ComputedBarAttribute) | undefined)
+            const value_casted = value as (((index: int32,offset: double) => ComputedBarAttribute) | undefined)
             this.getPeer()?.setOnScrollBarUpdateAttribute(value_casted)
             return this
         }
         return this
     }
-    public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    public onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
         if (this.checkPriority("onScrollIndex")) {
-            const value_casted = value as (((first: number,last: number) => void) | undefined)
+            const value_casted = value as (((first: int32,last: int32) => void) | undefined)
             this.getPeer()?.setOnScrollIndexAttribute(value_casted)
             return this
         }
         return this
     }
-    public cachedCount(value: number | undefined): this {
+    public cachedCount(value: int32 | undefined): this {
         if (this.checkPriority("cachedCount")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             return this
         }
@@ -862,25 +863,25 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public maxCount(value: number | undefined): this {
+    public maxCount(value: int32 | undefined): this {
         if (this.checkPriority("maxCount")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxCountAttribute(value_casted)
             return this
         }
         return this
     }
-    public minCount(value: number | undefined): this {
+    public minCount(value: int32 | undefined): this {
         if (this.checkPriority("minCount")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMinCountAttribute(value_casted)
             return this
         }
         return this
     }
-    public cellLength(value: number | undefined): this {
+    public cellLength(value: double | undefined): this {
         if (this.checkPriority("cellLength")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setCellLengthAttribute(value_casted)
             return this
         }
@@ -918,25 +919,25 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+    public onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
         if (this.checkPriority("onItemDragMove")) {
-            const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined)
+            const value_casted = value as (((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined)
             this.getPeer()?.setOnItemDragMoveAttribute(value_casted)
             return this
         }
         return this
     }
-    public onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+    public onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
         if (this.checkPriority("onItemDragLeave")) {
-            const value_casted = value as (((event: ItemDragInfo,itemIndex: number) => void) | undefined)
+            const value_casted = value as (((event: ItemDragInfo,itemIndex: int32) => void) | undefined)
             this.getPeer()?.setOnItemDragLeaveAttribute(value_casted)
             return this
         }
         return this
     }
-    public onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+    public onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
         if (this.checkPriority("onItemDrop")) {
-            const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined)
+            const value_casted = value as (((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined)
             this.getPeer()?.setOnItemDropAttribute(value_casted)
             return this
         }
@@ -958,9 +959,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public friction(value: number | Resource | undefined): this {
+    public friction(value: double | Resource | undefined): this {
         if (this.checkPriority("friction")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setFrictionAttribute(value_casted)
             return this
         }
@@ -998,9 +999,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public cachedCount(count: number | undefined, show: boolean | undefined): this {
+    public cachedCount(count: int32 | undefined, show: boolean | undefined): this {
         if (this.checkPriority("cachedCount")) {
-            const count_casted = count as (number | undefined)
+            const count_casted = count as (int32 | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
             return this
@@ -1023,6 +1024,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -1048,14 +1052,14 @@ export class ComputedBarAttribute_serializer {
     public static write(buffer: SerializerBase, value: ComputedBarAttribute): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTotalOffset  = value.totalOffset
-        valueSerializer.writeNumber(valueHolderForTotalOffset)
+        valueSerializer.writeFloat64(valueHolderForTotalOffset)
         const valueHolderForTotalLength  = value.totalLength
-        valueSerializer.writeNumber(valueHolderForTotalLength)
+        valueSerializer.writeFloat64(valueHolderForTotalLength)
     }
     public static read(buffer: DeserializerBase): ComputedBarAttribute {
         let valueDeserializer : DeserializerBase = buffer
-        const totalOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
-        const totalLengthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const totalOffsetTmpResult : double = valueDeserializer.readFloat64()
+        const totalLengthTmpResult : double = valueDeserializer.readFloat64()
         let value : ComputedBarAttribute = ({totalOffset: totalOffsetTmpResult, totalLength: totalLengthTmpResult} as ComputedBarAttribute)
         return value
     }
@@ -1065,17 +1069,17 @@ export class GridLayoutOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRegularSize  = value.regularSize
         const valueHolderForRegularSize_0  = valueHolderForRegularSize[0]
-        valueSerializer.writeNumber(valueHolderForRegularSize_0)
+        valueSerializer.writeInt32(valueHolderForRegularSize_0)
         const valueHolderForRegularSize_1  = valueHolderForRegularSize[1]
-        valueSerializer.writeNumber(valueHolderForRegularSize_1)
+        valueSerializer.writeInt32(valueHolderForRegularSize_1)
         const valueHolderForIrregularIndexes  = value.irregularIndexes
         if (valueHolderForIrregularIndexes !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIrregularIndexesTmpValue  = valueHolderForIrregularIndexes!
             valueSerializer.writeInt32((valueHolderForIrregularIndexesTmpValue.length).toInt())
             for (let valueHolderForIrregularIndexesTmpValueCounterI = 0; valueHolderForIrregularIndexesTmpValueCounterI < valueHolderForIrregularIndexesTmpValue.length; valueHolderForIrregularIndexesTmpValueCounterI++) {
-                const valueHolderForIrregularIndexesTmpValueTmpElement : number = valueHolderForIrregularIndexesTmpValue[valueHolderForIrregularIndexesTmpValueCounterI]
-                valueSerializer.writeNumber(valueHolderForIrregularIndexesTmpValueTmpElement)
+                const valueHolderForIrregularIndexesTmpValueTmpElement : int32 = valueHolderForIrregularIndexesTmpValue[valueHolderForIrregularIndexesTmpValueCounterI]
+                valueSerializer.writeInt32(valueHolderForIrregularIndexesTmpValueTmpElement)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1099,66 +1103,66 @@ export class GridLayoutOptions_serializer {
     }
     public static read(buffer: DeserializerBase): GridLayoutOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const regularSizeTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const regularSizeTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const regularSizeTmpResult : [ number, number ] = ([regularSizeTmpBufValue0, regularSizeTmpBufValue1] as [ number, number ])
+        const regularSizeTmpBufValue0 : int32 = valueDeserializer.readInt32()
+        const regularSizeTmpBufValue1 : int32 = valueDeserializer.readInt32()
+        const regularSizeTmpResult : [ int32, int32 ] = ([regularSizeTmpBufValue0, regularSizeTmpBufValue1] as [ int32, int32 ])
         const irregularIndexesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let irregularIndexesTmpBuf : Array<number> | undefined = undefined
+        let irregularIndexesTmpBuf : Array<int32> | undefined = undefined
         if ((irregularIndexesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const irregularIndexesTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let irregularIndexesTmpBuf_ : Array<number> = new Array<number>(irregularIndexesTmpBuf_Length)
+            let irregularIndexesTmpBuf_ : Array<int32> = new Array<int32>(irregularIndexesTmpBuf_Length)
             for (let irregularIndexesTmpBuf_BufCounterI = 0; irregularIndexesTmpBuf_BufCounterI < irregularIndexesTmpBuf_Length; irregularIndexesTmpBuf_BufCounterI++) {
-                irregularIndexesTmpBuf_[irregularIndexesTmpBuf_BufCounterI] = (valueDeserializer.readNumber() as number)
+                irregularIndexesTmpBuf_[irregularIndexesTmpBuf_BufCounterI] = valueDeserializer.readInt32()
             }
             irregularIndexesTmpBuf = irregularIndexesTmpBuf_
         }
-        const irregularIndexesTmpResult : Array<number> | undefined = irregularIndexesTmpBuf
+        const irregularIndexesTmpResult : Array<int32> | undefined = irregularIndexesTmpBuf
         const onGetIrregularSizeByIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onGetIrregularSizeByIndexTmpBuf : ((index: number) => [ number, number ]) | undefined = undefined
+        let onGetIrregularSizeByIndexTmpBuf : ((index: int32) => [ int32, int32 ]) | undefined = undefined
         if ((onGetIrregularSizeByIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onGetIrregularSizeByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetIrregularSizeByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onGetIrregularSizeByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onGetIrregularSizeByIndexTmpBuf = (index: number):[ number, number ] => {
+            onGetIrregularSizeByIndexTmpBuf = (index: int32):[ int32, int32 ] => {
                 const onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetIrregularSizeByIndexTmpBuf_BufResource.resourceId);
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetIrregularSizeByIndexTmpBuf_BufCall);
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetIrregularSizeByIndexTmpBuf_BufCallSync);
-                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writeNumber(index);
-                let onGetIrregularSizeByIndexTmpBuf_BufContinuationValue : [ number, number ] | undefined;
-                const onGetIrregularSizeByIndexTmpBuf_BufContinuationCallback : ((value: [ number, number ]) => void) = (value: [ number, number ]):void => {
+                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writeInt32(index);
+                let onGetIrregularSizeByIndexTmpBuf_BufContinuationValue : [ int32, int32 ] | undefined;
+                const onGetIrregularSizeByIndexTmpBuf_BufContinuationCallback : ((value: [ int32, int32 ]) => void) = (value: [ int32, int32 ]):void => {
                 onGetIrregularSizeByIndexTmpBuf_BufContinuationValue = value;
             }
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetIrregularSizeByIndexTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallbackSync(10, 1602877440, onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 49219211, onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.length());
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.release();
-                return (onGetIrregularSizeByIndexTmpBuf_BufContinuationValue as [ number, number ]);
+                return (onGetIrregularSizeByIndexTmpBuf_BufContinuationValue as [ int32, int32 ]);
             }
         }
-        const onGetIrregularSizeByIndexTmpResult : ((index: number) => [ number, number ]) | undefined = onGetIrregularSizeByIndexTmpBuf
+        const onGetIrregularSizeByIndexTmpResult : ((index: int32) => [ int32, int32 ]) | undefined = onGetIrregularSizeByIndexTmpBuf
         const onGetRectByIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onGetRectByIndexTmpBuf : ((index: number) => [ number, number, number, number ]) | undefined = undefined
+        let onGetRectByIndexTmpBuf : ((index: int32) => [ int32, int32, int32, int32 ]) | undefined = undefined
         if ((onGetRectByIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onGetRectByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetRectByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onGetRectByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onGetRectByIndexTmpBuf = (index: number):[ number, number, number, number ] => {
+            onGetRectByIndexTmpBuf = (index: int32):[ int32, int32, int32, int32 ] => {
                 const onGetRectByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onGetRectByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetRectByIndexTmpBuf_BufResource.resourceId);
                 onGetRectByIndexTmpBuf_BufArgsSerializer.writePointer(onGetRectByIndexTmpBuf_BufCall);
                 onGetRectByIndexTmpBuf_BufArgsSerializer.writePointer(onGetRectByIndexTmpBuf_BufCallSync);
-                onGetRectByIndexTmpBuf_BufArgsSerializer.writeNumber(index);
-                let onGetRectByIndexTmpBuf_BufContinuationValue : [ number, number, number, number ] | undefined;
-                const onGetRectByIndexTmpBuf_BufContinuationCallback : ((value: [ number, number, number, number ]) => void) = (value: [ number, number, number, number ]):void => {
+                onGetRectByIndexTmpBuf_BufArgsSerializer.writeInt32(index);
+                let onGetRectByIndexTmpBuf_BufContinuationValue : [ int32, int32, int32, int32 ] | undefined;
+                const onGetRectByIndexTmpBuf_BufContinuationCallback : ((value: [ int32, int32, int32, int32 ]) => void) = (value: [ int32, int32, int32, int32 ]):void => {
                 onGetRectByIndexTmpBuf_BufContinuationValue = value;
             }
                 onGetRectByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetRectByIndexTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallbackSync(10, 1618565120, onGetRectByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetRectByIndexTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 59584331, onGetRectByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetRectByIndexTmpBuf_BufArgsSerializer.length());
                 onGetRectByIndexTmpBuf_BufArgsSerializer.release();
-                return (onGetRectByIndexTmpBuf_BufContinuationValue as [ number, number, number, number ]);
+                return (onGetRectByIndexTmpBuf_BufContinuationValue as [ int32, int32, int32, int32 ]);
             }
         }
-        const onGetRectByIndexTmpResult : ((index: number) => [ number, number, number, number ]) | undefined = onGetRectByIndexTmpBuf
+        const onGetRectByIndexTmpResult : ((index: int32) => [ int32, int32, int32, int32 ]) | undefined = onGetRectByIndexTmpBuf
         let value : GridLayoutOptions = ({regularSize: regularSizeTmpResult, irregularIndexes: irregularIndexesTmpResult, onGetIrregularSizeByIndex: onGetIrregularSizeByIndexTmpResult, onGetRectByIndex: onGetRectByIndexTmpResult} as GridLayoutOptions)
         return value
     }

@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "interfaces/inner_api/ace/ace_forward_compatibility.h"
+#include "ui/base/versions.h"
 
 #include "base/json/json_util.h"
 #include "base/utils/macros.h"
@@ -34,27 +35,6 @@
 
 namespace OHOS::Ace {
 
-enum class PlatformVersion {
-    VERSION_FIVE = 5,
-    VERSION_SIX,
-    VERSION_SEVEN,
-    VERSION_EIGHT,
-    VERSION_NINE,
-    VERSION_TEN,
-    VERSION_ELEVEN,
-    VERSION_TWELVE,
-    VERSION_THIRTEEN,
-    VERSION_FOURTEEN,
-    VERSION_FIFTEEN,
-    VERSION_SIXTEEN,
-    VERSION_SEVENTEEN,
-    VERSION_EIGHTEEN,
-    VERSION_NINETEEN,
-    VERSION_TWENTY,
-    VERSION_TWENTY_ONE,
-    VERSION_TWENTY_TWO,
-    VERSION_TWENTY_THREE
-};
 struct AceBundleInfo {
     uint32_t versionCode = 0;
     std::string versionName;

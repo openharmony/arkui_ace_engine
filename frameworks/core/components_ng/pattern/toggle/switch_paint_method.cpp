@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+    const Color TMP_INACTIVE_COLOR = Color(0x337F7F7F);
 } // namespace
 
 SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect,
@@ -62,7 +63,9 @@ void SwitchModifier::InitializeParam(int32_t themeScopeId)
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     activeColor_ = switchTheme->GetActiveColor();
-    inactiveColor_ = switchTheme->GetInactiveColor();
+    isUseDiffPointColor_ = switchTheme->GetSwitchUseDiffPointColor();
+    inactiveColor_ = isUseDiffPointColor_ || SystemProperties::ConfigChangePerform() ? switchTheme->GetInactiveColor()
+                                                                                     : TMP_INACTIVE_COLOR;
     clickEffectColor_ = switchTheme->GetInteractivePressedColor();
     hoverColor_ = switchTheme->GetInteractiveHoverColor();
     focusColor_ = switchTheme->GetFocusedBGColorUnselected();
@@ -73,7 +76,6 @@ void SwitchModifier::InitializeParam(int32_t themeScopeId)
     colorAnimationDuration_ = switchTheme->GetColorAnimationDuration();
     pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
     pointColorUnchecked_ = switchTheme->GetPointColorUnchecked();
-    isUseDiffPointColor_ = switchTheme->GetSwitchUseDiffPointColor();
     focusBoardColor_ = switchTheme->GetFocusBoardColor();
     isCancelAnimation_ = isUseDiffPointColor_;
 }

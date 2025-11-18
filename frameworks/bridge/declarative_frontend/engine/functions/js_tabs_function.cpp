@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.h"
 
 namespace OHOS::Ace::Framework {
+constexpr int PARAM_COUNT_FOUR = 4;
 
 void JsTabContentTransitionProxy::JSBind(BindingTarget globalObj)
 {
@@ -93,6 +94,17 @@ JSRef<JSVal> JsTabsFunction::Execute(int32_t fromIndex, int32_t toIndex)
 
     JSRef<JSVal> params[] = { from, to };
     return JsFunction::ExecuteJS(2, params);
+}
+
+void JsTabsFunction::Execute(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)
+{
+    JSRef<JSVal> selectedIndexValue = JSRef<JSVal>::Make(ToJSValue(selectedIndex));
+    JSRef<JSVal> indexValue = JSRef<JSVal>::Make(ToJSValue(index));
+    JSRef<JSVal> positionValue = JSRef<JSVal>::Make(ToJSValue(position));
+    JSRef<JSVal> mainAxisLengthValue = JSRef<JSVal>::Make(ToJSValue(mainAxisLength));
+
+    JSRef<JSVal> params[] = { selectedIndexValue, indexValue, positionValue, mainAxisLengthValue };
+    JsFunction::ExecuteJS(PARAM_COUNT_FOUR, params);
 }
 
 void JsTabsFunction::Execute(const RefPtr<TabContentTransitionProxy>& proxy)

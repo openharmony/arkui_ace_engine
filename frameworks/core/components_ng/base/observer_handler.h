@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/common/container.h"
+#include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -50,6 +51,7 @@ struct NavDestinationInfo {
     NavDestinationState state;
     int32_t index;
     napi_value param;
+    std::string interopParam;
     std::string navDestinationId;
     NavDestinationMode mode;
     int32_t uniqueId;
@@ -193,12 +195,6 @@ struct SwiperContentInfo {
     std::vector<SwiperItemInfoNG> swiperItemInfos = {};
 };
 
-
-struct WindowSizeBreakpoint {
-    WidthBreakpoint widthBreakpoint;
-    HeightBreakpoint heightBreakpoint;
-};
-
 enum class GestureListenerType { TAP = 0, LONG_PRESS, PAN, PINCH, SWIPE, ROTATION, UNKNOWN };
 
 enum class GestureActionPhase { WILL_START = 0, WILL_END = 1, UNKNOWN = 2 };
@@ -222,6 +218,7 @@ public:
         const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
         const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
+    void NotifyTabContentStateUpdateForAni(const TabContentInfo& info);
     void NotifyTabChange(const TabContentInfo& info);
     void NotifyGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
         const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase);
@@ -257,6 +254,7 @@ public:
     using TabChangeHandleFunc = void (*)(const TabContentInfo&);
     using TabChangeHandleFuncForAni = std::function<void(const TabContentInfo& info)>;
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
+    using TabContentHandleFuncForAni = std::function<void(const NG::TabContentInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
     using SwiperContentObservrEmptyFunc = bool (*)();
@@ -271,6 +269,7 @@ public:
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
+    void SetHandleTabContentUpdateFuncForAni(TabContentHandleFuncForAni func);
     void SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
@@ -317,6 +316,7 @@ private:
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
+    TabContentHandleFuncForAni tabContentHandleFuncForAni_ = nullptr;
     TabChangeHandleFunc tabChangeHandleFunc_ = nullptr;
     TabChangeHandleFuncForAni tabChangeHandleFuncForAni_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;

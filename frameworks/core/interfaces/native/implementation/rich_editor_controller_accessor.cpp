@@ -469,18 +469,16 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
-    std::pair<const Dimension, const Dimension> pair = { Dimension::FromString(src.leadingMarginSize[0]),
-        Dimension::FromString(src.leadingMarginSize[1]) };
-    Ark_LeadingMarginPlaceholder arkLeadingMargin = {
-        .pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap),
-        .size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx)
-    };
+    Ark_LeadingMarginPlaceholder arkLeadingMargin;
+    arkLeadingMargin.pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap);
+    arkLeadingMargin.size.value0 = Converter::ArkValue<Ark_Dimension>(src.leadingMarginSize[0]);
+    arkLeadingMargin.size.value1 = Converter::ArkValue<Ark_Dimension>(src.leadingMarginSize[1]);
     dst.leadingMargin = Converter::ArkUnion<
         Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(arkLeadingMargin, ctx);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
-    dst.paragraphSpacing = Converter::ArkValue<Opt_Number>(src.paragraphSpacing);
+    dst.paragraphSpacing = Converter::ArkValue<Opt_Float64>(src.paragraphSpacing);
 }
 
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& src, ConvContext *ctx)
@@ -498,15 +496,15 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
-    dst.paragraphSpacing = Converter::ArkValue<Opt_Number>(src.paragraphSpacing);
+    dst.paragraphSpacing = Converter::ArkValue<Opt_Float64>(src.paragraphSpacing);
 }
 
 void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src, ConvContext *ctx)
 {
     dst.style = Converter::ArkValue<Ark_RichEditorParagraphStyle>(src);
     dst.range = {
-        .value0 = Converter::ArkValue<Ark_Number>(src.range.first),
-        .value1 = Converter::ArkValue<Ark_Number>(src.range.second)
+        .value0 = Converter::ArkValue<Ark_Int32>(src.range.first),
+        .value1 = Converter::ArkValue<Ark_Int32>(src.range.second)
     };
 }
 
@@ -544,9 +542,9 @@ void AssignArkValue(Ark_DecorationStyleResult& dst, const TextStyleResult& src, 
 void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& src, ConvContext *ctx)
 {
     dst.fontColor = ArkUnion<Ark_ResourceColor, Ark_String>(src.fontColor, ctx);
-    dst.fontSize = ArkValue<Ark_Number>(src.fontSize);
+    dst.fontSize = ArkValue<Ark_Float64>(src.fontSize);
     dst.fontStyle = ArkValue<Ark_FontStyle>(static_cast<OHOS::Ace::FontStyle>(src.fontStyle));
-    dst.fontWeight = ArkValue<Ark_Number>(src.fontWeight);
+    dst.fontWeight = ArkValue<Ark_Int32>(src.fontWeight);
     dst.fontFamily = ArkValue<Ark_String>(src.fontFamily, ctx);
     dst.decoration = ArkValue<Ark_DecorationStyleResult>(src, ctx);
     if (src.textShadows.size() > 0) {
@@ -555,8 +553,8 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& s
         dst.textShadow = ArkValue<Opt_Array_ShadowOptions>(Ark_Empty(), ctx);
     }
 
-    dst.letterSpacing = ArkValue<Opt_Number>(src.letterSpacing);
-    dst.lineHeight = ArkValue<Opt_Number>(src.lineHeight);
+    dst.letterSpacing = ArkValue<Opt_Float64>(src.letterSpacing);
+    dst.lineHeight = ArkValue<Opt_Float64>(src.lineHeight);
     if (src.fontFeature.size() > 0) {
         dst.fontFeature =
             Converter::ArkValue<Opt_String>(UnParseFontFeatureSetting(src.fontFeature), ctx);
@@ -569,9 +567,9 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& s
 
 void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src)
 {
-    dst.spanIndex = ArkValue<Ark_Number>(src.spanIndex);
-    dst.spanRange.value0 = ArkValue<Ark_Number>(src.spanRange[0]);
-    dst.spanRange.value1 = ArkValue<Ark_Number>(src.spanRange[1]);
+    dst.spanIndex = ArkValue<Ark_Int32>(src.spanIndex);
+    dst.spanRange.value0 = ArkValue<Ark_Int32>(src.spanRange[0]);
+    dst.spanRange.value1 = ArkValue<Ark_Int32>(src.spanRange[1]);
 }
 
 void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, ConvContext *ctx)
@@ -579,8 +577,8 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
     dst.value = ArkValue<Ark_String>(src.valueString, ctx);
     dst.textStyle = ArkValue<Ark_RichEditorTextStyleResult>(src.textStyle, ctx);
-    dst.offsetInSpan.value0 = ArkValue<Ark_Number>(src.offsetInSpan[0]);
-    dst.offsetInSpan.value1 = ArkValue<Ark_Number>(src.offsetInSpan[1]);
+    dst.offsetInSpan.value0 = ArkValue<Ark_Int32>(src.offsetInSpan[0]);
+    dst.offsetInSpan.value1 = ArkValue<Ark_Int32>(src.offsetInSpan[1]);
     dst.symbolSpanStyle = ArkValue<Opt_RichEditorSymbolSpanStyle>(Ark_Empty());
     dst.valueResource = ArkValue<Opt_Resource>(Ark_Empty());
     bool isSymbol = (src.type == SelectSpanType::TYPESYMBOLSPAN);
@@ -607,14 +605,14 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src,
     };
     dst.imageStyle = isBuilderSpan ? ArkValue<Ark_RichEditorImageSpanStyleResult>(builderStyle)
         : ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
-    dst.offsetInSpan.value0 = ArkValue<Ark_Number>(src.offsetInSpan[0]);
-    dst.offsetInSpan.value1 = ArkValue<Ark_Number>(src.offsetInSpan[1]);
+    dst.offsetInSpan.value0 = ArkValue<Ark_Int32>(src.offsetInSpan[0]);
+    dst.offsetInSpan.value1 = ArkValue<Ark_Int32>(src.offsetInSpan[1]);
 }
 
 void AssignArkValue(Ark_RichEditorSelection& dst, const SelectionInfo& src, ConvContext *ctx)
 {
-    dst.selection.value0 = ArkValue<Ark_Number>(src.GetSelection().selection[0]);
-    dst.selection.value1 = ArkValue<Ark_Number>(src.GetSelection().selection[1]);
+    dst.selection.value0 = ArkValue<Ark_Int32>(src.GetSelection().selection[0]);
+    dst.selection.value1 = ArkValue<Ark_Int32>(src.GetSelection().selection[1]);
     auto values = Converter::ArkSelectionConvert<
         Ark_Union_RichEditorTextSpanResult_RichEditorImageSpanResult>(src, ctx);
     if (values.empty()) {
@@ -653,26 +651,26 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
+Ark_Int32 AddTextSpanImpl(Ark_RichEditorController peer,
                            const Ark_ResourceStr* content,
                            const Opt_RichEditorTextSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    CHECK_NULL_RETURN(content, Converter::ArkValue<Ark_Number>(0));
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Int32>(0));
+    CHECK_NULL_RETURN(content, Converter::ArkValue<Ark_Int32>(0));
     auto result = Converter::OptConvert<std::u16string>(*content);
-    CHECK_NULL_RETURN(result.has_value() && !result.value().empty(), Converter::ArkValue<Ark_Number>(-1));
+    CHECK_NULL_RETURN(result.has_value() && !result.value().empty(), Converter::ArkValue<Ark_Int32>(-1));
     auto locOptions = Converter::OptConvertPtr<TextSpanOptions>(options).value_or(TextSpanOptions{});
     locOptions.value = result.value();
-    return Converter::ArkValue<Ark_Number>(peerImpl->AddTextSpanImpl(locOptions));
+    return Converter::ArkValue<Ark_Int32>(peerImpl->AddTextSpanImpl(locOptions));
 }
-Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
+Ark_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
                             const Ark_Union_PixelMap_ResourceStr* value,
                             const Opt_RichEditorImageSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Int32>(0));
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
     auto locOptions = Converter::OptConvertPtr<ImageSpanOptions>(options).value_or(ImageSpanOptions{});
     std::optional<ImageSourceInfo> info;
     Converter::VisitUnion(*value,
@@ -698,16 +696,16 @@ Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
         locOptions.isUriPureNumber = info->GetIsUriPureNumber();
     }
     auto hasImageSrc = locOptions.image.has_value() && !locOptions.image.value().empty();
-    CHECK_NULL_RETURN(hasImageSrc || locOptions.imagePixelMap.has_value(), Converter::ArkValue<Ark_Number>(-1));
-    return Converter::ArkValue<Ark_Number>(peerImpl->AddImageSpanImpl(locOptions));
+    CHECK_NULL_RETURN(hasImageSrc || locOptions.imagePixelMap.has_value(), Converter::ArkValue<Ark_Int32>(-1));
+    return Converter::ArkValue<Ark_Int32>(peerImpl->AddImageSpanImpl(locOptions));
 }
-Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
+Ark_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
                               const CustomNodeBuilder* value,
                               const Opt_RichEditorBuilderSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Int32>(0));
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
     SpanOptionBase locOptions;
     auto optionsOpt = Converter::OptConvertPtr<SpanOptionBase>(options);
     if (optionsOpt) {
@@ -716,25 +714,25 @@ Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
     auto pattern = peerImpl->GetPattern().Upgrade();
     auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
     auto customNode = CallbackHelper(*value).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
-    return Converter::ArkValue<Ark_Number>(peerImpl->AddBuilderSpanImpl(customNode, locOptions));
+    return Converter::ArkValue<Ark_Int32>(peerImpl->AddBuilderSpanImpl(customNode, locOptions));
 }
-Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
+Ark_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
                              const Ark_Resource* value,
                              const Opt_RichEditorSymbolSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Int32>(0));
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Int32>(0));
     SymbolSpanOptions locOptions;
     auto optionsOpt = Converter::OptConvertPtr<SymbolSpanOptions>(options);
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
     auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
-    CHECK_NULL_RETURN(convValue && convValue->symbol, Converter::ArkValue<Ark_Number>(-1));
+    CHECK_NULL_RETURN(convValue && convValue->symbol, Converter::ArkValue<Ark_Int32>(-1));
     locOptions.symbolId = convValue->symbol.value();
     locOptions.resourceObject = Converter::GetResourceObject(*value);
-    return Converter::ArkValue<Ark_Number>(peerImpl->AddSymbolSpanImpl(locOptions));
+    return Converter::ArkValue<Ark_Int32>(peerImpl->AddSymbolSpanImpl(locOptions));
 }
 void UpdateSpanStyleImpl(Ark_RichEditorController peer,
                          const Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions* value)

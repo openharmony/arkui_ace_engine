@@ -20,7 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, AttributeModifier, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
 import { default as webview } from "@ohos.web.webview"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
@@ -1869,7 +1869,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnHttpAuthRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): void {
+    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -3121,8 +3121,8 @@ export interface ScreenCaptureConfig {
 }
 export interface FullScreenEnterEvent {
     handler: FullScreenExitHandler;
-    videoWidth?: number;
-    videoHeight?: number;
+    videoWidth?: int32;
+    videoHeight?: int32;
 }
 export type OnFullScreenEnterCallback = (event: FullScreenEnterEvent) => void;
 export type MouseInfoCallback = (event: NativeEmbedMouseInfo) => void;
@@ -3705,7 +3705,7 @@ export interface WebAttribute extends CommonMethod {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         throw new Error("Unimplemented method onHttpAuthRequest")
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         throw new Error("Unimplemented method onInterceptRequest")
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -4030,7 +4030,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onFullScreenEnter_value?: OnFullScreenEnterCallback | undefined
     onScaleChange_value?: ((value0: OnScaleChangeEvent) => void) | undefined
     onHttpAuthRequest_value?: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined
-    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined
+    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined
     onPermissionRequest_value?: ((value0: OnPermissionRequestEvent) => void) | undefined
     onScreenCaptureRequest_value?: ((value0: OnScreenCaptureRequestEvent) => void) | undefined
     onContextMenuShow_value?: ((value0: OnContextMenuShowEvent) => boolean) | undefined
@@ -4264,7 +4264,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         return this
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         return this
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -4577,6 +4577,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("setWebOptions")) {
             const value_casted = value as (WebOptions)
             this.getPeer()?.setWebOptionsAttribute(value_casted)
+            this.applyOptionsFinish('WebAttribute');
             return this
         }
         return this
@@ -4655,9 +4656,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     }
     public javaScriptProxy(value: JavaScriptProxy | undefined): this {
         if (this.checkPriority("javaScriptProxy")) {
-            const value_casted = value as (JavaScriptProxy | undefined)
-            this.getPeer()?.setJavaScriptProxyAttribute(value_casted)
-            return this
+            hookJavaScriptProxy(this, value)
         }
         return this
     }
@@ -4957,9 +4956,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         if (this.checkPriority("onInterceptRequest")) {
-            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined)
+            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined)
             this.getPeer()?.setOnInterceptRequestAttribute(value_casted)
             return this
         }
@@ -5697,6 +5696,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -6324,7 +6326,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoWidthTmpValue  = valueHolderForVideoWidth!
-            valueSerializer.writeNumber(valueHolderForVideoWidthTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6332,7 +6334,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoHeightTmpValue  = valueHolderForVideoHeight!
-            valueSerializer.writeNumber(valueHolderForVideoHeightTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6341,17 +6343,17 @@ export class FullScreenEnterEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const handlerTmpResult : FullScreenExitHandler = (FullScreenExitHandler_serializer.read(valueDeserializer) as FullScreenExitHandler)
         const videoWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoWidthTmpBuf : number | undefined = undefined
+        let videoWidthTmpBuf : int32 | undefined = undefined
         if ((videoWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoWidthTmpBuf = (valueDeserializer.readNumber() as number)
+            videoWidthTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoWidthTmpResult : number | undefined = videoWidthTmpBuf
+        const videoWidthTmpResult : int32 | undefined = videoWidthTmpBuf
         const videoHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoHeightTmpBuf : number | undefined = undefined
+        let videoHeightTmpBuf : int32 | undefined = undefined
         if ((videoHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoHeightTmpBuf = (valueDeserializer.readNumber() as number)
+            videoHeightTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoHeightTmpResult : number | undefined = videoHeightTmpBuf
+        const videoHeightTmpResult : int32 | undefined = videoHeightTmpBuf
         let value : FullScreenEnterEvent = ({handler: handlerTmpResult, videoWidth: videoWidthTmpResult, videoHeight: videoHeightTmpResult} as FullScreenEnterEvent)
         return value
     }

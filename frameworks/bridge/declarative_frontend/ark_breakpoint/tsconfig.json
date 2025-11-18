@@ -7,12 +7,13 @@
     ],
     "compilerOptions": {
         "module": "ESNext",
-        "target": "ESNext",
+        "target": "ES2016",
         "outDir": "../engine",
         "rootDir": "src",
         "declaration": false,
         "noEmitOnError": true,
         "experimentalDecorators": true,
+        "useDefineForClassFields": false,
         "lib": [
             "ES2016"
         ],

@@ -82,6 +82,7 @@
 
 namespace OHOS::Ace {
 struct TextDetectConfig;
+class ResponseRegion;
 }
 
 namespace OHOS::Ace::NG {
@@ -358,8 +359,14 @@ namespace Converter {
 
     // Implementation is in cpp
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
-    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+    void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
+    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
         const GradientDirection &direction);
+    // if src is not string or number, return directly. If src is invalid string, use defaultValue.
+    void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Opt_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
 
     template<>
     inline uint32_t Convert(const Ark_Number& src)
@@ -541,6 +548,7 @@ namespace Converter {
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_Int32& src);
     template<> Color Convert(const Ark_Int64& src);
+    template<> Color Convert(const Ark_Float64& src);
     template<> Color Convert(const Ark_String& src);
     template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
@@ -551,6 +559,7 @@ namespace Converter {
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
+    template<> ResponseRegion Convert(const Ark_ResponseRegion &src);
     template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EdgesParam Convert(const Ark_Edges& src);
     template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
@@ -567,6 +576,7 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
+    template<> GradientColor Convert(const Ark_Tuple_ResourceColor_F64& value);
     template<> Header Convert(const Ark_Header& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
@@ -759,6 +769,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
+    template<> void AssignCast(std::optional<ResponseRegionSupportedTool>& dst,
+        const Ark_ResponseRegionSupportedTool& src);
     template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);
     template<> void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src);
     template<> void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src);
@@ -879,6 +891,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src);
+    template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src);

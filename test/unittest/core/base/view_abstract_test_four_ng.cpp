@@ -671,11 +671,11 @@ HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0097, TestSize.Level1)
 }
 
 /**
- * @tc.name: ViewAbstractTest098
+ * @tc.name: ViewAbstractTest0098
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTest098, TestSize.Level1)
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0098, TestSize.Level1)
 {
     /**
      * @tc.steps: step1.Using static methods to set component properties
@@ -703,6 +703,327 @@ HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTest098, TestSize.Level1)
     EXPECT_EQ(pattern->GetResCacheMapByKey("height"), result.ToString());
     pattern->RemoveResObj("width");
     pattern->RemoveResObj("height");
+}
+
+/**
+ * @tc.name: ViewAbstractTest0099
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0099, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    pattern->AddResCache("width", "xxxxxx");
+    ViewAbstract::SetWidth(resObj);
+    pattern->AddResCache("height", "xxxxxx");
+    ViewAbstract::SetHeight(resObj);
+    pattern->AddResCache("constraintSize.minWidth", "xxxxxx");
+    ViewAbstract::SetMinWidth(resObj);
+    pattern->AddResCache("constraintSize.minHeight", "xxxxxx");
+    ViewAbstract::SetMinHeight(resObj);
+    pattern->AddResCache("constraintSize.maxWidth", "xxxxxx");
+    ViewAbstract::SetMaxWidth(resObj);
+    pattern->AddResCache("constraintSize.maxHeight", "xxxxxx");
+    ViewAbstract::SetMaxHeight(resObj);
+    pattern->OnColorModeChange(0);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto defaultValue = Dimension(0.00, DimensionUnit::PX);
+    EXPECT_EQ(layoutConstraint->selfIdealSize->Height(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->selfIdealSize->Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->maxSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->maxSize.value().Height(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Height(), NG::CalcLength(defaultValue));
+    pattern->RemoveResObj("width");
+    pattern->RemoveResObj("height");
+    pattern->RemoveResObj("constraintSize.minWidth");
+    pattern->RemoveResObj("constraintSize.minHeight");
+    pattern->RemoveResObj("constraintSize.maxWidth");
+    pattern->RemoveResObj("constraintSize.maxHeight");
+}
+
+/**
+ * @tc.name: ViewAbstractTest0100
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    pattern->AddResCache("width", "xxxxxx");
+    ViewAbstract::SetWidth(frameNode, resObj);
+    pattern->AddResCache("height", "xxxxxx");
+    ViewAbstract::SetHeight(frameNode, resObj);
+    pattern->AddResCache("constraintSize.minWidth", "xxxxxx");
+    ViewAbstract::SetMinWidth(frameNode, resObj);
+    pattern->AddResCache("constraintSize.minHeight", "xxxxxx");
+    ViewAbstract::SetMinHeight(frameNode, resObj);
+    pattern->AddResCache("constraintSize.maxWidth", "xxxxxx");
+    ViewAbstract::SetMaxWidth(frameNode, resObj);
+    pattern->AddResCache("constraintSize.maxHeight", "xxxxxx");
+    ViewAbstract::SetMaxHeight(frameNode, resObj);
+    pattern->OnColorModeChange(0);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto defaultValue = Dimension(0.00, DimensionUnit::PX);
+    EXPECT_EQ(layoutConstraint->selfIdealSize->Height(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->selfIdealSize->Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->maxSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->maxSize.value().Height(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Height(), NG::CalcLength(defaultValue));
+    pattern->RemoveResObj("width");
+    pattern->RemoveResObj("height");
+    pattern->RemoveResObj("constraintSize.minWidth");
+    pattern->RemoveResObj("constraintSize.minHeight");
+    pattern->RemoveResObj("constraintSize.maxWidth");
+    pattern->RemoveResObj("constraintSize.maxHeight");
+}
+
+/**
+ * @tc.name: ViewAbstractTest0101
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0101, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    auto dimensionResult = Dimension(-10.0, DimensionUnit::PX);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(20);
+    pattern->AddResCache("width", dimensionResult.ToString());
+    ViewAbstract::SetWidth(resObj);
+    pattern->AddResCache("height", dimensionResult.ToString());
+    ViewAbstract::SetHeight(resObj);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(0);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto defaultValue = Dimension(0.00, DimensionUnit::PX);
+    EXPECT_EQ(layoutConstraint->selfIdealSize->Height(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->selfIdealSize->Width(), NG::CalcLength(defaultValue));
+    pattern->RemoveResObj("width");
+    pattern->RemoveResObj("height");
+}
+
+/**
+ * @tc.name: ViewAbstractTest0102
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0102, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    auto dimensionResult = Dimension(10.0, DimensionUnit::PX);
+    pattern->AddResCache("width", dimensionResult.ToString());
+    pattern->AddResCache("constraintSize.minWidth", dimensionResult.ToString());
+    ViewAbstract::SetMinWidth(resObj);
+    pattern->AddResCache("constraintSize.minHeight", dimensionResult.ToString());
+    ViewAbstract::SetMinHeight(resObj);
+    pattern->AddResCache("constraintSize.maxWidth", dimensionResult.ToString());
+    ViewAbstract::SetMaxWidth(resObj);
+    pattern->AddResCache("constraintSize.maxHeight", dimensionResult.ToString());
+    ViewAbstract::SetMaxHeight(resObj);
+    pattern->OnColorModeChange(0);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto defaultValue = Dimension(10.00, DimensionUnit::PX);
+    EXPECT_EQ(layoutConstraint->maxSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->maxSize.value().Height(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Height(), NG::CalcLength(defaultValue));
+    pattern->RemoveResObj("constraintSize.minWidth");
+    pattern->RemoveResObj("constraintSize.minHeight");
+    pattern->RemoveResObj("constraintSize.maxWidth");
+    pattern->RemoveResObj("constraintSize.maxHeight");
+}
+
+/**
+ * @tc.name: ViewAbstractTest0103
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0103, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    auto dimensionResult = Dimension(-10.0, DimensionUnit::PX);
+    pattern->AddResCache("constraintSize.minWidth", dimensionResult.ToString());
+    ViewAbstract::SetMinWidth(frameNode, resObj);
+    pattern->AddResCache("constraintSize.minHeight", dimensionResult.ToString());
+    ViewAbstract::SetMinHeight(frameNode, resObj);
+    pattern->AddResCache("constraintSize.maxWidth", dimensionResult.ToString());
+    ViewAbstract::SetMaxWidth(frameNode, resObj);
+    pattern->AddResCache("constraintSize.maxHeight", dimensionResult.ToString());
+    ViewAbstract::SetMaxHeight(frameNode, resObj);
+    pattern->OnColorModeChange(0);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto defaultValue = Dimension(-10.00, DimensionUnit::PX);
+    EXPECT_EQ(layoutConstraint->maxSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->maxSize.value().Height(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Width(), NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutConstraint->minSize.value().Height(), NG::CalcLength(defaultValue));
+    pattern->RemoveResObj("constraintSize.minWidth");
+    pattern->RemoveResObj("constraintSize.minHeight");
+    pattern->RemoveResObj("constraintSize.maxWidth");
+    pattern->RemoveResObj("constraintSize.maxHeight");
+}
+
+/**
+ * @tc.name: ViewAbstractTest0104
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0104, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    auto dimensionResult = Dimension(10.0, DimensionUnit::PX);
+    pattern->AddResCache("margin", dimensionResult.ToString());
+    ViewAbstract::SetMargin(resObj);
+    pattern->AddResCache("padding", dimensionResult.ToString());
+    ViewAbstract::SetPadding(resObj);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto defaultValue = Dimension(10.00, DimensionUnit::PX);
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->top, NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top, NG::CalcLength(defaultValue));
+    pattern->RemoveResObj("margin");
+    pattern->RemoveResObj("padding");
+}
+
+/**
+ * @tc.name: ViewAbstractTest0105
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0105, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    pattern->AddResCache("margin", "xxxxxx");
+    ViewAbstract::SetMargin(resObj);
+    pattern->AddResCache("padding", "xxxxxx");
+    ViewAbstract::SetPadding(resObj);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto defaultValue = Dimension(0.00, DimensionUnit::PX);
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->top, NG::CalcLength(defaultValue));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top, NG::CalcLength(defaultValue));
+    pattern->RemoveResObj("margin");
+    pattern->RemoveResObj("padding");
 }
 
 /**

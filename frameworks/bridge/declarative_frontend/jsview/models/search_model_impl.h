@@ -57,6 +57,8 @@ public:
     void ResetPlaceholderColor() override {};
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
+    void SetDividerColor(const Color& color) override;
+    void ResetDividerColor() override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override {}

@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"

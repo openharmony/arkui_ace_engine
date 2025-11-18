@@ -41,11 +41,14 @@ export class PeerNode extends IncrementalNode {
     protected static cursor: int32 = UNINITIALIZE_CURSOR
     private static staticLock = new Mutex()
     static nextId(): int32 {
+        PeerNode.staticLock.lock();
         if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
             PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
             PeerNode.currentId = PeerNode.cursor
         }
-        return PeerNode.currentId++;
+        let resId = PeerNode.currentId++;
+        PeerNode.staticLock.unlock();
+        return resId;
     }
     private id: int32
     private _onReuse?: (param?: RecordData) => void
@@ -142,7 +145,7 @@ export class PeerNode extends IncrementalNode {
         ArkUIAniModule._UINode_OnUpdateDone(this.peer.ptr)
     }
 
-    setReusePoolSize(size: number, reuseKey: string): void {
+    setReusePoolSize(size: int32, reuseKey: string): void {
         if (size < 0) {
             return
         }
@@ -265,7 +268,7 @@ export class PeerNode extends IncrementalNode {
         super.dispose()
     }
 
-    public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
+    public getOrCreateStateStyleMutable(curState: int32 = 15): MutableState<int32> | undefined {
         if (this._uiStateStyle !== undefined) {
             return this._uiStateStyle!;
         }
@@ -274,7 +277,7 @@ export class PeerNode extends IncrementalNode {
             this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
                 this._uiStateStyle!.value = state
-            })
+            }, curState)
             return this._uiStateStyle!;
         }
     }

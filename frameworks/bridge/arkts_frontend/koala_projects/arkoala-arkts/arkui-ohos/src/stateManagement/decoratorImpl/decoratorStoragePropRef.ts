@@ -82,6 +82,7 @@ export class StoragePropRefDecoratedVariable<T>
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 

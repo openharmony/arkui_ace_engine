@@ -295,6 +295,7 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setComponent3DOptions")) {
             const sceneOptions_casted = sceneOptions as (SceneOptions | undefined)
             this.getPeer()?.setComponent3DOptionsAttribute(sceneOptions_casted)
+            this.applyOptionsFinish('Component3DAttribute');
             return this
         }
         return this
@@ -363,6 +364,9 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
+
 constexpr double DISPLAY_HEIGHT = 1280;
 
 constexpr double SYSTEM_LEFT_START = 0.0f;
@@ -76,9 +77,13 @@ constexpr double KEYBOARD_HEIGHT = 420.0f;
 
 class SafeAreaManagerTest : public testing::Test {
 public:
+
     static void SetUpTestCase();
+
     static void TearDownTestCase();
+
     void SetUp() override;
+
     void TearDown() override;
 
     struct Rect {
@@ -91,28 +96,23 @@ public:
     void CommonExpectEQ(const Rect& s1, const Rect& s2);
 
     RefPtr<SafeAreaManager> safeAreaManager_;
+    
     NG::SafeAreaInsets cutoutArea =
         NG::SafeAreaInsets({ CUTOUT_LEFT_START, CUTOUT_LEFT_END }, { CUTOUT_TOP_START, CUTOUT_TOP_END },
             { CUTOUT_RIGHT_START, CUTOUT_RIGHT_END }, { CUTOUT_BOTTOM_START, CUTOUT_BOTTOM_END });
-    
     NG::SafeAreaInsets systemArea =
         NG::SafeAreaInsets({ SYSTEM_LEFT_START, SYSTEM_LEFT_END }, { SYSTEM_TOP_START, SYSTEM_TOP_END },
             { SYSTEM_RIGHT_START, SYSTEM_RIGHT_END }, { SYSTEM_BOTTOM_START, SYSTEM_BOTTOM_END });
-    
     NG::SafeAreaInsets navArea = NG::SafeAreaInsets({ NAV_LEFT_START, NAV_LEFT_END }, { NAV_TOP_START, NAV_TOP_END },
         { NAV_RIGHT_START, NAV_RIGHT_END }, { NAV_BOTTOM_START, NAV_BOTTOM_END });
-    
     NG::SafeAreaInsets cutoutAreaNotValid =
         NG::SafeAreaInsets({ CUTOUT_LEFT_END, CUTOUT_LEFT_START }, { CUTOUT_TOP_END, CUTOUT_TOP_START },
             { CUTOUT_RIGHT_END, CUTOUT_RIGHT_START }, { CUTOUT_BOTTOM_END, CUTOUT_BOTTOM_START });
-    
     NG::SafeAreaInsets systemAreaNotValid =
         NG::SafeAreaInsets({ SYSTEM_LEFT_END, SYSTEM_LEFT_START }, { SYSTEM_TOP_END, SYSTEM_TOP_START },
             { SYSTEM_RIGHT_END, SYSTEM_RIGHT_START }, { SYSTEM_BOTTOM_END, SYSTEM_BOTTOM_START });
-    
     NG::SafeAreaInsets navAreaNotValid = NG::SafeAreaInsets({ NAV_LEFT_END, NAV_LEFT_START },
         { NAV_TOP_END, NAV_TOP_START }, { NAV_RIGHT_END, NAV_RIGHT_START }, { NAV_BOTTOM_END, NAV_BOTTOM_START });
-    
     NG::SafeAreaInsets cutoutAreaWithRoot =
         NG::SafeAreaInsets({ CUTOUT_WITH_ROOT_LEFT_START, CUTOUT_WITH_ROOT_LEFT_END }, { CUTOUT_WITH_ROOT_TOP_START,
             CUTOUT_WITH_ROOT_TOP_END }, { CUTOUT_WITH_ROOT_RIGHT_START, CUTOUT_WITH_ROOT_RIGHT_END },

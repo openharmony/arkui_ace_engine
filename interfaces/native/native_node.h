@@ -2758,6 +2758,27 @@ typedef enum {
     NODE_TEXT_LAYOUT_MANAGER = 1043,
 
     /**
+     * @brief Set the edit menu options of the text.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the edit menu options of text. The parameter type is {@link OH_ArkUI_EditMenuOptions}.\n
+     *
+     * @since 23
+     */
+     NODE_TEXT_EDIT_MENU_OPTIONS = 1044,
+
+     /**
+      * @brief Bind the selection menu for text.
+      *
+      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+      * .object: the custom selection menu of text.
+      *     The parameter type is {@link ArkUI_TextSelectionMenuOptions}.\n
+      *
+      * @since 23
+      */
+     NODE_TEXT_BIND_SELECTION_MENU = 1045,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -7281,7 +7302,7 @@ typedef enum {
      * .value[0].i32: alignment of <b>GridItem</b> components in the parent <b>Grid</b> container, \n
      * specified using the {@link ArkUI_GridItemAlignment} enum. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_GRID_ALIGN_ITEMS = 1013008,
 
@@ -7295,7 +7316,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .object: current {@link ArkUI_GridLayoutOptions} object. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_GRID_LAYOUT_OPTIONS = 1013009,
 
@@ -7316,6 +7337,58 @@ typedef enum {
     NODE_GRID_COLUMN_TEMPLATE_ITEMFILLPOLICY = 1013010,
 
     /**
+     * @brief Specifies whether to enable edit mode for the <b>Grid</b> component.
+     * In edit mode, <b>GridItem</b> components can be dragged through the <b>NODE_GRID_ON_ITEM_DRAG_START</b> event.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable edit mode for the <b>Grid</b> component.
+     * </b>: Disable edit mode. <b>1</b>: Enable edit mode. Default value: <b>0</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable edit mode for the <b>Grid</b> component.
+     * <b>0</b>: Disable edit mode. <b>1</b>: Enable edit mode. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_EDIT_MODE = 1013011,
+
+    /**
+     * @brief Specifies whether to enable the drag animation for <b>GridItem</b> components in the <b>Grid</b>
+     * container. This attribute can be set, reset, and obtained as required through APIs.
+     * Animations are supported only in scrolling mode (when either <b>NODE_GRID_ROW_TEMPLATE</b> or
+     * <b>NODE_GRID_COLUMN_TEMPLATE</b> is set, but not both). Drag animations are only supported in regularly sized
+     * grid layouts; scenarios involving spanning across rows or columns are not supported.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable the drag animation for <b>GridItem</b> components in the <b>Grid</b> container.
+     * <b>0</b>: Disable the drag animation. <b>1</b>: Enable the drag animation. Default value: <b>0</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable the drag animation for <b>GridItem</b> components in the <b>Grid</b> container.
+     * <b>0</b>: Disable the drag animation. <b>1</b>: Enable the drag animation. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_DRAG_ANIMATION = 1013012,
+
+    /**
+     * @brief Specifies whether to enable mouse-based multi-selection in the <b>Grid</b> container. This attribute can
+     * be set, reset, and obtained as required through APIs. When enabled, mouse-based multi-selection within the
+     * <b>Grid</b> area triggers the <b>NODE_GRID_ITEM_EVENT_ON_SELECT</b> event on <b>GridItem</b> components.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable mouse-based multi-selection.
+     * <b>0</b>: Disable mouse-based multi-selection. <b>1</b>: Enable mouse-based multi-selection. Default value:
+     * <b>0</b>.\n \n Format of the return value {@link ArkUI_AttributeItem}:\n .value[0].i32: whether to enable
+     * mouse-based multi-selection. <b>0</b>: Disable mouse-based multi-selection. <b>1</b>: Enable mouse-based
+     * multi-selection. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_MULTI_SELECTABLE = 1013013,
+
+    /**
      * @brief Sets the style of the <b>GridItem</b> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -7326,9 +7399,40 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: style of the <b>GridItem</b> component, specified using {@link ArkUI_SliderStyle}. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_GRID_ITEM_STYLE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID_ITEM,
+
+    /**
+     * @brief Specifies whether the <b>GridItem</b> component can be selected using mouse-based multi-selection.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>GridItem</b> component can be selected using mouse-based multi-selection.
+     * <b>0</b>: not selectable. <b>1</b>: selectable. Default value: <b>1</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>GridItem</b> component can be selected using mouse-based multi-selection.
+     * <b>0</b>: not selectable. <b>1</b>: selectable. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ITEM_SELECTABLE = 1014001,
+
+    /**
+     * @brief Sets the selected state of the <b>GridItem</b> component. 
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: selected state of the <b>GridItem</b> component.
+     * <b>0</b>: not selected. <b>1</b>: selected. Default value: <b>0</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n 
+     * .value[0].i32: selected state of the <b>GridItem</b> component. <b>0</b>: not selected. <b>1</b>: selected. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ITEM_SELECTED = 1014002,
 
     /**
     * @brief Defines the column width of the text picker.
@@ -9039,7 +9143,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the first child component in the grid display area. \n
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index of the last child component in the grid display area. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_GRID_ON_SCROLL_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID,
 
@@ -9062,7 +9166,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: scroll source. The parameter type is {@link ArkUI_ScrollSource}. \n
      * @return Returns one or no number to indicate the actual amount by which the scroll component scrolls.
      *
-     * @since 21
+     * @since 22
      */
     NODE_GRID_ON_WILL_SCROLL = 1013001,
 
@@ -9082,7 +9186,7 @@ typedef enum {
      * and a negative offset indicates content scrolling downward. \n
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_GRID_ON_DID_SCROLL = 1013002,
 
@@ -9100,9 +9204,128 @@ typedef enum {
      * value.f32 at index 0: total offset of the grid content relative to the display area, in px. \n
      * value.f32 at index 1: total length of the grid content, in px. \n
      *
-     * @since 21
+     * @since 22
      */
     NODE_GRID_ON_SCROLL_BAR_UPDATE = 1013003,
+
+    /**
+     * @brief Defines the <b>Grid</b> component's child drag start event.
+     *
+     * This event is triggered under the following scenarios: \n
+     * 1. <b>NODE_GRID_EDIT_MODE</b> is set to <b>1</b>. \n
+     * 2. The user long-presses and drags a <b>Grid</b> child component with sufficient displacement. \n
+     * The event parameter is {@link ArkUI_NodeEvent}. \n
+     * value.f32 at index 0: x-coordinate of the current drag point relative to the <b>Grid</b> component, in vp,
+     * obtained using <b>OH_ArkUI_NodeEvent_GetNumberValue</b>. \n
+     * value.f32 at index 1: y-coordinate of the current drag point relative to the <b>Grid</b> component, in vp,
+     * obtained using <b>OH_ArkUI_NodeEvent_GetNumberValue</b>. \n
+     * value.i32 at index 2: index of the dragged child component in the <b>Grid</b> component,
+     * obtained using <b>OH_ArkUI_NodeEvent_GetNumberValue</b>. \n
+     *
+     * @return Whether the drag operation is allowed. \n
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     * value.i32 at index 0 in the return value indicates whether dragging is allowed.
+     * <b>0</b>: not allowed. <b>1</b>: allowed. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ON_ITEM_DRAG_START = 1013004,
+
+    /**
+     * @brief Defines the event triggered when a dragged child component enters this <b>Grid</b> component's area.
+     *
+     * This event is triggered under the following scenarios:\n
+     * A child component successfully dragged using <b>NODE_GRID_ON_ITEM_DRAG_START</b> enters the current <b>Grid</b>
+     * component's area. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: x-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: y-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ON_ITEM_DRAG_ENTER = 1013005,
+
+    /**
+     * @brief Defines the event triggered when a dragged child component moves within this <b>Grid</b> component's area.
+     *
+     * This event is triggered under the following scenarios:\n
+     * A child component successfully dragged using <b>NODE_GRID_ON_ITEM_DRAG_START</b> moves within the current
+     * <b>Grid</b> component's area. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains four parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: x-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: y-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: index of the dragged child component in the source <b>Grid</b>
+     * component. \n
+     * <b>ArkUI_NodeComponentEvent.data[3].i32</b>: index of the dragged child component in the current <b>Grid</b>
+     * component. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ON_ITEM_DRAG_MOVE = 1013006,
+
+    /**
+     * @brief Defines the event triggered when a dragged child component leaves this <b>Grid</b> component's area.
+     *
+     * This event is triggered under the following scenarios:\n
+     * A child component successfully dragged using <b>NODE_GRID_ON_ITEM_DRAG_START</b> leaves the current <b>Grid</b>
+     * component's area. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: x-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: y-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: index of the dragged child component in the source <b>Grid</b>
+     * component. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ON_ITEM_DRAG_LEAVE = 1013007,
+
+    /**
+     * @brief Defines the event triggered when a dragged child component is released.
+     *
+     * This event is triggered under the following scenarios:\n
+     * A child component successfully dragged using <b>NODE_GRID_ON_ITEM_DRAG_START</b> is released. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains five parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: x-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: y-coordinate of the current drag point relative to the <b>Grid</b>
+     * component, in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: index of the dragged child component in the source <b>Grid</b>
+     * component. \n
+     * <b>ArkUI_NodeComponentEvent.data[3].i32</b>: index of the dragged child component in the current <b>Grid</b>
+     * component. \n
+     * <b>ArkUI_NodeComponentEvent.data[4].i32</b>: whether the dragged child component is successfully released. \n
+     * <b>1</b>: The component is released within the <b>Grid</b> component's area.
+     * <b>0</b>: The component is released outside the <b>Grid</b> component's area. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ON_ITEM_DROP = 1013008,
+
+    /**
+     * @brief Defines the selected state change event of the <b>GridItem</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: selected state. <b>0</b>: not selected. <b>1</b>: selected. \n
+     *
+     * @since 23
+     */
+    NODE_GRID_ITEM_ON_SELECT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID_ITEM,
 } ArkUI_NodeEventType;
 
 /**

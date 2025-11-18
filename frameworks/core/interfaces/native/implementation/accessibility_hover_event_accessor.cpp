@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AccessibilityHoverEventAccessor {
 namespace {
-const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
+const Ark_Float64 DefaultValueArkNumber = Converter::ArkValue<Ark_Float64>(0);
 } // namespace
 void DestroyPeerImpl(Ark_AccessibilityHoverEvent peer)
 {
@@ -55,17 +55,17 @@ void SetTypeImpl(Ark_AccessibilityHoverEvent peer,
         info->SetActionType(optValue.value());
     }
 }
-Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
+Ark_Float64 GetXImpl(Ark_AccessibilityHoverEvent peer)
 {
     CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetXImpl(Ark_AccessibilityHoverEvent peer,
-              const Ark_Number* x)
+              const Ark_Float64* x)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(x);
@@ -78,17 +78,17 @@ void SetXImpl(Ark_AccessibilityHoverEvent peer,
     localLocation.SetX(xConvert, animation);
     info->SetLocalLocation(localLocation);
 }
-Ark_Number GetYImpl(Ark_AccessibilityHoverEvent peer)
+Ark_Float64 GetYImpl(Ark_AccessibilityHoverEvent peer)
 {
     CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetYImpl(Ark_AccessibilityHoverEvent peer,
-              const Ark_Number* y)
+              const Ark_Float64* y)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(y);
@@ -101,7 +101,7 @@ void SetYImpl(Ark_AccessibilityHoverEvent peer,
     localLocation.SetY(yConvert, animation);
     info->SetLocalLocation(localLocation);
 }
-Ark_Number GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
+Ark_Float64 GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
 {
     CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
@@ -109,10 +109,10 @@ Ark_Number GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
     const auto& screenLocation = info->GetScreenLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
-                     const Ark_Number* displayX)
+                     const Ark_Float64* displayX)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(displayX);
@@ -125,7 +125,7 @@ void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
     screenLocation.SetX(xConvert, animation);
     info->SetScreenLocation(screenLocation);
 }
-Ark_Number GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
+Ark_Float64 GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
 {
     CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
@@ -133,10 +133,10 @@ Ark_Number GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
     const auto& screenLocation = info->GetScreenLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
-                     const Ark_Number* displayY)
+                     const Ark_Float64* displayY)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(displayY);
@@ -149,7 +149,7 @@ void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
     screenLocation.SetY(yConvert, animation);
     info->SetScreenLocation(screenLocation);
 }
-Ark_Number GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
+Ark_Float64 GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
 {
     CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
@@ -157,10 +157,10 @@ Ark_Number GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
     const auto& globalLocation = info->GetGlobalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
-                    const Ark_Number* windowX)
+                    const Ark_Float64* windowX)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(windowX);
@@ -173,7 +173,7 @@ void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
     globalLocation.SetX(xConvert, animation);
     info->SetGlobalLocation(globalLocation);
 }
-Ark_Number GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
+Ark_Float64 GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
 {
     CHECK_NULL_RETURN(peer, DefaultValueArkNumber);
     auto info = peer->GetEventInfo();
@@ -181,10 +181,10 @@ Ark_Number GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
     const auto& globalLocation = info->GetGlobalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
-                    const Ark_Number* windowY)
+                    const Ark_Float64* windowY)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(windowY);

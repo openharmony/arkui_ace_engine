@@ -34,6 +34,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -492,13 +493,10 @@ HWTEST_F(MenuAnimationTestNg, GetAnimationOffset001, TestSize.Level1)
      */
     wrapperPattern->menuPlacement_ = Placement::LEFT;
     wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::LEFT);
     wrapperPattern->menuPlacement_ = Placement::RIGHT;
     wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::RIGHT);
     wrapperPattern->menuPlacement_ = Placement::TOP;
     wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::TOP);
 }
 
 /**

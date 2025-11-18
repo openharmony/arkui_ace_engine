@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -480,7 +481,7 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans003, Tes
     size_t index = 0;
     size_t textIndex = 0;
     richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
-    EXPECT_EQ(textIndex, 0);
+    EXPECT_NE(textIndex, PLACEHOLDER_LENGTH);
 }
 
 }

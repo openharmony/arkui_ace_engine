@@ -28,10 +28,10 @@ void DestroyPeerImpl(Ark_ChildrenMainSize peer)
 {
     delete peer;
 }
-Ark_ChildrenMainSize ConstructImpl(const Ark_Number* childDefaultSize)
+Ark_ChildrenMainSize ConstructImpl(Ark_Float64 childDefaultSize)
 {
     CHECK_NULL_RETURN(childDefaultSize, nullptr);
-    float size = Converter::Convert<float>(*childDefaultSize);
+    float size = Converter::Convert<float>(childDefaultSize);
     return NonNegative(size) ? new ChildrenMainSizePeer(size) : nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -39,9 +39,9 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SpliceImpl(Ark_ChildrenMainSize peer,
-                const Ark_Number* start,
-                const Opt_Number* deleteCount,
-                const Opt_Array_Number* childrenSize)
+                Ark_Int32 start,
+                const Opt_Int32* deleteCount,
+                const Opt_Array_Float64* childrenSize)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(start);
@@ -49,7 +49,7 @@ void SpliceImpl(Ark_ChildrenMainSize peer,
     auto handler = peer->GetHandler();
     CHECK_NULL_VOID(handler);
 
-    auto convStart = Converter::Convert<int32_t>(*start);
+    auto convStart = Converter::Convert<int32_t>(start);
     if (convStart < 0) {
         return; // throw an exception by TS
     }
@@ -70,8 +70,8 @@ void SpliceImpl(Ark_ChildrenMainSize peer,
     handler->ChangeData(convStart, delCount, floatArray);
 }
 void UpdateImpl(Ark_ChildrenMainSize peer,
-                const Ark_Number* index,
-                const Ark_Number* childSize)
+                Ark_Int32 index,
+                Ark_Float64 childSize)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(index);
@@ -80,27 +80,27 @@ void UpdateImpl(Ark_ChildrenMainSize peer,
     auto handler = peer->GetHandler();
     CHECK_NULL_VOID(handler);
 
-    auto convIndex = Converter::Convert<int32_t>(*index);
+    auto convIndex = Converter::Convert<int32_t>(index);
     if (convIndex < 0) {
         return; // throw an exception by TS
     }
-    auto convChildSize = Converter::Convert<float>(*childSize);
+    auto convChildSize = Converter::Convert<float>(childSize);
     auto array = std::vector<float>{convChildSize >= 0 ? convChildSize : DEFAULT_SIZE};
     handler->ChangeData(convIndex, 1, array);
 }
-Ark_Number GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
+Ark_Float64 GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(-1);
     CHECK_NULL_RETURN(peer, errValue);
     auto handler = peer->GetHandler();
     CHECK_NULL_RETURN(handler, errValue);
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(handler->GetChildSize(-1)));
+    return Converter::ArkValue<Ark_Float64>(static_cast<float>(handler->GetChildSize(-1)));
 }
 void SetChildDefaultSizeImpl(Ark_ChildrenMainSize peer,
-                             const Ark_Number* childDefaultSize)
+                             Ark_Float64 childDefaultSize)
 {
     CHECK_NULL_VOID(peer && childDefaultSize);
-    float size = Converter::Convert<float>(*childDefaultSize);
+    float size = Converter::Convert<float>(childDefaultSize);
     if (NonNegative(size)) {
         peer->SetDefaultSize(size);
     }
@@ -120,4 +120,7 @@ const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
     return &ChildrenMainSizeAccessorImpl;
 }
 
+struct ChildrenMainSizePeer {
+    virtual ~ChildrenMainSizePeer() = default;
+};
 }

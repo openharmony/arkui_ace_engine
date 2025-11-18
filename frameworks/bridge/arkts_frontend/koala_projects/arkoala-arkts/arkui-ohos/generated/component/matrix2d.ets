@@ -70,18 +70,20 @@ export class Matrix2D implements MaterializedBase {
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, Matrix2D.getFinalizer())
     }
-    constructor() {
-        this(false, Matrix2D.construct0())
+    constructor(unit?: LengthMetricsUnit) {
+        this(false, Matrix2D.construct(unit))
     }
-    constructor(unit: LengthMetricsUnit) {
-        this(false, Matrix2D.construct1(unit))
-    }
-    static construct0(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._Matrix2D_construct0()
-        return retval
-    }
-    static construct1(unit: LengthMetricsUnit): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._Matrix2D_construct1(unit.valueOf())
+    static construct(unit?: LengthMetricsUnit): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(unitTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._Matrix2D_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     static getFinalizer(): KPointer {

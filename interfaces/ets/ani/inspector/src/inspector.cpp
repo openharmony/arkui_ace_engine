@@ -28,7 +28,7 @@ const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
 const char DRAW_CHILDREN_TYPE[] = "drawChildren";
 const char ANI_INSPECTOR_NS[] = "@ohos.arkui.inspector.inspector";
-const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserverImpl";
+const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserver";
 const char KOALA_INSPECTOR_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.Inspector";
 const char KOALA_COMPONENT_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.ComponentObserver";
 } // namespace
@@ -288,7 +288,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
     return result;
 }
  
-static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array filters)
+static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_int depth, ani_array filters)
 {
     if (depth < 0) {
         AniThrow(env, "The parameter depth must be greater than 0.",

@@ -362,7 +362,7 @@ public:
 
 /**
  * @tc.name: accessibilityTest001
- * @tc.desc: TransformAccessbilityElementInfo
+ * @tc.desc: TransformAccessibilityElementInfo
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest001, TestSize.Level1)
@@ -372,7 +372,7 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest001, TestSize.L
     ArkUI_AccessibilityElementInfo info;
     FillNativeAccessibilityElementInfo(beforeInfo, info);
     OHOS::Accessibility::AccessibilityElementInfo afterInfo;
-    Framework::TransformAccessbilityElementInfo(info, afterInfo);
+    Framework::AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(info, afterInfo);
     CheckTransformElementInfoResult(beforeInfo, afterInfo);
 }
 
@@ -394,7 +394,7 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest002, TestSize.L
     FillNativeAccessibilityEventInfo(nativeEventInfo, beforeEventInfo, info);
 
     OHOS::Accessibility::AccessibilityEventInfo accessibilityEventInfo;
-    Framework::TransformAccessbilityEventInfo(nativeEventInfo, accessibilityEventInfo);
+    Framework::AccessibilityThirdProviderUtils::TransformAccessbilityEventInfo(nativeEventInfo, accessibilityEventInfo);
 
     CheckTransformEventInfoResult(beforeEventInfo, accessibilityEventInfo);
 }
@@ -424,7 +424,7 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest003, TestSize.L
     }
 
     OHOS::Accessibility::AccessibilityElementInfo afterInfo;
-    Framework::TransformAccessbilityElementInfo(info, afterInfo);
+    Framework::AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(info, afterInfo);
     CheckTransformElementInfoResult(beforeInfo, afterInfo);
 
     EXPECT_EQ(afterInfo.GetChildCount(), childCount);
@@ -433,7 +433,7 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest003, TestSize.L
     // clear child
     info.ClearChildNodeIds();
     OHOS::Accessibility::AccessibilityElementInfo afterInfo2;
-    Framework::TransformAccessbilityElementInfo(info, afterInfo2);
+    Framework::AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(info, afterInfo2);
     CheckTransformElementInfoResult(beforeInfo, afterInfo2);
     EXPECT_EQ(afterInfo2.GetChildCount(), 0);
 }
@@ -472,7 +472,7 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest004, TestSize.L
     }
 
     OHOS::Accessibility::AccessibilityElementInfo afterInfo;
-    Framework::TransformAccessbilityElementInfo(info, afterInfo);
+    Framework::AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(info, afterInfo);
     CheckTransformElementInfoResult(beforeInfo, afterInfo);
 
     EXPECT_EQ(afterInfo.GetActionList().size(), actionCount);
@@ -488,14 +488,14 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest004, TestSize.L
     // clear action
     info.ClearOperationActions();
     OHOS::Accessibility::AccessibilityElementInfo afterInfo2;
-    Framework::TransformAccessbilityElementInfo(info, afterInfo2);
+    Framework::AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(info, afterInfo2);
     CheckTransformElementInfoResult(beforeInfo, afterInfo2);
     EXPECT_EQ(afterInfo2.GetActionList().size(), 0);
 }
 
 /**
  * @tc.name: accessibilityTest005
- * @tc.desc: Test TransformAccessbilityElementInfo with nullptr description
+ * @tc.desc: Test TransformAccessibilityElementInfo with nullptr description
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest005, TestSize.Level1)
@@ -509,11 +509,25 @@ HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest005, TestSize.L
     info.AddOperationAction(nullptrAction1);
     
     OHOS::Accessibility::AccessibilityElementInfo afterInfo;
-    Framework::TransformAccessbilityElementInfo(info, afterInfo);
+    Framework::AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(info, afterInfo);
 
     auto actionList = afterInfo.GetActionList();
     EXPECT_EQ(actionList.size(), 2);
     EXPECT_EQ(actionList[0].GetDescriptionInfo(), "");
     EXPECT_EQ(actionList[1].GetDescriptionInfo(), "");
+}
+
+/**
+ * @tc.name: accessibilityTest005
+ * @tc.desc: Test TransformAccessbilityEventInfo with nullptr elementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityProviderUtilsTestNg, AccessibilityUtilsTest006, TestSize.Level1)
+{
+    ArkUI_AccessibilityEventInfo nativeEventInfo;
+    OHOS::Accessibility::AccessibilityEventInfo accessibilityEventInfo;
+    // eventinfo with nullptr elementInfo, will not crash
+    Framework::AccessibilityThirdProviderUtils::TransformAccessbilityEventInfo(nativeEventInfo, accessibilityEventInfo);
+    EXPECT_EQ(accessibilityEventInfo.GetElementInfo().GetAccessibilityId(), -1);
 }
 } // namespace OHOS::Ace::NG

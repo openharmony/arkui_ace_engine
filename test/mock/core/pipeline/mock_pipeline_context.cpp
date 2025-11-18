@@ -24,6 +24,7 @@
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -192,6 +193,11 @@ std::string PipelineContext::GetModuleName()
     return "";
 }
 
+const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
+{
+    return loadCompleteMgr_;
+}
+
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
@@ -223,6 +229,11 @@ void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
     g_isContainerCustomTitleVisible = visible;
 }
 
+void PipelineContext::GetComponentOverlayInspector(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {}
+
+void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {}
+
 void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
 {
     g_isContainerControlButtonVisible = visible;
@@ -247,6 +258,9 @@ PipelineContext::PipelineContext()
     }
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (!loadCompleteMgr_) {
+        loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     }
 }
 

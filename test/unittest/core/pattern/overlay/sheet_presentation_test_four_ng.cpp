@@ -27,6 +27,7 @@
 #include "test/mock/core/common/mock_window.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"

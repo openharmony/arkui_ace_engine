@@ -20,6 +20,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 

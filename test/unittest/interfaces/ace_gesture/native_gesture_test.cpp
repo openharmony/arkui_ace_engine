@@ -1380,9 +1380,13 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
 {
     ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
-    auto ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(nullptr, 0);
+    /**
+     * @tc.steps: step1. set abnormal param.
+     * @tc.expected: return ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    auto ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(nullptr, 0.0);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
-    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(recognizer, 0);
+    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(recognizer, 0.0);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
@@ -1396,15 +1400,23 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
     auto longPressGesture = gestureAPI->createLongPressGesture(1, true, 500);
     ASSERT_NE(longPressGesture, nullptr);
     ASSERT_NE(longPressGesture->gesture, nullptr);
-    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(longPressGesture, 0);
+    /**
+     * @tc.steps: step2. set normal param.
+     * @tc.expected: return ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(longPressGesture, 0.0);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     int32_t ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(nullptr, nullptr);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
     ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(recognizer, nullptr);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
-    int32_t res = 0;
+    /**
+     * @tc.steps: step3. get value of step2.
+     * @tc.expected: res equals 15.0.
+     */
+    double res = 0.0;
     ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(recognizer, &res);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
     OH_ArkUI_LongPressGesture_GetAllowableMovement(longPressGesture, &res);
-    EXPECT_EQ(res, 15);
+    EXPECT_DOUBLE_EQ(res, 15.0);
 }

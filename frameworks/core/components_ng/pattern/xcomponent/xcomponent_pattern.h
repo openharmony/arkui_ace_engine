@@ -402,6 +402,7 @@ protected:
     void* nativeWindow_ = nullptr;
     bool hasReleasedSurface_ = false;
     RefPtr<RenderContext> renderContextForSurface_;
+    RefPtr<RenderContext> handlingSurfaceRenderContext_;
     std::optional<int32_t> transformHintChangedCallbackId_;
     std::string surfaceId_;
     bool isOnTree_ = false;
@@ -500,7 +501,6 @@ private:
     std::optional<std::string> soPath_;
     std::optional<uint64_t> screenId_;
 
-    RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;

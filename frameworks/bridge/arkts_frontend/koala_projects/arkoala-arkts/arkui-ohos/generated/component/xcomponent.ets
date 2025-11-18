@@ -258,6 +258,18 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._XComponentAttribute_setEnableSecure(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableTransparentLayerAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._XComponentAttribute_setEnableTransparentLayer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setHdrBrightnessAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -307,6 +319,9 @@ export interface XComponentAttribute extends CommonMethod {
     enableSecure(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableSecure")
     }
+    enableTransparentLayer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableTransparentLayer")
+    }
     hdrBrightness(value: double | undefined): this {
         throw new Error("Unimplemented method hdrBrightness")
     }
@@ -319,6 +334,7 @@ export class ArkXComponentStyle extends ArkCommonMethodStyle implements XCompone
     onDestroy_value?: VoidCallback | undefined
     enableAnalyzer_value?: boolean | undefined
     enableSecure_value?: boolean | undefined
+    enableTransparentLayer_value?: boolean | undefined
     hdrBrightness_value?: double | undefined
     attributeModifier_value?: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined
     setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
@@ -334,6 +350,9 @@ export class ArkXComponentStyle extends ArkCommonMethodStyle implements XCompone
         return this
     }
     enableSecure(value: boolean | undefined): this {
+        return this
+    }
+    enableTransparentLayer(value: boolean | undefined): this {
         return this
     }
     hdrBrightness(value: double | undefined): this {
@@ -362,6 +381,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
             hookSetXComponentOptions(this, params)
             const params_casted = params as (XComponentParameters | XComponentOptions | NativeXComponentParameters)
             this.getPeer()?.setXComponentOptionsAttribute(params_casted)
+            this.applyOptionsFinish('XComponentAttribute');
             return this
         }
         return this
@@ -398,6 +418,14 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public enableTransparentLayer(value: boolean | undefined): this {
+        if (this.checkPriority("enableTransparentLayer")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableTransparentLayerAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public hdrBrightness(value: double | undefined): this {
         if (this.checkPriority("hdrBrightness")) {
             const value_casted = value as (double | undefined)
@@ -413,6 +441,9 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

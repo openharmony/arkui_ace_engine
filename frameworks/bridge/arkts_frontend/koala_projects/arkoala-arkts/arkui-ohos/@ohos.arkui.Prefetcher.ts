@@ -1230,58 +1230,58 @@ class DataSourceObserver<T> implements DataChangeListener {
     ]);
   }
 
-  onDataAdded(index: number): void {
+  onDataAdded(index: int32): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'added',
-        startIndex: index as int32,
+        startIndex: index,
         count: 1,
       },
     ]);
   }
 
-  onDataAdd(index: number): void {
+  onDataAdd(index: int32): void {
     this.onDataAdded(index);
   }
 
-  onDataMoved(from: number, to: number): void {
+  onDataMoved(from: int32, to: int32): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'swapped',
-        a: from as int32,
-        b: to as int32,
+        a: from,
+        b: to,
       },
     ]);
   }
 
-  onDataMove(from: number, to: number): void {
+  onDataMove(from: int32, to: int32): void {
     this.onDataMoved(from, to);
   }
 
-  onDataDeleted(index: number): void {
+  onDataDeleted(index: int32): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'deleted',
-        startIndex: index as int32,
+        startIndex: index,
         count: 1,
       },
     ]);
   }
 
-  onDataDelete(index: number): void {
+  onDataDelete(index: int32): void {
     this.onDataDeleted(index);
   }
 
-  onDataChanged(index: number): void {
+  onDataChanged(index: int32): void {
     this.simpleChangeListener.batchUpdate([
       {
         kind: 'updated',
-        index: index as int32,
+        index: index,
       },
     ]);
   }
 
-  onDataChange(index: number): void {
+  onDataChange(index: int32): void {
     this.onDataChanged(index);
   }
 

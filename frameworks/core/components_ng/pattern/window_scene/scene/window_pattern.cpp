@@ -210,9 +210,10 @@ void WindowPattern::OnAttachToFrameNode()
     auto state = session_->GetSessionState();
     auto key = session_->GetScreenSnapshotStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
-        "name: %{public}s, state: %{public}u, in recents: %{public}d, prelaunch: %{public}d",
+        "name: %{public}s, state: %{public}u, in recents: %{public}d, prelaunch: %{public}d, "
+        "isAppLock: %{public}d",
         session_->GetPersistentId(), host->GetId(), session_->GetSessionInfo().bundleName_.c_str(),
-        state, session_->GetShowRecent(), session_->IsPrelaunch());
+        state, session_->GetShowRecent(), session_->IsPrelaunch(), session_->GetAppLockControl());
     
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowForPrelaunch(), true);
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
@@ -232,7 +233,7 @@ void WindowPattern::OnAttachToFrameNode()
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         (session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
-        if (!session_->GetShowRecent()) {
+        if (!session_->GetShowRecent() && !session_->GetAppLockControl()) {
             AddChild(host, appWindow_, appWindowName_, 0);
         }
         CreateSnapshotWindow();
@@ -247,6 +248,12 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
+    if (session_->GetAppLockControl()) {
+        CreateSnapshotWindow();
+        AddChild(host, snapshotWindow_, snapshotWindowName_);
+        attachToFrameNodeFlag_ = true;
+        return;
+    }
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);

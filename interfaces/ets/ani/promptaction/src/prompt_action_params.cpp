@@ -17,6 +17,22 @@
 
 #include "core/pipeline/pipeline_base.h"
 
+std::unordered_map<int, OHOS::Ace::BlurStyle> blurStyleMap = {
+    { PromptActionBlurStyle::THIN, OHOS::Ace::BlurStyle::THIN },
+    { PromptActionBlurStyle::REGULAR, OHOS::Ace::BlurStyle::REGULAR },
+    { PromptActionBlurStyle::THICK, OHOS::Ace::BlurStyle::THICK },
+    { PromptActionBlurStyle::BACKGROUND_THIN, OHOS::Ace::BlurStyle::BACKGROUND_THIN },
+    { PromptActionBlurStyle::BACKGROUND_REGULAR, OHOS::Ace::BlurStyle::BACKGROUND_REGULAR },
+    { PromptActionBlurStyle::BACKGROUND_THICK, OHOS::Ace::BlurStyle::BACKGROUND_THICK },
+    { PromptActionBlurStyle::BACKGROUND_ULTRA_THICK, OHOS::Ace::BlurStyle::BACKGROUND_ULTRA_THICK },
+    { PromptActionBlurStyle::NONE, OHOS::Ace::BlurStyle::NO_MATERIAL },
+    { PromptActionBlurStyle::COMPONENT_ULTRA_THIN, OHOS::Ace::BlurStyle::COMPONENT_ULTRA_THIN },
+    { PromptActionBlurStyle::COMPONENT_THIN, OHOS::Ace::BlurStyle::COMPONENT_THIN },
+    { PromptActionBlurStyle::COMPONENT_REGULAR, OHOS::Ace::BlurStyle::COMPONENT_REGULAR },
+    { PromptActionBlurStyle::COMPONENT_THICK, OHOS::Ace::BlurStyle::COMPONENT_THICK },
+    { PromptActionBlurStyle::COMPONENT_ULTRA_THICK, OHOS::Ace::BlurStyle::COMPONENT_ULTRA_THICK },
+};
+
 std::unordered_map<int, uint32_t> colorMap = {
     {PromptActionColor::PROMPT_ACTION_COLOR_WHITE, 0xffffff | 0xFF000000},
     {PromptActionColor::PROMPT_ACTION_COLOR_BLACK, 0x000000 | 0xFF000000},
@@ -1048,13 +1064,11 @@ bool GetLengthParam(ani_env *env, ani_object object, const char *name, OHOS::Ace
     return GetLengthParam(env, resultRef, result);
 }
 
-bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result)
+bool GetColorParam(ani_env* env, ani_object object, std::string& result)
 {
-    int32_t resultInt;
-    if (!GetEnumInt(env, object, "arkui.component.enums.Color", resultInt)) {
+    if (!GetEnumString(env, object, "arkui.component.enums.Color", result)) {
         return false;
     }
-    result = static_cast<PromptActionColor>(resultInt);
     return true;
 }
 
@@ -1065,16 +1079,14 @@ bool GetResourceColorParam(ani_env *env, ani_ref ref, OHOS::Ace::Color& result)
     }
     std::string resultStr;
     if (GetStringParam(env, ref, resultStr)) {
-        OHOS::Ace::Color::ParseColorString(resultStr, result);
-        return true;
+        if (OHOS::Ace::Color::ParseColorString(resultStr, result)) {
+            return true;
+        }
     }
 
-    PromptActionColor resultColor;
     ani_object object = static_cast<ani_object>(ref);
-    if (GetColorParam(env, object, resultColor)) {
-        auto iter = colorMap.find(resultColor);
-        if (iter != colorMap.end()) {
-            result = OHOS::Ace::Color(iter->second);
+    if (GetColorParam(env, object, resultStr)) {
+        if (OHOS::Ace::Color::ParseColorString(resultStr, result)) {
             return true;
         }
     }
@@ -1471,7 +1483,17 @@ void CheckDimension(OHOS::Ace::CalcDimension value)
 
 bool GetBackgroundBlurStyleParam(ani_env* env, ani_object object, int32_t& result)
 {
-    return GetEnumInt(env, object, "backgroundBlurStyle", "arkui.component.common.BlurStyle", result);
+    int32_t resultInt;
+    if (!GetEnumInt(env, object, "backgroundBlurStyle", "arkui.component.common.BlurStyle", resultInt)) {
+        return false;
+    }
+
+    auto iter = blurStyleMap.find(resultInt);
+    if (iter != blurStyleMap.end()) {
+        result = static_cast<int32_t>(iter->second);
+        return true;
+    }
+    return false;
 }
 
 bool GetBackgroundBlurStyleParamOpt(ani_env* env, ani_object object, std::optional<int32_t>& result)

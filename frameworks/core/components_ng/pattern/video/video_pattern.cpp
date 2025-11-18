@@ -31,6 +31,7 @@
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/video/video_theme.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -650,6 +651,14 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
             eventHub->FireStopEvent();
             break;
         case PlaybackStatus::PREPARED: {
+            auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+            if (layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                auto pipeline = host->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+            }
             ContainerScope scope(instanceId_);
             if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
                 return;
@@ -706,6 +715,9 @@ void VideoPattern::OnError(int32_t code, const std::string& message)
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
+    if (!GetIsPrepared()) {
+        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+    }
 
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1024,12 +1036,16 @@ void VideoPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (pipeline && layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+        pipeline->GetLoadCompleteManager()->AddLoadComponent(hostId_);
+    }
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoFullScreenPattern>(this)) {
         SetMethodCall();
     }
-    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(hostId_);
 }
@@ -1038,12 +1054,16 @@ void VideoPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    auto id = host->GetId();
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (pipeline && layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+        pipeline->GetLoadCompleteManager()->DeleteLoadComponent(id);
+    }
     if (host->GetNodeStatus() == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         Pause();
     }
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
-    auto id = host->GetId();
-    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
 }

@@ -185,9 +185,16 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level0)
  */
 HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan003, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. add image span
+     */
     ImageSpanOptions options;
     int32_t res = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, true, 0, false);
     ASSERT_EQ(res, 0);
@@ -200,11 +207,18 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan003, TestSize.Level0)
  */
 HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add image span
+     */
     ImageSpanOptions options;
     options.image = IMAGE_VALUE;
     options.bundleName = BUNDLE_NAME;

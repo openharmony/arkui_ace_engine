@@ -24,13 +24,13 @@ import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } fro
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
-    KeyboardAvoidMode } from '@ohos/arkui/UIContext';
+    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { Context, PointerStyle, PixelMap } from '#external';
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
-import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/common';
+import { KeyEvent, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from 'arkui/component/common';
 import { GlobalScope_ohos_font } from '#generated';
 import router from '@ohos/router';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
@@ -57,8 +57,8 @@ import { KeyProcessingMode } from 'arkui/component/focus';
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
-import { UIContextAtomicServiceBar } from '#generated';
-import { GlobalScope } from '#generated';
+import { UIContextAtomicServiceBar, UIContextGetInfo } from '#generated';
+import { GlobalScope, SheetOptions } from '#generated';
 import { default as mediaquery } from '@ohos/mediaquery';
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
 import { AsyncCallback } from '#generated';
@@ -74,6 +74,7 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 import { IUIContext } from "arkui/component/idlize"
+import { default as uiObserver } from '@ohos/arkui/observer';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -350,7 +351,7 @@ export class DragControllerImpl extends DragController {
             if (customDragInfo.pixelMap !== undefined) {
                 ArkUIAniModule._DragController_executeDragWithCallback(custom as DragItemInfo, nullptr,
                     destroyCallback, dragInfo, callback);
-            } else {
+            } else if (customDragInfo.builder !== undefined) {
                 const peerNode = createUiDetachedRoot((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
                 }, customDragInfo.builder as CustomBuilder);
@@ -360,6 +361,11 @@ export class DragControllerImpl extends DragController {
                 }
                 let dragItemInfoNull: DragItemInfo = {};
                 ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo, callback);
+            } else {
+                destroyCallback = (): void => {}
+                let dragItemInfoNull: DragItemInfo = {};
+                ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, nullptr,
                     destroyCallback, dragInfo, callback);
             }
         }
@@ -389,7 +395,7 @@ export class DragControllerImpl extends DragController {
             if (customDragInfo.pixelMap !== undefined) {
                 promise = ArkUIAniModule._DragController_executeDragWithPromise(custom as DragItemInfo,
                     nullptr, destroyCallback, dragInfo);
-            } else {
+            } else if (customDragInfo.builder !== undefined) {
                 const peerNode = createUiDetachedRoot((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
                 }, customDragInfo.builder as CustomBuilder);
@@ -399,6 +405,11 @@ export class DragControllerImpl extends DragController {
                 }
                 let dragItemInfoNull: DragItemInfo = {};
                 promise = ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo);
+            } else {
+                destroyCallback = (): void => {}
+                let dragItemInfoNull: DragItemInfo = {};
+                ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, nullptr,
                     destroyCallback, dragInfo);
             }
         }
@@ -427,7 +438,7 @@ export class DragControllerImpl extends DragController {
                 const dragItemInfo = element as DragItemInfo;
                 if (dragItemInfo.pixelMap !== undefined) {
                     dragItemInfoArray.push(dragItemInfo);
-                } else {
+                } else if (dragItemInfo.builder !== undefined) {
                     const peerNode = createUiDetachedRoot((): PeerNode => {
                         return ArkComponentRootPeer.create(undefined);
                     }, dragItemInfo.builder as CustomBuilder);
@@ -1422,6 +1433,12 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
     }
+    getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let navigationInfo = UIContextGetInfo.getNavigationInfoByUniqueId(id);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return navigationInfo;
+    }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }
@@ -1450,6 +1467,39 @@ export class UIContextImpl extends UIContext {
         let result = IUIContext.dispatchKeyEvent(node, event);
         ArkUIAniModule._Common_Restore_InstanceId();
         return true;
+    }
+
+    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+        let ptr: KPointer = 0;
+        if (bindSheetContent.getNodePtr() != undefined) {
+            ptr = bindSheetContent.getNodePtr() as KPointer;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = IUIContext.openBindSheet(ptr, sheetOptions, targetId);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        let ptr: KPointer = 0;
+        if (bindSheetContent.getNodePtr() != undefined) {
+            ptr = bindSheetContent.getNodePtr() as KPointer;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = IUIContext.updateBindSheet(ptr, sheetOptions, partialUpdate);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+        let ptr: KPointer = 0;
+        if (bindSheetContent.getNodePtr() != undefined) {
+            ptr = bindSheetContent.getNodePtr() as KPointer;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = IUIContext.closeBindSheet(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public getFocusController(): FocusController {
@@ -1498,7 +1548,7 @@ export class UIContextImpl extends UIContext {
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        _animateTo(param, event);
+        AnimationExtender.AnimateToImmediatelyImpl(param, event, false)
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -1528,13 +1578,12 @@ export class UIContextImpl extends UIContext {
         return ArkUIAniModule._Common_getWindowName(this.instanceId_);
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
-
-        return this.getWindowWidthBreakpoint_serialize() as WidthBreakpoint;
-
+        let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();
+        return ret as WidthBreakpoint;
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
-      return this.getWindowHeightBreakpoint_serialize() as HeightBreakpoint;
-
+        let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
+        return ret as HeightBreakpoint;
     }
     public vp2px(value: number): number {
          return ArkUIAniModule._Common_vp2px(value, this.instanceId_);
@@ -1558,13 +1607,6 @@ export class UIContextImpl extends UIContext {
     public getId() : int32 {
         return this.instanceId_;
     }
-
-    private getWindowWidthBreakpoint_serialize(): WidthBreakpoint {
-        throw new Error("no impl");
-    }
-    private getWindowHeightBreakpoint_serialize(): HeightBreakpoint {
-        throw new Error("no impl");
-    }
     private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
                                                          onIdleCallback: ((index: number) => void),
                                                          delayTime: number): void {
@@ -1583,7 +1625,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId()
     }
     clearResourceCache(): void {
-        // ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
+        ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
     }
     postFrameCallback(frameCallback: FrameCallback): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
@@ -1695,6 +1737,12 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId()
     }
 
+    public enableSwipeBack(enabled: boolean | undefined): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        UIContextGetInfo.enableSwipeBack(enabled);
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
+
     public setUIStates(callback: () => void): void {
         if (this.checkThread(this.instanceId_)) {
             callback();
@@ -1711,7 +1759,7 @@ export class UIContextImpl extends UIContext {
         return inspector.getFilteredInspectorTree(filters);
     }
  
-    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+    public getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string {
         return inspector.getFilteredInspectorTreeById(id, depth, filters);
     }
 
@@ -1721,6 +1769,27 @@ export class UIContextImpl extends UIContext {
 
     public setImageRawDataCacheSize(value: int): void {
         ArkUIAniModule._Common_SetImageRawDataCacheSize(value, this.instanceId_);
+    }
+
+    public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
+        const id_casted = id as (string);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let nodePtr = FrameNodeExtender.getFrameNodeByKey(id_casted);
+        if (!nodePtr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return [];
+        }
+        let tag = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr);
+        if (tag === 'Swiper') {
+            let ret: Array<SwiperDynamicSyncScene> =
+                [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
+                new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
+            let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return result;
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return [];
     }
     public updateParallelizeItemNode() {
         this.updateParallelizeItemNodeCallback_?.()

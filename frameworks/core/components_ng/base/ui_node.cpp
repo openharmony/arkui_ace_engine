@@ -21,10 +21,12 @@
 #include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
@@ -691,6 +693,23 @@ void UINode::AdoptChild(const RefPtr<FrameNode>& child, bool silently, bool addD
     child->SetActive(true);
 }
 
+void UINode::UpdateBuilderNodeColorMode(const RefPtr<UINode>& child)
+{
+    if (!SystemProperties::ConfigChangePerform() || !context_ ||
+        (child->nodeStatus_ != NodeStatus::BUILDER_NODE_ON_MAINTREE && !child->isCNode_ &&
+        !child->IsArkTsFrameNode())) {
+        return;
+    }
+    auto colorMode = static_cast<int32_t>(context_->GetColorMode());
+    if (child->CheckIsDarkMode() != colorMode) {
+        context_->SetIsSystemColorChange(true);
+        SetRerenderable(true);
+        SetMeasureAnyway(true);
+        SetShouldClearCache(true);
+        NotifyColorModeChange(colorMode);
+    }
+}
+
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
@@ -724,18 +743,6 @@ void UINode::DoAddChild(
     }
     MarkNeedSyncRenderTree(true);
     ProcessIsInDestroyingForReuseableNode(child);
-    // Forced update colormode when builderNode attach to main tree.
-    if (SystemProperties::ConfigChangePerform() && child->nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE &&
-        context_) {
-        auto colorMode = static_cast<int32_t>(context_->GetColorMode());
-        if (child->CheckIsDarkMode() != colorMode) {
-            context_->SetIsSystemColorChange(true);
-            SetRerenderable(true);
-            SetMeasureAnyway(true);
-            SetShouldClearCache(true);
-            NotifyColorModeChange(colorMode);
-        }
-    }
     UpdateForceDarkAllowedNode(child);
 }
 
@@ -922,6 +929,8 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
+    // Forced update colormode when builderNode attach to main tree.
+    UpdateBuilderNodeColorMode(Claim(this));
     isRemoving_ = false;
     if (isThreadSafeNode_) {
         isFree_ = false;

@@ -44,6 +44,7 @@ constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
+constexpr float DEFAULT_BIAS = 0.5f;
 
 void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
 {
@@ -571,8 +572,8 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
     CHECK_NULL_VOID(targetNode);
     auto instanceId = sheetStyle.instanceId.has_value() && !sheetStyle.showInSubWindow.value_or(false) ?
         sheetStyle.instanceId.value() : Container::CurrentId();
-    auto buildNodeFunc = [buildFunc, instanceId]() -> RefPtr<UINode> {
-        NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
+    auto buildNodeFunc = [buildFunc](int32_t id) -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcess(id);
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
@@ -1196,14 +1197,14 @@ void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<
 void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
     const std::optional<float>& vertical)
 {
-    // auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
-    // if (horisontal.has_value()) {
-    //     biasPair.first = horisontal.value();
-    // }
-    // if (vertical.has_value()) {
-    //     biasPair.second = vertical.value();
-    // }
-    // ViewAbstract::SetBias(frameNode, biasPair);
+    auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    if (horisontal.has_value()) {
+        biasPair.first = horisontal.value();
+    }
+    if (vertical.has_value()) {
+        biasPair.second = vertical.value();
+    }
+    ViewAbstract::SetBias(frameNode, biasPair);
 }
 
 void ViewAbstractModelStatic::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,

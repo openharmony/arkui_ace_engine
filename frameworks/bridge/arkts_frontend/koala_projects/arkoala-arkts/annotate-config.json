@@ -13,5 +13,6 @@
 		"./arkui-ohos/build/**/*.ts",
 		"./arkui-ohos/src/stateManagement/tools/ts/*.ts"
 	],
-	"fileExtension": ".ets"
+	"fileExtension": ".ets",
+	"commonMethodSrc": "./arkui-ohos/generated/component/common.ets"
 }

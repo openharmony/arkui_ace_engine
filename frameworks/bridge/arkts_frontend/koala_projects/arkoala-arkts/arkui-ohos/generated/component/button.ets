@@ -476,6 +476,7 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
             const label_casted = label as (ResourceStr)
             const options_casted = options as (ButtonOptions | undefined)
             this.getPeer()?.setButtonOptions0Attribute(label_casted, options_casted)
+            this.applyOptionsFinish('ButtonAttribute');
             return this
         }
         return this
@@ -484,6 +485,7 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         if (this.checkPriority("setButtonOptions")) {
             const options_casted = options as (ButtonOptions | undefined)
             this.getPeer()?.setButtonOptions1Attribute(options_casted)
+            this.applyOptionsFinish('ButtonAttribute');
             return this
         }
         return this
@@ -605,6 +607,9 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

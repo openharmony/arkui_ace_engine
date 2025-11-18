@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "layout_wrapper.h"
-#include "base/utils/string_expression.h"
 #include "core/components_ng/layout/layout_property.h"
 
-#include "core/pipeline_ng/pipeline_context.h"
+#include "base/utils/string_expression.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/position_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1720,7 +1721,7 @@ void LayoutProperty::SetOverlayOffset(
     const std::optional<Dimension>& overlayOffsetX, const std::optional<Dimension>& overlayOffsetY)
 {
     bool xChanged = true;
-    bool yChanged = true;
+    bool yChanged = false;
     if ((!overlayOffsetX.has_value() && overlayOffsetX_.Value() == 0) ||
         (overlayOffsetX.has_value() && overlayOffsetX.value() == overlayOffsetX_)) {
         xChanged = false;
@@ -2510,5 +2511,14 @@ std::string LayoutProperty::GetAlignmentStringFromLocalized(
         return layoutDirection == TextDirection::LTR ? it->second.first : it->second.second;
     }
     return "center";
+}
+
+void LayoutProperty::UpdateIsUserSetBackgroundColor(bool value)
+{
+    isUserSetBackgroundColor_ = value;
+}
+bool LayoutProperty::GetIsUserSetBackgroundColor() const
+{
+    return isUserSetBackgroundColor_;
 }
 } // namespace OHOS::Ace::NG

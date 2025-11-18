@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -45,6 +45,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/text/html_utils.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
@@ -965,7 +966,24 @@ void TextPattern::HandleOnAskCelia()
     };
     dataDetectorAdapter_->OnClickAIMenuOption(aiSpan, *menuOptionAndActions.begin(), nullptr);
 }
-    
+
+bool TextPattern::IsAskCeliaSupported()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto isAskCeliaSupported = textFieldManager->IsAskCeliaSupported();
+    if (!isAskCeliaSupported.has_value()) {
+        CHECK_NULL_RETURN(GetDataDetectorAdapter(), false);
+        textFieldManager->SetIsAskCeliaSupported(dataDetectorAdapter_->IsAskCeliaSupported());
+        isAskCeliaSupported = textFieldManager->IsAskCeliaSupported();
+    }
+    return isAskCeliaSupported.value_or(false);
+}
+
 void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
     NG::TextLineStyle& textLineStyle, const std::optional<TextStyle>& textStyle)
 {
@@ -5091,7 +5109,11 @@ void TextPattern::DumpTextStyleInfo()
                 textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString() : "Na")
             .append(" ForegroundColor: ")
             .append(
-                renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na"));
+            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na")
+            .append(" TextColorFlagByUser: ")
+            .append(textLayoutProp->HasTextColorFlagByUser()
+                ? std::to_string(textLayoutProp->GetTextColorFlagByUserValue(false))
+                : "Na"));
     if (renderContext->HasForegroundColorStrategy()) {
         auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
         DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
@@ -5250,7 +5272,7 @@ void TextPattern::DumpTextStyleInfo4()
         dumpLog.AddDesc(
             std::string("SymbolColorList: ")
                 .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList()))
-                .append("prop: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasSymbolColorList()
                             ? StringUtils::SymbolColorListToString(textLayoutProp->GetSymbolColorList().value())
                             : "Na"));

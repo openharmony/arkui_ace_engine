@@ -28,9 +28,9 @@
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
 constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
 std::unordered_map<int32_t, OHOS::Ace::BorderStyle> borderStyleMap = {
-    { 0, OHOS::Ace::BorderStyle::DOTTED },
+    { 2, OHOS::Ace::BorderStyle::DOTTED },
     { 1, OHOS::Ace::BorderStyle::DASHED },
-    { 2, OHOS::Ace::BorderStyle::SOLID },
+    { 0, OHOS::Ace::BorderStyle::SOLID },
 };
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
@@ -875,6 +875,13 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
         return false;
     }
 
+    ani_vm* vm = nullptr;
+    status = env->GetVM(&vm);
+    if (status != ANI_OK || vm == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetVM fail. status: %{public}d", status);
+        return false;
+    }
+
     ani_ref globalRef;
     status = env->GlobalReference_Create(resultRef, &globalRef);
     if (status != ANI_OK) {
@@ -882,10 +889,17 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
         return false;
     }
 
-    result = [env, globalRef](const int32_t reason, const int32_t instanceId) {
+    result = [vm, globalRef](const int32_t reason, const int32_t instanceId) {
         TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG,
             "Dissmiss dialog enter. reason: %{public}d, instanceId: %{public}d", reason, instanceId);
         if (!globalRef) {
+            return;
+        }
+
+        ani_env* env = nullptr;
+        ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetEnv fail. status: %{public}d", status);
             return;
         }
 
@@ -893,15 +907,9 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
         ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
         ani_fn_object func = static_cast<ani_fn_object>(globalRef);
         ani_ref fnReturnVal {};
-        ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
+        status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
         if (status != ANI_OK) {
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] FunctionalObject_Call fail. status: %{public}d", status);
-        }
-
-        status = env->GlobalReference_Delete(globalRef);
-        if (status != ANI_OK) {
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
-                "[ANI] GlobalReference_Delete fail. status: %{public}d", status);
         }
     };
     return true;

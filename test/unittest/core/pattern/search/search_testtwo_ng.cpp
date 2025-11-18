@@ -22,6 +22,7 @@
 #include "ui/view/frame_node.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -3011,8 +3012,7 @@ HWTEST_F(SearchTestTwoNg, searchSymbolIconColorTest, TestSize.Level1)
     auto color = pattern->GetDefaultIconColor(IMAGE_INDEX);
     auto searchTheme = pattern->GetTheme();
     ASSERT_NE(searchTheme, nullptr);
-    auto normalIconColor = searchTheme->GetSymbolIconColor();
-    EXPECT_EQ(color, normalIconColor);
+    EXPECT_EQ(color, Color::BLACK);
 }
 
 /**

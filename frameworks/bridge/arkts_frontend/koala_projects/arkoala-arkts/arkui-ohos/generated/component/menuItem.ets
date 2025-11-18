@@ -300,6 +300,7 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
         if (this.checkPriority("setMenuItemOptions")) {
             const value_casted = value as (MenuItemOptions | CustomBuilder | undefined)
             this.getPeer()?.setMenuItemOptionsAttribute(value_casted)
+            this.applyOptionsFinish('MenuItemAttribute');
             return this
         }
         return this
@@ -367,6 +368,9 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -17,6 +17,7 @@
 #include "ui/properties/color.h"
 
 #include "base/utils/utf_helper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -473,6 +474,41 @@ void ResetSearchInspectorId(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetId(frameNode, "");
+}
+
+void SetSearchDividerColor(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorSpace, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color, static_cast<ColorSpace>(colorSpace));
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("dividerColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("dividerColor");
+        }
+    }
+    SearchModelNG::SetDividerColor(frameNode, result);
+}
+
+void ResetSearchDividerColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetDividerColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("dividerColor");
+    }
 }
 
 void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
@@ -1412,6 +1448,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchHalfLeading = ResetSearchHalfLeading,
         .setSearchFontFeature = SetSearchFontFeature,
         .resetSearchFontFeature = ResetSearchFontFeature,
+        .setSearchDividerColor = SetSearchDividerColor,
+        .resetSearchDividerColor = ResetSearchDividerColor,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
         .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
         .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,
@@ -1540,6 +1578,8 @@ const CJUISearchModifier* GetCJUISearchModifier()
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
         .resetSearchLineHeight = ResetSearchLineHeight,
+        .setSearchDividerColor = SetSearchDividerColor,
+        .resetSearchDividerColor = ResetSearchDividerColor,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
         .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
         .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

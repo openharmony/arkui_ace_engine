@@ -29,6 +29,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -2018,6 +2019,12 @@ void SearchPattern::UpdateDividerColorMode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerColorSetByUser = layoutProperty->GetDividerColorSetByUser().value_or(false);
+    if (dividerColorSetByUser) {
+        return;
+    }
     auto dividerFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
     CHECK_NULL_VOID(dividerFrameNode);
     auto searchTheme = GetTheme();
@@ -2063,8 +2070,15 @@ void SearchPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto searchTheme = GetTheme();
-    CHECK_NULL_VOID(searchTheme);
+    if (!SystemProperties::ConfigChangePerform()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    } else {
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (!layoutProperty->GetIsUserSetBackgroundColor()) {
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        }
+    }
     UpdateCancelButtonColorMode();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) ||
         !SystemProperties::IsNeedSymbol()) {
@@ -2074,9 +2088,14 @@ void SearchPattern::OnColorConfigurationUpdate()
     UpdateDividerColorMode();
     if (SystemProperties::ConfigChangePerform()) {
         UpdateSearchSymbol();
-        return;
     }
+    UpdateTextFieldColor();
+}
 
+void SearchPattern::UpdateTextFieldColor()
+{
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
     auto buttonNode = buttonNode_.Upgrade();
     if (buttonNode) {
         auto buttonRenderContext = buttonNode->GetRenderContext();
@@ -2098,8 +2117,14 @@ void SearchPattern::OnColorConfigurationUpdate()
     if (textField) {
         auto textFieldLayoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(textFieldLayoutProperty);
-        textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
-        textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+        auto textFieldPaintProperty = textField->GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(textFieldPaintProperty);
+        if (!textFieldPaintProperty->HasTextColorFlagByUser()) {
+            textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
+        }
+        if (!textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false)) {
+            textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+        }
         textField->MarkModifyDone();
         textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -2112,20 +2137,24 @@ void SearchPattern::UpdateSearchSymbol()
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
-    if (searchIconUsingThemeColor_ && iconFrameNode && iconFrameNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+    if (searchIconUsingThemeColor_ && iconFrameNode && iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
-        symbolLayoutProperty->UpdateSymbolColorList({Color(searchTheme->GetSymbolIconColor())});
-        iconFrameNode->MarkModifyDone();
-        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (!symbolLayoutProperty->GetTextColorFlagByUserValue(false)) {
+            symbolLayoutProperty->UpdateSymbolColorList({ Color(searchTheme->GetSymbolIconColor()) });
+            iconFrameNode->MarkModifyDone();
+            iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     }
     auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    if (cancelIconUsingThemeColor_ && cancelIconFrameNode && cancelIconFrameNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+    if (cancelIconUsingThemeColor_ && cancelIconFrameNode && cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
-        symbolLayoutProperty->UpdateSymbolColorList({Color(searchTheme->GetSymbolIconColor())});
-        cancelIconFrameNode->MarkModifyDone();
-        cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (!symbolLayoutProperty->GetTextColorFlagByUserValue(false)) {
+            symbolLayoutProperty->UpdateSymbolColorList({ Color(searchTheme->GetSymbolIconColor()) });
+            cancelIconFrameNode->MarkModifyDone();
+            cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
     }
 }
 
@@ -3086,6 +3115,16 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             }
         },
 
+        { "dividerColor",
+            [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateDividerColorResource(*realValue);
+                }
+            }
+        },
+
         {"minFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
             if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
@@ -3358,6 +3397,19 @@ void SearchPattern::UpdateDecorationColorResource(const Color& value)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchPattern::UpdateDividerColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+
+    dividerRenderProperty->UpdateDividerColor(value);
+    dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SearchPattern::UpdateMinFontSizeResource(const Dimension& value)
 {
     auto frameNode = GetHost();
@@ -3551,12 +3603,5 @@ void SearchPattern::InitMargin(const RefPtr<SearchLayoutProperty>& property)
         margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
     }
     property->UpdateMargin(margin);
-}
-
-void SearchPattern::OnAttachToMainTree()
-{
-    auto host = GetHost();
-    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 } // namespace OHOS::Ace::NG

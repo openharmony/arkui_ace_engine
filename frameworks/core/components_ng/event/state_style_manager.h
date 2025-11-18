@@ -74,9 +74,9 @@ public:
         supportedStates_ = state;
     }
 
-    void AddSupportedUIStateWithCallback(
+    bool AddSupportedUIStateWithCallback(
         UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
-    void RemoveSupportedUIState(UIState state, bool isInner);
+    bool RemoveSupportedUIState(UIState state, bool isInner);
 
     bool GetUserSetStateStyle()
     {
@@ -221,8 +221,8 @@ private:
         ResetPressedCancelPendingState();
     }
 
-    bool IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const;
-    bool IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
+    bool IsOutOfPressedRegion(int32_t sourceType, int32_t sourceTool, const Offset& location) const;
+    bool IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType, int32_t sourceTool,
         const Offset& location) const;
     void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
     void CleanScrollingParentListener();

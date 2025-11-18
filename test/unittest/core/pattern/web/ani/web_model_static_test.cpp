@@ -110,6 +110,7 @@ HWTEST_F(WebModelStaticTest, CreateFrameNode001, TestSize.Level1)
     WebModelStatic::NotifyPopupWindowResultStatic(-1, true);
     WebModelStatic::NotifyPopupWindowResultStatic(1, true);
     WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
+    WebModelStatic::SetJavaScriptProxy(AccessibilityManager::RawPtr(frameNode), nullptr);
     WebModelStatic::SetPopup(AccessibilityManager::RawPtr(frameNode), true, 0);
     keyBoardMode = BlurOnKeyboardHideMode::BLUR;
     WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
@@ -668,8 +669,8 @@ HWTEST_F(WebModelStaticTest, SetEnableFollowSystemFontWeight002, TestSize.Level1
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetEnableFollowSystemFontWeight(AccessibilityManager::RawPtr(frameNode), false);
-    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(false), false);
+    WebModelStatic::SetEnableFollowSystemFontWeight(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(true), true);
 #endif
 }
 
@@ -1216,7 +1217,7 @@ HWTEST_F(WebModelStaticTest, SetMediaOptions001, TestSize.Level1)
     WebModelStatic::SetAudioSessionType(AccessibilityManager::RawPtr(frameNode), audioSessionType);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioResumeInterval(0), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioExclusive(true), true);
-    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioSessionType(3), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioSessionType(WebAudioSessionType::AMBIENT), true);
 #endif
 }
 
@@ -1519,6 +1520,29 @@ HWTEST_F(WebModelStaticTest, JavaScriptOnDocumentEnd025, TestSize.Level1)
     stack->Push(frameNode);
     ScriptItems scriptItemsEnd;
     WebModelStatic::JavaScriptOnDocumentEnd(AccessibilityManager::RawPtr(frameNode), scriptItemsEnd);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_NE(webPatternStatic->onDocumentEndScriptItems_, std::nullopt);
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnHeadEnd001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, JavaScriptOnHeadEnd001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    ScriptItems scriptItemsEnd;
+    ScriptItemsByOrder scriptItemsByOrder;
+    WebModelStatic::JavaScriptOnHeadEnd(AccessibilityManager::RawPtr(frameNode), scriptItemsEnd, scriptItemsByOrder);
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
     EXPECT_NE(webPatternStatic->onDocumentEndScriptItems_, std::nullopt);
@@ -2256,7 +2280,6 @@ HWTEST_F(WebModelStaticTest, SetOnFileSelectorShow001, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
-
     auto callback = [&callCount](const BaseEventInfo* info) {
         callCount++;
         return true;
@@ -2285,7 +2308,6 @@ HWTEST_F(WebModelStaticTest, SetOnDetectedBlankScreen, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
-
     auto callback = [&callCount](const BaseEventInfo* info) {
         callCount++;
         return true;

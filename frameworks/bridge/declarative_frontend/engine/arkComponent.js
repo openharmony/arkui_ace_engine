@@ -3096,6 +3096,67 @@ class ResponseRegionModifier extends ModifierWithKey {
   }
 }
 ResponseRegionModifier.identity = Symbol('responseRegion');
+class ResponseRegionListModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+    if (reset) {
+      getUINativeModule().common.resetResponseRegionList(node);
+    }
+    else {
+      let responseRegion = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push((_a = this.value[i].tool) !== null && _a !== void 0 ? _a : 'PLACEHOLDER');
+          responseRegion.push((_b = this.value[i].x) !== null && _b !== void 0 ? _b : 'PLACEHOLDER');
+          responseRegion.push((_c = this.value[i].y) !== null && _c !== void 0 ? _c : 'PLACEHOLDER');
+          responseRegion.push((_d = this.value[i].width) !== null && _d !== void 0 ? _d : 'PLACEHOLDER');
+          responseRegion.push((_e = this.value[i].height) !== null && _e !== void 0 ? _e : 'PLACEHOLDER');
+        }
+      }
+      else {
+        responseRegion.push((_f = this.value.tool) !== null && _f !== void 0 ? _f : 'PLACEHOLDER');
+        responseRegion.push((_g = this.value.x) !== null && _g !== void 0 ? _g  : 'PLACEHOLDER');
+        responseRegion.push((_h = this.value.y) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
+        responseRegion.push((_i = this.value.width) !== null && _i !== void 0 ? _i : 'PLACEHOLDER');
+        responseRegion.push((_j = this.value.height) !== null && _j !== void 0 ? _j : 'PLACEHOLDER');
+      }
+      getUINativeModule().common.setResponseRegionList(node, responseRegion, responseRegion.length);
+    }
+  }
+  checkObjectDiff() {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      }
+      else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].tool, this.value[i].tool) &&
+            isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height))) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+    else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.tool, this.value.tool) &&
+        isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)));
+    }
+    else {
+      return false;
+    }
+  }
+}
+ResponseRegionListModifier.identity = Symbol('responseRegionList');
 class FlexGrowModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3989,6 +4050,10 @@ class ArkComponent {
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
+    return this;
+  }
+  responseRegionList(value) {
+    modifierWithKey(this._modifiersWithKeys, ResponseRegionListModifier.identity, ResponseRegionListModifier, value);
     return this;
   }
   responseRegion(value) {
@@ -11085,6 +11150,22 @@ class SearchSearchButtonModifier extends ModifierWithKey {
   }
 }
 SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
+class SearchDividerColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSearchDividerColor(node);
+    } else {
+      getUINativeModule().search.setSearchDividerColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchDividerColorModifier.identity = Symbol('dividerColor');
 class SearchFontColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12004,6 +12085,10 @@ class ArkSearchComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
+  dividerColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchDividerColorModifier.identity, SearchDividerColorModifier, value);
+    return this;
+  }
   selectionMenuHidden(value) {
     modifierWithKey(this._modifiersWithKeys, SearchSelectionMenuHiddenModifier.identity, SearchSelectionMenuHiddenModifier, value);
     return this;
@@ -12631,6 +12716,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   expandSafeArea(types, edges) {
+    throw new Error('Method not implemented.');
+  }
+  responseRegionList(value) {
     throw new Error('Method not implemented.');
   }
   responseRegion(value) {
@@ -37418,6 +37506,10 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, value);
     return this;
   }
+  onContentDidScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnContentDidScrollModifier.identity, TabsOnContentDidScrollModifier, value);
+    return this;
+  }
   fadingEdge(value) {
     modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
     return this;
@@ -38022,6 +38114,22 @@ class TabsOnUnselectedModifier extends ModifierWithKey {
   }
 }
 TabsOnUnselectedModifier.identity = Symbol('tabOnUnselected');
+class TabsOnContentDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnContentDidScroll(node);
+    } else {
+      getUINativeModule().tabs.setTabsOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnContentDidScrollModifier.identity = Symbol('tabsOnContentDidScroll');
 class FadingEdgeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

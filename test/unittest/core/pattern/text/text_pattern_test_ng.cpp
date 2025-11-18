@@ -16,6 +16,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"

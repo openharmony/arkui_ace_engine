@@ -2809,6 +2809,8 @@ struct CJUISearchModifier {
     void (*resetSearchLetterSpacing)(ArkUINodeHandle node);
     void (*setSearchLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetSearchLineHeight)(ArkUINodeHandle node);
+    void (*setSearchDividerColor)(ArkUINodeHandle node, ArkUI_Uint32 unit, ArkUI_Uint32 colorSpace, void* resRawPtr);
+    void (*resetSearchDividerColor)(ArkUINodeHandle node);
     void (*setSearchAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetSearchAdaptMinFontSize)(ArkUINodeHandle node);
     void (*setSearchAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);

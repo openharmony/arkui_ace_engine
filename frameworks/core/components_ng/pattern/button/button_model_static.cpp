@@ -509,7 +509,11 @@ void ButtonModelStatic::ResetFontFamily(FrameNode* frameNode)
 
 void ButtonModelStatic::ResetButtonFontColor(FrameNode* frameNode)
 {
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     Color textColor = buttonTheme->GetTextStyle().GetTextColor();
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor, frameNode);

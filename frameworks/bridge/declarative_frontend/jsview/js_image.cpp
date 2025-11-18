@@ -921,7 +921,7 @@ void JSImage::SetSyncLoad(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetSyncMode(tmpInfo->ToBoolean());
 }
 
-void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
+void JSImage::ConstructorCallback(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
         return;
@@ -934,8 +934,8 @@ void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
         return;
     }
-    auto jscolorfilter = Referenced::MakeRefPtr<JSColorFilter>();
-    if (jscolorfilter == nullptr) {
+    auto imageColorFilter = Referenced::MakeRefPtr<ImageColorFilter>();
+    if (imageColorFilter == nullptr) {
         return;
     }
     std::vector<float> colorfilter;
@@ -948,12 +948,12 @@ void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
     if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
         return;
     }
-    jscolorfilter->SetColorFilterMatrix(std::move(colorfilter));
-    jscolorfilter->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(jscolorfilter));
+    imageColorFilter->SetColorFilterMatrix(std::move(colorfilter));
+    imageColorFilter->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(imageColorFilter));
 }
 
-void JSColorFilter::DestructorCallback(JSColorFilter* obj)
+void JSImage::DestructorCallback(ImageColorFilter* obj)
 {
     if (obj != nullptr) {
         obj->DecRefCount();
@@ -977,9 +977,9 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
             ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
             return;
         }
-        JSColorFilter* colorFilter;
+        ImageColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
-            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
+            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<ImageColorFilter>();
         } else {
             ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
             return;
@@ -1140,8 +1140,8 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
 
-    JSClass<JSColorFilter>::Declare("ColorFilter");
-    JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
+    JSClass<ImageColorFilter>::Declare("ColorFilter");
+    JSClass<ImageColorFilter>::Bind(globalObj, JSImage::ConstructorCallback, JSImage::DestructorCallback);
 }
 
 void JSImage::JsSetDraggable(const JSCallbackInfo& info)

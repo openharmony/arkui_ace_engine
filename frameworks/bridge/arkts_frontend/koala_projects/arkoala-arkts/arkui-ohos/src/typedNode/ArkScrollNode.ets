@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { int32 } from '@koalaui/common';
 import { ArkScrollableNode } from './ArkScrollableNode';
 import {
   ScrollAttribute,
@@ -103,14 +104,14 @@ export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute 
         this.markDirty()
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
-        const value_casted = value as (Color | number | string | undefined)
+    scrollBarColor(value: Color | int32 | string | undefined): this {
+        const value_casted = value as (Color | int32 | string | undefined)
         this.getPeer()?.setScrollBarColorAttribute(value_casted)
         this.markDirty()
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
-        const value_casted = value as (number | string | undefined)
+    scrollBarWidth(value: double | string | undefined): this {
+        const value_casted = value as (double | string | undefined)
         this.getPeer()?.setScrollBarWidthAttribute(value_casted)
         this.markDirty()
         return this
@@ -133,8 +134,8 @@ export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute 
         this.markDirty()
         return this
     }
-    friction(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    friction(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setFrictionAttribute(value_casted)
         this.markDirty()
         return this

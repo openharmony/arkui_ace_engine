@@ -206,20 +206,20 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
 {
-    dst.index = ArkValue<Ark_Number>(src.index);
+    dst.index = ArkValue<Ark_Int32>(src.index);
     dst.itemGroupArea = src.area < 0 ?
         ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
     dst.itemIndexInGroup = src.indexInGroup < 0 ?
-        ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
+        ArkValue<Opt_Int32>(Ark_Empty{}) : ArkValue<Opt_Int32>(src.indexInGroup);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemGroupIndex& src)
 {
-    dst.index = ArkValue<Ark_Number>(src.index);
+    dst.index = ArkValue<Ark_Int32>(src.index);
     dst.itemGroupArea = src.area < 0 ?
         ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
     dst.itemIndexInGroup = src.indexInGroup < 0 ?
-        ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
+        ArkValue<Opt_Int32>(Ark_Empty{}) : ArkValue<Opt_Int32>(src.indexInGroup);
 }
 
 void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
@@ -248,24 +248,25 @@ void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OH
     CHECK_NULL_VOID(src);
     dst.navigationId = ArkValue<Ark_String>(src->navigationId);
     dst.pathStack = new NavPathStackPeer(src->pathStack.Upgrade());
+    dst.uniqueId = ArkValue<Opt_Int32>(src->uniqueId);
 }
 
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
-    dst.radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(src.GetBlurRadius());
+    dst.radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
     dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
         src.GetColor().ColorToString(), ctx);
     auto offset = src.GetOffset();
-    dst.offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetX());
-    dst.offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetY());
+    dst.offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetX());
+    dst.offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetY());
     dst.fill = Converter::ArkValue<Opt_Boolean>(src.GetIsFilled());
 }
 
 void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 {
-    dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
-    dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
+    dst.x = ArkValue<Ark_Float64>(static_cast<float>(src.GetX()));
+    dst.y = ArkValue<Ark_Float64>(static_cast<float>(src.GetY()));
 }
 
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
@@ -490,8 +491,10 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *c
     position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY().ConvertToVp(), ctx);
     area.position = Converter::ArkValue<Ark_Position>(position);
     Ark_Position globPosition;
-    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX().ConvertToVp(), ctx);
-    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY().ConvertToVp(), ctx);
+    globPosition.x = Converter::ArkValue<Opt_Length>(
+        src.origin.GetX().ConvertToVp() + src.area.GetOffset().GetX().ConvertToVp(), ctx);
+    globPosition.y = Converter::ArkValue<Opt_Length>(
+        src.origin.GetY().ConvertToVp() + src.area.GetOffset().GetY().ConvertToVp(), ctx);
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
     if (!src.id.empty()) {
@@ -531,8 +534,8 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_OffsetResult& dst, const Offset& src, ConvContext *ctx)
 {
-    dst.xOffset = ArkValue<Ark_Number>(src.GetX(), ctx);
-    dst.yOffset = ArkValue<Ark_Number>(src.GetY(), ctx);
+    dst.xOffset = ArkValue<Ark_Float64>(src.GetX(), ctx);
+    dst.yOffset = ArkValue<Ark_Float64>(src.GetY(), ctx);
 }
 
 void AssignArkValue(Ark_RectResult& dst, const RectF& src)
@@ -641,26 +644,26 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     Offset localOffset = src.GetLocalLocation();
     Offset screenOffset = src.GetScreenLocation();
 
-    dst.displayX = ArkValue<Ark_Number>(
+    dst.displayX = ArkValue<Ark_Float64>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    dst.displayY = ArkValue<Ark_Number>(
+    dst.displayY = ArkValue<Ark_Float64>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
-    dst.id = ArkValue<Ark_Number>(src.GetFingerId());
+    dst.id = ArkValue<Ark_Int32>(src.GetFingerId());
 
     dst.type = ArkValue<Ark_TouchType>(src.GetTouchType());
 
-    dst.windowX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.windowY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-    dst.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    dst.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 
-    dst.pressedTime = ArkValue<Opt_Number>(src.GetPressedTime().time_since_epoch().count());
-    dst.pressure = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
+    dst.pressedTime = ArkValue<Opt_Int64>(static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count()));
+    dst.pressure = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
 
-    dst.width = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
-    dst.height = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
+    dst.width = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
+    dst.height = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
 
     dst.hand = ArkValue<Opt_InteractionHand>(static_cast<ArkUI_InteractionHand>(src.GetOperatingHand()));
 }
@@ -668,9 +671,9 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
 {
     AssignArkValue(dst.touchObject, src);
-    dst.size = ArkValue<Ark_Number>(src.GetSize());
-    dst.force = ArkValue<Ark_Number>(src.GetForce());
-    dst.timestamp = ArkValue<Ark_Number>(static_cast<int32_t>(src.GetTimeStamp().time_since_epoch().count()));
+    dst.size = ArkValue<Ark_Int32>(src.GetSize());
+    dst.force = ArkValue<Ark_Float64>(src.GetForce());
+    dst.timestamp = ArkValue<Ark_Int64>(static_cast<int64_t>(src.GetTimeStamp().time_since_epoch().count()));
 }
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
@@ -695,8 +698,8 @@ void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
 
 void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
-    dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
-    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
+    dst.fontSize = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(src.fontSize);
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(src.fontWeight);
     auto arkEffectStrategy = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
     dst.effectStrategy = Converter::ArkValue<Opt_SymbolEffectStrategy>(arkEffectStrategy);
     auto arkRenderingStrategy = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
@@ -805,8 +808,8 @@ void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 
 void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)
 {
-    dst.size.value0 = ArkValue<Ark_Number>(src.size[0]);
-    dst.size.value1 = ArkValue<Ark_Number>(src.size[1]);
+    dst.size.value0 = ArkValue<Ark_Int32>(src.size[0]);
+    dst.size.value1 = ArkValue<Ark_Int32>(src.size[1]);
     dst.verticalAlign = ArkValue<Ark_ImageSpanAlignment>(
         static_cast<OHOS::Ace::VerticalAlign>(src.verticalAlign));
     dst.objectFit = ArkValue<Ark_ImageFit>(
@@ -918,8 +921,8 @@ void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
             end = selectionRangeInfo->end_;
         }
     }
-    dst.start = Converter::ArkValue<Opt_Number>(start);
-    dst.end = Converter::ArkValue<Opt_Number>(end);
+    dst.start = Converter::ArkValue<Opt_Int32>(start);
+    dst.end = Converter::ArkValue<Opt_Int32>(end);
 }
 
 void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, ConvContext *ctx)

@@ -139,7 +139,7 @@ export interface SwipeActionOptions {
     start?: CustomBuilder | SwipeActionItem;
     end?: CustomBuilder | SwipeActionItem;
     edgeEffect?: SwipeEdgeEffect;
-    onOffsetChange?: ((offset: number) => void);
+    onOffsetChange?: ((offset: double) => void);
 }
 export enum ListItemStyle {
     NONE = 0,
@@ -205,6 +205,7 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         if (this.checkPriority("setListItemOptions")) {
             const value_casted = value as (ListItemOptions | undefined)
             this.getPeer()?.setListItemOptionsAttribute(value_casted)
+            this.applyOptionsFinish('ListItemAttribute');
             return this
         }
         return this
@@ -248,6 +249,9 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class ListItemOptions_serializer {
@@ -376,11 +380,11 @@ export class SwipeActionItem_serializer {
         if ((actionAreaDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const actionAreaDistanceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let actionAreaDistanceTmpBuf_ : string | number | Resource | undefined
-            if (actionAreaDistanceTmpBuf_UnionSelector == (0).toChar()) {
+            if (actionAreaDistanceTmpBuf_UnionSelector == (0).toByte()) {
                 actionAreaDistanceTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (actionAreaDistanceTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (actionAreaDistanceTmpBuf_UnionSelector == (1).toByte()) {
                 actionAreaDistanceTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (actionAreaDistanceTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (actionAreaDistanceTmpBuf_UnionSelector == (2).toByte()) {
                 actionAreaDistanceTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for actionAreaDistanceTmpBuf_ has to be chosen through deserialisation.")
@@ -520,7 +524,7 @@ export class SwipeActionOptions_serializer {
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const startTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let startTmpBuf_ : CustomBuilder | SwipeActionItem | undefined
-            if (startTmpBuf_UnionSelector == (0).toChar()) {
+            if (startTmpBuf_UnionSelector == (0).toByte()) {
                 const startTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const startTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const startTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
@@ -533,7 +537,7 @@ export class SwipeActionOptions_serializer {
                     startTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
-            } else if (startTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (startTmpBuf_UnionSelector == (1).toByte()) {
                 startTmpBuf_ = SwipeActionItem_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for startTmpBuf_ has to be chosen through deserialisation.")
@@ -546,7 +550,7 @@ export class SwipeActionOptions_serializer {
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const endTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let endTmpBuf_ : CustomBuilder | SwipeActionItem | undefined
-            if (endTmpBuf_UnionSelector == (0).toChar()) {
+            if (endTmpBuf_UnionSelector == (0).toByte()) {
                 const endTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const endTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const endTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
@@ -559,7 +563,7 @@ export class SwipeActionOptions_serializer {
                     endTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
-            } else if (endTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (endTmpBuf_UnionSelector == (1).toByte()) {
                 endTmpBuf_ = SwipeActionItem_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for endTmpBuf_ has to be chosen through deserialisation.")
@@ -574,23 +578,23 @@ export class SwipeActionOptions_serializer {
         }
         const edgeEffectTmpResult : SwipeEdgeEffect | undefined = edgeEffectTmpBuf
         const onOffsetChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onOffsetChangeTmpBuf : ((offset: number) => void) | undefined = undefined
+        let onOffsetChangeTmpBuf : ((offset: double) => void) | undefined = undefined
         if ((onOffsetChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onOffsetChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onOffsetChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onOffsetChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onOffsetChangeTmpBuf = (offset: number):void => {
+            onOffsetChangeTmpBuf = (offset: double):void => {
                 const onOffsetChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onOffsetChangeTmpBuf_BufArgsSerializer.writeInt32(onOffsetChangeTmpBuf_BufResource.resourceId);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCall);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCallSync);
-                onOffsetChangeTmpBuf_BufArgsSerializer.writeNumber(offset);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
+                onOffsetChangeTmpBuf_BufArgsSerializer.writeFloat64(offset);
+                InteropNativeModule._CallCallbackSync(10, -949162837, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
                 onOffsetChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onOffsetChangeTmpResult : ((offset: number) => void) | undefined = onOffsetChangeTmpBuf
+        const onOffsetChangeTmpResult : ((offset: double) => void) | undefined = onOffsetChangeTmpBuf
         let value : SwipeActionOptions = ({start: startTmpResult, end: endTmpResult, edgeEffect: edgeEffectTmpResult, onOffsetChange: onOffsetChangeTmpResult} as SwipeActionOptions)
         return value
     }

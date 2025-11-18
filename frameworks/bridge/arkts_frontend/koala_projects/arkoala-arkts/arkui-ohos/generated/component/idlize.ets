@@ -22,7 +22,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback, SheetOptions_serializer, SheetOptions } from "./common"
 import { ArkListOptions_serializer } from "./../framework/ohos.arkui.ArcList"
 import { ArkListOptions, ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
 import { SwipeActionOptions_serializer, SwipeActionOptions } from "./listItem"
@@ -41,7 +41,7 @@ import { LoadingProgressConfiguration } from "./loadingProgress"
 import { ProgressConfiguration } from "./progress"
 import { RadioConfiguration } from "./radio"
 import { RatingConfiguration } from "./rating"
-import { MenuItemConfiguration } from "./select"
+import { MenuItemConfiguration, MenuItemConfigurationInternal } from "./select"
 import { SliderConfiguration } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
@@ -64,6 +64,8 @@ import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
 import { TargetInfo } from "@ohos.arkui.UIContext"
+import { uiObserver_NavigationInfo_serializer } from "./../framework/ohos.arkui.observer"
+import { default as uiObserver } from "@ohos.arkui.observer"
 import { router_RouterOptions_serializer, router_RouterState_serializer } from "./../framework/ohos.router"
 import { AsyncCallback, BusinessError } from "@ohos.base"
 import { default as router } from "@ohos.router"
@@ -76,7 +78,7 @@ import { default as curves } from "@ohos.curves"
 import { Scroller, Scroller_serializer } from "./scroll"
 import { ComponentContentBase } from "arkui.ComponentContent"
 import { CustomDialogController } from "./customDialogController"
-import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos.promptAction"
+import { LevelMode, ImmersiveMode } from "@ohos.promptAction"
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from "./particle"
 import { RootModifier } from "./../RootModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -86,7 +88,6 @@ import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
 import { GlobalScope } from "./../framework/GlobalScope"
 import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
-import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
 import { TimePickerDialogOptions_serializer, TimePickerDialogOptions } from "./timePicker"
 import { TextPickerDialogOptions_serializer, TextPickerDialogOptions,DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from "./datePicker"
@@ -1332,6 +1333,40 @@ export class FocusController {
         return
     }
 }
+export class ForEachOps {
+    static SyncOnMoveOps_serialize(node: KPointer, additionalChild: Array<KPointer>, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((additionalChild.length).toInt())
+        for (let additionalChildCounterI = 0; additionalChildCounterI < additionalChild.length; additionalChildCounterI++) {
+            const additionalChildTmpElement : KPointer = additionalChild[additionalChildCounterI]
+            thisSerializer.writePointer(additionalChildTmpElement)
+        }
+        if (onMoveOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveOpsTmpValue  = onMoveOps!
+            thisSerializer.holdAndWriteCallback(onMoveOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (onMoveDragEventOps !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onMoveDragEventOpsTmpValue  = onMoveDragEventOps!
+            ItemDragEventHandler_serializer.write(thisSerializer, onMoveDragEventOpsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ForEachOps_SyncOnMoveOps(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static SyncOnMoveOps(node: KPointer, additionalChild: Array<KPointer>, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
+        const node_casted = node as (KPointer)
+        const additionalChild_casted = additionalChild as (Array<KPointer>)
+        const onMoveOps_casted = onMoveOps as (OnMoveHandler | undefined)
+        const onMoveDragEventOps_casted = onMoveDragEventOps as (ItemDragEventHandler | undefined)
+        ForEachOps.SyncOnMoveOps_serialize(node_casted, additionalChild_casted, onMoveOps_casted, onMoveDragEventOps_casted)
+        return
+    }
+}
 export class FrameNodeExtender {
     static constructorFrameNode_serialize(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode()
@@ -2388,6 +2423,49 @@ export class IUIContext {
         thisSerializer.release()
         return retval
     }
+    static openBindSheet_serialize(bindSheetContent: KPointer, sheetOptions?: SheetOptions, targetId?: int32): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (sheetOptions !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const sheetOptionsTmpValue  = sheetOptions!
+            SheetOptions_serializer.write(thisSerializer, sheetOptionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (targetId !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const targetIdTmpValue  = targetId!
+            thisSerializer.writeInt32(targetIdTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._IUIContext_openBindSheet(bindSheetContent, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static updateBindSheet_serialize(bindSheetContent: KPointer, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        SheetOptions_serializer.write(thisSerializer, sheetOptions)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._IUIContext_updateBindSheet(bindSheetContent, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static closeBindSheet_serialize(bindSheetContent: KPointer): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._IUIContext_closeBindSheet(bindSheetContent, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
     public static freezeUINode(id: string, isFrozen: boolean): void {
         const id_casted = id as (string)
         const isFrozen_casted = isFrozen as (boolean)
@@ -2404,6 +2482,22 @@ export class IUIContext {
         const node_casted = node as (number | string)
         const event_casted = event as (KeyEvent)
         return IUIContext.dispatchKeyEvent_serialize(node_casted, event_casted)
+    }
+    public static openBindSheet(bindSheetContent: KPointer, sheetOptions?: SheetOptions, targetId?: int32): Promise<void> {
+        const bindSheetContent_casted = bindSheetContent as (KPointer)
+        const sheetOptions_casted = sheetOptions as (SheetOptions | undefined)
+        const targetId_casted = targetId as (int32 | undefined)
+        return IUIContext.openBindSheet_serialize(bindSheetContent_casted, sheetOptions_casted, targetId_casted)
+    }
+    public static updateBindSheet(bindSheetContent: KPointer, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        const bindSheetContent_casted = bindSheetContent as (KPointer)
+        const sheetOptions_casted = sheetOptions as (SheetOptions)
+        const partialUpdate_casted = partialUpdate as (boolean | undefined)
+        return IUIContext.updateBindSheet_serialize(bindSheetContent_casted, sheetOptions_casted, partialUpdate_casted)
+    }
+    public static closeBindSheet(bindSheetContent: KPointer): Promise<void> {
+        const bindSheetContent_casted = bindSheetContent as (KPointer)
+        return IUIContext.closeBindSheet_serialize(bindSheetContent_casted)
     }
 }
 export class LazyBuild {
@@ -2495,6 +2589,46 @@ export class LazyForEachOps {
         return
     }
 }
+export class LevelOrderExtenderInternal {
+    public static fromPtr(ptr: KPointer): LevelOrderExtender {
+        return new LevelOrderExtender(ptr)
+    }
+}
+export class LevelOrderExtender implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, LevelOrderExtender.getFinalizer())
+    }
+    constructor() {
+        this(LevelOrderExtender.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._LevelOrderExtender_getFinalizer()
+    }
+    static clamp_serialize(order: number): LevelOrderExtender {
+        const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_clamp(order)
+        const obj : LevelOrderExtender = LevelOrderExtenderInternal.fromPtr(retval)
+        return obj
+    }
+    public static clamp(order: number): LevelOrderExtender {
+        const order_casted = order as (number)
+        return LevelOrderExtender.clamp_serialize(order_casted)
+    }
+    public getOrder(): number {
+        return this.getOrder_serialize()
+    }
+    getOrder_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_getOrder(this.peer!.ptr)
+        return retval
+    }
+}
 export class NavExtender {
     static setNavigationOptions_serialize(ptr: KPointer, pathStack: NavPathStack): void {
         ArkUIGeneratedNativeModule._NavExtender_setNavigationOptions(ptr, toPeerPtr(pathStack))
@@ -2564,6 +2698,17 @@ export class NavExtender {
         thisSerializer.holdAndWriteCallback(callback)
         ArkUIGeneratedNativeModule._NavExtender_setCreateNavDestinationCallback(toPeerPtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    static getRouteMapInConfig_serialize(context: KPointer): Array<string> {
+        const retval = ArkUIGeneratedNativeModule._NavExtender_getRouteMapInConfig(context)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult: Array<string> = buffer
+        return returnResult
     }
     public static setNavigationOptions(ptr: KPointer, pathStack: NavPathStack): void {
         const ptr_casted = ptr as (KPointer)
@@ -2647,6 +2792,10 @@ export class NavExtender {
         const callback_casted = callback as (NavExtender_CreateNavDestination)
         NavExtender.setCreateNavDestinationCallback_serialize(peer_casted, callback_casted)
         return
+    }
+    public static getRouteMapInConfig(context: KPointer): Array<string> {
+        const context_casted = context as (KPointer)
+        return NavExtender.getRouteMapInConfig_serialize(context_casted)
     }
 }
 export class NodeContainerOps {
@@ -4212,16 +4361,17 @@ export class SelectExtender {
     }
 }
 export class StateStylesOps {
-    static onStateStyleChange_serialize(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+    static onStateStyleChange_serialize(node: KPointer, stateStyleChange: Callback_StateStylesChange, allState: int32): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(stateStyleChange)
-        ArkUIGeneratedNativeModule._StateStylesOps_onStateStyleChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._StateStylesOps_onStateStyleChange(node, thisSerializer.asBuffer(), thisSerializer.length(), allState)
         thisSerializer.release()
     }
-    public static onStateStyleChange(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+    public static onStateStyleChange(node: KPointer, stateStyleChange: Callback_StateStylesChange, allState: int32): void {
         const node_casted = node as (KPointer)
         const stateStyleChange_casted = stateStyleChange as (Callback_StateStylesChange)
-        StateStylesOps.onStateStyleChange_serialize(node_casted, stateStyleChange_casted)
+        const allState_casted = allState as (int32)
+        StateStylesOps.onStateStyleChange_serialize(node_casted, stateStyleChange_casted, allState_casted)
         return
     }
 }
@@ -4474,6 +4624,40 @@ export class UIContextAtomicServiceBar {
         return UIContextAtomicServiceBar.getBarRect_serialize()
     }
 }
+export class UIContextGetInfo {
+    static getNavigationInfoByUniqueId_serialize(id: int64): uiObserver.NavigationInfo | undefined {
+        const retval  = ArkUIGeneratedNativeModule._UIContextGetInfo_getNavigationInfoByUniqueId(id)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : uiObserver.NavigationInfo | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = uiObserver_NavigationInfo_serializer.read(retvalDeserializer)
+        }
+        const returnResult : uiObserver.NavigationInfo | undefined = buffer
+        return returnResult
+    }
+    static enableSwipeBack_serialize(enabled: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (enabled !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enabledTmpValue  = enabled!
+            thisSerializer.writeBoolean(enabledTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIContextGetInfo_enableSwipeBack(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
+        const id_casted = id as (int64)
+        return UIContextGetInfo.getNavigationInfoByUniqueId_serialize(id_casted)
+    }
+    public static enableSwipeBack(enabled: boolean | undefined): void {
+        const enabled_cast = enabled as (boolean | undefined)
+        UIContextGetInfo.enableSwipeBack_serialize(enabled_cast)
+        return
+    }
+}
 export class ArkRootPeer extends PeerNode {
     attributeSet?: RootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -4651,13 +4835,13 @@ export interface CustomDialogControllerOptionsExtender {
     levelMode?: LevelMode;
     levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
-    levelOrder?: LevelOrder;
+    levelOrderExtender?: LevelOrderExtender;
     focusable?: boolean;
 }
 export interface CustomDialogControllerExternalOptionsExtender {
     customStyle?: boolean;
 }
-export type Callback_RangeUpdate = (start: int32, end: int32) => void;
+export type Callback_RangeUpdate = (start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
 export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
 export interface LengthMetricsCustom {
@@ -4983,6 +5167,9 @@ export class ArkRootComponent extends ComponentBase implements Root {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export class ArkComponentRootComponent extends ComponentBase implements ComponentRoot {
     getPeer(): ArkComponentRootPeer {
@@ -4999,6 +5186,9 @@ export class ArkComponentRootComponent extends ComponentBase implements Componen
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export class ArkCustomBuilderRootComponent extends ComponentBase implements CustomBuilderRoot {
     getPeer(): ArkCustomBuilderRootPeer {
@@ -5014,6 +5204,9 @@ export class ArkCustomBuilderRootComponent extends ComponentBase implements Cust
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class ArkCustomLayoutRootComponent extends ComponentBase implements CustomLayoutRoot {
@@ -5046,6 +5239,9 @@ export class ArkCustomLayoutRootComponent extends ComponentBase implements Custo
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export function getRectangleById(id: string): ComponentInfo {
@@ -5093,6 +5289,17 @@ export class CustomDialogControllerExtender_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return CustomDialogControllerExtenderInternal.fromPtr(ptr)
+    }
+}
+export class LevelOrderExtender_serializer {
+    public static write(buffer: SerializerBase, value: LevelOrderExtender): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LevelOrderExtender {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LevelOrderExtenderInternal.fromPtr(ptr)
     }
 }
 export class NodeEdgeStyles_serializer {
@@ -7013,11 +7220,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForLevelOrder  = value.levelOrder
-        if (valueHolderForLevelOrder !== undefined) {
+        const valueHolderForLevelOrderExtender  = value.levelOrderExtender
+        if (valueHolderForLevelOrderExtender !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLevelOrderTmpValue  = valueHolderForLevelOrder!
-            LevelOrder_serializer.write(valueSerializer, valueHolderForLevelOrderTmpValue)
+            const valueHolderForLevelOrderExtenderTmpValue  = valueHolderForLevelOrderExtender!
+            LevelOrderExtender_serializer.write(valueSerializer, valueHolderForLevelOrderExtenderTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7449,19 +7656,19 @@ export class CustomDialogControllerOptionsExtender_serializer {
             immersiveModeTmpBuf = ImmersiveMode.fromValue(valueDeserializer.readInt32())
         }
         const immersiveModeTmpResult : ImmersiveMode | undefined = immersiveModeTmpBuf
-        const levelOrderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelOrderTmpBuf : LevelOrder | undefined = undefined
-        if ((levelOrderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelOrderTmpBuf = (LevelOrder_serializer.read(valueDeserializer) as LevelOrder)
+        const levelOrderExtenderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let levelOrderExtenderTmpBuf : LevelOrderExtender | undefined = undefined
+        if ((levelOrderExtenderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelOrderExtenderTmpBuf = (LevelOrderExtender_serializer.read(valueDeserializer) as LevelOrderExtender)
         }
-        const levelOrderTmpResult : LevelOrder | undefined = levelOrderTmpBuf
+        const levelOrderExtenderTmpResult : LevelOrderExtender | undefined = levelOrderExtenderTmpBuf
         const focusableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let focusableTmpBuf : boolean | undefined = undefined
         if ((focusableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             focusableTmpBuf = valueDeserializer.readBoolean()
         }
         const focusableTmpResult : boolean | undefined = focusableTmpBuf
-        let value : CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrder: levelOrderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
+        let value : CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrderExtender: levelOrderExtenderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
         return value
     }
 }

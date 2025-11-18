@@ -97,6 +97,16 @@ constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 constexpr char COLUMN_ROLE[] = "column";
 
+// Relationship between form styles and resource text content
+const static std::unordered_map<FormStyleAttribution, std::pair<const char*, FormChildNodeType>> FORM_STYLE_RES_MAP = {
+    { FormStyleAttribution::PARENT_CONTROL, { TIME_LIMIT_RESOURCE_NAME, FormChildNodeType::TIME_LIMIT_TEXT_NODE } },
+    { FormStyleAttribution::APP_LOCK, { APP_LOCKED_RESOURCE_NAME, FormChildNodeType::APP_LOCKED_TEXT_NODE } },
+    { FormStyleAttribution::DEVELOPER_MODE_TIPS,
+        { DEVELOPER_MODE_TIPS_RESOURCE_NAME, FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE } },
+    { FormStyleAttribution::DUE_DISABLE, { DUE_CONTROL_RESOURCE_NAME, FormChildNodeType::DUE_CONTROL_TEXT_NODE } },
+    { FormStyleAttribution::DUE_REMOVE, { DUE_CONTROL_RESOURCE_NAME, FormChildNodeType::DUE_CONTROL_TEXT_NODE } }
+};
+
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
     explicit FormSnapshotCallback(const WeakPtr<FormPattern>& node) : weakFormPattern_(node) {}
@@ -314,7 +324,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
                 formPattern->UnregisterAccessibility();
                 formPattern->isSnapshot_ = true;
                 formPattern->needSnapshotAgain_ = false;
-                }, "ArkUIFormRemoveFrsNode");
+                }, "ArkUIFormRemoveFrsNode", PriorityType::HIGH);
             return;
         }
     }
@@ -460,7 +470,7 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleOnSnapshot(pixelMap);
-        }, "ArkUIFormHandleOnSnapshot");
+        }, "ArkUIFormHandleOnSnapshot", PriorityType::HIGH);
 }
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -820,8 +830,8 @@ void FormPattern::GetWantParam(RequestFormInfo& info)
     formViewScale_ = CalculateViewScale(width, height, layoutWidth, layoutHeight);
     info.formViewScale = formViewScale_;
     TAG_LOGD(AceLogTag::ACE_FORM, "FormPattern::GetWantParam FORM_ENABLE_SKELETON_KEY %{public}d,"
-        " layoutWidth %{public}f, layoutHeight %{public}f, viewScale: %{public}f", isEnable,
-        layoutWidth, layoutHeight, formViewScale_);
+        " layoutWidth %{public}f, layoutHeight %{public}f, viewScale: %{public}f, formId: %{public}" PRId64,
+        isEnable, layoutWidth, layoutHeight, formViewScale_, info.id);
 }
 
 float FormPattern::CalculateViewScale(float width, float height, float layoutWidth, float layoutHeight)
@@ -1215,7 +1225,7 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
         rootNode = CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     }
 #endif
-    SetForbiddenRootNodeAccessibilityAction(rootNode);
+    SetMaskRootNodeAccessibilityAction(rootNode);
     CHECK_NULL_VOID(rootNode);
     auto renderContext = rootNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1263,21 +1273,10 @@ RefPtr<FrameNode> FormPattern::CreateTextNode(bool isRowStyle)
 {
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
     RefPtr<FrameNode> textNode = nullptr;
-    if (attribution == FormStyleAttribution::PARENT_CONTROL) {
-        textNode = CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
-    }
-    if (attribution == FormStyleAttribution::APP_LOCK) {
-        textNode = CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE, textNode);
-    }
-    if (attribution == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
-        textNode = CreateForbiddenTextNode(DEVELOPER_MODE_TIPS_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE, textNode);
-    }
-    if (attribution == FormStyleAttribution::DUE_DISABLE || attribution == FormStyleAttribution::DUE_REMOVE) {
-        textNode = CreateForbiddenTextNode(DUE_CONTROL_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::DUE_CONTROL_TEXT_NODE, textNode);
+    auto it = FORM_STYLE_RES_MAP.find(attribution);
+    if (it != FORM_STYLE_RES_MAP.end()) {
+        textNode = CreateForbiddenTextNode(it->second.first, isRowStyle);
+        AddFormChildNode(it->second.second, textNode);
     }
     return textNode;
 }
@@ -1659,7 +1658,7 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(container);
             container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
             container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
-            }, "ArkUIFormRunCard");
+            }, "ArkUIFormRunCard", PriorityType::HIGH);
     });
 
     InitAddFormUpdateAndErrorCallback(instanceID);
@@ -2036,7 +2035,7 @@ void FormPattern::OnLoadEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireOnLoadEvent();
-        }, "ArkUIFormFireLoadEvent");
+        }, "ArkUIFormFireLoadEvent", PriorityType::HIGH);
 }
 
 void FormPattern::OnActionEvent(const std::string& action)
@@ -2090,7 +2089,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto eventAction = JsonUtil::ParseJsonString(action);
                 TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
-                }, "ArkUIFormFireRouterEvent");
+                }, "ArkUIFormFireRouterEvent", PriorityType::HIGH);
         }
     }
 
@@ -2142,6 +2141,7 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
 void FormPattern::RemoveSubContainer()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
     if (eventHub) {
         eventHub->FireOnCache();
@@ -2188,15 +2188,11 @@ void FormPattern::OnLanguageConfigurationUpdate()
 {
     RefPtr<FrameNode> textNode = nullptr;
     std::string content;
-    if (formSpecialStyle_.GetFormStyleAttribution() == FormStyleAttribution::PARENT_CONTROL) {
-        GetResourceContent(TIME_LIMIT_RESOURCE_NAME, content);
-        textNode = GetFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
-    } else if (formSpecialStyle_.GetFormStyleAttribution() == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
-        GetResourceContent(DEVELOPER_MODE_TIPS_RESOURCE_NAME, content);
-        textNode = GetFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
-    } else {
-        GetResourceContent(APP_LOCKED_RESOURCE_NAME, content);
-        textNode = GetFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
+    auto attribution = formSpecialStyle_.GetFormStyleAttribution();
+    auto it = FORM_STYLE_RES_MAP.find(attribution);
+    if (it != FORM_STYLE_RES_MAP.end()) {
+        GetResourceContent(it->second.first, content);
+        textNode = GetFormChildNode(it->second.second);
     }
     CHECK_NULL_VOID(textNode);
     auto host = GetHost();
@@ -2544,7 +2540,7 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
                         form->GetSubContainer()->UpdateCard(data, imageDataMap);
                     }
                 },
-                "ArkUIFormUpdateCard");
+                "ArkUIFormUpdateCard", PriorityType::HIGH);
         });
 
     formManagerBridge_->AddFormErrorCallback(
@@ -2559,7 +2555,7 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
                     CHECK_NULL_VOID(form);
                     form->FireOnErrorEvent(code, msg);
                 },
-                "ArkUIFormFireErrorEvent");
+                "ArkUIFormFireErrorEvent", PriorityType::HIGH);
         });
 }
 
@@ -2580,7 +2576,7 @@ void FormPattern::InitAddUninstallAndSurfaceNodeCallback(int32_t instanceID)
                 CHECK_NULL_VOID(form);
                 form->FireOnUninstallEvent(formId);
             },
-            "ArkUIFormFireUninstallEvent");
+            "ArkUIFormFireUninstallEvent", PriorityType::HIGH);
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
@@ -2599,7 +2595,7 @@ void FormPattern::InitAddUninstallAndSurfaceNodeCallback(int32_t instanceID)
                     CHECK_NULL_VOID(form);
                     form->FireFormSurfaceNodeCallback(node, want);
                 },
-                "ArkUIFormFireSurfaceNodeCallback");
+                "ArkUIFormFireSurfaceNodeCallback", PriorityType::HIGH);
         });
 }
 
@@ -2621,7 +2617,7 @@ void FormPattern::InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceID)
                     CHECK_NULL_VOID(form);
                     form->FireFormSurfaceChangeCallback(width, height, borderWidth);
                 },
-                "ArkUIFormFireSurfaceChange");
+                "ArkUIFormFireSurfaceChange", PriorityType::HIGH);
         });
 
     formManagerBridge_->AddFormSurfaceDetachCallback([weak = WeakClaim(this), instanceID]() {
@@ -2656,7 +2652,7 @@ void FormPattern::InitAddUnTrustAndSnapshotCallback(int32_t instanceID)
                 CHECK_NULL_VOID(formPattern);
                 formPattern->HandleUnTrustForm();
             },
-            "ArkUIFormHandleUnTrust");
+            "ArkUIFormHandleUnTrust", PriorityType::HIGH);
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
@@ -2709,7 +2705,7 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleEnableForm(enable);
-            }, "ArkUIFormHandleEnableForm");
+            }, "ArkUIFormHandleEnableForm", PriorityType::HIGH);
         });
 
     formManagerBridge_->AddLockFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool lock) {
@@ -2722,7 +2718,7 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleLockEvent(lock);
-            }, "ArkUIFormHandleLockForm");
+            }, "ArkUIFormHandleLockForm", PriorityType::HIGH);
         });
 }
 
@@ -2741,7 +2737,7 @@ void FormPattern::InitUpdateFormDoneCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->FireOnUpdateFormDone(formId);
-            }, "ArkUIFormFireUpdateDoneEvent");
+            }, "ArkUIFormFireUpdateDoneEvent", PriorityType::HIGH);
     });
 }
 
@@ -2769,7 +2765,7 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireOnAcquiredEvent(id);
-            }, "ArkUIFormFireAcquiredEvent");
+            }, "ArkUIFormFireAcquiredEvent", PriorityType::HIGH);
     });
 
     subContainer_->SetFormLoadCallback([weak = WeakClaim(this)]() {
@@ -3024,7 +3020,7 @@ void FormPattern::InitializeFormAccessibility()
     formNode->NotifyAccessibilityChildTreeRegister();
 }
 
-void FormPattern::SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddenRootNode)
+void FormPattern::SetMaskRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddenRootNode)
 {
     CHECK_NULL_VOID(forbiddenRootNode);
     auto host = GetHost();
@@ -3043,10 +3039,10 @@ void FormPattern::SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &for
     accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
 
     std::string content;
-    if (formSpecialStyle_.GetFormStyleAttribution() != FormStyleAttribution::PARENT_CONTROL) {
-        GetResourceContent(APP_LOCKED_RESOURCE_NAME, content);
-    } else {
-        GetResourceContent(TIME_LIMIT_RESOURCE_NAME, content);
+    auto attribution = formSpecialStyle_.GetFormStyleAttribution();
+    auto it = FORM_STYLE_RES_MAP.find(attribution);
+    if (it != FORM_STYLE_RES_MAP.end()) {
+        GetResourceContent(it->second.first, content);
     }
     accessibilityProperty->SetAccessibilityText(content);
     accessibilityProperty->SetAccessibilityGroup(true);
@@ -3094,7 +3090,7 @@ bool FormPattern::OnAccessibilityStateChange(bool state)
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->formManagerBridge_);
         pattern->formManagerBridge_->ReAddForm();
-        }, "ReAddForm");
+        }, "ReAddForm", PriorityType::HIGH);
     return true;
 }
 
@@ -3114,7 +3110,7 @@ void FormPattern::InitDueControlFormCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleFormDueControl(isDisablePolicy, isControl);
-            }, "ArkUIFormHandleDueControlEvent");
+            }, "ArkUIFormHandleDueControlEvent", PriorityType::HIGH);
     });
 }
 

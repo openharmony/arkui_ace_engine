@@ -59,6 +59,7 @@ export class ObjectLinkDecoratedVariable<T>
         // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 

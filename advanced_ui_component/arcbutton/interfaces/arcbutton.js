@@ -134,8 +134,7 @@ let ArcButtonOptions = class ArcButtonOptions {
         this.shadowColor =
             options.shadowColor ?? ColorMetrics.resourceColor('#000000');
         this.shadowEnabled = options.shadowEnabled ?? false;
-        this.fontSize =
-            options.fontSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE);
+        this.fontSize = options.fontSize;
         this.fontColor =
             options.fontColor ?? ColorMetrics.resourceColor(Color.White);
         this.pressedFontColor =
@@ -241,7 +240,7 @@ export class ArcButton extends ViewV2 {
     }
 
     optionsChange() {
-        this.fontSize = this.cover(this.options.fontSize);
+        this.fontSize = this.cover(this.options.fontSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE));
         this.judgeTextWidth();
         this.changeStatus();
     }
@@ -495,8 +494,9 @@ export class ArcButton extends ViewV2 {
             Text.height(this.textHeight);
             Text.textAlign(TextAlign.Center);
             Text.fontColor(this.fontColor.color);
-            Text.maxFontSize(`${Constants.MAX_FONT_SIZE}fp`);
-            Text.minFontSize(`${Constants.MIN_FONT_SIZE}fp`);
+            Text.maxFontSize(this.options.fontSize ? undefined : `${Constants.MAX_FONT_SIZE}fp`);
+            Text.minFontSize(this.options.fontSize ? undefined : `${Constants.MIN_FONT_SIZE}fp`);
+            Text.fontSize(this.options.fontSize ? this.cover(this.options.fontSize) : undefined);
             Text.fontWeight(FontWeight.Medium);
             Text.fontStyle(this.options.fontStyle);
             Text.fontFamily(this.options.fontFamily);

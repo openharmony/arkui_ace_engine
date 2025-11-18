@@ -23,6 +23,7 @@
 #undef private
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "third_party/cJSON/cJSON.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "nweb_autofill.h"
@@ -739,6 +740,37 @@ HWTEST_F(WebPatternPartTwoTest, ParseNWebViewDataNode001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     MockPipelineContext::SetUp();
     auto child = std::make_unique<JsonValue>();
+    std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
+    int32_t nId = 1;
+    webPattern->ParseNWebViewDataNode(std::move(child), nodeInfos, nId);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: ParseNWebViewDataNode002
+ * @tc.desc: ParseNWebViewDataNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, ParseNWebViewDataNode002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    cJSON* jsObj = cJSON_CreateObject();
+    cJSON* usernames = cJSON_Parse("{\"value\":\"names\",\"selectableUsernames\":[\"username1\",\"username2\"]}");
+    cJSON_AddItemToObject(jsObj, "username", usernames);
+    auto child = std::make_unique<JsonValue>(jsObj);
     std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
     int32_t nId = 1;
     webPattern->ParseNWebViewDataNode(std::move(child), nodeInfos, nId);

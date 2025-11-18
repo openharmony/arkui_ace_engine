@@ -764,4 +764,18 @@ TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point
     }
     return point;
 }
+
+void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+{
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
+    ACE_SCOPED_TRACE("TpFlush end by up event");
+    lastTpFlush_ = false;
+    vsyncPeriod_ = 0;
+    lastVsyncTimeStamp_ = 0;
+    hisAvgPointTimeStamp_ = 0;
+    vsyncTimeReportExemption_ = false;
+    vsyncFlushed_ = false;
+    isTpFlushFrameDisplayPeriod_ = false;
+    isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+}
 }

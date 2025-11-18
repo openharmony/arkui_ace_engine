@@ -139,6 +139,7 @@ TimePickerSettingData BuildTimePickerSettingData(const Ark_TimePickerDialogOptio
         settingData.dateTimeOptions.minuteType = dateTimeOptions->minuteType;
         settingData.dateTimeOptions.secondType = dateTimeOptions->secondType;
     }
+    settingData.isEnableHapticFeedback = true;
     auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
     if (enableHapticFeedback) {
         settingData.isEnableHapticFeedback = enableHapticFeedback.value();

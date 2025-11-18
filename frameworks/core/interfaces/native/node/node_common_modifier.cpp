@@ -18,6 +18,7 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
@@ -5008,6 +5009,52 @@ void ResetObscured(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::vector<ObscuredReasons> reasons(0);
     ViewAbstract::SetObscured(frameNode, reasons);
+}
+
+void SetResponseRegionList(ArkUINodeHandle node, const ArkUI_Int32* tools, const ArkUI_Float32* values, ArkUI_CharPtr* calcValues, const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    for (int32_t i = 0; i < length / NUM_5; i++) {
+        auto toolType = static_cast<NG::ResponseRegionSupportedTool>(tools[i * NUM_5]);
+        CalcDimension xDimen =
+            CalcDimension(values[i * NUM_4 + NUM_0], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_0]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * NUM_4 + NUM_1], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_1]));
+        
+        CalcDimension widthDimen =
+            CalcDimension(values[i * NUM_4 + NUM_2], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]));
+        if (static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]) == DimensionUnit::CALC) {
+            auto calcValue = calcValues[i * NUM_4 + NUM_2];
+            widthDimen.SetCalcValue(calcValue);
+        }
+
+        CalcDimension heightDimen =
+            CalcDimension(values[i * NUM_4 + NUM_3], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]));
+        if (static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]) == DimensionUnit::CALC) {
+            auto calcValue = calcValues[i * NUM_4 + NUM_3];
+            heightDimen.SetCalcValue(calcValue);
+        }
+        CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+        regionMap[toolType].emplace_back(dimenRect);
+    }
+    ViewAbstract::SetResponseRegionList(frameNode, regionMap);
+}
+
+void ResetResponseRegionList(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::ALL;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].emplace_back(dimenRect);
+    ViewAbstract::SetResponseRegionList(frameNode, regionMap);
 }
 
 void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
@@ -10168,6 +10215,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetTabIndex = ResetTabIndex,
         .setObscured = SetObscured,
         .resetObscured = ResetObscured,
+        .setResponseRegionList = SetResponseRegionList,
+        .resetResponseRegionList = ResetResponseRegionList,
         .setResponseRegion = SetResponseRegion,
         .resetResponseRegion = ResetResponseRegion,
         .setForegroundEffect = SetForegroundEffect,

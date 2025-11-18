@@ -2341,7 +2341,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetInteractionEventBindingInfo(ArkUIRunt
 ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto defaultReturnValue = panda::JSValueRef::Undefined(vm);
+    auto defaultReturnValue = panda::BooleanRef::New(vm, false);
     CHECK_NULL_RETURN(vm, defaultReturnValue);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
@@ -2370,15 +2370,15 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
         function->Call(vm, function.ToLocal(), params, 1);
     };
     int isExcludeInner = GetIsExcludeInner(runtimeCallInfo, 3);
-    GetArkUINodeModifiers()->getUIStateModifier()->addSupportedUIState(
+    auto result = GetArkUINodeModifiers()->getUIStateModifier()->addSupportedUIState(
         nativeNode, state, reinterpret_cast<void*>(&callback), isExcludeInner);
-    return defaultReturnValue;
+    return panda::BooleanRef::New(vm, result);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::RemoveSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto defaultReturnValue = panda::JSValueRef::Undefined(vm);
+    auto defaultReturnValue = panda::BooleanRef::New(vm, false);
     CHECK_NULL_RETURN(vm, defaultReturnValue);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
@@ -2386,8 +2386,8 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveSupportedStates(ArkUIRuntimeCallIn
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(secondArg->IsNumber(), defaultReturnValue);
     auto state = secondArg->ToNumber(vm)->Value();
-    GetArkUINodeModifiers()->getUIStateModifier()->removeSupportedUIState(nativeNode, state);
-    return defaultReturnValue;
+    auto result = GetArkUINodeModifiers()->getUIStateModifier()->removeSupportedUIState(nativeNode, state);
+    return panda::BooleanRef::New(vm, result);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::CreateAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)

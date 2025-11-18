@@ -134,6 +134,7 @@ public:
 
     void SetHeight(float height)
     {
+        prevHeight_ = height;
         height_ = height;
     }
 
@@ -182,6 +183,7 @@ private:
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
     void MeasurePickerItems(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    void HandleOffScreenItems(LayoutWrapper* layoutWrapper);
     void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index) const;
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
     void MeasureBelow(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
@@ -212,17 +214,20 @@ private:
     int32_t totalItemCount_ = 0;
     int32_t prevTotalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
+    int32_t middleIndexInVisibleWindow_ = 0;
 
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
     float height_ = 0.0f; // usage: record picker real height
+    float prevHeight_ = 0.0f;
     float contentMainSize_ = 0.0f;  // usage: picker content area height
     float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
     float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
+    float currentOffsetFromMiddle_ = 0.0f;
 
     float pickerItemHeight_ = 0.0f;
     float pickerDefaultHeight_ = 0.0f;

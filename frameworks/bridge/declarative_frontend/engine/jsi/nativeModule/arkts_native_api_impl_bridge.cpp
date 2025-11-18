@@ -954,6 +954,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDragPreview));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragPreview"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDragPreview));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegionList"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetResponseRegionList));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegionList"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetResponseRegionList));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetResponseRegion));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
@@ -1737,6 +1741,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchButton));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchButton"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchButton));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchDividerColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchDividerColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchDividerColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchDividerColor));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFontColor));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
@@ -4989,6 +4997,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabOnUnselected));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabOnUnselected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabOnUnselected));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetOnContentDidScroll));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetOnContentDidScroll));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarBackgroundColor));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarBackgroundColor"),

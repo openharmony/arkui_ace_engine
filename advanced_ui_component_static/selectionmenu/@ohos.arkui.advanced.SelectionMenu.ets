@@ -17,7 +17,7 @@
 import {
   Measurable, ResourceStr, MenuItemOptions, RichEditorController, ResourceColor, Resource, Color, Button, MenuItem,
   ShadowStyle, $r, Builder, BuilderParam, CustomBuilder, RichEditorSelection, RichEditorTextSpanResult, Column, ForEach,
-  ConstraintSizeOptions, SizeResult, MeasureResult, SymbolEffect, Area, GeometryInfo, px2vp, Component, Length, Menu,
+  ConstraintSizeOptions, SizeResult, MeasureResult, SymbolEffect, Area, GeometryInfo, Component, Length, Menu,
   RichEditorTextStyle, FontStyle, FontWeight, TextDecorationType, Flex, Visibility, Scroll, FlexWrap, MenuItemGroup,
   OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy, ClassCastError,
   RichEditorTextStyleResult
@@ -347,7 +347,7 @@ struct SelectionMenuComponent {
   }
 
   measureFlexPadding(): number {
-    return Math.floor((this.theme.expandedOptionPadding - px2vp(2.0)) * 10) / 10
+    return Math.floor((this.theme.expandedOptionPadding - this.getUIContext().px2vp(2.0)) * 10) / 10
   }
 
   getFontScale(): number {
@@ -398,7 +398,7 @@ struct SelectionMenuComponent {
   IconPanel() {
     Flex({ wrap: FlexWrap.Wrap }) {
       if (this.editorMenuOptions) {
-        ForEach(this.editorMenuOptions!, (item: EditorMenuOptions, index: number) => {
+        ForEach(this.editorMenuOptions!, (item: EditorMenuOptions, index: int) => {
           Button("") {
             if (item.symbolStyle !== undefined) {
               SymbolGlyph()
@@ -586,7 +586,7 @@ struct SelectionMenuComponent {
                 this.showExpandedMenuOptions = true
               })
           } else if (this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions!.length > 0) {
-            ForEach(this.expandedMenuOptions!, (expandedMenuOptionItem: ExpandedMenuOptions, index: number) => {
+            ForEach(this.expandedMenuOptions!, (expandedMenuOptionItem: ExpandedMenuOptions, index: int) => {
               MenuItem(expandedMenuOptionItem as MenuItemOptions)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
                 .borderRadius(this.theme.iconBorderRadius)

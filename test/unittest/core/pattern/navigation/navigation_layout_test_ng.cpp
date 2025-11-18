@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 #include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"

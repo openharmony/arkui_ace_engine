@@ -19,6 +19,7 @@
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -31,6 +32,7 @@
 #include "ui/view/pattern.h"
 
 #include "base/geometry/axis.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -44,6 +46,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
+#include "base/utils/string_expression.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -63,6 +66,7 @@
 #endif
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -115,6 +119,21 @@ void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityP
             renderContext->UpdateAccessibilityFocus(false);
         }
     }
+}
+
+std::optional<float> ParseDimensionToPx(
+    const CalcDimension& dimension, const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (dimension.Unit() != DimensionUnit::CALC) {
+        return ConvertToPx(dimension, scaleProperty, percentReference);
+    }
+    if (dimension.CalcValue().empty()) {
+        return std::nullopt;
+    }
+    std::vector<std::string> calcRpnexp;
+    auto calcLengthOfDimension = NG::CalcLength(dimension.CalcValue());
+    StringExpression::ConvertDal2Rpn(calcLengthOfDimension.CalcValue(), calcRpnexp);
+    return ConvertToPx(calcLengthOfDimension, scaleProperty, percentReference, calcRpnexp);
 }
 } // namespace
 
@@ -194,10 +213,13 @@ public:
             return;
         }
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(UiNode);
+        auto arkoalaLazyNode = AceType::DynamicCast<ArkoalaLazyNode>(UiNode);
         auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(UiNode);
         auto repeatVirtualScroll2Node = AceType::DynamicCast<RepeatVirtualScroll2Node>(UiNode);
         if (lazyForEachNode) {
             lazyForEachNode->BuildAllChildren();
+        } else if (arkoalaLazyNode) {
+            arkoalaLazyNode->BuildAllChildren();
         } else if (repeatVirtualScrollNode || repeatVirtualScroll2Node) {
             TAG_LOGE(AceLogTag::ACE_REPEAT, "repeatVirtualScroll not support in non scoll container!");
         } else {
@@ -1273,29 +1295,38 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         return;
     }
     auto gestureEventHub = eventHub_ ? eventHub_->GetOrCreateGestureEventHub() : nullptr;
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap;
     std::vector<DimensionRect> responseRegion;
     std::vector<DimensionRect> mouseResponseRegion;
     if (gestureEventHub) {
         touchable = gestureEventHub->GetTouchable();
         hitTestMode = GestureEventHub::GetHitTestModeStr(gestureEventHub);
-        responseRegion = gestureEventHub->GetResponseRegion();
-        mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
+        responseRegionMap = gestureEventHub->GetResponseRegionMap();
         monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->PutExtAttr("touchable", touchable, filter);
     json->PutExtAttr("hitTestBehavior", hitTestMode.c_str(), filter);
     json->PutExtAttr("monopolizeEvents", monopolizeEvents, filter);
-    auto jsArr = JsonUtil::CreateArray(true);
+    auto jsArrMap = JsonUtil::CreateArray(true);
+    for (const auto& [toolType, regionVec] : responseRegionMap) {
+        auto iStr = static_cast<int32_t>(toolType);
+        for (const auto& region : regionVec) {
+            jsArrMap->Put(std::to_string(iStr).c_str(), region.ToJsonString().c_str());
+        }
+    }
+    json->PutExtAttr("responseRegionMap", jsArrMap, filter);
+    auto jsArrTouch = JsonUtil::CreateArray(true);
     for (int32_t i = 0; i < static_cast<int32_t>(responseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
-        jsArr->Put(iStr.c_str(), responseRegion[i].ToJsonString().c_str());
+        jsArrTouch->Put(iStr.c_str(), responseRegion[i].ToJsonString().c_str());
     }
-    json->PutExtAttr("responseRegion", jsArr, filter);
+    json->PutExtAttr("responseRegion", jsArrTouch, filter);
+    auto jsArrMouse = JsonUtil::CreateArray(true);
     for (int32_t i = 0; i < static_cast<int32_t>(mouseResponseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
-        jsArr->Put(iStr.c_str(), mouseResponseRegion[i].ToJsonString().c_str());
+        jsArrMouse->Put(iStr.c_str(), mouseResponseRegion[i].ToJsonString().c_str());
     }
-    json->PutExtAttr("mouseResponseRegion", jsArr, filter);
+    json->PutExtAttr("mouseResponseRegion", jsArrMouse, filter);
 }
 
 void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -3089,7 +3120,8 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, const To
     if (regionList) {
         responseRegionList = *regionList;
     } else {
-        responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchEvent.sourceType));
+        responseRegionList = GetResponseRegionList(paintRect,
+            static_cast<int32_t>(touchEvent.sourceType), static_cast<int32_t>(touchEvent.sourceTool));
     }
 
     auto revertPoint = parentRevertPoint;
@@ -3207,7 +3239,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     auto checkedResponseRegionForStylus = CheckResponseRegionForStylus(origRect, touchRestrict.touchEvent);
     auto responseRegionList =
-        GetResponseRegionList(checkedResponseRegionForStylus, static_cast<int32_t>(touchRestrict.sourceType));
+        GetResponseRegionList(checkedResponseRegionForStylus,
+            static_cast<int32_t>(touchRestrict.sourceType), static_cast<int32_t>(touchRestrict.sourceTool));
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is " SEC_PLD(%{public}s) " in %{public}s, depth: %{public}d",
             SEC_PARAM(parentRevertPoint.ToString().c_str()), tag_.c_str(), depth_);
@@ -3433,7 +3466,8 @@ void FrameNode::TipsTouchTest(const PointF& globalPoint, const PointF& parentLoc
     auto paintRect = cacheMatrixInfo.paintRectWithTransform;
     auto defaultResponseRegion = renderContext_->GetPaintRectWithoutTransform();
     auto responseRegionList =
-        GetResponseRegionList(defaultResponseRegion, static_cast<int32_t>(touchRestrict.sourceType));
+        GetResponseRegionList(defaultResponseRegion,
+            static_cast<int32_t>(touchRestrict.sourceType), static_cast<int32_t>(touchRestrict.sourceTool));
     RefPtr<TargetComponent> targetComponent = targetComponent_.Upgrade();
     if (!targetComponent) {
         targetComponent = MakeRefPtr<TargetComponent>();
@@ -3483,7 +3517,70 @@ bool FrameNode::ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF&
     return mouseHub->ProcessTipsMouseTestHit(coordinateOffset, newComingTargets);
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
+void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScaleProperty& scaleProperty,
+    const RectF& rect, std::vector<RectF>& responseRegionResult)
+{
+    auto x = ParseDimensionToPx(region.GetX(), scaleProperty, rect.Width());
+    auto y = ParseDimensionToPx(region.GetY(), scaleProperty, rect.Height());
+    auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
+    auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
+    if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+        return;
+    }
+    if (width.value() < 0.0 || height.value() < 0.0) {
+        responseRegionResult.emplace_back(rect);
+        return;
+    }
+    RectF regionFloat(
+        rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
+    responseRegionResult.emplace_back(regionFloat);
+}
+
+std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool)
+{
+    std::vector<RectF> responseRegionResult;
+    auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
+    if (!gestureHub) {
+        responseRegionResult.emplace_back(rect);
+        return responseRegionResult;
+    }
+    auto scaleProperty = ScaleProperty::CreateScaleProperty(GetContext());
+    auto responseRegionMap = gestureHub->GetResponseRegionMap();
+
+    if (responseRegionMap.size() == 0) {
+        responseRegionResult = GetResponseRegionListRaw(rect, sourceType);
+        return responseRegionResult;
+    }
+
+    static const std::unordered_map<SourceTool, ResponseRegionSupportedTool> SOURCE_TYPE_TO_TOOL_MAP {
+        { SourceTool::UNKNOWN, ResponseRegionSupportedTool::ALL },
+        { SourceTool::FINGER, ResponseRegionSupportedTool::FINGER },
+        { SourceTool::PEN, ResponseRegionSupportedTool::PEN },
+        { SourceTool::MOUSE, ResponseRegionSupportedTool::MOUSE },
+        { SourceTool::TOUCHPAD, ResponseRegionSupportedTool::ALL }
+    };
+    auto it = SOURCE_TYPE_TO_TOOL_MAP.find(static_cast<SourceTool>(sourceTool));
+    if (it == SOURCE_TYPE_TO_TOOL_MAP.end()) {
+        responseRegionResult.emplace_back(rect);
+        return responseRegionResult;
+    }
+    
+    auto toolType = it->second;
+    if (responseRegionMap.find(toolType) != responseRegionMap.end()) {
+        for (const auto& region : responseRegionMap[toolType]) {
+            ParseRegionAndAdd(region, scaleProperty, rect, responseRegionResult);
+        }
+    }
+    if ((toolType != ResponseRegionSupportedTool::ALL) &&
+        (responseRegionMap.find(ResponseRegionSupportedTool::ALL) != responseRegionMap.end())) {
+        for (const auto& region : responseRegionMap[ResponseRegionSupportedTool::ALL]) {
+            ParseRegionAndAdd(region, scaleProperty, rect, responseRegionResult);
+        }
+    }
+    return responseRegionResult;
+}
+
+std::vector<RectF> FrameNode::GetResponseRegionListRaw(const RectF& rect, int32_t sourceType)
 {
     std::vector<RectF> responseRegionList;
     auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
@@ -3535,10 +3632,10 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
     return responseRegionList;
 }
 
-std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceType)
+std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceType, int32_t sourceTool)
 {
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
+    auto responseRegionList = GetResponseRegionList(paintRect, sourceType, sourceTool);
     return responseRegionList;
 }
 
@@ -3570,28 +3667,34 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& windowR
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-    if (gestureHub->GetResponseRegion().empty()) {
+    auto responseRegionVec = gestureHub->GetFingerResponseRegionFromMap();
+    if (gestureHub->GetResponseRegion().empty() && responseRegionVec.empty()) {
         responseRegionList.emplace_back(rectToScreen);
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
-    for (const auto& region : gestureHub->GetResponseRegion()) {
-        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rawRect.Width());
-        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rawRect.Height());
-        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rawRect.Width());
-        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rawRect.Height());
-        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
-            continue;
+    for (const auto& region : responseRegionVec) {
+        ParseRegionAndAdd(region, scaleProperty, rawRect, responseRegionList);
+    }
+    if (responseRegionList.size() == 0) {
+        for (const auto& region : gestureHub->GetResponseRegion()) {
+            auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rawRect.Width());
+            auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rawRect.Height());
+            auto width = ConvertToPx(region.GetWidth(), scaleProperty, rawRect.Width());
+            auto height = ConvertToPx(region.GetHeight(), scaleProperty, rawRect.Height());
+            if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+                continue;
+            }
+            RectF rawRegion(round(rawRect.GetX() + x.value()), round(rawRect.GetY() + y.value()),
+                round(width.value()), round(height.value()));
+            RectF regionToScreen = rectToScreen;
+            if (rawRegion != rawRect) {
+                auto regionWithTransform = GetRectToWindowWithTransform(rawRegion);
+                regionToScreen = GetRectToScreen(regionWithTransform);
+            }
+            responseRegionList.emplace_back(regionToScreen);
         }
-        RectF rawRegion(round(rawRect.GetX() + x.value()), round(rawRect.GetY() + y.value()),
-            round(width.value()), round(height.value()));
-        RectF regionToScreen = rectToScreen;
-        if (rawRegion != rawRect) {
-            auto regionWithTransform = GetRectToWindowWithTransform(rawRegion);
-            regionToScreen = GetRectToScreen(regionWithTransform);
-        }
-        responseRegionList.emplace_back(regionToScreen);
     }
     ACE_LAYOUT_TRACE_END()
     return responseRegionList;
@@ -3756,7 +3859,9 @@ void FrameNode::CollectSelfAxisResult(const PointF& globalPoint, const PointF& l
         }
     }
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
-    auto resRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.touchEvent.sourceType));
+    auto resRegionList = GetResponseRegionList(origRect,
+        static_cast<int32_t>(touchRestrict.touchEvent.sourceType),
+        static_cast<int32_t>(touchRestrict.touchEvent.sourceTool));
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "AxisTest: point is %{public}s in %{public}s, depth: %{public}d",
             parentRevertPoint.ToString().c_str(), tag_.c_str(), depth_);

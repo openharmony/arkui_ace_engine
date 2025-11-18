@@ -1994,6 +1994,11 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode>& node, RefPt
                 metadataObject->Put("username", autoFillUserName.c_str());
                 nodeInfoWrap->SetMetadata(metadataObject->ToString());
                 viewDataWrap->SetUserSelected(true);
+            } else if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_PASSWORD) {
+                auto jsonValue = JsonUtil::Create(true);
+                jsonValue->Put("username", autoFillUserName.c_str());
+                nodeInfoWrap->SetMetadata(jsonValue->ToString());
+                viewDataWrap->SetUserSelected(true);
             }
         }
         pattern->SetAutoFillUserName("");
@@ -2416,6 +2421,13 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
         return true;
     }
     return false;
+}
+
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{
+    CHECK_NULL_VOID(pipelineContext_);
+    pipelineContext_->GetComponentOverlayInspector(root, config, isInSubWindow);
 }
 
 void AceContainer::TriggerGarbageCollection()
@@ -3491,6 +3503,10 @@ void AceContainer::ProcessColorModeUpdate(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     configurationChange.colorModeUpdate = true;
+    if (!SystemProperties::ConfigChangePerform() || !configurationChange.OnlyColorModeChange()) {
+        // clear cache of ark theme instances when configuration updates
+        NG::TokenThemeStorage::GetInstance()->CacheClear();
+    }
     if (parsedConfig.colorMode == "dark") {
         SetColorMode(ColorMode::DARK);
         SetColorScheme(ColorScheme::SCHEME_DARK);

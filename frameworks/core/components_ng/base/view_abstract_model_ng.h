@@ -45,6 +45,7 @@
 
 namespace OHOS::Ace {
 class SpanString;
+class CalcDimensionRect;
 }
 namespace OHOS::Ace::NG {
 constexpr int32_t MAT4_ZERO = 0;
@@ -1397,6 +1398,13 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
     {
         ViewAbstract::SetOnDrop(std::move(onDrop));
+    }
+
+    void SetResponseRegionList(
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+        override
+    {
+        ViewAbstract::SetResponseRegionList(responseRegionMap);
     }
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override

@@ -44,7 +44,7 @@ public:
         const std::string& id, int32_t uniqueId, NG::ScrollEventType eventType, float offset, Ace::Axis axis);
     void OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo);
     void OnDensityChange(double density);
-    void OnWinSizeLayoutBreakpointChange(const NG::WindowSizeBreakpoint info);
+    void OnWinSizeLayoutBreakpointChange(const WindowSizeBreakpoint info);
     void OnWillClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
         const RefPtr<NG::FrameNode> frameNode);
     void OnDidClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,

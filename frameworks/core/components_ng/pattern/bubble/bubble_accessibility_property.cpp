@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 
+#include "core/components_ng/base/ui_node.h"
+
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
 #endif

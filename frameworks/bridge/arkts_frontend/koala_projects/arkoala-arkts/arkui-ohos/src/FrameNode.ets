@@ -119,6 +119,7 @@ import { ElementIdToCustomProperties } from "#handwritten"
 import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
 import { FrameNodeExtender, SizeTLengthMetrics, NodeEdgesLengthMetrics } from './framework';
 import { extractors } from "#handwritten";
+import { PeerNode } from './PeerNode';
 import hilog from '@ohos.hilog';
 import { Vector2 } from "./Graphics.ets"
 
@@ -203,9 +204,7 @@ export class FrameNode implements MaterializedBase {
     get gestureEvent(): UIGestureEvent {
         if (this._gestureEvent === undefined) {
             this._gestureEvent = new UIGestureEvent();
-            const retval = FrameNodeExtender.getFrameNodePtr(this)
-            let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
-            // this._gestureEvent!.setPeer(peer);
+            this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this.peer!.ptr as KPointer));
         }
         return this._gestureEvent as UIGestureEvent;
     }
@@ -1761,7 +1760,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createButtonNode(context: UIContext, type: 'Button'): ButtonFrameNode {
+    export function createButtonNode(context: UIContext): ButtonFrameNode {
         return new ButtonFrameNode(context, 'Button', (node: FrameNode, type: ModifierType): ArkButtonNode => {
             let arknode = new ArkButtonNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1772,7 +1771,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createCheckboxNode(context: UIContext, type: string): CheckboxFrameNode {
+    export function createCheckboxNode(context: UIContext): CheckboxFrameNode {
         return new CheckboxFrameNode(context, 'Checkbox', (node: FrameNode, type: ModifierType): ArkCheckboxNode => {
             let arknode = new ArkCheckboxNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1783,7 +1782,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createCheckboxGroupNode(context: UIContext, type: string): CheckboxGroupFrameNode {
+    export function createCheckboxGroupNode(context: UIContext): CheckboxGroupFrameNode {
         return new CheckboxGroupFrameNode(context, 'CheckboxGroup', (node: FrameNode, type: ModifierType): ArkCheckboxGroupNode => {
             let arknode = new ArkCheckboxGroupNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1794,7 +1793,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRadioNode(context: UIContext, type: string): RadioFrameNode {
+    export function createRadioNode(context: UIContext): RadioFrameNode {
         return new RadioFrameNode(context, 'Radio', (node: FrameNode, type: ModifierType): ArkRadioNode => {
             let arknode = new ArkRadioNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1805,7 +1804,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRatingNode(context: UIContext, type: string): RatingFrameNode {
+    export function createRatingNode(context: UIContext): RatingFrameNode {
         return new RatingFrameNode(context, 'Rating', (node: FrameNode, type: ModifierType): ArkRatingNode => {
             let arknode = new ArkRatingNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1816,7 +1815,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createSelectNode(context: UIContext, type: string): SelectFrameNode {
+    export function createSelectNode(context: UIContext): SelectFrameNode {
         return new SelectFrameNode(context, 'Select', (node: FrameNode, type: ModifierType): ArkSelectNode => {
             let arknode = new ArkSelectNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1827,7 +1826,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createSliderNode(context: UIContext, type: string): SliderFrameNode {
+    export function createSliderNode(context: UIContext): SliderFrameNode {
         return new SliderFrameNode(context, 'Slider', (node: FrameNode, type: ModifierType): ArkSliderNode => {
             let arknode = new ArkSliderNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1838,7 +1837,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createToggleNode(context: UIContext, type: string, options?: ToggleOptions): ToggleFrameNode {
+    export function createToggleNode(context: UIContext, options?: ToggleOptions): ToggleFrameNode {
         let toggleNode = new ToggleFrameNode(context, 'Toggle', (node: FrameNode, type: ModifierType): ArkToggleNode => {
             let arknode = new ArkToggleNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

@@ -81,6 +81,10 @@ bool AceContainer::IsCrossAxisWindow()
     return false;
 }
 
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{}
+
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 
 void AceContainer::DispatchExtensionDataToHostWindow(

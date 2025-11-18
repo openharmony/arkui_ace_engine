@@ -36,6 +36,7 @@
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -2197,5 +2198,20 @@ HWTEST_F(FormPatternTest, FormPatternTest_062, TestSize.Level0)
 
     pattern->SetObscured(true);
     EXPECT_TRUE(pattern->isFormObscured_);
+}
+
+/**
+ * @tc.name: FormPatternTest_063
+ * @tc.desc: OnLanguageConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_063, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_FALSE(pattern->isTibetanLanguage_);
 }
 } // namespace OHOS::Ace::NG

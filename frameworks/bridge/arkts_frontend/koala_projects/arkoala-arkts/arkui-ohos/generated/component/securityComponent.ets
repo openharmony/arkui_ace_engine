@@ -20,18 +20,19 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { Resource_serializer } from "./../framework/resource"
 import { Position_serializer, Edges_serializer, LocalizedEdges_serializer, BorderRadiuses_serializer, Padding_serializer, SizeOptions_serializer, ConstraintSizeOptions_serializer, Dimension, Position, Edges, LocalizedEdges, ResourceColor, BorderRadiuses, Padding, Length, SizeOptions, ConstraintSizeOptions, Bias } from "./units"
 import { AlignRuleOption_serializer, LocalizedAlignRuleOptions_serializer, AlignRuleOption, LocalizedAlignRuleOptions, ChainStyle, HorizontalAlignParam, VerticalAlignParam, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam } from "./common"
+import { FocusBoxStyle_serializer, FocusBoxStyle } from "./focus"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Resource } from "global.resource"
 import { FontStyle, FontWeight, Color, BorderStyle, Alignment, Axis, TextHeightAdaptivePolicy } from "./enums"
-import { LengthMetrics } from "arkui.Graphics"
+import { extractors, hookSecurityComponentMethodAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { hookSecurityComponentMethodAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { SecurityComponentMethodModifier } from "./../SecurityComponentMethodModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkSecurityComponentMethodPeer extends PeerNode {
@@ -729,6 +730,18 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_setEnabled(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFocusBoxAttribute(style: FocusBoxStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (style !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const styleTmpValue  = style!
+            FocusBoxStyle_serializer.write(thisSerializer, styleTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_setFocusBox(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SecurityComponentLayoutDirection {
     HORIZONTAL = 0,
@@ -837,6 +850,9 @@ export interface SecurityComponentMethod {
     enabled(respond: boolean | undefined): this {
         throw new Error("Unimplemented method enabled")
     }
+    focusBox(style: FocusBoxStyle | undefined): this {
+        throw new Error("Unimplemented method focusBox")
+    }
     attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -942,6 +958,9 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
         return this
     }
     enabled(respond: boolean | undefined): this {
+        return this
+    }
+    focusBox(style: FocusBoxStyle | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
@@ -1228,6 +1247,14 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
+    public focusBox(style: FocusBoxStyle | undefined): this {
+        if (this.checkPriority("focusBox")) {
+            const style_casted = style as (FocusBoxStyle | undefined)
+            this.getPeer()?.setFocusBoxAttribute(style_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
         hookSecurityComponentMethodAttributeModifier(this, value);
         return this
@@ -1235,5 +1262,8 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }

@@ -464,6 +464,22 @@ inline bool StringToCalcDimensionNG(
     }
 }
 
+inline bool UnstringifyCalcDimension(
+    const std::string& value, CalcDimension& result, bool useVp = false,
+    DimensionUnit defaultUnit = DimensionUnit::PX)
+{
+    if (value.rfind("calc") != std::string::npos) {
+        auto valueNum = value.substr(0, value.rfind("calc"));
+        result = CalcDimension(valueNum, DimensionUnit::CALC);
+        return true;
+    } else if (value.rfind("auto") != std::string::npos) {
+        result = Dimension(0.0f, DimensionUnit::AUTO);
+        return true;
+    } else {
+        return StringToDimensionWithUnitNG(value, result, useVp ? DimensionUnit::VP : defaultUnit);
+    }
+}
+
 inline std::string ReplaceChar(std::string str, char old_char, char new_char)
 {
     for (char& it : str) {

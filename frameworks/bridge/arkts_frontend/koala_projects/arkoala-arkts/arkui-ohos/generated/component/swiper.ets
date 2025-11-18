@@ -1080,6 +1080,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         if (this.checkPriority("setSwiperOptions")) {
             const controller_casted = controller as (SwiperController | undefined)
             this.getPeer()?.setSwiperOptionsAttribute(controller_casted)
+            this.applyOptionsFinish('SwiperAttribute');
             return this
         }
         return this
@@ -1345,6 +1346,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

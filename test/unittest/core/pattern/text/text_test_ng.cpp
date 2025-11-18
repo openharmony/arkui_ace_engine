@@ -24,6 +24,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
@@ -97,21 +98,27 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
     textModelNG.SetFontWeight(FontWeight::LIGHTER);
     textStyle.SetFontWeight(FontWeight::W100);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W100);
+
     textModelNG.SetFontWeight(FontWeight::REGULAR);
     textStyle.SetFontWeight(FontWeight::W400);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
+
     textModelNG.SetFontWeight(FontWeight::NORMAL);
     textStyle.SetFontWeight(FontWeight::W400);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
+
     textModelNG.SetFontWeight(FontWeight::MEDIUM);
     textStyle.SetFontWeight(FontWeight::W500);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W500);
+
     textModelNG.SetFontWeight(FontWeight::BOLD);
     textStyle.SetFontWeight(FontWeight::W700);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W700);
+
     textModelNG.SetFontWeight(FontWeight::BOLDER);
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
+
     textModelNG.SetFontWeight(FontWeight::W900);
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
@@ -171,14 +178,11 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     int32_t endIndex = 10;
     textModelNG.SetTextSelection(frameNode, startIndex, endIndex);
     EXPECT_NE(textPattern->textSelector_.GetStart(), startIndex);
-
     std::u16string eventValue;
     auto onCopyResult = [&eventValue](const std::u16string& param) { eventValue = param; };
-
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     textModelNG.SetOnCopy(frameNode, onCopyResult);
     EXPECT_NE(eventHub->onCopy_, nullptr);
-
     bool isSelectChanged = false;
     auto onSelectionChanged = [&isSelectChanged](int32_t, int32_t) { isSelectChanged = true; };
     textModelNG.SetOnTextSelectionChange(frameNode, onSelectionChanged);
@@ -197,7 +201,6 @@ HWTEST_F(TextTestNg, SetTextContentWithStyledString001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
-
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -210,12 +213,10 @@ HWTEST_F(TextTestNg, SetTextContentWithStyledString001, TestSize.Level1)
      * @tc.expected: pManager's paragraphs will be reseted
      */
     EXPECT_TRUE(textPattern->pManager_->GetParagraphs().empty());
-
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph });
     EXPECT_FALSE(textPattern->pManager_->GetParagraphs().empty());
-
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     EXPECT_TRUE(textPattern->pManager_->GetParagraphs().empty());
 }

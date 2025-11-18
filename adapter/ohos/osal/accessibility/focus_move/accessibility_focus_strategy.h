@@ -42,6 +42,7 @@ enum class AceFocusMoveResult : int32_t {
     FIND_EMBED_TARGET,
     FIND_FAIL_IN_CHILDTREE,
     FIND_FAIL_IN_SCROLL,
+    FIND_FAIL_LOST_NODE,
 };
 
 struct AceFocusMoveDetailCondition {

@@ -17,6 +17,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
 #include "core/components_ng/pattern/shape/polygon_pattern.h"
 

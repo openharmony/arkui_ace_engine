@@ -2000,8 +2000,7 @@ void SelectPattern::OnColorConfigurationUpdate()
     auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(selectTheme);
 
-    auto pattern = host->GetPattern<SelectPattern>();
-    auto menuNode = pattern->GetMenuNode();
+    auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -2016,6 +2015,7 @@ void SelectPattern::OnColorConfigurationUpdate()
         }
     }
 
+    UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
     auto optionNode = menuPattern->GetOptions();
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
@@ -2028,7 +2028,6 @@ void SelectPattern::OnColorConfigurationUpdate()
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    UpdateMenuScrollColorConfiguration(menuNode);
     host->SetNeedCallChildrenUpdate(false);
     SetColorByUser(host, selectTheme);
 }
@@ -2081,14 +2080,13 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<S
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SelectPattern::UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode)
+void SelectPattern::UpdateMenuChildColorConfiguration(
+    const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange)
 {
     CHECK_NULL_VOID(menuNode);
-    auto scrollNode = AceType::DynamicCast<NG::FrameNode>(menuNode->GetChildAtIndex(0));
+    auto scrollNode = menuNode->GetFirstChild();
     CHECK_NULL_VOID(scrollNode);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(scrollPattern);
-    scrollPattern->OnColorConfigurationUpdate();
+    scrollNode->UpdateConfigurationUpdate(configurationChange);
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)

@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 using namespace testing;
 using namespace testing::ext;

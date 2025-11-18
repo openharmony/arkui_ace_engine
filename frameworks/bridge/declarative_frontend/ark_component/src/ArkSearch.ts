@@ -468,6 +468,23 @@ class SearchInputFilterModifier extends ModifierWithKey<ArkSearchInputFilter> {
   }
 }
 
+class SearchDividerColorModifier extends ModifierWithKey<ColorMetrics> {
+  constructor(value: ColorMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dividerColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchDividerColor(node);
+    } else {
+      getUINativeModule().search.setSearchDividerColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class SearchMinFontScaleModifier extends ModifierWithKey<number | Resource> {
   constructor(value: number | Resource) {
     super(value);
@@ -1126,6 +1143,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchInputFilter.value = value;
     searchInputFilter.error = error;
     modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
+    return this;
+  }
+  dividerColor(value: ColorMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, SearchDividerColorModifier.identity, SearchDividerColorModifier, value);
     return this;
   }
   minFontScale(value: number | Resource): this {

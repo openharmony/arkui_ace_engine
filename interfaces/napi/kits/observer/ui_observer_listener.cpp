@@ -91,6 +91,37 @@ bool CheckAndParseStr(napi_env env, napi_value arg, std::string& recv)
     return true;
 }
 
+napi_value GetNavDestinationParam(napi_env env, const NG::NavDestinationInfo& info)
+{
+    if (info.interopParam.empty()) {
+        return info.param;
+    }
+    if (!env) {
+        return nullptr;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    napi_value globalValue;
+    napi_get_global(env, &globalValue);
+    napi_value jsonClass;
+    napi_get_named_property(env, globalValue, "JSON", &jsonClass);
+    napi_value parseFunc;
+    napi_get_named_property(env, jsonClass, "parse", &parseFunc);
+    napi_value stringifiedParamNapi = nullptr;
+    napi_create_string_utf8(env, info.interopParam.c_str(), info.interopParam.length(), &stringifiedParamNapi);
+    napi_value interopParam = nullptr;
+    if (napi_call_function(env, jsonClass, parseFunc, 1, &stringifiedParamNapi, &interopParam) != napi_ok) {
+        napi_get_and_clear_last_exception(env, &interopParam);
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_close_handle_scope(env, scope);
+    return interopParam;
+}
+
 static GestureEvent* GetBaseEventInfo(
     napi_env env, napi_callback_info info, size_t* argc = nullptr, napi_value* argv = nullptr)
 {
@@ -275,7 +306,7 @@ void UIObserverListener::OnDensityChange(double density)
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::OnWinSizeLayoutBreakpointChange(const NG::WindowSizeBreakpoint info)
+void UIObserverListener::OnWinSizeLayoutBreakpointChange(const WindowSizeBreakpoint info)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -1236,6 +1267,7 @@ void UIObserverListener::AddTargetObject(napi_value objValueEvent, const BaseEve
     napi_value napiY = nullptr;
     napi_create_double(env_, localOffset.GetY().ConvertToVp(), &napiY);
     napi_set_named_property(env_, napiOffset, "y", napiY);
+    napi_set_named_property(env_, napiTargetObject, "position", napiOffset);
 
     napi_value napiGlobalOffset = nullptr;
     napi_create_object(env_, &napiGlobalOffset);
@@ -1247,6 +1279,7 @@ void UIObserverListener::AddTargetObject(napi_value objValueEvent, const BaseEve
     napi_create_double(env_, localOffset.GetY().ConvertToVp() + origin.GetY().ConvertToVp(),
         &napiGlobalY);
     napi_set_named_property(env_, napiGlobalOffset, "y", napiGlobalY);
+    napi_set_named_property(env_, napiTargetObject, "globalPosition", napiGlobalOffset);
 
     napi_value napiArea = nullptr;
     napi_create_object(env_, &napiArea);
@@ -1285,7 +1318,7 @@ napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinat
     napi_set_named_property(env_, objValue, "name", napiName);
     napi_set_named_property(env_, objValue, "state", napiState);
     napi_set_named_property(env_, objValue, "index", napiIdx);
-    napi_set_named_property(env_, objValue, "param", info.param);
+    napi_set_named_property(env_, objValue, "param", GetNavDestinationParam(env_, info));
     napi_set_named_property(env_, objValue, "navDestinationId", napiNavDesId);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         napi_value napiMode = nullptr;

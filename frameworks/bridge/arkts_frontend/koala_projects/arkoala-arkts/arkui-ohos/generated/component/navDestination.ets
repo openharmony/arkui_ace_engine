@@ -31,7 +31,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceStr, Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater, hookGetConfigInRouteMap } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CustomBuilder } from "./builder"
@@ -96,7 +96,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
         return new NavDestinationContextInternal(ptr)
     }
     public getConfigInRouteMap(): RouteMapConfig | undefined {
-        return this.getConfigInRouteMap_serialize()
+        return hookGetConfigInRouteMap(this)
     }
     private getPathInfo(): NavPathInfo {
         return this.getPathInfo_serialize()
@@ -1003,6 +1003,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         if (this.checkPriority("setNavDestinationOptions")) {
             const moduleInfo_casted = moduleInfo as (NavDestinationModuleInfo | undefined)
             this.getPeer()?.setNavDestinationOptionsAttribute(moduleInfo_casted)
+            this.applyOptionsFinish('NavDestinationAttribute');
             return this
         }
         return this
@@ -1270,6 +1271,9 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

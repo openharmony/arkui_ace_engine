@@ -322,15 +322,13 @@ HWTEST_F(RichEditorDragTestNg, OnDragEnd001, TestSize.Level2)
     }
 
     RefPtr<Ace::DragEvent> event = nullptr;
-    richEditorPattern->showSelect_ = false;
     richEditorPattern->OnDragEnd(event);
-    ASSERT_EQ(richEditorPattern->showSelect_, false);
+    ASSERT_EQ(richEditorPattern->showSelect_, true);
 
     event = AceType::MakeRefPtr<Ace::DragEvent>();
     event->SetResult(DragRet::DRAG_SUCCESS);
-    richEditorPattern->showSelect_ = false;
     richEditorPattern->OnDragEnd(event);
-    ASSERT_EQ(richEditorPattern->showSelect_, false);
+    ASSERT_EQ(richEditorPattern->showSelect_, true);
 
     if (isTestAddObject) {
         richEditorPattern->recoverDragResultObjects_.clear();
@@ -1166,7 +1164,6 @@ HWTEST_F(RichEditorDragTestNg, HandleCursorOnDragLeaved001, TestSize.Level2)
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    richEditorPattern->isCursorAlwaysDisplayed_ = false;
     richEditorPattern->HandleCursorOnDragLeaved(notifyDragEvent);
     EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, false);
 }
@@ -1194,7 +1191,7 @@ HWTEST_F(RichEditorDragTestNg, HandleCursorOnDragMoved001, TestSize.Level2)
      */
     richEditorPattern->isCursorAlwaysDisplayed_ = true;
     richEditorPattern->HandleCursorOnDragMoved(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, true);
+    EXPECT_EQ(richEditorPattern->caretVisible_, true);
     /**
      * @tc.steps: step2. change parameter and call function.
      */

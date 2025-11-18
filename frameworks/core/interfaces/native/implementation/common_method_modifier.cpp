@@ -17,6 +17,7 @@
 #include <variant>
 #include "arkoala_api_generated.h"
 
+#include "base/geometry/response_region.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/accessibility/accessibility_utils.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
@@ -75,7 +77,6 @@
 using namespace OHOS::Ace::NG::Converter;
 
 namespace {
-constexpr double PERCENT_100 = 100.0;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -94,11 +95,16 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_5 = 5;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
-constexpr float MIN_ANGEL = 0.0f;
-constexpr float MAX_ANGEL = 360.0f;
+constexpr float MIN_ANGLE = 0.0f;
+constexpr float MAX_ANGLE = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
+enum class PixelroundRule {
+    NO_FORCE_ROUND,
+    FORCE_FLOOR,
+    FORCE_CEIL,
+};
 }
 
 namespace OHOS::Ace::NG {
@@ -220,6 +226,35 @@ Ark_BaseGestureEvent CreateArkBaseGestureEvent(const std::shared_ptr<BaseGesture
     CHECK_NULL_RETURN(peer, nullptr);
     peer->SetRecognizerType(typeName);
     return peer;
+}
+void CheckAngle(std::optional<float>& angle)
+{
+    if (angle.has_value()) {
+        angle = std::clamp(angle.value(), MIN_ANGLE, MAX_ANGLE);
+    }
+}
+void ParseSweepGradientCenter(NG::Gradient& gradient, const Ark_Tuple_Length_Length& center)
+{
+    auto centerX = Converter::OptConvert<Dimension>(center.value0);
+    if (centerX) {
+        if (centerX->Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            gradient.GetSweepGradient()->centerX =
+                CalcDimension(centerX->Value() * Converter::PERCENT_100, DimensionUnit::PERCENT);
+        } else {
+            gradient.GetSweepGradient()->centerX = CalcDimension(*centerX);
+        }
+    }
+    auto centerY = Converter::OptConvert<Dimension>(center.value1);
+    if (centerY) {
+        if (centerY->Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            gradient.GetSweepGradient()->centerY =
+                CalcDimension(centerY->Value() * Converter::PERCENT_100, DimensionUnit::PERCENT);
+        } else {
+            gradient.GetSweepGradient()->centerY = CalcDimension(*centerY);
+        }
+    }
 }
 } // namespace
 
@@ -849,10 +884,7 @@ Gradient Convert(const Ark_RadialGradientOptions& src)
     }
 
     // color stops
-    std::vector<GradientColor> colorStops = Converter::Convert<std::vector<GradientColor>>(src.colors);
-    for (GradientColor gradientColor : colorStops) {
-        gradient.AddColor(gradientColor);
-    }
+    Converter::AssignGradientColors(&gradient, &(src.colors));
 
     return gradient;
 }
@@ -916,16 +948,25 @@ std::vector<DimensionRect> Convert(const Ark_Rectangle &src)
     return { Convert<DimensionRect>(src) };
 }
 
+template<>
+std::vector<ResponseRegion> Convert(const Ark_ResponseRegion &src)
+{
+    return { Convert<ResponseRegion>(src) };
+}
+
 using PixelRoundPolicyOneRule = bool; // let rule 'Ceil' is false, rool 'FLoor' is true
 
 template<>
-void AssignCast(std::optional<PixelRoundPolicyOneRule>& dst, const Ark_PixelRoundCalcPolicy& src)
+void AssignCast(std::optional<PixelroundRule>& dst, const Ark_PixelRoundCalcPolicy& src)
 {
     if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL) {
-        dst = false;
+        dst = PixelroundRule::FORCE_CEIL;
     }
     if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_FLOOR) {
-        dst = true;
+        dst = PixelroundRule::FORCE_FLOOR;
+    }
+    if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_NO_FORCE_ROUND) {
+        dst = PixelroundRule::NO_FORCE_ROUND;
     }
 }
 
@@ -933,20 +974,28 @@ template<>
 uint16_t Convert(const Ark_PixelRoundPolicy& src)
 {
     uint16_t dst = 0;
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.start); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_START : PixelRoundPolicy::FORCE_CEIL_START;
+    if (auto rule = OptConvert<PixelroundRule>(src.start); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_START :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_START :
+                      PixelRoundPolicy::NO_FORCE_ROUND_START;
         dst |= static_cast<uint16_t>(policy);
     }
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.end); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_END : PixelRoundPolicy::FORCE_CEIL_END;
+    if (auto rule = OptConvert<PixelroundRule>(src.end); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_END :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_END :
+                      PixelRoundPolicy::NO_FORCE_ROUND_END;
         dst |= static_cast<uint16_t>(policy);
     }
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.top); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_TOP : PixelRoundPolicy::FORCE_CEIL_TOP;
+    if (auto rule = OptConvert<PixelroundRule>(src.top); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_TOP :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_TOP :
+                      PixelRoundPolicy::NO_FORCE_ROUND_TOP;
         dst |= static_cast<uint16_t>(policy);
     }
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.bottom); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_BOTTOM : PixelRoundPolicy::FORCE_CEIL_BOTTOM;
+    if (auto rule = OptConvert<PixelroundRule>(src.bottom); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_BOTTOM :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_BOTTOM :
+                      PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM;
         dst |= static_cast<uint16_t>(policy);
     }
     return dst;
@@ -1004,6 +1053,12 @@ BorderStyleProperty Convert(const Ark_EdgeOutlineStyles& src)
 }
 template<>
 InvertVariant Convert(const Ark_Number& value)
+{
+    float fDst = Converter::Convert<float>(value);
+    return std::variant<float, InvertOption>(fDst);
+}
+template<>
+InvertVariant Convert(const Ark_Float64& value)
 {
     float fDst = Converter::Convert<float>(value);
     return std::variant<float, InvertOption>(fDst);
@@ -1312,13 +1367,15 @@ RotateOpt Convert(const Ark_RotateOptions& src)
     options.vec5f.emplace_back(OptConvert<float>(src.x));
     options.vec5f.emplace_back(OptConvert<float>(src.y));
     options.vec5f.emplace_back(OptConvert<float>(src.z));
-    options.vec5f.emplace_back(OptConvert<float>(src.angle));
+    std::optional<float> angle;
+    ConvertAngleWithDefault(src.angle, angle, 0.0f);
+    options.vec5f.emplace_back(angle);
     options.vec5f.emplace_back(OptConvert<float>(src.perspective));
 
     auto centerX =  OptConvert<Dimension>(src.centerX);
     auto centerY =  OptConvert<Dimension>(src.centerY);
     auto center = DimensionOffset(Dimension(0.5f, DimensionUnit::PERCENT), Dimension(0.5f, DimensionUnit::PERCENT));
-    center.SetZ(Dimension(0.5f, DimensionUnit::PERCENT));
+    center.SetZ(Dimension(0, DimensionUnit::VP));
     if (centerX.has_value()) {
         center.SetX(centerX.value());
     }
@@ -1451,8 +1508,7 @@ RotateAngleOptions Convert(const Ark_RotateAngleOptions& src)
 template<>
 RotateOptions Convert(const Ark_RotateOptions& src)
 {
-    RotateOptions rotateOptions(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.5_pct);
-    // The value of centerZ is 50%, which is equivalent to 0 when finally set to the RS because not support percent.
+    RotateOptions rotateOptions(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
     auto coordX = OptConvert<float>(src.x);
     auto coordY = OptConvert<float>(src.y);
     auto coordZ = OptConvert<float>(src.z);
@@ -1469,7 +1525,8 @@ RotateOptions Convert(const Ark_RotateOptions& src)
             rotateOptions.zDirection = coordZ.value();
         }
     }
-    auto angle = OptConvert<float>(src.angle);
+    std::optional<float> angle;
+    ConvertAngleWithDefault(src.angle, angle, 0.0f);
     if (angle.has_value()) {
         rotateOptions.angle = angle.value();
     }
@@ -1800,12 +1857,12 @@ RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
 
 void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src)
 {
-    dst.windowX = ArkValue<Ark_Number>(src.windowPoint.GetX());
-    dst.windowY = ArkValue<Ark_Number>(src.windowPoint.GetY());
-    dst.parentX = ArkValue<Ark_Number>(src.currentCmpPoint.GetX());
-    dst.parentY = ArkValue<Ark_Number>(src.currentCmpPoint.GetY());
-    dst.x = ArkValue<Ark_Number>(src.subCmpPoint.GetX());
-    dst.y = ArkValue<Ark_Number>(src.subCmpPoint.GetY());
+    dst.windowX = ArkValue<Ark_Float64>(src.windowPoint.GetX());
+    dst.windowY = ArkValue<Ark_Float64>(src.windowPoint.GetY());
+    dst.parentX = ArkValue<Ark_Float64>(src.currentCmpPoint.GetX());
+    dst.parentY = ArkValue<Ark_Float64>(src.currentCmpPoint.GetY());
+    dst.x = ArkValue<Ark_Float64>(src.subCmpPoint.GetX());
+    dst.y = ArkValue<Ark_Float64>(src.subCmpPoint.GetY());
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id);
 }
@@ -1890,13 +1947,13 @@ void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeRe
 
 void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
 {
-    dst.id = ArkValue<Ark_Number>(src.fingerId_);
-    dst.globalX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetX()));
-    dst.globalY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetY()));
-    dst.localX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
-    dst.localY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
-    dst.displayX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetX()));
-    dst.displayY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetY()));
+    dst.id = ArkValue<Ark_Int32>(src.fingerId_);
+    dst.globalX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetX()));
+    dst.globalY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetY()));
+    dst.localX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
+    dst.localY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetY()));
     dst.hand = ArkValue<Opt_InteractionHand>(static_cast<Ark_InteractionHand>(src.operatingHand_));
 }
 } // namespace Converter
@@ -2061,6 +2118,16 @@ void SetMouseResponseRegionImpl(Ark_NativePointer node,
         ViewAbstract::SetMouseResponseRegion(frameNode, {});
     }
 }
+void SetResponseRegionListImpl(Ark_NativePointer node,
+                               const Opt_Array_ResponseRegion* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (auto convArray = Converter::OptConvertPtr<std::vector<ResponseRegion>>(value); convArray) {
+        ViewAbstract::SetResponseRegionList(frameNode, *convArray);
+    }
+}
+
 void SetSizeImpl(Ark_NativePointer node,
                  const Opt_SizeOptions* value)
 {
@@ -2196,16 +2263,15 @@ void SetSafeAreaPaddingImpl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Padding& value) {
             auto convValue = Converter::Convert<PaddingProperty>(value);
-            // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LocalizedPadding& value) {
-             LOGE("ARKOALA: CommonMethod::SafeAreaPaddingImpl: Ark_LocalizedPadding is not supported.\n");
             auto convValue = Converter::Convert<PaddingProperty>(value);
-             // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LengthMetrics& value) {
             auto convValue = Converter::Convert<CalcLength>(value);
-             // ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         []() {}
     );
@@ -2234,6 +2300,14 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetBackgroundColorImpl(node, value);
+    } else if (frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        Color backgroundColor;
+        bool isValid = false;
+        if (colorValue.has_value()) {
+            isValid = true;
+            backgroundColor = colorValue.value();
+        }
+        NavDestinationModelStatic::SetBackgroundColor(frameNode, backgroundColor, isValid);
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
     }
@@ -2395,7 +2469,7 @@ void SetCompositingFilterImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetCompositingFilter(frameNode, ptrOpt.value());
 }
 void SetOpacityImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_Resource* value)
+                    const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2504,11 +2578,13 @@ void SetBorderColorImpl(Ark_NativePointer node,
         return;
     }
     auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
-    if (color) {
-        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
-    } else {
-        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
+    if (!color) {
+        BorderColorProperty defaultColor;
+        defaultColor.SetColor(Color::BLACK);
+        ViewAbstractModelStatic::SetBorderColor(frameNode, defaultColor);
+        return;
     }
+    ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
 }
 void SetBorderRadiusImpl(Ark_NativePointer node,
                          const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
@@ -2855,6 +2931,25 @@ void SetOnAccessibilityHoverImpl(Ark_NativePointer node,
     };
     ViewAbstractModelStatic::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
+void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                            const Opt_AccessibilityTransparentCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHoverTransparentFunc = [arkCallback = CallbackHelper(*optValue), node = weakNode](
+        TouchEventInfo& info) {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkTouchEventSync(info);
+        arkCallback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, std::move(onHoverTransparentFunc));
+}
 void SetHoverEffectImpl(Ark_NativePointer node,
                         const Opt_HoverEffect* value)
 {
@@ -2905,7 +3000,7 @@ void SetOnTouchImpl(Ark_NativePointer node,
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
 void SetOnKeyEventImpl(Ark_NativePointer node,
-                       const Opt_Callback_KeyEvent_Void* value)
+                       const Opt_Callback_KeyEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2918,29 +3013,11 @@ void SetOnKeyEventImpl(Ark_NativePointer node,
         auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::ArkKeyEventSync(info);
-            arkCallback.InvokeSync(event.ArkValue());
-            return false;
-        };
-        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
-    }
-#ifdef WRONG_GEN
-    // this code for Opt_Callback_KeyEvent_Boolean* value
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        ViewAbstract::DisableOnKeyEvent(frameNode);
-    } else {
-        auto weakNode = AceType::WeakClaim(frameNode);
-        auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
-            PipelineContext::SetCallBackNode(node);
-            const auto event = Converter::ArkKeyEventSync(info);
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
         ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     }
-#endif
 }
 void SetOnDigitalCrownImpl(Ark_NativePointer node,
                            const Opt_Callback_CrownEvent_Void* value)
@@ -3127,7 +3204,7 @@ void SetOnBlurImpl(Ark_NativePointer node,
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
 void SetTabIndexImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3251,7 +3328,7 @@ void SetMotionBlurImpl(Ark_NativePointer node,
     }
 }
 void SetBrightnessImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3267,7 +3344,7 @@ void SetBrightnessImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetBrightness(frameNode, convValue);
 }
 void SetContrastImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3283,7 +3360,7 @@ void SetContrastImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetContrast(frameNode, convValue);
 }
 void SetGrayscaleImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3308,7 +3385,7 @@ void SetColorBlendImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetColorBlend(frameNode, convValue);
 }
 void SetSaturateImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3323,7 +3400,7 @@ void SetSaturateImpl(Ark_NativePointer node,
     ViewAbstract::SetSaturate(frameNode, convValue.value());
 }
 void SetSepiaImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+                  const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3332,7 +3409,7 @@ void SetSepiaImpl(Ark_NativePointer node,
     ViewAbstract::SetSepia(frameNode, convValue.value_or(0._vp));
 }
 void SetInvertImpl(Ark_NativePointer node,
-                   const Opt_Union_Number_InvertOptions* value)
+                   const Opt_Union_F64_InvertOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3343,7 +3420,7 @@ void SetInvertImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetInvert(frameNode, convValue);
 }
 void SetHueRotateImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_String* value)
+                      const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3351,7 +3428,7 @@ void SetHueRotateImpl(Ark_NativePointer node,
     auto convValue = std::optional<float>();
     if (optValue.has_value()) {
         Converter::VisitUnion(optValue.value(),
-            [&convValue](const Ark_Number& val) {
+            [&convValue](const Ark_Float64& val) {
                 convValue = Converter::Convert<float>(val);
             },
             [&convValue](const Ark_String& val) {
@@ -3420,14 +3497,17 @@ void SetScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ScaleOpt scaleOptions = Converter::OptConvertPtr<ScaleOpt>(value).value_or(ScaleOpt{});
-
-    float scaleX = scaleOptions.x.value_or(1.0f);
-    float scaleY = scaleOptions.y.value_or(1.0f);
+    std::optional<ScaleOpt> scaleOptions = Converter::OptConvertPtr<ScaleOpt>(value);
+    if (!scaleOptions) {
+        ViewAbstract::SetScale(frameNode, VectorF(1.0f, 1.0f));
+        return;
+    }
+    float scaleX = scaleOptions->x.value_or(1.0f);
+    float scaleY = scaleOptions->y.value_or(1.0f);
     ViewAbstract::SetScale(frameNode, VectorF(scaleX, scaleY));
 
-    CalcDimension centerX = scaleOptions.centerX.value_or(0.5_pct);
-    CalcDimension centerY = scaleOptions.centerY.value_or(0.5_pct);
+    CalcDimension centerX = scaleOptions->centerX.value_or(0.5_pct);
+    CalcDimension centerY = scaleOptions->centerY.value_or(0.5_pct);
     ViewAbstractModelStatic::SetPivot(frameNode, DimensionOffset(centerX, centerY));
 }
 void SetRotateImpl(Ark_NativePointer node,
@@ -3442,40 +3522,6 @@ void SetRotateImpl(Ark_NativePointer node,
             ViewAbstractModelStatic::SetRotate(frameNode, EMPTY_ROTATE_VECTOR);
             return;
         }
-        auto xValue = Converter::GetOptPtr(&(value->value.value0.centerX));
-        if (xValue.has_value()) {
-            Converter::VisitUnion(
-                xValue.value(),
-                [&convValue](const Ark_String& val) {
-                    std::string degreeStr = Converter::Convert<std::string>(val);
-                    auto dim = StringUtils::StringToCalcDimension(degreeStr);
-                    convValue->center->SetX(dim);
-                },
-                [](const Ark_Number& val) {}, []() {});
-        }
-        auto yValue = Converter::GetOptPtr(&(value->value.value0.centerY));
-        if (yValue.has_value()) {
-            Converter::VisitUnion(
-                yValue.value(),
-                [&convValue](const Ark_String& val) {
-                    std::string degreeStr = Converter::Convert<std::string>(val);
-                    auto dim = StringUtils::StringToCalcDimension(degreeStr);
-                    convValue->center->SetY(dim);
-                },
-                [](const Ark_Number& val) {}, []() {});
-        }
-        auto angleValue = value->value.value0.angle;
-        Converter::VisitUnion(
-            angleValue,
-            [&convValue](const Ark_String& str) {
-                std::string degreeStr = Converter::Convert<std::string>(str);
-                float angle = static_cast<float>(StringUtils::StringToDegree(degreeStr));
-                int32_t indA = 3;
-                if (convValue->vec5f.size() > static_cast<size_t>(indA)) {
-                    convValue->vec5f[indA] = angle;
-                }
-            },
-            [](const Ark_Number& val) {}, []() {});
         ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
         ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
     } else {
@@ -4126,6 +4172,7 @@ void SetLinearGradientImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         Gradient defaultGradient;
+        defaultGradient.CreateGradientWithType(NG::GradientType::LINEAR);
         ViewAbstract::SetLinearGradient(frameNode, defaultGradient);
         return;
     }
@@ -4136,7 +4183,12 @@ void SetLinearGradientImpl(Ark_NativePointer node,
         gradient.SetRepeat(repeat.value());
     }
     auto linear = gradient.GetLinearGradient();
-    linear->angle = Converter::OptConvert<Dimension>(optValue->angle);
+    std::optional<float> degreeOpt;
+    constexpr float DEFAULT_ANGLE = 180.0f;
+    Converter::ConvertAngleWithDefault(optValue->angle, degreeOpt, DEFAULT_ANGLE);
+    if (degreeOpt) {
+        linear->angle = CalcDimension(degreeOpt.value(), DimensionUnit::PX);
+    }
     auto direction = Converter::OptConvert<GradientDirection>(optValue->direction);
     if (direction) {
         Converter::AssignLinearGradientDirection(linear, direction.value());
@@ -4152,6 +4204,7 @@ void SetSweepGradientImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         Gradient defaultGradient;
+        defaultGradient.CreateGradientWithType(NG::GradientType::SWEEP);
         ViewAbstract::SetSweepGradient(frameNode, defaultGradient);
         return;
     }
@@ -4162,16 +4215,25 @@ void SetSweepGradientImpl(Ark_NativePointer node,
         gradient.SetRepeat(repeat.value());
     }
     auto sweep = gradient.GetSweepGradient();
-    auto centerX = Converter::OptConvert<Dimension>(optValue->center.value0);
-    auto centerY = Converter::OptConvert<Dimension>(optValue->center.value1);
-    auto startAngle = Converter::OptConvert<Dimension>(optValue->start);
-    auto endAngle = Converter::OptConvert<Dimension>(optValue->end);
-    auto rotation = Converter::OptConvert<Dimension>(optValue->rotation);
-    sweep->startAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->start), MIN_ANGEL, MAX_ANGEL);
-    sweep->endAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->end), MIN_ANGEL, MAX_ANGEL);
-    sweep->rotation = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->rotation), MIN_ANGEL, MAX_ANGEL);
-    if (centerX) sweep->centerX = centerX.value();
-    if (centerY) sweep->centerY = centerY.value();
+    ParseSweepGradientCenter(gradient, optValue->center);
+    std::optional<float> degreeStart;
+    std::optional<float> degreeEnd;
+    std::optional<float> degreeRotation;
+    Converter::ConvertAngleWithDefault(optValue->start, degreeStart, 0.0f);
+    Converter::ConvertAngleWithDefault(optValue->end, degreeEnd, 0.0f);
+    Converter::ConvertAngleWithDefault(optValue->rotation, degreeRotation, 0.0f);
+    if (degreeStart) {
+        CheckAngle(degreeStart);
+        sweep->startAngle = CalcDimension(degreeStart.value(), DimensionUnit::PX);
+    }
+    if (degreeEnd) {
+        CheckAngle(degreeEnd);
+        sweep->endAngle = CalcDimension(degreeEnd.value(), DimensionUnit::PX);
+    }
+    if (degreeRotation) {
+        CheckAngle(degreeRotation);
+        sweep->rotation = CalcDimension(degreeRotation.value(), DimensionUnit::PX);
+    }
     Converter::AssignGradientColors(&gradient, &optValue->colors);
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
@@ -4183,6 +4245,7 @@ void SetRadialGradientImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Gradient>(value);
     if (!convValue) {
         Gradient defaultGradient;
+        defaultGradient.CreateGradientWithType(NG::GradientType::RADIAL);
         ViewAbstract::SetRadialGradient(frameNode, defaultGradient);
         return;
     }
@@ -4295,7 +4358,7 @@ void SetGeometryTransition0Impl(Ark_NativePointer node,
         frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void SetRestoreIdImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4308,7 +4371,7 @@ void SetRestoreIdImpl(Ark_NativePointer node,
     ViewAbstract::SetRestoreId(frameNode, *convValue);
 }
 void SetSphericalEffectImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4326,7 +4389,7 @@ void SetSphericalEffectImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetSphericalEffect(frameNode, convValue);
 }
 void SetLightUpEffectImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4920,7 +4983,7 @@ void SetForegroundBlurStyleImpl(Ark_NativePointer node,
 }
 void SetOnClick1Impl(Ark_NativePointer node,
                      const Opt_Callback_ClickEvent_Void* event,
-                     const Opt_Number* distanceThreshold)
+                     const Opt_Float64* distanceThreshold)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4991,7 +5054,7 @@ void SetTransition1Impl(Ark_NativePointer node,
     }
 }
 void SetBlurImpl(Ark_NativePointer node,
-                 const Opt_Number* blurRadius,
+                 const Opt_Float64* blurRadius,
                  const Opt_BlurOptions* options,
                  const Opt_SystemAdaptiveOptions* sysOptions)
 {
@@ -5003,7 +5066,7 @@ void SetBlurImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetFrontBlur(frameNode, blurRadiusOpt, optionsOpt, sysOptionsOpt);
 }
 void SetLinearGradientBlurImpl(Ark_NativePointer node,
-                               const Opt_Number* value,
+                               const Opt_Float64* value,
                                const Opt_LinearGradientBlurOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5037,16 +5100,16 @@ void SetUseEffect1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
 }
 void SetBackdropBlurImpl(Ark_NativePointer node,
-                         const Opt_Number* radius,
+                         const Opt_Float64* radius,
                          const Opt_BlurOptions* options,
                          const Opt_SystemAdaptiveOptions* sysOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optRadius = Converter::OptConvertPtr<Dimension>(radius);
+    double radiusValue = Converter::OptConvertPtr<double>(radius).value_or(0.0);
     auto optOption = Converter::OptConvertPtr<BlurOption>(options);
     auto sysOpts = Converter::OptConvertPtr<SysOptions>(sysOptions).value_or(SysOptions());
-    ViewAbstractModelStatic::SetBackdropBlur(frameNode, optRadius, optOption, sysOpts);
+    ViewAbstractModelStatic::SetBackdropBlur(frameNode, Dimension(radiusValue, DimensionUnit::PX), optOption, sysOpts);
 }
 void SetSharedTransitionImpl(Ark_NativePointer node,
                              const Opt_String* id,
@@ -5173,7 +5236,8 @@ void SetOverlayImpl(Ark_NativePointer node,
             LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
         },
         [frameNode]() {
-            ViewAbstractModelStatic::ResetOverlay(frameNode);
+            OverlayOptions overlay;
+            ViewAbstract::SetOverlayNode(frameNode, nullptr, overlay);
         });
 }
 void SetBlendModeImpl(Ark_NativePointer node,
@@ -5355,11 +5419,12 @@ void BindMenuBase(Ark_NativePointer node,
             ViewAbstractModelStatic::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
         },
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value), node]() {
-                auto uiNode = callback.BuildSync(node);
-                ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
-            ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
+            CallbackHelper(value).BuildAsync([frameNode, node, menuParam](const RefPtr<UINode>& uiNode) {
+                auto builder = [uiNode]() {
+                    ViewStackProcessor::GetInstance()->Push(uiNode);
+                };
+                ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
+                }, node);
         },
         []() {});
 }
@@ -5623,7 +5688,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
         }, node);
 }
 void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                const Opt_Array_Number* ratios,
+                                const Opt_Array_Float64* ratios,
                                 const Opt_VisibleAreaChangeCallback* event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5657,7 +5722,7 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     auto onVisibleAreaChange =
         [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
             Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
             PipelineContext::SetCallBackNode(node);
             arkCallback.InvokeSync(isExpanding, currentRatio);
         };
@@ -5809,6 +5874,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetHeightImpl,
         CommonMethodModifier::SetResponseRegionImpl,
         CommonMethodModifier::SetMouseResponseRegionImpl,
+        CommonMethodModifier::SetResponseRegionListImpl,
         CommonMethodModifier::SetSizeImpl,
         CommonMethodModifier::SetConstraintSizeImpl,
         CommonMethodModifier::SetHitTestBehaviorImpl,
@@ -5846,6 +5912,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnHoverImpl,
         CommonMethodModifier::SetOnHoverMoveImpl,
         CommonMethodModifier::SetOnAccessibilityHoverImpl,
+        CommonMethodModifier::SetOnAccessibilityHoverTransparentImpl,
         CommonMethodModifier::SetHoverEffectImpl,
         CommonMethodModifier::SetOnMouseImpl,
         CommonMethodModifier::SetOnTouchImpl,

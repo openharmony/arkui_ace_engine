@@ -488,14 +488,14 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
         }
         return true;
     }
-    if (!AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Numeric")) {
+    if (!AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Long")) {
         return false;
     }
-    ani_double numberValue;
-    if ((ANI_OK != env->Object_CallMethodByName_Double(numberBadgeObj, "unboxed", ":d", &numberValue))) {
+    ani_long numberValue;
+    if (ANI_OK != env->Object_CallMethodByName_Long(numberBadgeObj, "toLong", ":l", &numberValue)) {
         return false;
     }
-    auto number = static_cast<double>(numberValue);
+    auto number = static_cast<int64_t>(numberValue);
     if (number < 0 || number > INT_MAX) {
         previewOptions.isNumber = false;
         previewOptions.isShowBadge = true;

@@ -36,6 +36,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
@@ -63,7 +64,7 @@ public:
 
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    std::function<RefPtr<UINode>()> builderFunc_;
+    std::function<RefPtr<UINode>(int32_t id)> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     static void SetApiVersion(int32_t apiTargetVersion);
@@ -135,7 +136,7 @@ void SheetShowInSubwindowTestNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
 
 void SheetShowInSubwindowTestNg::CreateSheetBuilder(float builderHeight, float titleHeight)
 {
-    auto builderFunc = [builderHeight]() -> RefPtr<UINode> {
+    auto builderFunc = [builderHeight](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });

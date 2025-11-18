@@ -43,6 +43,18 @@ enum class MenuType {
     SELECT_OVERLAY_RIGHT_CLICK_MENU, // menu type used for select overlay menu triggered by right-click
 };
 
+enum class MenuLifeCycleEvent {
+    ABOUT_TO_APPEAR,
+    ON_WILL_APPEAR,
+    ON_APPEAR,
+    ON_DID_APPEAR,
+
+    ABOUT_TO_DISAPPEAR,
+    ON_WILL_DISAPPEAR,
+    ON_DISAPPEAR,
+    ON_DID_DISAPPEAR,
+};
+
 enum class ContextMenuRegisterType : char {
     NORMAL_TYPE = 0,
     CUSTOM_TYPE = 1,

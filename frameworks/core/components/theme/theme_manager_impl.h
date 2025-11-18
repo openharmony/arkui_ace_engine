@@ -16,24 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 
-#include <shared_mutex>
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace {
-class ThemeWrappers final {
-public:
-    void Emplace(ThemeType type, const RefPtr<TokenThemeWrapper>& themeWrapper);
-    RefPtr<TokenThemeWrapper> Find(ThemeType type);
-    void Clear();
-private:
-    std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>> themesWrappers_;
-    std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>> themesWrappersMulti_;
-
-    mutable std::shared_mutex themesMutex_;
-};
-
 class ACE_EXPORT ThemeManagerImpl : public ThemeManager {
     DECLARE_ACE_TYPE(ThemeManagerImpl, ThemeManager);
 
@@ -111,9 +99,14 @@ public:
      */
     RefPtr<Theme> GetTheme(ThemeType type) override;
 
+    RefPtr<Theme> GetThemeMultiThread(ThemeType type);
+
     template<typename T>
     RefPtr<T> GetTheme()
     {
+        if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+            return AceType::DynamicCast<T>(GetThemeMultiThread(T::TypeId()));
+        }
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
 
@@ -123,13 +116,22 @@ public:
      */
     RefPtr<Theme> GetTheme(ThemeType type, int32_t themeScopeId) override;
 
+    RefPtr<Theme> GetThemeMultiThread(ThemeType type, int32_t themeScopeId);
+
     template<typename T>
     RefPtr<T> GetTheme(int32_t themeScopeId)
     {
+        if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+            return AceType::DynamicCast<T>(GetThemeMultiThread(T::TypeId()), themeScopeId);
+        }
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()), themeScopeId);
     }
 
     void LoadResourceThemes() override;
+
+    void LoadResourceThemesInner();
+
+    void LoadResourceThemesMultiThread();
 
     uint32_t GetResourceLimitKeys() const override
     {
@@ -148,14 +150,9 @@ public:
 
     RefPtr<Theme> GetThemeKit(ThemeType type, int32_t themeScopeId);
 
-    void AddThemeWithType(ThemeType type, const RefPtr<Theme>& theme);
-    RefPtr<Theme> GetThemeWithType(ThemeType type) const;
-    bool IsThemeExists(ThemeType type) const;
-    void ClearThemes();
-
 private:
+    using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
-    std::unordered_map<ThemeType, RefPtr<Theme>> themesMulti_;
     ThemeWrappers themeWrappersLight_;
     ThemeWrappers themeWrappersDark_;
 
@@ -167,7 +164,7 @@ private:
     ThemeWrappers& GetThemeWrappers(ColorMode mode);
     ColorMode GetCurrentColorMode() const;
 
-    mutable std::shared_mutex themesMutex_;
+    std::mutex themeMultiThreadMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H

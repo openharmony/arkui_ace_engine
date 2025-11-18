@@ -783,6 +783,8 @@ private:
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
     void UpdateSubTabBarImageIndicator();
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;
     CancelableCallback<void()> showTabBarTask_;

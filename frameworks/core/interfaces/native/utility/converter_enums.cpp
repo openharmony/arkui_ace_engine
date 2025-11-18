@@ -897,6 +897,7 @@ void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
         case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
         case ARK_STICKY_STYLE_HEADER: dst = V2::StickyStyle::HEADER; break;
         case ARK_STICKY_STYLE_FOOTER: dst = V2::StickyStyle::FOOTER; break;
+        case ARK_STICKY_STYLE_BOTH: dst = V2::StickyStyle::BOTH; break;
         default: LOGE("Unexpected enum value in Ark_StickyStyle: %{public}d", src);
     }
 }
@@ -1019,6 +1020,8 @@ void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src
         case ARK_ANIMATION_MODE_CONTENT_FIRST: dst = TabAnimateMode::CONTENT_FIRST; break;
         case ARK_ANIMATION_MODE_ACTION_FIRST: dst = TabAnimateMode::ACTION_FIRST; break;
         case ARK_ANIMATION_MODE_NO_ANIMATION: dst = TabAnimateMode::NO_ANIMATION; break;
+        case ARK_ANIMATION_MODE_CONTENT_FIRST_WITH_JUMP: dst = TabAnimateMode::CONTENT_FIRST_WITH_JUMP; break;
+        case ARK_ANIMATION_MODE_ACTION_FIRST_WITH_JUMP: dst = TabAnimateMode::ACTION_FIRST_WITH_JUMP; break;
         default: LOGE("Unexpected enum value in Ark_AnimationMode: %{public}d", src);
     }
 }
@@ -1873,6 +1876,20 @@ void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
         case ARK_HIT_TEST_MODE_NONE: dst = HitTestMode::HTMNONE; break;
         default: {
             LOGE("Unexpected enum value in Ark_HitTestMode: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<ResponseRegionSupportedTool>& dst, const Ark_ResponseRegionSupportedTool& src)
+{
+    switch (src) {
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_ALL: dst = ResponseRegionSupportedTool::ALL; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_FINGER: dst = ResponseRegionSupportedTool::FINGER; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_PEN: dst = ResponseRegionSupportedTool::PEN; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_MOUSE: dst = ResponseRegionSupportedTool::MOUSE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ResponseRegionSupportedTool: %{public}d", src);
         }
     }
 }

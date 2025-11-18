@@ -74,39 +74,39 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
+Ark_Float64 GetDisplayXImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenX());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
+Ark_Float64 GetDisplayYImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenY());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetWindowXImpl(Ark_DragEvent peer)
+Ark_Float64 GetWindowXImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetX());
-    return ArkValue<Ark_Number>(value);
+    return ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetWindowYImpl(Ark_DragEvent peer)
+Ark_Float64 GetWindowYImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetY());
-    return ArkValue<Ark_Number>(value);
+    return ArkValue<Ark_Float64>(value);
 }
 void SetDataImpl(Ark_DragEvent peer,
                  Ark_unifiedDataChannel_UnifiedData unifiedData)
@@ -165,32 +165,32 @@ Ark_Rectangle GetPreviewRectImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(info, {});
     return ArkValue<Ark_Rectangle>(info->GetPreviewRect(), Converter::FC);
 }
-Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
+Ark_Float64 GetVelocityXImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityX());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
+Ark_Float64 GetVelocityYImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityY());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
-Ark_Number GetVelocityImpl(Ark_DragEvent peer)
+Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->dragInfo;
     CHECK_NULL_RETURN(info, errValue);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityValue());
-    return Converter::ArkValue<Ark_Number>(value);
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                               const Callback_Void* customDropAnimation)

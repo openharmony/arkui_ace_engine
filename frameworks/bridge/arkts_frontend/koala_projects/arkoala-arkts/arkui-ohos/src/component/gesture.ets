@@ -23,9 +23,9 @@ export class GestureHandler {
     addGestureToGroup(group: KPointer): void { }
 }
 export class TapGestureHandler extends GestureHandler {
-    finger?: number;
-    count?: number;
-    distanceThreshold?: number;
+    finger?: int32;
+    count?: int32;
+    distanceThreshold?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: (event: GestureEvent) => void;
     pointer: KPointer = nullptr;
@@ -63,8 +63,8 @@ export class TapGestureHandler extends GestureHandler {
     }
 }
 export class LongPressGestureHandler extends GestureHandler {
-    finger?: number;
-    duration?: number;
+    finger?: int32;
+    duration?: int32;
     repeat?: boolean;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
@@ -120,9 +120,9 @@ export class LongPressGestureHandler extends GestureHandler {
     }
 }
 export class PanGestureHandler extends GestureHandler {
-    finger?: number;
+    finger?: int32;
     direction?: PanDirection;
-    distance?: number;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -185,9 +185,9 @@ export class PanGestureHandler extends GestureHandler {
     }
 }
 export class SwipeGestureHandler extends GestureHandler {
-    finger?: number;
+    finger?: int32;
     direction?: SwipeDirection;
-    speed?: number;
+    speed?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: Callback<GestureEvent>;
     pointer: KPointer = nullptr;
@@ -226,8 +226,8 @@ export class SwipeGestureHandler extends GestureHandler {
     }
 }
 export class PinchGestureHandler extends GestureHandler {
-    finger?: number;
-    distance?: number;
+    finger?: int32;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -289,8 +289,8 @@ export class PinchGestureHandler extends GestureHandler {
     }
 }
 export class RotationGestureHandler extends GestureHandler {
-    finger?: number;
-    angle?: number;
+    finger?: int32;
+    angle?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -421,9 +421,9 @@ export class Gesture {
     addGestureToGroup(group: KPointer): void { }
 }
 export class TapGesture extends Gesture {
-    finger?: number;
-    count?: number;
-    distanceThreshold?: number;
+    finger?: int32;
+    count?: int32;
+    distanceThreshold?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: Callback<GestureEvent>;
     pointer: KPointer = nullptr;
@@ -465,8 +465,8 @@ export class TapGesture extends Gesture {
     }
 }
 export class LongPressGesture extends Gesture {
-    finger?: number;
-    duration?: number;
+    finger?: int32;
+    duration?: int32;
     repeat?: boolean;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
@@ -523,9 +523,9 @@ export class LongPressGesture extends Gesture {
     }
 }
 export class PanGesture extends Gesture {
-    finger?: number;
+    finger?: int32;
     direction?: PanDirection;
-    distance?: number;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     panGestureOptions?: PanGestureOptions;
@@ -601,8 +601,8 @@ export class PanGesture extends Gesture {
     }
 }
 export class PinchGesture extends Gesture {
-    finger?: number;
-    distance?: number;
+    finger?: int32;
+    distance?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -665,8 +665,8 @@ export class PinchGesture extends Gesture {
     }
 }
 export class RotationGesture extends Gesture {
-    finger?: number;
-    angle?: number;
+    finger?: int32;
+    angle?: double;
     isFingerCountLimited?: boolean;
     pointer: KPointer = nullptr;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -729,9 +729,9 @@ export class RotationGesture extends Gesture {
     }
 }
 export class SwipeGesture extends Gesture {
-    finger?: number;
+    finger?: int32;
     direction?: SwipeDirection;
-    speed?: number;
+    speed?: double;
     isFingerCountLimited?: boolean;
     onActionCallback?: Callback<GestureEvent>;
     pointer: KPointer = nullptr;

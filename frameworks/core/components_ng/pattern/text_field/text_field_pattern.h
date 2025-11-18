@@ -268,6 +268,12 @@ struct MoveCaretToContentRectData {
     bool moveContent = true;
 };
 
+struct RelatedLPXInfo {
+    double lastLogicScale = 0;
+    bool hasLPXPadding = false;
+    bool initTextRectWithLPX = false;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
@@ -363,7 +369,6 @@ public:
     }
 
     void OnModifyDone() override;
-    void MultiThreadDelayedExecution();
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -832,14 +837,11 @@ public:
 
     void InitSurfaceChangedCallback();
     void InitSurfaceChangedCallbackMultiThread();
-    void InitSurfaceChangedCallbackMultiThreadAction();
     void InitSurfacePositionChangedCallback();
     void InitSurfacePositionChangedCallbackMultiThread();
-    void InitSurfacePositionChangedCallbackMultiThreadAction();
 
     void RegisterWindowFocusChangeCallback();
     void RegisterWindowFocusChangeCallbackMultiThread();
-    void RegisterWindowFocusChangeCallbackMultiThreadAction();
 
     bool HasSurfaceChangedCallback()
     {
@@ -1186,7 +1188,6 @@ public:
 
     void StopEditing();
     void StopEditingMultiThread();
-    void StopEditingMultiThreadAction();
 
     void MarkContentChange()
     {
@@ -1262,11 +1263,9 @@ public:
 
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder);
     void SetCustomKeyboardMultiThread(const std::function<void()>&& keyboardBuilder);
-    void SetCustomKeyboardMultiThreadAction(const std::function<void()>&& keyboardBuilder);
 
     void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
     void SetCustomKeyboardWithNodeMultiThread(const RefPtr<UINode>& keyboardBuilder);
-    void SetCustomKeyboardWithNodeMultiThreadAction(const RefPtr<UINode>& keyboardBuilder);
 
     bool HasCustomKeyboard() const
     {
@@ -1311,6 +1310,7 @@ public:
 
     virtual RefPtr<FocusHub> GetFocusHub() const;
     void UpdateCaretInfoToController(bool forceUpdate = false);
+    void UpdateCaretInfoToControllerMultiThread();
     void OnObscuredChanged(bool isObscured);
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {
@@ -1377,6 +1377,8 @@ public:
         isModifyDone_ = value;
     }
 
+    void StartTwinklingMultiThread();
+
     const TimeStamp& GetLastClickTime()
     {
         return lastClickTimeStamp_;
@@ -1430,7 +1432,6 @@ public:
     }
 
     void RegisterWindowSizeCallbackMultiThread();
-    void RegisterWindowSizeCallbackMultiThreadAction();
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
@@ -1798,7 +1799,6 @@ protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
     void OnAttachToMainTreeMultiThread();
-    void OnAttachToMainTreeMultiThreadAddition();
 
     void OnDetachFromMainTree() override;
     void OnDetachFromMainTreeMultiThread();
@@ -2128,6 +2128,10 @@ private:
     void UpdateMagnifierWithFloatingCaretPos();
     bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
     void ApplyInnerBorderColor();
+    void InitTextRect();
+    void HandleInputOperations();
+    void ReprocessAllRelatedToLPX();
+    bool HasLPXBorder();
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);
 #endif
@@ -2351,31 +2355,13 @@ private:
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
+    RelatedLPXInfo lpxInfo_;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;
 #endif
 
     // ----- multi thread state variables -----
-    bool initSurfacePositionChangedCallbackMultiThread_ = false;
-    bool initSurfaceChangedCallbackMultiThread_ = false;
-    bool handleCountStyleMultiThread_ = false;
-    bool startTwinklingMultiThread_ = false;
-    bool registerWindowFocusChangeCallbackMultiThread_ = false;
-    bool registerWindowSizeCallbackMultiThread_ = false;
-    bool processDefaultStyleAndBehaviorsMultiThread_ = false;
-    bool stopEditingMultiThread_ = false;
-    bool triggerAvoidOnCaretChangeMultiThread_ = false;
-    bool updateCaretInfoToControllerMultiThread_ = false;
-    bool setShowKeyBoardOnFocusMultiThread_ = false;
-    bool setShowKeyBoardOnFocusMultiThreadValue_ = false;
-    bool setSelectionFlagMultiThread_ = false;
-    bool setCustomKeyboardWithNodeMultiThread_ = false;
-    RefPtr<UINode> setCustomKeyboardWithNodeMultiThreadValue_;
-    bool setCustomKeyboardMultiThread_ = false;
-    std::function<void()> setCustomKeyboardMultiThreadValue_;
-    bool moveCaretToContentRectMultiThread_ = false;
-    MoveCaretToContentRectData moveCaretToContentRectMultiThreadValue_;
     // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG

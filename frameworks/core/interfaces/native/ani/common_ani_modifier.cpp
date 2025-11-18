@@ -98,18 +98,17 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
-    // auto context = NG::PipelineContext::GetCurrentContextSafely();
-    // if (context == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
-    //     return nullptr;
-    // }
-    // auto frontend = context->GetFrontend();
-    // if (frontend == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
-    //     return nullptr;
-    // }
-    // return frontend->GetHostContext(key);
-    return nullptr;
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
+        return nullptr;
+    }
+    return frontend->GetHostContext();
 }
 
 void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type)
@@ -617,6 +616,16 @@ std::optional<std::string> GetWindowName(ani_int instanceId)
     return windowName;
 }
 
+ani_int GetWindowWidthBreakpoint()
+{
+    return ViewAbstract::GetWindowWidthBreakpoint();
+}
+
+ani_int GetWindowHeightBreakpoint()
+{
+    return ViewAbstract::GetWindowHeightBreakpoint();
+}
+
 void* TransferKeyEventPointer(ani_long nativePtr)
 {
     CHECK_NULL_RETURN(nativePtr, nullptr);
@@ -966,6 +975,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
         .getWindowName = OHOS::Ace::NG::GetWindowName,
+        .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
+        .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,
         .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,
         .createKeyEventAccessorWithPointer = OHOS::Ace::NG::CreateKeyEventAccessorWithPointer,
         .createEventTargetInfoAccessor = OHOS::Ace::NG::CreateEventTargetInfoAccessor,
@@ -987,6 +998,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
         .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .getColorValueByString = OHOS::Ace::NG::GetColorValueByString,
         .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
         .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
         .removeThemeInNative = OHOS::Ace::NG::RemoveThemeInNative,

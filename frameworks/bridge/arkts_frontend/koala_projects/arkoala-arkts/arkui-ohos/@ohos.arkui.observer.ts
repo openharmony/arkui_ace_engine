@@ -11,10 +11,10 @@ declare namespace uiObserver {
     }
     type Callback<T,V = void> = (data: T) => V
       
-    export interface UIObserver {
+    export class UIObserver {
         on(type: string, callback: object): void;
         off(type: string, callback?: object): void;
-        
+
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
@@ -44,10 +44,24 @@ declare namespace uiObserver {
             callback?: Callback<NavDestinationSwitchInfo>
           ): void;
 
-        onTabChange(callback: object): void;
-        offTabChange(callback?: object): void;
-        onTabChange(options: ObserverOptions, callback: object): void;
-        offTabChange(options: ObserverOptions, callback?: object): void;
+        onTabChange(callback: Callback<TabContentInfo>): void;
+        offTabChange(callback?: Callback<TabContentInfo>): void;
+        onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        onDensityUpdate(callback: Callback<DensityInfo>): void;
+        offDensityUpdate(callback?: Callback<DensityInfo>): void;
+
+        onWillDraw(callback: Callback<void>): void;
+        offWillDraw(callback?: Callback<void>): void;
+
+        onDidLayout(callback: Callback<void>): void;
+        offDidLayout(callback?: Callback<void>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -66,6 +80,7 @@ declare namespace uiObserver {
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId: int32 | undefined;
     }
 
     export interface NavDestinationSwitchInfo {
@@ -114,11 +129,11 @@ declare namespace uiObserver {
 
     export interface TabContentInfo {
         tabContentId: string;
-        tabContentUniqueId: number;
+        tabContentUniqueId: int;
         state: TabContentState;
-        index: number;
+        index: int;
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         lastIndex?: int;
     }
 

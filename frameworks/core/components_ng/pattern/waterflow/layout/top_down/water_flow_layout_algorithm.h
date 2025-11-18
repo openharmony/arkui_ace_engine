@@ -74,7 +74,6 @@ private:
     // Record the index range after measurement completion
     int32_t measuredStartIndex_ = -1;
     int32_t measuredEndIndex_ = -1;
-    LayoutWrapper* layoutWrapper_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H

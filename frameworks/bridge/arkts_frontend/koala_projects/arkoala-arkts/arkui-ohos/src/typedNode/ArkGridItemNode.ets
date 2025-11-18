@@ -15,6 +15,7 @@
 
 import { RuntimeType, runtimeType } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
+import { int32 } from '@koalaui/common';
 import {
   GridItemAttribute,
   ArkGridItemPeer,
@@ -48,26 +49,26 @@ export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
     allowChildCount(): number {
         return 1;
     }
-    rowStart(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    rowStart(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setRowStartAttribute(value_casted)
         this.markDirty()
         return this
     }
-    rowEnd(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    rowEnd(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setRowEndAttribute(value_casted)
         this.markDirty()
         return this
     }
-    columnStart(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    columnStart(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setColumnStartAttribute(value_casted)
         this.markDirty()
         return this
     }
-    columnEnd(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    columnEnd(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setColumnEndAttribute(value_casted)
         this.markDirty()
         return this

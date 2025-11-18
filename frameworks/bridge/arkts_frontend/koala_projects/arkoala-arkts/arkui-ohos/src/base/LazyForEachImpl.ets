@@ -30,6 +30,7 @@ import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
+let arkLazyTotalCount: int32 = 0 // update dataSource totalCount changes
 
 export function updateLazyItems() {
     globalLazyItems.forEach((age, node, map) => {
@@ -44,17 +45,24 @@ export function updateLazyItems() {
 /** @memo:intrinsic */
 export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-    keyGenerator?: (item: T, index: number) => string,
-    isRepeat: boolean = false,
+    itemGenerator: (item: T, index: int32) => void,
+    keyGenerator?: (item: T, index: int32) => string,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
+    isRepeat: boolean = false,
 ) {
     const node = createLazyNode(isRepeat)
+    if (arkLazyTotalCount !== dataSource.totalCount()) {
+        console.log(`dataSource totalCount changed from ${arkLazyTotalCount} to ${dataSource.totalCount()}`)
+        arkLazyTotalCount = dataSource.totalCount()
+    }
 
-    let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
-        pool?.dispose()
-    })
+    let pool = rememberDisposable(
+        () => new LazyItemPool(node, CustomComponent.current),
+        (pool?: LazyItemPool) => {
+            pool?.dispose()
+        }
+    )
     let changeCounter = rememberMutableState(0)
     changeCounter.value //subscribe
     let listener = remember(() => {
@@ -84,6 +92,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
                 currentRenderingComponent, currentExtendableComponent)
         } catch (error) {
             InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
+            InteropNativeModule._NativeLog(`${(error as Error).stack}`)
             return nullptr
         } finally {
             ObserveSingleton.instance.renderingComponent = lastRenderingComponent
@@ -182,7 +191,7 @@ class LazyItemPool implements Disposable {
         index: int32,
         data: T,
         /** @memo */
-        itemGenerator: (item: T, index: number) => void,
+        itemGenerator: (item: T, index: int32) => void,
         currentRenderingComponent: int32,
         currentExtendableComponent: object | undefined
     ): pointer {
@@ -199,7 +208,7 @@ class LazyItemPool implements Disposable {
                 const lastExtendableComponent = ExtendableComponent.current
                 ObserveSingleton.instance.renderingComponent = currentRenderingComponent
                 ExtendableComponent.current = currentExtendableComponent
-                memoEntry2<T, number, void>(
+                memoEntry2<T, int32, void>(
                     context,
                     0,
                     itemGenerator,
@@ -224,6 +233,7 @@ class LazyItemPool implements Disposable {
     pruneBy(criteria: (index: int32) => boolean) {
         this._activeItems.forEach((node, index) => {
             if (criteria(index)) {
+                console.log(`LazyItemPool.pruneBy(): node will be disposed for index ${index}`)
                 node.dispose()
                 this._activeItems.delete(index)
                 globalLazyItems.delete(node)
@@ -236,14 +246,19 @@ class LazyItemPool implements Disposable {
      * @param start 
      * @param end 
      */
-    updateActiveRange(start: int32, end: int32) {
-        if (start > end) {
-            return
-        }
+    updateActiveRange(start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) {
         try {
             this.pruneBy(index => {
                 index = this.convertFromToIndexRevert(index)
-                return index < start || index > end
+                return !this.isInCacheRange(
+                    index,
+                    start,
+                    end,
+                    cacheStart,
+                    cacheEnd,
+                    isLoop,
+                    arkLazyTotalCount
+                )
             })
         } catch (error) {
             InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
@@ -331,5 +346,67 @@ class LazyItemPool implements Disposable {
             return index + 1;
         }
         return index;
+    }
+
+    // check if index is in cache range
+    private isInCacheRange(
+        index: int32,
+        start: int32,
+        end: int32,
+        cacheStart: int32,
+        cacheEnd: int32,
+        isLoop: boolean,
+        total: int32
+    ): boolean {
+        if (total <= 0 || index < 0 || index >= total) {
+            return false;
+        }
+
+        // calculate cache boundaries
+        const cacheStartBound = start - cacheStart;
+        const cacheEndBound = end + cacheEnd;
+
+        if (!isLoop) {
+            // non-loop mode: simple clamping
+            const actualStart = Math.max(0, cacheStartBound);
+            const actualEnd = Math.min(total - 1, cacheEndBound);
+            return index >= actualStart && index <= actualEnd;
+        } else {
+            // loop mode
+            const normalize = (idx: int32): int32 => {
+                return ((idx % total) + total) % total;
+            };
+
+            const normIndex = normalize(index);
+            const normStart = normalize(start);
+            const normEnd = normalize(end);
+
+            // check if visible region is wrapped
+            const isWrapped = normStart > normEnd;
+            if (isWrapped) {
+                // wrapped case: visible region is [start, totalCount-1] + [0, end]
+                // cache region is [start-cacheStart, totalCount-1] + [0, end+cacheEnd]
+                // full coverage condition: cache regions connect or overlap
+                if (cacheStartBound <= cacheEndBound + 1) {
+                    return true;
+                }
+            } else {
+                // normal case: check if cache region covers entire list
+                if (cacheStartBound - cacheEndBound + 1 >= total) {
+                    return true;
+                }
+            }
+
+            // non-full coverage case
+            const normCacheStart = normalize(cacheStartBound);
+            const normCacheEnd = normalize(cacheEndBound);
+            if (normCacheStart <= normCacheEnd) {
+                // single continuous region
+                return normIndex >= normCacheStart && normIndex <= normCacheEnd;
+            } else {
+                // two regions: [0, normCacheEnd] + [normCacheStart, totalCount-1]
+                return normIndex >= normCacheStart || normIndex <= normCacheEnd;
+            }
+        }
     }
 }

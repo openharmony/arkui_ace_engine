@@ -468,6 +468,9 @@ public:
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
 
+    UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
+
 protected:
     void RunIntentPageIfNeeded();
     void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);
@@ -583,7 +586,6 @@ protected:
     std::string restoreNavDestinationInfo_;
 
     VMType vmType_ = VMType::NORMAL;
-    NG::WindowSizeBreakpoint lastBreakpoint_ = { WidthBreakpoint::UNDEFINED, HeightBreakpoint::HEIGHT_SM };
 
 private:
     void ProcessWindowSizeLayoutBreakPointChange();

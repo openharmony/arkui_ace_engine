@@ -24,6 +24,8 @@
 #include "ui/base/ace_type.h"
 
 #include "base/error/error_code.h"
+#include "base/geometry/calc_dimension_rect.h"
+#include "base/geometry/response_region.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
@@ -134,16 +136,14 @@ void ViewAbstract::SetWidth(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("width", value.ToString());
         } else {
-            if (std::strcmp(widthString.c_str(), "0.00auto") == 0) {
-                value = Dimension(0.0f, DimensionUnit::AUTO);
-            } else if(!StringUtils::StringToCalcDimensionNG(widthString, value)) {
-                ClearWidthOrHeight(true);
+            if(!StringUtils::UnstringifyCalcDimension(widthString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), true);
                 return;
             }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                ClearWidthOrHeight(true);
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), true);
                 return;
             } else {
                 value.SetValue(0.0);
@@ -204,16 +204,14 @@ void ViewAbstract::SetHeight(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("height", value.ToString());
         } else {
-            if (std::strcmp(heightString.c_str(), "0.00auto") == 0) {
-                value = Dimension(0.0f, DimensionUnit::AUTO);
-            } else if(!StringUtils::StringToCalcDimensionNG(heightString, value)) {
-                ClearWidthOrHeight(false);
+            if(!StringUtils::UnstringifyCalcDimension(heightString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
                 return;
             }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                ClearWidthOrHeight(false);
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
                 return;
             } else {
                 value.SetValue(0.0);
@@ -293,7 +291,10 @@ void ViewAbstract::SetMinWidth(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -337,7 +338,10 @@ void ViewAbstract::SetMinHeight(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -393,7 +397,10 @@ void ViewAbstract::SetMaxWidth(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -437,7 +444,10 @@ void ViewAbstract::SetMaxHeight(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -623,6 +633,7 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     }
 
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true);
 }
 
 void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj)
@@ -661,6 +672,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("backgroundColor");
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
@@ -681,6 +693,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, 
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
@@ -1285,7 +1298,9 @@ void ViewAbstract::SetPadding(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
             pattern->AddResCache("padding", result.ToString());
         } else {
-            result = StringUtils::StringToCalcDimension(padding);
+            if(!StringUtils::UnstringifyCalcDimension(padding, result)) {
+                result.Reset();
+            }
         }
         CalcLength paddingLength;
         if (result.Unit() == DimensionUnit::CALC) {
@@ -1455,7 +1470,9 @@ void ViewAbstract::SetMargin(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
             pattern->AddResCache("margin", result.ToString());
         } else {
-            result = StringUtils::StringToCalcDimension(margin);
+            if(!StringUtils::UnstringifyCalcDimension(margin, result)) {
+                result.Reset();
+            }
         }
         CalcLength marginLength;
         if (result.Unit() == DimensionUnit::CALC) {
@@ -2808,6 +2825,15 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     CHECK_NULL_VOID(eventHub);
     auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
     visibleAreaUserCallback.measureFromViewport = measureFromViewport;
+}
+
+void ViewAbstract::SetResponseRegionList(
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap,
+    bool isResponseRegionSupported)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetResponseRegionMap(responseRegionMap);
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -6119,7 +6145,10 @@ void ViewAbstract::SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& 
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("width", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(widthString);
+            if(!StringUtils::UnstringifyCalcDimension(widthString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         CalcLength width;
         if (value.Unit() == DimensionUnit::CALC) {
@@ -6175,7 +6204,10 @@ void ViewAbstract::SetHeight(FrameNode* frameNode, const RefPtr<ResourceObject>&
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("height", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(heightString);
+            if(!StringUtils::UnstringifyCalcDimension(heightString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
@@ -7507,7 +7539,10 @@ void ViewAbstract::SetMinWidth(FrameNode* frameNode, const RefPtr<ResourceObject
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -7543,7 +7578,10 @@ void ViewAbstract::SetMaxWidth(FrameNode* frameNode, const RefPtr<ResourceObject
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -7579,7 +7617,10 @@ void ViewAbstract::SetMinHeight(FrameNode* frameNode, const RefPtr<ResourceObjec
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -7615,7 +7656,10 @@ void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const RefPtr<ResourceObjec
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -7830,6 +7874,26 @@ void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& drag
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetDragPreview(dragDropInfo);
+}
+
+void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetResponseRegionMap(responseRegionMap);
+}
+
+void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
+    const std::vector<ResponseRegion>& responseRegions)
+{
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap;
+    for (auto responseRegion : responseRegions) {
+        CalcDimensionRect responseRect(responseRegion.GetWidth(), responseRegion.GetHeight(), responseRegion.GetX(), responseRegion.GetY());
+        responseRegionMap[responseRegion.GetTool()].emplace_back(responseRect);
+    }
+    SetResponseRegionList(frameNode, responseRegionMap);
 }
 
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
@@ -8172,6 +8236,16 @@ bool ViewAbstract::GetDefaultFocus(FrameNode* frameNode)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsDefaultFocus();
+}
+
+std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> ViewAbstract::GetResponseRegionList(
+    FrameNode* frameNode)
+{
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> defaultRect;
+    CHECK_NULL_RETURN(frameNode, defaultRect);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, defaultRect);
+    return gestureHub->GetResponseRegionMap();
 }
 
 std::vector<DimensionRect> ViewAbstract::GetResponseRegion(FrameNode* frameNode)

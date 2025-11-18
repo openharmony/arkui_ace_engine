@@ -46,6 +46,8 @@ export class ComponentBase implements UICommonBase {
         this.isFirstBuild = false;
         ArkUINativeModule._ApplyModifierFinish(this.peer!.peer.ptr)
     }
+    public applyOptionsFinish(traceName: string): void {
+    }
     public applyAttributes(attrs: Object): void {
         this.applyAttributesFinish()
     }

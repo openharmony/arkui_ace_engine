@@ -222,7 +222,7 @@ constexpr int32_t DEFAULT_TAP_COUNT = 1;
 constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
-constexpr int32_t DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15;
+constexpr double DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15.0;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
@@ -326,7 +326,7 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
     bool repeatResult = false;
     int32_t durationNum = DEFAULT_LONG_PRESS_DURATION;
     bool isLimitFingerCount = false;
-    int32_t allowableMovementNum = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
+    double allowableMovementNum = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
@@ -350,7 +350,7 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
             isLimitFingerCount = limitFingerCount->ToBoolean();
         }
         if (allowableMovement->IsNumber()) {
-            int32_t allowableMoveNumber = allowableMovement->ToNumber<int32_t>();
+            double allowableMoveNumber = allowableMovement->ToNumber<double>();
             allowableMovementNum =
                 allowableMoveNumber <= 0 ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMoveNumber;
         }

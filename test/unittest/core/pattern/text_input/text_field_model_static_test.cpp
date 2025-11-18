@@ -1013,6 +1013,12 @@ HWTEST_F(TextFieldModelStaticTest, SetDefaultCancelIcon, TestSize.Level1)
     TextFieldModelStatic::SetDefaultCancelIcon(nullptr);
     // No assertion needed, just ensure no crash
 
+    // Test case 3: frameNode is not null and all components are valid, should set default cancel icon properties
+    TextFieldModelStatic::SetDefaultCancelIcon(node);
+    // No assertion needed
+    TextFieldModelStatic::SetDefaultCancelIcon(nullptr);
+    // just ensure no crash
+
     // All test cases executed without crash
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::NUMBER);
     EXPECT_TRUE(textFieldLayoutProperty->HasTextInputType());
@@ -1167,9 +1173,11 @@ HWTEST_F(TextFieldModelStaticTest, SetShowCounter, TestSize.Level1)
     auto node = Referenced::RawPtr(textFieldNode);
     TextFieldModelStatic::SetShowCounter(node, false);
     EXPECT_TRUE(textFieldLayoutProperty->HasShowCounter());
+    EXPECT_FALSE(textFieldLayoutProperty->GetShowCounterValue(true));
 
     TextFieldModelStatic::SetShowCounter(node, true);
     EXPECT_TRUE(textFieldLayoutProperty->HasShowCounter());
+    EXPECT_TRUE(textFieldLayoutProperty->GetShowCounterValue(false));
 
     TextFieldModelStatic::SetShowCounter(node, std::nullopt);
     EXPECT_FALSE(textFieldLayoutProperty->HasShowCounter());
@@ -1192,8 +1200,12 @@ HWTEST_F(TextFieldModelStaticTest, SetFontFeature, TestSize.Level1)
     ASSERT_NE(textFieldLayoutProperty, nullptr);
     auto node = Referenced::RawPtr(textFieldNode);
 
-    FONT_FEATURES_LIST featureList = {{"\"subs\" on", 1}};
-    TextFieldModelStatic::SetFontFeature(node, featureList);
+    FONT_FEATURES_LIST featureList1 = {{"\"subs\" on", 1}};
+    TextFieldModelStatic::SetFontFeature(node, featureList1);
+    EXPECT_TRUE(textFieldLayoutProperty->HasFontFeature());
+
+    FONT_FEATURES_LIST featureList2 = {{"", 1}};
+    TextFieldModelStatic::SetFontFeature(node, featureList2);
     EXPECT_TRUE(textFieldLayoutProperty->HasFontFeature());
     
     TextFieldModelStatic::SetFontFeature(node, std::nullopt);

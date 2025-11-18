@@ -2183,6 +2183,11 @@ HWTEST_F(SwiperPatternTestNg, PropertyPrefMonitor002, TestSize.Level1)
     pattern_->PropertyPrefMonitor(true);
     EXPECT_TRUE(pattern_->isInAutoPlay_);
     EXPECT_TRUE(pattern_->isAutoPlayAnimationRunning_);
+
+    pattern_->isInAutoPlay_ = false;
+    pattern_->PropertyPrefMonitor(false);
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
+    EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
 }
 
 /**

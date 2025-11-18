@@ -81,6 +81,7 @@ public:
     static void SetFontFeature(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
+    static void SetDividerColor(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);

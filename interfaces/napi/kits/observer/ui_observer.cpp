@@ -666,7 +666,7 @@ void UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInst
         holder.end());
 }
 
-void UIObserver::HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info)
+void UIObserver::HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const WindowSizeBreakpoint& info)
 {
     auto iter = specifiedWinSizeLayoutBreakpointListeners_.find(instanceId);
     if (iter == specifiedWinSizeLayoutBreakpointListeners_.end()) {

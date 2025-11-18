@@ -101,6 +101,7 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setWindowSceneOptions")) {
             const persistentId_casted = persistentId as (number)
             this.getPeer()?.setWindowSceneOptionsAttribute(persistentId_casted)
+            this.applyOptionsFinish('WindowSceneAttribute');
             return this
         }
         return this
@@ -121,6 +122,9 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -123,6 +123,8 @@ struct OverlayManagerInfo {
     bool enableBackPressedEvent = false;
 };
 
+enum class MenuLifeCycleEvent;
+
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
@@ -493,7 +495,7 @@ public:
         std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam,
         const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
+        std::function<RefPtr<UINode>(int32_t)>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t info)>&& onWillDismiss,
         std::function<void()>&& onWillAppear,  std::function<void()>&& onWillDisappear,
@@ -502,7 +504,7 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         const RefPtr<FrameNode>& targetNode);
     void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        std::function<RefPtr<UINode>(int32_t)>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t info)>&& onWillDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -760,6 +762,19 @@ public:
     bool IsTopOrder(std::optional<double> levelOrder);
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
     void PopToast(int32_t targetId);
+    void RegisterMenuLifeCycleCallback(int32_t targetId,
+        const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>&& callback)
+    {
+        menuLifeCycleCallbackMap_[targetId] = std::move(callback);
+    }
+    void UnRegisterMenuLifeCycleCallback(int32_t targetId)
+    {
+        menuLifeCycleCallbackMap_.erase(targetId);
+    }
+    std::function<void(const MenuLifeCycleEvent&)>& GetMenuLifeCycleCallback(int32_t targetId)
+    {
+        return menuLifeCycleCallbackMap_[targetId];
+    }
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -1056,6 +1071,7 @@ private:
     std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
     std::unordered_set<int32_t> onDisappearFilterIds_;
+    std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
 };
 } // namespace OHOS::Ace::NG
 

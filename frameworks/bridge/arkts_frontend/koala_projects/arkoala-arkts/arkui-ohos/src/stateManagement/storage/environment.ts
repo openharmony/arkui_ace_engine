@@ -87,9 +87,6 @@ class Environment {
     }
 
     public static envProp<T>(key: string, value: T): boolean {
-        if (!Environment.getOrCreate().keySet.has(key)) {
-            return false; // Invalid key
-        }
         return Environment.getOrCreate().envPropInternal<T>(key, value);
     }
 

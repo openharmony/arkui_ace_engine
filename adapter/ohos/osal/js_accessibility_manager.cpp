@@ -1861,6 +1861,7 @@ void JsAccessibilityManager::UpdateElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
+    CHECK_NULL_VOID(node);
     if (node->IsAccessibilityVirtualNode()) {
         auto parentUinode = node->GetVirtualNodeParent().Upgrade();
         CHECK_NULL_VOID(parentUinode);
@@ -3457,7 +3458,7 @@ bool JsAccessibilityManager::CheckHoverTransparentCallbackListEmpty(int32_t cont
 int64_t JsAccessibilityManager::CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node)
 {
     auto surfaceId = GetSurfaceIdByEmbedNode(node);
-    if (surfaceId == "0") {
+    if (surfaceId == "0" || surfaceId.empty()) {
         return INVALID_NODE_ID;
     }
 #ifdef WEB_SUPPORTED
@@ -6922,6 +6923,8 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
     }
 
     SearchWebElementInfoByAccessibilityIdNG(elementId, mode, infos, ngPipeline, webPattern);
+    TAG_LOGD(AceLogTag::ACE_WEB, "SearchWebElementInfo infos.size: %{public}zu",
+        infos.size());
     SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId, true);
 }
 

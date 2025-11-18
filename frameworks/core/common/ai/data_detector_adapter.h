@@ -123,6 +123,8 @@ public:
     {
         return taskId == taskId_;
     }
+    bool IsAskCeliaSupported();
+
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;

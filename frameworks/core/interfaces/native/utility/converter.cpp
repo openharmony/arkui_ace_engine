@@ -20,6 +20,7 @@
 #include "converter.h"
 
 #include "base/utils/string_utils.h"
+#include "base/geometry/response_region.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
@@ -54,8 +55,6 @@ namespace {
     constexpr double NUM_DOUBLE_100 = 100.;
     constexpr int32_t NUM_PERCENT_100 = 100;
     constexpr int32_t DEFAULT_MULTIPLE = 100;
-    constexpr float GRADIENT_MIN_POSITION = 0.0f;
-    constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
     constexpr uint16_t UTF16_BOM = 0xFEFF;
     constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
@@ -212,11 +211,9 @@ void AssignGradientColors(Gradient *gradient,
     for (int32_t i = 0; i < colors->length; i++) {
         auto color = OptConvert<Color>(colors->array[i].value0);
         auto position = Convert<float>(colors->array[i].value1);
-        if (LessOrEqual(position, GRADIENT_MIN_POSITION)) {
-            position = GRADIENT_DEFAULT_MIN_POSITION;
-        }
         if (color.has_value()) {
             NG::GradientColor gradientColor;
+            position = std::clamp(position, 0.0f, 1.0f);
             gradientColor.SetColor(color.value());
             gradientColor.SetHasValue(true);
             gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
@@ -225,7 +222,24 @@ void AssignGradientColors(Gradient *gradient,
     }
 }
 
-void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+void AssignGradientColors(Gradient *gradient,
+    const Array_Tuple_ResourceColor_F64 *colors)
+{
+    for (int32_t i = 0; i < colors->length; i++) {
+        auto color = OptConvert<Color>(colors->array[i].value0);
+        auto position = Convert<float>(colors->array[i].value1);
+        if (color.has_value()) {
+            NG::GradientColor gradientColor;
+            position = std::clamp(position, 0.0f, 1.0f);
+            gradientColor.SetColor(color.value());
+            gradientColor.SetHasValue(true);
+            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
+            gradient->AddColor(gradientColor);
+        }
+    }
+}
+
+void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
     const GradientDirection &direction)
 {
     switch (direction) {
@@ -526,6 +540,12 @@ std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
         } else {
             LOGE("ResourceConverter::GetDimensionInner Unknown string value");
         }
+    } else if (type_ == ResourceType::STRING) {
+        if (auto str = GetStringResource(); str) {
+            return StringUtils::StringToDimension(*str, true);
+        } else {
+            LOGE("ResourceConverter::ToDimension Unknown string value");
+        }
     }
     return std::nullopt;
 }
@@ -533,16 +553,14 @@ std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
 std::optional<CalcLength> ResourceConverter::ToCalcLength()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
-    if (type_ == ResourceType::STRING) {
-        auto str = GetStringResource();
-        if (str) {
-            return CalcLength(*str);
-        }
-        LOGE("ResourceConverter::ToCalcLength Unknown resource value");
+    auto dimOpt = ToCalcDimension();
+    if (!dimOpt.has_value()) {
         return std::nullopt;
     }
-    auto dimOpt = ToDimension();
-    return dimOpt ? std::make_optional(CalcLength(*dimOpt)) : std::nullopt;
+    if (dimOpt.value().Unit() == DimensionUnit::CALC) {
+        return std::make_optional(CalcLength(dimOpt.value().CalcValue()));
+    }
+    return std::make_optional(CalcLength(dimOpt.value()));
 }
 
 std::optional<float> ResourceConverter::ToFloat()
@@ -976,6 +994,12 @@ CalcDimension Convert(const Ark_Number& src)
 }
 
 template<>
+CalcDimension Convert(const Ark_Float64& src)
+{
+    return Convert<Dimension>(src);
+}
+
+template<>
 CalcLength Convert(const Ark_Number& src)
 {
     return CalcLength(Convert<Dimension>(src));
@@ -1011,6 +1035,13 @@ Color Convert(const Ark_Number& src)
 
 template<>
 Color Convert(const Ark_Int32& src)
+{
+    uint32_t value = static_cast<uint32_t>(src);
+    return Color(ColorAlphaAdapt(value));
+}
+
+template<>
+Color Convert(const Ark_Float64& src)
 {
     uint32_t value = static_cast<uint32_t>(src);
     return Color(ColorAlphaAdapt(value));
@@ -1388,6 +1419,28 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
 
 template<>
 GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
+{
+    GradientColor gradientColor;
+    gradientColor.SetHasValue(false);
+
+    // color
+    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
+    if (colorOpt) {
+        gradientColor.SetColor(colorOpt.value());
+        gradientColor.SetHasValue(true);
+    }
+
+    // stop value
+    float value = Converter::Convert<float>(src.value1);
+    value = std::clamp(value, 0.0f, 1.0f);
+    //  [0, 1] -> [0, 100.0];
+    gradientColor.SetDimension(CalcDimension(value * Converter::PERCENT_100, DimensionUnit::PERCENT));
+
+    return gradientColor;
+}
+
+template<>
+GradientColor Convert(const Ark_Tuple_ResourceColor_F64& src)
 {
     GradientColor gradientColor;
     gradientColor.SetHasValue(false);
@@ -2342,6 +2395,48 @@ DimensionRect Convert(const Ark_Rectangle &src)
 }
 
 template<>
+ResponseRegion Convert(const Ark_ResponseRegion &src)
+{
+    ResponseRegion dst;
+    if (auto dim = OptConvert<CalcDimension>(src.width); dim) {
+        if (dim.has_value()) {
+            dst.SetWidth(*dim);
+        } else {
+            dst.SetWidth(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
+        }
+    }
+    if (auto dim = OptConvert<CalcDimension>(src.height); dim) {
+        if (dim.has_value()) {
+            dst.SetHeight(*dim);
+        } else {
+            dst.SetHeight(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
+        }
+    }
+    if (auto dim = OptConvert<CalcDimension>(src.x); dim) {
+        if (dim.has_value()) {
+            dst.SetX(*dim);
+        } else {
+            dst.SetX(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
+        }
+    }
+    if (auto dim = OptConvert<CalcDimension>(src.y); dim) {
+        if (dim.has_value()) {
+            dst.SetY(*dim);
+        } else {
+            dst.SetY(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
+        }
+    }
+    if (auto dim = OptConvert<ResponseRegionSupportedTool>(src.tool); dim) {
+        if (dim.has_value()) {
+            dst.SetTool(*dim);
+        } else {
+            dst.SetTool(ResponseRegionSupportedTool::FINGER);
+        }
+    }
+    return dst;
+}
+
+template<>
 EffectOption Convert(const Ark_BackgroundEffectOptions& src)
 {
     EffectOption dst;
@@ -3185,7 +3280,7 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     if (optOnAppear.has_value()) {
         selectMenuParam.onAppear =
             [arkCallback = CallbackHelper(optOnAppear.value())](int32_t start, int32_t end) {
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
         };
     }
     auto optOnDisappear = Converter::GetOpt(src.onDisappear);
@@ -3199,14 +3294,14 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     if (optOnMenuShow.has_value()) {
         selectMenuParam.onMenuShow =
             [arkCallback = CallbackHelper(optOnMenuShow.value())](int32_t start, int32_t end) {
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
         };
     }
     auto optOnMenuHide = Converter::OptConvert<MenuCallback>(src.onMenuHide);
     if (optOnMenuHide.has_value()) {
         selectMenuParam.onMenuHide =
             [arkCallback = CallbackHelper(optOnMenuHide.value())](int32_t start, int32_t end) {
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
         };
     }
     auto previewMenuOptions = Converter::OptConvert<NG::PreviewMenuOptions>(src.previewMenuOptions);
@@ -3289,7 +3384,7 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 template<>
 TouchLocationInfo Convert(const Ark_TouchObject& src)
 {
-    TouchLocationInfo dst(src.id.i32);
+    TouchLocationInfo dst(src.id);
     double windowX = Converter::Convert<double>(src.windowX);
     double windowY = Converter::Convert<double>(src.windowY);
     double x = Converter::Convert<double>(src.x);
@@ -3303,8 +3398,8 @@ TouchLocationInfo Convert(const Ark_TouchObject& src)
         PipelineBase::Vp2PxWithCurrentDensity(y)));
     dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
         PipelineBase::Vp2PxWithCurrentDensity(displayY)));
-    auto pressedTimeOpt = Converter::OptConvert<int32_t>(src.pressedTime);
-    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeOpt.value_or(0)));
+    auto pressedTimeOpt = Converter::OptConvert<int64_t>(src.pressedTime);
+    std::chrono::nanoseconds nanoseconds(pressedTimeOpt.value_or(0));
     TimeStamp time(nanoseconds);
     dst.SetPressedTime(time);
     dst.SetForce(Converter::OptConvert<float>(src.pressure).value_or(0.0f));
@@ -3502,6 +3597,14 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
         dst = peer->levelOrder->GetOrder();
     }
 }
+template<>
+void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
+{
+    auto peer = src;
+    if (peer && peer->levelOrder) {
+        dst = peer->levelOrder->GetOrder();
+    }
+}
 
 template<>
 void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
@@ -3577,6 +3680,60 @@ void AssignCast(std::optional<Orientation>& dst, const Ark_window_Orientation& s
             dst = Orientation::USER_ROTATION_LANDSCAPE_INVERTED; break;
         case ARK_WINDOW_ORIENTATION_FOLLOW_DESKTOP: dst = Orientation::FOLLOW_DESKTOP; break;
         default: LOGE("Unexpected enum value in Ark_window_Orientation: %{public}d", src);
+    }
+}
+
+void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<float>& angle,
+    float defaultValue)
+{
+    if (src.tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    ConvertAngleWithDefault(src.value, angle, defaultValue);
+}
+
+void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle,
+    float defaultValue)
+{
+    if (src.selector == 0) {
+        angle = Converter::Convert<float>(src.value0);
+    } else if (src.selector == 1) {
+        auto str = Converter::Convert<std::string>(src.value1);
+        double temp = static_cast<double>(defaultValue);
+        if (StringUtils::StringToDegree(str, temp)) {
+            angle = static_cast<float>(temp);
+        } else {
+            angle = defaultValue;
+        }
+    } else {
+        LOGW("unknown branch in %{public}s, %{public}d", __func__, src.selector);
+    }
+}
+
+// Note: These two overloads can be removed if Ark_LinearGradientOptions::angle type changes from
+// Opt_Union_Number_String to Opt_Union_F64_String
+void ConvertAngleWithDefault(const Opt_Union_Number_String& src, std::optional<float>& angle, float defaultValue)
+{
+    if (src.tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    ConvertAngleWithDefault(src.value, angle, defaultValue);
+}
+
+void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<float>& angle, float defaultValue)
+{
+    if (src.selector == 0) {
+        angle = Converter::Convert<float>(src.value0);
+    } else if (src.selector == 1) {
+        auto str = Converter::Convert<std::string>(src.value1);
+        double temp = static_cast<double>(defaultValue);
+        if (StringUtils::StringToDegree(str, temp)) {
+            angle = static_cast<float>(temp);
+        } else {
+            angle = defaultValue;
+        }
+    } else {
+        LOGW("unknown branch in %{public}s, %{public}d", __func__, src.selector);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

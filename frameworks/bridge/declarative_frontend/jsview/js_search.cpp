@@ -151,6 +151,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
     JSClass<JSSearch>::StaticMethod("minFontScale", &JSSearch::SetMinFontScale);
     JSClass<JSSearch>::StaticMethod("maxFontScale", &JSSearch::SetMaxFontScale);
+    JSClass<JSSearch>::StaticMethod("dividerColor", &JSSearch::SetDividerColor);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
     JSClass<JSSearch>::StaticMethod("halfLeading", &JSSearch::SetHalfLeading);
@@ -523,6 +524,9 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform() && srcObject) {
         RegisterResource<std::string>("cancelButtonIconSrc", srcObject, iconSrc);
     }
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
 
     // set icon color
     Color iconColor;
@@ -533,10 +537,10 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
         ParseJsColor(iconColorProp, iconColor, colorObject)) {
         SearchModel::GetInstance()->SetCancelIconColor(iconColor);
-        cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
+        cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, bundleName, moduleName);
     } else {
         SearchModel::GetInstance()->ResetCancelIconColor();
-        cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
+        cancelIconOptions = NG::IconOptions(iconSize, iconSrc, bundleName, moduleName);
     }
     if (SystemProperties::ConfigChangePerform() && colorObject) {
         RegisterResource<Color>("cancelButtonIconColor", colorObject, iconColor);
@@ -1504,6 +1508,24 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetTextDecorationColor(result);
     if (textDecorationStyle) {
         SearchModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
+}
+
+void JSSearch::SetDividerColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color color;
+    RefPtr<ResourceObject> resObj;
+    UnregisterResource("dividerColor");
+    if (ParseJsColor(info[0], color, resObj)) {
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<Color>("dividerColor", resObj, color);
+        }
+        SearchModel::GetInstance()->SetDividerColor(color);
+    } else {
+        SearchModel::GetInstance()->ResetDividerColor();
     }
 }
 

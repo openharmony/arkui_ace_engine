@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
+#include "core/interfaces/native/implementation/spring_back_action_peer.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
@@ -94,29 +95,27 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
         sheetOptions.onWillSpringBackWhenDismiss);
     if (onWillSpringBackWhenDismiss) {
         callbacks.sheetSpringBack = [arkCallback = CallbackHelper(onWillSpringBackWhenDismiss.value())]() {
-            Ark_SpringBackAction parameter;
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::SheetSpringBackStatic));
-            parameter.springBack = keeper.ArkValue();
+            Ark_SpringBackAction parameter = &g_springBackPeer;
             arkCallback.Invoke(parameter);
         };
     }
-    auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
+    auto onHeightDidChange = Converter::OptConvert<Callback_I32_Void>(sheetOptions.onHeightDidChange);
     if (onHeightDidChange) {
         callbacks.onHeightDidChange = [arkCallback = CallbackHelper(onHeightDidChange.value())](int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+            arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value));
         };
     }
-    auto onWidthDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onWidthDidChange);
+    auto onWidthDidChange = Converter::OptConvert<Callback_I32_Void>(sheetOptions.onWidthDidChange);
     if (onWidthDidChange) {
         callbacks.onWidthDidChange = [arkCallback = CallbackHelper(onWidthDidChange.value())](int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+            arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value));
         };
     }
-    auto onDetentsDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onDetentsDidChange);
+    auto onDetentsDidChange = Converter::OptConvert<Callback_I32_Void>(sheetOptions.onDetentsDidChange);
     if (onDetentsDidChange) {
         callbacks.onDetentsDidChange = [arkCallback = CallbackHelper(onDetentsDidChange.value())](
             int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+            arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value));
         };
     }
 }

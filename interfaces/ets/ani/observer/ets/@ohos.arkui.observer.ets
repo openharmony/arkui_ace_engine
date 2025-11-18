@@ -51,47 +51,16 @@ import hilog from '@ohos.hilog'
         observerOptions: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationSwitchInfo>
     ): void;
+
+    export native function onTabChange(callback: Callback<ObserverOptions>): void;
+    export native function offTabChange(callback?: Callback<ObserverOptions>): void;
+    export native function onTabChange(options: ObserverOptions, callback: Callback<ObserverOptions>): void;
+    export native function offTabChange(options: ObserverOptions, callback?: Callback<ObserverOptions>): void;
+
     export class DensityInfo {
         density: number;
     }
-    export default interface UIObserver
-    {
-        on(type: string, callback: object) : void;
-        off(type: string, callback?: object) : void;
-        on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
-        off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
-
-        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
-
-        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
-        onNavDestinationUpdate(
-            options: NavDestinationSwitchObserverOptions,
-            callback: Callback<NavDestinationInfo>
-        ): void;
-        offNavDestinationUpdate(
-            options: NavDestinationSwitchObserverOptions,
-            callback?: Callback<NavDestinationInfo>
-        ): void;
-        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
-        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
-        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
-        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
-        onNavDestinationSwitch(
-            observerOptions: NavDestinationSwitchObserverOptions,
-            callback: Callback<NavDestinationSwitchInfo>
-          ): void;
-        offNavDestinationSwitch(
-            observerOptions: NavDestinationSwitchObserverOptions,
-            callback?: Callback<NavDestinationSwitchInfo>
-          ): void;
-
-        onTabChange(callback: object): void;
-        offTabChange(callback?: object): void;
-        onTabChange(options: ObserverOptions, callback: object): void;
-        offTabChange(options: ObserverOptions, callback?: object): void;
-    }
-    
-    class UIObserverImpl implements UIObserver
+    export class UIObserver
     {
         private nativeObserverAddr:long = 0;
         
@@ -100,10 +69,10 @@ import hilog from '@ohos.hilog'
                 this.nativeObserverAddr = nativeAddr;
             }
         }
-        
+
         public native on(type: string, callback: object) : void;
         public native off(type: string, callback?: object) : void;
-        
+
         public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
@@ -133,10 +102,22 @@ import hilog from '@ohos.hilog'
             callback?: Callback<NavDestinationSwitchInfo>
           ): void;
 
-        public native onTabChange(callback: object): void;
-        public native offTabChange(callback?: object): void;
-        public native onTabChange(options: ObserverOptions, callback: object): void;
-        public native offTabChange(options: ObserverOptions, callback?: object): void;
+        public native onTabChange(callback: Callback<TabContentInfo>): void;
+        public native offTabChange(callback?: Callback<TabContentInfo>): void;
+        public native onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        public native offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        public native onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        public native onDensityUpdate(callback: Callback<DensityInfo>): void;
+        public native offDensityUpdate(callback?: Callback<DensityInfo>): void;
+        public native onWillDraw(callback: Callback<void>): void;
+        public native offWillDraw(callback?: Callback<void>): void;
+        public native onDidLayout(callback: Callback<void>): void;
+        public native offDidLayout(callback?: Callback<void>): void;
     }
 
     export interface NavigationInfo {
@@ -245,6 +226,15 @@ import hilog from '@ohos.hilog'
                 throw Error("state in NavDestinationInfo type Error");
             }
         }
+        static castToNavDestinationMode(value: number): NavDestinationMode {
+            if (value === 0) {
+                return NavDestinationMode.STANDARD;
+            } else if (value === 1) {
+                return NavDestinationMode.DIALOG;
+            } else {
+                throw Error("mode in NavDestinationInfo type Error");
+            }
+        }
         static transferStatic(input: Any): Object {
             let dynamicValue = ESValue.wrap(input);
             let staticValue = new NavDestinationInfoImpl();
@@ -294,6 +284,22 @@ import hilog from '@ohos.hilog'
             }
             staticValue.navDestinationId = navDestinationId.toString();
 
+            let uniqueId = dynamicValue.getProperty("uniqueId");
+            if (!uniqueId.isNumber()) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            } else if (!(uniqueId.isUndefined() || uniqueId.isNull())) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            }
+            staticValue.uniqueId = uniqueId.toNumber() as int;
+
+            let mode = dynamicValue.getProperty("mode");
+            if (!mode.isNumber()) {
+                throw Error("mode in NavDestinationInfo type Error");
+            } else if (!(mode.isUndefined() || mode.isNull())) {
+                throw Error("mode in NavDestinationInfo type Error");
+            }
+            staticValue.mode = NavDestinationInfoImpl.castToNavDestinationMode(mode.toNumber());
+
             return staticValue;
         }
 
@@ -316,6 +322,16 @@ import hilog from '@ohos.hilog'
                 dynamicValue.setProperty('param', ESValue.wrap(staticValue.param));
             }
             dynamicValue.setProperty('navDestinationId', ESValue.wrap(staticValue.navDestinationId));
+            if (staticValue.uniqueId === null || staticValue.uniqueId === undefined) {
+                dynamicValue.setProperty('uniqueId', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
+            if (staticValue.mode === null || staticValue.mode === undefined) {
+                dynamicValue.setProperty('mode', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('mode', ESValue.wrapNumber(staticValue.mode!));
+            }
             return dynamicValue as Any;
         }
     }
@@ -432,21 +448,21 @@ import hilog from '@ohos.hilog'
 
     export interface TabContentInfo {
         tabContentId: string;
-        tabContentUniqueId: number;
+        tabContentUniqueId: int;
         state: TabContentState;
-        index: number;
+        index: int;
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         lastIndex?: int;
     }
 
     export class TabContentInfoImpl implements TabContentInfo {
         tabContentId: string;
-        tabContentUniqueId: number;
+        tabContentUniqueId: int;
         state: TabContentState;
-        index: number;
+        index: int;
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         lastIndex?: int;
         static setTabContentInfoImplLastIndex(contentInfo: TabContentInfoImpl, value: int): void {
             contentInfo.lastIndex = value;

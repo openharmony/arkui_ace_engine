@@ -1841,6 +1841,7 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         if (this.checkPriority("setTextInputOptions")) {
             const value_casted = value as (TextInputOptions | undefined)
             this.getPeer()?.setTextInputOptionsAttribute(value_casted)
+            this.applyOptionsFinish('TextInputAttribute');
             return this
         }
         return this
@@ -2431,6 +2432,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

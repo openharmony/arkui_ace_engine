@@ -710,6 +710,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
 void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
     int32_t appearingTimeWithContinuousOperation, bool isSubwindow)
 {
+    CHECK_NULL_VOID(window_);
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show tips ng enter, subwindowId: %{public}d", window_->GetWindowId());
     auto popup = popupInfo.popupNode;
     CHECK_NULL_VOID(popup);
@@ -728,7 +729,6 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     CHECK_NULL_VOID(overlayManager);
     ResizeWindow();
     ShowWindow(popupInfo.focusable);
-    CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
     overlayManager->ShowTips(targetId, popupInfo, appearingTime, appearingTimeWithContinuousOperation, isSubwindow);
@@ -737,9 +737,11 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
 
 void SubwindowOhos::HideTipsNG(int32_t targetId, int32_t disappearingTime)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "hide tips ng enter, subwindowId: %{public}d, subwindowName: %{public}s",
-        window_->GetWindowId(), window_->GetWindowName().c_str());
+    if (window_) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+            "hide tips ng enter, subwindowId: %{public}d, subwindowName: %{public}s",
+            window_->GetWindowId(), window_->GetWindowName().c_str());
+    }
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1276,15 +1278,14 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
 }
 
 void SubwindowOhos::ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
-    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange,
-    std::function<void(const float)>&& onWidthDidChange,
-    std::function<void(const float)>&& onTypeDidChange,
-    std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode)
+    std::function<RefPtr<NG::UINode>(int32_t)>&& buildNodeFunc,
+    std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc, NG::SheetStyle& sheetStyle,
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+    std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+    const RefPtr<NG::FrameNode>& targetNode)
 {
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);

@@ -249,8 +249,8 @@ ArkUIAniPageTransitionOption ParseTransitionOption(ani_env* env, ani_object opti
     }
     ani_ref durationRef;
     if ((status = env->Object_GetPropertyByName_Ref(options, "duration", &durationRef)) == ANI_OK) {
-        double duration = defaultDuration;
-        if (AniUtils::GetOptionalDouble(env, durationRef, duration)) {
+        int32_t duration = defaultDuration;
+        if (AniUtils::GetOptionalInt(env, durationRef, duration)) {
             option.duration = static_cast<int32_t>(duration);
             if (option.duration < 0) {
                 option.duration = defaultDuration;
@@ -261,8 +261,8 @@ ArkUIAniPageTransitionOption ParseTransitionOption(ani_env* env, ani_object opti
     }
     ani_ref delayRef = 0;
     if ((status = env->Object_GetPropertyByName_Ref(options, "delay", &delayRef)) == ANI_OK) {
-        double delay = 0.0;
-        if (AniUtils::GetOptionalDouble(env, delayRef, delay)) {
+        int32_t delay = 0.0;
+        if (AniUtils::GetOptionalInt(env, delayRef, delay)) {
             option.delay = static_cast<int32_t>(delay);
         }
     } else {

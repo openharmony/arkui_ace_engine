@@ -146,6 +146,16 @@ void ProgressModelStatic::SetBorderColor(FrameNode* frameNode, const std::option
     }
 }
 
+void ProgressModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER,
+            frameNode);
+    }
+}
+
 void ProgressModelStatic::SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
 {
     if (value) {
@@ -180,15 +190,17 @@ void ProgressModelStatic::SetText(FrameNode* frameNode, const std::optional<std:
     if (!value.has_value()) {
         auto maxValue = progressPaintProperty->GetMaxValue();
         auto curValue = progressPaintProperty->GetValue();
-        int32_t curPercent = curValue.value() * 100 / maxValue.value();
-        std::string number = std::to_string(curPercent) + "%";
-        bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
-        if (!isShowText) {
-            number = "";
+        if (maxValue.has_value() && curValue.has_value()) {
+            int32_t curPercent = curValue.value() * 100 / maxValue.value();
+            std::string number = std::to_string(curPercent) + "%";
+            bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
+            if (!isShowText) {
+                number = "";
+            }
+            textLayoutProperty->UpdateContent(number);
+            context = number;
+            pattern->SetTextFromUser(false);
         }
-        textLayoutProperty->UpdateContent(number);
-        context = number;
-        pattern->SetTextFromUser(false);
     } else {
         textLayoutProperty->UpdateContent(value.value());
         context = value.value();

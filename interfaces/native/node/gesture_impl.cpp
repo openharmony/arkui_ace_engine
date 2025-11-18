@@ -609,7 +609,7 @@ int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* reco
 }
 
 ArkUI_ErrorCode OH_ArkUI_LongPressGesture_SetAllowableMovement(
-    ArkUI_GestureRecognizer* recognizer, int32_t allowableMovement)
+    ArkUI_GestureRecognizer* recognizer, double allowableMovement)
 {
     if (!recognizer) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -624,7 +624,7 @@ ArkUI_ErrorCode OH_ArkUI_LongPressGesture_SetAllowableMovement(
             ->setLongPressGestureAllowableMovement(gesture, allowableMovement));
 }
 
-int32_t OH_ArkUI_LongPressGesture_GetAllowableMovement(ArkUI_GestureRecognizer* recognizer, int32_t* allowableMovement)
+int32_t OH_ArkUI_LongPressGesture_GetAllowableMovement(ArkUI_GestureRecognizer* recognizer, double* allowableMovement)
 {
     if (!recognizer || !allowableMovement) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;

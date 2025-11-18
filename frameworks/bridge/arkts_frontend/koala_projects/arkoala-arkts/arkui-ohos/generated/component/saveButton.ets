@@ -179,6 +179,18 @@ export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
         ArkUIGeneratedNativeModule._SaveButtonAttribute_setStateEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setUserCancelEventAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SaveButtonAttribute_setUserCancelEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SaveIconStyle {
     FULL_FILLED = 0,
@@ -207,7 +219,8 @@ export interface SaveButtonOptions {
 }
 export enum SaveButtonOnClickResult {
     SUCCESS = 0,
-    TEMPORARY_AUTHORIZATION_FAILED = 1
+    TEMPORARY_AUTHORIZATION_FAILED = 1,
+    CANCELED_BY_USER = 2
 }
 export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError) => void;
 export interface SaveButtonAttribute extends SecurityComponentMethod {
@@ -232,6 +245,9 @@ export interface SaveButtonAttribute extends SecurityComponentMethod {
     stateEffect(value: boolean | undefined): this {
         throw new Error("Unimplemented method stateEffect")
     }
+    userCancelEvent(value: boolean | undefined): this {
+        throw new Error("Unimplemented method userCancelEvent")
+    }
     attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -243,6 +259,7 @@ export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implemen
     iconSize_value?: Dimension | SizeOptions | undefined
     iconBorderRadius_value?: Dimension | BorderRadiuses | undefined
     stateEffect_value?: boolean | undefined
+    userCancelEvent_value?: boolean | undefined
     setSaveButtonOptions(options?: SaveButtonOptions): this {
         return this
     }
@@ -264,6 +281,9 @@ export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implemen
     stateEffect(value: boolean | undefined): this {
         return this
     }
+    userCancelEvent(value: boolean | undefined): this {
+        return this
+    }
     public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -280,6 +300,7 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         if (this.checkPriority("setSaveButtonOptions")) {
             const options_casted = options as (SaveButtonOptions | undefined)
             this.getPeer()?.setSaveButtonOptionsAttribute(options_casted)
+            this.applyOptionsFinish('SaveButtonAttribute');
             return this
         }
         return this
@@ -332,6 +353,14 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         }
         return this
     }
+    public userCancelEvent(value: boolean | undefined): this {
+        if (this.checkPriority("userCancelEvent")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setUserCancelEventAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
         hookSaveButtonAttributeModifier(this, value);
         return this
@@ -339,6 +368,9 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

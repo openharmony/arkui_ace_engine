@@ -202,6 +202,11 @@ public:
         SetHoverState(state_, host);
     }
 
+    void SetIsNeedFocusStyle(bool isNeedFocusStyle)
+    {
+        isNeedFocusStyle_ = isNeedFocusStyle;
+    }
+
     void SetHoverState(const RatingAnimationType& state, const RefPtr<FrameNode>& host)
     {
         if (state_ == state) {
@@ -249,6 +254,7 @@ private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
     bool isFocus_ = false;
+    bool isNeedFocusStyle_ = false;
     bool indicator_ = false;
     bool isImageInfoFromTheme_ = false;
     Dimension distance_ = 4.0_vp;

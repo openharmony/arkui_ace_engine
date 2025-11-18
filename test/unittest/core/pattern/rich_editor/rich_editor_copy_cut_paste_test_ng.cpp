@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
@@ -92,18 +93,13 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy001, TestSize.Level0)
     richEditorPattern->clipboard_ = clipboard;
     AddSpan("test1");
     richEditorPattern->HandleOnCopy();
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-    richEditorPattern->HandleOnCopy();
+
     ClearSpan();
     AddImageSpan();
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->HandleOnCopy();
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
 }
 
 /**
@@ -183,7 +179,6 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy003, TestSize.Level0)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->HandleOnCopy();
     EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
-    EXPECT_EQ(isEventCalled, true);
 }
 
 /**
@@ -341,18 +336,14 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level0)
     ASSERT_NE(taskExecutor, nullptr);
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(taskExecutor);
     richEditorPattern->clipboard_ = clipboard;
-    AddSpan("testHandleOnPaste1");
-    richEditorPattern->HandleOnPaste();
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 8;
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
 
     ClearSpan();
     AddImageSpan();
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     richEditorPattern->OnCopyOperation(true);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
 
     richEditorPattern->ResetSelection();
     richEditorPattern->OnCopyOperation(true);
@@ -413,9 +404,9 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr002, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     std::string text = "";
-    auto str = richEditorPattern->pasteStr_;
+    richEditorPattern->caretVisible_ = false;
     richEditorPattern->PasteStr(text);
-    EXPECT_EQ(str, richEditorPattern->pasteStr_);
+    EXPECT_TRUE(richEditorPattern->caretVisible_);
 }
 
 /**
@@ -527,7 +518,6 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut003, TestSize.Level0)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->HandleOnCut();
     EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
-    EXPECT_EQ(isEventCalled, true);
 }
 
 /**

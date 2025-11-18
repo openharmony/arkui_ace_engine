@@ -25,6 +25,7 @@
 #include "test/mock/core/rosen/testing_bitmap.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
 #include "core/components_ng/pattern/model/model_layout_algorithm.h"
 #include "core/components_ng/pattern/model/model_light.h"

@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "../../Graphics"
-import { BorderStyle } from "../../component/enums"
-import { RenderNode } from "../../RenderNode"
+import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "../Graphics"
+import { BorderStyle } from "../component/enums"
+import { RenderNode } from "../RenderNode"
 import { ArkUIAniModule } from "arkui.ani"
 import hilog from '@ohos.hilog'
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { int16, uint32 } from "@koalaui/compat"
-import { ShapeClipTransfer } from "./ShapeClipTransfer"
-import { ShapeMaskTransfer } from "./ShapeMaskTransfer"
-import { TransferUtil } from "./TransferUtil"
+import { ShapeClipTransfer } from "../handwritten/transfer/ShapeClipTransfer"
+import { ShapeMaskTransfer } from "../handwritten/transfer/ShapeMaskTransfer"
+import { TransferUtil } from "../handwritten/transfer/TransferUtil"
 
 export class RenderNodeTransfer {
     private mapNodeStatic = new Map<int, RenderNode>();
@@ -32,27 +32,28 @@ export class RenderNodeTransfer {
     private transProperty2Static(inVal: ESValue, rn: RenderNode): void {
         rn.lengthMetricsUnit = TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue") as int as LengthMetricsUnit;
         let styleVal = TransferUtil.getPropBorderStyle(inVal, "borderStyleValue");
-        rn.borderStyle = {left: undefined, top: undefined, right: undefined, bottom: undefined} as NodeEdges<BorderStyle>;
+        if (styleVal) {
+            rn.borderStyle = styleVal as NodeEdges<BorderStyle>;
+        }
         let borderWidthVal = TransferUtil.getPropBorderNoExcept(inVal, "borderWidthValue");
-        rn.borderWidth = borderWidthVal as NodeEdges<number>;
-
+        if (borderWidthVal) {
+            rn.borderWidth = borderWidthVal as NodeEdges<number>;
+        }
         let borderColorVal = TransferUtil.getPropEdgesColor(inVal, "borderColorValue");
-        rn.borderColor = borderColorVal as NodeEdges<number>;
-
+        if (borderColorVal) {
+            rn.borderColor = borderColorVal as NodeEdges<number>;
+        }
         let borderRadiusVal = TransferUtil.getPropCornersNoExcept(inVal, "borderRadiusValue");
-        rn.borderRadius = borderRadiusVal as Corners<number>;
-
+        if (borderRadiusVal) {
+            rn.borderRadius = borderRadiusVal as Corners<number>;
+        }
         let maskVal = TransferUtil.getPropShapeMask(inVal, "shapeMaskValue");
-        if (maskVal !== undefined) {
+        if (maskVal) {
             rn.shapeMask = maskVal as ShapeMask;
-        } else {
-            rn.shapeMask = new ShapeMask();
         }
         let clipVal = TransferUtil.getPropShapeClip(inVal, "shapeClipValue");
-        if (clipVal !== undefined) {
+        if (clipVal) {
             rn.shapeClip = clipVal as ShapeClip;
-        } else {
-            rn.shapeClip = new ShapeClip();
         }
         let colorVal = TransferUtil.getPropColorInt(inVal, "backgroundColorValue");
         if (colorVal !== undefined) {
@@ -163,12 +164,24 @@ export class RenderNodeTransfer {
     private transferProperty2Dynamic(inRn: RenderNode, outJs: ESValue) {
         // [peer, type, nodePtrVal, nodeId, _nativeRef ] init on constructor, apiTargetVersion not need
         TransferUtil.setPropNumber('lengthMetricsUnitValue', inRn.lengthMetricsUnit, outJs);
-        TransferUtil.setPropEdgeStyle('borderStyleValue', inRn.borderStyle, outJs);
-        TransferUtil.setPropEdges('borderWidthValue', inRn.borderWidth, outJs);
-        TransferUtil.setPropEdgesColor('borderColorValue', inRn.borderColor, outJs);
-        TransferUtil.setPropCorners('borderRadiusValue', inRn.borderRadius, outJs);
-        TransferUtil.setPropShapeMask('shapeMaskValue', inRn.shapeMask, outJs);
-        TransferUtil.setPropShapeClip('shapeClipValue', inRn.shapeClip, outJs);
+        if (inRn.borderStyle) {
+            TransferUtil.setPropEdgeStyle('borderStyleValue', inRn.borderStyle!, outJs);
+        }
+        if (inRn.borderWidth) {
+            TransferUtil.setPropEdges('borderWidthValue', inRn.borderWidth!, outJs);
+        }
+        if (inRn.borderColor) {
+            TransferUtil.setPropEdgesColor('borderColorValue', inRn.borderColor!, outJs);
+        }
+        if (inRn.borderRadius) {
+            TransferUtil.setPropCorners('borderRadiusValue', inRn.borderRadius!, outJs);
+        }
+        if (inRn.shapeMask) {
+            TransferUtil.setPropShapeMask('shapeMaskValue', inRn.shapeMask!, outJs);
+        }
+        if (inRn.shapeClip) {
+            TransferUtil.setPropShapeClip('shapeClipValue', inRn.shapeClip!, outJs);
+        }
         TransferUtil.setPropColorLong('backgroundColorValue', inRn.backgroundColor, outJs);
         TransferUtil.setPropBool('clipToFrameValue', inRn.clipToFrame, outJs);
         TransferUtil.setPropFrame('frameValue', inRn.frame, outJs);

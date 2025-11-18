@@ -107,6 +107,7 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         if (this.checkPriority("setPathOptions")) {
             const options_casted = options as (PathOptions | undefined)
             this.getPeer()?.setPathOptionsAttribute(options_casted)
+            this.applyOptionsFinish('PathAttribute');
             return this
         }
         return this
@@ -126,6 +127,9 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

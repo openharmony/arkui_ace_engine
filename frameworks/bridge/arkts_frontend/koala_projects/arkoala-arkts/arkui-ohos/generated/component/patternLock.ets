@@ -495,6 +495,7 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setPatternLockOptions")) {
             const controller_casted = controller as (PatternLockController | undefined)
             this.getPeer()?.setPatternLockOptionsAttribute(controller_casted)
+            this.applyOptionsFinish('PatternLockAttribute');
             return this
         }
         return this
@@ -610,6 +611,9 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

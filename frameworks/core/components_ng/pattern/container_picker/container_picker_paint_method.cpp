@@ -86,9 +86,12 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorBackground(PaintWrapper*
     SetDefaultIndicatorBackground(pickerNode, backgroundColor, borderRadius);
 
     float height = PICKER_ITEM_HEIGHT.ConvertToPx();
-    float width = pickerRect.Width();
+    PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
+    RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
+        pickerRect.Width() - padding.Width(), pickerRect.Height() - padding.Height() };
+    float width = contentRect.Width();
     float maxRadius = std::min(height, width) / 2;
-    float left = 0.0f;
+    float left = contentRect.GetX();
     float top = pickerRect.Height() / 2 - height / 2;
     auto topLeft = GreatNotEqual(borderRadius.radiusTopLeft->ConvertToPx(), maxRadius) ?
         maxRadius : borderRadius.radiusTopLeft->ConvertToPx();
@@ -147,16 +150,19 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorDivider(PaintWrapper* pa
     auto dividerLength = contentRect.Width();
     CheckMarginAndLength(dividerLength, startMargin, endMargin);
     if (GreatOrEqual(contentRect.Height(), PICKER_ITEM_HEIGHT.ConvertToPx()) && GreatNotEqual(strokeWidth, 0.0)) {
-        DividerPainter dividerPainter(strokeWidth, dividerLength, false, dividerColor, LineCap::SQUARE);
+        PickerDividerPaintInfo dividerInfo;
+        dividerInfo.dividerColor = dividerColor;
+        dividerInfo.dividerLength = dividerLength;
+        dividerInfo.strokeWidth = strokeWidth;
         double upperLine = (contentRect.Height() - PICKER_ITEM_HEIGHT.ConvertToPx()) / 2
                                 + contentRect.GetY() - strokeWidth / 2;
         double downLine = (contentRect.Height() + PICKER_ITEM_HEIGHT.ConvertToPx()) / 2
                                 + contentRect.GetY() - strokeWidth / 2;
 
         OffsetF upperOffset = OffsetF(contentRect.GetX() + startMargin, upperLine);
-        dividerPainter.DrawLine(canvas, upperOffset);
+        PaintLine(upperOffset, dividerInfo, canvas);
         OffsetF downOffset = OffsetF(contentRect.GetX() + startMargin, downLine);
-        dividerPainter.DrawLine(canvas, downOffset);
+        PaintLine(downOffset, dividerInfo, canvas);
     }
 }
 
@@ -214,6 +220,24 @@ void ContainerPickerPaintMethod::SetDefaultIndicatorDivider(RefPtr<FrameNode> pi
     if (style.isDefaultEndMargin) {
         endMargin = Dimension().ConvertToPx();
     }
+}
+
+void ContainerPickerPaintMethod::PaintLine(const OffsetF& offset, const PickerDividerPaintInfo &dividerInfo,
+    RSCanvas& canvas) const
+{
+    canvas.Save();
+    RSBrush brush;
+    brush.SetColor(dividerInfo.dividerColor.GetValue());
+    canvas.AttachBrush(brush);
+
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    auto endPointX = offset.GetX() + dividerInfo.dividerLength;
+    auto endPointY = offset.GetY() + dividerInfo.strokeWidth;
+
+    canvas.DrawRect(RSRect(startPointX, startPointY, endPointX, endPointY));
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 } // namespace OHOS::Ace::NG

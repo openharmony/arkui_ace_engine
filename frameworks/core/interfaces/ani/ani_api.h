@@ -261,7 +261,7 @@ struct ArkUIDragControllerAsync {
     ArkUIDragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
-    OHOS::Ace::Ani::DragAction* dragAction = nullptr;
+    std::shared_ptr<OHOS::Ace::Ani::DragAction> dragAction = nullptr;
 };
 
 struct ArkUIPreviewStyle {
@@ -398,6 +398,7 @@ struct ArkUIWaterFlowSection {
     std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
 struct ArkUIAniWebModifier {
+    void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferJsGeolocationToStatic)(void* peer, void* nativePtr);
     bool (*transferJsResultToStatic)(void* peer, void* nativePtr);
@@ -503,6 +504,8 @@ struct ArkUIAniCommonModifier {
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
     std::optional<std::string> (*getWindowName)(ani_int instanceId);
+    ani_int (*getWindowWidthBreakpoint)();
+    ani_int (*getWindowHeightBreakpoint)();
     void* (*transferKeyEventPointer)(ani_long nativePtr);
     void* (*createKeyEventAccessorWithPointer)(ani_long nativePtr);
     void* (*createEventTargetInfoAccessor)();
@@ -707,9 +710,12 @@ struct ArkUIAniCanvasModifier {
         ani_double dirtyHeight);
     void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
     ani_int (*getCanvasId)(ArkUICanvasRenderingContext peer);
+    void (*setAttachCallbackId)(ArkUICanvasRenderingContext peer, ani_int attachCallbackId);
+    void (*setDetachCallbackId)(ArkUICanvasRenderingContext peer, ani_int detachCallbackId);
 };
 
 struct ArkUIAniTraceModifier {
+    bool (*getAttributeSetTraceEnabled)();
     void (*traceBegin)(const std::string& traceName);
     void (*traceEnd)();
     void (*asyncTraceBegin)(const std::string& traceName, int taskId);

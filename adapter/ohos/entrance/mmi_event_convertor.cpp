@@ -558,6 +558,19 @@ void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, C
     event.SetPointerEvent(pointerEvent);
 }
 
+void ValidateAxes(uint32_t& axes, AxisEvent& event)
+{
+    axes &= ((event.action == AxisAction::BEGIN || event.action == AxisAction::END) && NearZero(event.verticalAxis))
+                ? (~static_cast<uint32_t>(1U << static_cast<uint32_t>(AxisType::VERTICAL_AXIS)))
+                : static_cast<uint32_t>(-1);
+    axes &= ((event.action == AxisAction::BEGIN || event.action == AxisAction::END) && NearZero(event.horizontalAxis))
+                ? (~static_cast<uint32_t>(1U << static_cast<uint32_t>(AxisType::HORIZONTAL_AXIS)))
+                : static_cast<uint32_t>(-1);
+    axes &= ((event.action == AxisAction::BEGIN || event.action == AxisAction::END) && NearZero(event.pinchAxisScale))
+                ? (~static_cast<uint32_t>(1U << static_cast<uint32_t>(AxisType::PINCH_AXIS)))
+                : static_cast<uint32_t>(-1);
+}
+
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -606,6 +619,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
                 ? (1 << static_cast<uint32_t>(AxisType::HORIZONTAL_AXIS)): 0;
     axes |= pointerEvent->HasAxis(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH)
                 ? (1 << static_cast<uint32_t>(AxisType::PINCH_AXIS)): 0;
+    ValidateAxes(axes, event);
     event.axes = axes;
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());

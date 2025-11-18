@@ -145,17 +145,15 @@ void SetMarkImpl(Ark_NativePointer node,
         CheckBoxModelStatic::SetCheckMarkColor(frameNode, color.value());
     }
 
-    auto size = Converter::OptConvert<Dimension>(optValue->size);
+    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size, DimensionUnit::VP);
+    Validator::ValidateNonPercent(size);
     Validator::ValidateNonNegative(size);
-    if (size) {
-        CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
-    }
-
-    auto width = Converter::OptConvert<Dimension>(optValue->strokeWidth);
+    CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
+    auto width =
+        Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->strokeWidth, DimensionUnit::VP);
+    Validator::ValidateNonPercent(width);
     Validator::ValidateNonNegative(width);
-    if (width) {
-        CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width.value());
-    }
+    CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_OnCheckboxChangeCallback* value)

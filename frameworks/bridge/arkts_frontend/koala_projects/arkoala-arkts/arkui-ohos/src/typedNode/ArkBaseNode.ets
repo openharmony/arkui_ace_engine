@@ -206,7 +206,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnTouchAttribute(value);
         return this
     }
-    public onKeyEvent(value: ((parameter: KeyEvent) => void) | undefined): this {
+    public onKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {
         this.getPeer().setOnKeyEventAttribute(value);
         return this
     }
@@ -249,7 +249,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnBlurAttribute(value);
         return this
     }
-    public tabIndex(value: number | undefined): this {
+    public tabIndex(value: int | undefined): this {
         this.getPeer().setTabIndexAttribute(value);
         return this
     }
@@ -478,7 +478,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public stateStyles(value: StateStyles | undefined): this {
         return this
     }
-    public restoreId(value: number | undefined): this {
+    public restoreId(value: int | undefined): this {
         this.getPeer().setRestoreIdAttribute(value);
         return this
     }

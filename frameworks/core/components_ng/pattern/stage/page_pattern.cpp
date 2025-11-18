@@ -19,6 +19,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
@@ -113,6 +114,10 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
         if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
             ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+            auto pipeline = pattern->GetContext();
+            if (pipeline) {
+                pipeline->GetLoadCompleteManager()->StopCollect();
+            }
         }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);

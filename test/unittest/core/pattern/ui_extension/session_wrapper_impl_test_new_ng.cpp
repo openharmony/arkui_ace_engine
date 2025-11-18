@@ -1019,6 +1019,12 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg027, TestSize.L
     auto ret = sessionWrapper->NotifyOccupiedAreaChangeInfo(info, needWaitLayout);
     EXPECT_NE(patternUpgrade, nullptr);
     EXPECT_TRUE(ret);
+    needWaitLayout = false;
+    ret = sessionWrapper->NotifyOccupiedAreaChangeInfo(info, needWaitLayout);
+    EXPECT_NE(patternUpgrade, nullptr);
+    EXPECT_TRUE(ret);
+    EXPECT_NE(pipeline, nullptr);
+    EXPECT_NE(sessionWrapper->displayAreaWindow_, curWindow);
 }
 
 /**

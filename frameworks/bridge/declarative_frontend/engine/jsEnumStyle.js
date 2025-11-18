@@ -1920,6 +1920,14 @@ let TouchTestStrategy;
   TouchTestStrategy.FORWARD = 2;
 })(TouchTestStrategy || (TouchTestStrategy = {}));
 
+let ResponseRegionSupportedTool;
+(function (ResponseRegionSupportedTool) {
+  ResponseRegionSupportedTool.ALL = 0;
+  ResponseRegionSupportedTool.FINGER = 1;
+  ResponseRegionSupportedTool.PEN = 2;
+  ResponseRegionSupportedTool.MOUSE = 3;
+})(ResponseRegionSupportedTool || (ResponseRegionSupportedTool = {}));
+
 let EffectLayer;
 (function (EffectLayer) {
   EffectLayer.NONE = 0;
@@ -3179,8 +3187,137 @@ class NavPathStack {
 
 globalThis.NavPathStack = NavPathStack;
 
-function registerNavStackOperation(pushPathCallback) {
-  InteropNavPathStackModule.pushPathStaticCallback = pushPathCallback;
+class InteropNavPathStackModule {
+  static pushPathCallback = undefined;
+  static pushDestinationCallback = undefined;
+  static pushPathByNameCallback = undefined;
+  static pushDestinationByNameCallback = undefined;
+  static replacePathCallback = undefined;
+  static replaceDestinationCallback = undefined;
+  static replacePathByNameCallback = undefined;
+  static removeByIndexesCallback = undefined;
+  static removeByNameCallback = undefined;
+  static removeByNavDestinationIdCallback = undefined;
+  static popCallback = undefined;
+  static popToNameCallback = undefined;
+  static popToIndexCallback = undefined;
+  static moveToTopCallback = undefined;
+  static moveIndexToTopCallback = undefined;
+  static clearCallback = undefined;
+  static getAllPathNameCallback = undefined;
+  static getParamByNameCallback = undefined;
+  static getIndexByNameCallback = undefined;
+  static getParentCallback = undefined; // not impl yet
+  static sizeCallback = undefined;
+  static disableAnimationCallback = undefined;
+  static setInterceptionCallback = undefined;
+  static getPathStackCallback = undefined;
+  static setPathStackCallback = undefined;
+  static getParamByIndexCallback = undefined;
+}
+
+function registeNavPushPathCallback(pushPathCallback) {
+  InteropNavPathStackModule.pushPathCallback = pushPathCallback;
+}
+
+function registeNavPushDestinationCallback(pushDestinationCallback) {
+  InteropNavPathStackModule.pushDestinationCallback = pushDestinationCallback;
+}
+
+function registeNavPushPathByNameCallback(pushPathByNameCallback) {
+  InteropNavPathStackModule.pushPathByNameCallback = pushPathByNameCallback;
+}
+
+function registeNavPushDestinationByNameCallback(pushDestinationByNameCallback) {
+  InteropNavPathStackModule.pushDestinationByNameCallback = pushDestinationByNameCallback;
+}
+
+function registeNavReplacePathCallback(replacePathCallback) {
+  InteropNavPathStackModule.replacePathCallback = replacePathCallback;
+}
+
+function registeNavReplaceDestinationCallback(replaceDestinationCallback) {
+  InteropNavPathStackModule.replaceDestinationCallback = replaceDestinationCallback;
+}
+
+function registeNavReplacePathByNameCallback(replacePathByNameCallback) {
+  InteropNavPathStackModule.replacePathByNameCallback = replacePathByNameCallback;
+}
+
+function registeNavRemoveByIndexesCallback(removeByIndexesCallback) {
+  InteropNavPathStackModule.removeByIndexesCallback = removeByIndexesCallback;
+}
+
+function registeNavRemoveByNameCallback(removeByNameCallback) {
+  InteropNavPathStackModule.removeByNameCallback = removeByNameCallback;
+}
+
+function registeNavRemoveByNavDestinationIdCallback(removeByNavDestinationIdCallback) {
+  InteropNavPathStackModule.removeByNavDestinationIdCallback = removeByNavDestinationIdCallback;
+}
+
+function registeNavPopCallback(popCallback) {
+  InteropNavPathStackModule.popCallback = popCallback;
+}
+
+function registeNavPopToNameCallback(popToNameCallback) {
+  InteropNavPathStackModule.popToNameCallback = popToNameCallback;
+}
+
+function registeNavPopToIndexCallback(popToIndexCallback) {
+  InteropNavPathStackModule.popToIndexCallback = popToIndexCallback;
+}
+
+function registeNavMoveToTopCallback(moveToTopCallback) {
+  InteropNavPathStackModule.moveToTopCallback = moveToTopCallback;
+}
+
+function registeNavMoveIndexToTopCallback(moveIndexToTopCallback) {
+  InteropNavPathStackModule.moveIndexToTopCallback = moveIndexToTopCallback;
+}
+
+function registeNavClearCallback(clearCallback) {
+  InteropNavPathStackModule.clearCallback = clearCallback;
+}
+
+function registeNavGetAllPathNameCallback(getAllPathNameCallback) {
+  InteropNavPathStackModule.getAllPathNameCallback = getAllPathNameCallback;
+}
+
+function registeNavGetParamByNameCallback(getParamByNameCallback) {
+  InteropNavPathStackModule.getParamByNameCallback = getParamByNameCallback;
+}
+
+function registeNavGetIndexByNameCallback(getIndexByNameCallback) {
+  InteropNavPathStackModule.getIndexByNameCallback = getIndexByNameCallback;
+}
+
+function registeNavGetParentCallback(getParentCallback) {
+  InteropNavPathStackModule.getParentCallback = getParentCallback;
+}
+
+function registeNavSizeCallback(sizeCallback) {
+  InteropNavPathStackModule.sizeCallback = sizeCallback;
+}
+
+function registeNavDisableAnimationCallback(disableAnimationCallback) {
+  InteropNavPathStackModule.disableAnimationCallback = disableAnimationCallback;
+}
+
+function registeNavSetInterceptionCallback(setInterceptionCallback) {
+  InteropNavPathStackModule.setInterceptionCallback = setInterceptionCallback;
+}
+
+function registeNavGetPathStackCallback(getPathStackCallback) {
+  InteropNavPathStackModule.getPathStackCallback = getPathStackCallback;
+}
+
+function registeNavSetPathStackCallback(setPathStackCallback) {
+  InteropNavPathStackModule.setPathStackCallback = setPathStackCallback;
+}
+
+function registeNavGetParamByIndexCallback(getParamByIndexCallback) {
+  InteropNavPathStackModule.getParamByIndexCallback = getParamByIndexCallback;
 }
 
 class NavPathStackExtent extends NavPathStack {
@@ -3188,146 +3325,331 @@ class NavPathStackExtent extends NavPathStack {
     super();
     this.staticStack = undefined;
   }
-
-  getPathStack() {
-    
-  }
-  setPathStack(pathStack, animated) {
-    
-  }
-  getJsIndexFromNativeIndex(index) {
-    
-  }
-  initNavPathIndex(pathName) {
-    
-  }
-  getAllPathIndex() {
-    
-  }
-  findInPopArray(name) {
-    
-  }
+  // for native use
   setNativeStack(stack) {
     this.staticStack = stack;
   }
-  getNativeStack() {
-    return this.nativeStack;
+  getPathStack() {
+    if (!InteropNavPathStackModule.getPathStackCallback) {
+      console.warn('AceNavigation', 'invalid static getPathStackCallback');
+      return [];
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return [];
+    }
+    return JSON.parse(InteropNavPathStackModule.getPathStackCallback(this.staticStack));
   }
-  setParent(parent) {
-    
+  setPathStack(pathStack, animated) {
+    if (!InteropNavPathStackModule.setPathStackCallback) {
+      console.warn('AceNavigation', 'invalid static setPathStackCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.setPathStackCallback(this.staticStack, JSON.stringify(pathStack), animated);
   }
   getParent() {
-    
-  }
-  pushName(name, param) {
-    
-  }
-  push(info, animated) {
-    this.pushPath(info, animated);
+    if (!InteropNavPathStackModule.getParentCallback) {
+      console.warn('AceNavigation', 'invalid static getParentCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    // need copy construct and return new NavPathStackExtend
+    return JSON.parse(InteropNavPathStackModule.getParentCallback(this.staticStack));
   }
   pushPathByName(name, param, onPop, animated) {
-    
+    let realAnimated = animated;
+    if (typeof onPop === 'boolean') {
+      realAnimated = onPop;
+    }
+    if (!InteropNavPathStackModule.pushPathByNameCallback) {
+      console.warn('AceNavigation', 'invalid static pushPathByNameCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.pushPathByNameCallback(this.staticStack, name, JSON.stringify(param), realAnimated);
   }
   pushDestinationByName(name, param, onPop, animated) {
-    
-  }
-  pushWithLaunchModeAndAnimated(info, launchMode, animated, createPromise) {
-    
+    let realAnimated = animated;
+    if (typeof onPop === 'boolean') {
+      realAnimated = onPop;
+    }
+    if (!InteropNavPathStackModule.pushDestinationByNameCallback) {
+      console.warn('AceNavigation', 'invalid static pushDestinationByNameCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.pushDestinationByNameCallback(this.staticStack, name, JSON.stringify(param), realAnimated);
   }
   pushPath(info, optionParam) {
     if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
       return;
     }
-    if (InteropNavPathStackModule.pushPathStaticCallback && this.staticStack) {
-      InteropNavPathStackModule.pushPathStaticCallback(this.staticStack, info, animated);
+    if (!InteropNavPathStackModule.pushPathCallback) {
+      console.warn('AceNavigation', 'invalid static pushPathCallback');
+      return;
     }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.pushPathCallback(this.staticStack, JSON.stringify(info), optionParam);
   }
   pushDestination(info, optionParam) {
-    
-  }
-  doReplaceInner(info, optionParam, isReplaceDestination) {
-    
+    if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
+      return undefined;
+    }
+    if (!InteropNavPathStackModule.pushDestinationCallback) {
+      console.warn('AceNavigation', 'invalid static pushDestinationCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return InteropNavPathStackModule.pushDestinationCallback(this.staticStack, JSON.stringify(info), optionParam);
   }
   replacePath(info, optionParam) {
-    
+    if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
+      return;
+    }
+    if (!InteropNavPathStackModule.replacePathCallback) {
+      console.warn('AceNavigation', 'invalid static replacePathCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.replacePathCallback(this.staticStack, JSON.stringify(info), optionParam);
   }
   replaceDestination(info, navigationOptions) {
-    
+    if (!this.checkPathValid(info)) {
+      console.warn('AceNavigation', 'invalid input info');
+      return undefined;
+    }
+    if (!InteropNavPathStackModule.replaceDestinationCallback) {
+      console.warn('AceNavigation', 'invalid static replaceDestinationCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return InteropNavPathStackModule.replaceDestinationCallback(this.staticStack, JSON.stringify(info), navigationOptions);
   }
   replacePathByName(name, param, animated) {
-    
-  }
-  setIsReplace(value) {
-    
-  }
-  setAnimated(value) {
-    
+    if (!InteropNavPathStackModule.replacePathByNameCallback) {
+      console.warn('AceNavigation', 'invalid static replacePathByNameCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.replacePathByNameCallback(this.staticStack, name, JSON.stringify(param), animated);
   }
   pop(result, animated) {
-    this.nativeStack?.pop(result, animated);
-  }
-  popTo(name, animated) {
-    
+    if (!InteropNavPathStackModule.popCallback) {
+      console.warn('AceNavigation', 'invalid static popCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return InteropNavPathStackModule.popCallback(this.staticStack, animated);
   }
   popToName(name, result, animated) {
-    
-  }
-  innerPopToIndex(index, result, animated, needFireOnResult) {
-    
+    if (!InteropNavPathStackModule.popToNameCallback) {
+      console.warn('AceNavigation', 'invalid static popToNameCallback');
+      return -1;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return -1;
+    }
+    return InteropNavPathStackModule.popToNameCallback(this.staticStack, name, result, animated);
   }
   popToIndex(index, result, animated) {
-    
+    if (!InteropNavPathStackModule.popToIndexCallback) {
+      console.warn('AceNavigation', 'invalid static popToIndexCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.popToIndexCallback(this.staticStack, index, result, animated);
   }
   moveToTop(name, animated) {
-    
+    if (!InteropNavPathStackModule.moveToTopCallback) {
+      console.warn('AceNavigation', 'invalid static moveToTopCallback');
+      return -1;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return -1;
+    }
+    return InteropNavPathStackModule.moveToTopCallback(this.staticStack, name, animated);
   }
   moveIndexToTop(index, animated) {
-    
+    if (!InteropNavPathStackModule.moveIndexToTopCallback) {
+      console.warn('AceNavigation', 'invalid static moveIndexToTopCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.moveIndexToTopCallback(this.staticStack, index, animated);
   }
   clear(animated) {
-    
+    if (!InteropNavPathStackModule.clearCallback) {
+      console.warn('AceNavigation', 'invalid static clearCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.clearCallback(this.staticStack, animated);
   }
   removeByIndexes(indexes) {
-    
+    if (!InteropNavPathStackModule.removeByIndexesCallback) {
+      console.warn('AceNavigation', 'invalid static removeByIndexesCallback');
+      return 0;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return 0;
+    }
+    return InteropNavPathStackModule.removeByIndexesCallback(this.staticStack, indexes);
   }
   removeByName(name) {
-    
+    if (!InteropNavPathStackModule.removeByNameCallback) {
+      console.warn('AceNavigation', 'invalid static removeByNameCallback');
+      return -1;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return -1;
+    }
+    return InteropNavPathStackModule.removeByNameCallback(this.staticStack, name);
   }
   removeByNavDestinationId(navDestinationId) {
-    
-  }
-  removeIndex(index) {
-    
-  }
-  removeInvalidPage(index) {
-    
+    if (!InteropNavPathStackModule.removeByNavDestinationIdCallback) {
+      console.warn('AceNavigation', 'invalid static removeByNavDestinationIdCallback');
+      return false;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return false;
+    }
+    return InteropNavPathStackModule.removeByNavDestinationIdCallback(this.staticStack, navDestinationId);
   }
   getAllPathName() {
-    
+    // if need interop?
+    if (!InteropNavPathStackModule.getAllPathNameCallback) {
+      console.warn('AceNavigation', 'invalid static getAllPathNameCallback');
+      return [];
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return [];
+    }
+    let staticResult = InteropNavPathStackModule.getAllPathNameCallback(this.staticStack);
+    return JSON.parse(staticResult);
   }
+  getSerializedParamByIndexInner(index) {
+    if (!InteropNavPathStackModule.getParamByIndexCallback) {
+      console.warn('AceNavigation', 'invalid static getParamByIndexCallback');
+      return '';
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return '';
+    }
+    return InteropNavPathStackModule.getParamByIndexCallback(this.staticStack, index);
+  }
+
   getParamByIndex(index) {
-    
+    let serializedParam = this.getSerializedParamByIndexInner(index);
+    if (serializedParam === '') {
+      return undefined;
+    }
+    return JSON.parse(serializedParam);
   }
   getParamByName(name) {
-    
+    if (!InteropNavPathStackModule.getParamByNameCallback) {
+      console.warn('AceNavigation', 'invalid static getParamByNameCallback');
+      return undefined;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return undefined;
+    }
+    return JSON.parse(InteropNavPathStackModule.getParamByNameCallback(this.staticStack, name));
   }
   getIndexByName(name) {
-    
-  }
-  getNameByIndex(index) {
-    
-  }
-  getOnPopByIndex(index) {
-    
+    if (!InteropNavPathStackModule.getIndexByNameCallback) {
+      console.warn('AceNavigation', 'invalid static getIndexByNameCallback');
+      return [];
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return [];
+    }
+    return JSON.parse(InteropNavPathStackModule.getIndexByNameCallback(this.staticStack, name));
   }
   size() {
-    
+    if (!InteropNavPathStackModule.sizeCallback) {
+      console.warn('AceNavigation', 'invalid static sizeCallback');
+      return 0;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return 0;
+    }
+    return InteropNavPathStackModule.sizeCallback(this.staticStack);
   }
   disableAnimation(disableAnimation) {
-    
+    if (!InteropNavPathStackModule.disableAnimationCallback) {
+      console.warn('AceNavigation', 'invalid static disableAnimationCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.disableAnimationCallback(this.staticStack, disableAnimation);
   }
   setInterception(interception) {
-    
+    // NOT-IMPL-YET
+    if (!InteropNavPathStackModule.setInterceptionCallback) {
+      console.warn('AceNavigation', 'invalid static setInterceptionCallback');
+      return;
+    }
+    if (!this.staticStack) {
+      console.warn('AceNavigation', 'invalid static stack');
+      return;
+    }
+    InteropNavPathStackModule.setInterceptionCallback(this.staticStack, interception);
   }
 }
 

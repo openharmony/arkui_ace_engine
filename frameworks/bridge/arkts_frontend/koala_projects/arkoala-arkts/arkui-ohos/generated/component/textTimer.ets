@@ -370,6 +370,7 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
         if (this.checkPriority("setTextTimerOptions")) {
             const options_casted = options as (TextTimerOptions | undefined)
             this.getPeer()?.setTextTimerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('TextTimerAttribute');
             return this
         }
         return this
@@ -451,6 +452,9 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

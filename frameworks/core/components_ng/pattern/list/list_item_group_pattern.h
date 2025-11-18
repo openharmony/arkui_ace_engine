@@ -376,9 +376,29 @@ public:
         return header_.Upgrade();
     }
 
+    RefPtr<UINode> GetHeaderNode() const
+    {
+        auto header = GetHeader();
+        if (header) {
+            return header->GetFrameChildByIndex(0, false);
+        } else {
+            return nullptr;
+        }
+    }
+
     RefPtr<UINode> GetFooter() const
     {
         return footer_.Upgrade();
+    }
+
+    RefPtr<UINode> GetFooterNode() const
+    {
+        auto footer = GetFooter();
+        if (footer) {
+            return footer->GetFrameChildByIndex(0, false);
+        } else {
+            return nullptr;
+        }
     }
 
     void OnColorModeChange(uint32_t colorMode) override;

@@ -19,8 +19,18 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
+typedef struct JavaScriptProxyProperyRef {
+    ani_ref objectRef;
+    ani_ref nameRef;
+    ani_ref methodListRef;
+    ani_ref controllerRef;
+    ani_ref asyncMethodListRef;
+    ani_ref permissionRef;
+} JavaScriptProxyProperyRef;
+
 ani_long ExtractorsToWebviewWebviewControllerPtr(ani_env* env, ani_class aniClass, ani_object object);
 ani_object ExtractorsFromWebviewWebviewControllerPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
+void SetJavaScriptProxyController(ani_env* env, ani_class aniClass, ani_long node, ani_object object);
 
 ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferJsGeolocationToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);

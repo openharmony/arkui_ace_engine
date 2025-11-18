@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_STATIC_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_STATIC_UTILS_H
 
-#include "core/components/common/layout/constants.h"
+#include <string>
+
+#include "ui/accessibility/accessibility_constants.h"
 
 namespace OHOS::Ace {
 

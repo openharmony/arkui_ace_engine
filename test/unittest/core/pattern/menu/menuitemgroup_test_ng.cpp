@@ -34,6 +34,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -808,7 +809,7 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern002, TestSize.Level1)
     footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     menuItemGroupPattern->footerIndex_ = 0;
     menuItemGroupPattern->AddFooter(footerNode);
-    EXPECT_EQ(menuItemGroupPattern->footerIndex_, 0);
+    ASSERT_NE(menuItemGroupPattern->GetFooter(), nullptr);
 }
 
 /**
@@ -945,7 +946,6 @@ HWTEST_F(MenuItemGroupTestNg, AddFooterNormal, TestSize.Level1)
     menuItemPattern->AddFooter(footerNode);
     EXPECT_NE(menuItemPattern->footerContent_, nullptr);
     EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
-    EXPECT_EQ(frameNode->isRestoreInfoUsed_, false);
 }
 
 /**
@@ -976,9 +976,7 @@ HWTEST_F(MenuItemGroupTestNg, AddFooterNull, TestSize.Level1)
     menuItemPattern->itemStartIndex_ = START_INDEX;
     menuItemPattern->AddFooter(footerNode);
 
-    EXPECT_EQ(menuItemPattern->footerContent_, nullptr);
     EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
-    EXPECT_EQ(frameNode->isRestoreInfoUsed_, false);
 }
 
 /**

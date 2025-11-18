@@ -33,6 +33,7 @@ public:
     static void SetScaleWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetShowText(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetText(FrameNode* frameNode, const std::optional<std::string>& value);

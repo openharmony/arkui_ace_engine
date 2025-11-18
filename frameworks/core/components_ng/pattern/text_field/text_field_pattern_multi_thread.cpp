@@ -130,35 +130,6 @@ void TextFieldPattern::OnAttachToMainTreeMultiThread()
     CHECK_NULL_VOID(autoFillContainerNode);
     firstAutoFillContainerNode_ = WeakClaim(RawPtr(autoFillContainerNode));
     AddTextFieldInfo();
-    OnAttachToMainTreeMultiThreadAddition();
-}
-
-void TextFieldPattern::OnAttachToMainTreeMultiThreadAddition()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    if (initSurfacePositionChangedCallbackMultiThread_) {
-        initSurfacePositionChangedCallbackMultiThread_ = false;
-        InitSurfacePositionChangedCallbackMultiThreadAction();
-    }
-    if (initSurfaceChangedCallbackMultiThread_) {
-        initSurfaceChangedCallbackMultiThread_ = false;
-        InitSurfaceChangedCallbackMultiThreadAction();
-    }
-    if (registerWindowSizeCallbackMultiThread_) {
-        registerWindowSizeCallbackMultiThread_ = false;
-        RegisterWindowSizeCallbackMultiThreadAction();
-    }
-    if (registerWindowFocusChangeCallbackMultiThread_) {
-        registerWindowFocusChangeCallbackMultiThread_ = false;
-        RegisterWindowFocusChangeCallbackMultiThread();
-    }
-    if (processDefaultStyleAndBehaviorsMultiThread_) {
-        processDefaultStyleAndBehaviorsMultiThread_ = false;
-        ProcessDefaultStyleAndBehaviorsMultiThread();
-    }
-    MultiThreadDelayedExecution(); // Delayed operation
 }
 
 void TextFieldPattern::OnDetachFromMainTreeMultiThread()
@@ -197,9 +168,21 @@ void TextFieldPattern::OnDetachFromMainTreeMultiThread()
     pipeline->RemoveWindowFocusChangedCallback(node->GetId());
 }
 
+void TextFieldPattern::UpdateCaretInfoToControllerMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateCaretInfoToController();
+    });
+}
+
 void TextFieldPattern::HandleSetSelectionMultiThread(int32_t start, int32_t end, bool showHandle)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSetSelection %{public}d, %{public}d, showOverlay:%{public}d", start, end,
         showHandle);
     StopTwinkling();
@@ -209,141 +192,78 @@ void TextFieldPattern::HandleSetSelectionMultiThread(int32_t start, int32_t end,
     } else {
         CloseSelectOverlay();
     }
-    updateCaretInfoToControllerMultiThread_ = true;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::MultiThreadDelayedExecution()
-{
-    if (setShowKeyBoardOnFocusMultiThread_) {
-        setShowKeyBoardOnFocusMultiThread_ = false;
-        if (setShowKeyBoardOnFocusMultiThreadValue_) {
-            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SHOW_KEYBOARD_ON_FOCUS);
-        } else {
-            CloseKeyboard(true, false);
-        }
-    }
-    if (setSelectionFlagMultiThread_) {
-        setSelectionFlagMultiThread_ = false;
-        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SET_SELECTION)) {
-            NotifyOnEditChanged(true);
-        }
-        TriggerAvoidWhenCaretGoesDown();
-    }
-    if (updateCaretInfoToControllerMultiThread_) {
-        updateCaretInfoToControllerMultiThread_ = false;
-        UpdateCaretInfoToController();
-    }
-    if (startTwinklingMultiThread_) {
-        startTwinklingMultiThread_ = false;
-        StartTwinkling();
-    }
-    if (stopEditingMultiThread_) {
-        stopEditingMultiThread_ = false;
-        StopEditingMultiThreadAction();
-    }
-    if (triggerAvoidOnCaretChangeMultiThread_) {
-        triggerAvoidOnCaretChangeMultiThread_ = false;
-        TriggerAvoidOnCaretChange();
-    }
-    if (handleCountStyleMultiThread_) {
-        handleCountStyleMultiThread_ = false;
-        HandleCountStyle();
-    }
-    if (setCustomKeyboardWithNodeMultiThread_) {
-        setCustomKeyboardWithNodeMultiThread_ = false;
-        SetCustomKeyboardWithNodeMultiThreadAction(setCustomKeyboardWithNodeMultiThreadValue_);
-        setCustomKeyboardWithNodeMultiThreadValue_.Reset();
-    } else if (setCustomKeyboardMultiThread_) {
-        setCustomKeyboardMultiThread_ = false;
-        SetCustomKeyboardMultiThreadAction(std::move(setCustomKeyboardMultiThreadValue_));
-        setCustomKeyboardMultiThreadValue_ = nullptr;
-    }
-    if (moveCaretToContentRectMultiThread_) {
-        moveCaretToContentRectMultiThread_ = false;
-        MoveCaretToContentRectMultiThread(moveCaretToContentRectMultiThreadValue_);
-    }
+    UpdateCaretInfoToControllerMultiThread();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::InitSurfaceChangedCallbackMultiThread()
 {
-    initSurfaceChangedCallbackMultiThread_ = true;
-}
-
-void TextFieldPattern::InitSurfaceChangedCallbackMultiThreadAction()
-{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (!HasSurfaceChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
-                WindowSizeChangeReason type) {
-                auto pattern = weak.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
-                }
-            });
-        UpdateSurfaceChangedCallbackId(callbackId);
-    }
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitSurfaceChangedCallback();
+    });
 }
 
 void TextFieldPattern::InitSurfacePositionChangedCallbackMultiThread()
 {
-    initSurfacePositionChangedCallbackMultiThread_ = true;
-}
-
-void TextFieldPattern::InitSurfacePositionChangedCallbackMultiThreadAction()
-{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (!HasSurfacePositionChangedCallback()) {
-        auto callbackId =
-            pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t posX, int32_t posY) {
-                auto pattern = weak.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfacePositionChanged(posX, posY);
-                }
-            });
-        UpdateSurfacePositionChangedCallbackId(callbackId);
-    }
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitSurfacePositionChangedCallback();
+    });
 }
 
 void TextFieldPattern::SetCaretPositionMultiThread(int32_t position, bool moveContent)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
-    moveCaretToContentRectMultiThread_ = true;
-    moveCaretToContentRectMultiThreadValue_ = {
+    MoveCaretToContentRectData val = {
         .index = position,
         .textAffinity = TextAffinity::DOWNSTREAM,
         .isEditorValueChanged = true,
         .moveContent = moveContent
     };
-    updateCaretInfoToControllerMultiThread_ = true;
+    MoveCaretToContentRectMultiThread(val);
+    UpdateCaretInfoToControllerMultiThread();
     if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
-        startTwinklingMultiThread_ = true;
+        StartTwinklingMultiThread();
     }
     CloseSelectOverlay();
     CancelDelayProcessOverlay();
-    triggerAvoidOnCaretChangeMultiThread_ = true;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->TriggerAvoidOnCaretChange();
+    });
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value)
 {
-    selectController_->MoveCaretToContentRect(
-        value.index, value.textAffinity, value.isEditorValueChanged, value.moveContent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([value, weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto selectController = pattern->GetTextSelectController();
+        CHECK_NULL_VOID(selectController);
+        selectController->MoveCaretToContentRect(
+            value.index, value.textAffinity, value.isEditorValueChanged, value.moveContent);
+    });
 }
 
 void TextFieldPattern::SetSelectionFlagMultiThread(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!HasFocus() || GetIsPreviewText()) {
+    if (!host || !HasFocus() || GetIsPreviewText()) {
         return;
     }
     auto length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
@@ -353,12 +273,12 @@ void TextFieldPattern::SetSelectionFlagMultiThread(
     bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     isTouchPreviewText_ = false;
     if (selectionStart == selectionEnd) {
-        moveCaretToContentRectMultiThread_ = true;
-        moveCaretToContentRectMultiThreadValue_ = {
+        MoveCaretToContentRectData val = {
             .index = selectionEnd,
             .textAffinity = TextAffinity::DOWNSTREAM,
         };
-        startTwinklingMultiThread_ = true;
+        MoveCaretToContentRectMultiThread(val);
+        StartTwinklingMultiThread();
     } else {
         cursorVisible_ = false;
         showSelect_ = true;
@@ -383,7 +303,14 @@ void TextFieldPattern::SetSelectionFlagMultiThread(
             ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
         }
     }
-    setSelectionFlagMultiThread_ = true;
+
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SET_SELECTION)) {
+            pattern->NotifyOnEditChanged(true);
+        }
+    });
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -392,20 +319,13 @@ void TextFieldPattern::StopEditingMultiThread()
     if (!HasFocus()) {
         return;
     }
-    stopEditingMultiThread_ = true;
-}
-
-void TextFieldPattern::StopEditingMultiThreadAction()
-{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ContainerScope scope(host->GetInstanceId());
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Stop Editing", host->GetId());
-    FocusHub::LostFocusToViewRoot();
-    UpdateSelection(selectController_->GetCaretIndex());
-    StopTwinkling();
-    CloseKeyboard(true);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StopEditing();
+    });
 }
 
 void TextFieldPattern::RegisterWindowSizeCallbackMultiThread()
@@ -416,16 +336,15 @@ void TextFieldPattern::RegisterWindowSizeCallbackMultiThread()
         return;
     }
     isOritationListenerRegisted_ = true;
-    registerWindowSizeCallbackMultiThread_ = true;
-}
-
-void TextFieldPattern::RegisterWindowSizeCallbackMultiThreadAction()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddWindowSizeChangeCallback(host->GetId());
+    });
 }
 
 void TextFieldPattern::RegisterWindowFocusChangeCallbackMultiThread()
@@ -436,16 +355,15 @@ void TextFieldPattern::RegisterWindowFocusChangeCallbackMultiThread()
         return;
     }
     isWindowFocusChangeCallbackRegisted_ = true;
-    registerWindowFocusChangeCallbackMultiThread_ = true;
-}
-
-void TextFieldPattern::RegisterWindowFocusChangeCallbackMultiThreadAction()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddWindowFocusChangedCallback(host->GetId());
+    });
 }
 
 void TextFieldPattern::SetPreviewTextOperationMultiThread(PreviewTextInfo info)
@@ -481,11 +399,22 @@ void TextFieldPattern::SetPreviewTextOperationMultiThread(PreviewTextInfo info)
 
     if (HasFocus()) {
         cursorVisible_ = true;
-        startTwinklingMultiThread_ = true;
+        StartTwinklingMultiThread();
     } else {
         cursorVisible_ = false;
         StopTwinkling();
     }
+}
+
+void TextFieldPattern::StartTwinklingMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StartTwinkling();
+    });
 }
 
 void TextFieldPattern::SetPreviewTextOperationMultiThreadPart(PreviewTextInfo info, int32_t start, int32_t end)
@@ -543,7 +472,12 @@ void TextFieldPattern::FinishTextPreviewOperationMultiThread(bool triggerOnWillC
         int32_t len = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
         showCountBorderStyle_ = len >
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
-        handleCountStyleMultiThread_ = true;
+        
+        host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleCountStyle();
+        });
     }
 
     FinishTextPreviewOperationMultiThreadPart(triggerOnWillChange);
@@ -610,8 +544,17 @@ void TextFieldPattern::SetShowKeyBoardOnFocusMultiThread(bool value)
         return;
     }
 
-    setShowKeyBoardOnFocusMultiThread_ = true;
-    setShowKeyBoardOnFocusMultiThreadValue_ = value;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([value, weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (value) {
+            pattern->RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SHOW_KEYBOARD_ON_FOCUS);
+        } else {
+            pattern->CloseKeyboard(true, false);
+        }
+    });
 }
 
 FocusPattern TextFieldPattern::GetFocusPatternMultiThread() const
@@ -623,71 +566,36 @@ FocusPattern TextFieldPattern::GetFocusPatternMultiThread() const
 
 void TextFieldPattern::SetCustomKeyboardMultiThread(const std::function<void()>&& keyboardBuilder)
 {
-    setCustomKeyboardMultiThread_ = true;
-    setCustomKeyboardWithNodeMultiThread_ = false;
-    setCustomKeyboardMultiThreadValue_ = keyboardBuilder;
-}
-
-void TextFieldPattern::SetCustomKeyboardMultiThreadAction(const std::function<void()>&& keyboardBuilder)
-{
-    if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
-        // close customKeyboard and request system keyboard
-        CloseCustomKeyboard();
-        customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-        StartTwinkling();
-        return;
-    }
-    if (!customKeyboardBuilder_ && keyboardBuilder) {
-        // close system keyboard and request custom keyboard
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        if (imeShown_) {
-            CloseKeyboard(true);
-            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-            StartTwinkling();
-            return;
-        }
-#endif
-    }
-    customKeyboardBuilder_ = keyboardBuilder;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask(
+        [weakPtr = WeakClaim(this), keyboardFunc = std::move(keyboardBuilder)] () mutable {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCustomKeyboard(std::move(keyboardFunc));
+    });
 }
 
 void TextFieldPattern::SetCustomKeyboardWithNodeMultiThread(const RefPtr<UINode>& keyboardBuilder)
 {
-    setCustomKeyboardWithNodeMultiThread_ = true;
-    setCustomKeyboardMultiThread_ = false;
-    setCustomKeyboardWithNodeMultiThreadValue_ = keyboardBuilder;
-}
-
-void TextFieldPattern::SetCustomKeyboardWithNodeMultiThreadAction(const RefPtr<UINode>& keyboardBuilder)
-{
-    if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
-        // close customKeyboard and request system keyboard
-        CloseCustomKeyboard();
-        customKeyboard_ = keyboardBuilder; // refresh current keyboard
-        RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-        StartTwinkling();
-        return;
-    }
-    if (!customKeyboard_ && keyboardBuilder) {
-        // close system keyboard and request custom keyboard
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        if (imeShown_) {
-            CloseKeyboard(true);
-            customKeyboard_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-            StartTwinkling();
-            return;
-        }
-#endif
-    }
-    customKeyboard_ = keyboardBuilder;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this), keyboardBuilder]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCustomKeyboardWithNode(keyboardBuilder);
+    });
 }
 
 void TextFieldPattern::ProcessDefaultStyleAndBehaviors()
 {
-    processDefaultStyleAndBehaviorsMultiThread_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ProcessDefaultStyleAndBehaviorsMultiThread();
+    });
 }
 
 void TextFieldPattern::ProcessDefaultStyleAndBehaviorsMultiThread()

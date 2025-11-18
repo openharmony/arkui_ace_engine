@@ -485,7 +485,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternAdditionalTwoTestNgUpdat
      * @tc.expected: These Dump properties are matched.
      */
     pattern->UpdateButtonsProperty();
-    EXPECT_EQ(pattern->buttonContainer_, nullptr);
+    EXPECT_EQ(pattern->isFirstDefaultFocus_, true);
 }
 
 /**

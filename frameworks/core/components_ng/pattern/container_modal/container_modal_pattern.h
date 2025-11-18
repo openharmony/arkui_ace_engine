@@ -242,6 +242,7 @@ public:
     bool IsContainerModalTransparent() const;
 
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
+    Dimension toolBarTitleHeight_ = CONTAINER_TITLE_HEIGHT;
 
     RefPtr<ContainerModalToolBar> GetTitleManager()
     {
@@ -253,6 +254,19 @@ public:
         return isTitleShow_ && customTitleSettedShow_ && IsContainerModalTransparent();
     }
     bool CheckNodeOnContainerModalTitle(const RefPtr<FrameNode>& node);
+
+    void SetToolbarTitleHeight();
+    void SetControlButtonsRowHeight();
+
+    void IsSetContainerModalTitleHeight(bool isSetHeight)
+    {
+        isSetContainerModalTitleHeight_ = isSetHeight;
+    }
+
+    bool GetIsSetContainerModalTitleHeight() const
+    {
+        return isSetContainerModalTitleHeight_;
+    }
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -333,6 +347,7 @@ protected:
     RefPtr<ContainerModalToolBar> titleMgr_;
     RefPtr<ContainerModalToolBar> floatTitleMgr_;
     bool isHaveToolBar_ = false;
+    bool isSetContainerModalTitleHeight_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

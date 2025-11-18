@@ -69,6 +69,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -227,6 +228,7 @@ enum PictureInPictureState {
 };
 
 struct PipData {
+    int32_t nodeId;
     uint32_t mainWindowId;
     int delegateId = -1;
     int childId = -1;
@@ -3935,6 +3937,19 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t nodeId = host->GetId();
+    {
+        std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+        for (auto& iter : pipCallbackMap_) {
+            if (iter.second.nodeId == nodeId && iter.second.mainWindowId != windowId_) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "Pip old windowId:%{public}u, nodeId:%{public}d,"
+                    "windowId_:%{public}u", iter.second.mainWindowId, nodeId, windowId_);
+                auto errCode = OH_PictureInPicture_SetParentWindowId(iter.first, windowId_);
+                if (errCode == 0) {
+                    iter.second.mainWindowId = windowId_;
+                }
+            }
+        }
+    }
 
     pipelineContext->AddWindowStateChangedCallback(nodeId);
     pipelineContext->AddWindowSizeChangeCallback(nodeId);
@@ -5306,6 +5321,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
             }
         }
         hintToTypeWrap.autoFillType = type;
+        hintToTypeWrap.metadata = node->GetMetadata();
     } else if (!placeholder.empty()) {
         // try hint2Type
         auto host = GetHost();
@@ -5341,7 +5357,13 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
             continue;
         }
         for (auto child = object->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
-            if (child->IsString()) {
+            if (child->IsArray() && child->GetKey() ==
+                    OHOS::NWeb::NWEB_VIEW_DATA_KEY_SELECTABLE_USER_NAMES) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "[Password Autofill] the number of selectable usernames: %{public}d",
+                        child->GetArraySize());
+                node->SetMetadata(object->ToString());
+            } else if (child->IsString()) {
                 ParseViewDataString(child->GetKey(), child->GetString(), node);
             } else if (child->IsNumber()) {
                 ParseViewDataNumber(child->GetKey(), child->GetInt(), node, rect, viewScale);
@@ -9164,7 +9186,9 @@ bool WebPattern::Pip(int status,
         case PIP_STATE_HLS_ENTER: {
             napi_env env = CreateEnv();
             CHECK_NULL_RETURN(env, false);
-            PipInfo pipInfo{windowId_, delegateId, childId,
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, false);
+            PipInfo pipInfo{host->GetId(), windowId_, delegateId, childId,
                             frameRoutingId, width, height};
             result = CreatePip(status, env, init, pipController, pipInfo);
             WEB_CHECK_FALSE_RETURN(result, false);
@@ -9245,6 +9269,7 @@ bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipCo
     pipData.childId = pipInfo.childId;
     pipData.mainWindowId = pipInfo.mainWindowId;
     pipData.frameRoutingId = pipInfo.frameRoutingId;
+    pipData.nodeId = pipInfo.nodeId;
     {
         std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
         g_currentControllerId = pipController;

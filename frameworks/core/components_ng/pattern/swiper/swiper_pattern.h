@@ -851,6 +851,11 @@ public:
         mainSizeIsMeasured_ = mainSizeIsMeasured;
     }
 
+    void SetArrowTouched(bool isArrowTouched)
+    {
+        isArrowTouched_ = isArrowTouched;
+    }
+
     std::vector<SwiperItemInfoNG> GetShownItemInfoFromIndex(int32_t index);
 protected:
     void MarkDirtyNodeSelf();
@@ -1329,6 +1334,8 @@ private:
     void UpdateDefaultColor();
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1513,6 +1520,7 @@ private:
     TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
+    bool isArrowTouched_ = false;
     WeakPtr<FrameNode> indicatorNode_;
     bool isBindIndicator_ = false;
     std::function<void()> resetFunc_;

@@ -4454,5 +4454,137 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_TouchTestInfo_SetTouchResultId"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnCreateMenuCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnPrepareMenuCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnMenuItemClickCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnDestroyMenuCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetContent"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetContent"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetIcon"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetIcon"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetLabelInfo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetLabelInfo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_SetId"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItem_GetId"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_GetSize"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_GetItem"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_Insert"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_Erase"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextMenuItemArray_Clear"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetSpanType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetSpanType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetContentNode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetContentNode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetResponseType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetResponseType"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_GetHapticFeedbackMode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback"
     }
 ]

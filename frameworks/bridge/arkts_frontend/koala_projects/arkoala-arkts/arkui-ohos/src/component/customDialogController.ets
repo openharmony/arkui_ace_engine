@@ -15,14 +15,15 @@
 
 import { ExtendableComponent } from "./extendableComponent"
 import { CustomDialogControllerExtender, CustomDialogControllerOptionsExtender,
-    CustomDialogControllerExternalOptionsExtender } from '#generated' 
+    CustomDialogControllerExternalOptionsExtender, LevelOrderExtender } from '#generated'
+import { LevelOrder } from '@ohos.promptAction';
+import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 
 export class CustomDialogController extends CustomDialogControllerExtender {
     customComponent?: ExtendableComponent | undefined = undefined
     constructor(value: CustomDialogControllerOptions) {
-        super(value)
-        if ((value) !== (undefined) && (value.baseComponent) !== (undefined))
-        {            
+        super(convert(value))
+        if ((value) !== (undefined) && (value.baseComponent) !== (undefined)) {
             this.customComponent = (value.baseComponent)!
         }
     }
@@ -40,7 +41,34 @@ export class CustomDialogController extends CustomDialogControllerExtender {
         return {customStyle: options.customStyle} as CustomDialogControllerExternalOptions
     }
 }
+function convert(value: CustomDialogControllerOptions): CustomDialogControllerOptionsExtender {
+    let extender: CustomDialogControllerOptionsExtender = value as CustomDialogControllerOptionsExtender
+    const builder = value.builder;
+    const currentExtendableComponent = ExtendableComponent.current;
+    /** @memo */
+    const cb: () => void = (): void => {
+        const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+        const lastExtendableComponent = ExtendableComponent.current;
+        ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
+        ExtendableComponent.current = value.baseComponent ?? currentExtendableComponent;
+        try {
+            builder();
+        } catch(e) {
+            console.error('Failed to call builder.');
+            throw e;
+        } finally {
+            ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+            ExtendableComponent.current = lastExtendableComponent;
+        }
+    };
+    extender.builder = cb;
+    if (value.levelOrder !== undefined) {
+        extender.levelOrderExtender = value.levelOrder as LevelOrderExtender
+    }
+    return extender
+}
 export interface CustomDialogControllerOptions extends CustomDialogControllerOptionsExtender {
-    baseComponent?: ExtendableComponent
+    baseComponent?: ExtendableComponent,
+    levelOrder?: LevelOrder,
 }
 export interface CustomDialogControllerExternalOptions extends CustomDialogControllerExternalOptionsExtender {}

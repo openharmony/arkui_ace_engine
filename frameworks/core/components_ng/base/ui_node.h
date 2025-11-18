@@ -19,30 +19,48 @@
 #include <cstdint>
 #include <list>
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 
+#include "ui/base/versions.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "base/view_data/view_data_wrap.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/window_animation_config.h"
-#include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/property/accessibility_property.h"
-#include "core/event/touch_event.h"
-#include "core/event/mouse_event.h"
+#include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/property.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
+
+namespace OHOS::Ace {
+
+namespace NG {
+    class NGGestureRecognizer;
+}
+class ViewDataWrap;
+class PageNodeInfoWrap;
+class TouchEventTarget;
+using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
+class MouseEventTarget;
+using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
+class AxisEventTarget;
+using AxisTestResult = std::list<RefPtr<AxisEventTarget>>;
+struct TouchRestrict;
+using ResponseLinkResult = std::list<RefPtr<NG::NGGestureRecognizer>>;
+}
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
+class FocusHub;
+class LayoutWrapperNode;
+class FrameNode;
+class CustomNode;
 
 struct ExtraInfo {
     std::string page;
@@ -1187,6 +1205,8 @@ public:
         return subtreeIgnoreCount_ != 0;
     }
 
+    virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1218,7 +1238,6 @@ protected:
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     virtual void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) {};
     virtual void DumpAdvanceInfo() {}
@@ -1289,6 +1308,7 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
+    void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);
     void UpdateForceDarkAllowedNode(const RefPtr<UINode>& child);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
     void UpdateDrawChildObserver(const RefPtr<UINode>& child);
