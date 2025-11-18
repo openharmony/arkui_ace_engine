@@ -3314,7 +3314,7 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
+    TAG_LOGI(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
     auto rootElement = context->GetRootElement();
     CHECK_NULL_VOID(rootElement);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
@@ -3326,7 +3326,7 @@ void UIContentImpl::AddKeyFrameNodeCallback(const std::function<
     void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameNodeCallback");
+    TAG_LOGI(AceLogTag::ACE_WINDOW, "AddKeyFrameNodeCallback");
     addNodeCallback_ = callback;
 }
 
@@ -3346,13 +3346,13 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFra
         CHECK_NULL_VOID(surfaceNode);
         CHECK_NULL_VOID(keyFrameNode);
         keyFrameNode->SetRSUIContext(surfaceNode->GetRSUIContext());
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "keyFrameNode %{public}" PRIu64 "",
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "keyFrameNode %{public}" PRIu64 "",
             surfaceNode->GetId(), keyFrameNode->GetId());
         surfaceNode->AddChild(keyFrameNode, -1);
     }
 #endif
 #endif
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameNode.");
+    TAG_LOGI(AceLogTag::ACE_WINDOW, "LinkKeyFrameNode.");
     auto rootElement = context->GetRootElement();
     CHECK_NULL_VOID(rootElement);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
@@ -3365,7 +3365,7 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
+    TAG_LOGI(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
     cachedAnimateFlag_.store(true);
     cachedConfig_ = config;
     cachedReason_ = reason;
@@ -3504,6 +3504,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
             return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
             rosenRenderContext->SetIsDraggingFlag(false);
+            rosenRenderContext->SetReDraggingFlag(false);
             [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetKeyFrameNodeOpacityAnimation(

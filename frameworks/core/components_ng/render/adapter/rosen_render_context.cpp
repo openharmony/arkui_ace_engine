@@ -7619,7 +7619,7 @@ void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue
 void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 {
     if (keyFrameNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeKeyFrameNode. %{public}d", freezeFlag);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "FreezeKeyFrameNode: %{public}d", freezeFlag);
         keyFrameNode_->SetFreeze(freezeFlag);
     }
 }
@@ -7627,11 +7627,12 @@ void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 void RosenRenderContext::RemoveKeyFrameNode()
 {
     if (reDraggingFlag_) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for redragging");
         reDraggingFlag_ = false;
         return;
     }
     if (keyFrameNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode.");
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: removed");
         keyFrameNode_->RemoveFromTree();
         keyFrameNode_ = nullptr;
     }
@@ -7714,7 +7715,7 @@ void RosenRenderContext::FlushImplicitTransaction()
 void RosenRenderContext::LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& rootNode)
 {
     if (keyFrameNode_ && rootNode) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "LinkKeyFrameNodeToRootNode");
         auto renderContext = rootNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         keyFrameNode_->SetLinkedNodeId(renderContext->GetNodeId());
@@ -7725,7 +7726,7 @@ void RosenRenderContext::LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& roo
 void RosenRenderContext::CreateKeyFrameNode()
 {
     if (!keyFrameNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSWindowKeyFrameNode.");
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "CreateKeyFrameNode");
         if (!SystemProperties::GetMultiInstanceEnabled()) {
             keyFrameNode_ = Rosen::RSWindowKeyFrameNode::Create();
             Rosen::RSTransaction::FlushImplicitTransaction();
