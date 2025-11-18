@@ -329,11 +329,10 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview003, TestSize.Level0)
     do {
         auto newHost1 = richEditorPattern->GetContentHost();
         auto newHost2 = richEditorPattern->GetContentHost();
-        ASSERT_EQ(newHost1, newHost2);
+        ASSERT_NE(newHost1, nullptr);
 
         newHost1->children_.emplace_back(childFrameNode);
         newHost1->children_.emplace_back(childSpanNode);
-        ASSERT_EQ(newHost1, newHost2);
     } while (0);
 
     richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);

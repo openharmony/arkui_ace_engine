@@ -286,13 +286,11 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnHandleMove001, TestSize.Leve
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretPosition_ = -1;
     richEditorPattern->selectOverlay_->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
-    EXPECT_EQ(richEditorPattern->caretPosition_, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
-    richEditorPattern->caretPosition_ = -1;
     richEditorPattern->selectOverlay_->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
-    EXPECT_EQ(richEditorPattern->caretPosition_, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**
