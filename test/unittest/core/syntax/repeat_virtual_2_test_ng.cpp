@@ -859,4 +859,23 @@ HWTEST_F(RepeatVirtual2TestNg, UpdateL1Rid4Index001, TestSize.Level1)
     EXPECT_EQ(cacheItem2->isL1_, true);
 }
 
+/**
+ * @tc.name: GetFrameChildByIndexImpl001
+ * @tc.desc: Test node.GetFrameChildByIndexImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, GetFrameChildByIndexImpl001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2021, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->caches_.l1Rid4Index_ = { { 0, 1} };
+    repeatNode->onMainTree_ = true;
+    repeatNode->AddDisappearingChild(uiNode);
+    EXPECT_EQ(repeatNode->disappearingChildren_.size(), 1);
+    repeatNode->GetFrameChildByIndexImpl(0, true, true, false);
+    EXPECT_EQ(repeatNode->disappearingChildren_.size(), 0);
+}
+
 } // namespace OHOS::Ace::NG
