@@ -80,6 +80,10 @@ constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0f, 3.0f, 5.0f };
 
+bool HUKS_CRYPTO_EXTENSION_ABILITY = false;
+constexpr int CAPABILITY_NOT_SUPPORTED_ERROR = 801;
+const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
+
 void EraseSpace(std::string& data)
 {
     auto iter = data.begin();
@@ -120,6 +124,16 @@ namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
 bool JSWeb::webDebuggingAccess_ = false;
 int32_t JSWeb::webDebuggingPort_ = 0;
+
+napi_env GetNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
+
 class JSWebDialog : public WebTransferBase<RefPtr<Result>> {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -519,8 +533,10 @@ public:
         } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsNumber()) {
             std::string identity = args[0]->ToString();
             int32_t type = args[1]->ToNumber<int32_t>();
-            if (result_) {
-                result_->HandleConfirm(identity, type);
+            constexpr int32_t credentialUKey = 4;
+            if (type == credentialUKey && !HUKS_CRYPTO_EXTENSION_ABILITY) {
+                napi_throw_error(GetNapiEnv(), std::to_string(CAPABILITY_NOT_SUPPORTED_ERROR).c_str(), CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
+                result_->HandleCancel();
                 return;
             }
         } else {
@@ -3130,6 +3146,17 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
     WebModel::GetInstance()->SetWebNativeMessageConnectFunction(std::move(webNativeMessageManagerFunctionCallback));
     WebModel::GetInstance()->SetWebNativeMessageDisconnectFunction(
         std::move(webNativeMessageDisconnectFunctionCallback));
+
+    auto isHuksCryptoExtensionFunc = controller->GetProperty("isHuksCryptoExtension");
+    if (isHuksCryptoExtensionFunc->IsFunction()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::isHuksCryptoExtension");
+        auto func = JSRef<JSFunc>::Cast(isHuksCryptoExtensionFunc);
+        JSRef<JSVal> argv[] = {};
+        JSRef<JSVal> result = func->Call(controller, 1, argv);
+        if (result->IsBoolean()) {
+            HUKS_CRYPTO_EXTENSION_ABILITY = result->ToBoolean();
+        }
+    }
 }
 
 void JSWeb::Create(const JSCallbackInfo& info)
