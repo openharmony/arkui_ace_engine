@@ -37,12 +37,15 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
         {
             std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
             sharedImageManager->sharedImageMap_.erase(picName);
+            LOGI("clear image cache name: %{public}s", picName.c_str());
+            if (sharedImageManager->sharedImageTotalSize_ > dataSize) {
+                sharedImageManager->sharedImageTotalSize_ -= dataSize;
+            } else {
+                sharedImageManager->sharedImageTotalSize_ = 0;
+            }
         }
         {
             std::lock_guard<std::mutex> lockCancelableCallbackMap_(sharedImageManager->cancelableCallbackMapMutex_);
-            std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
-            LOGW("clear image cache name: %{public}s", picName.c_str());
-            sharedImageManager->sharedImageTotalSize_ -= dataSize;
             sharedImageManager->cancelableCallbackMap_.erase(picName);
         }
     };
@@ -121,7 +124,11 @@ bool SharedImageManager::UpdateImageMap(const std::string& name, const SharedIma
     bool isClear = false;
     auto iter = sharedImageMap_.find(name);
     if (iter != sharedImageMap_.end()) {
-        sharedImageTotalSize_ -= iter->second.size();
+        if (sharedImageTotalSize_ > iter->second.size()) {
+            sharedImageTotalSize_ -= iter->second.size();
+        } else {
+            sharedImageTotalSize_ = 0;
+        }
         sharedImageTotalSize_ += sharedImage.size();
         iter->second = sharedImage;
     } else {
@@ -183,7 +190,11 @@ bool SharedImageManager::Remove(const std::string& name)
         LOGW("Remove failed: image data of %{private}s does not found in SharedImageMap", name.c_str());
         return false;
     }
-    sharedImageTotalSize_ -= iter->second.size();
+    if (sharedImageTotalSize_ > iter->second.size()) {
+        sharedImageTotalSize_ -= iter->second.size();
+    } else {
+        sharedImageTotalSize_ = 0;
+    }
     LOGW("clear image cache name: %{public}s", name.c_str());
     int res = static_cast<int>(sharedImageMap_.erase(name));
     return (res != 0);
