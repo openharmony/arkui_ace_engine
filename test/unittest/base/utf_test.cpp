@@ -175,6 +175,7 @@ HWTEST_F(UtfTestNg, ConvertIllegalStr_001, TestSize.Level1)
     std::string str = "Hello世界";
     std::string originalStr = str;
     ConvertIllegalStr(str);
+    
     EXPECT_EQ(str, originalStr);
 }
 
@@ -187,6 +188,7 @@ HWTEST_F(UtfTestNg, ConvertIllegalStr_002, TestSize.Level1)
 {
     std::string str = "Hello\xC3\x28";
     ConvertIllegalStr(str);
+    
     EXPECT_TRUE(IsUTF8(str));
     EXPECT_NE(str, "Hello\xC3\x28");
 }
@@ -200,6 +202,7 @@ HWTEST_F(UtfTestNg, ConvertIllegalStr_003, TestSize.Level1)
 {
     std::string str = "";
     ConvertIllegalStr(str);
+    
     EXPECT_TRUE(str.empty());
 }
 
@@ -212,6 +215,7 @@ HWTEST_F(UtfTestNg, SplitUtf16Pair_001, TestSize.Level1)
 {
     uint32_t pair = 0xD83DDE00;
     auto result = SplitUtf16Pair(pair);
+    
     EXPECT_EQ(result.first, 0xD83D);
     EXPECT_EQ(result.second, 0xDE00);
 }
@@ -225,6 +229,7 @@ HWTEST_F(UtfTestNg, SplitUtf16Pair_002, TestSize.Level1)
 {
     uint32_t pair = 0x00410042;
     auto result = SplitUtf16Pair(pair);
+    
     EXPECT_EQ(result.first, 0x0041);
     EXPECT_EQ(result.second, 0x0042);
 }
