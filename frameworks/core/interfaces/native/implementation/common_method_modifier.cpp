@@ -3849,7 +3849,7 @@ void SetMarkAnchorImpl(Ark_NativePointer node,
         }
         ViewAbstractModelStatic::MarkAnchor(frameNode, anchorOpt->first);
     } else {
-        ViewAbstractModelStatic::MarkAnchor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::MarkAnchor(frameNode, OffsetT<Dimension>(0.0_vp, 0.0_vp));
     }
     ViewAbstractModelStatic::ResetMarkAnchorStart(frameNode);
 }
