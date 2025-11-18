@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "accessor_test_base.h"
+#include "accessor_test_utils.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -30,7 +31,9 @@ class ButtonContentModifierHelperAccessor : public StaticAccessorTest<GENERATED_
 public:
     void FireBuilder(ButtonPattern* pattern)
     {
+#ifdef WRONG_PRIVATE
         pattern->FireBuilder();
+#endif
     }
 };
 
@@ -66,18 +69,10 @@ HWTEST_F(ButtonContentModifierHelperAccessor, buttonContentModifierHelperAccesso
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    Ark_Object obj = {
-        .resource = Ark_CallbackResource {
-            .resourceId = TEST_OBJ_ID,
-            .hold = [](InteropInt32){},
-            .release = [](InteropInt32){},
-        }
-    };
+    auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_ButtonConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_ButtonConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),

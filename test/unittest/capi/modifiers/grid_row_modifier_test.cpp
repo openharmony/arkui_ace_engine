@@ -100,8 +100,7 @@ namespace OHOS::Ace::NG {
     void AssignArkValue(Ark_GridRowColumnOption& dst, const int32_t& src)
     {
         auto dimensionValue = Dimension(src);
-        auto arkIntValue = Converter::ArkValue<Ark_Number>(dimensionValue);
-        auto optValue = Converter::ArkValue<Opt_Number>(arkIntValue);
+        auto optValue = Converter::ArkValue<Opt_Int32>(dimensionValue);
         dst.xs = optValue;
         dst.sm = optValue;
         dst.md = optValue;
@@ -111,12 +110,12 @@ namespace OHOS::Ace::NG {
     }
     void AssignArkValue(Ark_GridRowColumnOption& dst, const GridRowColumnOption& src)
     {
-        dst.xs = Converter::ArkValue<Opt_Number>(src.xs);
-        dst.sm = Converter::ArkValue<Opt_Number>(src.sm);
-        dst.md = Converter::ArkValue<Opt_Number>(src.md);
-        dst.lg = Converter::ArkValue<Opt_Number>(src.lg);
-        dst.xl = Converter::ArkValue<Opt_Number>(src.xl);
-        dst.xxl = Converter::ArkValue<Opt_Number>(src.xxl);
+        dst.xs = Converter::ArkValue<Opt_Int32>(src.xs);
+        dst.sm = Converter::ArkValue<Opt_Int32>(src.sm);
+        dst.md = Converter::ArkValue<Opt_Int32>(src.md);
+        dst.lg = Converter::ArkValue<Opt_Int32>(src.lg);
+        dst.xl = Converter::ArkValue<Opt_Int32>(src.xl);
+        dst.xxl = Converter::ArkValue<Opt_Int32>(src.xxl);
     }
 using namespace TypeHelper;
 namespace {
@@ -344,9 +343,9 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestValidValues, TestSiz
     };
 
     auto initValueColumns = [this, &inputValue](const int32_t& initValue) {
-        auto ArkUnion = Converter::ArkUnion<Ark_Union_Number_GridRowColumnOption, Ark_Number>(initValue);
-        auto ArkUnionOptnl = std::optional<Ark_Union_Number_GridRowColumnOption>(ArkUnion);
-        inputValue.columns = Converter::ArkValue<Opt_Union_Number_GridRowColumnOption>(ArkUnionOptnl);
+        auto ArkUnion = Converter::ArkUnion<Ark_Union_I32_GridRowColumnOption, Ark_Int32>(initValue);
+        auto ArkUnionOptnl = std::optional<Ark_Union_I32_GridRowColumnOption>(ArkUnion);
+        inputValue.columns = Converter::ArkValue<Opt_Union_I32_GridRowColumnOption>(ArkUnionOptnl);
     };
 
     auto initValueDirection = [this, &inputValue](const Ark_GridRowDirection& initValue) {
@@ -402,9 +401,9 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestInvalidValues, TestS
     };
 
     auto initValueColumns = [this, &inputValue](const int32_t& initValue) {
-        auto ArkUnion = Converter::ArkUnion<Ark_Union_Number_GridRowColumnOption, Ark_Number>(initValue);
-        auto ArkUnionOptnl = std::optional<Ark_Union_Number_GridRowColumnOption>(ArkUnion);
-        inputValue.columns = Converter::ArkValue<Opt_Union_Number_GridRowColumnOption>(ArkUnionOptnl);
+        auto ArkUnion = Converter::ArkUnion<Ark_Union_I32_GridRowColumnOption, Ark_Int32>(initValue);
+        auto ArkUnionOptnl = std::optional<Ark_Union_I32_GridRowColumnOption>(ArkUnion);
+        inputValue.columns = Converter::ArkValue<Opt_Union_I32_GridRowColumnOption>(ArkUnionOptnl);
     };
 
     auto initValueDirection = [this, &inputValue](const Ark_GridRowDirection& initValue) {

@@ -137,7 +137,7 @@ HWTEST_F(DecorationStyleAccessorTest, getTypeTest, TestSize.Level1)
     Ark_DecorationStyleInterface* stylePtr = new Ark_DecorationStyleInterface();
     for (auto& [input, value, expected] : testFixtureTextDecorationValues) {
         DestroyPeer(peer_);
-        stylePtr->type = Converter::ArkValue<Ark_TextDecorationType>(value);
+        stylePtr->type = Converter::ArkValue<Opt_TextDecorationType>(value);
         peer_ = accessor_->construct(stylePtr);
         auto type = accessor_->getType(peer_);
         EXPECT_EQ(expected, type) <<
@@ -154,7 +154,7 @@ HWTEST_F(DecorationStyleAccessorTest, getStyleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getStyle, nullptr);
     Ark_DecorationStyleInterface stylePtr;
-    stylePtr.type = Converter::ArkValue<Ark_TextDecorationType>(Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE);
+    stylePtr.type = Converter::ArkValue<Opt_TextDecorationType>(Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE);
     for (auto& [input, value, expected] : testFixtureTextDecorationStyleValues) {
         DestroyPeer(peer_);
         stylePtr.style = Converter::ArkValue<Opt_TextDecorationStyle>(value);
@@ -175,7 +175,7 @@ HWTEST_F(DecorationStyleAccessorTest, getColorTestValidValues, TestSize.Level1)
     ASSERT_NE(accessor_->getColor, nullptr);
     Ark_DecorationStyleInterface* stylePtr = new Ark_DecorationStyleInterface();
     auto textDecorationType = Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE;
-    stylePtr->type = Converter::ArkValue<Ark_TextDecorationType>(textDecorationType);
+    stylePtr->type = Converter::ArkValue<Opt_TextDecorationType>(textDecorationType);
     auto checkValue =
         [this, stylePtr](const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
         DestroyPeer(peer_);
@@ -207,7 +207,7 @@ HWTEST_F(DecorationStyleAccessorTest, getColorTestInvalidValues, TestSize.Level1
     ASSERT_NE(accessor_->getColor, nullptr);
     Ark_DecorationStyleInterface* stylePtr = new Ark_DecorationStyleInterface();
     auto textDecorationType = Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE;
-    stylePtr->type = Converter::ArkValue<Ark_TextDecorationType>(textDecorationType);
+    stylePtr->type = Converter::ArkValue<Opt_TextDecorationType>(textDecorationType);
     auto checkValue =
         [this, stylePtr](const std::string& input, const Opt_ResourceColor& value) {
         DestroyPeer(peer_);

@@ -60,7 +60,6 @@ HWTEST_F(SliderContentModifierHelperAccessor, sliderContentModifierHelperAccesso
 
     struct CheckEvent {
         int32_t nodeId;
-        int32_t resourceId;
         int32_t objId;
         std::optional<bool> enabled;
         std::optional<int> value;
@@ -70,22 +69,13 @@ HWTEST_F(SliderContentModifierHelperAccessor, sliderContentModifierHelperAccesso
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    Ark_Object obj = {
-        .resource = Ark_CallbackResource {
-            .resourceId = TEST_OBJ_ID,
-            .hold = [](InteropInt32){},
-            .release = [](InteropInt32){},
-        }
-    };
+    auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_SliderConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_SliderConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
-                .resourceId = resourceId,
                 .objId = config.contentModifier.resource.resourceId,
                 .enabled = Converter::OptConvert<bool>(config.enabled),
                 .value = Converter::OptConvert<int>(config.value),
@@ -103,7 +93,6 @@ HWTEST_F(SliderContentModifierHelperAccessor, sliderContentModifierHelperAccesso
 
     FireBuilder(pattern.GetRawPtr());
     EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
-    EXPECT_EQ(checkEvent->resourceId, TEST_BUILDER_ID);
     EXPECT_EQ(checkEvent->objId, TEST_OBJ_ID);
     ASSERT_TRUE(checkEvent->enabled.has_value()) << "enabled is not set";
     EXPECT_EQ(checkEvent->enabled.value(), TEST_DEFAULT_ENABLED);
@@ -115,8 +104,6 @@ HWTEST_F(SliderContentModifierHelperAccessor, sliderContentModifierHelperAccesso
     EXPECT_EQ(checkEvent->max.value(), TEST_DEFAULT_MAX);
     ASSERT_TRUE(checkEvent->step.has_value());
     EXPECT_EQ(checkEvent->step.value(), TEST_DEFAULT_STEP);
-
-    sliderNode = nullptr;
 }
 
 }

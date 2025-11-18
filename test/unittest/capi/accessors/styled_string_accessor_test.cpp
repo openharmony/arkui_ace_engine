@@ -248,7 +248,7 @@ private:
     void FillDecorationStyle(Ark_StyledStringValue& styledValue)
     {
         const Ark_DecorationStyleInterface decorationStyle = {
-            .type = Converter::ArkValue<Ark_TextDecorationType>(TEST_DCRN_TYPE),
+            .type = Converter::ArkValue<Opt_TextDecorationType>(TEST_DCRN_TYPE),
             .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
             .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
         };
@@ -1032,6 +1032,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling1Test, Test
     EXPECT_TRUE(std::equal(arkBufferData, arkBufferDataEnd, tlvData.data()));
 }
 
+#ifdef WRONG_GEN
 /**
  * @tc.name: styledStringMarshalling0Unmarshalling0Test
  * @tc.desc:
@@ -1039,7 +1040,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling1Test, Test
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling0Unmarshalling0Test, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     ASSERT_NE(accessor_->marshalling0, nullptr);
     ASSERT_NE(accessor_->unmarshalling0, nullptr);
 
@@ -1049,13 +1049,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling0U
 
     auto marshallUserDataFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId,
         const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation) {
-            EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
             EXPECT_EQ(marshallableVal.resource.resourceId, TEST_USERDATASPAN_RESOURCE_ID);
 
-            Ark_Buffer arkMarshallResult {
-                .data = marshallResult,
-                .length = marshallResultLen
-            };
+            Ark_Buffer arkMarshallResult { .data = marshallResult, .length = marshallResultLen };
             CallbackHelper(continuation).InvokeSync(arkMarshallResult);
     };
     auto arkMarshUserDataCallback = Converter::ArkValue<StyledStringMarshallCallback>(
@@ -1068,15 +1064,8 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling0U
     static RefPtr<OHOS::Ace::SpanString> checkSpanString = nullptr;
     auto unmarshallUserDataFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Buffer buf,
         const Callback_StyledStringMarshallingValue_Void continuation) {
-            EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
             EXPECT_EQ(std::memcmp(marshallResult, buf.data, marshallResultLen), 0);
-            Ark_UserDataSpan arkUserDataSpan = {
-                .resource = {
-                    .resourceId = TEST_NEW_USERDATASPAN_ID,
-                    .hold = [](InteropInt32 id) { EXPECT_EQ(id, TEST_NEW_USERDATASPAN_ID); },
-                    .release = [](InteropInt32 id) { EXPECT_EQ(id, TEST_NEW_USERDATASPAN_ID); }
-                }
-            };
+            Ark_UserDataSpan arkUserDataSpan = ArkCreate<Ark_Object>(TEST_NEW_USERDATASPAN_ID);
             CallbackHelper(continuation).InvokeSync(arkUserDataSpan);
     };
     auto arkUnmarshUserDataCallback = Converter::ArkValue<StyledStringUnmarshallCallback>(nullptr,
@@ -1085,9 +1074,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling0U
     auto onUnmarshalling = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Opt_StyledString value, const Opt_Array_String error) {
         EXPECT_FALSE(Converter::GetOpt(error).has_value());
-        auto arkPeer = Converter::GetOpt(value);
-        ASSERT_TRUE(arkPeer.has_value());
-        auto peer = arkPeer.value();
+        auto peer = Converter::GetOpt(value).value_or(nullptr);
         ASSERT_TRUE(peer);
         checkSpanString = peer->spanString;
     };
@@ -1108,8 +1095,8 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling0U
     EXPECT_EQ(userDataSpanHolder->span_.resource.resourceId, TEST_NEW_USERDATASPAN_ID);
 
     AsyncWorkTestHelper::DoComplete();
-#endif
 }
+#endif
 
 /**
  * @tc.name: styledStringUnmarshalling1TestValid

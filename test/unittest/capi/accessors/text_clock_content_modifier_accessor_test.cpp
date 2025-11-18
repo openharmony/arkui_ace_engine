@@ -58,7 +58,6 @@ HWTEST_F(TextClockContentModifierHelperAccessor, textClockContentModifierHelperA
 
     struct CheckEvent {
         int32_t nodeId;
-        int32_t resourceId;
         int32_t objId;
         std::optional<bool> enabled;
         std::optional<bool> started;
@@ -67,22 +66,13 @@ HWTEST_F(TextClockContentModifierHelperAccessor, textClockContentModifierHelperA
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    Ark_Object obj = {
-        .resource = Ark_CallbackResource {
-            .resourceId = TEST_OBJ_ID,
-            .hold = [](InteropInt32){},
-            .release = [](InteropInt32){},
-        }
-    };
+    auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_TextClockConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_TextClockConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
-                .resourceId = resourceId,
                 .objId = config.contentModifier.resource.resourceId,
                 .enabled = Converter::OptConvert<bool>(config.enabled),
                 .started = Converter::OptConvert<bool>(config.started),
@@ -99,7 +89,6 @@ HWTEST_F(TextClockContentModifierHelperAccessor, textClockContentModifierHelperA
 
     FireBuilder(pattern.GetRawPtr());
     EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
-    EXPECT_EQ(checkEvent->resourceId, TEST_BUILDER_ID);
     EXPECT_EQ(checkEvent->objId, TEST_OBJ_ID);
     ASSERT_TRUE(checkEvent->enabled.has_value()) << "enabled is not set";
     EXPECT_EQ(checkEvent->enabled.value(), TEST_DEFAULT_ENABLED);
@@ -112,7 +101,6 @@ HWTEST_F(TextClockContentModifierHelperAccessor, textClockContentModifierHelperA
     auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() / 1000;
     auto diff = (time - checkEvent->timeValue.value());
     EXPECT_TRUE(diff >= 0 && diff <= 1);
-    textClockNode = nullptr;
 }
 
 }

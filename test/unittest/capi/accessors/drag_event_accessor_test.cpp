@@ -202,12 +202,10 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
     accessor_->setData(peer_, arkUnifiedData);
-    auto dataPeer = accessor_->getData(peer_);
-#ifdef WRONG_GEN
+    auto getDataOpt = accessor_->getData(peer_);
     auto getData = Converter::GetOpt(getDataOpt);
     ASSERT_NE(getData, std::nullopt);
     auto dataPeer = getData.value();
-#endif
     ASSERT_NE(dataPeer, nullptr);
     ASSERT_NE(dataPeer->unifiedData, nullptr);
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
@@ -221,12 +219,9 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDataInvalidTest, TestSize.Level1)
 {
-    auto dataPeer = accessor_->getData(nullptr);
-#ifdef WRONG_GEN
+    auto dataPeerOpt = accessor_->getData(nullptr);
     auto dataPeer = Converter::GetOpt(dataPeerOpt);
     ASSERT_EQ(dataPeer, std::nullopt);
-#endif
-    ASSERT_EQ(dataPeer, nullptr);
 }
 
 /**

@@ -940,8 +940,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, setEditMenuOptionsTest, TestSize.Level
         CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(*item->content == TEST_CONTENT_ONE));
     };
     auto arkClickCallback = Converter::ArkValue<::OnMenuItemClickCallback>(testOnMenuItemClickCallback, testID);
-    auto optOnCreateMenuCallback = Converter::ArkValue<::OnCreateMenuCallback>(arkCreateCallback);
-    auto optOnMenuItemClickCallback = Converter::ArkValue<::OnMenuItemClickCallback>(arkClickCallback);
+    auto optOnCreateMenuCallback = Converter::ArkValue<Opt_OnCreateMenuCallback>(arkCreateCallback);
+    auto optOnMenuItemClickCallback = Converter::ArkValue<Opt_OnMenuItemClickCallback>(arkClickCallback);
 
     Ark_EditMenuOptions options { .onCreateMenu = optOnCreateMenuCallback,
         .onMenuItemClick = optOnMenuItemClickCallback };

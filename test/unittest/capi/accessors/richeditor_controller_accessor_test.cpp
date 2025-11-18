@@ -116,13 +116,9 @@ void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpa
         dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyle>(src.textStyle.value(), ctx);
     }
 }
-void AssignArkValue(
-    Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions& dst,
-    const TextSpanOptionsForUpdate& src, Converter::ConvContext *ctx)
+void AssignArkValue(UpdateSpanStyleArgType& dst, const TextSpanOptionsForUpdate& src, Converter::ConvContext *ctx)
 {
-    dst = Converter::ArkUnion<
-        Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions,
-        Ark_RichEditorUpdateTextSpanStyleOptions>(src, ctx);
+    dst = Converter::ArkUnion<UpdateSpanStyleArgType, Ark_RichEditorUpdateTextSpanStyleOptions>(src, ctx);
 }
 
 void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDecorationStruct& src,
@@ -130,7 +126,7 @@ void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDeco
 {
     dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.color, ctx);
     dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.style);
-    dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.textDecoration);
+    dst.type = Converter::ArkValue<Opt_TextDecorationType>(src.textDecoration);
 }
 
 void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style,
@@ -369,9 +365,7 @@ HWTEST_F(RichEditorControllerAccessorTest, updateSpanStyleTest, TestSize.Level1)
     updateOptions.end = TEST_END;
     updateOptions.textStyle = TextStyle(FONT_FAMILIES, FONT_SIZE, FONT_WEIGHT, FONT_STYLE, FONT_COLOUR);
     Converter::ConvContext ctx;
-    auto value = Converter::ArkValue<
-        Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions
-        >(updateOptions, &ctx);
+    auto value = Converter::ArkValue<UpdateSpanStyleArgType>(updateOptions, &ctx);
 
     EXPECT_CALL(*mockRichEditorController_, UpdateSpanStyle(
         updateOptions.start, updateOptions.end, updateOptions.textStyle.value(), updateOptions.imageSpanAttribute

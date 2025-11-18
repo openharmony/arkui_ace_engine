@@ -20,6 +20,10 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/interfaces/native/implementation/rich_editor_controller_structs.h"
 
+// Create alias for long type name
+using UpdateSpanStyleArgType = GTEST_CONCAT_TOKEN_(Ark_Union_RichEditorUpdateTextSpanStyleOptions_,
+   RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions);
+
 namespace OHOS::Ace::NG::Converter {
 class ConvContext;
 void AssignArkValue(Ark_DecorationStyleInterface& dst, const TextDecorationStruct& src);
@@ -31,10 +35,7 @@ void AssignArkValue(Ark_RichEditorBuilderSpanOptions& dst, const OHOS::Ace::Span
 void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpanOptionsForUpdate& src,
     ConvContext *ctx);
 void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style, ConvContext *ctx);
-void AssignArkValue(
-    Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions& dst,
-    const TextSpanOptionsForUpdate& src,
-    ConvContext *ctx);
+void AssignArkValue(UpdateSpanStyleArgType& dst, const TextSpanOptionsForUpdate& src, ConvContext *ctx);
 void AssignArkValue(Ark_TextAlign& dst, const OHOS::Ace::TextAlign& src);
 void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const UpdateParagraphStyle& style);

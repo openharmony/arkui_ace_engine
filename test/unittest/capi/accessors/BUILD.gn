@@ -27,7 +27,7 @@ ace_unittest("capi_all_accessors_test") {
     #"base_gesture_event_accessor_test.cpp",
     "baseline_offset_style_accessor_test.cpp",
     "bounce_symbol_effect_accessor_test.cpp",
-    # "button_content_modifier_accessor_test.cpp",
+    "button_content_modifier_accessor_test.cpp",
     # "calendar_accessor_test.cpp",
     "calendar_picker_dialog_accessor_test.cpp",
     #"canvas_gradient_accessor_test.cpp",

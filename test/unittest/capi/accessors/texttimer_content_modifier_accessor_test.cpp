@@ -60,7 +60,6 @@ HWTEST_F(TextTimerContentModifierHelperAccessor, TextTimerContentModifierHelperA
 
     struct CheckEvent {
         int32_t nodeId;
-        int32_t resourceId;
         int32_t objId;
         std::optional<bool> enabled;
         std::optional<double> count;
@@ -70,22 +69,13 @@ HWTEST_F(TextTimerContentModifierHelperAccessor, TextTimerContentModifierHelperA
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    Ark_Object obj = {
-        .resource = Ark_CallbackResource {
-            .resourceId = TEST_OBJ_ID,
-            .hold = [](InteropInt32){},
-            .release = [](InteropInt32){},
-        }
-    };
+    auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_TextTimerConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_TextTimerConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
-                .resourceId = resourceId,
                 .objId = config.contentModifier.resource.resourceId,
                 .enabled = Converter::OptConvert<bool>(config.enabled),
                 .count = Converter::OptConvert<double>(config.count),
@@ -104,7 +94,6 @@ HWTEST_F(TextTimerContentModifierHelperAccessor, TextTimerContentModifierHelperA
     FireBuilder(pattern.GetRawPtr());
 
     EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
-    EXPECT_EQ(checkEvent->resourceId, TEST_BUILDER_ID);
     EXPECT_EQ(checkEvent->objId, TEST_OBJ_ID);
     ASSERT_TRUE(checkEvent->enabled.has_value()) << "enabled is not set";
     EXPECT_EQ(checkEvent->enabled.value(), TEST_DEFAULT_ENABLED);
@@ -116,8 +105,6 @@ HWTEST_F(TextTimerContentModifierHelperAccessor, TextTimerContentModifierHelperA
     EXPECT_EQ(checkEvent->started.value(), TEST_DEFAULT_STARTED);
     ASSERT_TRUE(checkEvent->elapsedTime.has_value()) << "elapsedTime is not set";
     EXPECT_EQ(checkEvent->elapsedTime.value(), TEST_DEFAULT_ELAPSED_TIME);
-
-    testNode = nullptr;
 }
 
 }

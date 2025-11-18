@@ -66,18 +66,10 @@ HWTEST_F(ProgressContentModifierHelperAccessor, ProgressContentModifierHelperAcc
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    Ark_Object obj = {
-        .resource = Ark_CallbackResource {
-            .resourceId = TEST_OBJ_ID,
-            .hold = [](InteropInt32){},
-            .release = [](InteropInt32){},
-        }
-    };
+    auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_ProgressConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_ProgressConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
@@ -106,8 +98,5 @@ HWTEST_F(ProgressContentModifierHelperAccessor, ProgressContentModifierHelperAcc
     EXPECT_EQ(checkEvent->value.value(), TEST_DEFAULT_VALUE);
     ASSERT_TRUE(checkEvent->total.has_value()) << "total is not set";
     EXPECT_EQ(checkEvent->total.value(), TEST_DEFAULT_TOTAL);
-
-    testNode = nullptr;
 }
-
 }

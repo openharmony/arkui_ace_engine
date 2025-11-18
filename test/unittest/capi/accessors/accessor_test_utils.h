@@ -26,6 +26,20 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+inline Ark_Object ArkCreate(int32_t id)
+{
+    return {
+        .resource = {
+            .resourceId = id,
+            .hold = [](InteropInt32){},
+            .release = [](InteropInt32){},
+        }
+    };
+}
+} // namespace Converter
+
 // Resource functions
 using NamedResourceId = std::tuple<const char *, ResourceType>;
 using IntResourceId = std::tuple<uint32_t, ResourceType>;

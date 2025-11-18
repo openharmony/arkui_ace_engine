@@ -68,18 +68,10 @@ HWTEST_F(GaugeContentModifierHelperAccessor, gaugeContentModifierHelperAccessorT
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    Ark_Object obj = {
-        .resource = Ark_CallbackResource {
-            .resourceId = TEST_OBJ_ID,
-            .hold = [](InteropInt32){},
-            .release = [](InteropInt32){},
-        }
-    };
+    auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_GaugeConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_GaugeConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
@@ -110,8 +102,6 @@ HWTEST_F(GaugeContentModifierHelperAccessor, gaugeContentModifierHelperAccessorT
     EXPECT_EQ(checkEvent->min.value(), TEST_DEFAULT_MIN);
     ASSERT_TRUE(checkEvent->max.has_value());
     EXPECT_EQ(checkEvent->max.value(), TEST_DEFAULT_MAX);
-
-    gaugeNode = nullptr;
 }
 
 }
