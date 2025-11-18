@@ -216,7 +216,7 @@ export class ToolBarV2Modifier implements AttributeModifier<ColumnAttribute> {
   public paddingValue?: LengthMetrics = LengthMetrics.resource($r('sys.float.padding_level12'));
 
   applyNormalAttribute(instance: ColumnAttribute): void {
-    instance.backgroundColor(this.backgroundColorValue);
+    instance.backgroundColor(this.backgroundColorValue ?? $r('sys.color.ohos_id_color_toolbar_bg'));
   }
 
   public backgroundColor(backgroundColor: ColorMetrics): ToolBarV2Modifier {
@@ -265,8 +265,7 @@ export struct ToolBarV2 {
     new ToolBarV2Modifier()
       .padding(LengthMetrics.resource($r('sys.float.padding_level12')))
       .stateEffect(true)
-      .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
-      .backgroundColor(ColorMetrics.resourceColor($r('sys.color.ohos_id_color_toolbar_bg')));
+      .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT));
   @Local
   localActivatedIndex: number = -1;
   @Local
