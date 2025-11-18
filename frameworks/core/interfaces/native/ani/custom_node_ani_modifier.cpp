@@ -150,7 +150,7 @@ void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
         state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
     }
 
-    info.uniqueId = static_cast<ani_double>(host->GetId());
+    info.uniqueId = static_cast<ani_int>(host->GetId());
     info.index = static_cast<ani_int>(host->GetIndex());
     info.name = pattern->GetName();
     info.navDestinationId = std::to_string(pattern->GetNavDestinationId());
@@ -190,7 +190,7 @@ bool QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& inf
     auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
     auto navDestinationResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetNavigationState(nodePtr);
     CHECK_NULL_RETURN(navDestinationResult, false);
-    info.uniqueId = static_cast<ani_double>(navDestinationResult->uniqueId);
+    info.uniqueId = static_cast<ani_int>(navDestinationResult->uniqueId);
     info.index = navDestinationResult->index;
     info.name = navDestinationResult->name;
     info.navDestinationId = navDestinationResult->navDestinationId;

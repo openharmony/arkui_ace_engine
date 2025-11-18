@@ -439,7 +439,19 @@ import hilog from '@ohos.hilog'
 
     export interface ScrollEventInfo {}
 
-    export interface NavDestinationSwitchInfo {}
+    export interface NavDestinationSwitchInfo {
+        context: UIAbilityContext | UIContext;
+        from: NavDestinationInfo | NavBar;
+        to: NavDestinationInfo | NavBar;
+        operation: NavigationOperation;
+    }
+
+    export class NavDestinationSwitchInfoImpl implements NavDestinationSwitchInfo {
+        context: UIAbilityContext | UIContext;
+        from: NavDestinationInfo | NavBar;
+        to: NavDestinationInfo | NavBar;
+        operation: NavigationOperation;
+    }
 
     export enum TabContentState {
         ON_SHOW = 0,
