@@ -1397,21 +1397,14 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
         gradient.SetRepeat(repeatingOpt.value());
     }
 
-    auto gradientColors = Converter::Convert<std::vector<std::pair<Color, Dimension>>>(value.colors);
-
+    auto gradientColors = Converter::Convert<std::vector<GradientColor>>(value.colors);
+    
     if (gradientColors.size() == 1) {
-        auto item = gradientColors.front();
-        GradientColor gradientColor;
-        gradientColor.SetColor(item.first);
-        gradientColor.SetDimension(item.second);
-        gradient.AddColor(gradientColor);
-        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColors.front());
+        gradient.AddColor(gradientColors.front());
     } else {
         for (auto item : gradientColors) {
-            GradientColor gradientColor;
-            gradientColor.SetColor(item.first);
-            gradientColor.SetDimension(item.second);
-            gradient.AddColor(gradientColor);
+            gradient.AddColor(item);
         }
     }
     return gradient;
