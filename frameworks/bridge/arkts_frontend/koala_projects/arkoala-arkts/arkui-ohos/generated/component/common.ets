@@ -76,6 +76,7 @@ import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
+import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer } from "./../framework/ohos.data.unifiedDataChannel"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
@@ -666,8 +667,8 @@ export interface DragEvent {
     getWindowX(): double
     getWindowY(): double
     setData(unifiedData: unifiedDataChannel.UnifiedData): void
-    getData(): unifiedDataChannel.UnifiedData
-    getSummary(): unifiedDataChannel.Summary
+    getData(): unifiedDataChannel.UnifiedData | undefined
+    getSummary(): unifiedDataChannel.Summary | undefined
     setResult(dragResult: DragResult): void
     getResult(): DragResult
     getPreviewRect(): Rectangle
@@ -675,7 +676,7 @@ export interface DragEvent {
     getVelocityY(): double
     getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
-    startDataLoading(options: unifiedDataChannel.GetDataParams): string
+    startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
     enableInternalDropAnimation(configuration: string): void
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -735,10 +736,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setData_serialize(unifiedData_casted)
         return
     }
-    public getData(): unifiedDataChannel.UnifiedData {
+    public getData(): unifiedDataChannel.UnifiedData | undefined {
         return this.getData_serialize()
     }
-    public getSummary(): unifiedDataChannel.Summary {
+    public getSummary(): unifiedDataChannel.Summary | undefined {
         return hookDragEventGetSummary(this)
     }
     public setResult(dragResult: DragResult): void {
@@ -766,7 +767,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
-    public startDataLoading(options: unifiedDataChannel.GetDataParams): string {
+    public startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined {
         return hookDragEventStartDataLoading(this, options)
     }
     public enableInternalDropAnimation(configuration: string): void {
@@ -817,15 +818,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     setData_serialize(unifiedData: unifiedDataChannel.UnifiedData): void {
         ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, extractors.toUnifiedDataChannelUnifiedDataPtr(unifiedData))
     }
-    getData_serialize(): unifiedDataChannel.UnifiedData {
+    getData_serialize(): unifiedDataChannel.UnifiedData | undefined {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        const obj : unifiedDataChannel.UnifiedData = extractors.fromUnifiedDataChannelUnifiedDataPtr(retval)
-        return obj
-    }
-    getSummary_serialize(): unifiedDataChannel.Summary {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        const obj : unifiedDataChannel.Summary = extractors.fromUnifiedDataChannelSummaryPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : unifiedDataChannel.UnifiedData | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (unifiedDataChannel_UnifiedData_serializer.read(retvalDeserializer) as unifiedDataChannel.UnifiedData)
+        }
+        const returnResult : unifiedDataChannel.UnifiedData | undefined = buffer
+        return returnResult
     }
     setResult_serialize(dragResult: DragResult): void {
         ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, dragResult.valueOf())
@@ -7711,13 +7713,13 @@ export interface CommonMethod {
     transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
         throw new Error("Unimplemented method transition")
     }
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    gesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method gesture")
     }
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method priorityGesture")
     }
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method parallelGesture")
     }
     blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -8505,13 +8507,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
         return this
     }
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    gesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
     blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -10414,19 +10416,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public gesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
             hookGesture(this, gesture, mask)
         }
         return this
     }
-    public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
             hookPriorityGesture(this, gesture, mask)
         }
         return this
     }
-    public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
             hookParallelGesture(this, gesture, mask)
         }
@@ -23684,7 +23686,7 @@ export interface TouchEvent {
     changedTouches: Array<TouchObject>
     stopPropagation(): void
     preventDefault(): void
-    getHistoricalPoints(): Array<HistoricalPoint>
+    getHistoricalPoints(): Array<HistoricalPoint> | undefined
 }
 export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
     get type(): TouchType {
@@ -23729,7 +23731,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     public static fromPtr(ptr: KPointer): TouchEventInternal {
         return new TouchEventInternal(ptr)
     }
-    public getHistoricalPoints(): Array<HistoricalPoint> {
+    public getHistoricalPoints(): Array<HistoricalPoint> | undefined {
         return this.getHistoricalPoints_serialize()
     }
     private getType(): TouchType {
@@ -23756,15 +23758,20 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setChangedTouches_serialize(changedTouches_casted)
         return
     }
-    getHistoricalPoints_serialize(): Array<HistoricalPoint> {
+    getHistoricalPoints_serialize(): Array<HistoricalPoint> | undefined {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = HistoricalPoint_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<HistoricalPoint> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = HistoricalPoint_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<HistoricalPoint> = buffer
+        const returnResult : Array<HistoricalPoint> | undefined = buffer
         return returnResult
     }
     private getType_serialize(): TouchType {

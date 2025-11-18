@@ -159,11 +159,12 @@ export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommo
   }
 }
 
-export function hookDragEventStartDataLoading(event: DragEventInternal, options: unifiedDataChannel.GetDataParams) : string {
+export function hookDragEventStartDataLoading(event: DragEventInternal, options: unifiedDataChannel.GetDataParams) :
+  string | undefined {
   return ArkUIAniModule._DragEvent_Start_Data_Loading(event.peer!.ptr, options)
 }
 
-export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataChannel.Summary {
+export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataChannel.Summary | undefined {
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 

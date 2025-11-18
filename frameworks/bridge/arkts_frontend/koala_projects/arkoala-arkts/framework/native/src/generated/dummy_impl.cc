@@ -29432,29 +29432,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
+    Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_unifiedDataChannel_UnifiedData>(300);
+            return {};
         }
         string out("getData(");
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_unifiedDataChannel_UnifiedData>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_unifiedDataChannel_UnifiedData>(300);
+        return {};
     }
-    Ark_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
+    Opt_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_unifiedDataChannel_Summary>(300);
+            return {};
         }
         string out("getSummary(");
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_unifiedDataChannel_Summary>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_unifiedDataChannel_Summary>(300);
+        return {};
     }
     void SetResultImpl(Ark_DragEvent peer,
                        Ark_DragResult dragResult)
@@ -42888,7 +42888,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
+    Opt_Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
     {
         if (!needGroupedLog(1))
         {
