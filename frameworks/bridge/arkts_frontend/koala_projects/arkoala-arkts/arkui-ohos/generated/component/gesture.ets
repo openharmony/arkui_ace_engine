@@ -756,7 +756,7 @@ export class BaseGestureEvent_serializer {
         // instructive change end
     }
 }
-export interface BaseGestureEvent {
+export interface BaseGestureEvent extends BaseEvent {
     fingerList: Array<FingerInfo>
 }
 export class BaseGestureEventInternal extends BaseEventInternal implements MaterializedBase,BaseGestureEvent {
@@ -812,7 +812,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         thisSerializer.release()
     }
 }
-export interface GestureEvent {
+export interface GestureEvent extends BaseEvent {
     repeat: boolean
     fingerList: Array<FingerInfo>
     offsetX: double
