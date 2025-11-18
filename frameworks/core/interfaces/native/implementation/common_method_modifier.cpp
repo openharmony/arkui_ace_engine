@@ -2578,11 +2578,13 @@ void SetBorderColorImpl(Ark_NativePointer node,
         return;
     }
     auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
-    if (color) {
-        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
-    } else {
-        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
+    if (!color) {
+        BorderColorProperty defaultColor;
+        defaultColor.SetColor(Color::BLACK);
+        ViewAbstractModelStatic::SetBorderColor(frameNode, defaultColor);
+        return;
     }
+    ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
 }
 void SetBorderRadiusImpl(Ark_NativePointer node,
                          const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
