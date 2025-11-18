@@ -2437,15 +2437,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebNativeMessageCallback::JSBind(globalObj);
 }
 
-napi_env GetNapiEnv()
-{
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    auto nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, nullptr);
-    return reinterpret_cast<napi_env>(nativeEngine);
-}
-
 napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValue)
 {
     napi_value undefined;
