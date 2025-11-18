@@ -764,9 +764,17 @@ export function hookSliderSetSuffixMethod(node: ArkSliderComponent | ArkSliderPe
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
   WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }
+<<<<<<< HEAD
 
 export function hookListItemGroupOptionsImpl(node: ArkListItemGroupComponent, options: ListItemGroupOptions | undefined): void {
   ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
+=======
+export function hookListItemGroupOptionsImpl(
+    node: ArkListItemGroupComponent,
+    options: ListItemGroupOptions | undefined
+): void {
+    ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
+>>>>>>> 61518ea6ee9 ([0702]修改行宽和变量名)
 }
 
 export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,
