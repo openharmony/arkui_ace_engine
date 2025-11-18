@@ -3146,7 +3146,7 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
         JSRef<JSVal> argv[] = {};
         JSRef<JSVal> result = func->Call(controller, 1, argv);
         if (result->IsBoolean()) {
-            HUKS_CRYPTO_EXTENSION_ABILITY = result->ToBoolean();
+            huksCryptoExtensionAbility = result->ToBoolean();
         }
     }
 }
