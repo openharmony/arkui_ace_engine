@@ -170,15 +170,12 @@ static struct {
     ani_static_method method = nullptr;
 } g_koalaANICallbackDispatcher;
 
-static thread_local ani_env* currentContext = nullptr;
-
 bool setKoalaANICallbackDispatcher(
     ani_env* aniEnv,
     ani_class clazz,
     const char* dispatcherMethodName,
     const char* dispatcherMethodSig
 ) {
-    currentContext = aniEnv;
     g_koalaANICallbackDispatcher.clazz = clazz;
     CHECK_ANI_FATAL(aniEnv->Class_FindStaticMethod(
         clazz, dispatcherMethodName, dispatcherMethodSig,
@@ -193,8 +190,4 @@ bool setKoalaANICallbackDispatcher(
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) {
     *clazz = g_koalaANICallbackDispatcher.clazz;
     *method = g_koalaANICallbackDispatcher.method;
-}
-
-ani_env* getKoalaANIContext(void* hint) {
-    return reinterpret_cast<ani_env*>(hint);
 }
