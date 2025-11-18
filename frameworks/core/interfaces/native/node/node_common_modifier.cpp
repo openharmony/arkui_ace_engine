@@ -5648,6 +5648,13 @@ void ResetHoverEffect(ArkUINodeHandle node)
     ViewAbstract::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
 }
 
+ArkUI_Int32 GetHoverEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetHoverEffect(frameNode));
+}
+
 void SetClickEffect(ArkUINodeHandle node, const int32_t levelValue, ArkUI_Float32 scaleValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -7324,6 +7331,13 @@ void ResetMonopolizeEvents(ArkUINodeHandle node)
     ViewAbstractModelNG::SetMonopolizeEvents(frameNode, false);
 }
 
+ArkUI_Bool GetMonopolizeEvents(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetMonopolizeEvents(frameNode));
+}
+
 void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -8375,6 +8389,28 @@ void ResetFocusScopeId(ArkUINodeHandle node)
     ViewAbstract::SetFocusScopeId(frameNode, id, isGroup, arrowKeyStepOut);
 }
 
+void GetFocusScopeId(ArkUINodeHandle node, ArkUI_Bool (*values)[2], ArkUI_CharPtr* id)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto isGroup = ViewAbstract::GetIsGroup(frameNode);
+    auto arrowValue = ViewAbstract::GetArrowKeyStepOut(frameNode);
+    g_strValue = ViewAbstract::GetFocusScopeId(frameNode);
+    (*values)[NUM_0] = isGroup;
+    (*values)[NUM_1] = arrowValue;
+    *id = g_strValue.c_str();
+}
+
+void GetFocusPriority(ArkUINodeHandle node, ArkUI_Int32 (*values)[1], ArkUI_CharPtr* id)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto scopePriority = ViewAbstract::GetFocusScopePriority(frameNode);
+    g_strValue = ViewAbstract::GetFocusScopeId(frameNode);
+    (*values)[NUM_0] = scopePriority;
+    *id = g_strValue.c_str();
+}
+
 void SetFocusScopePriority(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -8842,6 +8878,13 @@ void ResetClickDistance(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetClickDistance(frameNode, std::numeric_limits<double>::infinity());
+}
+
+ArkUI_Float32 GetClickDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(ViewAbstract::GetClickDistance(frameNode));
 }
 
 void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue)
@@ -10378,6 +10421,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityFocusDrawLevel = ResetAccessibilityFocusDrawLevel,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
+        .getHoverEffect = GetHoverEffect,
         .setClickEffect = SetClickEffect,
         .resetClickEffect = ResetClickEffect,
         .setKeyBoardShortCut = SetKeyBoardShortCut,
@@ -10409,6 +10453,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetBlendMode = ResetBlendMode,
         .setMonopolizeEvents = SetMonopolizeEvents,
         .resetMonopolizeEvents = ResetMonopolizeEvents,
+        .getMonopolizeEvents = GetMonopolizeEvents,
         .setConstraintSize = SetConstraintSize,
         .resetConstraintSize = ResetConstraintSize,
         .setOutlineColor = SetOutlineColor,
@@ -10545,6 +10590,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .getAccessibilityRole = GetAccessibilityRole,
         .setFocusScopeId = SetFocusScopeId,
         .resetFocusScopeId = ResetFocusScopeId,
+        .getFocusScopeId = GetFocusScopeId,
+        .getFocusPriority = GetFocusPriority,
+        .getClickDistance = GetClickDistance,
         .setFocusScopePriority = SetFocusScopePriority,
         .resetFocusScopePriority = ResetFocusScopePriority,
         .setPixelRound = SetPixelRound,
@@ -10860,6 +10908,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetAccessibilityGroup = ResetAccessibilityGroup,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
+        .getHoverEffect = GetHoverEffect,
         .setClickEffect = SetClickEffect,
         .resetClickEffect = ResetClickEffect,
         .setKeyBoardShortCut = SetKeyBoardShortCut,
@@ -10890,6 +10939,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetBlendMode = ResetBlendMode,
         .setMonopolizeEvents = SetMonopolizeEvents,
         .resetMonopolizeEvents = ResetMonopolizeEvents,
+        .getMonopolizeEvents = GetMonopolizeEvents,
         .setConstraintSize = SetConstraintSize,
         .resetConstraintSize = ResetConstraintSize,
         .setOutlineColor = SetOutlineColor,
@@ -11024,6 +11074,9 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getAccessibilityRole = GetAccessibilityRole,
         .setFocusScopeId = SetFocusScopeId,
         .resetFocusScopeId = ResetFocusScopeId,
+        .getFocusScopeId = GetFocusScopeId,
+        .getFocusPriority = GetFocusPriority,
+        .getClickDistance = GetClickDistance,
         .setFocusScopePriority = SetFocusScopePriority,
         .resetFocusScopePriority = ResetFocusScopePriority,
         .setPixelRound = SetPixelRound,
@@ -11182,6 +11235,34 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
             Offset(origin.GetX(), origin.GetY()));
     };
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
+}
+
+void SetOnSizeChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onSizeChanged = [nodeId, node = AceType::WeakClaim(frameNode), extraParam](
+                             const Rect& oldRect, const Rect& rect) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SIZE_CHANGE;
+        PipelineContext::SetCallBackNode(node);
+        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
+        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
+
+        event.componentAsyncEvent.data[2].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        event.componentAsyncEvent.data[3].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
+        SendArkUISyncEvent(&event);
+    };
+
+    auto sizeChangeCallback = [sizeChangeFunc = std::move(onSizeChanged)](const RectF& oldRect, const RectF& rect) {
+        sizeChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+            Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()));
+    };
+    ViewAbstract::SetOnSizeChanged(frameNode, std::move(sizeChangeCallback));
 }
 
 void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
@@ -12201,6 +12282,13 @@ void ResetOnBlur(ArkUINodeHandle node)
 }
 
 void ResetOnAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetAreaChanged(frameNode);
+}
+
+void ResetOnSizeChange(ArkUINodeHandle node)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
