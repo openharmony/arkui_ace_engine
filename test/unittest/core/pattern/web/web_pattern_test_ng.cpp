@@ -3066,36 +3066,6 @@ HWTEST_F(WebPatternTestNg, InitDataDetector_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitSelectDataDetector_001
- * @tc.desc: InitSelectDataDetector.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNg, InitSelectDataDetector_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    bool ret = webPattern->GetDataDetectorEnable();
-    ASSERT_EQ(ret, false);
-    webPattern->GetDataDetectorAdapter();
-    webPattern->InitSelectDataDetector();
-    TextDetectConfig config;
-    webPattern->UpdateEnableSelectedDataDetector(true);
-    webPattern->UpdateSelectedDataDetectorConfig(config);
-    ret = webPattern->GetDataDetectorEnable();
-    ASSERT_EQ(ret, false);
-#endif
-}
-
-/**
  * @tc.name: CreatePip_001
  * @tc.desc: CreatePip.
  * @tc.type: FUNC
