@@ -557,15 +557,22 @@ void ImageModelNG::SetPixelMap(FrameNode* frameNode, void* drawableDescriptor)
 #endif
 }
 
-void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor)
+void ImageModelNG::SetDrawableDescriptor(FrameNode* frameNode, void* newDrawableDescriptor)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(animatedDrawableDescriptor);
-    CHECK_NULL_VOID(pattern);
-    auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
-    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    pattern->UpdateDrawableDescriptor(drawable);
+    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
+    CHECK_NULL_VOID(drawableAddr);
+    auto drawableType = drawableAddr->GetDrawableType();
+    if (drawableType != DrawableType::ANIMATED) {
+        auto pixelMap = drawableAddr->GetPixelMap();
+        auto srcInfo = ImageSourceInfo(pixelMap);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+    } else {
+        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+        pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+        pattern->UpdateDrawableDescriptor(drawable);
+    }
 }
 
 void ImageModelNG::SetResource(FrameNode* frameNode, void* resource)

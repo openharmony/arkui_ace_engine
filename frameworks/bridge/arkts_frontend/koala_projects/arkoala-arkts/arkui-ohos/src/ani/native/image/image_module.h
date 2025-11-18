@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Ani {
 ani_long ExtractorsToDrawableDescriptorPtr(ani_env* env, [[maybe_unused]] ani_object obj,
-    ani_object drawableAni, ani_int drawableType);
+    ani_object drawableAni);
 ani_long ExtractorsToDrawingColorFilterPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object colorFilterObj);
 ani_long ExtractorsToDrawingLatticePtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object latticeObj);
 ani_object ExtractorsFromImagePixelMapPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_long pointer);
@@ -28,7 +28,7 @@ ani_long ExtractorsToImagePixelMapPtr(ani_env* env, [[maybe_unused]] ani_object 
 void ImageResizableOptions(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object latticeAni);
 void ImageConstructPixelMap(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object pixelMapAni);
 void ImageConstructDrawableDescriptor(
-    ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object drawableAni, ani_int drawableType);
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object drawableAni);
 void ImageDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object latticeAni);
 ani_long Image_ColorFilter_TransferStatic(ani_env* env, [[maybe_unused]] ani_object obj, ani_long colorFilter);
 ani_long Image_ColorFilter_TransferDynamic(ani_env* env, [[maybe_unused]] ani_object obj, ani_long colorFilterPeer);
