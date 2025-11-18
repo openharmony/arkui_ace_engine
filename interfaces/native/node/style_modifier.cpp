@@ -309,6 +309,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN), "CustomSpan" },
     { static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE), "XComponentTexture" },
     { static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT), "EmbeddedComponent" },
+    { static_cast<uint32_t>(ARKUI_NODE_PICKER), "Picker" },
 };
 
 std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
@@ -350,6 +351,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "CustomSpan", static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN) },
     { "XComponentTexture", static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE) },
     { "EmbeddedComponent", static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) },
+    { "Picker", static_cast<uint32_t>(ARKUI_NODE_PICKER) },
 };
 
 void ResetAttributeItem()
@@ -20644,6 +20646,154 @@ const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTy
     g_attributeItem.size = RETURN_SIZE_ONE;
     return getters[subTypeId](node);
 }
+
+int32_t SetContainerPickerSelectedIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0 || item->value[0].i32 < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerSelectedIndex(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetContainerPickerEnableHapticFeedback(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerEnableHapticFeedback(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetContainerPickerCanLoop(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerCanLoop(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetContainerPickerIndicatorStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!item || !item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    const ArkUI_PickerIndicatorStyle* indicatorStyle = reinterpret_cast<ArkUI_PickerIndicatorStyle*>(item->object);
+    CHECK_NULL_RETURN(indicatorStyle, ERROR_CODE_PARAM_INVALID);
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerIndicator(node->uiNodeHandle, indicatorStyle);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetContainerPickerSelectedIndex(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto selectedIndex = fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerSelectedIndex(node->uiNodeHandle);
+    g_numberValues[0].i32 = selectedIndex;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetContainerPickerEnableHapticFeedback(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto enableHapticFeedback = fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerEnableHapticFeedback(node->uiNodeHandle);
+    g_numberValues[0].i32 = enableHapticFeedback;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetContainerPickerCanLoop(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto canLoop = fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerCanLoop(node->uiNodeHandle);
+    g_numberValues[0].i32 = canLoop;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetContainerPickerIndicatorStyle(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    static ArkUI_PickerIndicatorStyle indicatorStyle;
+    indicatorStyle =
+        fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerIndicator(node->uiNodeHandle);
+    if (indicatorStyle.type == 1) {
+        g_numberValues[0].i32 = indicatorStyle.type;
+        g_numberValues[1].f32 = indicatorStyle.strokeWidth;
+        g_numberValues[2].u32 = indicatorStyle.dividerColor;
+        g_numberValues[3].f32 = indicatorStyle.startMargin;
+        g_numberValues[4].f32 = indicatorStyle.endMargin;
+    } else if (indicatorStyle.type == 0) {
+        g_numberValues[0].i32 = indicatorStyle.type;
+        g_numberValues[1].u32 = indicatorStyle.backgroundColor;
+        g_numberValues[2].f32 = indicatorStyle.topLeftRadius;
+        g_numberValues[3].f32 = indicatorStyle.topRightRadius;
+        g_numberValues[4].f32 = indicatorStyle.bottomLeftRadius;
+        g_numberValues[5].f32 = indicatorStyle.bottomRightRadius;
+    }
+    g_attributeItem.object = &indicatorStyle;
+    return &g_attributeItem;
+}
+
+void ResetContainerPickerSelectedIndex(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerSelectedIndex(node->uiNodeHandle);
+}
+
+void ResetContainerPickerEnableHapticFeedback(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerEnableHapticFeedback(node->uiNodeHandle);
+}
+
+void ResetContainerPickerCanLoop(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerCanLoop(node->uiNodeHandle);
+}
+
+void ResetContainerPickerIndicatorStyle(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerIndicator(node->uiNodeHandle);
+}
+
+int32_t SetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
+{
+    static Setter* setters[] = { SetContainerPickerSelectedIndex, SetContainerPickerEnableHapticFeedback,
+        SetContainerPickerCanLoop, SetContainerPickerIndicatorStyle };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, item);
+}
+
+const ArkUI_AttributeItem* GetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Getter* getters[] = { GetContainerPickerSelectedIndex, GetContainerPickerEnableHapticFeedback,
+        GetContainerPickerCanLoop, GetContainerPickerIndicatorStyle };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return nullptr;
+    }
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return getters[subTypeId](node);
+}
+
+void ResetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Resetter* resetters[] = { ResetContainerPickerSelectedIndex, ResetContainerPickerEnableHapticFeedback,
+        ResetContainerPickerCanLoop, ResetContainerPickerIndicatorStyle };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    return resetters[subTypeId](node);
+}
 } // namespace
 
 int32_t SetCheckboxGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
@@ -20691,7 +20841,8 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetXComponentAttribute, SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute, SetScrollAttribute,
         SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
         SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetRelativeContainerAttribute,
-        SetGridAttribute, SetGridItemAttribute, nullptr, SetEmbeddedComponentAttribute };
+        SetGridAttribute, SetGridItemAttribute, nullptr, SetEmbeddedComponentAttribute, nullptr,
+        SetContainerPickerAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -20721,7 +20872,8 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
         GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute,
         GetXComponentAttribute, GetCheckboxGroupAttribute, GetStackAttribute, GetSwiperAttribute, GetScrollAttribute,
         GetListAttribute, nullptr, GetListItemGroupAttribute, GetColumnAttribute, GetRowAttribute, GetFlexAttribute,
-        GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetRelativeContainerAttribute, GetGridAttribute, GetGridItemAttribute };
+        GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetRelativeContainerAttribute, GetGridAttribute,
+        GetGridItemAttribute, nullptr, nullptr, nullptr, GetContainerPickerAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -20745,10 +20897,11 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
         ResetTextInputAttribute, ResetTextAreaAttribute, ResetButtonAttribute, ResetProgressAttribute,
         ResetCheckboxAttribute, ResetXComponentAttribute, ResetDatePickerAttribute, ResetTimePickerAttribute,
         ResetTextPickerAttribute, ResetCalendarPickerAttribute, ResetSliderAttribute, ResetRadioAttribute,
-        ResetImageAnimatorAttribute, ResetXComponentAttribute, ResetCheckboxGroupAttribute,
-        ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
+        ResetImageAnimatorAttribute, ResetXComponentAttribute, ResetCheckboxGroupAttribute, ResetStackAttribute,
+        ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
         ResetListItemGroupAttribute, ResetColumnAttribute, ResetRowAttribute, ResetFlexAttribute, ResetRefreshAttribute,
-        ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute, ResetGridItemAttribute };
+        ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute, ResetGridItemAttribute,
+        nullptr, nullptr, nullptr, ResetContainerPickerAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =

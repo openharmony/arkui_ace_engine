@@ -4734,5 +4734,21 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_SelectedDragPreviewStyle_GetColor"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureBackground"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
     }
 ]
