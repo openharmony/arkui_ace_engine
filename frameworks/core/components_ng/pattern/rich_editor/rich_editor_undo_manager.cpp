@@ -766,9 +766,12 @@ void StringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
     auto insertLength = record.rangeAfter.GetLength();
     bool hasSelection = record.selectionBefore.GetLength() > 0;
     bool isOnlyDelete = delLength > 0 && insertLength == 0;
-    // Historical Operation Specifications: process delete forward when redo delete forward without selection
-    bool isDeleteForward =
-        !isUndo && !hasSelection && isOnlyDelete && record.deleteDirection == RichEditorDeleteDirection::FORWARD;
+    bool isDelForwardWithoutSelection =
+        !hasSelection && isOnlyDelete && record.deleteDirection == RichEditorDeleteDirection::FORWARD;
+    bool isInsertWithSelection = hasSelection && insertLength > 0;
+    // Historical Operation Specifications:
+    // process delete forward when redo delete forward without selection or insert value with selection
+    bool isDeleteForward = !isUndo && (isDelForwardWithoutSelection || isInsertWithSelection);
     pattern->SetCaretPosition(isDeleteForward ? record.rangeBefore.start : record.rangeBefore.end);
     if (delLength > 0) {
         isDeleteForward ? pattern->DeleteForwardOperation(delLength, false)
