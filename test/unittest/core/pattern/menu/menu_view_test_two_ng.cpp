@@ -420,7 +420,7 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam001, TestSize.Level1)
      */
     MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
     EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
-    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
     EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
     EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
 
@@ -430,7 +430,7 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam001, TestSize.Level1)
 
     menuParamValue = const_cast<MenuParam&>(menuParam);
     EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
-    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
     EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
     EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
 }
@@ -464,7 +464,7 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam002, TestSize.Level1)
 
     menuParam.previewBorderRadius = NG::BorderRadiusProperty(0.0_vp);
     MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
-    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
 
     menuParam.outlineColor = NG::BorderColorProperty();
     MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
@@ -517,7 +517,7 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam003, TestSize.Level1)
      */
     MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
     EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
-    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
     EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
     EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
     EXPECT_TRUE(menuParamValue.isDarkMode);
@@ -529,7 +529,7 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam003, TestSize.Level1)
 
     menuParamValue = const_cast<MenuParam&>(menuParam);
     EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
-    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
     EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
     EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
     EXPECT_TRUE(menuParamValue.isDarkMode);
