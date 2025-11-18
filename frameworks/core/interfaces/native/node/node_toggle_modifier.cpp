@@ -523,12 +523,12 @@ const ArkUIToggleModifier* GetToggleModifier()
         .setToggleState = SetToggleState,
         .setToggleOnChange = SetToggleOnChange,
         .resetToggleOnChange = ResetToggleOnChange,
+        .setIsUserSetMargin = SetIsUserSetMargin,
         .setToggleSelectedColorPtr = SetToggleSelectedColorPtr,
         .setToggleSwitchPointColorPtr = SetToggleSwitchPointColorPtr,
         .setTogglePointRadiusPtr = SetTogglePointRadiusPtr,
         .setToggleUnselectedColorPtr = SetToggleUnselectedColorPtr,
         .setToggleTrackBorderRadiusPtr = SetToggleTrackBorderRadiusPtr,
-        .setIsUserSetMargin = SetIsUserSetMargin,
         .getToggleState = GetToggleState,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
