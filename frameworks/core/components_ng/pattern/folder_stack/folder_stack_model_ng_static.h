@@ -26,6 +26,10 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetUpdateUpperItems(FrameNode* frameNode, const std::vector<std::string>& itemId);
     static void SetAlignment(FrameNode* frameNode, const std::optional<Alignment>& valueOpt);
+    static void SetOnFolderStateChange(
+        FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange);
+    static void SetOnHoverStatusChange(
+        FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange);
 };
 }
 

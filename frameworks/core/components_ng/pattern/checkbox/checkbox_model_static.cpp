@@ -24,16 +24,16 @@ namespace OHOS::Ace::NG {
 
 void CheckBoxModelStatic::SetSelect(FrameNode* frameNode, const std::optional<bool>& isSelected)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
-    // CHECK_NULL_VOID(eventHub);
-    // eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected.value_or(false));
-    // auto pattern = frameNode->GetPattern<CheckBoxPattern>();
-    // if (isSelected.has_value()) {
-    //     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected.value(), frameNode);
-    // } else {
-    //     ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, frameNode);
-    // }
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected.value_or(false));
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    if (isSelected.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, frameNode);
+    }
 }
 
 void CheckBoxModelStatic::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color)
