@@ -84,7 +84,7 @@ constexpr int32_t CREDENTIAL_UKEY = 4;
 constexpr int CAPABILITY_NOT_SUPPORTED_ERROR = 801;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
 
-bool huksCryptoExtensionAbility = false;
+bool g_huksCryptoExtensionAbility = false;
 
 void EraseSpace(std::string& data)
 {
@@ -535,8 +535,9 @@ public:
         } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsNumber()) {
             std::string identity = args[0]->ToString();
             int32_t type = args[1]->ToNumber<int32_t>();
-            if (type == CREDENTIAL_UKEY && !huksCryptoExtensionAbility) {
-                napi_throw_error(GetNapiEnv(), std::to_string(CAPABILITY_NOT_SUPPORTED_ERROR).c_str(), CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
+            if (type == CREDENTIAL_UKEY && !g_huksCryptoExtensionAbility) {
+                napi_throw_error(GetNapiEnv(), std::to_string(CAPABILITY_NOT_SUPPORTED_ERROR).c_str(),
+                                 CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
                 result_->HandleCancel();
                 return;
             }
@@ -3146,7 +3147,7 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
         JSRef<JSVal> argv[] = {};
         JSRef<JSVal> result = func->Call(controller, 1, argv);
         if (result->IsBoolean()) {
-            huksCryptoExtensionAbility = result->ToBoolean();
+            g_huksCryptoExtensionAbility = result->ToBoolean();
         }
     }
 }
