@@ -446,6 +446,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout003, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
+
     std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
@@ -484,6 +485,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout004, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
+
     std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
@@ -522,6 +524,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout005, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
+
     std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
@@ -558,6 +561,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout006, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
+
     std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
@@ -594,6 +598,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout007, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
+
     std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
@@ -630,6 +635,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout008, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
+
     std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
