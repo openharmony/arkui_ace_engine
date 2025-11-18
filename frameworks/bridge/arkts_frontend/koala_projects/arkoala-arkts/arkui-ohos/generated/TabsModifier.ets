@@ -20,7 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
+import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
 import { Length, ResourceColor } from "./component/units"
@@ -49,19 +49,19 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _animationCurve_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _animationCurve_0_0value?: curves.Curve | curves.ICurve | undefined
     _animationDuration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _animationDuration_0_0value?: number | undefined
+    _animationDuration_0_0value?: int32 | undefined
     _animationMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _animationMode_0_0value?: AnimationMode | undefined
     _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeEffect_0_0value?: EdgeEffect | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((value0: number) => void) | undefined
+    _onChange_0_0value?: ((value0: int32) => void) | undefined
     _onSelected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSelected_0_0value?: ((value0: number) => void) | undefined
+    _onSelected_0_0value?: ((value0: int32) => void) | undefined
     _onTabBarClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTabBarClick_0_0value?: ((value0: number) => void) | undefined
+    _onTabBarClick_0_0value?: ((value0: int32) => void) | undefined
     _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onUnselected_0_0value?: ((value0: number) => void) | undefined
+    _onUnselected_0_0value?: ((value0: int32) => void) | undefined
     _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAnimationStart_0_0value?: OnTabsAnimationStartCallback | undefined
     _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -88,6 +88,8 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _barBackgroundEffect_0_0value?: BackgroundEffectOptions | undefined
     _onContentWillChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onContentWillChange_0_0value?: OnTabsContentWillChangeCallback | undefined
+    _onContentDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onContentDidScroll_0_0value?: OnTabsContentDidScrollCallback | undefined
     _barMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barMode_0_0value?: BarMode | undefined
     _barMode_0_1value?: ScrollableBarModeOptions | undefined
@@ -98,7 +100,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _barBackgroundBlurStyle_1_0value?: BlurStyle | undefined
     _barBackgroundBlurStyle_1_1value?: BackgroundBlurStyleOptions | undefined
     _cachedMaxCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedMaxCount_0_0value?: number | undefined
+    _cachedMaxCount_0_0value?: int32 | undefined
     _cachedMaxCount_0_1value?: TabsCacheMode | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
@@ -197,7 +199,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._animationDuration_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAnimationDurationAttribute((this._animationDuration_0_0value as number | undefined));
+                    peer.setAnimationDurationAttribute((this._animationDuration_0_0value as int32 | undefined));
                     this._animationDuration_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -207,7 +209,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._animationDuration_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAnimationDurationAttribute((undefined as number | undefined));
+                    peer.setAnimationDurationAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -251,7 +253,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._onChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: int32) => void) | undefined));
                     this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -261,7 +263,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnChangeAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -269,7 +271,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._onSelected_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSelectedAttribute((this._onSelected_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnSelectedAttribute((this._onSelected_0_0value as ((value0: int32) => void) | undefined));
                     this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -279,7 +281,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._onSelected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSelectedAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnSelectedAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -287,7 +289,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._onTabBarClick_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTabBarClickAttribute((this._onTabBarClick_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnTabBarClickAttribute((this._onTabBarClick_0_0value as ((value0: int32) => void) | undefined));
                     this._onTabBarClick_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -297,7 +299,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._onTabBarClick_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTabBarClickAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnTabBarClickAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -305,7 +307,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._onUnselected_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as ((value0: int32) => void) | undefined));
                     this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -315,7 +317,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._onUnselected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnUnselectedAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnUnselectedAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -553,6 +555,24 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
+        if (this._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onContentDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnContentDidScrollAttribute((this._onContentDidScroll_0_0value as OnTabsContentDidScrollCallback | undefined));
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnContentDidScrollAttribute((undefined as OnTabsContentDidScrollCallback | undefined));
+                }
+            }
+        }
         if (this._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._barMode_0_flag) {
@@ -611,7 +631,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._cachedMaxCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedMaxCountAttribute((this._cachedMaxCount_0_0value as number | undefined), (this._cachedMaxCount_0_1value as TabsCacheMode | undefined));
+                    peer.setCachedMaxCountAttribute((this._cachedMaxCount_0_0value as int32 | undefined), (this._cachedMaxCount_0_1value as TabsCacheMode | undefined));
                     this._cachedMaxCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -621,7 +641,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._cachedMaxCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedMaxCountAttribute((undefined as number | undefined), (undefined as TabsCacheMode | undefined));
+                    peer.setCachedMaxCountAttribute((undefined as int32 | undefined), (undefined as TabsCacheMode | undefined));
                 }
             }
         }
@@ -702,7 +722,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                     break;
                 }
                 default: {
-                    this.animationDuration((undefined as number | undefined));
+                    this.animationDuration((undefined as int32 | undefined));
                 }
             }
         }
@@ -741,7 +761,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                     break;
                 }
                 default: {
-                    this.onChange((undefined as ((value0: number) => void) | undefined));
+                    this.onChange((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -754,7 +774,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                     break;
                 }
                 default: {
-                    this.onSelected((undefined as ((value0: number) => void) | undefined));
+                    this.onSelected((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -767,7 +787,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                     break;
                 }
                 default: {
-                    this.onTabBarClick((undefined as ((value0: number) => void) | undefined));
+                    this.onTabBarClick((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -780,7 +800,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                     break;
                 }
                 default: {
-                    this.onUnselected((undefined as ((value0: number) => void) | undefined));
+                    this.onUnselected((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -953,6 +973,19 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
+        if (modifier._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onContentDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onContentDidScroll(modifier._onContentDidScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.onContentDidScroll((undefined as OnTabsContentDidScrollCallback | undefined));
+                }
+            }
+        }
         if (modifier._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._barMode_0_flag) {
@@ -1001,7 +1034,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                     break;
                 }
                 default: {
-                    this.cachedMaxCount((undefined as number | undefined), (undefined as TabsCacheMode | undefined));
+                    this.cachedMaxCount((undefined as int32 | undefined), (undefined as TabsCacheMode | undefined));
                 }
             }
         }
@@ -1061,7 +1094,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    animationDuration(value: number | undefined): this {
+    animationDuration(value: int32 | undefined): this {
         if (((this._animationDuration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._animationDuration_0_0value) !== (value)))
         {
             this._animationDuration_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1094,7 +1127,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: int32) => void) | undefined): this {
         if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1105,7 +1138,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    onSelected(value: ((value0: number) => void) | undefined): this {
+    onSelected(value: ((value0: int32) => void) | undefined): this {
         if (((this._onSelected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onSelected_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1116,7 +1149,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    onTabBarClick(value: ((value0: number) => void) | undefined): this {
+    onTabBarClick(value: ((value0: int32) => void) | undefined): this {
         if (((this._onTabBarClick_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onTabBarClick_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1127,7 +1160,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    onUnselected(value: ((value0: number) => void) | undefined): this {
+    onUnselected(value: ((value0: int32) => void) | undefined): this {
         if (((this._onUnselected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onUnselected_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1281,6 +1314,17 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
+    onContentDidScroll(value: OnTabsContentDidScrollCallback | undefined): this {
+        if (((this._onContentDidScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onContentDidScroll_0_0value = value
+        } else
+        {
+            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         if (((this._barMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
@@ -1317,7 +1361,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
+    cachedMaxCount(count: int32 | undefined, mode: TabsCacheMode | undefined): this {
         if (((this._cachedMaxCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedMaxCount_0_0value) !== (count)) || (true))
         {
             this._cachedMaxCount_0_flag = AttributeUpdaterFlag.UPDATE

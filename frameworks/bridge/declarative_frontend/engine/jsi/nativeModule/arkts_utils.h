@@ -116,6 +116,8 @@ public:
         std::vector<std::string> &result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsFontFamiliesFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
         std::vector<std::string> &result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseResponseRegionTool(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, ResponseRegionSupportedTool& toolType);
     static bool ParseJsLengthMetrics(
         const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
     static bool ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,

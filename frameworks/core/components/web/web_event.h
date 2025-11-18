@@ -132,6 +132,9 @@ public:
     virtual std::vector<std::string> GetAcceptType() = 0;
     virtual bool IsCapture() = 0;
     virtual std::vector<std::string> GetMimeType() = 0;
+    virtual std::string GetDefaultPath() = 0;
+    virtual std::vector<std::string> GetDescriptions() = 0;
+    virtual bool IsAcceptAllOptionExcluded() = 0;
 };
 
 class ACE_EXPORT WebError : public AceType {

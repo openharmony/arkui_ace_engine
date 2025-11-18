@@ -25,6 +25,7 @@ export class ComponentBase implements UICommonBase {
     protected isFirstBuild: boolean = true
     public isFirstRender: boolean = true
     protected gestureEvent: UIGestureEvent | undefined = undefined
+    private attributeHook_: (peer?: PeerNode)=>void = ()=>{}
     setPeer(peer: PeerNode | undefined) {
         this.peer = peer
     }
@@ -38,11 +39,14 @@ export class ComponentBase implements UICommonBase {
         return this.gestureEvent
     }
     protected checkPriority(name: string): boolean {
+        this.attributeHook_(this.peer);
         return true
     }
     public applyAttributesFinish(): void {
         this.isFirstBuild = false;
         ArkUINativeModule._ApplyModifierFinish(this.peer!.peer.ptr)
+    }
+    public applyOptionsFinish(traceName: string): void {
     }
     public applyAttributes(attrs: Object): void {
         this.applyAttributesFinish()
@@ -53,6 +57,10 @@ export class ComponentBase implements UICommonBase {
 
     public animationEnd(): this {
         return this;
+    }
+    
+    public setAttributeHook(hook: (peer?: PeerNode) => void) {
+        this.attributeHook_ = hook;
     }
 
     @memo

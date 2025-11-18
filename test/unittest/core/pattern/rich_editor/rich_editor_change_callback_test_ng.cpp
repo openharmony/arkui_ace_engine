@@ -121,7 +121,7 @@ void RichEditorChangeCallbackTestNg::InitDeleteCallback(RichEditorModelNG& richE
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -169,7 +169,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest001, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest002, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -239,7 +239,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest002, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -303,7 +303,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest004, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -367,7 +367,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest004, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest005, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -416,7 +416,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest005, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest006, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -476,7 +476,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest006, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -489,6 +489,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
+    richEditorPattern->isStyledUndoSupported_ = true;
+    richEditorPattern->RecreateUndoManager();
     bool isWillCalled = false;
     int32_t originalCount = 0;
     int32_t replacedCount = 0;
@@ -500,10 +502,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
     };
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
-    int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
+    int32_t afterLength = 0;
+    auto onDidChange = [&isDidCalled, &afterLength](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.GetRichEditorReplacedSpans().size();
+        afterLength = afterResult.GetRangeAfter().GetLength();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -526,13 +528,13 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
     isDidCalled = false;
     originalCount = 0;
     replacedCount = 0;
-    afterCount = 0;
+    afterLength = 0;
     richEditorPattern->HandleOnRedoAction();
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
     EXPECT_EQ(replacedCount, 1);
-    EXPECT_EQ(afterCount, 1);
+    EXPECT_EQ(afterLength, 6);
 }
 
 /**
@@ -540,7 +542,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onWillDid
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest008, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -602,7 +604,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest008, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, add text span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest009, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest009, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -641,7 +643,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest009, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, add text span then insert value
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest010, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest010, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -687,7 +689,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest010, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, add multi text span then insert value
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest011, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest011, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -737,7 +739,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest011, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, add image span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest012, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest012, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -783,7 +785,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest012, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest013, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest013, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -829,7 +831,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest013, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest014, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest014, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -876,7 +878,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest014, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest015, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest015, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -925,7 +927,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest015, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, delete text
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest016, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest016, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -953,7 +955,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest016, TestSize.Lev
  * @tc.desc: test for callback onWillchange/onDidChange, delete text
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest017, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest017, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -986,7 +988,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest017, TestSize.Lev
  * @tc.desc: test for aboutToDelete callback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -1021,7 +1023,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest001, TestSize.Level1)
  * @tc.desc: test for aboutToDelete callback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest002, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest002, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -1055,7 +1057,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest002, TestSize.Level1)
  * @tc.desc: test for aboutToDelete callback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest003, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest003, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -1091,7 +1093,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest003, TestSize.Level1)
  * @tc.desc: test Get focus edit status is true
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged001, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. get richEditor richEditorPattern
@@ -1123,7 +1125,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged001, TestSize.Level1
  * @tc.desc: test Lose focus edit status is true
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged002, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged002, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. get richEditor richEditorPattern
@@ -1155,7 +1157,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged002, TestSize.Level1
  * @tc.desc: test Click on edit status is true
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged004, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged004, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. get richEditor richEditorPattern
@@ -1190,7 +1192,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged004, TestSize.Level1
  * @tc.desc: test mouse release while dragging edit status is true
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged005, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged005, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. get richEditor richEditorPattern
@@ -1225,7 +1227,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged005, TestSize.Level1
  * @tc.desc: test OnSubmitTest
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -1277,7 +1279,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
  * @tc.desc: test onIMEInputComplete
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -1325,7 +1327,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
  * @tc.desc: test onIMEInputComplete
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -1386,7 +1388,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
  * @tc.desc: test onIMEInputComplete
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -1440,7 +1442,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
  * @tc.desc: test on handle move done
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackTestNg, OnHandleMoveDone001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackTestNg, OnHandleMoveDone001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

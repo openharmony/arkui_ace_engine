@@ -47,6 +47,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1093,10 +1094,10 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     if (edgeEffect == EdgeEffect::SPRING && !scrollEffect_) {
         auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
         CHECK_NULL_VOID(springEffect);
-        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
+        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)](bool useCurrentDelta) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern, false);
-            return pattern->OutBoundaryCallback();
+            return pattern->OutBoundaryCallback(useCurrentDelta);
         });
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
@@ -2608,6 +2609,7 @@ int32_t ScrollablePattern::ScrollToTarget(
 ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
+    CHECK_NULL_RETURN(parent, (ScrollResult{ 0, false }));
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         if (!HasEdgeEffect(offset)) {
@@ -2652,6 +2654,9 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
 ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
+    if (!parent) {
+        return { 0, true };
+    }
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         auto result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
@@ -2736,6 +2741,9 @@ ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t sour
 {
     auto remainOffset = 0.0;
     auto parent = GetNestedScrollParent();
+    if (!parent) {
+        return { remainOffset, true };
+    }
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         if (GetEdgeEffect() == EdgeEffect::NONE) {
@@ -2934,6 +2942,7 @@ bool ScrollablePattern::HandleScrollableOverScroll(float velocity)
 {
     bool result = false;
     for (auto ancestor = GetNestedScrollParent(); ancestor != nullptr; ancestor = ancestor->GetNestedScrollParent()) {
+        CHECK_NULL_RETURN(ancestor, false);
         if (ancestor->NestedScrollOutOfBoundary()) {
             result = ancestor->HandleScrollVelocity(velocity, Claim(this));
             break;
@@ -3586,6 +3595,7 @@ void ScrollablePattern::Register2DragDropManager()
 float ScrollablePattern::IsInHotZone(const PointF& point)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.f);
     auto offset = 0.f;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.f);
@@ -3744,6 +3754,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
  */
 void ScrollablePattern::StopHotzoneScroll()
 {
+    if (!animator_) {
+        return;
+    }
     if (!AnimateStoped()) {
         animator_->Stop();
     }
@@ -4776,7 +4789,7 @@ void ScrollablePattern::GetRepeatCountInfo(
             totalChildCount += repeatRealCount;
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
                    AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
-                   AceType::InstanceOf<CustomNode>(child)
+                   AceType::InstanceOf<CustomNode>(child) || AceType::InstanceOf<ParallelizeUIAdapterNode>(child)
 #ifdef ACE_STATIC
                    || InstanceOf<ArkoalaLazyNode>(child)
 #endif

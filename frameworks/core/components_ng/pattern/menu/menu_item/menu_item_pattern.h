@@ -133,7 +133,9 @@ public:
     {
         isSelected_ = isSelected;
         if (!isOptionPattern_) {
-            GetHost()->MarkModifyDone();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkModifyDone();
         }
         UpdateDividerSelectedStatus(isSelected_);
     }
@@ -436,6 +438,15 @@ public:
     void SetShowDefaultSelectedIcon(bool show);
     void SetCheckMarkVisibleType(VisibleType type);
     void OnColorConfigurationUpdate() override;
+    float GetLeftRowMinWidth()
+    {
+        return leftRowMinWidth_;
+    }
+
+    void SetLeftRowMinWidth(float width)
+    {
+        leftRowMinWidth_ = width;
+    }
 
 protected:
     void RegisterOnKeyEvent();
@@ -629,6 +640,7 @@ friend class ServiceCollaborationMenuAceHelper;
     std::optional<PointF> lastInnerPosition_ = std::nullopt;
     std::optional<PointF> lastOutterPosition_ = std::nullopt;
     bool leaveFromBottom_ = false;
+    float leftRowMinWidth_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

@@ -54,6 +54,7 @@ constexpr Dimension KEYBOARD_SPACE = 8.0_vp;
 // help value to calculate p2 p4 position
 constexpr Dimension DEFAULT_BUBBLE_ARROW_WIDTH = 16.0_vp;
 constexpr Dimension DEFAULT_BUBBLE_ARROW_HEIGHT = 8.0_vp;
+constexpr Dimension BUBBLE_MIN_ARROW_HEIGHT = 1.0_px;
 Dimension DEFAULT_P2_HEIGHT = 7.32_vp;
 Dimension DEFAULT_P2_WIDTH = 1.5_vp;
 Dimension DEFAULT_P4_END_Y = 6.0_vp;
@@ -537,6 +538,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 Dimension GetMaxWith(uint32_t maxColumns)
 {
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
+    CHECK_NULL_RETURN(gridColumnInfo, Dimension());
     auto parent = gridColumnInfo->GetParent();
     if (parent) {
         parent->BuildColumnWidth();
@@ -809,6 +811,21 @@ void BubbleLayoutAlgorithm::UpdateDumpInfo()
     dumpInfo_.targetID = targetNodeId_;
 }
 
+void BubbleLayoutAlgorithm::InitBubbleArrow(const RefPtr<BubbleLayoutProperty>& layoutProp,
+    LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutProp);
+    auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
+    auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
+    if (!enableArrow_) {
+        height = BUBBLE_MIN_ARROW_HEIGHT;
+    }
+    calculateArrowPoint(height, width, layoutWrapper);
+    arrowHeight_ = height.ConvertToPx();
+    scaledBubbleSpacing_ = arrowHeight_;
+    SetArrowSize(realArrowWidth_, realArrowHeight_);
+}
+
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow,
     LayoutWrapper* layoutWrapper)
 {
@@ -824,16 +841,11 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     isCaretMode_ = layoutProp->GetIsCaretMode().value_or(true);
-    auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
-    auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
-    calculateArrowPoint(height, width, layoutWrapper);
     followCursor_ = isTips_ && layoutProp->GetShowAtAnchorValue(TipsAnchorType::TARGET) == TipsAnchorType::CURSOR;
-    arrowHeight_ = height.ConvertToPx();
-    scaledBubbleSpacing_ = arrowHeight_;
-    SetArrowSize(realArrowWidth_, realArrowHeight_);
+    enableArrow_ = followCursor_ ? false : layoutProp->GetEnableArrow().value_or(true);
+    InitBubbleArrow(layoutProp, layoutWrapper);
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
     auto constraint = layoutProp->GetLayoutConstraint();
-    enableArrow_ = followCursor_ ? false : layoutProp->GetEnableArrow().value_or(true);
     followTransformOfTarget_ = layoutProp->GetFollowTransformOfTarget().value_or(false);
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, layoutProp->GetMeasureType(MeasureType::MATCH_PARENT), true);

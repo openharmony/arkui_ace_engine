@@ -28,6 +28,9 @@ public:
 
 private:
     // DynamicModal
+    static ani_long DynamicConstruct(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_int id, [[maybe_unused]] ani_int flag);
     static ani_status SetDynamicOption(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj);

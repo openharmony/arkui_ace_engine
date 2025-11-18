@@ -2012,9 +2012,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     MockContainer::Current()->SetIsUIExtensionWindow(true);
     context_->ChangeDarkModeBrightness();
     auto rsUIDirector = context_->GetRSUIDirector();
-    context_->RSTransactionBegin(rsUIDirector);
-    context_->SetAppBgColor(Color::BLUE);
-    context_->RSTransactionCommit(rsUIDirector);
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
     context_->ChangeDarkModeBrightness();
     MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
@@ -2654,261 +2652,296 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg129, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test001
- * @tc.desc: Test OnTouchEvent with RVS enabled and touch event processing
+ * @tc.name: PipelineContextTestNg_TouchOptimizer_NullPtr_Test
+ * @tc.desc: Test PipelineContext functions when touchOptimizer_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Test, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.steps: Create pipeline context with null touchOptimizer and test functions
+     * @tc.expected: Functions should handle null pointer gracefully
      */
     ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
     
-    // Enable RVS feature in ResSchedTouchOptimizer
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    optimizer.slideAccepted_ = true;
-    optimizer.lastTpFlush_ = false;
-    optimizer.lastTpFlushCount_ = 0;
+    // 保存原始的touchOptimizer
+    auto originalTouchOptimizer = std::move(context_->touchOptimizer_);
     
-    // Create a touch event
+    // 设置touchOptimizer为nullptr
+    context_->touchOptimizer_ = nullptr;
+    
+    // 测试FlushVsync中touchOptimizer_为null的情况
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    // 测试OnTouchEvent中touchOptimizer_为null的情况
     TouchEvent touchEvent;
-    touchEvent.id = 1;
     touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    context_->OnTouchEvent(touchEvent, false);
+    
+    // 测试ConsumeTouchEventsInterpolation中touchOptimizer_为null的情况
+    std::unordered_set<int32_t> ids = {1};
+    std::map<int32_t, int32_t> timestampToIds = {{0, 1}};
+    std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
+    std::unordered_map<int, TouchEvent> idToTouchPoints;
+    
+    context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
+    
+    // 恢复原始的touchOptimizer
+    context_->touchOptimizer_ = std::move(originalTouchOptimizer);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TouchOptimizer_Exists_Test
+ * @tc.desc: Test PipelineContext functions when touchOptimizer_ exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test functions with existing touchOptimizer_
+     * @tc.expected: Functions should work normally with touchOptimizer_
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
+    
+    // 测试FlushVsync中touchOptimizer_存在的情况
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    // 测试OnTouchEvent中touchOptimizer_存在的情况
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.x = 100;
-    touchEvent.y = 200;
-    touchEvent.xReverse = 0;
-    touchEvent.yReverse = 0;
-    touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-    
-    /**
-     * @tc.steps: 2. Call OnTouchEvent and verify RVS processing
-     * @tc.expected: Touch event is processed correctly with RVS
-     */
     context_->OnTouchEvent(touchEvent, false);
     
-    // Verify the touch event was added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    
-    // Clean up
-    context_->touchEvents_.clear();
+    // 验证touchOptimizer_的状态
+    EXPECT_FALSE(context_->touchOptimizer_->GetIsTpFlushFrameDisplayPeriod());
+    EXPECT_FALSE(context_->touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
 }
 
 /**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test002
- * @tc.desc: Test OnTouchEvent with RVS enabled and slide direction set
+ * @tc.name: PipelineContextTestNg_TpFlushFrameDisplayPeriod_Test
+ * @tc.desc: Test TpFlushFrameDisplayPeriod with touchOptimizer_
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test002, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TpFlushFrameDisplayPeriod_Test, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.steps: Test TpFlushFrameDisplayPeriod functionality
+     * @tc.expected: RequestFrame should be called when TpFlushFrameDisplayPeriod is true
      */
     ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
     
-    // Enable RVS feature and set slide direction
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    optimizer.slideAccepted_ = true;
-    optimizer.SetSlideDirection(1); // HORIZONTAL
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
     
-    // Create multiple touch events to trigger RVS queue processing
-    std::list<TouchEvent> touchEvents;
-    for (int i = 0; i < 10; i++) {
-        TouchEvent touchEvent;
-        touchEvent.id = 1;
-        touchEvent.type = TouchType::MOVE;
-        touchEvent.sourceTool = SourceTool::FINGER;
-        touchEvent.x = 100 + i * 10; // Horizontal movement
-        touchEvent.y = 200;
-        touchEvent.xReverse = 0;
-        touchEvent.yReverse = 0;
-        touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-        touchEvents.push_back(touchEvent);
-    }
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
     
-    /**
-     * @tc.steps: 2. Process touch events through OnTouchEvent
-     * @tc.expected: RVS queue is updated and processed
-     */
-    for (const auto& event : touchEvents) {
-        context_->OnTouchEvent(event, false);
-    }
+    // 设置touchOptimizer_的状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
+    context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     
-    // Verify touch events were added
-    EXPECT_FALSE(context_->touchEvents_.empty());
+    // 期望RequestFrame被调用
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
     
-    // Clean up
-    context_->touchEvents_.clear();
+    // 调用FlushVsync
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // 重置状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
 }
 
 /**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test003
- * @tc.desc: Test OnTouchEvent with RVS enabled and non-finger source tool
+ * @tc.name: PipelineContextTestNg_FirstFrameAfterTpFlush_Test
+ * @tc.desc: Test FirstFrameAfterTpFlushFrameDisplayPeriod with touchOptimizer_
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test003, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameAfterTpFlush_Test, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.steps: Test FirstFrameAfterTpFlushFrameDisplayPeriod functionality
+     * @tc.expected: RequestFrame should be called when FirstFrameAfterTpFlushFrameDisplayPeriod is true
      */
     ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
     
-    // Enable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
     
-    // Create a touch event with non-finger source tool
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // 设置touchOptimizer_的状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
+    context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    
+    // 期望RequestFrame被调用
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // 调用FlushVsync
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // 重置状态
+    context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TouchEvent_NeedTpFlush_Test
+ * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test OnTouchEvent when NeedTpFlushVsync returns true
+     * @tc.expected: FlushVsync should be called directly
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
+    context_->SetupRootElement();
+    
+    // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
+    context_->touchOptimizer_->slideAccepted_ = false; // 这将导致NeedTpFlushVsync返回true
+
+    // 创建触摸事件
     TouchEvent touchEvent;
-    touchEvent.id = 1;
     touchEvent.type = TouchType::MOVE;
-    touchEvent.sourceTool = SourceTool::MOUSE; // Non-finger source
-    touchEvent.x = 100;
-    touchEvent.y = 200;
-    touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-    
-    /**
-     * @tc.steps: 2. Call OnTouchEvent with non-finger source
-     * @tc.expected: Event is processed but RVS is not triggered
-     */
-    context_->OnTouchEvent(touchEvent, false);
-    
-    // Verify the touch event was added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    
-    // Clean up
-    context_->touchEvents_.clear();
-}
-
-/**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test004
- * @tc.desc: Test OnTouchEvent with RVS enabled and different touch types
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Enable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    
-    // Test different touch types
-    std::vector<TouchType> touchTypes = { TouchType::DOWN, TouchType::UP, TouchType::MOVE, TouchType::CANCEL };
-    
-    for (const auto& touchType : touchTypes) {
-        TouchEvent touchEvent;
-        touchEvent.id = 1;
-        touchEvent.type = touchType;
-        touchEvent.sourceTool = SourceTool::FINGER;
-        touchEvent.x = 100;
-        touchEvent.y = 200;
-        touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-        
-        /**
-         * @tc.steps: 2. Call OnTouchEvent with different touch types
-         * @tc.expected: Events are processed correctly
-         */
-        context_->OnTouchEvent(touchEvent, false);
-        
-        // Verify the touch event was added to touchEvents_
-        if (touchEvent.type == TouchType::MOVE) {
-            EXPECT_FALSE(context_->touchEvents_.empty());
-        }
-        
-        // Clean up for next iteration
-        context_->touchEvents_.clear();
-    }
-}
-
-/**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test005
- * @tc.desc: Test OnTouchEvent with RVS disabled
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: 1. Initialize parameters and setup test environment with RVS disabled
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Disable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = false;
-    
-    // Create a touch event
-    TouchEvent touchEvent;
     touchEvent.id = 1;
-    touchEvent.type = TouchType::MOVE;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.x = 100;
-    touchEvent.y = 200;
-    touchEvent.SetTime(std::chrono::high_resolution_clock::now());
+    touchEvent.sourceType = SourceType::TOUCH;
     
-    /**
-     * @tc.steps: 2. Call OnTouchEvent with RVS disabled
-     * @tc.expected: Event is processed normally without RVS
-     */
+    // 调用OnTouchEvent
     context_->OnTouchEvent(touchEvent, false);
-    
-    // Verify the touch event was added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    
-    // Clean up
-    context_->touchEvents_.clear();
+    EXPECT_FALSE(context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_);
+    // 重置状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
+    context_->touchOptimizer_->slideAccepted_ = true;
 }
 
 /**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test006
- * @tc.desc: Test OnTouchEvent with multiple touch points
+ * @tc.name: RSTransactionBeginAndCommit
+ * @tc.desc: Test the function ChangeDarkModeBrightness.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test006, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, RSTransactionBeginAndCommit001, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    context_->SetAppBgColor(Color::BLACK);
+    context_->ChangeDarkModeBrightness();
+    context_->SetIsJsCard(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsFormRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsDynamicRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->appBgColor_ = Color::TRANSPARENT;
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    context_->ChangeDarkModeBrightness();
+    EXPECT_NE(context_->stageManager_, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TouchEvent_NoNeedTpFlush_Test
+ * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test OnTouchEvent when NeedTpFlushVsync returns false
+     * @tc.expected: RequestFrame should be called
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
     
-    // Enable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
     
-    // Create multiple touch events with different IDs
-    for (int id = 1; id <= 3; id++) {
-        TouchEvent touchEvent;
-        touchEvent.id = id;
-        touchEvent.type = TouchType::MOVE;
-        touchEvent.sourceTool = SourceTool::FINGER;
-        touchEvent.x = 100 + id * 10;
-        touchEvent.y = 200 + id * 10;
-        touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-        
-        /**
-         * @tc.steps: 2. Call OnTouchEvent with multiple touch points
-         * @tc.expected: All events are processed correctly
-         */
-        context_->OnTouchEvent(touchEvent, false);
-    }
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
     
-    // Verify the touch events were added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    EXPECT_EQ(context_->touchEvents_.size(), 3);
+    // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回false
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
     
-    // Clean up
-    context_->touchEvents_.clear();
+    // 期望RequestFrame被调用
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // 创建触摸事件
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.sourceType = SourceType::TOUCH;
+    
+    // 调用OnTouchEvent
+    context_->OnTouchEvent(touchEvent, false);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg095
+ * @tc.desc: Test the function ChangeDarkModeBrightness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    context_->SetAppBgColor(Color::BLACK);
+    context_->ChangeDarkModeBrightness();
+    context_->SetIsJsCard(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsFormRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsDynamicRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->appBgColor_ = Color::TRANSPARENT;
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    context_->ChangeDarkModeBrightness();
+    EXPECT_NE(context_->stageManager_, nullptr);
 }
 } // namespace NG
 } // namespace OHOS::Ace

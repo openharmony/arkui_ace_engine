@@ -33,6 +33,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
@@ -857,5 +858,65 @@ HWTEST_F(MenuItemTestOneNg, RemoveParentRestrictionsForFixIdeal002, TestSize.Lev
     menuItemLayoutAlgorithm_->RemoveParentRestrictionsForFixIdeal(layoutProp, childConstraint);
     EXPECT_TRUE(std::isinf(childConstraint.maxSize.Width()));
     EXPECT_TRUE(std::isinf(childConstraint.maxSize.Height()));
+}
+
+/**
+ * @tc.name: MeasureItemViews001
+ * @tc.desc: Test MenuItem MeasureItemViews001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureItemViews001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set font scale to 1.75.
+     */
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step2. create menu and initialize.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto leftNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(leftNode, nullptr);
+    auto rightNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rightNode, nullptr);
+    menuItemNode->AddChild(leftNode);
+    menuItemNode->AddChild(rightNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto algorithm = AceType::DynamicCast<MenuItemLayoutAlgorithm>(menuItemPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        std::move(menuItemNode), AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto props = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(props, nullptr);
+    
+
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(std::move(leftNode),
+        AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    ASSERT_NE(childWrapper, nullptr);
+    layoutWrapper->AppendChild(childWrapper);
+    layoutWrapper->hostNode_ = menuItemNode;
+    std::optional<LayoutConstraintF> layoutConstraint;
+    auto childConstraint = props->CreateChildConstraint();
+    algorithm->MeasureItemViews(childConstraint, layoutConstraint, AceType::RawPtr(layoutWrapper));
 }
 } // namespace OHOS::Ace::NG

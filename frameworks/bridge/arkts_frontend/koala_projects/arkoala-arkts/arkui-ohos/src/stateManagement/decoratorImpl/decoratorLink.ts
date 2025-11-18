@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IDecoratedV1Variable, WatchFuncType } from '../decorator';
+import { IDecoratedV1Variable, IVariableOwner, WatchFuncType } from '../decorator';
 import { ILinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 /**
  * implementation of V1 @Link
@@ -40,7 +40,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
     constructor(
-        owningView: ExtendableComponent | null,
+        owningView: IVariableOwner | undefined,
         varName: string,
         source: IDecoratedV1Variable<T>,
         sourceGet: () => T,
@@ -68,16 +68,20 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     }
 
     public get(): T {
-        return this.sourceGet_();
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${this.getTraceInfo()}`);
+        const value = this.sourceGet_();
+        uiUtils.builtinContainersAddRefAnyKey(value);
+        return value;
     }
 
     public set(newValue: T): void {
         const oldValue = this.sourceGet_();
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue !== newValue) {
             if (this.sourceSet_ === undefined) {
                 throw new Error(`${this.getInfo()}: Can not set @Link value. @Link source is immutable error.`);
             }
-            const value = uiUtils.makeObserved(newValue);
+            const value = uiUtils.makeV1Observed(newValue);
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec

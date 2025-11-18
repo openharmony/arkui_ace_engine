@@ -155,6 +155,9 @@ function __Interop_createCompatibleStaticState_Internal(value: Object): Object {
     if(InteropExtractorModule.createCompatibleStaticState === undefined) {
         throw new Error('Non Method For createCompatibleStaticState');
     }
+    if (value instanceof SynchedPropertyTwoWayPU<Object>) {
+        value = value.getRootSource();
+    }
     return InteropExtractorModule.createCompatibleStaticState(value);
 }
 
@@ -170,4 +173,8 @@ function createObservedObject(value: Object): Object {
         value = ObservedObject.createNew(value, null);
     }
     return value;
+}
+
+function invokeObserveFireChange(target: Object, key: string): void {
+    ObserveV2.getObserve().fireChange(RefInfo.get(UIUtilsImpl.instance().getTarget(target)), key);
 }

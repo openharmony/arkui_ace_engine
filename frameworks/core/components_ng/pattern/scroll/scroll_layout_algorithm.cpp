@@ -19,6 +19,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -256,9 +257,6 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     viewPortExtent_ = childSize;
-    if (axis != Axis::FREE && viewPortExtent_ < viewPort_) {
-        viewPortExtent_.SetMainSize(viewPortExtent_.MainSize(axis) - contentStartOffset_ - contentEndOffset_, axis);
-    }
     viewPortLength_ = axis == Axis::FREE ? viewPort_.Width() : GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_ + contentStartOffset_)
                                                 : OffsetF(currentOffset_ + contentStartOffset_, crossOffset_);
@@ -272,7 +270,16 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutDirection == TextDirection::RTL) {
         UpdateScrollAlignment(scrollAlignment);
     }
-    auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
+
+    OffsetF alignmentPosition;
+    if (axis != Axis::FREE && GetMainAxisSize(viewPortExtent_, axis) < GetMainAxisSize(viewPort_, axis)) {
+        alignmentPosition = Alignment::GetAlignPosition(size,
+            SizeF(viewPortExtent_.CrossSize(axis),
+                viewPortExtent_.MainSize(axis) + contentStartOffset_ + contentEndOffset_, axis),
+            scrollAlignment);
+    } else {
+        alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
+    }
     if (GreatNotEqual(viewPortExtent_.Width(), size.Width()) && layoutDirection == TextDirection::RTL &&
         axis == Axis::VERTICAL) {
         alignmentPosition.SetX(size.Width() - viewPortExtent_.Width());

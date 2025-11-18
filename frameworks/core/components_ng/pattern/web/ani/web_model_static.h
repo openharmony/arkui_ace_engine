@@ -34,6 +34,8 @@ public:
     static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
     static void SetSharedRenderProcessToken(FrameNode* frameNode,
         const std::optional<std::string>& sharedRenderProcessToken);
+    static void SetEmulateTouchFromMouseEvent(FrameNode* frameNode,
+        const std::optional<bool>& emulateTouchFromMouseEvent);
     static void SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController);
     static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
     static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
@@ -59,7 +61,8 @@ public:
     static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
-    static void JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems);
+    static void JavaScriptOnHeadEnd(
+        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
     static void SetNativeEmbedOptions(
         FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange);
     static void SetBypassVsyncCondition(FrameNode *frameNode, const std::optional<WebBypassVsyncCondition>& condition);
@@ -100,6 +103,8 @@ public:
         FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
     static void SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnPageStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnLoadStarted(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnLoadFinished(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnProgressChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnTitleReceive(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnGeolocationHide(
@@ -134,6 +139,8 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetOnInterceptRequest(
         FrameNode* frameNode, std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& callback);
+    static void SetOnOverrideErrorPage(
+        FrameNode* frameNode, std::function<std::string(const BaseEventInfo* info)>&& callback);
     static void SetPermissionRequestEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetScreenCaptureRequestEventId(
@@ -186,6 +193,10 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetNativeEmbedVisibilityChangeId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetNativeEmbedObjectParamChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetForceEnableZoom(FrameNode* frameNode, bool isForceEnableZoom);
+    static void SetRotateRenderEffect(FrameNode* frameNode, const std::optional<WebRotateEffect>& effect);
     static void SetNativeEmbedGestureEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetNativeEmbedMouseEventId(
@@ -207,6 +218,7 @@ public:
     static void SetAdsBlockedEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetBackToTop(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled);
     static void NotifyPopupWindowResultStatic(int32_t webId, bool result);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
@@ -218,6 +230,9 @@ public:
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetActivateContentEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId);
+    static void SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

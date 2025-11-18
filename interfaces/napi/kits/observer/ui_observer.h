@@ -76,7 +76,7 @@ public:
     static void RegisterWinSizeLayoutBreakpointCallback(
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInstanceId, napi_value callback);
-    static void HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info);
+    static void HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const WindowSizeBreakpoint& info);
     static void RegisterDrawCallback(int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value callback);
     static void RegisterLayoutCallback(
@@ -163,6 +163,16 @@ public:
     static void UnRegisterTextChangeEventCallback(napi_value cb);
     static void UnRegisterTextChangeEventCallback(const std::string& id, napi_value cb);
     static void HandleTextChangeEvent(const NG::TextChangeEventInfo& info);
+
+    static void RegisterSwiperContentUpdateCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterSwiperContentUpdateCallback(
+        const std::string& id, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterSwiperContentUpdateCallback(napi_value callback = nullptr);
+    static void UnRegisterSwiperContentUpdateCallback(
+        const std::string& id, napi_value callback = nullptr);
+    static void HandleSwiperContentUpdate(const NG::SwiperContentInfo& info);
+    static bool IsSwiperContentObserverEmpty();
+
     using PanGestureListenersPair =
         std::pair<std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>&,
             std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>&>;
@@ -244,6 +254,9 @@ private:
     static std::list<std::shared_ptr<UIObserverListener>> textChangeEventListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedTextChangeEventListeners_;
+    static std::list<std::shared_ptr<UIObserverListener>> unspecifiedSwiperContentListeners_;
+    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedSwiperContentListeners_;
 
     static std::unordered_map<napi_ref, NavIdAndListenersMap> abilityUIContextNavDesSwitchListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;

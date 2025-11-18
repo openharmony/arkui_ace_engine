@@ -294,7 +294,9 @@ void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
         auto frameNode = GetAttachedNode();
         if (!frameNode.Invalid()) {
             auto host = frameNode.Upgrade();
-            responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+            CHECK_NULL_VOID(host);
+            responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(
+                static_cast<int32_t>(event.sourceType), static_cast<int32_t>(event.sourceTool));
         }
     }
     if (fingersId_.find(event.id) == fingersId_.end()) {

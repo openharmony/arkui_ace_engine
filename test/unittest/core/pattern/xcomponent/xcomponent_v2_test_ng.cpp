@@ -42,7 +42,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
-ArkUI_XComponent_Params params;
+ArkUI_XComponent_Params g_params;
 bool g_isCreated = false;
 bool g_isChanged = false;
 bool g_isDestroyed = false;
@@ -86,10 +86,10 @@ void XComponentV2TestNg::TearDownTestSuite()
 
 RefPtr<FrameNode> XComponentV2TestNg::CreateXComponentNode()
 {
-    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &g_params));
     return frameNode;
 }
 
@@ -984,10 +984,10 @@ HWTEST_F(XComponentV2TestNg, FlushImplicitTransaction001, TestSize.Level1)
     SystemProperties::multiInstanceEnabled_ = false;
     ASSERT_FALSE(SystemProperties::multiInstanceEnabled_);
 
-    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &g_params));
 
     ASSERT_TRUE(frameNode);
     auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
@@ -1015,10 +1015,10 @@ HWTEST_F(XComponentV2TestNg, FlushImplicitTransaction002, TestSize.Level1)
     SystemProperties::multiInstanceEnabled_ = true;
     ASSERT_TRUE(SystemProperties::multiInstanceEnabled_);
 
-    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &g_params));
 
     ASSERT_TRUE(frameNode);
     auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
@@ -1063,5 +1063,122 @@ HWTEST_F(XComponentV2TestNg, GetSurfaceHolderTest, TestSize.Level1)
     OH_ArkUI_SurfaceHolder* surfaceHolder = new OH_ArkUI_SurfaceHolder();
     pattern->SetSurfaceHolder(surfaceHolder);
     ASSERT_TRUE(pattern->GetSurfaceHolder());
+}
+
+/**
+ * @tc.name: OnModifyDoneTest001
+ * @tc.desc: Test XComponentPatternV2 OnModifyDone func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnModifyDoneTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->usesSuperMethod_ = false;
+    ASSERT_TRUE(pattern->renderContextForSurface_);
+    pattern->renderContextForSurface_->propBackgroundColor_.reset();
+
+    /**
+     * @tc.steps: step2. call OnModifyDone func
+     * @tc.expected: surface background color is updated
+     */
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->renderContextForSurface_->propBackgroundColor_, Color::BLACK);
+}
+
+/**
+ * @tc.name: OnModifyDoneTest002
+ * @tc.desc: Test XComponentPatternV2 OnModifyDone func when usesSuperMethod_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnModifyDoneTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->usesSuperMethod_ = true;
+    ASSERT_TRUE(pattern->renderContextForSurface_);
+    pattern->handlingSurfaceRenderContext_ = pattern->renderContextForSurface_;
+    pattern->renderContextForSurface_->propBackgroundColor_.reset();
+
+    /**
+     * @tc.steps: step2. call OnModifyDone func
+     * @tc.expected: surface background color is updated
+     */
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->renderContextForSurface_->propBackgroundColor_, Color::BLACK);
+}
+
+/**
+ * @tc.name: InitializeRenderContextTest
+ * @tc.desc: Test XComponentPatternV2 InitializeRenderContextTest func when isThreadSafeNode is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, InitializeRenderContextTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->usesSuperMethod_ = true;
+    pattern->renderContextForSurface_ = nullptr;
+    /**
+     * @tc.steps: step2. call InitializeRenderContext when isThreadSafeNode is true
+     * @tc.expected: renderContextForSurface_ is initialized
+     */
+    pattern->InitializeRenderContext(true);
+    EXPECT_TRUE(pattern->renderContextForSurface_);
+}
+
+/**
+ * @tc.name: XComponentV2InitAndDisposeSurfaceTest
+ * @tc.desc: Test FlushImplicitTransaction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentV2InitAndDisposeSurfaceTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode.
+     * @tc.expected: xcomponent frameNode create successfully.
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call InitializeRenderContext.
+     * @tc.expected: surface renderContext create successfully.
+     */
+    pattern->InitializeRenderContext();
+    EXPECT_TRUE(pattern->renderContextForSurface_);
+    EXPECT_EQ(pattern->renderContextForSurface_, pattern->handlingSurfaceRenderContext_);
+
+    /**
+     * @tc.steps: step3. call DisposeSurface.
+     * @tc.expected: surface renderContext dispose successfully.
+     */
+    pattern->DisposeSurface();
+    EXPECT_FALSE(pattern->renderContextForSurface_);
+    EXPECT_EQ(pattern->renderContextForSurface_, pattern->handlingSurfaceRenderContext_);
 }
 } // namespace OHOS::Ace::NG

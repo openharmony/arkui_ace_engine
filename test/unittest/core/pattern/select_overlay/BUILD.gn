@@ -23,5 +23,6 @@ ace_unittest("select_overlay_test_ng") {
     "select_overlay_test_ng.cpp",
     "select_overlay_testthree_ng.cpp",
     "select_overlay_testtwo_ng.cpp",
+    "select_overlay_testfive_ng.cpp",
   ]
 }

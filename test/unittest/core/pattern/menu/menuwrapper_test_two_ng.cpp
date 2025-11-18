@@ -1,0 +1,1182 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <type_traits>
+#include "gtest/gtest.h"
+
+#define private public
+#define protected public
+
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/rosen/testing_canvas.h"
+
+#include "core/common/ace_engine.h"
+#include "core/common/multi_thread_build_manager.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/common/properties/shadow_config.h"
+#include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/select/select_theme.h"
+#include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/syntax/lazy_for_each_model.h"
+#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/event/touch_event.h"
+
+using namespace testing;
+using namespace testing::ext;
+using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace::NG {
+namespace {
+const InspectorFilter filter;
+constexpr int32_t TARGET_ID = 3;
+constexpr int32_t WRAPPER_ID = 4;
+constexpr MenuType TYPE = MenuType::MENU;
+const std::string EMPTY_TEXT = "";
+const std::string TEXT_TAG = "text";
+const std::string MENU_TAG = "menu";
+const std::string MENU_ITEM_TEXT = "menuItem";
+const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
+const std::string MENU_TOUCH_EVENT_TYPE = "1";
+const DirtySwapConfig configDirtySwap = { false, false, false, false, true, false };
+const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+constexpr Dimension BORDER_RADIUS = 50.0_vp;
+const BorderRadiusProperty& BORDER_RADIUS_PROPERTY = BorderRadiusProperty(BORDER_RADIUS);
+
+constexpr float FULL_SCREEN_WIDTH = 720.0f;
+constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float TARGET_SIZE_WIDTH = 100.0f;
+constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
+constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+constexpr double BORDER_RADIUS_RATE = 1.5;
+
+const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
+const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
+    { "", "icon3" }, { "", "" } };
+const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
+    { "", "" }, { "", "icon4_new" } };
+} // namespace
+class MenuWrapperTwoTestNg : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
+    void InitMenuWrapperTwoTestNg();
+    void InitMenuItemTestNg();
+    PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
+    RefPtr<FrameNode> GetPreviewMenuWrapper(
+        SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
+    void CreateTargetAndMenuWrapper(RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& wrapperNode);
+    RefPtr<FrameNode> menuFrameNode_;
+    RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
+    RefPtr<FrameNode> menuItemFrameNode_;
+    RefPtr<MenuItemPattern> menuItemPattern_;
+    RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
+};
+
+void MenuWrapperTwoTestNg::SetUpTestCase()
+{
+    MockContainer::SetUp();
+}
+
+void MenuWrapperTwoTestNg::TearDownTestCase()
+{
+    MockContainer::TearDown();
+}
+
+void MenuWrapperTwoTestNg::SetUp()
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    RefPtr<MenuTheme> menuTheme_ = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([menuTheme_](ThemeType type) -> RefPtr<Theme> {
+        if (type == MenuTheme::TypeId()) {
+            return menuTheme_;
+        }
+        return AceType::MakeRefPtr<SelectTheme>();
+    });
+}
+
+void MenuWrapperTwoTestNg::TearDown()
+{
+    MockPipelineContext::TearDown();
+    menuFrameNode_ = nullptr;
+    menuAccessibilityProperty_ = nullptr;
+    menuItemFrameNode_ = nullptr;
+    menuItemPattern_ = nullptr;
+    menuItemAccessibilityProperty_ = nullptr;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    ScreenSystemManager::GetInstance().dipScale_ = 1.0;
+    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+}
+
+void MenuWrapperTwoTestNg::InitMenuWrapperTwoTestNg()
+{
+    menuFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuFrameNode_, nullptr);
+
+    menuAccessibilityProperty_ = menuFrameNode_->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    ASSERT_NE(menuAccessibilityProperty_, nullptr);
+}
+
+void MenuWrapperTwoTestNg::InitMenuItemTestNg()
+{
+    menuItemFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    ASSERT_NE(menuItemFrameNode_, nullptr);
+
+    menuItemPattern_ = menuItemFrameNode_->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern_, nullptr);
+
+    menuItemAccessibilityProperty_ = menuItemFrameNode_->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
+    ASSERT_NE(menuItemAccessibilityProperty_, nullptr);
+}
+
+PaintWrapper* MenuWrapperTwoTestNg::GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty)
+{
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    return paintWrapper;
+}
+
+RefPtr<FrameNode> MenuWrapperTwoTestNg::GetPreviewMenuWrapper(
+    SizeF itemSize, std::optional<MenuPreviewAnimationOptions> scaleOptions)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    if (!(LessOrEqual(itemSize.Width(), 0.0) || LessOrEqual(itemSize.Height(), 0.0))) {
+        auto itemGeometryNode = textNode->GetGeometryNode();
+        CHECK_NULL_RETURN(itemGeometryNode, nullptr);
+        itemGeometryNode->SetFrameSize(itemSize);
+    }
+    targetNode->MountToParent(rootNode);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    if (scaleOptions != std::nullopt) {
+        menuParam.previewAnimationOptions = scaleOptions.value();
+    }
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    CHECK_NULL_RETURN(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    return menuWrapperNode;
+}
+
+void MenuWrapperTwoTestNg::CreateTargetAndMenuWrapper(RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& wrapperNode)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    targetNode->MountToParent(rootNode);
+    targetNode->GetOrCreateGestureEventHub();
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto customGeometryNode = customNode->GetGeometryNode();
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    wrapperNode = MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+}
+
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg032
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg032, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto* layoutWrapperNode = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+    RefPtr<LayoutWrapper> layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    menuPattern->isSelectMenu_ = true;
+    menuPattern->SetType(MenuType::CONTEXT_MENU);
+    auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    menuItem->MountToParent(wrapperNode);
+    auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+    auto firstChildLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+
+    layoutWrapperNode->AppendChild(firstChildLayoutWrapper);
+    layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, firstChildLayoutWrapper);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->menuStatus_ = MenuStatus::HIDE;
+    wrapperPattern->isShowInSubWindow_ = false;
+    wrapperPattern->isFirstShow_ = false;
+    EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
+    layoutProperty->UpdateShowInSubWindow(true);
+    wrapperPattern->isOpenMenu_ = true;
+    wrapperPattern->menuStatus_ = MenuStatus::ON_SHOW_ANIMATION;
+    wrapperNode->onMainTree_ = true;
+    EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg033
+ * @tc.desc: test SetHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg033, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto* layoutWrapperNode = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+    RefPtr<LayoutWrapper> layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    menuPattern->isSelectMenu_ = true;
+    menuPattern->SetType(MenuType::CONTEXT_MENU);
+    auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    menuItem->MountToParent(wrapperNode);
+    auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+    auto firstChildLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+
+    layoutWrapperNode->AppendChild(firstChildLayoutWrapper);
+    layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, firstChildLayoutWrapper);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->menuStatus_ = MenuStatus::HIDE;
+    wrapperPattern->SetHotAreas(layoutWrapper);
+    EXPECT_TRUE(wrapperPattern->isShowInSubWindow_);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg034
+ * @tc.desc: test SetHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg034, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto* layoutWrapperNode = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+    RefPtr<LayoutWrapper> layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    menuPattern->isSelectMenu_ = true;
+    menuPattern->SetType(MenuType::CONTEXT_MENU);
+    auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    menuItem->MountToParent(wrapperNode);
+    auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+    auto firstChildLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+
+    layoutWrapperNode->AppendChild(firstChildLayoutWrapper);
+    layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, firstChildLayoutWrapper);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->menuStatus_ = MenuStatus::HIDE;
+    wrapperPattern->isShowInSubWindow_ = false;
+    wrapperPattern->SetHotAreas(layoutWrapper);
+    EXPECT_FALSE(wrapperPattern->isShowInSubWindow_);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg037
+ * @tc.desc: test IsMenuPreviewNode with previewMode.Custom
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuWrapper with customPreview
+     * @tc.expected: menuWrapperNode is not null
+     */
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call IsMenuPreviewNode
+     * @tc.expected: menu node is false, preview node is true
+     */
+    auto menu = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menu, nullptr);
+    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(menu));
+
+    auto preview = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(1));
+    ASSERT_NE(preview, nullptr);
+    EXPECT_TRUE(menuWrapPattern->IsMenuPreviewNode(preview));
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg038
+ * @tc.desc: test IsMenuPreviewNode with previewMode.Image
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuWrapper、menu、image
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuWrapPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapPattern, nullptr);
+
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
+    menuNode->MountToParent(wrapperNode);
+
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    imageNode->MountToParent(wrapperNode);
+
+    /**
+     * @tc.steps: step2. call IsMenuPreviewNode
+     * @tc.expected: menu node is false, preview node is true
+     */
+    auto menu = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menu, nullptr);
+    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(menu));
+
+    auto preview = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
+    ASSERT_NE(preview, nullptr);
+    EXPECT_TRUE(menuWrapPattern->IsMenuPreviewNode(preview));
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg039
+ * @tc.desc: test IsMenuPreviewNode without preview
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuWrapper、menu
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(mainMenu, nullptr);
+    mainMenu->MountToParent(wrapperNode);
+
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    imageNode->MountToParent(wrapperNode);
+
+    /**
+     * @tc.steps: step2. call IsMenuPreviewNode
+     * @tc.expected: menu node is false, imageNode node is false
+     */
+    auto menuWrapPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapPattern, nullptr);
+    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(mainMenu));
+    EXPECT_FALSE(menuWrapPattern->IsMenuPreviewNode(imageNode));
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg040
+ * @tc.desc: test SetAnimationBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPatternTestNg040, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    menuWrapperPattern->SetAnimationBorderRadius(BORDER_RADIUS_RATE, BORDER_RADIUS_PROPERTY);
+    auto animationInfo_ = menuWrapperPattern->GetPreviewMenuAnimationInfo();
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusTopLeft.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusTopLeft->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusTopRight.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusTopRight->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusBottomLeft.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusBottomLeft->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusBottomRight.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusBottomRight->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+}
+
+/**
+ * @tc.name: IsTouchWithinParentMenuItemZoneTest01
+ * @tc.desc: test IsTouchWithinParentMenuItemZone
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, IsTouchWithinParentMenuItemZoneTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuWrapper、menu、image
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto children = wrapperNode->GetChildren();
+    auto child = children.rbegin();
+    /**
+     * @tc.steps: step2. test PointF(0.0f, 0.0f)
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(0.0f, 0.0f)));
+
+    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode1, nullptr);
+    auto menuNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 3, []() { return AceType::MakeRefPtr<MenuPattern>(3, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode1, nullptr);
+    auto menuNodeInner1 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 4, []() { return AceType::MakeRefPtr<MenuPattern>(4, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNodeInner1, nullptr);
+
+    menuNode1->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 30.0f));
+    auto mockMenuNodeContext1 = AceType::DynamicCast<MockRenderContext>(menuNode1->GetRenderContext());
+    mockMenuNodeContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+    menuNode1->MountToParent(wrapperNode);
+
+    menuNodeInner1->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 30.0f));
+    auto mockMenuNodeInnerContext1 = AceType::DynamicCast<MockRenderContext>(menuNodeInner1->GetRenderContext());
+    mockMenuNodeInnerContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+    menuNodeInner1->MountToParent(menuNode1);
+
+    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 30.0f));
+    auto mockmenuItemNodeContext1 = AceType::DynamicCast<MockRenderContext>(menuItemNode1->GetRenderContext());
+    mockmenuItemNodeContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+    menuItemNode1->MountToParent(menuNodeInner1);
+
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 5, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    imageNode->MountToParent(wrapperNode);
+
+    auto menuNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 7, []() { return AceType::MakeRefPtr<MenuPattern>(7, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode2, nullptr);
+    menuNode2->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 30.0f));
+    auto mockMenuNodeContext2 = AceType::DynamicCast<MockRenderContext>(menuNode2->GetRenderContext());
+    mockMenuNodeContext2->SetPaintRectWithTransform(RectF(30.0f, 30.0f, 60.0f, 60.0f));
+    menuNode2->MountToParent(wrapperNode);
+
+    auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 6, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode2, nullptr);
+    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 30.0f));
+    menuItemNode2->MountToParent(menuNode2);
+
+    auto menuNodeParrent2 = menuNode2->GetPattern<MenuPattern>();
+    menuNodeParrent2->SetParentMenuItem(menuItemNode1);
+
+    children = wrapperNode->GetChildren();
+    child = children.rbegin();
+    /**
+     * @tc.steps: step3. test PointF(1.0f, 1.0f)
+     * @tc.expected: return true
+     */
+    EXPECT_TRUE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(1.0f, 1.0f)));
+    /**
+     * @tc.steps: step4. test PointF(31.0f, 31.0f)
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(31.0f, 31.0f)));
+}
+
+/**
+ * @tc.name: IsTouchWithinParentMenuItemZoneTest02
+ * @tc.desc: test IsTouchWithinParentMenuItemZone
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, IsTouchWithinParentMenuItemZoneTest02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuWrapper、menu、image
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    
+    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode1, nullptr);
+    auto menuNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 3, []() { return AceType::MakeRefPtr<MenuPattern>(3, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode1, nullptr);
+
+    menuNode1->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 30.0f));
+    auto mockMenuNodeContext1 = AceType::DynamicCast<MockRenderContext>(menuNode1->GetRenderContext());
+    mockMenuNodeContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+    menuNode1->MountToParent(wrapperNode);
+
+    auto children = wrapperNode->GetChildren();
+    auto child = children.rbegin();
+    /**
+     * @tc.steps: step2. test PointF(0.0f, 0.0f)
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(0.0f, 0.0f)));
+
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 5, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    imageNode->MountToParent(wrapperNode);
+
+    auto menuNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 7, []() { return AceType::MakeRefPtr<MenuPattern>(7, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode2, nullptr);
+    menuNode2->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 30.0f));
+    auto mockMenuNodeContext2 = AceType::DynamicCast<MockRenderContext>(menuNode2->GetRenderContext());
+    mockMenuNodeContext2->SetPaintRectWithTransform(RectF(30.0f, 30.0f, 60.0f, 60.0f));
+    menuNode2->MountToParent(wrapperNode);
+
+    auto menuNodeParrent2 = menuNode2->GetPattern<MenuPattern>();
+    menuNodeParrent2->SetParentMenuItem(menuItemNode1);
+
+    children = wrapperNode->GetChildren();
+    child = children.rbegin();
+    /**
+     * @tc.steps: step3. test PointF(1.0f, 1.0f)
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(wrapperPattern->IsTouchWithinParentMenuItemZone(child, children, PointF(1.0f, 1.0f)));
+}
+
+
+/**
+ * @tc.name: HasSideSubMenuTest01
+ * @tc.desc: test HasSideSubMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, HasSideSubMenuTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuWrapper、menu
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    
+    auto menuNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 3, []() { return AceType::MakeRefPtr<MenuPattern>(3, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode1, nullptr);
+    auto menuNodeInner1 = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 4, []() { return AceType::MakeRefPtr<MenuPattern>(4, V2::MENU_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNodeInner1, nullptr);
+    menuNode1->MountToParent(wrapperNode);
+    menuNodeInner1->MountToParent(menuNode1);
+    auto menuNodeInnerPattern = menuNodeInner1->GetPattern<MenuPattern>();
+    auto layoutProps = menuNodeInnerPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+    layoutProps->UpdateExpandingMode(SubMenuExpandingMode::SIDE);
+
+    /**
+     * @tc.steps: step2. test HasSideSubMenu()
+     * @tc.expected: HasSideSubMenu() is true
+     */
+    EXPECT_TRUE(wrapperPattern->HasSideSubMenu());
+}
+
+/**
+ * @tc.name: HandleInteraction001
+ * @tc.desc: Verify HandleInteraction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, HandleInteraction001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu, nullptr);
+    auto container =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    auto mockContainerContext = AceType::DynamicCast<MockRenderContext>(container->GetRenderContext());
+    mockContainerContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto mockMenuContext = AceType::DynamicCast<MockRenderContext>(menu->GetRenderContext());
+    mockMenuContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 70.0f, 70.0f));
+    mockScroll->MountToParent(container);
+    menu->MountToParent(mockScroll);
+    container->MountToParent(wrapperNode);
+
+    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode1->MountToParent(menu);
+    auto mockMenuItemContext1 = AceType::DynamicCast<MockRenderContext>(menuItemNode1->GetRenderContext());
+    mockMenuItemContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+
+    auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode2->MountToParent(menu);
+    auto mockMenuItemContext2 = AceType::DynamicCast<MockRenderContext>(menuItemNode2->GetRenderContext());
+    mockMenuItemContext2->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    locationInfo.SetGlobalLocation(Offset(10, 10));
+    Offset location(10, 10);
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(location);
+    info.changedTouches_.emplace_back(locationInfo);
+
+    wrapperPattern->SetLastTouchItem(menuItemNode2);
+    wrapperPattern->currentTouchItem_ = menuItemNode1;
+    wrapperPattern->isClearLastMenuItem_ = false;
+    wrapperPattern->HandleInteraction(info);
+    EXPECT_EQ(wrapperPattern->lastTouchItem_, wrapperPattern->currentTouchItem_);
+
+    EXPECT_EQ(wrapperPattern->isClearLastMenuItem_, true);
+
+    wrapperPattern->currentTouchItem_ = menuItemNode2;
+    wrapperPattern->HandleInteraction(info);
+    EXPECT_EQ(wrapperPattern->lastTouchItem_, wrapperPattern->currentTouchItem_);
+}
+
+/**
+ * @tc.name: MenuWrapperPaintMethodTestNg001
+ * @tc.desc: test overlay draw function
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto paintMethod = wrapperPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    auto paintProperty = wrapperPattern->GetPaintProperty<MenuWrapperPaintProperty>();
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(wrapperNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    auto function = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    RSCanvas canvas;
+    function(canvas);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    function(canvas);
+    auto context = PipelineContext::GetCurrentContext();
+    wrapperNode->context_ = AceType::RawPtr(context);
+    auto pipline = wrapperNode->GetContext();
+    ASSERT_NE(pipline, nullptr);
+    auto menuTheme = pipline->GetTheme<MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->doubleBorderEnable_ = true;
+    function(canvas);
+    EXPECT_NE(wrapperPattern->GetMenuStatus(), MenuStatus::SHOW);
+}
+
+/**
+ * @tc.name: MenuWrapperPaintMethodTestNg002
+ * @tc.desc: test PaintDoubleBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPaintMethodTestNg002, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<MenuWrapperPaintMethod>(wrapperPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    auto paintProperty = wrapperPattern->GetPaintProperty<MenuWrapperPaintProperty>();
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(wrapperNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas canvas;
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageNode->MountToParent(wrapperNode);
+    wrapperNode->children_.push_back(nullptr);
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    MenuPathParams params;
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateMenuPathParams(params);
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(6));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(6));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    params.didNeedArrow = true;
+    menuPattern->UpdateMenuPathParams(params);
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    const std::list<Placement> placements = { Placement::LEFT, Placement::TOP, Placement::RIGHT, Placement::BOTTOM };
+    for (const auto& placement : placements) {
+        params.arrowPlacement = placement;
+        menuPattern->UpdateMenuPathParams(params);
+        paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    }
+}
+
+/**
+ * @tc.name: MenuWrapperPaintMethodTestNg003
+ * @tc.desc: PaintDoubleBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperPaintMethodTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create wrapperPattern、paintMethod、menuPattern
+     * @tc.expected: node is not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->SetHasCustomOutlineWidth(true);
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    auto paintMethod = AceType::DynamicCast<MenuWrapperPaintMethod>(wrapperPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(wrapperNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper =
+        new PaintWrapper(renderContext, geometryNode, wrapperPattern->GetPaintProperty<MenuWrapperPaintProperty>());
+    Testing::MockCanvas canvas;
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    MenuPathParams params;
+    params.didNeedArrow = true;
+    menuPattern->UpdateMenuPathParams(params);
+    /**
+     * @tc.steps: step2. Call PaintDoubleBorder.
+     * @tc.expected: Attributes are called successfully.
+     */
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(2));
+    EXPECT_CALL(canvas, ClipPath(_, RSClipOp::INTERSECT, _)).Times(2);
+    EXPECT_CALL(canvas, ClipPath(_, RSClipOp::DIFFERENCE, _)).Times(1);
+    EXPECT_CALL(canvas, DrawPath(_)).Times(5);
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+}
+
+/**
+ * @tc.name: MenuWrapperHotArea001
+ * @tc.desc: test Menu hot area
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperHotArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode
+     * @tc.expected: Use targetTag and targetId will find the targetNode
+     */
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<TextPattern>());
+    auto findNode = FrameNode::GetFrameNode(V2::TEXT_ETS_TAG, TARGET_ID);
+    EXPECT_EQ(targetNode, findNode);
+    /**
+     * @tc.steps: step2. create wrapperNode and call AddTargetWindowHotArea
+     * @tc.expected: cannot add window hotArea
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    std::vector<Rect> rects;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    EXPECT_EQ(rects.size(), 0);
+    auto context = wrapperNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    /**
+     * @tc.steps: step3. config the container and set targetWindow mode
+     * @tc.expected: can add hot area to the rects
+     */
+    auto mockContainer = MockContainer::Current();
+    auto instanceId = context->GetInstanceId();
+    AceEngine::Get().RemoveContainer(instanceId);
+    AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+    /**
+     * @tc.steps: step4. set isSubContainer_ true, call AddTargetWindowHotArea
+     * @tc.expected: can not add hot area to the rects
+     */
+    mockContainer->isSubContainer_ = true;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: MenuWrapperHotArea002
+ * @tc.desc: test Menu hot area
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperHotArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode
+     */
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<TextPattern>());
+    /**
+     * @tc.steps: step2. create wrapperNode and menu, call add hot area
+     * @tc.expected: the hot area size meetings expectations.
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto mockContainer = MockContainer::Current();
+    mockContainer->isSubContainer_ = false;
+    auto context = wrapperNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    std::vector<Rect> rects;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    wrapperPattern->AddWrapperChildHotArea(rects, wrapperNode);
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 2);
+}
+
+/**
+ * @tc.name: MenuWrapperHotArea003
+ * @tc.desc: test Menu hot area
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuWrapperHotArea003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode
+     */
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<TextPattern>());
+    /**
+     * @tc.steps: step2. create wrapperNode and menu, call add hot area
+     * @tc.expected: the hot area size meetings expectations.
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto mockContainer = MockContainer::Current();
+    mockContainer->isSubContainer_ = true;
+    auto context = wrapperNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    AceEngine::Get().RemoveContainer(instanceId);
+    AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    std::vector<Rect> rects;
+    wrapperPattern->AddTargetWindowHotArea(rects);
+    wrapperPattern->AddWrapperChildHotArea(rects, wrapperNode);
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: ConvertModalModeToString001
+ * @tc.desc: test ConvertModalModeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, ConvertModalModeToString001, TestSize.Level1)
+{
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->menuParam_.modalMode = std::nullopt;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: undefined\n");
+    wrapperPattern->menuParam_.modalMode = ModalMode::AUTO;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.AUTO\n");
+    wrapperPattern->menuParam_.modalMode = ModalMode::NONE;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.NONE\n");
+    wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.TARGET_WINDOW\n");
+    wrapperPattern->menuParam_.modalMode = static_cast<ModalMode>(999);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    wrapperPattern->DumpInfo();
+    wrapperPattern->DumpInfo(json);
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.AUTO\n");
+}
+
+/**
+ * @tc.name: AddFilterHotArea001
+ * @tc.desc: test AddFilterHotArea001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, AddFilterHotArea001, TestSize.Level1)
+{
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto menu = wrapperPattern->GetMenu();
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuPattern->previewMode_ = MenuPreviewMode::CUSTOM;
+    wrapperPattern->filterColumnNode_ = AceType::MakeRefPtr<FrameNode>(
+        V2::MENU_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    std::vector<Rect> rects;
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 0);
+    wrapperPattern->isFilterInSubWindow_ = true;
+    wrapperPattern->AddFilterHotArea(rects);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: RegisterDetachCallbackTest001
+ * @tc.desc: test RegisterDetachCallbackTest001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, RegisterDetachCallbackTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> targetNode;
+    RefPtr<FrameNode> wrapperNode;
+    CreateTargetAndMenuWrapper(targetNode, wrapperNode);
+    ASSERT_NE(targetNode, nullptr);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+    wrapperPattern->OnAttachToMainTree();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 1);
+    wrapperPattern->OnDetachFromMainTree();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+}
+
+/**
+ * @tc.name: RegisterDetachCallbackTest002
+ * @tc.desc: test OnAttachToMainTreeMultiThread and OnDetachFromMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, RegisterDetachCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the menuwrapper node and get its pattern.
+     */
+    RefPtr<FrameNode> targetNode;
+    RefPtr<FrameNode> wrapperNode;
+    CreateTargetAndMenuWrapper(targetNode, wrapperNode);
+    ASSERT_NE(targetNode, nullptr);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+    /**
+     * @tc.steps: step2. Call OnAttachToMainTreeMultiThread.
+     * @tc.expected: The result is expected.
+     */
+    wrapperPattern->OnAttachToMainTreeMultiThread();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 1);
+    /**
+     * @tc.steps: step3. Call OnAttachToMainTreeMultiThread.
+     * @tc.expected: The targetNode->destroyCallbacksMap_.size() should be 0.
+     */
+    wrapperPattern->OnDetachFromMainTreeMultiThread();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+}
+
+/**
+ * @tc.name: MenuTransitionEffectMultiThreadTest001
+ * @tc.desc: Test MenuTransitionEffectMultiThread in multi-thread scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, MenuTransitionEffectMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread environment and create a thread-safe select node.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    /**
+     * @tc.steps: step2. Call SetMenuTransitionEffect and check if a task is posted.
+     * @tc.expected: A task should be added to afterAttachMainTreeTasks_.
+     */
+    MenuModelNG model;
+    model.Create();
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. Execute SetMenuTransitionEffect.
+     * @tc.expected: The afterAttachMainTreeTasks_ size should be initialTaskCount + 1.
+     */
+    auto initialTaskCount = wrapperNode->afterAttachMainTreeTasks_.size();
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    pattern->SetMenuTransitionEffect(wrapperNode, menuParam);
+    EXPECT_EQ(wrapperNode->afterAttachMainTreeTasks_.size(), initialTaskCount + 1);
+
+    /**
+     * @tc.steps: step4. Execute the posted task.
+     * @tc.expected: The afterAttachMainTreeTasks_ size should be 0.
+     */
+    wrapperNode->ExecuteAfterAttachMainTreeTasks();
+    EXPECT_EQ(wrapperNode->afterAttachMainTreeTasks_.size(), 0);
+
+    /**
+     * @tc.steps: step5. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+}
+} // namespace OHOS::Ace::NG

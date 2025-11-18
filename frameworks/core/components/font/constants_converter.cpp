@@ -501,6 +501,7 @@ void CheckMinMaxLineHeight(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         }
         txtStyle.lineHeightStyle = Rosen::LineHeightStyle::kFontHeight;
         txtStyle.heightScale = info.lineHeightMultiply;
+        txtStyle.heightOnly = true;
     }
 }
 
@@ -784,6 +785,9 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
             if (options.GetScopeType().has_value()) {
                 txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetScopeType().value()));
             }
+        }
+        if (effectType == SymbolEffectType::REPLACE || effectType == SymbolEffectType::QUICK_REPLACE) {
+            txtStyle.symbol.SetFirstActive(true);
         }
     } else {
         auto effectStrategyValue = textStyle.GetEffectStrategy();

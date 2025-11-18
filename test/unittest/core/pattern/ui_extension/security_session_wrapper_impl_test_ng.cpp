@@ -285,7 +285,8 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg003, 
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_OK;
     AAFwk::Want want;
     AAFwk::WantParams params;
-    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    auto sessionCallbacks =
+        sessionWrapper->session_->GetExtensionSessionEventCallback();
     sessionWrapper->foregroundCallback_(errcode);
     sessionWrapper->backgroundCallback_(errcode);
     sessionWrapper->destructionCallback_(errcode);
@@ -337,7 +338,8 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg004, 
     /**
      * @tc.steps: step2. test CreateSession
      */
-    auto container = Platform::AceContainer::GetContainer(sessionWrapper->instanceId_);
+    auto container =
+        Platform::AceContainer::GetContainer(sessionWrapper->instanceId_);
     EXPECT_NE(container, nullptr);
     sessionWrapper->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     SessionConfig config;
@@ -509,7 +511,8 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg008, 
     sessionWrapper->instanceId_ = 1;
     EXPECT_NE(sessionWrapper->instanceId_, sessionWrapper->hostPattern_.Upgrade()->GetInstanceIdFromHost());
     sessionWrapper->GetInstanceIdFromHost();
-    sessionWrapper->instanceId_ = sessionWrapper->hostPattern_.Upgrade()->GetInstanceIdFromHost();
+    sessionWrapper->instanceId_ =
+        sessionWrapper->hostPattern_.Upgrade()->GetInstanceIdFromHost();
     sessionWrapper->GetInstanceIdFromHost();
 
     sessionWrapper->hostPattern_ = nullptr;
@@ -819,6 +822,28 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg018, 
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     EXPECT_TRUE(sessionWrapper->NotifyFocusStateAsync(false));
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg019
+ * @tc.desc: Test the method UpdateInstanceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg019, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateInstanceId
+     */
+    sessionWrapper->UpdateInstanceId(10);
+    EXPECT_EQ(sessionWrapper->patternInstanceId_, 10);
 #endif
 }
 } // namespace OHOS::Ace::NG

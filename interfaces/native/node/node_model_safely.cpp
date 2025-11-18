@@ -304,6 +304,9 @@ void MarkDirtySafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
+        if (nodePtr) {
+            impl->getMultiThreadManagerAPI()->executeAfterAttachTasks(nodePtr->uiNodeHandle);
+        }
         MarkDirty(nodePtr, dirtyFlag);
     }
 }

@@ -163,6 +163,7 @@ void GridPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
+        InitFocusEvent(focusHub);
     }
     SetAccessibilityAction();
     Register2DragDropManager();
@@ -357,9 +358,6 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     if (!isInitialized_) {
         FireObserverOnReachEnd();
     }
-    if (!NearZero(mainSizeChanged_)) {
-        info_.prevHeight_ += mainSizeChanged_;
-    }
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
     if (!NearZero(finalOffset)) {
         bool scrollDownToEnd =
@@ -528,7 +526,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
 
     bool offsetEnd = info_.offsetEnd_;
-    mainSizeChanged_ = info_.lastMainSize_ - gridLayoutInfo.lastMainSize_;
     info_ = gridLayoutInfo;
     info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
@@ -540,8 +537,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
-    if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
-        endHeight_ = GetTotalHeight() - info_.contentStartOffset_ - GetMainContentSize();
+    if (!offsetEnd && info_.offsetEnd_) {
+        endHeight_ = info_.currentHeight_;
     }
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
         bool indexChanged = (startIndex_ != info_.startIndex_) || (endIndex_ != info_.endIndex_);
@@ -780,6 +777,25 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+void GridPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+void GridPattern::HandleBlurEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (focusHub->GetFocusDependence() != FocusDependence::AUTO) {
+        focusHub->SetFocusDependence(FocusDependence::AUTO);
+    }
+}
 void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();

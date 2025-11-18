@@ -177,10 +177,10 @@ HWTEST_F(TextFieldPatternTestTwo, InitDragDropCallBack001, TestSize.Level0)
     pattern->dragStatus_ = DragStatus::DRAGGING;
     eventHub->GetOnDragEnd().operator()(event);
     eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->
-        onDragEnter_.operator()(event, extraParams);
+        onDragEnter.operator()(event, extraParams);
     pattern->dragStatus_ = DragStatus::ON_DROP;
     eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->
-        onDragEnter_.operator()(event, extraParams);
+        onDragEnter.operator()(event, extraParams);
     EXPECT_EQ(pattern->dragStatus_, DragStatus::ON_DROP);
 }
 

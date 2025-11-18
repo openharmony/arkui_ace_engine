@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/draw_context_peer.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"

@@ -21,7 +21,7 @@ import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImagePeer, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
-import { int32 } from "@koalaui/common"
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod, PointLightStyle } from "./component/common"
 import { Resource } from "global.resource"
 import { default as image } from "@ohos.multimedia.image"
@@ -31,6 +31,9 @@ import { ColorMetrics } from "arkui.Graphics"
 import { default as matrix4 } from "@ohos.matrix4"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { ImageAnalyzerConfig } from "./component/imageCommon"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { TypeChecker } from "#components"
+import { CallbackTransformer } from "./CallbackTransformer"
 export class ImageModifier extends CommonMethodModifier implements ImageAttribute,AttributeModifier<ImageAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
@@ -1239,5 +1242,16 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
+    }
+}
+export class ImageModifier_serializer {
+    public static write(buffer: SerializerBase, value: ImageModifier): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toImageModifierPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ImageModifier {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return extractors.fromImageModifierPtr(ptr)
     }
 }

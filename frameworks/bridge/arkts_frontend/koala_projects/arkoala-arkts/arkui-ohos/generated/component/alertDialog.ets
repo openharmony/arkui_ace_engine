@@ -81,7 +81,7 @@ export interface AlertDialogParam {
     cancel?: VoidCallback;
     alignment?: DialogAlignment;
     offset?: Offset;
-    gridCount?: number;
+    gridCount?: int32;
     maskRect?: Rectangle;
     showInSubWindow?: boolean;
     isModal?: boolean;
@@ -106,7 +106,7 @@ export interface AlertDialogParam {
     onWillAppear?: (() => void);
     onWillDisappear?: (() => void);
     levelMode?: LevelMode;
-    levelUniqueId?: number;
+    levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
     levelOrder?: LevelOrder;
 }
@@ -174,11 +174,11 @@ export class AlertDialogButtonBaseOptions_serializer {
         }
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
@@ -187,19 +187,19 @@ export class AlertDialogButtonBaseOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
             if (valueHolderForFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
             } else if (valueHolderForFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
@@ -211,19 +211,19 @@ export class AlertDialogButtonBaseOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -346,11 +346,11 @@ export class AlertDialogButtonOptions_serializer {
         }
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
@@ -359,19 +359,19 @@ export class AlertDialogButtonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
             if (valueHolderForFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
             } else if (valueHolderForFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
@@ -383,19 +383,19 @@ export class AlertDialogButtonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -511,11 +511,11 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTitleTmpValue  = valueHolderForTitle!
             if (valueHolderForTitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTitleTmpValueForIdx0  = valueHolderForTitleTmpValue as string
                 valueSerializer.writeString(valueHolderForTitleTmpValueForIdx0)
             } else if (valueHolderForTitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTitleTmpValueForIdx1  = valueHolderForTitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTitleTmpValueForIdx1)
             }
@@ -527,11 +527,11 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSubtitleTmpValue  = valueHolderForSubtitle!
             if (valueHolderForSubtitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSubtitleTmpValueForIdx0  = valueHolderForSubtitleTmpValue as string
                 valueSerializer.writeString(valueHolderForSubtitleTmpValueForIdx0)
             } else if (valueHolderForSubtitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSubtitleTmpValueForIdx1  = valueHolderForSubtitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSubtitleTmpValueForIdx1)
             }
@@ -540,11 +540,11 @@ export class AlertDialogParamWithButtons_serializer {
         }
         const valueHolderForMessage  = value.message
         if (valueHolderForMessage instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForMessageForIdx0  = valueHolderForMessage as string
             valueSerializer.writeString(valueHolderForMessageForIdx0)
         } else if (valueHolderForMessage instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForMessageForIdx1  = valueHolderForMessage as Resource
             Resource_serializer.write(valueSerializer, valueHolderForMessageForIdx1)
         }
@@ -584,7 +584,7 @@ export class AlertDialogParamWithButtons_serializer {
         if (valueHolderForGridCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
-            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForGridCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -617,19 +617,19 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -681,27 +681,27 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCornerRadiusTmpValue  = valueHolderForCornerRadius!
             if (valueHolderForCornerRadiusTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx0  = valueHolderForCornerRadiusTmpValue as Dimension
                 if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx0  = valueHolderForCornerRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForCornerRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx1  = valueHolderForCornerRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForCornerRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx2  = valueHolderForCornerRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForCornerRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx1  = valueHolderForCornerRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx1)
             } else if (valueHolderForCornerRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx2  = valueHolderForCornerRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx2)
             }
@@ -713,15 +713,15 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -733,15 +733,15 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
             } else if (valueHolderForHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
@@ -753,27 +753,27 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
             if (valueHolderForBorderWidthTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as Dimension
                 if (valueHolderForBorderWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx0  = valueHolderForBorderWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx1  = valueHolderForBorderWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx2  = valueHolderForBorderWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderWidthTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx1)
             } else if (valueHolderForBorderWidthTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
@@ -785,31 +785,31 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
             if (valueHolderForBorderColorTmpValue instanceof ResourceColor) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as ResourceColor
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx0ForIdx2)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx3  = valueHolderForBorderColorTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForBorderColorTmpValue instanceof EdgeColors) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx1)
             } else if (valueHolderForBorderColorTmpValue instanceof LocalizedEdgeColors) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as LocalizedEdgeColors
                 LocalizedEdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx2)
             }
@@ -821,11 +821,11 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderStyleTmpValue  = valueHolderForBorderStyle!
             if (valueHolderForBorderStyleTmpValue instanceof BorderStyle) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx0  = valueHolderForBorderStyleTmpValue as BorderStyle
                 valueSerializer.writeInt32(valueHolderForBorderStyleTmpValueForIdx0.valueOf())
             } else if (valueHolderForBorderStyleTmpValue instanceof EdgeStyles) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx1  = valueHolderForBorderStyleTmpValue as EdgeStyles
                 EdgeStyles_serializer.write(valueSerializer, valueHolderForBorderStyleTmpValueForIdx1)
             }
@@ -837,11 +837,11 @@ export class AlertDialogParamWithButtons_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -916,7 +916,7 @@ export class AlertDialogParamWithButtons_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1019,11 +1019,11 @@ export class AlertDialogParamWithButtons_serializer {
         }
         const offsetTmpResult : Offset | undefined = offsetTmpBuf
         const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gridCountTmpBuf : number | undefined = undefined
+        let gridCountTmpBuf : int32 | undefined = undefined
         if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+            gridCountTmpBuf = valueDeserializer.readInt32()
         }
-        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const gridCountTmpResult : int32 | undefined = gridCountTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRectTmpBuf : Rectangle | undefined = undefined
         if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1346,11 +1346,11 @@ export class AlertDialogParamWithButtons_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1377,11 +1377,11 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTitleTmpValue  = valueHolderForTitle!
             if (valueHolderForTitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTitleTmpValueForIdx0  = valueHolderForTitleTmpValue as string
                 valueSerializer.writeString(valueHolderForTitleTmpValueForIdx0)
             } else if (valueHolderForTitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTitleTmpValueForIdx1  = valueHolderForTitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTitleTmpValueForIdx1)
             }
@@ -1393,11 +1393,11 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSubtitleTmpValue  = valueHolderForSubtitle!
             if (valueHolderForSubtitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSubtitleTmpValueForIdx0  = valueHolderForSubtitleTmpValue as string
                 valueSerializer.writeString(valueHolderForSubtitleTmpValueForIdx0)
             } else if (valueHolderForSubtitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSubtitleTmpValueForIdx1  = valueHolderForSubtitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSubtitleTmpValueForIdx1)
             }
@@ -1406,11 +1406,11 @@ export class AlertDialogParamWithConfirm_serializer {
         }
         const valueHolderForMessage  = value.message
         if (valueHolderForMessage instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForMessageForIdx0  = valueHolderForMessage as string
             valueSerializer.writeString(valueHolderForMessageForIdx0)
         } else if (valueHolderForMessage instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForMessageForIdx1  = valueHolderForMessage as Resource
             Resource_serializer.write(valueSerializer, valueHolderForMessageForIdx1)
         }
@@ -1450,7 +1450,7 @@ export class AlertDialogParamWithConfirm_serializer {
         if (valueHolderForGridCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
-            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForGridCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1483,19 +1483,19 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -1547,27 +1547,27 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCornerRadiusTmpValue  = valueHolderForCornerRadius!
             if (valueHolderForCornerRadiusTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx0  = valueHolderForCornerRadiusTmpValue as Dimension
                 if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx0  = valueHolderForCornerRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForCornerRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx1  = valueHolderForCornerRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForCornerRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx2  = valueHolderForCornerRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForCornerRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx1  = valueHolderForCornerRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx1)
             } else if (valueHolderForCornerRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx2  = valueHolderForCornerRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx2)
             }
@@ -1579,15 +1579,15 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -1599,15 +1599,15 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
             } else if (valueHolderForHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
@@ -1619,27 +1619,27 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
             if (valueHolderForBorderWidthTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as Dimension
                 if (valueHolderForBorderWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx0  = valueHolderForBorderWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx1  = valueHolderForBorderWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx2  = valueHolderForBorderWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderWidthTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx1)
             } else if (valueHolderForBorderWidthTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
@@ -1651,31 +1651,31 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
             if (valueHolderForBorderColorTmpValue instanceof ResourceColor) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as ResourceColor
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx0ForIdx2)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx3  = valueHolderForBorderColorTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForBorderColorTmpValue instanceof EdgeColors) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx1)
             } else if (valueHolderForBorderColorTmpValue instanceof LocalizedEdgeColors) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as LocalizedEdgeColors
                 LocalizedEdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx2)
             }
@@ -1687,11 +1687,11 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderStyleTmpValue  = valueHolderForBorderStyle!
             if (valueHolderForBorderStyleTmpValue instanceof BorderStyle) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx0  = valueHolderForBorderStyleTmpValue as BorderStyle
                 valueSerializer.writeInt32(valueHolderForBorderStyleTmpValueForIdx0.valueOf())
             } else if (valueHolderForBorderStyleTmpValue instanceof EdgeStyles) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx1  = valueHolderForBorderStyleTmpValue as EdgeStyles
                 EdgeStyles_serializer.write(valueSerializer, valueHolderForBorderStyleTmpValueForIdx1)
             }
@@ -1703,11 +1703,11 @@ export class AlertDialogParamWithConfirm_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -1782,7 +1782,7 @@ export class AlertDialogParamWithConfirm_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1889,11 +1889,11 @@ export class AlertDialogParamWithConfirm_serializer {
         }
         const offsetTmpResult : Offset | undefined = offsetTmpBuf
         const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gridCountTmpBuf : number | undefined = undefined
+        let gridCountTmpBuf : int32 | undefined = undefined
         if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+            gridCountTmpBuf = valueDeserializer.readInt32()
         }
-        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const gridCountTmpResult : int32 | undefined = gridCountTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRectTmpBuf : Rectangle | undefined = undefined
         if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -2216,11 +2216,11 @@ export class AlertDialogParamWithConfirm_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -2251,11 +2251,11 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTitleTmpValue  = valueHolderForTitle!
             if (valueHolderForTitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTitleTmpValueForIdx0  = valueHolderForTitleTmpValue as string
                 valueSerializer.writeString(valueHolderForTitleTmpValueForIdx0)
             } else if (valueHolderForTitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTitleTmpValueForIdx1  = valueHolderForTitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTitleTmpValueForIdx1)
             }
@@ -2267,11 +2267,11 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSubtitleTmpValue  = valueHolderForSubtitle!
             if (valueHolderForSubtitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSubtitleTmpValueForIdx0  = valueHolderForSubtitleTmpValue as string
                 valueSerializer.writeString(valueHolderForSubtitleTmpValueForIdx0)
             } else if (valueHolderForSubtitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSubtitleTmpValueForIdx1  = valueHolderForSubtitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSubtitleTmpValueForIdx1)
             }
@@ -2280,11 +2280,11 @@ export class AlertDialogParamWithOptions_serializer {
         }
         const valueHolderForMessage  = value.message
         if (valueHolderForMessage instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForMessageForIdx0  = valueHolderForMessage as string
             valueSerializer.writeString(valueHolderForMessageForIdx0)
         } else if (valueHolderForMessage instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForMessageForIdx1  = valueHolderForMessage as Resource
             Resource_serializer.write(valueSerializer, valueHolderForMessageForIdx1)
         }
@@ -2324,7 +2324,7 @@ export class AlertDialogParamWithOptions_serializer {
         if (valueHolderForGridCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
-            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForGridCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2357,19 +2357,19 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -2421,27 +2421,27 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCornerRadiusTmpValue  = valueHolderForCornerRadius!
             if (valueHolderForCornerRadiusTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx0  = valueHolderForCornerRadiusTmpValue as Dimension
                 if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx0  = valueHolderForCornerRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForCornerRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx1  = valueHolderForCornerRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForCornerRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx2  = valueHolderForCornerRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForCornerRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx1  = valueHolderForCornerRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx1)
             } else if (valueHolderForCornerRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx2  = valueHolderForCornerRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx2)
             }
@@ -2453,15 +2453,15 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -2473,15 +2473,15 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
             } else if (valueHolderForHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
@@ -2493,27 +2493,27 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
             if (valueHolderForBorderWidthTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as Dimension
                 if (valueHolderForBorderWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx0  = valueHolderForBorderWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx1  = valueHolderForBorderWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx2  = valueHolderForBorderWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderWidthTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx1)
             } else if (valueHolderForBorderWidthTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
@@ -2525,31 +2525,31 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
             if (valueHolderForBorderColorTmpValue instanceof ResourceColor) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as ResourceColor
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx0ForIdx2)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx3  = valueHolderForBorderColorTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForBorderColorTmpValue instanceof EdgeColors) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx1)
             } else if (valueHolderForBorderColorTmpValue instanceof LocalizedEdgeColors) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as LocalizedEdgeColors
                 LocalizedEdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx2)
             }
@@ -2561,11 +2561,11 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderStyleTmpValue  = valueHolderForBorderStyle!
             if (valueHolderForBorderStyleTmpValue instanceof BorderStyle) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx0  = valueHolderForBorderStyleTmpValue as BorderStyle
                 valueSerializer.writeInt32(valueHolderForBorderStyleTmpValueForIdx0.valueOf())
             } else if (valueHolderForBorderStyleTmpValue instanceof EdgeStyles) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx1  = valueHolderForBorderStyleTmpValue as EdgeStyles
                 EdgeStyles_serializer.write(valueSerializer, valueHolderForBorderStyleTmpValueForIdx1)
             }
@@ -2577,11 +2577,11 @@ export class AlertDialogParamWithOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -2656,7 +2656,7 @@ export class AlertDialogParamWithOptions_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2769,11 +2769,11 @@ export class AlertDialogParamWithOptions_serializer {
         }
         const offsetTmpResult : Offset | undefined = offsetTmpBuf
         const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gridCountTmpBuf : number | undefined = undefined
+        let gridCountTmpBuf : int32 | undefined = undefined
         if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+            gridCountTmpBuf = valueDeserializer.readInt32()
         }
-        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const gridCountTmpResult : int32 | undefined = gridCountTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRectTmpBuf : Rectangle | undefined = undefined
         if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -3096,11 +3096,11 @@ export class AlertDialogParamWithOptions_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

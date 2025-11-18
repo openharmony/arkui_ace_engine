@@ -23,6 +23,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
 void SetWaterFlowFooterContent(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long footerContent);
 void SetWaterFlowFooter(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long footerPtr);
+void ResetWaterFlowFooter(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 void SetWaterFlowScroller(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long scroller);
 void SetWaterFlowLayoutMode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int mode);
 } // namespace OHOS::Ace::Ani

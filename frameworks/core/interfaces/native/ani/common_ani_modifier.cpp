@@ -82,6 +82,7 @@ constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
+const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -97,18 +98,17 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
-    // auto context = NG::PipelineContext::GetCurrentContextSafely();
-    // if (context == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
-    //     return nullptr;
-    // }
-    // auto frontend = context->GetFrontend();
-    // if (frontend == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
-    //     return nullptr;
-    // }
-    // return frontend->GetHostContext(key);
-    return nullptr;
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
+        return nullptr;
+    }
+    return frontend->GetHostContext();
 }
 
 void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type)
@@ -604,6 +604,28 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     return value / windowConfig.designWidthScale;
 }
 
+std::optional<std::string> GetWindowName(ani_int instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, std::nullopt);
+    std::string windowName = window->GetWindowName();
+    return windowName;
+}
+
+ani_int GetWindowWidthBreakpoint()
+{
+    return ViewAbstract::GetWindowWidthBreakpoint();
+}
+
+ani_int GetWindowHeightBreakpoint()
+{
+    return ViewAbstract::GetWindowHeightBreakpoint();
+}
+
 void* TransferKeyEventPointer(ani_long nativePtr)
 {
     CHECK_NULL_RETURN(nativePtr, nullptr);
@@ -908,6 +930,14 @@ void SetImageRawDataCacheSize(ani_int value, ani_int instanceId)
     imageCache->SetDataCacheLimit(cacheSize);
 }
 
+void ApplyThemeScopeId(ani_env* env, ani_long ptr, ani_int themeScopeId)
+{
+    auto* selfPtr = reinterpret_cast<UINode*>(ptr);
+    if (selfPtr) {
+        selfPtr->SetThemeScopeId(themeScopeId);
+    }
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -944,6 +974,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .px2fp = OHOS::Ace::NG::Px2fp,
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
+        .getWindowName = OHOS::Ace::NG::GetWindowName,
+        .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
+        .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,
         .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,
         .createKeyEventAccessorWithPointer = OHOS::Ace::NG::CreateKeyEventAccessorWithPointer,
         .createEventTargetInfoAccessor = OHOS::Ace::NG::CreateEventTargetInfoAccessor,
@@ -965,6 +998,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
         .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .getColorValueByString = OHOS::Ace::NG::GetColorValueByString,
         .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
         .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
         .removeThemeInNative = OHOS::Ace::NG::RemoveThemeInNative,
@@ -976,13 +1010,14 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
         .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity,
         .setImageCacheCount = OHOS::Ace::NG::SetImageCacheCount,
-        .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize
+        .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize,
+        .applyThemeScopeId = OHOS::Ace::NG::ApplyThemeScopeId
     };
     return &impl;
 }
 
-void SetDrawModifier(ani_long ptr, uint32_t flag,
-    void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun)
+void SetDrawModifier(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun,
+    void* fnDrawForegroundFun)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
     CHECK_NULL_VOID(frameNode && frameNode->IsSupportDrawModifier());
@@ -1001,6 +1036,11 @@ void SetDrawModifier(ani_long ptr, uint32_t flag,
         auto* fnDrawFrontFunPtr =
             static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawFrontFun);
         drawModifier->drawFrontFunc = *fnDrawFrontFunPtr;
+    }
+    if (flag & FLAG_DRAW_FOREGROUND) {
+        auto* fnDrawForegroundFunPtr =
+            static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawForegroundFun);
+        drawModifier->drawForegroundFunc = *fnDrawForegroundFunPtr;
     }
     frameNode->SetDrawModifier(drawModifier);
     if (frameNode) {

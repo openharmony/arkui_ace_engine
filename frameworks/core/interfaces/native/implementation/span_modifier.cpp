@@ -15,7 +15,9 @@
 
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_static.h"
@@ -55,7 +57,7 @@ void SetFontImpl(Ark_NativePointer node,
         SpanModelNG::ResetFont(frameNode);
         return;
     }
-    auto fontSizeValue = Converter::OptConvert<Dimension>(optValue->size);
+    auto fontSizeValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size);
     Validator::ValidateNonNegative(fontSizeValue);
     Validator::ValidateNonPercent(fontSizeValue);
     SpanModelStatic::SetFontSize(frameNode, fontSizeValue);
@@ -164,6 +166,102 @@ void SetTextShadowImpl(Ark_NativePointer node,
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     SpanModelStatic::SetTextShadow(frameNode, shadowList);
 }
+void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                const Opt_TextBackgroundStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<TextBackgroundStyle>(value);
+    if (!convValue) {
+        // Implement Reset value
+        TextBackgroundStyle textBackgroundStyle;
+        SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, textBackgroundStyle);
+        return;
+    }
+    SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, *convValue);
+}
+void SetBaselineOffsetImpl(Ark_NativePointer node,
+                           const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonPercent(convValue);
+    SpanModelStatic::SetBaselineOffset(frameNode, convValue);
+}
+void SetKeyImpl(Ark_NativePointer node,
+                const Opt_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
+    if (!convValue) {
+        // keep the same processing
+        return;
+    }
+    ViewAbstract::SetInspectorId(frameNode, *convValue);
+}
+void SetIdImpl(Ark_NativePointer node,
+               const Opt_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto id = Converter::OptConvertPtr<std::string>(value);
+    ViewAbstract::SetInspectorId(frameNode, *id);
+}
+void SetOnClick0Impl(Ark_NativePointer node,
+                     const Opt_Callback_ClickEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SpanModelNG::ClearOnClick(frameNode);
+        return;
+    }
+    auto onClick = [callback = CallbackHelper(*optValue)](GestureEvent& info) {
+        const auto event = Converter::ArkClickEventSync(info);
+        callback.InvokeSync(event.ArkValue());
+    };
+    SpanModelNG::SetOnClick(frameNode, std::move(onClick));
+}
+void SetOnHoverImpl(Ark_NativePointer node,
+                    const Opt_HoverCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SpanModelNG::ResetOnHover(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](bool isHover, HoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        const auto event = Converter::ArkHoverEventSync(hoverInfo);
+        arkCallback.InvokeSync(arkIsHover, event.ArkValue());
+    };
+    SpanModelNG::SetOnHover(frameNode, std::move(onHover));
+}
+void SetOnClick1Impl(Ark_NativePointer node,
+                     const Opt_Callback_ClickEvent_Void* event,
+                     const Opt_Float64* distanceThreshold)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        SpanModelNG::ClearOnClick(frameNode);
+        return;
+    }
+    auto onEvent = [callback = CallbackHelper(*optEvent)](GestureEvent& info) {
+        const auto event = Converter::ArkClickEventSync(info);
+        callback.InvokeSync(event.ArkValue());
+    };
+    auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
+    SpanModelNG::SetOnClick(static_cast<UINode *>(node), std::move(onEvent));
+}
 } // SpanAttributeModifier
 const GENERATED_ArkUISpanModifier* GetSpanModifier()
 {
@@ -181,6 +279,13 @@ const GENERATED_ArkUISpanModifier* GetSpanModifier()
         SpanAttributeModifier::SetTextCaseImpl,
         SpanAttributeModifier::SetLineHeightImpl,
         SpanAttributeModifier::SetTextShadowImpl,
+        SpanAttributeModifier::SetTextBackgroundStyleImpl,
+        SpanAttributeModifier::SetBaselineOffsetImpl,
+        SpanAttributeModifier::SetKeyImpl,
+        SpanAttributeModifier::SetIdImpl,
+        SpanAttributeModifier::SetOnClick0Impl,
+        SpanAttributeModifier::SetOnHoverImpl,
+        SpanAttributeModifier::SetOnClick1Impl,
     };
     return &ArkUISpanModifierImpl;
 }

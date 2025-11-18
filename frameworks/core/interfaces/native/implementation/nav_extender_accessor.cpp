@@ -190,18 +190,46 @@ void PopToIndexImpl(Ark_NavPathStack pathStack,
     auto animatedVal = Converter::Convert<bool>(animated);
     navStack->NavigationContext::PathStack::PopToIndex(indexVal, animatedVal);
 }
-Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
+Ark_Int32 PopToNameImpl(Ark_NavPathStack pathStack,
                          const Ark_String* name,
                          Ark_Boolean animated)
 {
-    static Ark_Number invalidVal = Converter::ArkValue<Ark_Number>(-1);
+    static Ark_Int32 invalidVal = Converter::ArkValue<Ark_Int32>(-1);
     CHECK_NULL_RETURN(pathStack, invalidVal);
     auto navStack = pathStack->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto nameVal = Converter::Convert<std::string>(*name);
     auto animatedVal = Converter::Convert<bool>(animated);
     auto index = navStack->NavigationContext::PathStack::PopToName(nameVal, animatedVal);
-    return Converter::ArkValue<Ark_Number>(index);
+    return Converter::ArkValue<Ark_Int32>(index);
+}
+Array_String GetRouteMapInConfigImpl(Ark_NativePointer context)
+{
+    std::vector<std::string> result;
+    auto invalid = Converter::ArkValue<Array_String>(result, Converter::FC);
+    auto peer = static_cast<Ark_NavDestinationContext>(context);
+    CHECK_NULL_RETURN(peer && peer->handler, invalid);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, invalid);
+    auto navigationRoute = container->GetNavigationRoute();
+    CHECK_NULL_RETURN(navigationRoute, invalid);
+    auto navPathInfo = peer->handler->GetNavPathInfo();
+    CHECK_NULL_RETURN(navPathInfo, invalid);
+    NG::RouteItem routeInfo;
+    if (!navigationRoute->GetRouteItem(navPathInfo->GetName(), routeInfo)) {
+        return invalid;
+    }
+    result.emplace_back(navPathInfo->GetName());
+    result.emplace_back(routeInfo.pageSourceFile.value_or(""));
+    auto routeData = routeInfo.data;
+    if (routeData.size() > 0) {
+        auto data = JsonUtil::Create(true);
+        for (auto iter = routeInfo.data.begin(); iter != routeInfo.data.end(); iter++) {
+            data->Put(iter->first.c_str(), iter->second.c_str());
+        }
+        result.emplace_back(data->ToString());
+    }
+    return Converter::ArkValue<Array_String>(result, Converter::FC);
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
@@ -221,6 +249,7 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::PopToIndexImpl,
         NavExtenderAccessor::PopToNameImpl,
         NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
+        NavExtenderAccessor::GetRouteMapInConfigImpl,
     };
     return &NavExtenderAccessorImpl;
 }

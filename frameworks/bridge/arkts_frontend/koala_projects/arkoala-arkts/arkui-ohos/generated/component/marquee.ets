@@ -57,19 +57,19 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -85,15 +85,15 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -121,15 +121,15 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -145,11 +145,11 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -209,11 +209,11 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
     }
 }
 export interface MarqueeOptions {
-    start: boolean;
+    start: boolean | undefined;
     step?: double;
     loop?: int32;
     fromStart?: boolean;
-    src: string;
+    src: string | undefined;
 }
 export interface MarqueeAttribute extends CommonMethod {
     setMarqueeOptions(options: MarqueeOptions): this {
@@ -307,6 +307,7 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         if (this.checkPriority("setMarqueeOptions")) {
             const options_casted = options as (MarqueeOptions)
             this.getPeer()?.setMarqueeOptionsAttribute(options_casted)
+            this.applyOptionsFinish('MarqueeAttribute');
             return this
         }
         return this
@@ -391,6 +392,9 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -415,7 +419,13 @@ export class MarqueeOptions_serializer {
     public static write(buffer: SerializerBase, value: MarqueeOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForStart  = value.start
-        valueSerializer.writeBoolean(valueHolderForStart)
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue  = valueHolderForStart!
+            valueSerializer.writeBoolean(valueHolderForStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForStep  = value.step
         if (valueHolderForStep !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -441,11 +451,22 @@ export class MarqueeOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForSrc  = value.src
-        valueSerializer.writeString(valueHolderForSrc)
+        if (valueHolderForSrc !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSrcTmpValue  = valueHolderForSrc!
+            valueSerializer.writeString(valueHolderForSrcTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): MarqueeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const startTmpResult : boolean = valueDeserializer.readBoolean()
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startTmpBuf : boolean | undefined = undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTmpBuf = valueDeserializer.readBoolean()
+        }
+        const startTmpResult : boolean | undefined = startTmpBuf
         const stepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let stepTmpBuf : double | undefined = undefined
         if ((stepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -464,7 +485,12 @@ export class MarqueeOptions_serializer {
             fromStartTmpBuf = valueDeserializer.readBoolean()
         }
         const fromStartTmpResult : boolean | undefined = fromStartTmpBuf
-        const srcTmpResult : string = (valueDeserializer.readString() as string)
+        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let srcTmpBuf : string | undefined = undefined
+        if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            srcTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const srcTmpResult : string | undefined = srcTmpBuf
         let value : MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult} as MarqueeOptions)
         return value
     }

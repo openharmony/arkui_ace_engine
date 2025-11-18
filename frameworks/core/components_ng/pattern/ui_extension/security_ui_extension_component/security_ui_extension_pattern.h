@@ -142,6 +142,23 @@ public:
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 
+    bool GetIsTransferringCaller()
+    {
+        return isTransferringCaller_;
+    }
+    void SetIsTransferringCaller(bool isTransferringCaller)
+    {
+        isTransferringCaller_ = isTransferringCaller;
+    }
+    void SetIsWindowModeFollowHost(bool isWindowModeFollowHost)
+    {
+        isWindowModeFollowHost_ = isWindowModeFollowHost;
+    }
+    bool GetIsWindowModeFollowHost()
+    {
+        return isWindowModeFollowHost_;
+    }
+
 protected:
     void UpdateSessionInstanceId(int32_t instanceId);
     void InitializeAccessibility() override;
@@ -184,6 +201,9 @@ protected:
     bool hasMountToParent_ = false;
     bool hasAttachContext_ = false;
     bool needReNotifyForeground_ = false;
+
+    bool isTransferringCaller_ = false;
+    bool isWindowModeFollowHost_ = false;
 
     int32_t callbackId_ = 0;
     RectF displayArea_;

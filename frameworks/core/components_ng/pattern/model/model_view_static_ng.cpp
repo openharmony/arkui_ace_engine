@@ -119,4 +119,9 @@ void ModelViewNG::AddShaderInputBuffer(FrameNode* frameNode, const std::shared_p
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer, frameNode);
 }
+
+void ModelViewNG::SetBackgroundColor(FrameNode* frameNode, uint32_t argb)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, BackgroundColor, argb, frameNode);
+}
 }

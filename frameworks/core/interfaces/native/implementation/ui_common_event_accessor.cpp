@@ -77,7 +77,7 @@ void SetOnAppearImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnAppear = Converter::GetOptPtr(callback_);
     if (arkOnAppear) {
-        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() { arkCallback.Invoke(); };
+        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() { arkCallback.InvokeSync(); };
         ViewAbstract::SetFrameNodeCommonOnAppear(rawPtr, std::move(onAppear));
     } else {
         ViewAbstract::ClearJSFrameNodeOnAppear(rawPtr);
@@ -91,7 +91,7 @@ void SetOnDisappearImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callbac
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnDisAppear = Converter::GetOptPtr(callback_);
     if (arkOnDisAppear) {
-        auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() { arkCallback.Invoke(); };
+        auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() { arkCallback.InvokeSync(); };
         ViewAbstract::SetFrameNodeCommonOnDisappear(rawPtr, std::move(onDisAppear));
     } else {
         ViewAbstract::ClearJSFrameNodeOnDisappear(rawPtr);
@@ -201,7 +201,7 @@ void SetOnSizeChangeImpl(Ark_UICommonEvent peer, const Opt_SizeChangeCallback* c
                 &ctx);
             newValue.width = Converter::ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()),
                 &ctx);
-            arkCallback.Invoke(oldValue, newValue);
+            arkCallback.InvokeSync(oldValue, newValue);
         };
         ViewAbstract::SetFrameNodeCommonOnSizeChange(rawPtr, std::move(onSizeChanged));
     } else {
@@ -224,8 +224,8 @@ void SetOnVisibleAreaApproximateChangeImpl(
     auto onVisibleChange = [arkCallback = CallbackHelper(arkOnVisibleChange.value())](
                                bool isExpanding, double currentRatio) {
         auto arkIsExpanding = Converter::ArkValue<Ark_Boolean>(isExpanding);
-        auto arkCurrentRatio = Converter::ArkValue<Ark_Number>(currentRatio);
-        arkCallback.Invoke(arkIsExpanding, arkCurrentRatio);
+        auto arkCurrentRatio = Converter::ArkValue<Ark_Float64>(currentRatio);
+        arkCallback.InvokeSync(arkIsExpanding, arkCurrentRatio);
     };
     std::vector<double> ratioList = Converter::Convert<std::vector<double>>(options->ratios);
     auto expectedUpdateIntervalValue = Converter::OptConvert<int32_t>(options->expectedUpdateInterval);

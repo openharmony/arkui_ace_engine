@@ -745,6 +745,13 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
         renderingContext2DModel_->SetFillColor(color, true);
     }
 }
+void CanvasRendererPeerImpl::SetFillStyle(const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (color) {
+        renderingContext2DModel_->SetFillColor(color.value(), true);
+    }
+}
 void CanvasRendererPeerImpl::SetFillStyle(const uint32_t colorNum)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
@@ -768,6 +775,13 @@ void CanvasRendererPeerImpl::SetStrokeStyle(const std::string& colorStr)
     Color color;
     if (Color::ParseColorString(colorStr, color)) {
         renderingContext2DModel_->SetStrokeColor(color, true);
+    }
+}
+void CanvasRendererPeerImpl::SetStrokeStyle(const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (color) {
+        renderingContext2DModel_->SetStrokeColor(color.value(), true);
     }
 }
 void CanvasRendererPeerImpl::SetStrokeStyle(const uint32_t colorNum)

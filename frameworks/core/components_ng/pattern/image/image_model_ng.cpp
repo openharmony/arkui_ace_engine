@@ -267,11 +267,15 @@ void ImageModelNG::SetBorderRadius(const NG::BorderRadiusProperty& borderRadius)
 {
     if (SystemProperties::ConfigChangePerform()) {
         std::string key = "image.borderRadius.edges";
+        std::string borderRadiusKey = "image.borderRadius";
+        std::string radiusKey = "borderRadius";
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->RemoveResObj(key);
+        pattern->RemoveResObj(borderRadiusKey);
+        pattern->RemoveResObj(radiusKey);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [borderRadius, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
@@ -1216,7 +1220,11 @@ void HandleFillColorResource(const RefPtr<ResourceObject>& resObj, const RefPtr<
 void HandleBorderRadiusResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImagePattern>& pattern)
 {
     std::string key = "image.borderRadius";
+    std::string borderRadiusKey = "image.borderRadius.edges";
+    std::string radiusKey = "borderRadius";
     pattern->RemoveResObj(key);
+    pattern->RemoveResObj(borderRadiusKey);
+    pattern->RemoveResObj(radiusKey);
     CHECK_NULL_VOID(resObj);
     auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
         auto pattern = weak.Upgrade();

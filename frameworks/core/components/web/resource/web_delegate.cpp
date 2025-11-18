@@ -414,6 +414,30 @@ std::vector<std::string> FileSelectorParamOhos::GetMimeType()
     return std::vector<std::string>();
 }
 
+std::string FileSelectorParamOhos::GetDefaultPath()
+{
+    if (param_) {
+        return param_->DefaultPath();
+    }
+    return "";
+}
+
+std::vector<std::string> FileSelectorParamOhos::GetDescriptions()
+{
+    if (param_) {
+        return param_->Descriptions();
+    }
+    return std::vector<std::string>();
+}
+
+bool FileSelectorParamOhos::IsAcceptAllOptionExcluded()
+{
+    if (param_) {
+        return param_->IsAcceptAllOptionExcluded();
+    }
+    return false;
+}
+
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {
@@ -3687,7 +3711,7 @@ bool WebDelegate::GetIsSmoothDragResizeEnabled()
         return false;
     }
     bool isBrowserUsage = nweb_->IsNWebEx();
-    if ((OHOS::system::GetDeviceType() != "2in1" && !IsPcMode()) || !isBrowserUsage) {
+    if (OHOS::system::GetDeviceType() != "2in1" || !isBrowserUsage) {
         TAG_LOGD(AceLogTag::ACE_WEB, "Smooth drag resize only support browser in 2in1");
         return false;
     }

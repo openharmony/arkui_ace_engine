@@ -20,10 +20,10 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDropAttribute, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
+import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -53,6 +53,8 @@ import { default as rpc } from "@ohos.rpc"
 import { default as curves } from "@ohos.curves"
 import { UIContext } from "@ohos.arkui.UIContext"
 import { BuildOptions } from "arkui.BuilderNode"
+import { ImageModifier } from "./../ImageModifier"
+import { ImageModifier_serializer } from "./../ImageModifier"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -77,21 +79,22 @@ import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
+import { ArkUIAniModule } from "arkui.ani"
 // instructive change end
 export interface BaseEvent {
     target: EventTarget
-    timestamp: number
+    timestamp: int64
     source: SourceType
-    axisHorizontal?: number | undefined
-    axisVertical?: number | undefined
-    pressure: number
-    tiltX: number
-    tiltY: number
-    rollAngle?: number | undefined
+    axisHorizontal?: double | undefined
+    axisVertical?: double | undefined
+    pressure: double
+    tiltX: double
+    tiltY: double
+    rollAngle?: double | undefined
     sourceTool: SourceTool
     getModifierKeyState?: ModifierKeyStateGetter | undefined
-    deviceId?: number | undefined
-    targetDisplayId?: number | undefined
+    deviceId?: int32 | undefined
+    targetDisplayId?: int32 | undefined
 }
 export class BaseEventInternal implements MaterializedBase,BaseEvent {
     peer?: Finalizable | undefined = undefined
@@ -104,10 +107,10 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set target(target: EventTarget) {
         this.setTarget(target)
     }
-    get timestamp(): number {
+    get timestamp(): int64 {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: number) {
+    set timestamp(timestamp: int64) {
         this.setTimestamp(timestamp)
     }
     get source(): SourceType {
@@ -116,43 +119,43 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set source(source: SourceType) {
         this.setSource(source)
     }
-    get axisHorizontal(): number | undefined {
+    get axisHorizontal(): double | undefined {
         return this.getAxisHorizontal()
     }
-    set axisHorizontal(axisHorizontal: number | undefined) {
-        const axisHorizontal_NonNull  = (axisHorizontal as number)
+    set axisHorizontal(axisHorizontal: double | undefined) {
+        const axisHorizontal_NonNull  = (axisHorizontal as double)
         this.setAxisHorizontal(axisHorizontal_NonNull)
     }
-    get axisVertical(): number | undefined {
+    get axisVertical(): double | undefined {
         return this.getAxisVertical()
     }
-    set axisVertical(axisVertical: number | undefined) {
-        const axisVertical_NonNull  = (axisVertical as number)
+    set axisVertical(axisVertical: double | undefined) {
+        const axisVertical_NonNull  = (axisVertical as double)
         this.setAxisVertical(axisVertical_NonNull)
     }
-    get pressure(): number {
+    get pressure(): double {
         return this.getPressure()
     }
-    set pressure(pressure: number) {
+    set pressure(pressure: double) {
         this.setPressure(pressure)
     }
-    get tiltX(): number {
+    get tiltX(): double {
         return this.getTiltX()
     }
-    set tiltX(tiltX: number) {
+    set tiltX(tiltX: double) {
         this.setTiltX(tiltX)
     }
-    get tiltY(): number {
+    get tiltY(): double {
         return this.getTiltY()
     }
-    set tiltY(tiltY: number) {
+    set tiltY(tiltY: double) {
         this.setTiltY(tiltY)
     }
-    get rollAngle(): number | undefined {
+    get rollAngle(): double | undefined {
         return this.getRollAngle()
     }
-    set rollAngle(rollAngle: number | undefined) {
-        const rollAngle_NonNull  = (rollAngle as number)
+    set rollAngle(rollAngle: double | undefined) {
+        const rollAngle_NonNull = (rollAngle as double)
         this.setRollAngle(rollAngle_NonNull)
     }
     get sourceTool(): SourceTool {
@@ -168,18 +171,18 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         const getModifierKeyState_NonNull  = (getModifierKeyState as ModifierKeyStateGetter)
         this.setGetModifierKeyState(getModifierKeyState_NonNull)
     }
-    get deviceId(): number | undefined {
+    get deviceId(): int32 | undefined {
         return this.getDeviceId()
     }
-    set deviceId(deviceId: number | undefined) {
-        const deviceId_NonNull  = (deviceId as number)
+    set deviceId(deviceId: int32 | undefined) {
+        const deviceId_NonNull  = (deviceId as int32)
         this.setDeviceId(deviceId_NonNull)
     }
-    get targetDisplayId(): number | undefined {
+    get targetDisplayId(): int32 | undefined {
         return this.getTargetDisplayId()
     }
-    set targetDisplayId(targetDisplayId: number | undefined) {
-        const targetDisplayId_NonNull  = (targetDisplayId as number)
+    set targetDisplayId(targetDisplayId: int32 | undefined) {
+        const targetDisplayId_NonNull  = (targetDisplayId as int32)
         this.setTargetDisplayId(targetDisplayId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -206,11 +209,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setTarget_serialize(target_casted)
         return
     }
-    private getTimestamp(): number {
+    private getTimestamp(): int64 {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: number): void {
-        const timestamp_casted = timestamp as (number)
+    private setTimestamp(timestamp: int64): void {
+        const timestamp_casted = timestamp as (int64)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -222,51 +225,51 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setSource_serialize(source_casted)
         return
     }
-    private getAxisHorizontal(): number | undefined {
+    private getAxisHorizontal(): double | undefined {
         return this.getAxisHorizontal_serialize()
     }
-    private setAxisHorizontal(axisHorizontal: number | undefined): void {
-        const axisHorizontal_casted = axisHorizontal as (number | undefined)
+    private setAxisHorizontal(axisHorizontal: double | undefined): void {
+        const axisHorizontal_casted = axisHorizontal as (double | undefined)
         this.setAxisHorizontal_serialize(axisHorizontal_casted)
         return
     }
-    private getAxisVertical(): number | undefined {
+    private getAxisVertical(): double | undefined {
         return this.getAxisVertical_serialize()
     }
-    private setAxisVertical(axisVertical: number | undefined): void {
-        const axisVertical_casted = axisVertical as (number | undefined)
+    private setAxisVertical(axisVertical: double | undefined): void {
+        const axisVertical_casted = axisVertical as (double | undefined)
         this.setAxisVertical_serialize(axisVertical_casted)
         return
     }
-    private getPressure(): number {
+    private getPressure(): double {
         return this.getPressure_serialize()
     }
-    private setPressure(pressure: number): void {
-        const pressure_casted = pressure as (number)
+    private setPressure(pressure: double): void {
+        const pressure_casted = pressure as (double)
         this.setPressure_serialize(pressure_casted)
         return
     }
-    private getTiltX(): number {
+    private getTiltX(): double {
         return this.getTiltX_serialize()
     }
-    private setTiltX(tiltX: number): void {
-        const tiltX_casted = tiltX as (number)
+    private setTiltX(tiltX: double): void {
+        const tiltX_casted = tiltX as (double)
         this.setTiltX_serialize(tiltX_casted)
         return
     }
-    private getTiltY(): number {
+    private getTiltY(): double {
         return this.getTiltY_serialize()
     }
-    private setTiltY(tiltY: number): void {
-        const tiltY_casted = tiltY as (number)
+    private setTiltY(tiltY: double): void {
+        const tiltY_casted = tiltY as (double)
         this.setTiltY_serialize(tiltY_casted)
         return
     }
-    private getRollAngle(): number | undefined {
+    private getRollAngle(): double | undefined {
         return this.getRollAngle_serialize()
     }
-    private setRollAngle(rollAngle: number | undefined): void {
-        const rollAngle_casted = rollAngle as (number | undefined)
+    private setRollAngle(rollAngle: double | undefined): void {
+        const rollAngle_casted = rollAngle as (double | undefined)
         this.setRollAngle_serialize(rollAngle_casted)
         return
     }
@@ -286,19 +289,19 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setGetModifierKeyState_serialize(getModifierKeyState_casted)
         return
     }
-    private getDeviceId(): number | undefined {
+    private getDeviceId(): int32 | undefined {
         return this.getDeviceId_serialize()
     }
-    private setDeviceId(deviceId: number | undefined): void {
-        const deviceId_casted = deviceId as (number | undefined)
+    private setDeviceId(deviceId: int32 | undefined): void {
+        const deviceId_casted = deviceId as (int32 | undefined)
         this.setDeviceId_serialize(deviceId_casted)
         return
     }
-    private getTargetDisplayId(): number | undefined {
+    private getTargetDisplayId(): int32 | undefined {
         return this.getTargetDisplayId_serialize()
     }
-    private setTargetDisplayId(targetDisplayId: number | undefined): void {
-        const targetDisplayId_casted = targetDisplayId as (number | undefined)
+    private setTargetDisplayId(targetDisplayId: int32 | undefined): void {
+        const targetDisplayId_casted = targetDisplayId as (int32 | undefined)
         this.setTargetDisplayId_serialize(targetDisplayId_casted)
         return
     }
@@ -314,11 +317,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setTarget(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTimestamp_serialize(): number {
+    private getTimestamp_serialize(): int64 {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr)
         return retval
     }
-    private setTimestamp_serialize(timestamp: number): void {
+    private setTimestamp_serialize(timestamp: int64): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp)
     }
     private getSource_serialize(): SourceType {
@@ -328,90 +331,90 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     private setSource_serialize(source: SourceType): void {
         ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, source.valueOf())
     }
-    private getAxisHorizontal_serialize(): number | undefined {
+    private getAxisHorizontal_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setAxisHorizontal_serialize(axisHorizontal: number | undefined): void {
+    private setAxisHorizontal_serialize(axisHorizontal: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (axisHorizontal !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const axisHorizontalTmpValue  = axisHorizontal!
-            thisSerializer.writeNumber(axisHorizontalTmpValue)
+            thisSerializer.writeFloat64(axisHorizontalTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BaseEvent_setAxisHorizontal(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getAxisVertical_serialize(): number | undefined {
+    private getAxisVertical_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisVertical(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setAxisVertical_serialize(axisVertical: number | undefined): void {
+    private setAxisVertical_serialize(axisVertical: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (axisVertical !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const axisVerticalTmpValue  = axisVertical!
-            thisSerializer.writeNumber(axisVerticalTmpValue)
+            thisSerializer.writeFloat64(axisVerticalTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BaseEvent_setAxisVertical(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getPressure_serialize(): number {
+    private getPressure_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getPressure(this.peer!.ptr)
         return retval
     }
-    private setPressure_serialize(pressure: number): void {
+    private setPressure_serialize(pressure: double): void {
         ArkUIGeneratedNativeModule._BaseEvent_setPressure(this.peer!.ptr, pressure)
     }
-    private getTiltX_serialize(): number {
+    private getTiltX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTiltX(this.peer!.ptr)
         return retval
     }
-    private setTiltX_serialize(tiltX: number): void {
+    private setTiltX_serialize(tiltX: double): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTiltX(this.peer!.ptr, tiltX)
     }
-    private getTiltY_serialize(): number {
+    private getTiltY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTiltY(this.peer!.ptr)
         return retval
     }
-    private setTiltY_serialize(tiltY: number): void {
+    private setTiltY_serialize(tiltY: double): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTiltY(this.peer!.ptr, tiltY)
     }
-    private getRollAngle_serialize(): number | undefined {
+    private getRollAngle_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getRollAngle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRollAngle_serialize(rollAngle: number | undefined): void {
+    private setRollAngle_serialize(rollAngle: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rollAngle !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rollAngleTmpValue  = rollAngle!
-            thisSerializer.writeNumber(rollAngleTmpValue)
+            thisSerializer.writeFloat64(rollAngleTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -469,46 +472,46 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setGetModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getDeviceId_serialize(): number | undefined {
+    private getDeviceId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setDeviceId_serialize(deviceId: number | undefined): void {
+    private setDeviceId_serialize(deviceId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (deviceId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const deviceIdTmpValue  = deviceId!
-            thisSerializer.writeNumber(deviceIdTmpValue)
+            thisSerializer.writeInt32(deviceIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BaseEvent_setDeviceId(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTargetDisplayId_serialize(): number | undefined {
+    private getTargetDisplayId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTargetDisplayId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setTargetDisplayId_serialize(targetDisplayId: number | undefined): void {
+    private setTargetDisplayId_serialize(targetDisplayId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (targetDisplayId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const targetDisplayIdTmpValue  = targetDisplayId!
-            thisSerializer.writeNumber(targetDisplayIdTmpValue)
+            thisSerializer.writeInt32(targetDisplayIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -526,52 +529,52 @@ export class ChildrenMainSize implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get childDefaultSize(): number {
+    get childDefaultSize(): double {
         return this.getChildDefaultSize()
     }
-    set childDefaultSize(childDefaultSize: number) {
+    set childDefaultSize(childDefaultSize: double) {
         this.setChildDefaultSize(childDefaultSize)
     }
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ChildrenMainSize.getFinalizer())
     }
-    constructor(childDefaultSize: number) {
+    constructor(childDefaultSize: double) {
         this(false, ChildrenMainSize.construct(childDefaultSize))
     }
-    static construct(childDefaultSize: number): KPointer {
+    static construct(childDefaultSize: double): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_construct(childDefaultSize)
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
     }
-    public splice(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
-        const start_casted = start as (number)
-        const deleteCount_casted = deleteCount as (number | undefined)
-        const childrenSize_casted = childrenSize as (Array<number> | undefined)
+    public splice(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
+        const start_casted = start as (int32)
+        const deleteCount_casted = deleteCount as (int32 | undefined)
+        const childrenSize_casted = childrenSize as (Array<double> | undefined)
         this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
         return
     }
-    public update(index: number, childSize: number): void {
-        const index_casted = index as (number)
-        const childSize_casted = childSize as (number)
+    public update(index: int32, childSize: double): void {
+        const index_casted = index as (int32)
+        const childSize_casted = childSize as (double)
         this.update_serialize(index_casted, childSize_casted)
         return
     }
-    private getChildDefaultSize(): number {
+    private getChildDefaultSize(): double {
         return this.getChildDefaultSize_serialize()
     }
-    private setChildDefaultSize(childDefaultSize: number): void {
-        const childDefaultSize_casted = childDefaultSize as (number)
+    private setChildDefaultSize(childDefaultSize: double): void {
+        const childDefaultSize_casted = childDefaultSize as (double)
         this.setChildDefaultSize_serialize(childDefaultSize_casted)
         return
     }
-    splice_serialize(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
+    splice_serialize(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (deleteCount !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const deleteCountTmpValue  = deleteCount!
-            thisSerializer.writeNumber(deleteCountTmpValue)
+            thisSerializer.writeInt32(deleteCountTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -580,8 +583,8 @@ export class ChildrenMainSize implements MaterializedBase {
             const childrenSizeTmpValue  = childrenSize!
             thisSerializer.writeInt32((childrenSizeTmpValue.length).toInt())
             for (let childrenSizeTmpValueCounterI = 0; childrenSizeTmpValueCounterI < childrenSizeTmpValue.length; childrenSizeTmpValueCounterI++) {
-                const childrenSizeTmpValueTmpElement : number = childrenSizeTmpValue[childrenSizeTmpValueCounterI]
-                thisSerializer.writeNumber(childrenSizeTmpValueTmpElement)
+                const childrenSizeTmpValueTmpElement : double = childrenSizeTmpValue[childrenSizeTmpValueCounterI]
+                thisSerializer.writeFloat64(childrenSizeTmpValueTmpElement)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -589,14 +592,14 @@ export class ChildrenMainSize implements MaterializedBase {
         ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    update_serialize(index: number, childSize: number): void {
+    update_serialize(index: int32, childSize: double): void {
         ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
     }
-    private getChildDefaultSize_serialize(): number {
+    private getChildDefaultSize_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
         return retval
     }
-    private setChildDefaultSize_serialize(childDefaultSize: number): void {
+    private setChildDefaultSize_serialize(childDefaultSize: double): void {
         ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
     }
 }
@@ -658,19 +661,19 @@ export interface DragEvent {
     dragBehavior: DragBehavior
     useCustomDropAnimation: boolean
     getModifierKeyState?: ModifierKeyStateGetter | undefined
-    getDisplayX(): number
-    getDisplayY(): number
-    getWindowX(): number
-    getWindowY(): number
+    getDisplayX(): double
+    getDisplayY(): double
+    getWindowX(): double
+    getWindowY(): double
     setData(unifiedData: unifiedDataChannel.UnifiedData): void
     getData(): unifiedDataChannel.UnifiedData
     getSummary(): unifiedDataChannel.Summary
     setResult(dragResult: DragResult): void
     getResult(): DragResult
     getPreviewRect(): Rectangle
-    getVelocityX(): number
-    getVelocityY(): number
-    getVelocity(): number
+    getVelocityX(): double
+    getVelocityY(): double
+    getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: unifiedDataChannel.GetDataParams): string
     enableInternalDropAnimation(configuration: string): void
@@ -715,16 +718,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public static fromPtr(ptr: KPointer): DragEventInternal {
         return new DragEventInternal(ptr)
     }
-    public getDisplayX(): number {
+    public getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    public getDisplayY(): number {
+    public getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    public getWindowX(): number {
+    public getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    public getWindowY(): number {
+    public getWindowY(): double {
         return this.getWindowY_serialize()
     }
     public setData(unifiedData: unifiedDataChannel.UnifiedData): void {
@@ -749,13 +752,13 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public getPreviewRect(): Rectangle {
         return this.getPreviewRect_serialize()
     }
-    public getVelocityX(): number {
+    public getVelocityX(): double {
         return this.getVelocityX_serialize()
     }
-    public getVelocityY(): number {
+    public getVelocityY(): double {
         return this.getVelocityY_serialize()
     }
-    public getVelocity(): number {
+    public getVelocity(): double {
         return this.getVelocity_serialize()
     }
     public executeDropAnimation(customDropAnimation: (() => void)): void {
@@ -795,19 +798,19 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setGetModifierKeyState_serialize(getModifierKeyState_casted)
         return
     }
-    getDisplayX_serialize(): number {
+    getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    getDisplayY_serialize(): number {
+    getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    getWindowX_serialize(): number {
+    getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    getWindowY_serialize(): number {
+    getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getWindowY(this.peer!.ptr)
         return retval
     }
@@ -837,15 +840,15 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const returnResult : Rectangle = Rectangle_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getVelocityX_serialize(): number {
+    getVelocityX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocityX(this.peer!.ptr)
         return retval
     }
-    getVelocityY_serialize(): number {
+    getVelocityY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocityY(this.peer!.ptr)
         return retval
     }
-    getVelocity_serialize(): number {
+    getVelocity_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocity(this.peer!.ptr)
         return retval
     }
@@ -917,105 +920,19 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.release()
     }
 }
-export class DrawModifierInternal {
-    public static fromPtr(ptr: KPointer): DrawModifier {
-        return new DrawModifier(ptr)
-    }
-}
-export class DrawModifier implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    drawBehind(drawContext: DrawContext): void {
-        throw new Error("Not implemented!")
-    }
-    get drawBehind_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawBehind_callback()
-    }
-    set drawBehind_callback(drawBehind_callback: ((drawContext: DrawContext) => void)) {
-        this.setDrawBehind_callback(drawBehind_callback)
-    }
-    drawContent(drawContext: DrawContext): void {
-        throw new Error("Not implemented!")
-    }
-    get drawContent_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawContent_callback()
-    }
-    set drawContent_callback(drawContent_callback: ((drawContext: DrawContext) => void)) {
-        this.setDrawContent_callback(drawContent_callback)
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, DrawModifier.getFinalizer())
-    }
-    constructor() {
-        this(DrawModifier.construct())
-        this.drawBehind_callback = this.drawBehind
-        this.drawContent_callback = this.drawContent
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._DrawModifier_getFinalizer()
-    }
-    public invalidate(): void {
-        this.invalidate_serialize()
-        return
-    }
-    private getDrawBehind_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawBehind_callback_serialize()
-    }
-    private setDrawBehind_callback(drawBehind_callback: ((drawContext: DrawContext) => void)): void {
-        const drawBehind_callback_casted = drawBehind_callback as (((drawContext: DrawContext) => void))
-        this.setDrawBehind_callback_serialize(drawBehind_callback_casted)
-        return
-    }
-    private getDrawContent_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawContent_callback_serialize()
-    }
-    private setDrawContent_callback(drawContent_callback: ((drawContext: DrawContext) => void)): void {
-        const drawContent_callback_casted = drawContent_callback as (((drawContext: DrawContext) => void))
-        this.setDrawContent_callback_serialize(drawContent_callback_casted)
-        return
-    }
-    invalidate_serialize(): void {
-        ArkUIGeneratedNativeModule._DrawModifier_invalidate(this.peer!.ptr)
-    }
-    private getDrawBehind_callback_serialize(): ((drawContext: DrawContext) => void) {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_getDrawBehind_callback(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setDrawBehind_callback_serialize(drawBehind_callback: ((drawContext: DrawContext) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(drawBehind_callback)
-        ArkUIGeneratedNativeModule._DrawModifier_setDrawBehind_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getDrawContent_callback_serialize(): ((drawContext: DrawContext) => void) {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_getDrawContent_callback(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setDrawContent_callback_serialize(drawContent_callback: ((drawContext: DrawContext) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(drawContent_callback)
-        ArkUIGeneratedNativeModule._DrawModifier_setDrawContent_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-}
+
 export interface KeyEvent {
     type: KeyType
-    keyCode: number
+    keyCode: int32
     keyText: string
     keySource: KeySource
-    deviceId: number
-    metaKey: number
-    timestamp: number
+    deviceId: int32
+    metaKey: int32
+    timestamp: int64
     stopPropagation: (() => void)
     intentionCode: IntentionCode
     getModifierKeyState?: ModifierKeyStateGetter | undefined
-    unicode?: number | undefined
+    unicode?: int64 | undefined
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -1028,10 +945,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set type(type: KeyType) {
         this.setType(type)
     }
-    get keyCode(): number {
+    get keyCode(): int32 {
         return this.getKeyCode()
     }
-    set keyCode(keyCode: number) {
+    set keyCode(keyCode: int32) {
         this.setKeyCode(keyCode)
     }
     get keyText(): string {
@@ -1046,22 +963,22 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set keySource(keySource: KeySource) {
         this.setKeySource(keySource)
     }
-    get deviceId(): number {
+    get deviceId(): int32 {
         return this.getDeviceId()
     }
-    set deviceId(deviceId: number) {
+    set deviceId(deviceId: int32) {
         this.setDeviceId(deviceId)
     }
-    get metaKey(): number {
+    get metaKey(): int32 {
         return this.getMetaKey()
     }
-    set metaKey(metaKey: number) {
+    set metaKey(metaKey: int32) {
         this.setMetaKey(metaKey)
     }
-    get timestamp(): number {
+    get timestamp(): int64 {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: number) {
+    set timestamp(timestamp: int64) {
         this.setTimestamp(timestamp)
     }
     get stopPropagation(): (() => void) {
@@ -1083,11 +1000,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const getModifierKeyState_NonNull  = (getModifierKeyState as ModifierKeyStateGetter)
         this.setGetModifierKeyState(getModifierKeyState_NonNull)
     }
-    get unicode(): number | undefined {
+    get unicode(): int64 | undefined {
         return this.getUnicode()
     }
-    set unicode(unicode: number | undefined) {
-        const unicode_NonNull  = (unicode as number)
+    set unicode(unicode: int64 | undefined) {
+        const unicode_NonNull  = (unicode as int64)
         this.setUnicode(unicode_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1114,11 +1031,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setType_serialize(type_casted)
         return
     }
-    private getKeyCode(): number {
+    private getKeyCode(): int32 {
         return this.getKeyCode_serialize()
     }
-    private setKeyCode(keyCode: number): void {
-        const keyCode_casted = keyCode as (number)
+    private setKeyCode(keyCode: int32): void {
+        const keyCode_casted = keyCode as (int32)
         this.setKeyCode_serialize(keyCode_casted)
         return
     }
@@ -1138,27 +1055,27 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setKeySource_serialize(keySource_casted)
         return
     }
-    private getDeviceId(): number {
+    private getDeviceId(): int32 {
         return this.getDeviceId_serialize()
     }
-    private setDeviceId(deviceId: number): void {
-        const deviceId_casted = deviceId as (number)
+    private setDeviceId(deviceId: int32): void {
+        const deviceId_casted = deviceId as (int32)
         this.setDeviceId_serialize(deviceId_casted)
         return
     }
-    private getMetaKey(): number {
+    private getMetaKey(): int32 {
         return this.getMetaKey_serialize()
     }
-    private setMetaKey(metaKey: number): void {
-        const metaKey_casted = metaKey as (number)
+    private setMetaKey(metaKey: int32): void {
+        const metaKey_casted = metaKey as (int32)
         this.setMetaKey_serialize(metaKey_casted)
         return
     }
-    private getTimestamp(): number {
+    private getTimestamp(): int64 {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: number): void {
-        const timestamp_casted = timestamp as (number)
+    private setTimestamp(timestamp: int64): void {
+        const timestamp_casted = timestamp as (int64)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -1186,11 +1103,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setGetModifierKeyState_serialize(getModifierKeyState_casted)
         return
     }
-    private getUnicode(): number | undefined {
+    private getUnicode(): int64 | undefined {
         return this.getUnicode_serialize()
     }
-    private setUnicode(unicode: number | undefined): void {
-        const unicode_casted = unicode as (number | undefined)
+    private setUnicode(unicode: int64 | undefined): void {
+        const unicode_casted = unicode as (int64 | undefined)
         this.setUnicode_serialize(unicode_casted)
         return
     }
@@ -1201,11 +1118,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setType_serialize(type: KeyType): void {
         ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, type.valueOf())
     }
-    private getKeyCode_serialize(): number {
+    private getKeyCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getKeyCode(this.peer!.ptr)
         return retval
     }
-    private setKeyCode_serialize(keyCode: number): void {
+    private setKeyCode_serialize(keyCode: int32): void {
         ArkUIGeneratedNativeModule._KeyEvent_setKeyCode(this.peer!.ptr, keyCode)
     }
     private getKeyText_serialize(): string {
@@ -1222,30 +1139,51 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setKeySource_serialize(keySource: KeySource): void {
         ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, keySource.valueOf())
     }
-    private getDeviceId_serialize(): number {
+    private getDeviceId_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getDeviceId(this.peer!.ptr)
         return retval
     }
-    private setDeviceId_serialize(deviceId: number): void {
+    private setDeviceId_serialize(deviceId: int32): void {
         ArkUIGeneratedNativeModule._KeyEvent_setDeviceId(this.peer!.ptr, deviceId)
     }
-    private getMetaKey_serialize(): number {
+    private getMetaKey_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getMetaKey(this.peer!.ptr)
         return retval
     }
-    private setMetaKey_serialize(metaKey: number): void {
+    private setMetaKey_serialize(metaKey: int32): void {
         ArkUIGeneratedNativeModule._KeyEvent_setMetaKey(this.peer!.ptr, metaKey)
     }
-    private getTimestamp_serialize(): number {
+    private getTimestamp_serialize(): int64 {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr)
         return retval
     }
-    private setTimestamp_serialize(timestamp: number): void {
+    private setTimestamp_serialize(timestamp: int64): void {
         ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const retval = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
+        let buffer: (() => void) | undefined = undefined
+        
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
+            
+            buffer = (): void => {
+                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        
+        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
+        return returnResult;
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1304,23 +1242,23 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setGetModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getUnicode_serialize(): number | undefined {
+    private getUnicode_serialize(): int64 | undefined {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int64 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int64 | undefined = buffer
         return returnResult
     }
-    private setUnicode_serialize(unicode: number | undefined): void {
+    private setUnicode_serialize(unicode: int64 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (unicode !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const unicodeTmpValue  = unicode!
-            thisSerializer.writeNumber(unicodeTmpValue)
+            thisSerializer.writeInt64(unicodeTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1645,25 +1583,25 @@ export class ProgressMask implements MaterializedBase {
     constructor(_0: boolean, _1: boolean, _2: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ProgressMask.getFinalizer())
     }
-    constructor(value: number, total: number, color: ResourceColor) {
+    constructor(value: double, total: double, color: ResourceColor) {
         this(false, false, false, ProgressMask.construct(value, total, color))
     }
-    static construct(value: number, total: number, color: ResourceColor): KPointer {
+    static construct(value: double, total: double, color: ResourceColor): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (color instanceof Color) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const colorForIdx0  = color as Color
             thisSerializer.writeInt32(colorForIdx0.getOrdinal())
         } else if (color instanceof number) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const colorForIdx1  = color as number
             thisSerializer.writeNumber(colorForIdx1)
         } else if (color instanceof string) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const colorForIdx2  = color as string
             thisSerializer.writeString(colorForIdx2)
         } else if (color instanceof Resource) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const colorForIdx3  = color as Resource
             Resource_serializer.write(thisSerializer, colorForIdx3)
         }
@@ -1674,8 +1612,8 @@ export class ProgressMask implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ProgressMask_getFinalizer()
     }
-    public updateProgress(value: number): void {
-        const value_casted = value as (number)
+    public updateProgress(value: double): void {
+        const value_casted = value as (double)
         this.updateProgress_serialize(value_casted)
         return
     }
@@ -1689,25 +1627,25 @@ export class ProgressMask implements MaterializedBase {
         this.enableBreathingAnimation_serialize(value_casted)
         return
     }
-    updateProgress_serialize(value: number): void {
+    updateProgress_serialize(value: double): void {
         ArkUIGeneratedNativeModule._ProgressMask_updateProgress(this.peer!.ptr, value)
     }
     updateColor_serialize(value: ResourceColor): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof Color) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as Color
             thisSerializer.writeInt32(valueForIdx0.getOrdinal())
         } else if (value instanceof number) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as number
             thisSerializer.writeNumber(valueForIdx1)
         } else if (value instanceof string) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const valueForIdx2  = value as string
             thisSerializer.writeString(valueForIdx2)
         } else if (value instanceof Resource) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const valueForIdx3  = value as Resource
             Resource_serializer.write(thisSerializer, valueForIdx3)
         }
@@ -1728,10 +1666,10 @@ export class ScrollResult implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get offsetRemain(): number {
+    get offsetRemain(): double {
         return this.getOffsetRemain()
     }
-    set offsetRemain(offsetRemain: number) {
+    set offsetRemain(offsetRemain: double) {
         this.setOffsetRemain(offsetRemain)
     }
     constructor(peerPtr: KPointer) {
@@ -1747,19 +1685,19 @@ export class ScrollResult implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ScrollResult_getFinalizer()
     }
-    private getOffsetRemain(): number {
+    private getOffsetRemain(): double {
         return this.getOffsetRemain_serialize()
     }
-    private setOffsetRemain(offsetRemain: number): void {
-        const offsetRemain_casted = offsetRemain as (number)
+    private setOffsetRemain(offsetRemain: double): void {
+        const offsetRemain_casted = offsetRemain as (double)
         this.setOffsetRemain_serialize(offsetRemain_casted)
         return
     }
-    private getOffsetRemain_serialize(): number {
+    private getOffsetRemain_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ScrollResult_getOffsetRemain(this.peer!.ptr)
         return retval
     }
-    private setOffsetRemain_serialize(offsetRemain: number): void {
+    private setOffsetRemain_serialize(offsetRemain: double): void {
         ArkUIGeneratedNativeModule._ScrollResult_setOffsetRemain(this.peer!.ptr, offsetRemain)
     }
 }
@@ -1920,7 +1858,7 @@ export class TransitionEffect implements MaterializedBase {
     constructor(type: string) {
         this(false, TransitionEffect.construct0(type))
     }
-    constructor(effect: number) {
+    constructor(effect: double) {
         this(false, TransitionEffect.construct1(effect))
     }
     constructor(effect: TransitionEdge) {
@@ -1942,7 +1880,7 @@ export class TransitionEffect implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TransitionEffect_construct0(type)
         return retval
     }
-    static construct1(effect: number): KPointer {
+    static construct1(effect: double): KPointer {
         const retval  = ArkUIGeneratedNativeModule._TransitionEffect_construct1(effect)
         return retval
     }
@@ -2005,7 +1943,7 @@ export class TransitionEffect implements MaterializedBase {
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
     }
-    static opacity_serialize(alpha: number): TransitionEffect {
+    static opacity_serialize(alpha: double): TransitionEffect {
         const retval  = ArkUIGeneratedNativeModule._TransitionEffect_opacity(alpha)
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
@@ -2064,8 +2002,8 @@ export class TransitionEffect implements MaterializedBase {
         const options_casted = options as (ScaleOptions)
         return TransitionEffect.scale_serialize(options_casted)
     }
-    public static opacity(alpha: number): TransitionEffect {
-        const alpha_casted = alpha as (number)
+    public static opacity(alpha: double): TransitionEffect {
+        const alpha_casted = alpha as (double)
         return TransitionEffect.opacity_serialize(alpha_casted)
     }
     public static move(edge: TransitionEdge): TransitionEffect {
@@ -2375,23 +2313,23 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Length
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof LayoutPolicy) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LayoutPolicy
                 LayoutPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -2407,23 +2345,23 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Length
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof LayoutPolicy) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LayoutPolicy
                 LayoutPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -2433,25 +2371,13 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDrawModifierAttribute(value: DrawModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            DrawModifier_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setDrawModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setResponseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (TypeChecker.isArray_Rectangle(valueTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Array<Rectangle>
                 thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
                 for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
@@ -2459,7 +2385,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                     Rectangle_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
                 }
             } else if (valueTmpValue instanceof Rectangle) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Rectangle
                 Rectangle_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -2475,7 +2401,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (TypeChecker.isArray_Rectangle(valueTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Array<Rectangle>
                 thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
                 for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
@@ -2483,7 +2409,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                     Rectangle_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
                 }
             } else if (valueTmpValue instanceof Rectangle) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Rectangle
                 Rectangle_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -2491,6 +2417,22 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setMouseResponseRegion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setResponseRegionListAttribute(value: Array<ResponseRegion> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : ResponseRegion = valueTmpValue[valueTmpValueCounterI]
+                ResponseRegion_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setResponseRegionList(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSizeAttribute(value: SizeOptions | undefined): void {
@@ -2547,11 +2489,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -2579,27 +2521,27 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Padding) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Padding
                 Padding_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Length
                 if (valueTmpValueForIdx1 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx1ForIdx0  = valueTmpValueForIdx1 as string
                     thisSerializer.writeString(valueTmpValueForIdx1ForIdx0)
                 } else if (valueTmpValueForIdx1 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx1ForIdx1  = valueTmpValueForIdx1 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx1ForIdx1)
                 } else if (valueTmpValueForIdx1 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx1ForIdx2  = valueTmpValueForIdx1 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx1ForIdx2)
                 }
             } else if (valueTmpValue instanceof LocalizedPadding) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedPadding
                 LocalizedPadding_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -2615,15 +2557,15 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Padding) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Padding
                 Padding_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof LengthMetrics) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LengthMetrics
                 LengthMetrics_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof LocalizedPadding) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedPadding
                 LocalizedPadding_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -2639,27 +2581,27 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Padding) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Padding
                 Padding_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Length
                 if (valueTmpValueForIdx1 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx1ForIdx0  = valueTmpValueForIdx1 as string
                     thisSerializer.writeString(valueTmpValueForIdx1ForIdx0)
                 } else if (valueTmpValueForIdx1 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx1ForIdx1  = valueTmpValueForIdx1 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx1ForIdx1)
                 } else if (valueTmpValueForIdx1 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx1ForIdx2  = valueTmpValueForIdx1 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx1ForIdx2)
                 }
             } else if (valueTmpValue instanceof LocalizedPadding) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedPadding
                 LocalizedPadding_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -2675,27 +2617,27 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof ColorMetrics) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as ColorMetrics
                 ColorMetrics_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -2723,11 +2665,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof SizeOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as SizeOptions
                 SizeOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof ImageSize) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as ImageSize
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             }
@@ -2743,11 +2685,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Position) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Position
                 Position_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Alignment) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Alignment
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             }
@@ -2841,17 +2783,17 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setCompositingFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOpacityAttribute(value: number | Resource | undefined): void {
+    setOpacityAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -2879,11 +2821,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof BorderStyle) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as BorderStyle
                 thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
             } else if (valueTmpValue instanceof EdgeStyles) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EdgeStyles
                 EdgeStyles_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -2899,27 +2841,27 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Length
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof EdgeWidths) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof LocalizedEdgeWidths) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -2935,31 +2877,31 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof EdgeColors) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EdgeColors
                 EdgeColors_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof LocalizedEdgeColors) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedEdgeColors
                 LocalizedEdgeColors_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -2975,27 +2917,27 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Length
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof BorderRadiuses) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof LocalizedBorderRadiuses) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -3035,11 +2977,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof OutlineStyle) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as OutlineStyle
                 thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
             } else if (valueTmpValue instanceof EdgeOutlineStyles) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EdgeOutlineStyles
                 EdgeOutlineStyles_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -3055,23 +2997,23 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Dimension) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Dimension
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof EdgeOutlineWidths) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EdgeOutlineWidths
                 EdgeOutlineWidths_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -3087,31 +3029,31 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof EdgeColors) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EdgeColors
                 EdgeColors_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof LocalizedEdgeColors) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedEdgeColors
                 LocalizedEdgeColors_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -3127,23 +3069,23 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Dimension) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Dimension
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof OutlineRadiuses) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as OutlineRadiuses
                 OutlineRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -3159,27 +3101,27 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof ColoringStrategy) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as ColoringStrategy
                 thisSerializer.writeInt32(valueTmpValueForIdx1.getOrdinal())
             }
@@ -3237,6 +3179,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnAccessibilityHoverTransparentAttribute(value: AccessibilityTransparentCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityHoverTransparent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setHoverEffectAttribute(value: HoverEffect | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3273,7 +3227,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnTouch(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnKeyEventAttribute(value: ((event: KeyEvent) => void) | undefined): void {
+    setOnKeyEventAttribute(value: ((event: KeyEvent) => boolean) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -3405,12 +3359,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTabIndexAttribute(value: number | undefined): void {
+    setTabIndexAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3501,36 +3455,36 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setMotionBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBrightnessAttribute(value: number | undefined): void {
+    setBrightnessAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setContrastAttribute(value: number | undefined): void {
+    setContrastAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setContrast(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setGrayscaleAttribute(value: number | undefined): void {
+    setGrayscaleAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3543,15 +3497,15 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -3561,41 +3515,41 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setColorBlend(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSaturateAttribute(value: number | undefined): void {
+    setSaturateAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSaturate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSepiaAttribute(value: number | undefined): void {
+    setSepiaAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSepia(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setInvertAttribute(value: number | InvertOptions | undefined): void {
+    setInvertAttribute(value: double | InvertOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof InvertOptions) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as InvertOptions
                 InvertOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -3605,17 +3559,17 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setInvert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setHueRotateAttribute(value: number | string | undefined): void {
+    setHueRotateAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -3703,11 +3657,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof RotateOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as RotateOptions
                 RotateOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof RotateAngleOptions) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as RotateAngleOptions
                 RotateAngleOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -3843,11 +3797,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -3881,12 +3835,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setDisplayPriority(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setZIndexAttribute(value: number | undefined): void {
+    setZIndexAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3923,15 +3877,15 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Position) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Position
                 Position_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Edges) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Edges
                 Edges_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof LocalizedEdges) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedEdges
                 LocalizedEdges_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -3947,11 +3901,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Position) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Position
                 Position_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof LocalizedPosition) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LocalizedPosition
                 LocalizedPosition_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -3967,15 +3921,15 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Position) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Position
                 Position_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Edges) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Edges
                 Edges_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof LocalizedEdges) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as LocalizedEdges
                 LocalizedEdges_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -3997,28 +3951,24 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setEnabled(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAlignRulesWithAlignRuleOptionTypedValueAttribute(value: AlignRuleOption | undefined): void {
+    setAlignRulesAttribute(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            AlignRuleOption_serializer.write(thisSerializer, valueTmpValue)
+            if (valueTmpValue instanceof AlignRuleOption) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as AlignRuleOption
+                AlignRuleOption_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof LocalizedAlignRuleOptions) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as LocalizedAlignRuleOptions
+                LocalizedAlignRuleOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithAlignRuleOptionTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value: LocalizedAlignRuleOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            LocalizedAlignRuleOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAlignRules(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAspectRatioAttribute(value: number | undefined): void {
@@ -4135,15 +4085,15 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx0))
             } else if (valueTmpValue instanceof DragItemInfo) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as DragItemInfo
                 DragItemInfo_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -4219,11 +4169,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ShadowOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof ShadowStyle) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as ShadowStyle
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             }
@@ -4251,19 +4201,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof CircleShape) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as CircleShape
                 CircleShape_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof EllipseShape) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EllipseShape
                 EllipseShape_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof PathShape) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as PathShape
                 PathShape_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof RectShape) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as RectShape
                 RectShape_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -4291,19 +4241,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof CircleShape) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as CircleShape
                 CircleShape_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof EllipseShape) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as EllipseShape
                 EllipseShape_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof PathShape) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as PathShape
                 PathShape_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof RectShape) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as RectShape
                 RectShape_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -4349,36 +4299,36 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setGeometryTransition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setRestoreIdAttribute(value: number | undefined): void {
+    setRestoreIdAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setRestoreId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSphericalEffectAttribute(value: number | undefined): void {
+    setSphericalEffectAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSphericalEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLightUpEffectAttribute(value: number | undefined): void {
+    setLightUpEffectAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4503,6 +4453,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnAccessibilityActionInterceptAttribute(value: AccessibilityActionInterceptCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityActionIntercept(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAccessibilityTextHintAttribute(value: string | undefined): void {
@@ -4789,19 +4751,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const srcTmpValue  = src!
             if (srcTmpValue instanceof ResourceStr) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const srcTmpValueForIdx0  = srcTmpValue as ResourceStr
                 if (srcTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const srcTmpValueForIdx0ForIdx0  = srcTmpValueForIdx0 as string
                     thisSerializer.writeString(srcTmpValueForIdx0ForIdx0)
                 } else if (srcTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const srcTmpValueForIdx0ForIdx1  = srcTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, srcTmpValueForIdx0ForIdx1)
                 }
             } else if (srcTmpValue instanceof image.PixelMap) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const srcTmpValueForIdx1  = srcTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx1)
             }
@@ -4817,19 +4779,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const srcTmpValue  = src!
             if (srcTmpValue instanceof ResourceStr) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const srcTmpValueForIdx0  = srcTmpValue as ResourceStr
                 if (srcTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const srcTmpValueForIdx0ForIdx0  = srcTmpValueForIdx0 as string
                     thisSerializer.writeString(srcTmpValueForIdx0ForIdx0)
                 } else if (srcTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const srcTmpValueForIdx0ForIdx1  = srcTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, srcTmpValueForIdx0ForIdx1)
                 }
             } else if (srcTmpValue instanceof image.PixelMap) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const srcTmpValueForIdx1  = srcTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx1)
             }
@@ -4852,19 +4814,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const srcTmpValue  = src!
             if (srcTmpValue instanceof ResourceStr) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const srcTmpValueForIdx0  = srcTmpValue as ResourceStr
                 if (srcTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const srcTmpValueForIdx0ForIdx0  = srcTmpValueForIdx0 as string
                     thisSerializer.writeString(srcTmpValueForIdx0ForIdx0)
                 } else if (srcTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const srcTmpValueForIdx0ForIdx1  = srcTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, srcTmpValueForIdx0ForIdx1)
                 }
             } else if (srcTmpValue instanceof image.PixelMap) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const srcTmpValueForIdx1  = srcTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx1)
             }
@@ -4952,7 +4914,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setForegroundBlurStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnClick1Attribute(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): void {
+    setOnClick1Attribute(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (event !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4964,7 +4926,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (distanceThreshold !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const distanceThresholdTmpValue  = distanceThreshold!
-            thisSerializer.writeNumber(distanceThresholdTmpValue)
+            thisSerializer.writeFloat64(distanceThresholdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5040,7 +5002,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (blurRadius !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const blurRadiusTmpValue  = blurRadius!
-            thisSerializer.writeNumber(blurRadiusTmpValue)
+            thisSerializer.writeFloat64(blurRadiusTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5061,12 +5023,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLinearGradientBlurAttribute(value: number | undefined, options: LinearGradientBlurOptions | undefined): void {
+    setLinearGradientBlurAttribute(value: double | undefined, options: LinearGradientBlurOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5102,12 +5064,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackdropBlurAttribute(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+    setBackdropBlurAttribute(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (radius !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const radiusTmpValue  = radius!
-            thisSerializer.writeNumber(radiusTmpValue)
+            thisSerializer.writeFloat64(radiusTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5191,15 +5153,15 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const previewTmpValue  = preview!
             if (previewTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const previewTmpValueForIdx0  = previewTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(previewTmpValueForIdx0))
             } else if (previewTmpValue instanceof DragItemInfo) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const previewTmpValueForIdx1  = previewTmpValue as DragItemInfo
                 DragItemInfo_serializer.write(thisSerializer, previewTmpValueForIdx1)
             } else if (previewTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const previewTmpValueForIdx2  = previewTmpValue as string
                 thisSerializer.writeString(previewTmpValueForIdx2)
             }
@@ -5222,15 +5184,15 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
             } else if (valueTmpValue instanceof ComponentContent) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as ComponentContent
                 thisSerializer.holdAndWriteObject(valueTmpValueForIdx2)
             }
@@ -5269,11 +5231,11 @@ export class ArkCommonMethodPeer extends PeerNode {
     setAdvancedBlendModeAttribute(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (effect instanceof BlendMode) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const effectForIdx0  = effect as BlendMode
             thisSerializer.writeInt32(effectForIdx0.valueOf())
         } else if (effect instanceof uiEffect.Blender) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const effectForIdx1  = effect as uiEffect.Blender
             uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectForIdx1)
         }
@@ -5312,19 +5274,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const messageTmpValue  = message!
             if (messageTmpValue instanceof ResourceStr) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const messageTmpValueForIdx0  = messageTmpValue as ResourceStr
                 if (messageTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const messageTmpValueForIdx0ForIdx0  = messageTmpValueForIdx0 as string
                     thisSerializer.writeString(messageTmpValueForIdx0ForIdx0)
                 } else if (messageTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const messageTmpValueForIdx0ForIdx1  = messageTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, messageTmpValueForIdx0ForIdx1)
                 }
             } else if (messageTmpValue instanceof StyledString) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const messageTmpValueForIdx1  = messageTmpValue as StyledString
                 StyledString_serializer.write(thisSerializer, messageTmpValueForIdx1)
             }
@@ -5354,11 +5316,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const popupTmpValue  = popup!
             if (popupTmpValue instanceof PopupOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const popupTmpValueForIdx0  = popupTmpValue as PopupOptions
                 PopupOptions_serializer.write(thisSerializer, popupTmpValueForIdx0)
             } else if (popupTmpValue instanceof CustomPopupOptions) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const popupTmpValueForIdx1  = popupTmpValue as CustomPopupOptions
                 CustomPopupOptions_serializer.write(thisSerializer, popupTmpValueForIdx1)
             }
@@ -5374,7 +5336,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue  = content!
             if (TypeChecker.isArray_MenuElement(contentTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0  = contentTmpValue as Array<MenuElement>
                 thisSerializer.writeInt32((contentTmpValueForIdx0.length).toInt())
                 for (let contentTmpValueForIdx0CounterI = 0; contentTmpValueForIdx0CounterI < contentTmpValueForIdx0.length; contentTmpValueForIdx0CounterI++) {
@@ -5382,7 +5344,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                     MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx0TmpElement)
                 }
             } else if (contentTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const contentTmpValueForIdx1  = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx1))
             }
@@ -5412,7 +5374,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue  = content!
             if (TypeChecker.isArray_MenuElement(contentTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0  = contentTmpValue as Array<MenuElement>
                 thisSerializer.writeInt32((contentTmpValueForIdx0.length).toInt())
                 for (let contentTmpValueForIdx0CounterI = 0; contentTmpValueForIdx0CounterI < contentTmpValueForIdx0.length; contentTmpValueForIdx0CounterI++) {
@@ -5420,7 +5382,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                     MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx0TmpElement)
                 }
             } else if (contentTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const contentTmpValueForIdx1  = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx1))
             }
@@ -5495,11 +5457,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShowTmpValue  = isShow!
             if (isShowTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
             } else if (isShowTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
             }
@@ -5529,11 +5491,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShowTmpValue  = isShow!
             if (isShowTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
             } else if (isShowTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
             }
@@ -5563,11 +5525,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShowTmpValue  = isShow!
             if (isShowTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
             } else if (isShowTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
             }
@@ -5591,15 +5553,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindSheet(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnVisibleAreaChangeAttribute(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): void {
+    setOnVisibleAreaChangeAttribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (ratios !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const ratiosTmpValue  = ratios!
             thisSerializer.writeInt32((ratiosTmpValue.length).toInt())
             for (let ratiosTmpValueCounterI = 0; ratiosTmpValueCounterI < ratiosTmpValue.length; ratiosTmpValueCounterI++) {
-                const ratiosTmpValueTmpElement : number = ratiosTmpValue[ratiosTmpValueCounterI]
-                thisSerializer.writeNumber(ratiosTmpValueTmpElement)
+                const ratiosTmpValueTmpElement : double = ratiosTmpValue[ratiosTmpValueCounterI]
+                thisSerializer.writeFloat64(ratiosTmpValueTmpElement)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -5639,11 +5601,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FunctionKey) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FunctionKey
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             }
@@ -5728,19 +5690,19 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -5756,19 +5718,19 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -5784,11 +5746,11 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -5828,11 +5790,11 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -5848,15 +5810,15 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -5872,15 +5834,15 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -5896,15 +5858,15 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -5935,15 +5897,15 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
                 const valueTmpValueTmpElement : Length = valueTmpValue[valueTmpValueCounterI]
                 if (valueTmpValueTmpElement instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as string
                     thisSerializer.writeString(valueTmpValueTmpElementForIdx0)
                 } else if (valueTmpValueTmpElement instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
                     thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx2)
                 }
@@ -5979,21 +5941,21 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | number | string | undefined): void {
+    setScrollBarColorAttribute(value: Color | int32 | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -6003,17 +5965,17 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarWidthAttribute(value: number | string | undefined): void {
+    setScrollBarWidthAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -6047,17 +6009,17 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setEnableScrollInteraction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFrictionAttribute(value: number | Resource | undefined): void {
+    setFrictionAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -6115,12 +6077,12 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnScrollStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFlingSpeedLimitAttribute(value: number | undefined): void {
+    setFlingSpeedLimitAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6133,11 +6095,11 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ContentClipMode) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ContentClipMode
                 thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
             } else if (valueTmpValue instanceof RectShape) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as RectShape
                 RectShape_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -6241,9 +6203,9 @@ export interface Rectangle {
     height?: Length;
 }
 export interface ExpectedFrameRateRange {
-    min: number;
-    max: number;
-    expected: number;
+    min: int32;
+    max: int32;
+    expected: int32;
 }
 export enum AccessibilitySamePageMode {
     SEMI_SILENT = 0,
@@ -6377,6 +6339,16 @@ export enum AccessibilityRoleType {
     ROLE_NONE = 124
 }
 export type AccessibilityFocusCallback = (isFocus: boolean) => void;
+export enum AccessibilityAction {
+    UNDEFINED_ACTION = 0,
+    ACCESSIBILITY_CLICK = 1
+}
+export enum AccessibilityActionInterceptResult {
+    ACTION_INTERCEPT = 0,
+    ACTION_CONTINUE = 1,
+    ACTION_RISE = 2
+}
+export type AccessibilityActionInterceptCallback = (action: AccessibilityAction) => AccessibilityActionInterceptResult;
 export enum FinishCallbackType {
     REMOVED = 0,
     LOGICALLY = 1
@@ -6387,11 +6359,11 @@ export enum TouchTestStrategy {
     FORWARD = 2
 }
 export interface AnimateParam {
-    duration?: number;
-    tempo?: number;
+    duration?: int32;
+    tempo?: double;
     curve?: curves.Curve | string | curves.ICurve;
-    delay?: number;
-    iterations?: number;
+    delay?: int32;
+    iterations?: int32;
     playMode?: PlayMode;
     onFinish?: (() => void);
     finishCallbackType?: FinishCallbackType;
@@ -6401,16 +6373,16 @@ export type ICurve = curves.ICurve;
 export type Matrix4Transit = matrix4.Matrix4Transit;
 export interface MotionPathOptions {
     path: string;
-    from?: number;
-    to?: number;
+    from?: double;
+    to?: double;
     rotatable?: boolean;
 }
 export interface sharedTransitionOptions {
-    duration?: number;
+    duration?: int32;
     curve?: curves.Curve | string | curves.ICurve;
-    delay?: number;
+    delay?: int32;
     motionPath?: MotionPathOptions;
-    zIndex?: number;
+    zIndex?: int32;
     type?: SharedTransitionEffectType;
 }
 export interface GeometryTransitionOptions {
@@ -6429,29 +6401,29 @@ export enum TransitionHierarchyStrategy {
 }
 export interface SweepGradientOptions {
     center: [ Length, Length ];
-    start?: number | string;
-    end?: number | string;
-    rotation?: number | string;
-    colors: Array<[ ResourceColor, number ]>;
+    start?: double | string;
+    end?: double | string;
+    rotation?: double | string;
+    colors: Array<[ ResourceColor, double ]>;
     repeating?: boolean;
 }
 export interface RadialGradientOptions {
     center: [ Length, Length ];
     radius: Length;
-    colors: Array<[ ResourceColor, number ]>;
+    colors: Array<[ ResourceColor, double ]>;
     repeating?: boolean;
 }
 export interface TranslateOptions {
-    x?: number | string;
-    y?: number | string;
-    z?: number | string;
+    x?: double | string;
+    y?: double | string;
+    z?: double | string;
 }
 export interface ScaleOptions {
-    x?: number;
-    y?: number;
-    z?: number;
-    centerX?: number | string;
-    centerY?: number | string;
+    x?: double;
+    y?: double;
+    z?: double;
+    centerX?: double | string;
+    centerY?: double | string;
 }
 export interface VerticalAlignParam {
     anchor: string;
@@ -6493,14 +6465,14 @@ export enum ChainStyle {
     PACKED = 2
 }
 export interface RotateOptions {
-    x?: number;
-    y?: number;
-    z?: number;
-    centerX?: number | string;
-    centerY?: number | string;
-    centerZ?: number;
-    perspective?: number;
-    angle: number | string;
+    x?: double;
+    y?: double;
+    z?: double;
+    centerX?: double | string;
+    centerY?: double | string;
+    centerZ?: double;
+    perspective?: double;
+    angle: double | string;
 }
 export interface RotateAngleOptions {
     angleX?: number | string;
@@ -6522,8 +6494,8 @@ export interface AsymmetricTransitionOption {
     disappear: TransitionEffect;
 }
 export interface ItemDragInfo {
-    x: number;
-    y: number;
+    x: double;
+    y: double;
 }
 export enum EffectType {
     DEFAULT = 0,
@@ -6555,7 +6527,9 @@ export enum SourceType {
     MOUSE = 1,
     Mouse = 1,
     TOUCH_SCREEN = 2,
-    TouchScreen = 2
+    TouchScreen = 2,
+    KEY = 4,
+    JOYSTICK = 5
 }
 export enum SourceTool {
     UNKNOWN = 0,
@@ -6622,7 +6596,7 @@ export interface BackgroundBlurStyleOptions extends BlurStyleOptions {
 export interface ForegroundBlurStyleOptions extends BlurStyleOptions {
 }
 export interface BlurOptions {
-    grayscale: [ number, number ];
+    grayscale: [ double, double ];
 }
 export interface SystemAdaptiveOptions {
     disableSystemAdaptation?: boolean;
@@ -6630,13 +6604,13 @@ export interface SystemAdaptiveOptions {
 export interface BlurStyleOptions {
     colorMode?: ThemeColorMode;
     adaptiveColor?: AdaptiveColor;
-    scale?: number;
+    scale?: double;
     blurOptions?: BlurOptions;
 }
 export interface BackgroundEffectOptions {
-    radius: number;
-    saturation?: number;
-    brightness?: number;
+    radius: double;
+    saturation?: double;
+    brightness?: double;
     color?: ResourceColor;
     adaptiveColor?: AdaptiveColor;
     blurOptions?: BlurOptions;
@@ -6644,7 +6618,7 @@ export interface BackgroundEffectOptions {
     inactiveColor?: ResourceColor;
 }
 export interface ForegroundEffectOptions {
-    radius: number;
+    radius: double;
 }
 export interface PickerTextStyle {
     color?: ResourceColor;
@@ -6668,11 +6642,11 @@ export enum ShadowType {
     BLUR = 1
 }
 export interface ShadowOptions {
-    radius: number | Resource;
+    radius: double | Resource;
     type?: ShadowType;
     color?: Color | string | Resource | ColoringStrategy;
-    offsetX?: number | Resource;
-    offsetY?: number | Resource;
+    offsetX?: double | Resource;
+    offsetY?: double | Resource;
     fill?: boolean;
 }
 export enum ShadowStyle {
@@ -6685,8 +6659,8 @@ export enum ShadowStyle {
 }
 export interface MultiShadowOptions {
     radius?: number | Resource;
-    offsetX?: number | Resource;
-    offsetY?: number | Resource;
+    offsetX?: double | Resource;
+    offsetY?: double | Resource;
 }
 export enum SafeAreaType {
     SYSTEM = 0,
@@ -6722,24 +6696,24 @@ export interface BorderImageOption {
 }
 export interface TouchObject {
     type: TouchType;
-    id: number;
-    displayX: number;
-    displayY: number;
-    windowX: number;
-    windowY: number;
-    x: number;
-    y: number;
+    id: int32;
+    displayX: double;
+    displayY: double;
+    windowX: double;
+    windowY: double;
+    x: double;
+    y: double;
     hand?: InteractionHand;
-    pressedTime?: number;
-    pressure?: number;
-    width?: number;
-    height?: number;
+    pressedTime?: int64;
+    pressure?: double;
+    width?: double;
+    height?: double;
 }
 export interface HistoricalPoint {
     touchObject: TouchObject;
-    size: number;
-    force: number;
-    timestamp: number;
+    size: int32;
+    force: double;
+    timestamp: int64;
 }
 export type SizeChangeCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
@@ -6803,9 +6777,9 @@ export interface DropOptions {
     disableDataPrefetch?: boolean;
 }
 export interface CrownEvent {
-    timestamp: number;
-    angularVelocity: number;
-    degree: number;
+    timestamp: int64;
+    angularVelocity: double;
+    degree: double;
     action: CrownAction;
     stopPropagation: (() => void);
 }
@@ -6860,17 +6834,46 @@ export interface DismissSheetAction {
     reason: DismissReason;
 }
 export interface SpringBackAction {
-    springBack: VoidCallback;
+    springBack(): void
+}
+export class SpringBackActionInternal implements MaterializedBase,SpringBackAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, SpringBackActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(SpringBackActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._SpringBackAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._SpringBackAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): SpringBackActionInternal {
+        return new SpringBackActionInternal(ptr)
+    }
+    public springBack(): void {
+        this.springBack_serialize()
+        return
+    }
+    springBack_serialize(): void {
+        ArkUIGeneratedNativeModule._SpringBackAction_springBack(this.peer!.ptr)
+    }
 }
 export type SingleLengthDetent = [
     SheetSize | Length
 ]
 export type DoubleLengthDetents = [
-    SheetSize | Length,
+    (SheetSize | Length),
     SheetSize | Length | undefined
 ]
 export type TripleLengthDetents = [
-    SheetSize | Length,
+    (SheetSize | Length),
     SheetSize | Length | undefined,
     SheetSize | Length | undefined
 ]
@@ -6880,7 +6883,7 @@ export interface SheetOptions extends BindOptions {
     enableFloatingDragBar?: boolean;
     modalTransition?: ModalTransition;
     maskColor?: ResourceColor;
-    detents?: TripleLengthDetents;
+    detents?: SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents;
     blurStyle?: BlurStyle;
     showClose?: boolean | Resource;
     preferType?: SheetType;
@@ -6894,18 +6897,18 @@ export interface SheetOptions extends BindOptions {
     borderColor?: ResourceColor | EdgeColors | LocalizedEdgeColors;
     borderStyle?: BorderStyle | EdgeStyles;
     shadow?: ShadowOptions | ShadowStyle;
-    onHeightDidChange?: ((value0: number) => void);
+    onHeightDidChange?: ((value0: int32) => void);
     mode?: SheetMode;
     scrollSizeMode?: ScrollSizeMode;
-    onDetentsDidChange?: ((value0: number) => void);
-    onWidthDidChange?: ((value0: number) => void);
+    onDetentsDidChange?: ((value0: int32) => void);
+    onWidthDidChange?: ((value0: int32) => void);
     onTypeDidChange?: ((value0: SheetType) => void);
     uiContext?: UIContext;
     keyboardAvoidMode?: SheetKeyboardAvoidMode;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     offset?: Position;
-    effectEdge?: number;
+    effectEdge?: int32;
     radius?: LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses;
     detentSelection?: SheetSize | Length;
     showInSubWindow?: boolean;
@@ -6938,6 +6941,10 @@ export type PopupStateChangeCallback = (event: PopupStateChangeParam) => void;
 export interface PopupMaskType {
     color: ResourceColor;
 }
+export interface PopupBorderLinearGradient {
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, double ]>;
+}
 export interface PopupCommonOptions {
     placement?: Placement;
     popupColor?: ResourceColor;
@@ -6963,10 +6970,10 @@ export interface PopupCommonOptions {
     followTransformOfTarget?: boolean;
 }
 export interface TipsOptions {
-    appearingTime?: number;
-    disappearingTime?: number;
-    appearingTimeWithContinuousOperation?: number;
-    disappearingTimeWithContinuousOperation?: number;
+    appearingTime?: int32;
+    disappearingTime?: int32;
+    appearingTimeWithContinuousOperation?: int32;
+    disappearingTimeWithContinuousOperation?: int32;
     enableArrow?: boolean;
     arrowPointPosition?: ArrowPointPosition;
     arrowWidth?: Dimension;
@@ -6989,7 +6996,7 @@ export interface PopupOptions {
     targetSpace?: Length;
     enableArrow?: boolean;
     offset?: Position;
-    popupColor?: Color | string | Resource | number;
+    popupColor?: Color | string | Resource | int64;
     autoCancel?: boolean;
     width?: Dimension;
     arrowPointPosition?: ArrowPointPosition;
@@ -7007,7 +7014,7 @@ export interface PopupOptions {
 export interface CustomPopupOptions {
     builder: CustomBuilder;
     placement?: Placement;
-    popupColor?: Color | string | Resource | number;
+    popupColor?: Color | string | Resource | int64;
     enableArrow?: boolean;
     autoCancel?: boolean;
     onStateChange?: PopupStateChangeCallback;
@@ -7035,8 +7042,8 @@ export enum MenuPreviewMode {
     IMAGE = 1
 }
 export type AnimationNumberRange = [
-    number,
-    number
+    double,
+    double
 ]
 export interface ContextMenuAnimationOptions {
     scale?: AnimationNumberRange;
@@ -7085,7 +7092,7 @@ export interface PixelStretchEffectOptions {
 }
 export interface ClickEffect {
     level: ClickEffectLevel;
-    scale?: number;
+    scale?: double;
 }
 export interface FadingEdgeOptions {
     fadingEdgeLength?: LengthMetrics;
@@ -7131,7 +7138,8 @@ export enum MenuPolicy {
 }
 export interface DragPreviewOptions {
     mode?: DragPreviewMode | Array<DragPreviewMode>;
-    numberBadge?: boolean | number;
+    modifier?: ImageModifier;
+    numberBadge?: boolean | int64;
     sizeChangeEffect?: DraggingSizeChangeEffect;
 }
 export interface DragInteractionOptions {
@@ -7146,10 +7154,10 @@ export interface PreviewConfiguration {
     delayCreating?: boolean;
 }
 export interface InvertOptions {
-    low: number;
-    high: number;
-    threshold: number;
-    thresholdRange: number;
+    low: double;
+    high: double;
+    threshold: double;
+    thresholdRange: double;
 }
 export type TipsMessageType = ResourceStr | StyledString;
 export interface BackgroundImageOptions {
@@ -7158,6 +7166,13 @@ export interface BackgroundImageOptions {
 }
 export interface BackgroundOptions {
     align?: Alignment;
+}
+export interface ResponseRegion {
+    tool?: ResponseRegionSupportedTool;
+    x?: LengthMetrics;
+    y?: LengthMetrics;
+    width?: LengthMetrics | string;
+    height?: LengthMetrics | string;
 }
 // instructive change start
 export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
@@ -7177,6 +7192,9 @@ export interface CommonMethod {
     }
     mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         throw new Error("Unimplemented method mouseResponseRegion")
+    }
+    responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        throw new Error("Unimplemented method responseRegionList")
     }
     size(value: SizeOptions | undefined): this {
         throw new Error("Unimplemented method size")
@@ -7238,7 +7256,7 @@ export interface CommonMethod {
     compositingFilter(value: uiEffect.Filter | undefined): this {
         throw new Error("Unimplemented method compositingFilter")
     }
-    opacity(value: number | Resource | undefined): this {
+    opacity(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method opacity")
     }
     border(value: BorderOptions | undefined): this {
@@ -7289,6 +7307,9 @@ export interface CommonMethod {
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         throw new Error("Unimplemented method onAccessibilityHover")
     }
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        throw new Error("Unimplemented method onAccessibilityHoverTransparent")
+    }
     hoverEffect(value: HoverEffect | undefined): this {
         throw new Error("Unimplemented method hoverEffect")
     }
@@ -7298,7 +7319,7 @@ export interface CommonMethod {
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onTouch")
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         throw new Error("Unimplemented method onKeyEvent")
     }
     onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
@@ -7331,7 +7352,7 @@ export interface CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onBlur")
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         throw new Error("Unimplemented method tabIndex")
     }
     defaultFocus(value: boolean | undefined): this {
@@ -7354,6 +7375,10 @@ export interface CommonMethod {
     animationStop(value: AnimateParam | undefined): this {
         throw new Error("Unimplemented method animationStop")
     }
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        throw new Error("Unimplemented method __createOrSetAnimatableProperty")
+    }
     // instructive change end
 
     transition(value: TransitionEffect | undefined): this {
@@ -7362,28 +7387,28 @@ export interface CommonMethod {
     motionBlur(value: MotionBlurOptions | undefined): this {
         throw new Error("Unimplemented method motionBlur")
     }
-    brightness(value: number | undefined): this {
+    brightness(value: double | undefined): this {
         throw new Error("Unimplemented method brightness")
     }
-    contrast(value: number | undefined): this {
+    contrast(value: double | undefined): this {
         throw new Error("Unimplemented method contrast")
     }
-    grayscale(value: number | undefined): this {
+    grayscale(value: double | undefined): this {
         throw new Error("Unimplemented method grayscale")
     }
     colorBlend(value: Color | string | Resource | undefined): this {
         throw new Error("Unimplemented method colorBlend")
     }
-    saturate(value: number | undefined): this {
+    saturate(value: double | undefined): this {
         throw new Error("Unimplemented method saturate")
     }
-    sepia(value: number | undefined): this {
+    sepia(value: double | undefined): this {
         throw new Error("Unimplemented method sepia")
     }
-    invert(value: number | InvertOptions | undefined): this {
+    invert(value: double | InvertOptions | undefined): this {
         throw new Error("Unimplemented method invert")
     }
-    hueRotate(value: number | string | undefined): this {
+    hueRotate(value: double | string | undefined): this {
         throw new Error("Unimplemented method hueRotate")
     }
     useShadowBatching(value: boolean | undefined): this {
@@ -7446,7 +7471,7 @@ export interface CommonMethod {
     displayPriority(value: number | undefined): this {
         throw new Error("Unimplemented method displayPriority")
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         throw new Error("Unimplemented method zIndex")
     }
     direction(value: Direction | undefined): this {
@@ -7467,10 +7492,7 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this {
         throw new Error("Unimplemented method enabled")
     }
-    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
-        throw new Error("Unimplemented method alignRules")
-    }
-    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         throw new Error("Unimplemented method alignRules")
     }
     aspectRatio(value: number | undefined): this {
@@ -7548,13 +7570,13 @@ export interface CommonMethod {
     stateStyles(value: StateStyles | undefined): this {
         throw new Error("Unimplemented method stateStyles")
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         throw new Error("Unimplemented method restoreId")
     }
-    sphericalEffect(value: number | undefined): this {
+    sphericalEffect(value: double | undefined): this {
         throw new Error("Unimplemented method sphericalEffect")
     }
-    lightUpEffect(value: number | undefined): this {
+    lightUpEffect(value: double | undefined): this {
         throw new Error("Unimplemented method lightUpEffect")
     }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
@@ -7586,6 +7608,9 @@ export interface CommonMethod {
     }
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
         throw new Error("Unimplemented method onAccessibilityFocus")
+    }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        throw new Error("Unimplemented method onAccessibilityActionIntercept")
     }
     accessibilityTextHint(value: string | undefined): this {
         throw new Error("Unimplemented method accessibilityTextHint")
@@ -7674,7 +7699,7 @@ export interface CommonMethod {
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         throw new Error("Unimplemented method foregroundBlurStyle")
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         throw new Error("Unimplemented method onClick")
     }
     focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
@@ -7695,10 +7720,10 @@ export interface CommonMethod {
     parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         throw new Error("Unimplemented method parallelGesture")
     }
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         throw new Error("Unimplemented method blur")
     }
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         throw new Error("Unimplemented method linearGradientBlur")
     }
     systemBarEffect(): this {
@@ -7707,7 +7732,7 @@ export interface CommonMethod {
     useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
         throw new Error("Unimplemented method useEffect")
     }
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         throw new Error("Unimplemented method backdropBlur")
     }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
@@ -7764,7 +7789,7 @@ export interface CommonMethod {
     bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         throw new Error("Unimplemented method bindSheet")
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         throw new Error("Unimplemented method onVisibleAreaChange")
     }
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -7779,7 +7804,6 @@ export interface CommonMethod {
     onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
         throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
     }
-    overload alignRules { alignRulesWithAlignRuleOptionTypedValue, alignRulesWithLocalizedAlignRuleOptionsTypedValue }
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
         throw new Error("Unimplemented method accessibilityGroup")
     }
@@ -7820,7 +7844,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     backgroundFilter_value?: uiEffect.Filter | undefined
     foregroundFilter_value?: uiEffect.Filter | undefined
     compositingFilter_value?: uiEffect.Filter | undefined
-    opacity_value?: number | Resource | undefined
+    opacity_value?: double | Resource | undefined
     border_value?: BorderOptions | undefined
     borderStyle_value?: BorderStyle | EdgeStyles | undefined
     borderWidth_value?: Length | EdgeWidths | LocalizedEdgeWidths | undefined
@@ -7837,10 +7861,11 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onHover_value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
     onHoverMove_value?: ((value0: HoverEvent) => void) | undefined
     onAccessibilityHover_value?: AccessibilityCallback | undefined
+    onAccessibilityHoverTransparent_value?: AccessibilityTransparentCallback | undefined
     hoverEffect_value?: HoverEffect | undefined
     onMouse_value?: ((event: MouseEvent) => void) | undefined
     onTouch_value?: ((event: TouchEvent) => void) | undefined
-    onKeyEvent_value?: ((event: KeyEvent) => void) | undefined
+    onKeyEvent_value?: ((event: KeyEvent) => boolean) | undefined
     onDigitalCrown_value?: ((value0: CrownEvent) => void) | undefined
     onKeyPreIme_value?: ((value0: KeyEvent) => boolean) | undefined
     onKeyEventDispatch_value?: ((value0: KeyEvent) => boolean) | undefined
@@ -7851,7 +7876,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     tabStop_value?: boolean | undefined
     onFocus_value?: (() => void) | undefined
     onBlur_value?: (() => void) | undefined
-    tabIndex_value?: number | undefined
+    tabIndex_value?: int32 | undefined
     defaultFocus_value?: boolean | undefined
     groupDefaultFocus_value?: boolean | undefined
     focusOnTouch_value?: boolean | undefined
@@ -7859,14 +7884,14 @@ export class ArkCommonMethodStyle implements CommonMethod {
     animation_value?: AnimateParam | undefined
     transition_value?: TransitionEffect | undefined
     motionBlur_value?: MotionBlurOptions | undefined
-    brightness_value?: number | undefined
-    contrast_value?: number | undefined
-    grayscale_value?: number | undefined
+    brightness_value?: double | undefined
+    contrast_value?: double | undefined
+    grayscale_value?: double | undefined
     colorBlend_value?: Color | string | Resource | undefined
-    saturate_value?: number | undefined
-    sepia_value?: number | undefined
-    invert_value?: number | InvertOptions | undefined
-    hueRotate_value?: number | string | undefined
+    saturate_value?: double | undefined
+    sepia_value?: double | undefined
+    invert_value?: double | InvertOptions | undefined
+    hueRotate_value?: double | string | undefined
     useShadowBatching_value?: boolean | undefined
     useEffect_value?: boolean | undefined
     renderGroup_value?: boolean | undefined
@@ -7887,14 +7912,14 @@ export class ArkCommonMethodStyle implements CommonMethod {
     flexBasis_value?: number | string | undefined
     alignSelf_value?: ItemAlign | undefined
     displayPriority_value?: number | undefined
-    zIndex_value?: number | undefined
+    zIndex_value?: int32 | undefined
     direction_value?: Direction | undefined
     align_value?: Alignment | undefined
     position_value?: Position | Edges | LocalizedEdges | undefined
     markAnchor_value?: Position | LocalizedPosition | undefined
     offset_value?: Position | Edges | LocalizedEdges | undefined
     enabled_value?: boolean | undefined
-    alignRules_value?: AlignRuleOption | undefined
+    alignRules_value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     aspectRatio_value?: number | undefined
     clickEffect_value?: ClickEffect | null | undefined
     onDragStart_value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
@@ -7920,9 +7945,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     id_value?: string | undefined
     geometryTransition_value?: string | undefined
     stateStyles_value?: StateStyles | undefined
-    restoreId_value?: number | undefined
-    sphericalEffect_value?: number | undefined
-    lightUpEffect_value?: number | undefined
+    restoreId_value?: int32 | undefined
+    sphericalEffect_value?: double | undefined
+    lightUpEffect_value?: double | undefined
     pixelStretchEffect_value?: PixelStretchEffectOptions | undefined
     accessibilityGroup_value?: boolean | undefined
     accessibilityText_value?: string | undefined
@@ -7932,6 +7957,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     accessibilityScrollTriggerable_value?: boolean | undefined
     accessibilityRole_value?: AccessibilityRoleType | undefined
     onAccessibilityFocus_value?: AccessibilityFocusCallback | undefined
+    onAccessibilityActionIntercept_value?: AccessibilityActionInterceptCallback | undefined
     accessibilityTextHint_value?: string | undefined
     accessibilityDescription_value?: string | undefined
     accessibilityLevel_value?: string | undefined
@@ -8026,7 +8052,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     compositingFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
-    opacity(value: number | Resource | undefined): this {
+    opacity(value: double | Resource | undefined): this {
         return this
     }
     border(value: BorderOptions | undefined): this {
@@ -8077,6 +8103,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         return this
     }
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        return this
+    }
     hoverEffect(value: HoverEffect | undefined): this {
         return this
     }
@@ -8086,7 +8115,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         return this
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         return this
     }
     onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
@@ -8119,7 +8148,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         return this
     }
     defaultFocus(value: boolean | undefined): this {
@@ -8142,6 +8171,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animationStop(value: AnimateParam | undefined): this {
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
     // instructive change end
 
     transition(value: TransitionEffect | undefined): this {
@@ -8150,28 +8181,28 @@ export class ArkCommonMethodStyle implements CommonMethod {
     motionBlur(value: MotionBlurOptions | undefined): this {
         return this
     }
-    brightness(value: number | undefined): this {
+    brightness(value: double | undefined): this {
         return this
     }
-    contrast(value: number | undefined): this {
+    contrast(value: double | undefined): this {
         return this
     }
-    grayscale(value: number | undefined): this {
+    grayscale(value: double | undefined): this {
         return this
     }
     colorBlend(value: Color | string | Resource | undefined): this {
         return this
     }
-    saturate(value: number | undefined): this {
+    saturate(value: double | undefined): this {
         return this
     }
-    sepia(value: number | undefined): this {
+    sepia(value: double | undefined): this {
         return this
     }
-    invert(value: number | InvertOptions | undefined): this {
+    invert(value: double | InvertOptions | undefined): this {
         return this
     }
-    hueRotate(value: number | string | undefined): this {
+    hueRotate(value: double | string | undefined): this {
         return this
     }
     useShadowBatching(value: boolean | undefined): this {
@@ -8234,7 +8265,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     displayPriority(value: number | undefined): this {
         return this
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         return this
     }
     direction(value: Direction | undefined): this {
@@ -8255,10 +8286,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     enabled(value: boolean | undefined): this {
         return this
     }
-    alignRules(value: AlignRuleOption | undefined): this {
-        return this
-    }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         return this
     }
     aspectRatio(value: number | undefined): this {
@@ -8336,13 +8364,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     stateStyles(value: StateStyles | undefined): this {
         return this
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         return this
     }
-    sphericalEffect(value: number | undefined): this {
+    sphericalEffect(value: double | undefined): this {
         return this
     }
-    lightUpEffect(value: number | undefined): this {
+    lightUpEffect(value: double | undefined): this {
         return this
     }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
@@ -8373,6 +8401,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+        return this
+    }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
         return this
     }
     accessibilityTextHint(value: string | undefined): this {
@@ -8462,7 +8493,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         return this
     }
     focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
@@ -8483,10 +8514,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         return this
     }
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         return this
     }
     systemBarEffect(): this {
@@ -8495,7 +8526,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
         return this
     }
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
@@ -8552,7 +8583,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         return this
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         return this
     }
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -8577,12 +8608,12 @@ export interface OverlayOptions {
     offset?: OverlayOffset;
 }
 export interface OverlayOffset {
-    x?: number;
-    y?: number;
+    x?: double;
+    y?: double;
 }
 export type FractionStop = [
-    number,
-    number
+    double,
+    double
 ]
 export interface CommonShapeMethod extends CommonMethod {
     stroke(value: ResourceColor | undefined): this {
@@ -8682,11 +8713,11 @@ export interface LinearGradientBlurOptions {
     direction: GradientDirection;
 }
 export interface MotionBlurAnchor {
-    x: number;
-    y: number;
+    x: double;
+    y: double;
 }
 export interface MotionBlurOptions {
-    radius: number;
+    radius: double;
     anchor: MotionBlurAnchor;
 }
 export interface GeometryInfo extends SizeResult {
@@ -8732,10 +8763,10 @@ export interface ScrollableCommonMethod extends CommonMethod {
     scrollBar(value: BarState | undefined): this {
         throw new Error("Unimplemented method scrollBar")
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         throw new Error("Unimplemented method scrollBarColor")
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         throw new Error("Unimplemented method scrollBarWidth")
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
@@ -8744,7 +8775,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     enableScrollInteraction(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableScrollInteraction")
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method friction")
     }
     onReachStart(value: (() => void) | undefined): this {
@@ -8759,7 +8790,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     onScrollStop(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onScrollStop")
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         throw new Error("Unimplemented method flingSpeedLimit")
     }
     clipContent(value: ContentClipMode | RectShape | undefined): this {
@@ -8785,10 +8816,10 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     scrollBar(value: BarState | undefined): this {
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | undefined): this {
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: double | string | undefined): this {
         return this
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
@@ -8797,7 +8828,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     enableScrollInteraction(value: boolean | undefined): this {
         return this
     }
-    friction(value: number | Resource | undefined): this {
+    friction(value: double | Resource | undefined): this {
         return this
     }
     onReachStart(value: (() => void) | undefined): this {
@@ -8812,7 +8843,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     onScrollStop(value: (() => void) | undefined): this {
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         return this
     }
     clipContent(value: ContentClipMode | RectShape | undefined): this {
@@ -8834,29 +8865,27 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
         throw new Error("Not implemented")
     }
 }
-export type OnWillScrollCallback = (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;
-export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
-export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: number) => CustomBuilder | undefined;
-export type OnMoveHandler = (from: number, to: number) => void;
+export type OnWillScrollCallback = (scrollOffset: double, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;
+export type OnScrollCallback = (scrollOffset: double, scrollState: ScrollState) => void;
+export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: int32) => CustomBuilder | undefined;
+export type OnMoveHandler = (from: int32, to: int32) => void;
 export interface ItemDragEventHandler {
-    onLongPress?: ((value0: number) => void);
-    onDragStart?: ((value0: number) => void);
+    onLongPress?: ((value0: int32) => void);
+    onDragStart?: ((value0: int32) => void);
     onMoveThrough?: OnMoveHandler;
-    onDrop?: ((value0: number) => void);
-}
-export interface DynamicNode {
+    onDrop?: ((value0: int32) => void);
 }
 export interface EdgeEffectOptions {
     alwaysEnabled: boolean;
-    effectEdge?: number;
+    effectEdge?: int32;
 }
 export enum EffectEdge {
     START = 1,
     END = 2
 }
 export interface BackgroundBrightnessOptions {
-    rate: number;
-    lightUpDegree: number;
+    rate: double;
+    lightUpDegree: double;
 }
 export interface PointLightStyle {
     lightSource?: LightSource;
@@ -8870,24 +8899,25 @@ export interface LightSource {
     color?: ResourceColor;
 }
 export interface KeyframeAnimateParam {
-    delay?: number;
-    iterations?: number;
+    delay?: int32;
+    iterations?: int32;
     onFinish?: (() => void);
     expectedFrameRateRange?: ExpectedFrameRateRange;
 }
 export interface KeyframeState {
-    duration: number;
+    duration: int32;
     curve?: curves.Curve | string | curves.ICurve;
     event: (() => void);
 }
 export type Callback<T = void,V = void> = (data: T) => V;
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
 export type AccessibilityCallback = (isHover: boolean, event: AccessibilityHoverEvent) => void;
+export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
-    ratios: Array<number>;
-    expectedUpdateInterval?: number;
+    ratios: Array<double>;
+    expectedUpdateInterval?: int32;
 }
-export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: number) => void;
+export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: double) => void;
 export interface SelectionOptions {
     menuPolicy?: MenuPolicy;
 }
@@ -8947,9 +8977,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public drawModifier(value: DrawModifier | undefined): this {
         if (this.checkPriority("drawModifier")) {
-            const value_casted = value as (DrawModifier | undefined)
-            this.getPeer()?.setDrawModifierAttribute(value_casted)
-            return this
+            hookDrawModifier(this, value)
         }
         return this
     }
@@ -8965,6 +8993,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("mouseResponseRegion")) {
             const value_casted = value as (Array<Rectangle> | Rectangle | undefined)
             this.getPeer()?.setMouseResponseRegionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        if (this.checkPriority("responseRegionList")) {
+            const value_casted = value as (Array<ResponseRegion> | undefined)
+            this.getPeer()?.setResponseRegionListAttribute(value_casted)
             return this
         }
         return this
@@ -9129,9 +9165,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public opacity(value: number | Resource | undefined): this {
+    public opacity(value: double | Resource | undefined): this {
         if (this.checkPriority("opacity")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setOpacityAttribute(value_casted)
             return this
         }
@@ -9265,6 +9301,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        if (this.checkPriority("onAccessibilityHoverTransparent")) {
+            const value_casted = value as (AccessibilityTransparentCallback | undefined)
+            this.getPeer()?.setOnAccessibilityHoverTransparentAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public hoverEffect(value: HoverEffect | undefined): this {
         if (this.checkPriority("hoverEffect")) {
             const value_casted = value as (HoverEffect | undefined)
@@ -9289,9 +9333,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEvent")) {
-            const value_casted = value as (((event: KeyEvent) => void) | undefined)
+            const value_casted = value as (((event: KeyEvent) => boolean) | undefined)
             this.getPeer()?.setOnKeyEventAttribute(value_casted)
             return this
         }
@@ -9377,9 +9421,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public tabIndex(value: number | undefined): this {
+    public tabIndex(value: int32 | undefined): this {
         if (this.checkPriority("tabIndex")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setTabIndexAttribute(value_casted)
             return this
         }
@@ -9433,6 +9477,24 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        if (this.getPeer()) {
+            const peer = this.getPeer();
+            let isFirst = true;
+            const newCallback = (value: number | AnimatableArithmetic<T>): void => {
+                if (isFirst) {
+                    isFirst = false;
+                    callback(value);
+                    return;
+                }
+                this.setPeer(peer);
+                callback(value);
+                this.setPeer(undefined);
+            }
+            ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.getPeer().getPeerPtr(), functionName, value, newCallback);
+        }
+    }
     // instructive change end
 
     public transition(value: TransitionEffect | undefined): this {
@@ -9451,25 +9513,25 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public brightness(value: number | undefined): this {
+    public brightness(value: double | undefined): this {
         if (this.checkPriority("brightness")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setBrightnessAttribute(value_casted)
             return this
         }
         return this
     }
-    public contrast(value: number | undefined): this {
+    public contrast(value: double | undefined): this {
         if (this.checkPriority("contrast")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setContrastAttribute(value_casted)
             return this
         }
         return this
     }
-    public grayscale(value: number | undefined): this {
+    public grayscale(value: double | undefined): this {
         if (this.checkPriority("grayscale")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setGrayscaleAttribute(value_casted)
             return this
         }
@@ -9483,33 +9545,33 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public saturate(value: number | undefined): this {
+    public saturate(value: double | undefined): this {
         if (this.checkPriority("saturate")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setSaturateAttribute(value_casted)
             return this
         }
         return this
     }
-    public sepia(value: number | undefined): this {
+    public sepia(value: double | undefined): this {
         if (this.checkPriority("sepia")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setSepiaAttribute(value_casted)
             return this
         }
         return this
     }
-    public invert(value: number | InvertOptions | undefined): this {
+    public invert(value: double | InvertOptions | undefined): this {
         if (this.checkPriority("invert")) {
-            const value_casted = value as (number | InvertOptions | undefined)
+            const value_casted = value as (double | InvertOptions | undefined)
             this.getPeer()?.setInvertAttribute(value_casted)
             return this
         }
         return this
     }
-    public hueRotate(value: number | string | undefined): this {
+    public hueRotate(value: double | string | undefined): this {
         if (this.checkPriority("hueRotate")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setHueRotateAttribute(value_casted)
             return this
         }
@@ -9676,9 +9738,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public zIndex(value: number | undefined): this {
+    public zIndex(value: int32 | undefined): this {
         if (this.checkPriority("zIndex")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setZIndexAttribute(value_casted)
             return this
         }
@@ -9732,18 +9794,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
-        if (this.checkPriority("alignRulesWithAlignRuleOptionTypedValue")) {
-            const value_casted = value as (AlignRuleOption | undefined)
-            this.getPeer()?.setAlignRulesWithAlignRuleOptionTypedValueAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
-        if (this.checkPriority("alignRulesWithLocalizedAlignRuleOptionsTypedValue")) {
-            const value_casted = value as (LocalizedAlignRuleOptions | undefined)
-            this.getPeer()?.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value_casted)
+    public alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
+        if (this.checkPriority("alignRules")) {
+            const value_casted = value as (AlignRuleOption | LocalizedAlignRuleOptions | undefined)
+            this.getPeer()?.setAlignRulesAttribute(value_casted)
             return this
         }
         return this
@@ -9814,7 +9868,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
         if (this.checkPriority("allowDrop")) {
-            hookAllowDropAttribute(this, value)
+            hookAllowDrop(this, value)
             return this
         }
         return this
@@ -9946,25 +10000,25 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public restoreId(value: number | undefined): this {
+    public restoreId(value: int32 | undefined): this {
         if (this.checkPriority("restoreId")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setRestoreIdAttribute(value_casted)
             return this
         }
         return this
     }
-    public sphericalEffect(value: number | undefined): this {
+    public sphericalEffect(value: double | undefined): this {
         if (this.checkPriority("sphericalEffect")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setSphericalEffectAttribute(value_casted)
             return this
         }
         return this
     }
-    public lightUpEffect(value: number | undefined): this {
+    public lightUpEffect(value: double | undefined): this {
         if (this.checkPriority("lightUpEffect")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setLightUpEffectAttribute(value_casted)
             return this
         }
@@ -10060,6 +10114,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("onAccessibilityFocus")) {
             const value_casted = value as (AccessibilityFocusCallback | undefined)
             this.getPeer()?.setOnAccessibilityFocusAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        if (this.checkPriority("onAccessibilityActionIntercept")) {
+            const value_casted = value as (AccessibilityActionInterceptCallback | undefined)
+            this.getPeer()?.setOnAccessibilityActionInterceptAttribute(value_casted)
             return this
         }
         return this
@@ -10315,10 +10377,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    public onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         if (this.checkPriority("onClick")) {
             const event_casted = event as (((event: ClickEvent) => void) | undefined)
-            const distanceThreshold_casted = distanceThreshold as (number | undefined)
+            const distanceThreshold_casted = distanceThreshold as (double | undefined)
             this.getPeer()?.setOnClick1Attribute(event_casted, distanceThreshold_casted)
             return this
         }
@@ -10370,9 +10432,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("blur")) {
-            const blurRadius_casted = blurRadius as (number | undefined)
+            const blurRadius_casted = blurRadius as (double | undefined)
             const options_casted = options as (BlurOptions | undefined)
             const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
             this.getPeer()?.setBlurAttribute(blurRadius_casted, options_casted, sysOptions_casted)
@@ -10380,9 +10442,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    public linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         if (this.checkPriority("linearGradientBlur")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             const options_casted = options as (LinearGradientBlurOptions | undefined)
             this.getPeer()?.setLinearGradientBlurAttribute(value_casted, options_casted)
             return this
@@ -10405,9 +10467,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("backdropBlur")) {
-            const radius_casted = radius as (number | undefined)
+            const radius_casted = radius as (double | undefined)
             const options_casted = options as (BlurOptions | undefined)
             const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
             this.getPeer()?.setBackdropBlurAttribute(radius_casted, options_casted, sysOptions_casted)
@@ -10581,9 +10643,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    public onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         if (this.checkPriority("onVisibleAreaChange")) {
-            const ratios_casted = ratios as (Array<number> | undefined)
+            const ratios_casted = ratios as (Array<double> | undefined)
             const event_casted = event as (VisibleAreaChangeCallback | undefined)
             this.getPeer()?.setOnVisibleAreaChangeAttribute(ratios_casted, event_casted)
             return this
@@ -10643,6 +10705,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent implements CommonShapeMethod {
@@ -10748,6 +10813,9 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent implements ScrollableCommonMethod {
     getPeer(): ArkScrollableCommonMethodPeer {
@@ -10764,17 +10832,17 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public scrollBarColor(value: Color | number | string | undefined): this {
+    public scrollBarColor(value: Color | int32 | string | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | number | string | undefined)
+            const value_casted = value as (Color | int32 | string | undefined)
             this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
         return this
     }
-    public scrollBarWidth(value: number | string | undefined): this {
+    public scrollBarWidth(value: double | string | undefined): this {
         if (this.checkPriority("scrollBarWidth")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setScrollBarWidthAttribute(value_casted)
             return this
         }
@@ -10796,9 +10864,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public friction(value: number | Resource | undefined): this {
+    public friction(value: double | Resource | undefined): this {
         if (this.checkPriority("friction")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setFrictionAttribute(value_casted)
             return this
         }
@@ -10836,9 +10904,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public flingSpeedLimit(value: number | undefined): this {
+    public flingSpeedLimit(value: double | undefined): this {
         if (this.checkPriority("flingSpeedLimit")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setFlingSpeedLimitAttribute(value_casted)
             return this
         }
@@ -10894,6 +10962,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export function postCardAction(component: Object, action: Object): void {
     GlobalScope.postCardAction(component, action)
@@ -10906,12 +10977,12 @@ export function $rawfile(value: string): Resource {
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
     // instructive change start
-    _animateTo(value, event)
+    AnimationExtender.AnimateToImmediatelyImpl(value, event, false)
     // instructive change end
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
     // instructive change start
-    AnimationExtender.AnimateToImmediatelyImpl(value, event)
+    AnimationExtender.AnimateToImmediatelyImpl(value, event, true)
     // instructive change end
 }
 export function vp2px(value: number): number {
@@ -10919,6 +10990,41 @@ export function vp2px(value: number): number {
 }
 export function px2vp(value: number): number {
     return GlobalScope.px2vp(value)
+}
+export class ForegroundEffectOptions_serializer {
+    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRadius  = value.radius
+        valueSerializer.writeFloat64(valueHolderForRadius)
+    }
+    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const radiusTmpResult : double = valueDeserializer.readFloat64()
+        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
+        return value
+    }
+}
+export class InvertOptions_serializer {
+    public static write(buffer: SerializerBase, value: InvertOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForLow  = value.low
+        valueSerializer.writeFloat64(valueHolderForLow)
+        const valueHolderForHigh  = value.high
+        valueSerializer.writeFloat64(valueHolderForHigh)
+        const valueHolderForThreshold  = value.threshold
+        valueSerializer.writeFloat64(valueHolderForThreshold)
+        const valueHolderForThresholdRange  = value.thresholdRange
+        valueSerializer.writeFloat64(valueHolderForThresholdRange)
+    }
+    public static read(buffer: DeserializerBase): InvertOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const lowTmpResult : double = valueDeserializer.readFloat64()
+        const highTmpResult : double = valueDeserializer.readFloat64()
+        const thresholdTmpResult : double = valueDeserializer.readFloat64()
+        const thresholdRangeTmpResult : double = valueDeserializer.readFloat64()
+        let value : InvertOptions = ({low: lowTmpResult, high: highTmpResult, threshold: thresholdTmpResult, thresholdRange: thresholdRangeTmpResult} as InvertOptions)
+        return value
+    }
 }
 export class LayoutPolicy_serializer {
     public static write(buffer: SerializerBase, value: LayoutPolicy): void {
@@ -10929,6 +11035,22 @@ export class LayoutPolicy_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutPolicyInternal.fromPtr(ptr)
+    }
+}
+export class MotionBlurAnchor_serializer {
+    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): MotionBlurAnchor {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
+        return value
     }
 }
 export class NestedScrollOptions_serializer {
@@ -11046,17 +11168,17 @@ export class TouchTestInfo_serializer {
     public static write(buffer: SerializerBase, value: TouchTestInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForWindowX  = value.windowX
-        valueSerializer.writeNumber(valueHolderForWindowX)
+        valueSerializer.writeFloat64(valueHolderForWindowX)
         const valueHolderForWindowY  = value.windowY
-        valueSerializer.writeNumber(valueHolderForWindowY)
+        valueSerializer.writeFloat64(valueHolderForWindowY)
         const valueHolderForParentX  = value.parentX
-        valueSerializer.writeNumber(valueHolderForParentX)
+        valueSerializer.writeFloat64(valueHolderForParentX)
         const valueHolderForParentY  = value.parentY
-        valueSerializer.writeNumber(valueHolderForParentY)
+        valueSerializer.writeFloat64(valueHolderForParentY)
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
         const valueHolderForRect  = value.rect
         RectResult_serializer.write(valueSerializer, valueHolderForRect)
         const valueHolderForId  = value.id
@@ -11064,12 +11186,12 @@ export class TouchTestInfo_serializer {
     }
     public static read(buffer: DeserializerBase): TouchTestInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const windowXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const windowYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const parentXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const parentYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const windowXTmpResult : double = valueDeserializer.readFloat64()
+        const windowYTmpResult : double = valueDeserializer.readFloat64()
+        const parentXTmpResult : double = valueDeserializer.readFloat64()
+        const parentYTmpResult : double = valueDeserializer.readFloat64()
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
         const rectTmpResult : RectResult = RectResult_serializer.read(valueDeserializer)
         const idTmpResult : string = (valueDeserializer.readString() as string)
         let value : TouchTestInfo = ({windowX: windowXTmpResult, windowY: windowYTmpResult, parentX: parentXTmpResult, parentY: parentYTmpResult, x: xTmpResult, y: yTmpResult, rect: rectTmpResult, id: idTmpResult} as TouchTestInfo)
@@ -11134,14 +11256,14 @@ export class BackgroundBrightnessOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundBrightnessOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRate  = value.rate
-        valueSerializer.writeNumber(valueHolderForRate)
+        valueSerializer.writeFloat64(valueHolderForRate)
         const valueHolderForLightUpDegree  = value.lightUpDegree
-        valueSerializer.writeNumber(valueHolderForLightUpDegree)
+        valueSerializer.writeFloat64(valueHolderForLightUpDegree)
     }
     public static read(buffer: DeserializerBase): BackgroundBrightnessOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const rateTmpResult : number = (valueDeserializer.readNumber() as number)
-        const lightUpDegreeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rateTmpResult : double = valueDeserializer.readFloat64()
+        const lightUpDegreeTmpResult : double = valueDeserializer.readFloat64()
         let value : BackgroundBrightnessOptions = ({rate: rateTmpResult, lightUpDegree: lightUpDegreeTmpResult} as BackgroundBrightnessOptions)
         return value
     }
@@ -11216,11 +11338,11 @@ export class Bindable_Array_Arkui_Component_Units_ResourceStr_serializer {
         for (let valueHolderForValueCounterI = 0; valueHolderForValueCounterI < valueHolderForValue.length; valueHolderForValueCounterI++) {
             const valueHolderForValueTmpElement : ResourceStr = valueHolderForValue[valueHolderForValueCounterI]
             if (valueHolderForValueTmpElement instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpElementForIdx0  = valueHolderForValueTmpElement as string
                 valueSerializer.writeString(valueHolderForValueTmpElementForIdx0)
             } else if (valueHolderForValueTmpElement instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpElementForIdx1  = valueHolderForValueTmpElement as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForValueTmpElementForIdx1)
             }
@@ -11257,11 +11379,11 @@ export class Bindable_Array_Arkui_Component_Units_ResourceStr_serializer {
             for (let value0CounterI = 0; value0CounterI < value0.length; value0CounterI++) {
                 const value0TmpElement : ResourceStr = value0[value0CounterI];
                 if (value0TmpElement instanceof string) {
-                    onChangeTmpBufBufArgsSerializer.writeInt8((0).toChar());
+                    onChangeTmpBufBufArgsSerializer.writeInt8((0).toByte());
                     const value0TmpElementForIdx0  = value0TmpElement as string;
                     onChangeTmpBufBufArgsSerializer.writeString(value0TmpElementForIdx0);
                 } else if (value0TmpElement instanceof Resource) {
-                    onChangeTmpBufBufArgsSerializer.writeInt8((1).toChar());
+                    onChangeTmpBufBufArgsSerializer.writeInt8((1).toByte());
                     const value0TmpElementForIdx1  = value0TmpElement as Resource;
                     Resource_serializer.write(onChangeTmpBufBufArgsSerializer, value0TmpElementForIdx1);
                 }
@@ -11312,6 +11434,34 @@ export class Bindable_Array_Number_serializer {
             return;
         }
         let value : Bindable<Array<number>> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Array<number>>)
+        return value
+    }
+}
+export class Bindable_F64_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<double>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForValue  = value.value
+        valueSerializer.writeFloat64(valueHolderForValue)
+        const valueHolderForOnChange  = value.onChange
+        valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
+    }
+    public static read(buffer: DeserializerBase): Bindable<double> {
+        let valueDeserializer : DeserializerBase = buffer
+        const valueTmpResult : double = valueDeserializer.readFloat64()
+        const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpResult : ((value0: double) => void) = (value0: double):void => {
+            const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
+            onChangeTmpBufBufArgsSerializer.writeFloat64(value0);
+            InteropNativeModule._CallCallbackSync(10, -747300352, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            onChangeTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : Bindable<double> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<double>)
         return value
     }
 }
@@ -11368,6 +11518,34 @@ export class Bindable_Date_serializer {
             return;
         }
         let value : Bindable<Date> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Date>)
+        return value
+    }
+}
+export class Bindable_I32_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<int32>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForValue  = value.value
+        valueSerializer.writeInt32(valueHolderForValue)
+        const valueHolderForOnChange  = value.onChange
+        valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
+    }
+    public static read(buffer: DeserializerBase): Bindable<int32> {
+        let valueDeserializer : DeserializerBase = buffer
+        const valueTmpResult : int32 = valueDeserializer.readInt32()
+        const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpResult : ((value0: int32) => void) = (value0: int32):void => {
+            const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
+            onChangeTmpBufBufArgsSerializer.writeInt32(value0);
+            InteropNativeModule._CallCallbackSync(10, -747290452, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            onChangeTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : Bindable<int32> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<int32>)
         return value
     }
 }
@@ -11432,15 +11610,15 @@ export class BlurOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForGrayscale  = value.grayscale
         const valueHolderForGrayscale_0  = valueHolderForGrayscale[0]
-        valueSerializer.writeNumber(valueHolderForGrayscale_0)
+        valueSerializer.writeFloat64(valueHolderForGrayscale_0)
         const valueHolderForGrayscale_1  = valueHolderForGrayscale[1]
-        valueSerializer.writeNumber(valueHolderForGrayscale_1)
+        valueSerializer.writeFloat64(valueHolderForGrayscale_1)
     }
     public static read(buffer: DeserializerBase): BlurOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const grayscaleTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const grayscaleTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const grayscaleTmpResult : [ number, number ] = ([grayscaleTmpBufValue0, grayscaleTmpBufValue1] as [ number, number ])
+        const grayscaleTmpBufValue0 : double = valueDeserializer.readFloat64()
+        const grayscaleTmpBufValue1 : double = valueDeserializer.readFloat64()
+        const grayscaleTmpResult : [ double, double ] = ([grayscaleTmpBufValue0, grayscaleTmpBufValue1] as [ double, double ])
         let value : BlurOptions = ({grayscale: grayscaleTmpResult} as BlurOptions)
         return value
     }
@@ -11484,7 +11662,7 @@ export class ClickEffect_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -11493,11 +11671,11 @@ export class ClickEffect_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const levelTmpResult : ClickEffectLevel = ClickEffectLevel.fromValue(valueDeserializer.readInt32())
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         let value : ClickEffect = ({level: levelTmpResult, scale: scaleTmpResult} as ClickEffect)
         return value
     }
@@ -11506,11 +11684,11 @@ export class CrownEvent_serializer {
     public static write(buffer: SerializerBase, value: CrownEvent): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTimestamp  = value.timestamp
-        valueSerializer.writeNumber(valueHolderForTimestamp)
+        valueSerializer.writeInt64(valueHolderForTimestamp)
         const valueHolderForAngularVelocity  = value.angularVelocity
-        valueSerializer.writeNumber(valueHolderForAngularVelocity)
+        valueSerializer.writeFloat64(valueHolderForAngularVelocity)
         const valueHolderForDegree  = value.degree
-        valueSerializer.writeNumber(valueHolderForDegree)
+        valueSerializer.writeFloat64(valueHolderForDegree)
         const valueHolderForAction  = value.action
         valueSerializer.writeInt32(valueHolderForAction.valueOf())
         const valueHolderForStopPropagation  = value.stopPropagation
@@ -11518,9 +11696,9 @@ export class CrownEvent_serializer {
     }
     public static read(buffer: DeserializerBase): CrownEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const timestampTmpResult : number = (valueDeserializer.readNumber() as number)
-        const angularVelocityTmpResult : number = (valueDeserializer.readNumber() as number)
-        const degreeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const timestampTmpResult : int64 = valueDeserializer.readInt64()
+        const angularVelocityTmpResult : double = valueDeserializer.readFloat64()
+        const degreeTmpResult : double = valueDeserializer.readFloat64()
         const actionTmpResult : CrownAction = CrownAction.fromValue(valueDeserializer.readInt32())
         const stopPropagationTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const stopPropagationTmpBufBufCall : KPointer = valueDeserializer.readPointer()
@@ -11795,17 +11973,6 @@ export class DragItemInfo_serializer {
         return value
     }
 }
-export class DrawModifier_serializer {
-    public static write(buffer: SerializerBase, value: DrawModifier): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): DrawModifier {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DrawModifierInternal.fromPtr(ptr)
-    }
-}
 export class DropOptions_serializer {
     public static write(buffer: SerializerBase, value: DropOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -11839,7 +12006,7 @@ export class EdgeEffectOptions_serializer {
         if (valueHolderForEffectEdge !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEffectEdgeTmpValue  = valueHolderForEffectEdge!
-            valueSerializer.writeNumber(valueHolderForEffectEdgeTmpValue)
+            valueSerializer.writeInt32(valueHolderForEffectEdgeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -11848,11 +12015,11 @@ export class EdgeEffectOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const alwaysEnabledTmpResult : boolean = valueDeserializer.readBoolean()
         const effectEdgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let effectEdgeTmpBuf : number | undefined = undefined
+        let effectEdgeTmpBuf : int32 | undefined = undefined
         if ((effectEdgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            effectEdgeTmpBuf = (valueDeserializer.readNumber() as number)
+            effectEdgeTmpBuf = valueDeserializer.readInt32()
         }
-        const effectEdgeTmpResult : number | undefined = effectEdgeTmpBuf
+        const effectEdgeTmpResult : int32 | undefined = effectEdgeTmpBuf
         let value : EdgeEffectOptions = ({alwaysEnabled: alwaysEnabledTmpResult, effectEdge: effectEdgeTmpResult} as EdgeEffectOptions)
         return value
     }
@@ -11861,17 +12028,17 @@ export class ExpectedFrameRateRange_serializer {
     public static write(buffer: SerializerBase, value: ExpectedFrameRateRange): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForMin  = value.min
-        valueSerializer.writeNumber(valueHolderForMin)
+        valueSerializer.writeInt32(valueHolderForMin)
         const valueHolderForMax  = value.max
-        valueSerializer.writeNumber(valueHolderForMax)
+        valueSerializer.writeInt32(valueHolderForMax)
         const valueHolderForExpected  = value.expected
-        valueSerializer.writeNumber(valueHolderForExpected)
+        valueSerializer.writeInt32(valueHolderForExpected)
     }
     public static read(buffer: DeserializerBase): ExpectedFrameRateRange {
         let valueDeserializer : DeserializerBase = buffer
-        const minTmpResult : number = (valueDeserializer.readNumber() as number)
-        const maxTmpResult : number = (valueDeserializer.readNumber() as number)
-        const expectedTmpResult : number = (valueDeserializer.readNumber() as number)
+        const minTmpResult : int32 = valueDeserializer.readInt32()
+        const maxTmpResult : int32 = valueDeserializer.readInt32()
+        const expectedTmpResult : int32 = valueDeserializer.readInt32()
         let value : ExpectedFrameRateRange = ({min: minTmpResult, max: maxTmpResult, expected: expectedTmpResult} as ExpectedFrameRateRange)
         return value
     }
@@ -11970,19 +12137,6 @@ export class FocusMovement_serializer {
         return value
     }
 }
-export class ForegroundEffectOptions_serializer {
-    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeNumber(valueHolderForRadius)
-    }
-    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
-        return value
-    }
-}
 export class GeometryTransitionOptions_serializer {
     public static write(buffer: SerializerBase, value: GeometryTransitionOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -12075,28 +12229,6 @@ export class InputCounterOptions_serializer {
         return value
     }
 }
-export class InvertOptions_serializer {
-    public static write(buffer: SerializerBase, value: InvertOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForLow  = value.low
-        valueSerializer.writeNumber(valueHolderForLow)
-        const valueHolderForHigh  = value.high
-        valueSerializer.writeNumber(valueHolderForHigh)
-        const valueHolderForThreshold  = value.threshold
-        valueSerializer.writeNumber(valueHolderForThreshold)
-        const valueHolderForThresholdRange  = value.thresholdRange
-        valueSerializer.writeNumber(valueHolderForThresholdRange)
-    }
-    public static read(buffer: DeserializerBase): InvertOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const lowTmpResult : number = (valueDeserializer.readNumber() as number)
-        const highTmpResult : number = (valueDeserializer.readNumber() as number)
-        const thresholdTmpResult : number = (valueDeserializer.readNumber() as number)
-        const thresholdRangeTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : InvertOptions = ({low: lowTmpResult, high: highTmpResult, threshold: thresholdTmpResult, thresholdRange: thresholdRangeTmpResult} as InvertOptions)
-        return value
-    }
-}
 export class ItemDragEventHandler_serializer {
     public static write(buffer: SerializerBase, value: ItemDragEventHandler): void {
         let valueSerializer : SerializerBase = buffer
@@ -12136,54 +12268,54 @@ export class ItemDragEventHandler_serializer {
     public static read(buffer: DeserializerBase): ItemDragEventHandler {
         let valueDeserializer : DeserializerBase = buffer
         const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onLongPressTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onLongPressTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onLongPressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onLongPressTmpBuf = (value0: number):void => {
+            onLongPressTmpBuf = (value0: int32):void => {
                 const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
-                onLongPressTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                onLongPressTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
                 onLongPressTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onLongPressTmpResult : ((value0: number) => void) | undefined = onLongPressTmpBuf
+        const onLongPressTmpResult : ((value0: int32) => void) | undefined = onLongPressTmpBuf
         const onDragStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDragStartTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onDragStartTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onDragStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDragStartTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDragStartTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDragStartTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDragStartTmpBuf = (value0: number):void => {
+            onDragStartTmpBuf = (value0: int32):void => {
                 const onDragStartTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDragStartTmpBuf_BufArgsSerializer.writeInt32(onDragStartTmpBuf_BufResource.resourceId);
                 onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCall);
                 onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCallSync);
-                onDragStartTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
+                onDragStartTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
                 onDragStartTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDragStartTmpResult : ((value0: number) => void) | undefined = onDragStartTmpBuf
+        const onDragStartTmpResult : ((value0: int32) => void) | undefined = onDragStartTmpBuf
         const onMoveThroughTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onMoveThroughTmpBuf : OnMoveHandler | undefined = undefined
         if ((onMoveThroughTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onMoveThroughTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMoveThroughTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onMoveThroughTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onMoveThroughTmpBuf = (from: number, to: number):void => {
+            onMoveThroughTmpBuf = (from: int32, to: int32):void => {
                 const onMoveThroughTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(onMoveThroughTmpBuf_BufResource.resourceId);
                 onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCall);
                 onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCallSync);
-                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(from);
-                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(to);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(from);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(to);
                 InteropNativeModule._CallCallbackSync(10, -1200281222, onMoveThroughTmpBuf_BufArgsSerializer.asBuffer(), onMoveThroughTmpBuf_BufArgsSerializer.length());
                 onMoveThroughTmpBuf_BufArgsSerializer.release();
                 return;
@@ -12191,23 +12323,23 @@ export class ItemDragEventHandler_serializer {
         }
         const onMoveThroughTmpResult : OnMoveHandler | undefined = onMoveThroughTmpBuf
         const onDropTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDropTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onDropTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onDropTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDropTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDropTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDropTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDropTmpBuf = (value0: number):void => {
+            onDropTmpBuf = (value0: int32):void => {
                 const onDropTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDropTmpBuf_BufArgsSerializer.writeInt32(onDropTmpBuf_BufResource.resourceId);
                 onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCall);
                 onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCallSync);
-                onDropTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
+                onDropTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
                 onDropTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDropTmpResult : ((value0: number) => void) | undefined = onDropTmpBuf
+        const onDropTmpResult : ((value0: int32) => void) | undefined = onDropTmpBuf
         let value : ItemDragEventHandler = ({onLongPress: onLongPressTmpResult, onDragStart: onDragStartTmpResult, onMoveThrough: onMoveThroughTmpResult, onDrop: onDropTmpResult} as ItemDragEventHandler)
         return value
     }
@@ -12216,14 +12348,14 @@ export class ItemDragInfo_serializer {
     public static write(buffer: SerializerBase, value: ItemDragInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): ItemDragInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
         let value : ItemDragInfo = ({x: xTmpResult, y: yTmpResult} as ItemDragInfo)
         return value
     }
@@ -12243,21 +12375,21 @@ export class KeyframeState_serializer {
     public static write(buffer: SerializerBase, value: KeyframeState): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForDuration  = value.duration
-        valueSerializer.writeNumber(valueHolderForDuration)
+        valueSerializer.writeInt32(valueHolderForDuration)
         const valueHolderForCurve  = value.curve
         if (valueHolderForCurve !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCurveTmpValue  = valueHolderForCurve!
             if (valueHolderForCurveTmpValue instanceof curves.Curve) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
                 valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
             } else if (valueHolderForCurveTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as string
                 valueSerializer.writeString(valueHolderForCurveTmpValueForIdx1)
             } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCurveTmpValueForIdx2  = valueHolderForCurveTmpValue as curves.ICurve
                 curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx2)
             }
@@ -12269,7 +12401,7 @@ export class KeyframeState_serializer {
     }
     public static read(buffer: DeserializerBase): KeyframeState {
         let valueDeserializer : DeserializerBase = buffer
-        const durationTmpResult : number = (valueDeserializer.readNumber() as number)
+        const durationTmpResult : int32 = valueDeserializer.readInt32()
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -12311,9 +12443,9 @@ export class LinearGradientBlurOptions_serializer {
         for (let valueHolderForFractionStopsCounterI = 0; valueHolderForFractionStopsCounterI < valueHolderForFractionStops.length; valueHolderForFractionStopsCounterI++) {
             const valueHolderForFractionStopsTmpElement : FractionStop = valueHolderForFractionStops[valueHolderForFractionStopsCounterI]
             const valueHolderForFractionStopsTmpElement_0  = valueHolderForFractionStopsTmpElement[0]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_0)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_0)
             const valueHolderForFractionStopsTmpElement_1  = valueHolderForFractionStopsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_1)
         }
         const valueHolderForDirection  = value.direction
         valueSerializer.writeInt32(valueHolderForDirection.valueOf())
@@ -12323,8 +12455,8 @@ export class LinearGradientBlurOptions_serializer {
         const fractionStopsTmpBufLength : int32 = valueDeserializer.readInt32()
         let fractionStopsTmpBuf : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufLength)
         for (let fractionStopsTmpBufBufCounterI = 0; fractionStopsTmpBufBufCounterI < fractionStopsTmpBufLength; fractionStopsTmpBufBufCounterI++) {
-            const fractionStopsTmpBufTempBufValue0 : number = (valueDeserializer.readNumber() as number)
-            const fractionStopsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
+            const fractionStopsTmpBufTempBufValue0 : double = valueDeserializer.readFloat64()
+            const fractionStopsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
             fractionStopsTmpBuf[fractionStopsTmpBufBufCounterI] = ([fractionStopsTmpBufTempBufValue0, fractionStopsTmpBufTempBufValue1] as FractionStop)
         }
         const fractionStopsTmpResult : Array<FractionStop> = fractionStopsTmpBuf
@@ -12341,11 +12473,11 @@ export class LinearGradientOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAngleTmpValue  = valueHolderForAngle!
             if (valueHolderForAngleTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForAngleTmpValueForIdx0  = valueHolderForAngleTmpValue as number
                 valueSerializer.writeNumber(valueHolderForAngleTmpValueForIdx0)
             } else if (valueHolderForAngleTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForAngleTmpValueForIdx1  = valueHolderForAngleTmpValue as string
                 valueSerializer.writeString(valueHolderForAngleTmpValueForIdx1)
             }
@@ -12366,19 +12498,19 @@ export class LinearGradientOptions_serializer {
             const valueHolderForColorsTmpElement : [ ResourceColor, number ] = valueHolderForColors[valueHolderForColorsCounterI]
             const valueHolderForColorsTmpElement_0  = valueHolderForColorsTmpElement[0]
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx0  = valueHolderForColorsTmpElement_0 as Color
                 valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.getOrdinal())
             } else if (valueHolderForColorsTmpElement_0 instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx1  = valueHolderForColorsTmpElement_0 as number
                 valueSerializer.writeNumber(valueHolderForColorsTmpElement_0ForIdx1)
             } else if (valueHolderForColorsTmpElement_0 instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx2  = valueHolderForColorsTmpElement_0 as string
                 valueSerializer.writeString(valueHolderForColorsTmpElement_0ForIdx2)
             } else if (valueHolderForColorsTmpElement_0 instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx3  = valueHolderForColorsTmpElement_0 as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0ForIdx3)
             }
@@ -12507,22 +12639,6 @@ export class MeasureResult_serializer {
         return value
     }
 }
-export class MotionBlurAnchor_serializer {
-    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
-        const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
-    }
-    public static read(buffer: DeserializerBase): MotionBlurAnchor {
-        let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
-        return value
-    }
-}
 export class MotionBlurOptions_serializer {
     public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -12548,7 +12664,7 @@ export class MotionPathOptions_serializer {
         if (valueHolderForFrom !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFromTmpValue  = valueHolderForFrom!
-            valueSerializer.writeNumber(valueHolderForFromTmpValue)
+            valueSerializer.writeFloat64(valueHolderForFromTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12556,7 +12672,7 @@ export class MotionPathOptions_serializer {
         if (valueHolderForTo !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForToTmpValue  = valueHolderForTo!
-            valueSerializer.writeNumber(valueHolderForToTmpValue)
+            valueSerializer.writeFloat64(valueHolderForToTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12573,17 +12689,17 @@ export class MotionPathOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const pathTmpResult : string = (valueDeserializer.readString() as string)
         const fromTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fromTmpBuf : number | undefined = undefined
+        let fromTmpBuf : double | undefined = undefined
         if ((fromTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fromTmpBuf = (valueDeserializer.readNumber() as number)
+            fromTmpBuf = valueDeserializer.readFloat64()
         }
-        const fromTmpResult : number | undefined = fromTmpBuf
+        const fromTmpResult : double | undefined = fromTmpBuf
         const toTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let toTmpBuf : number | undefined = undefined
+        let toTmpBuf : double | undefined = undefined
         if ((toTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            toTmpBuf = (valueDeserializer.readNumber() as number)
+            toTmpBuf = valueDeserializer.readFloat64()
         }
-        const toTmpResult : number | undefined = toTmpBuf
+        const toTmpResult : double | undefined = toTmpBuf
         const rotatableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let rotatableTmpBuf : boolean | undefined = undefined
         if ((rotatableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -12601,7 +12717,7 @@ export class OverlayOffset_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            valueSerializer.writeNumber(valueHolderForXTmpValue)
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12609,7 +12725,7 @@ export class OverlayOffset_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            valueSerializer.writeNumber(valueHolderForYTmpValue)
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12617,17 +12733,17 @@ export class OverlayOffset_serializer {
     public static read(buffer: DeserializerBase): OverlayOffset {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | undefined = undefined
+        let xTmpBuf : double | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xTmpBuf = (valueDeserializer.readNumber() as number)
+            xTmpBuf = valueDeserializer.readFloat64()
         }
-        const xTmpResult : number | undefined = xTmpBuf
+        const xTmpResult : double | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | undefined = undefined
+        let yTmpBuf : double | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            yTmpBuf = (valueDeserializer.readNumber() as number)
+            yTmpBuf = valueDeserializer.readFloat64()
         }
-        const yTmpResult : number | undefined = yTmpBuf
+        const yTmpResult : double | undefined = yTmpBuf
         let value : OverlayOffset = ({x: xTmpResult, y: yTmpResult} as OverlayOffset)
         return value
     }
@@ -12771,11 +12887,11 @@ export class RotateAngleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAngleXTmpValue  = valueHolderForAngleX!
             if (valueHolderForAngleXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForAngleXTmpValueForIdx0  = valueHolderForAngleXTmpValue as number
                 valueSerializer.writeNumber(valueHolderForAngleXTmpValueForIdx0)
             } else if (valueHolderForAngleXTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForAngleXTmpValueForIdx1  = valueHolderForAngleXTmpValue as string
                 valueSerializer.writeString(valueHolderForAngleXTmpValueForIdx1)
             }
@@ -12787,11 +12903,11 @@ export class RotateAngleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAngleYTmpValue  = valueHolderForAngleY!
             if (valueHolderForAngleYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForAngleYTmpValueForIdx0  = valueHolderForAngleYTmpValue as number
                 valueSerializer.writeNumber(valueHolderForAngleYTmpValueForIdx0)
             } else if (valueHolderForAngleYTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForAngleYTmpValueForIdx1  = valueHolderForAngleYTmpValue as string
                 valueSerializer.writeString(valueHolderForAngleYTmpValueForIdx1)
             }
@@ -12803,11 +12919,11 @@ export class RotateAngleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAngleZTmpValue  = valueHolderForAngleZ!
             if (valueHolderForAngleZTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForAngleZTmpValueForIdx0  = valueHolderForAngleZTmpValue as number
                 valueSerializer.writeNumber(valueHolderForAngleZTmpValueForIdx0)
             } else if (valueHolderForAngleZTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForAngleZTmpValueForIdx1  = valueHolderForAngleZTmpValue as string
                 valueSerializer.writeString(valueHolderForAngleZTmpValueForIdx1)
             }
@@ -12819,11 +12935,11 @@ export class RotateAngleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterXTmpValue  = valueHolderForCenterX!
             if (valueHolderForCenterXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as number
                 valueSerializer.writeNumber(valueHolderForCenterXTmpValueForIdx0)
             } else if (valueHolderForCenterXTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterXTmpValueForIdx1  = valueHolderForCenterXTmpValue as string
                 valueSerializer.writeString(valueHolderForCenterXTmpValueForIdx1)
             }
@@ -12835,11 +12951,11 @@ export class RotateAngleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterYTmpValue  = valueHolderForCenterY!
             if (valueHolderForCenterYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as number
                 valueSerializer.writeNumber(valueHolderForCenterYTmpValueForIdx0)
             } else if (valueHolderForCenterYTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterYTmpValueForIdx1  = valueHolderForCenterYTmpValue as string
                 valueSerializer.writeString(valueHolderForCenterYTmpValueForIdx1)
             }
@@ -12963,7 +13079,7 @@ export class RotateOptions_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            valueSerializer.writeNumber(valueHolderForXTmpValue)
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12971,7 +13087,7 @@ export class RotateOptions_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            valueSerializer.writeNumber(valueHolderForYTmpValue)
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12979,7 +13095,7 @@ export class RotateOptions_serializer {
         if (valueHolderForZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZTmpValue  = valueHolderForZ!
-            valueSerializer.writeNumber(valueHolderForZTmpValue)
+            valueSerializer.writeFloat64(valueHolderForZTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12987,12 +13103,12 @@ export class RotateOptions_serializer {
         if (valueHolderForCenterX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterXTmpValue  = valueHolderForCenterX!
-            if (valueHolderForCenterXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterXTmpValueForIdx0)
+            if (valueHolderForCenterXTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterXTmpValueForIdx0)
             } else if (valueHolderForCenterXTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterXTmpValueForIdx1  = valueHolderForCenterXTmpValue as string
                 valueSerializer.writeString(valueHolderForCenterXTmpValueForIdx1)
             }
@@ -13003,12 +13119,12 @@ export class RotateOptions_serializer {
         if (valueHolderForCenterY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterYTmpValue  = valueHolderForCenterY!
-            if (valueHolderForCenterYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterYTmpValueForIdx0)
+            if (valueHolderForCenterYTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterYTmpValueForIdx0)
             } else if (valueHolderForCenterYTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterYTmpValueForIdx1  = valueHolderForCenterYTmpValue as string
                 valueSerializer.writeString(valueHolderForCenterYTmpValueForIdx1)
             }
@@ -13019,7 +13135,7 @@ export class RotateOptions_serializer {
         if (valueHolderForCenterZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterZTmpValue  = valueHolderForCenterZ!
-            valueSerializer.writeNumber(valueHolderForCenterZTmpValue)
+            valueSerializer.writeFloat64(valueHolderForCenterZTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13027,17 +13143,17 @@ export class RotateOptions_serializer {
         if (valueHolderForPerspective !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPerspectiveTmpValue  = valueHolderForPerspective!
-            valueSerializer.writeNumber(valueHolderForPerspectiveTmpValue)
+            valueSerializer.writeFloat64(valueHolderForPerspectiveTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForAngle  = value.angle
-        if (valueHolderForAngle instanceof number) {
-            valueSerializer.writeInt8((0).toChar())
-            const valueHolderForAngleForIdx0  = valueHolderForAngle as number
-            valueSerializer.writeNumber(valueHolderForAngleForIdx0)
+        if (valueHolderForAngle instanceof double) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForAngleForIdx0  = valueHolderForAngle as double
+            valueSerializer.writeFloat64(valueHolderForAngleForIdx0)
         } else if (valueHolderForAngle instanceof string) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForAngleForIdx1  = valueHolderForAngle as string
             valueSerializer.writeString(valueHolderForAngleForIdx1)
         }
@@ -13045,75 +13161,75 @@ export class RotateOptions_serializer {
     public static read(buffer: DeserializerBase): RotateOptions {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | undefined = undefined
+        let xTmpBuf : double | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xTmpBuf = (valueDeserializer.readNumber() as number)
+            xTmpBuf = valueDeserializer.readFloat64()
         }
-        const xTmpResult : number | undefined = xTmpBuf
+        const xTmpResult : double | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | undefined = undefined
+        let yTmpBuf : double | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            yTmpBuf = (valueDeserializer.readNumber() as number)
+            yTmpBuf = valueDeserializer.readFloat64()
         }
-        const yTmpResult : number | undefined = yTmpBuf
+        const yTmpResult : double | undefined = yTmpBuf
         const zTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zTmpBuf : number | undefined = undefined
+        let zTmpBuf : double | undefined = undefined
         if ((zTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            zTmpBuf = (valueDeserializer.readNumber() as number)
+            zTmpBuf = valueDeserializer.readFloat64()
         }
-        const zTmpResult : number | undefined = zTmpBuf
+        const zTmpResult : double | undefined = zTmpBuf
         const centerXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerXTmpBuf : number | string | undefined = undefined
+        let centerXTmpBuf : double | string | undefined = undefined
         if ((centerXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerXTmpBuf_ : number | string | undefined
+            let centerXTmpBuf_ : double | string | undefined
             if (centerXTmpBuf_UnionSelector == (0).toChar()) {
-                centerXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerXTmpBuf_UnionSelector == (1).toChar()) {
                 centerXTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerXTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerXTmpBuf = (centerXTmpBuf_ as number | string)
+            centerXTmpBuf = (centerXTmpBuf_ as double | string)
         }
-        const centerXTmpResult : number | string | undefined = centerXTmpBuf
+        const centerXTmpResult : double | string | undefined = centerXTmpBuf
         const centerYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerYTmpBuf : number | string | undefined = undefined
+        let centerYTmpBuf : double | string | undefined = undefined
         if ((centerYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerYTmpBuf_ : number | string | undefined
+            let centerYTmpBuf_ : double | string | undefined
             if (centerYTmpBuf_UnionSelector == (0).toChar()) {
-                centerYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerYTmpBuf_UnionSelector == (1).toChar()) {
                 centerYTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerYTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerYTmpBuf = (centerYTmpBuf_ as number | string)
+            centerYTmpBuf = (centerYTmpBuf_ as double | string)
         }
-        const centerYTmpResult : number | string | undefined = centerYTmpBuf
+        const centerYTmpResult : double | string | undefined = centerYTmpBuf
         const centerZTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerZTmpBuf : number | undefined = undefined
+        let centerZTmpBuf : double | undefined = undefined
         if ((centerZTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            centerZTmpBuf = (valueDeserializer.readNumber() as number)
+            centerZTmpBuf = valueDeserializer.readFloat64()
         }
-        const centerZTmpResult : number | undefined = centerZTmpBuf
+        const centerZTmpResult : double | undefined = centerZTmpBuf
         const perspectiveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let perspectiveTmpBuf : number | undefined = undefined
+        let perspectiveTmpBuf : double | undefined = undefined
         if ((perspectiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            perspectiveTmpBuf = (valueDeserializer.readNumber() as number)
+            perspectiveTmpBuf = valueDeserializer.readFloat64()
         }
-        const perspectiveTmpResult : number | undefined = perspectiveTmpBuf
+        const perspectiveTmpResult : double | undefined = perspectiveTmpBuf
         const angleTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let angleTmpBuf : number | string | undefined
+        let angleTmpBuf : double | string | undefined
         if (angleTmpBufUnionSelector == (0).toChar()) {
-            angleTmpBuf = (valueDeserializer.readNumber() as number)
+            angleTmpBuf = valueDeserializer.readFloat64()
         } else if (angleTmpBufUnionSelector == (1).toChar()) {
             angleTmpBuf = (valueDeserializer.readString() as string)
         } else {
             throw new Error("One of the branches for angleTmpBuf has to be chosen through deserialisation.")
         }
-        const angleTmpResult : number | string = (angleTmpBuf as number | string)
+        const angleTmpResult : double | string = (angleTmpBuf as double | string)
         let value : RotateOptions = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult, centerZ: centerZTmpResult, perspective: perspectiveTmpResult, angle: angleTmpResult} as RotateOptions)
         return value
     }
@@ -13125,7 +13241,7 @@ export class ScaleOptions_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            valueSerializer.writeNumber(valueHolderForXTmpValue)
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13133,7 +13249,7 @@ export class ScaleOptions_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            valueSerializer.writeNumber(valueHolderForYTmpValue)
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13141,7 +13257,7 @@ export class ScaleOptions_serializer {
         if (valueHolderForZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZTmpValue  = valueHolderForZ!
-            valueSerializer.writeNumber(valueHolderForZTmpValue)
+            valueSerializer.writeFloat64(valueHolderForZTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13149,12 +13265,12 @@ export class ScaleOptions_serializer {
         if (valueHolderForCenterX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterXTmpValue  = valueHolderForCenterX!
-            if (valueHolderForCenterXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterXTmpValueForIdx0)
+            if (valueHolderForCenterXTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterXTmpValueForIdx0)
             } else if (valueHolderForCenterXTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterXTmpValueForIdx1  = valueHolderForCenterXTmpValue as string
                 valueSerializer.writeString(valueHolderForCenterXTmpValueForIdx1)
             }
@@ -13165,12 +13281,12 @@ export class ScaleOptions_serializer {
         if (valueHolderForCenterY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterYTmpValue  = valueHolderForCenterY!
-            if (valueHolderForCenterYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterYTmpValueForIdx0)
+            if (valueHolderForCenterYTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterYTmpValueForIdx0)
             } else if (valueHolderForCenterYTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterYTmpValueForIdx1  = valueHolderForCenterYTmpValue as string
                 valueSerializer.writeString(valueHolderForCenterYTmpValueForIdx1)
             }
@@ -13181,53 +13297,53 @@ export class ScaleOptions_serializer {
     public static read(buffer: DeserializerBase): ScaleOptions {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | undefined = undefined
+        let xTmpBuf : double | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xTmpBuf = (valueDeserializer.readNumber() as number)
+            xTmpBuf = valueDeserializer.readFloat64()
         }
-        const xTmpResult : number | undefined = xTmpBuf
+        const xTmpResult : double | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | undefined = undefined
+        let yTmpBuf : double | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            yTmpBuf = (valueDeserializer.readNumber() as number)
+            yTmpBuf = valueDeserializer.readFloat64()
         }
-        const yTmpResult : number | undefined = yTmpBuf
+        const yTmpResult : double | undefined = yTmpBuf
         const zTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zTmpBuf : number | undefined = undefined
+        let zTmpBuf : double | undefined = undefined
         if ((zTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            zTmpBuf = (valueDeserializer.readNumber() as number)
+            zTmpBuf = valueDeserializer.readFloat64()
         }
-        const zTmpResult : number | undefined = zTmpBuf
+        const zTmpResult : double | undefined = zTmpBuf
         const centerXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerXTmpBuf : number | string | undefined = undefined
+        let centerXTmpBuf : double | string | undefined = undefined
         if ((centerXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerXTmpBuf_ : number | string | undefined
+            let centerXTmpBuf_ : double | string | undefined
             if (centerXTmpBuf_UnionSelector == (0).toChar()) {
-                centerXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerXTmpBuf_UnionSelector == (1).toChar()) {
                 centerXTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerXTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerXTmpBuf = (centerXTmpBuf_ as number | string)
+            centerXTmpBuf = (centerXTmpBuf_ as double | string)
         }
-        const centerXTmpResult : number | string | undefined = centerXTmpBuf
+        const centerXTmpResult : double | string | undefined = centerXTmpBuf
         const centerYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerYTmpBuf : number | string | undefined = undefined
+        let centerYTmpBuf : double | string | undefined = undefined
         if ((centerYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerYTmpBuf_ : number | string | undefined
+            let centerYTmpBuf_ : double | string | undefined
             if (centerYTmpBuf_UnionSelector == (0).toChar()) {
-                centerYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerYTmpBuf_UnionSelector == (1).toChar()) {
                 centerYTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerYTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerYTmpBuf = (centerYTmpBuf_ as number | string)
+            centerYTmpBuf = (centerYTmpBuf_ as double | string)
         }
-        const centerYTmpResult : number | string | undefined = centerYTmpBuf
+        const centerYTmpResult : double | string | undefined = centerYTmpBuf
         let value : ScaleOptions = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult} as ScaleOptions)
         return value
     }
@@ -13283,25 +13399,12 @@ export class SheetDismiss_serializer {
 export class SpringBackAction_serializer {
     public static write(buffer: SerializerBase, value: SpringBackAction): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForSpringBack  = value.springBack
-        valueSerializer.holdAndWriteCallback(valueHolderForSpringBack)
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): SpringBackAction {
         let valueDeserializer : DeserializerBase = buffer
-        const springBackTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const springBackTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const springBackTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const springBackTmpResult : VoidCallback = ():void => {
-            const springBackTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            springBackTmpBufBufArgsSerializer.writeInt32(springBackTmpBufBufResource.resourceId);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCall);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, -2038961969, springBackTmpBufBufArgsSerializer.asBuffer(), springBackTmpBufBufArgsSerializer.length());
-            springBackTmpBufBufArgsSerializer.release();
-            return;
-        }
-        let value : SpringBackAction = ({springBack: springBackTmpResult} as SpringBackAction)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SpringBackActionInternal.fromPtr(ptr)
     }
 }
 export class SystemAdaptiveOptions_serializer {
@@ -13358,19 +13461,19 @@ export class TouchObject_serializer {
         const valueHolderForType  = value.type
         valueSerializer.writeInt32(valueHolderForType.valueOf())
         const valueHolderForId  = value.id
-        valueSerializer.writeNumber(valueHolderForId)
+        valueSerializer.writeInt32(valueHolderForId)
         const valueHolderForDisplayX  = value.displayX
-        valueSerializer.writeNumber(valueHolderForDisplayX)
+        valueSerializer.writeFloat64(valueHolderForDisplayX)
         const valueHolderForDisplayY  = value.displayY
-        valueSerializer.writeNumber(valueHolderForDisplayY)
+        valueSerializer.writeFloat64(valueHolderForDisplayY)
         const valueHolderForWindowX  = value.windowX
-        valueSerializer.writeNumber(valueHolderForWindowX)
+        valueSerializer.writeFloat64(valueHolderForWindowX)
         const valueHolderForWindowY  = value.windowY
-        valueSerializer.writeNumber(valueHolderForWindowY)
+        valueSerializer.writeFloat64(valueHolderForWindowY)
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
         const valueHolderForHand  = value.hand
         if (valueHolderForHand !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -13383,7 +13486,7 @@ export class TouchObject_serializer {
         if (valueHolderForPressedTime !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPressedTimeTmpValue  = valueHolderForPressedTime!
-            valueSerializer.writeNumber(valueHolderForPressedTimeTmpValue)
+            valueSerializer.writeInt64(valueHolderForPressedTimeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13391,7 +13494,7 @@ export class TouchObject_serializer {
         if (valueHolderForPressure !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPressureTmpValue  = valueHolderForPressure!
-            valueSerializer.writeNumber(valueHolderForPressureTmpValue)
+            valueSerializer.writeFloat64(valueHolderForPressureTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13399,7 +13502,7 @@ export class TouchObject_serializer {
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
-            valueSerializer.writeNumber(valueHolderForWidthTmpValue)
+            valueSerializer.writeFloat64(valueHolderForWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13407,7 +13510,7 @@ export class TouchObject_serializer {
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            valueSerializer.writeNumber(valueHolderForHeightTmpValue)
+            valueSerializer.writeFloat64(valueHolderForHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13415,13 +13518,13 @@ export class TouchObject_serializer {
     public static read(buffer: DeserializerBase): TouchObject {
         let valueDeserializer : DeserializerBase = buffer
         const typeTmpResult : TouchType = TouchType.fromValue(valueDeserializer.readInt32())
-        const idTmpResult : number = (valueDeserializer.readNumber() as number)
-        const displayXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const displayYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const windowXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const windowYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const idTmpResult : int32 = valueDeserializer.readInt32()
+        const displayXTmpResult : double = valueDeserializer.readFloat64()
+        const displayYTmpResult : double = valueDeserializer.readFloat64()
+        const windowXTmpResult : double = valueDeserializer.readFloat64()
+        const windowYTmpResult : double = valueDeserializer.readFloat64()
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
         const handTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let handTmpBuf : InteractionHand | undefined = undefined
         if ((handTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -13429,29 +13532,29 @@ export class TouchObject_serializer {
         }
         const handTmpResult : InteractionHand | undefined = handTmpBuf
         const pressedTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pressedTimeTmpBuf : number | undefined = undefined
+        let pressedTimeTmpBuf : int64 | undefined = undefined
         if ((pressedTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            pressedTimeTmpBuf = (valueDeserializer.readNumber() as number)
+            pressedTimeTmpBuf = valueDeserializer.readInt64()
         }
-        const pressedTimeTmpResult : number | undefined = pressedTimeTmpBuf
+        const pressedTimeTmpResult : int64 | undefined = pressedTimeTmpBuf
         const pressureTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pressureTmpBuf : number | undefined = undefined
+        let pressureTmpBuf : double | undefined = undefined
         if ((pressureTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            pressureTmpBuf = (valueDeserializer.readNumber() as number)
+            pressureTmpBuf = valueDeserializer.readFloat64()
         }
-        const pressureTmpResult : number | undefined = pressureTmpBuf
+        const pressureTmpResult : double | undefined = pressureTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : number | undefined = undefined
+        let widthTmpBuf : double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            widthTmpBuf = (valueDeserializer.readNumber() as number)
+            widthTmpBuf = valueDeserializer.readFloat64()
         }
-        const widthTmpResult : number | undefined = widthTmpBuf
+        const widthTmpResult : double | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : number | undefined = undefined
+        let heightTmpBuf : double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            heightTmpBuf = (valueDeserializer.readNumber() as number)
+            heightTmpBuf = valueDeserializer.readFloat64()
         }
-        const heightTmpResult : number | undefined = heightTmpBuf
+        const heightTmpResult : double | undefined = heightTmpBuf
         let value : TouchObject = ({type: typeTmpResult, id: idTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, x: xTmpResult, y: yTmpResult, hand: handTmpResult, pressedTime: pressedTimeTmpResult, pressure: pressureTmpResult, width: widthTmpResult, height: heightTmpResult} as TouchObject)
         return value
     }
@@ -13490,12 +13593,12 @@ export class TranslateOptions_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            if (valueHolderForXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForXTmpValueForIdx0)
+            if (valueHolderForXTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForXTmpValueForIdx0)
             } else if (valueHolderForXTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as string
                 valueSerializer.writeString(valueHolderForXTmpValueForIdx1)
             }
@@ -13506,12 +13609,12 @@ export class TranslateOptions_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            if (valueHolderForYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForYTmpValueForIdx0)
+            if (valueHolderForYTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForYTmpValueForIdx0)
             } else if (valueHolderForYTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as string
                 valueSerializer.writeString(valueHolderForYTmpValueForIdx1)
             }
@@ -13522,12 +13625,12 @@ export class TranslateOptions_serializer {
         if (valueHolderForZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZTmpValue  = valueHolderForZ!
-            if (valueHolderForZTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForZTmpValueForIdx0  = valueHolderForZTmpValue as number
-                valueSerializer.writeNumber(valueHolderForZTmpValueForIdx0)
+            if (valueHolderForZTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForZTmpValueForIdx0  = valueHolderForZTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForZTmpValueForIdx0)
             } else if (valueHolderForZTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForZTmpValueForIdx1  = valueHolderForZTmpValue as string
                 valueSerializer.writeString(valueHolderForZTmpValueForIdx1)
             }
@@ -13538,50 +13641,50 @@ export class TranslateOptions_serializer {
     public static read(buffer: DeserializerBase): TranslateOptions {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | string | undefined = undefined
+        let xTmpBuf : double | string | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const xTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xTmpBuf_ : number | string | undefined
+            let xTmpBuf_ : double | string | undefined
             if (xTmpBuf_UnionSelector == (0).toChar()) {
-                xTmpBuf_ = (valueDeserializer.readNumber() as number)
+                xTmpBuf_ = valueDeserializer.readFloat64()
             } else if (xTmpBuf_UnionSelector == (1).toChar()) {
                 xTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for xTmpBuf_ has to be chosen through deserialisation.")
             }
-            xTmpBuf = (xTmpBuf_ as number | string)
+            xTmpBuf = (xTmpBuf_ as double | string)
         }
-        const xTmpResult : number | string | undefined = xTmpBuf
+        const xTmpResult : double | string | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | string | undefined = undefined
+        let yTmpBuf : double | string | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const yTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let yTmpBuf_ : number | string | undefined
+            let yTmpBuf_ : double | string | undefined
             if (yTmpBuf_UnionSelector == (0).toChar()) {
-                yTmpBuf_ = (valueDeserializer.readNumber() as number)
+                yTmpBuf_ = valueDeserializer.readFloat64()
             } else if (yTmpBuf_UnionSelector == (1).toChar()) {
                 yTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for yTmpBuf_ has to be chosen through deserialisation.")
             }
-            yTmpBuf = (yTmpBuf_ as number | string)
+            yTmpBuf = (yTmpBuf_ as double | string)
         }
-        const yTmpResult : number | string | undefined = yTmpBuf
+        const yTmpResult : double | string | undefined = yTmpBuf
         const zTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zTmpBuf : number | string | undefined = undefined
+        let zTmpBuf : double | string | undefined = undefined
         if ((zTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const zTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let zTmpBuf_ : number | string | undefined
+            let zTmpBuf_ : double | string | undefined
             if (zTmpBuf_UnionSelector == (0).toChar()) {
-                zTmpBuf_ = (valueDeserializer.readNumber() as number)
+                zTmpBuf_ = valueDeserializer.readFloat64()
             } else if (zTmpBuf_UnionSelector == (1).toChar()) {
                 zTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for zTmpBuf_ has to be chosen through deserialisation.")
             }
-            zTmpBuf = (zTmpBuf_ as number | string)
+            zTmpBuf = (zTmpBuf_ as double | string)
         }
-        const zTmpResult : number | string | undefined = zTmpBuf
+        const zTmpResult : double | string | undefined = zTmpBuf
         let value : TranslateOptions = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as TranslateOptions)
         return value
     }
@@ -13592,14 +13695,14 @@ export class VisibleAreaEventOptions_serializer {
         const valueHolderForRatios  = value.ratios
         valueSerializer.writeInt32((valueHolderForRatios.length).toInt())
         for (let valueHolderForRatiosCounterI = 0; valueHolderForRatiosCounterI < valueHolderForRatios.length; valueHolderForRatiosCounterI++) {
-            const valueHolderForRatiosTmpElement : number = valueHolderForRatios[valueHolderForRatiosCounterI]
-            valueSerializer.writeNumber(valueHolderForRatiosTmpElement)
+            const valueHolderForRatiosTmpElement : double = valueHolderForRatios[valueHolderForRatiosCounterI]
+            valueSerializer.writeFloat64(valueHolderForRatiosTmpElement)
         }
         const valueHolderForExpectedUpdateInterval  = value.expectedUpdateInterval
         if (valueHolderForExpectedUpdateInterval !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForExpectedUpdateIntervalTmpValue  = valueHolderForExpectedUpdateInterval!
-            valueSerializer.writeNumber(valueHolderForExpectedUpdateIntervalTmpValue)
+            valueSerializer.writeInt32(valueHolderForExpectedUpdateIntervalTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13607,17 +13710,17 @@ export class VisibleAreaEventOptions_serializer {
     public static read(buffer: DeserializerBase): VisibleAreaEventOptions {
         let valueDeserializer : DeserializerBase = buffer
         const ratiosTmpBufLength : int32 = valueDeserializer.readInt32()
-        let ratiosTmpBuf : Array<number> = new Array<number>(ratiosTmpBufLength)
+        let ratiosTmpBuf : Array<double> = new Array<double>(ratiosTmpBufLength)
         for (let ratiosTmpBufBufCounterI = 0; ratiosTmpBufBufCounterI < ratiosTmpBufLength; ratiosTmpBufBufCounterI++) {
-            ratiosTmpBuf[ratiosTmpBufBufCounterI] = (valueDeserializer.readNumber() as number)
+            ratiosTmpBuf[ratiosTmpBufBufCounterI] = valueDeserializer.readFloat64()
         }
-        const ratiosTmpResult : Array<number> = ratiosTmpBuf
+        const ratiosTmpResult : Array<double> = ratiosTmpBuf
         const expectedUpdateIntervalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let expectedUpdateIntervalTmpBuf : number | undefined = undefined
+        let expectedUpdateIntervalTmpBuf : int32 | undefined = undefined
         if ((expectedUpdateIntervalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            expectedUpdateIntervalTmpBuf = (valueDeserializer.readNumber() as number)
+            expectedUpdateIntervalTmpBuf = valueDeserializer.readInt32()
         }
-        const expectedUpdateIntervalTmpResult : number | undefined = expectedUpdateIntervalTmpBuf
+        const expectedUpdateIntervalTmpResult : int32 | undefined = expectedUpdateIntervalTmpBuf
         let value : VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult} as VisibleAreaEventOptions)
         return value
     }
@@ -13737,7 +13840,7 @@ export class AnimateParam_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13745,7 +13848,7 @@ export class AnimateParam_serializer {
         if (valueHolderForTempo !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTempoTmpValue  = valueHolderForTempo!
-            valueSerializer.writeNumber(valueHolderForTempoTmpValue)
+            valueSerializer.writeFloat64(valueHolderForTempoTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13754,15 +13857,15 @@ export class AnimateParam_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCurveTmpValue  = valueHolderForCurve!
             if (valueHolderForCurveTmpValue instanceof curves.Curve) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
                 valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
             } else if (valueHolderForCurveTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as string
                 valueSerializer.writeString(valueHolderForCurveTmpValueForIdx1)
             } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCurveTmpValueForIdx2  = valueHolderForCurveTmpValue as curves.ICurve
                 curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx2)
             }
@@ -13773,7 +13876,7 @@ export class AnimateParam_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13781,7 +13884,7 @@ export class AnimateParam_serializer {
         if (valueHolderForIterations !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIterationsTmpValue  = valueHolderForIterations!
-            valueSerializer.writeNumber(valueHolderForIterationsTmpValue)
+            valueSerializer.writeInt32(valueHolderForIterationsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13821,17 +13924,17 @@ export class AnimateParam_serializer {
     public static read(buffer: DeserializerBase): AnimateParam {
         let valueDeserializer : DeserializerBase = buffer
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         const tempoTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let tempoTmpBuf : number | undefined = undefined
+        let tempoTmpBuf : double | undefined = undefined
         if ((tempoTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            tempoTmpBuf = (valueDeserializer.readNumber() as number)
+            tempoTmpBuf = valueDeserializer.readFloat64()
         }
-        const tempoTmpResult : number | undefined = tempoTmpBuf
+        const tempoTmpResult : double | undefined = tempoTmpBuf
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -13850,17 +13953,17 @@ export class AnimateParam_serializer {
         }
         const curveTmpResult : curves.Curve | string | curves.ICurve | undefined = curveTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const iterationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iterationsTmpBuf : number | undefined = undefined
+        let iterationsTmpBuf : int32 | undefined = undefined
         if ((iterationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            iterationsTmpBuf = (valueDeserializer.readNumber() as number)
+            iterationsTmpBuf = valueDeserializer.readInt32()
         }
-        const iterationsTmpResult : number | undefined = iterationsTmpBuf
+        const iterationsTmpResult : int32 | undefined = iterationsTmpBuf
         const playModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let playModeTmpBuf : PlayMode | undefined = undefined
         if ((playModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -13923,7 +14026,7 @@ export class BackgroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13948,19 +14051,19 @@ export class BackgroundBlurStyleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForInactiveColorTmpValue  = valueHolderForInactiveColor!
             if (valueHolderForInactiveColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx0  = valueHolderForInactiveColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForInactiveColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForInactiveColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx1  = valueHolderForInactiveColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForInactiveColorTmpValueForIdx1)
             } else if (valueHolderForInactiveColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx2  = valueHolderForInactiveColorTmpValue as string
                 valueSerializer.writeString(valueHolderForInactiveColorTmpValueForIdx2)
             } else if (valueHolderForInactiveColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx3  = valueHolderForInactiveColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForInactiveColorTmpValueForIdx3)
             }
@@ -13983,11 +14086,11 @@ export class BackgroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14027,12 +14130,12 @@ export class BackgroundEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundEffectOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        valueSerializer.writeNumber(valueHolderForRadius)
+        valueSerializer.writeFloat64(valueHolderForRadius)
         const valueHolderForSaturation  = value.saturation
         if (valueHolderForSaturation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSaturationTmpValue  = valueHolderForSaturation!
-            valueSerializer.writeNumber(valueHolderForSaturationTmpValue)
+            valueSerializer.writeFloat64(valueHolderForSaturationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14040,7 +14143,7 @@ export class BackgroundEffectOptions_serializer {
         if (valueHolderForBrightness !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBrightnessTmpValue  = valueHolderForBrightness!
-            valueSerializer.writeNumber(valueHolderForBrightnessTmpValue)
+            valueSerializer.writeFloat64(valueHolderForBrightnessTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14049,19 +14152,19 @@ export class BackgroundEffectOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -14097,19 +14200,19 @@ export class BackgroundEffectOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForInactiveColorTmpValue  = valueHolderForInactiveColor!
             if (valueHolderForInactiveColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx0  = valueHolderForInactiveColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForInactiveColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForInactiveColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx1  = valueHolderForInactiveColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForInactiveColorTmpValueForIdx1)
             } else if (valueHolderForInactiveColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx2  = valueHolderForInactiveColorTmpValue as string
                 valueSerializer.writeString(valueHolderForInactiveColorTmpValueForIdx2)
             } else if (valueHolderForInactiveColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForInactiveColorTmpValueForIdx3  = valueHolderForInactiveColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForInactiveColorTmpValueForIdx3)
             }
@@ -14119,19 +14222,19 @@ export class BackgroundEffectOptions_serializer {
     }
     public static read(buffer: DeserializerBase): BackgroundEffectOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const radiusTmpResult : double = valueDeserializer.readFloat64()
         const saturationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let saturationTmpBuf : number | undefined = undefined
+        let saturationTmpBuf : double | undefined = undefined
         if ((saturationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            saturationTmpBuf = (valueDeserializer.readNumber() as number)
+            saturationTmpBuf = valueDeserializer.readFloat64()
         }
-        const saturationTmpResult : number | undefined = saturationTmpBuf
+        const saturationTmpResult : double | undefined = saturationTmpBuf
         const brightnessTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let brightnessTmpBuf : number | undefined = undefined
+        let brightnessTmpBuf : double | undefined = undefined
         if ((brightnessTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            brightnessTmpBuf = (valueDeserializer.readNumber() as number)
+            brightnessTmpBuf = valueDeserializer.readFloat64()
         }
-        const brightnessTmpResult : number | undefined = brightnessTmpBuf
+        const brightnessTmpResult : double | undefined = brightnessTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14197,11 +14300,11 @@ export class Bindable_Arkui_Component_Units_ResourceStr_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
@@ -14229,11 +14332,11 @@ export class Bindable_Arkui_Component_Units_ResourceStr_serializer {
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             if (value0 instanceof string) {
-                onChangeTmpBufBufArgsSerializer.writeInt8((0).toChar());
+                onChangeTmpBufBufArgsSerializer.writeInt8((0).toByte());
                 const value0ForIdx0  = value0 as string;
                 onChangeTmpBufBufArgsSerializer.writeString(value0ForIdx0);
             } else if (value0 instanceof Resource) {
-                onChangeTmpBufBufArgsSerializer.writeInt8((1).toChar());
+                onChangeTmpBufBufArgsSerializer.writeInt8((1).toByte());
                 const value0ForIdx1  = value0 as Resource;
                 Resource_serializer.write(onChangeTmpBufBufArgsSerializer, value0ForIdx1);
             }
@@ -14281,19 +14384,19 @@ export class ContentCoverOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -14502,9 +14605,9 @@ export class ContextMenuAnimationOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
             const valueHolderForScaleTmpValue_0  = valueHolderForScaleTmpValue[0]
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue_0)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue_0)
             const valueHolderForScaleTmpValue_1  = valueHolderForScaleTmpValue[1]
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue_1)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue_1)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14521,9 +14624,9 @@ export class ContextMenuAnimationOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHoverScaleTmpValue  = valueHolderForHoverScale!
             const valueHolderForHoverScaleTmpValue_0  = valueHolderForHoverScaleTmpValue[0]
-            valueSerializer.writeNumber(valueHolderForHoverScaleTmpValue_0)
+            valueSerializer.writeFloat64(valueHolderForHoverScaleTmpValue_0)
             const valueHolderForHoverScaleTmpValue_1  = valueHolderForHoverScaleTmpValue[1]
-            valueSerializer.writeNumber(valueHolderForHoverScaleTmpValue_1)
+            valueSerializer.writeFloat64(valueHolderForHoverScaleTmpValue_1)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14533,8 +14636,8 @@ export class ContextMenuAnimationOptions_serializer {
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scaleTmpBuf : AnimationNumberRange | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const scaleTmpBuf_Value0 : number = (valueDeserializer.readNumber() as number)
-            const scaleTmpBuf_Value1 : number = (valueDeserializer.readNumber() as number)
+            const scaleTmpBuf_Value0 : double = valueDeserializer.readFloat64()
+            const scaleTmpBuf_Value1 : double = valueDeserializer.readFloat64()
             scaleTmpBuf = ([scaleTmpBuf_Value0, scaleTmpBuf_Value1] as AnimationNumberRange)
         }
         const scaleTmpResult : AnimationNumberRange | undefined = scaleTmpBuf
@@ -14547,8 +14650,8 @@ export class ContextMenuAnimationOptions_serializer {
         const hoverScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hoverScaleTmpBuf : AnimationNumberRange | undefined = undefined
         if ((hoverScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const hoverScaleTmpBuf_Value0 : number = (valueDeserializer.readNumber() as number)
-            const hoverScaleTmpBuf_Value1 : number = (valueDeserializer.readNumber() as number)
+            const hoverScaleTmpBuf_Value0 : double = valueDeserializer.readFloat64()
+            const hoverScaleTmpBuf_Value1 : double = valueDeserializer.readFloat64()
             hoverScaleTmpBuf = ([hoverScaleTmpBuf_Value0, hoverScaleTmpBuf_Value1] as AnimationNumberRange)
         }
         const hoverScaleTmpResult : AnimationNumberRange | undefined = hoverScaleTmpBuf
@@ -14564,11 +14667,11 @@ export class DragPreviewOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForModeTmpValue  = valueHolderForMode!
             if (TypeChecker.isDragPreviewMode(valueHolderForModeTmpValue)) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForModeTmpValueForIdx0  = valueHolderForModeTmpValue as DragPreviewMode
                 valueSerializer.writeInt32(valueHolderForModeTmpValueForIdx0.valueOf())
             } else if (TypeChecker.isArray_DragPreviewMode(valueHolderForModeTmpValue)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForModeTmpValueForIdx1  = valueHolderForModeTmpValue as Array<DragPreviewMode>
                 valueSerializer.writeInt32((valueHolderForModeTmpValueForIdx1.length).toInt())
                 for (let valueHolderForModeTmpValueForIdx1CounterI = 0; valueHolderForModeTmpValueForIdx1CounterI < valueHolderForModeTmpValueForIdx1.length; valueHolderForModeTmpValueForIdx1CounterI++) {
@@ -14579,18 +14682,26 @@ export class DragPreviewOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForModifier  = value.modifier
+        if (valueHolderForModifier !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModifierTmpValue  = valueHolderForModifier!
+            ImageModifier_serializer.write(valueSerializer, valueHolderForModifierTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForNumberBadge  = value.numberBadge
         if (valueHolderForNumberBadge !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForNumberBadgeTmpValue  = valueHolderForNumberBadge!
             if (valueHolderForNumberBadgeTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForNumberBadgeTmpValueForIdx0  = valueHolderForNumberBadgeTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForNumberBadgeTmpValueForIdx0)
-            } else if (valueHolderForNumberBadgeTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
-                const valueHolderForNumberBadgeTmpValueForIdx1  = valueHolderForNumberBadgeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForNumberBadgeTmpValueForIdx1)
+            } else if (valueHolderForNumberBadgeTmpValue instanceof int64) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForNumberBadgeTmpValueForIdx1  = valueHolderForNumberBadgeTmpValue as int64
+                valueSerializer.writeInt64(valueHolderForNumberBadgeTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -14626,28 +14737,34 @@ export class DragPreviewOptions_serializer {
             modeTmpBuf = (modeTmpBuf_ as DragPreviewMode | Array<DragPreviewMode>)
         }
         const modeTmpResult : DragPreviewMode | Array<DragPreviewMode> | undefined = modeTmpBuf
+        const modifierTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modifierTmpBuf : ImageModifier | undefined = undefined
+        if ((modifierTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            modifierTmpBuf = (ImageModifier_serializer.read(valueDeserializer) as ImageModifier)
+        }
+        const modifierTmpResult : ImageModifier | undefined = modifierTmpBuf
         const numberBadgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let numberBadgeTmpBuf : boolean | number | undefined = undefined
+        let numberBadgeTmpBuf : boolean | int64 | undefined = undefined
         if ((numberBadgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const numberBadgeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let numberBadgeTmpBuf_ : boolean | number | undefined
+            let numberBadgeTmpBuf_ : boolean | int64 | undefined
             if (numberBadgeTmpBuf_UnionSelector == (0).toChar()) {
                 numberBadgeTmpBuf_ = valueDeserializer.readBoolean()
             } else if (numberBadgeTmpBuf_UnionSelector == (1).toChar()) {
-                numberBadgeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                numberBadgeTmpBuf_ = valueDeserializer.readInt64()
             } else {
                 throw new Error("One of the branches for numberBadgeTmpBuf_ has to be chosen through deserialisation.")
             }
-            numberBadgeTmpBuf = (numberBadgeTmpBuf_ as boolean | number)
+            numberBadgeTmpBuf = (numberBadgeTmpBuf_ as boolean | int64)
         }
-        const numberBadgeTmpResult : boolean | number | undefined = numberBadgeTmpBuf
+        const numberBadgeTmpResult : boolean | int64 | undefined = numberBadgeTmpBuf
         const sizeChangeEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let sizeChangeEffectTmpBuf : DraggingSizeChangeEffect | undefined = undefined
         if ((sizeChangeEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             sizeChangeEffectTmpBuf = DraggingSizeChangeEffect.fromValue(valueDeserializer.readInt32())
         }
         const sizeChangeEffectTmpResult : DraggingSizeChangeEffect | undefined = sizeChangeEffectTmpBuf
-        let value : DragPreviewOptions = ({mode: modeTmpResult, numberBadge: numberBadgeTmpResult, sizeChangeEffect: sizeChangeEffectTmpResult} as DragPreviewOptions)
+        let value : DragPreviewOptions = ({mode: modeTmpResult, modifier: modifierTmpResult, numberBadge: numberBadgeTmpResult, sizeChangeEffect: sizeChangeEffectTmpResult} as DragPreviewOptions)
         return value
     }
 }
@@ -14668,7 +14785,7 @@ export class FadingEdgeOptions_serializer {
         const fadingEdgeLengthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fadingEdgeLengthTmpBuf : LengthMetrics | undefined = undefined
         if ((fadingEdgeLengthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fadingEdgeLengthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            fadingEdgeLengthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const fadingEdgeLengthTmpResult : LengthMetrics | undefined = fadingEdgeLengthTmpBuf
         let value : FadingEdgeOptions = ({fadingEdgeLength: fadingEdgeLengthTmpResult} as FadingEdgeOptions)
@@ -14698,7 +14815,7 @@ export class ForegroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14726,11 +14843,11 @@ export class ForegroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14747,18 +14864,18 @@ export class HistoricalPoint_serializer {
         const valueHolderForTouchObject  = value.touchObject
         TouchObject_serializer.write(valueSerializer, valueHolderForTouchObject)
         const valueHolderForSize  = value.size
-        valueSerializer.writeNumber(valueHolderForSize)
+        valueSerializer.writeInt32(valueHolderForSize)
         const valueHolderForForce  = value.force
-        valueSerializer.writeNumber(valueHolderForForce)
+        valueSerializer.writeFloat64(valueHolderForForce)
         const valueHolderForTimestamp  = value.timestamp
-        valueSerializer.writeNumber(valueHolderForTimestamp)
+        valueSerializer.writeInt64(valueHolderForTimestamp)
     }
     public static read(buffer: DeserializerBase): HistoricalPoint {
         let valueDeserializer : DeserializerBase = buffer
         const touchObjectTmpResult : TouchObject = TouchObject_serializer.read(valueDeserializer)
-        const sizeTmpResult : number = (valueDeserializer.readNumber() as number)
-        const forceTmpResult : number = (valueDeserializer.readNumber() as number)
-        const timestampTmpResult : number = (valueDeserializer.readNumber() as number)
+        const sizeTmpResult : int32 = valueDeserializer.readInt32()
+        const forceTmpResult : double = valueDeserializer.readFloat64()
+        const timestampTmpResult : int64 = valueDeserializer.readInt64()
         let value : HistoricalPoint = ({touchObject: touchObjectTmpResult, size: sizeTmpResult, force: forceTmpResult, timestamp: timestampTmpResult} as HistoricalPoint)
         return value
     }
@@ -14770,7 +14887,7 @@ export class KeyframeAnimateParam_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14778,7 +14895,7 @@ export class KeyframeAnimateParam_serializer {
         if (valueHolderForIterations !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIterationsTmpValue  = valueHolderForIterations!
-            valueSerializer.writeNumber(valueHolderForIterationsTmpValue)
+            valueSerializer.writeInt32(valueHolderForIterationsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14802,17 +14919,17 @@ export class KeyframeAnimateParam_serializer {
     public static read(buffer: DeserializerBase): KeyframeAnimateParam {
         let valueDeserializer : DeserializerBase = buffer
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const iterationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iterationsTmpBuf : number | undefined = undefined
+        let iterationsTmpBuf : int32 | undefined = undefined
         if ((iterationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            iterationsTmpBuf = (valueDeserializer.readNumber() as number)
+            iterationsTmpBuf = valueDeserializer.readInt32()
         }
-        const iterationsTmpResult : number | undefined = iterationsTmpBuf
+        const iterationsTmpResult : int32 | undefined = iterationsTmpBuf
         const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onFinishTmpBuf : (() => void) | undefined = undefined
         if ((onFinishTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14856,29 +14973,29 @@ export class LightSource_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForPositionX  = value.positionX
         if (valueHolderForPositionX instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForPositionXForIdx0  = valueHolderForPositionX as string
             valueSerializer.writeString(valueHolderForPositionXForIdx0)
         } else if (valueHolderForPositionX instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForPositionXForIdx1  = valueHolderForPositionX as number
             valueSerializer.writeNumber(valueHolderForPositionXForIdx1)
         } else if (valueHolderForPositionX instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForPositionXForIdx2  = valueHolderForPositionX as Resource
             Resource_serializer.write(valueSerializer, valueHolderForPositionXForIdx2)
         }
         const valueHolderForPositionY  = value.positionY
         if (valueHolderForPositionY instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForPositionYForIdx0  = valueHolderForPositionY as string
             valueSerializer.writeString(valueHolderForPositionYForIdx0)
         } else if (valueHolderForPositionY instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForPositionYForIdx1  = valueHolderForPositionY as number
             valueSerializer.writeNumber(valueHolderForPositionYForIdx1)
         } else if (valueHolderForPositionY instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForPositionYForIdx2  = valueHolderForPositionY as Resource
             Resource_serializer.write(valueSerializer, valueHolderForPositionYForIdx2)
         }
@@ -14889,19 +15006,19 @@ export class LightSource_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -15072,11 +15189,11 @@ export class MenuElement_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
@@ -15085,11 +15202,11 @@ export class MenuElement_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -15213,19 +15330,19 @@ export class PopupMaskType_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForColor  = value.color
         if (valueHolderForColor instanceof Color) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
             valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
         } else if (valueHolderForColor instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForColorForIdx1  = valueHolderForColor as number
             valueSerializer.writeNumber(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForColorForIdx2  = valueHolderForColor as string
             valueSerializer.writeString(valueHolderForColorForIdx2)
         } else if (valueHolderForColor instanceof Resource) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForColorForIdx3  = valueHolderForColor as Resource
             Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
@@ -15247,6 +15364,120 @@ export class PopupMaskType_serializer {
         }
         const colorTmpResult : ResourceColor = (colorTmpBuf as Color | number | string | Resource)
         let value : PopupMaskType = ({color: colorTmpResult} as PopupMaskType)
+        return value
+    }
+}
+export class ResponseRegion_serializer {
+    public static write(buffer: SerializerBase, value: ResponseRegion): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTool  = value.tool
+        if (valueHolderForTool !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForToolTmpValue  = (valueHolderForTool as ResponseRegionSupportedTool)
+            valueSerializer.writeInt32(valueHolderForToolTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForX  = value.x
+        if (valueHolderForX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForXTmpValue  = valueHolderForX!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForY  = value.y
+        if (valueHolderForY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForYTmpValue  = valueHolderForY!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as LengthMetrics
+                LengthMetrics_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as LengthMetrics
+                LengthMetrics_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ResponseRegion {
+        let valueDeserializer : DeserializerBase = buffer
+        const toolTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let toolTmpBuf : ResponseRegionSupportedTool | undefined = undefined
+        if ((toolTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            toolTmpBuf = ResponseRegionSupportedTool.fromValue(valueDeserializer.readInt32())
+        }
+        const toolTmpResult : ResponseRegionSupportedTool | undefined = toolTmpBuf
+        const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let xTmpBuf : LengthMetrics | undefined = undefined
+        if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            xTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const xTmpResult : LengthMetrics | undefined = xTmpBuf
+        const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let yTmpBuf : LengthMetrics | undefined = undefined
+        if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            yTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const yTmpResult : LengthMetrics | undefined = yTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : LengthMetrics | string | undefined = undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : LengthMetrics | string | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+            }
+            widthTmpBuf = (widthTmpBuf_ as LengthMetrics | string)
+        }
+        const widthTmpResult : LengthMetrics | string | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : LengthMetrics | string | undefined = undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : LengthMetrics | string | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+            }
+            heightTmpBuf = (heightTmpBuf_ as LengthMetrics | string)
+        }
+        const heightTmpResult : LengthMetrics | string | undefined = heightTmpBuf
+        let value : ResponseRegion = ({tool: toolTmpResult, x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as ResponseRegion)
         return value
     }
 }
@@ -15294,12 +15525,12 @@ export class ShadowOptions_serializer {
     public static write(buffer: SerializerBase, value: ShadowOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        if (valueHolderForRadius instanceof number) {
-            valueSerializer.writeInt8((0).toChar())
-            const valueHolderForRadiusForIdx0  = valueHolderForRadius as number
-            valueSerializer.writeNumber(valueHolderForRadiusForIdx0)
+        if (valueHolderForRadius instanceof double) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForRadiusForIdx0  = valueHolderForRadius as double
+            valueSerializer.writeFloat64(valueHolderForRadiusForIdx0)
         } else if (valueHolderForRadius instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForRadiusForIdx1  = valueHolderForRadius as Resource
             Resource_serializer.write(valueSerializer, valueHolderForRadiusForIdx1)
         }
@@ -15316,19 +15547,19 @@ export class ShadowOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof ColoringStrategy) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as ColoringStrategy
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx3.getOrdinal())
             }
@@ -15339,12 +15570,12 @@ export class ShadowOptions_serializer {
         if (valueHolderForOffsetX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
-            if (valueHolderForOffsetXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetXTmpValueForIdx0)
+            if (valueHolderForOffsetXTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetXTmpValueForIdx0)
             } else if (valueHolderForOffsetXTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetXTmpValueForIdx1  = valueHolderForOffsetXTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForOffsetXTmpValueForIdx1)
             }
@@ -15355,12 +15586,12 @@ export class ShadowOptions_serializer {
         if (valueHolderForOffsetY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
-            if (valueHolderForOffsetYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetYTmpValueForIdx0)
+            if (valueHolderForOffsetYTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetYTmpValueForIdx0)
             } else if (valueHolderForOffsetYTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetYTmpValueForIdx1  = valueHolderForOffsetYTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForOffsetYTmpValueForIdx1)
             }
@@ -15379,15 +15610,15 @@ export class ShadowOptions_serializer {
     public static read(buffer: DeserializerBase): ShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
         const radiusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let radiusTmpBuf : number | Resource | undefined
+        let radiusTmpBuf : double | Resource | undefined
         if (radiusTmpBufUnionSelector == (0).toChar()) {
-            radiusTmpBuf = (valueDeserializer.readNumber() as number)
+            radiusTmpBuf = valueDeserializer.readFloat64()
         } else if (radiusTmpBufUnionSelector == (1).toChar()) {
             radiusTmpBuf = Resource_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for radiusTmpBuf has to be chosen through deserialisation.")
         }
-        const radiusTmpResult : number | Resource = (radiusTmpBuf as number | Resource)
+        const radiusTmpResult : double | Resource = (radiusTmpBuf as double | Resource)
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : ShadowType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15414,35 +15645,35 @@ export class ShadowOptions_serializer {
         }
         const colorTmpResult : Color | string | Resource | ColoringStrategy | undefined = colorTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetXTmpBuf : number | Resource | undefined = undefined
+        let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetXTmpBuf_ : number | Resource | undefined
+            let offsetXTmpBuf_ : double | Resource | undefined
             if (offsetXTmpBuf_UnionSelector == (0).toChar()) {
-                offsetXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetXTmpBuf_UnionSelector == (1).toChar()) {
                 offsetXTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetXTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetXTmpBuf = (offsetXTmpBuf_ as number | Resource)
+            offsetXTmpBuf = (offsetXTmpBuf_ as double | Resource)
         }
-        const offsetXTmpResult : number | Resource | undefined = offsetXTmpBuf
+        const offsetXTmpResult : double | Resource | undefined = offsetXTmpBuf
         const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetYTmpBuf : number | Resource | undefined = undefined
+        let offsetYTmpBuf : double | Resource | undefined = undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetYTmpBuf_ : number | Resource | undefined
+            let offsetYTmpBuf_ : double | Resource | undefined
             if (offsetYTmpBuf_UnionSelector == (0).toChar()) {
-                offsetYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetYTmpBuf_UnionSelector == (1).toChar()) {
                 offsetYTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetYTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetYTmpBuf = (offsetYTmpBuf_ as number | Resource)
+            offsetYTmpBuf = (offsetYTmpBuf_ as double | Resource)
         }
-        const offsetYTmpResult : number | Resource | undefined = offsetYTmpBuf
+        const offsetYTmpResult : double | Resource | undefined = offsetYTmpBuf
         const fillTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fillTmpBuf : boolean | undefined = undefined
         if ((fillTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15460,7 +15691,7 @@ export class sharedTransitionOptions_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -15469,15 +15700,15 @@ export class sharedTransitionOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCurveTmpValue  = valueHolderForCurve!
             if (valueHolderForCurveTmpValue instanceof curves.Curve) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
                 valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
             } else if (valueHolderForCurveTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as string
                 valueSerializer.writeString(valueHolderForCurveTmpValueForIdx1)
             } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCurveTmpValueForIdx2  = valueHolderForCurveTmpValue as curves.ICurve
                 curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx2)
             }
@@ -15488,7 +15719,7 @@ export class sharedTransitionOptions_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -15504,7 +15735,7 @@ export class sharedTransitionOptions_serializer {
         if (valueHolderForZIndex !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZIndexTmpValue  = valueHolderForZIndex!
-            valueSerializer.writeNumber(valueHolderForZIndexTmpValue)
+            valueSerializer.writeInt32(valueHolderForZIndexTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -15520,11 +15751,11 @@ export class sharedTransitionOptions_serializer {
     public static read(buffer: DeserializerBase): sharedTransitionOptions {
         let valueDeserializer : DeserializerBase = buffer
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15543,11 +15774,11 @@ export class sharedTransitionOptions_serializer {
         }
         const curveTmpResult : curves.Curve | string | curves.ICurve | undefined = curveTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const motionPathTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let motionPathTmpBuf : MotionPathOptions | undefined = undefined
         if ((motionPathTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15555,11 +15786,11 @@ export class sharedTransitionOptions_serializer {
         }
         const motionPathTmpResult : MotionPathOptions | undefined = motionPathTmpBuf
         const zIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zIndexTmpBuf : number | undefined = undefined
+        let zIndexTmpBuf : int32 | undefined = undefined
         if ((zIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            zIndexTmpBuf = (valueDeserializer.readNumber() as number)
+            zIndexTmpBuf = valueDeserializer.readInt32()
         }
-        const zIndexTmpResult : number | undefined = zIndexTmpBuf
+        const zIndexTmpResult : int32 | undefined = zIndexTmpBuf
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : SharedTransitionEffectType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15575,11 +15806,11 @@ export class SheetTitleOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTitle  = value.title
         if (valueHolderForTitle instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForTitleForIdx0  = valueHolderForTitle as string
             valueSerializer.writeString(valueHolderForTitleForIdx0)
         } else if (valueHolderForTitle instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForTitleForIdx1  = valueHolderForTitle as Resource
             Resource_serializer.write(valueSerializer, valueHolderForTitleForIdx1)
         }
@@ -15588,11 +15819,11 @@ export class SheetTitleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSubtitleTmpValue  = valueHolderForSubtitle!
             if (valueHolderForSubtitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSubtitleTmpValueForIdx0  = valueHolderForSubtitleTmpValue as string
                 valueSerializer.writeString(valueHolderForSubtitleTmpValueForIdx0)
             } else if (valueHolderForSubtitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSubtitleTmpValueForIdx1  = valueHolderForSubtitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSubtitleTmpValueForIdx1)
             }
@@ -15674,19 +15905,19 @@ export class TextDecorationOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -15744,15 +15975,15 @@ export class Bindable_Arkui_Component_Units_Length_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as number
             valueSerializer.writeNumber(valueHolderForValueForIdx1)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForValueForIdx2  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx2)
         }
@@ -15782,15 +16013,15 @@ export class Bindable_Arkui_Component_Units_Length_serializer {
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             if (value0 instanceof string) {
-                onChangeTmpBufBufArgsSerializer.writeInt8((0).toChar());
+                onChangeTmpBufBufArgsSerializer.writeInt8((0).toByte());
                 const value0ForIdx0  = value0 as string;
                 onChangeTmpBufBufArgsSerializer.writeString(value0ForIdx0);
             } else if (value0 instanceof number) {
-                onChangeTmpBufBufArgsSerializer.writeInt8((1).toChar());
+                onChangeTmpBufBufArgsSerializer.writeInt8((1).toByte());
                 const value0ForIdx1  = value0 as number;
                 onChangeTmpBufBufArgsSerializer.writeNumber(value0ForIdx1);
             } else if (value0 instanceof Resource) {
-                onChangeTmpBufBufArgsSerializer.writeInt8((2).toChar());
+                onChangeTmpBufBufArgsSerializer.writeInt8((2).toByte());
                 const value0ForIdx2  = value0 as Resource;
                 Resource_serializer.write(onChangeTmpBufBufArgsSerializer, value0ForIdx2);
             }
@@ -15810,15 +16041,15 @@ export class DividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
             if (valueHolderForStrokeWidthTmpValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeWidthTmpValueForIdx0)
             } else if (valueHolderForStrokeWidthTmpValue instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStrokeWidthTmpValueForIdx1)
             } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
             }
@@ -15830,19 +16061,19 @@ export class DividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -15854,15 +16085,15 @@ export class DividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartMarginTmpValue  = valueHolderForStartMargin!
             if (valueHolderForStartMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartMarginTmpValueForIdx0  = valueHolderForStartMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForStartMarginTmpValueForIdx0)
             } else if (valueHolderForStartMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStartMarginTmpValueForIdx1)
             } else if (valueHolderForStartMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStartMarginTmpValueForIdx2  = valueHolderForStartMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStartMarginTmpValueForIdx2)
             }
@@ -15874,15 +16105,15 @@ export class DividerStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndMarginTmpValue  = valueHolderForEndMargin!
             if (valueHolderForEndMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndMarginTmpValueForIdx0  = valueHolderForEndMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForEndMarginTmpValueForIdx0)
             } else if (valueHolderForEndMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForEndMarginTmpValueForIdx1)
             } else if (valueHolderForEndMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForEndMarginTmpValueForIdx2  = valueHolderForEndMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForEndMarginTmpValueForIdx2)
             }
@@ -15903,9 +16134,9 @@ export class DividerStyle_serializer {
                 strokeWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
                 strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
-        } else {
+            } else {
                 throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
-        }
+            }
             strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | number | Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
@@ -15974,15 +16205,15 @@ export class PixelStretchEffectOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTopTmpValue  = valueHolderForTop!
             if (valueHolderForTopTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as string
                 valueSerializer.writeString(valueHolderForTopTmpValueForIdx0)
             } else if (valueHolderForTopTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as number
                 valueSerializer.writeNumber(valueHolderForTopTmpValueForIdx1)
             } else if (valueHolderForTopTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTopTmpValueForIdx2  = valueHolderForTopTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTopTmpValueForIdx2)
             }
@@ -15994,15 +16225,15 @@ export class PixelStretchEffectOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBottomTmpValue  = valueHolderForBottom!
             if (valueHolderForBottomTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBottomTmpValueForIdx0  = valueHolderForBottomTmpValue as string
                 valueSerializer.writeString(valueHolderForBottomTmpValueForIdx0)
             } else if (valueHolderForBottomTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBottomTmpValueForIdx1  = valueHolderForBottomTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBottomTmpValueForIdx1)
             } else if (valueHolderForBottomTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBottomTmpValueForIdx2  = valueHolderForBottomTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBottomTmpValueForIdx2)
             }
@@ -16014,15 +16245,15 @@ export class PixelStretchEffectOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeftTmpValue  = valueHolderForLeft!
             if (valueHolderForLeftTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLeftTmpValueForIdx0  = valueHolderForLeftTmpValue as string
                 valueSerializer.writeString(valueHolderForLeftTmpValueForIdx0)
             } else if (valueHolderForLeftTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLeftTmpValueForIdx1  = valueHolderForLeftTmpValue as number
                 valueSerializer.writeNumber(valueHolderForLeftTmpValueForIdx1)
             } else if (valueHolderForLeftTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForLeftTmpValueForIdx2  = valueHolderForLeftTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForLeftTmpValueForIdx2)
             }
@@ -16034,15 +16265,15 @@ export class PixelStretchEffectOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRightTmpValue  = valueHolderForRight!
             if (valueHolderForRightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRightTmpValueForIdx0  = valueHolderForRightTmpValue as string
                 valueSerializer.writeString(valueHolderForRightTmpValueForIdx0)
             } else if (valueHolderForRightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRightTmpValueForIdx1  = valueHolderForRightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForRightTmpValueForIdx1)
             } else if (valueHolderForRightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForRightTmpValueForIdx2  = valueHolderForRightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForRightTmpValueForIdx2)
             }
@@ -16182,70 +16413,70 @@ export class RadialGradientOptions_serializer {
         const valueHolderForCenter  = value.center
         const valueHolderForCenter_0  = valueHolderForCenter[0]
         if (valueHolderForCenter_0 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForCenter_0ForIdx0  = valueHolderForCenter_0 as string
             valueSerializer.writeString(valueHolderForCenter_0ForIdx0)
         } else if (valueHolderForCenter_0 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForCenter_0ForIdx1  = valueHolderForCenter_0 as number
             valueSerializer.writeNumber(valueHolderForCenter_0ForIdx1)
         } else if (valueHolderForCenter_0 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForCenter_0ForIdx2  = valueHolderForCenter_0 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForCenter_0ForIdx2)
         }
         const valueHolderForCenter_1  = valueHolderForCenter[1]
         if (valueHolderForCenter_1 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForCenter_1ForIdx0  = valueHolderForCenter_1 as string
             valueSerializer.writeString(valueHolderForCenter_1ForIdx0)
         } else if (valueHolderForCenter_1 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForCenter_1ForIdx1  = valueHolderForCenter_1 as number
             valueSerializer.writeNumber(valueHolderForCenter_1ForIdx1)
         } else if (valueHolderForCenter_1 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForCenter_1ForIdx2  = valueHolderForCenter_1 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForCenter_1ForIdx2)
         }
         const valueHolderForRadius  = value.radius
         if (valueHolderForRadius instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForRadiusForIdx0  = valueHolderForRadius as string
             valueSerializer.writeString(valueHolderForRadiusForIdx0)
         } else if (valueHolderForRadius instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForRadiusForIdx1  = valueHolderForRadius as number
             valueSerializer.writeNumber(valueHolderForRadiusForIdx1)
         } else if (valueHolderForRadius instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForRadiusForIdx2  = valueHolderForRadius as Resource
             Resource_serializer.write(valueSerializer, valueHolderForRadiusForIdx2)
         }
         const valueHolderForColors  = value.colors
         valueSerializer.writeInt32((valueHolderForColors.length).toInt())
         for (let valueHolderForColorsCounterI = 0; valueHolderForColorsCounterI < valueHolderForColors.length; valueHolderForColorsCounterI++) {
-            const valueHolderForColorsTmpElement : [ ResourceColor, number ] = valueHolderForColors[valueHolderForColorsCounterI]
+            const valueHolderForColorsTmpElement : [ ResourceColor, double ] = valueHolderForColors[valueHolderForColorsCounterI]
             const valueHolderForColorsTmpElement_0  = valueHolderForColorsTmpElement[0]
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx0  = valueHolderForColorsTmpElement_0 as Color
                 valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.getOrdinal())
             } else if (valueHolderForColorsTmpElement_0 instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx1  = valueHolderForColorsTmpElement_0 as number
                 valueSerializer.writeNumber(valueHolderForColorsTmpElement_0ForIdx1)
             } else if (valueHolderForColorsTmpElement_0 instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx2  = valueHolderForColorsTmpElement_0 as string
                 valueSerializer.writeString(valueHolderForColorsTmpElement_0ForIdx2)
             } else if (valueHolderForColorsTmpElement_0 instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx3  = valueHolderForColorsTmpElement_0 as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0ForIdx3)
             }
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForColorsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
@@ -16296,7 +16527,7 @@ export class RadialGradientOptions_serializer {
         }
         const radiusTmpResult : Length = (radiusTmpBuf as string | number | Resource)
         const colorsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
+        let colorsTmpBuf : Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
@@ -16312,10 +16543,10 @@ export class RadialGradientOptions_serializer {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
             const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
-            const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
+            const colorsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
+            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
-        const colorsTmpResult : Array<[ ResourceColor, number ]> = colorsTmpBuf
+        const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -16334,15 +16565,15 @@ export class Rectangle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
             if (valueHolderForXTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as string
                 valueSerializer.writeString(valueHolderForXTmpValueForIdx0)
             } else if (valueHolderForXTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as number
                 valueSerializer.writeNumber(valueHolderForXTmpValueForIdx1)
             } else if (valueHolderForXTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXTmpValueForIdx2  = valueHolderForXTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForXTmpValueForIdx2)
             }
@@ -16354,15 +16585,15 @@ export class Rectangle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
             if (valueHolderForYTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as string
                 valueSerializer.writeString(valueHolderForYTmpValueForIdx0)
             } else if (valueHolderForYTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as number
                 valueSerializer.writeNumber(valueHolderForYTmpValueForIdx1)
             } else if (valueHolderForYTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForYTmpValueForIdx2  = valueHolderForYTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForYTmpValueForIdx2)
             }
@@ -16374,15 +16605,15 @@ export class Rectangle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -16394,15 +16625,15 @@ export class Rectangle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
             } else if (valueHolderForHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
@@ -16490,29 +16721,29 @@ export class SweepGradientOptions_serializer {
         const valueHolderForCenter  = value.center
         const valueHolderForCenter_0  = valueHolderForCenter[0]
         if (valueHolderForCenter_0 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForCenter_0ForIdx0  = valueHolderForCenter_0 as string
             valueSerializer.writeString(valueHolderForCenter_0ForIdx0)
         } else if (valueHolderForCenter_0 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForCenter_0ForIdx1  = valueHolderForCenter_0 as number
             valueSerializer.writeNumber(valueHolderForCenter_0ForIdx1)
         } else if (valueHolderForCenter_0 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForCenter_0ForIdx2  = valueHolderForCenter_0 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForCenter_0ForIdx2)
         }
         const valueHolderForCenter_1  = valueHolderForCenter[1]
         if (valueHolderForCenter_1 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForCenter_1ForIdx0  = valueHolderForCenter_1 as string
             valueSerializer.writeString(valueHolderForCenter_1ForIdx0)
         } else if (valueHolderForCenter_1 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForCenter_1ForIdx1  = valueHolderForCenter_1 as number
             valueSerializer.writeNumber(valueHolderForCenter_1ForIdx1)
         } else if (valueHolderForCenter_1 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForCenter_1ForIdx2  = valueHolderForCenter_1 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForCenter_1ForIdx2)
         }
@@ -16520,12 +16751,12 @@ export class SweepGradientOptions_serializer {
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
-            if (valueHolderForStartTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStartTmpValueForIdx0)
+            if (valueHolderForStartTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStartTmpValueForIdx0)
             } else if (valueHolderForStartTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as string
                 valueSerializer.writeString(valueHolderForStartTmpValueForIdx1)
             }
@@ -16536,12 +16767,12 @@ export class SweepGradientOptions_serializer {
         if (valueHolderForEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
-            if (valueHolderForEndTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as number
-                valueSerializer.writeNumber(valueHolderForEndTmpValueForIdx0)
+            if (valueHolderForEndTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForEndTmpValueForIdx0)
             } else if (valueHolderForEndTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as string
                 valueSerializer.writeString(valueHolderForEndTmpValueForIdx1)
             }
@@ -16552,12 +16783,12 @@ export class SweepGradientOptions_serializer {
         if (valueHolderForRotation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRotationTmpValue  = valueHolderForRotation!
-            if (valueHolderForRotationTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForRotationTmpValueForIdx0  = valueHolderForRotationTmpValue as number
-                valueSerializer.writeNumber(valueHolderForRotationTmpValueForIdx0)
+            if (valueHolderForRotationTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForRotationTmpValueForIdx0  = valueHolderForRotationTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRotationTmpValueForIdx0)
             } else if (valueHolderForRotationTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRotationTmpValueForIdx1  = valueHolderForRotationTmpValue as string
                 valueSerializer.writeString(valueHolderForRotationTmpValueForIdx1)
             }
@@ -16567,27 +16798,27 @@ export class SweepGradientOptions_serializer {
         const valueHolderForColors  = value.colors
         valueSerializer.writeInt32((valueHolderForColors.length).toInt())
         for (let valueHolderForColorsCounterI = 0; valueHolderForColorsCounterI < valueHolderForColors.length; valueHolderForColorsCounterI++) {
-            const valueHolderForColorsTmpElement : [ ResourceColor, number ] = valueHolderForColors[valueHolderForColorsCounterI]
+            const valueHolderForColorsTmpElement : [ ResourceColor, double ] = valueHolderForColors[valueHolderForColorsCounterI]
             const valueHolderForColorsTmpElement_0  = valueHolderForColorsTmpElement[0]
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx0  = valueHolderForColorsTmpElement_0 as Color
                 valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.getOrdinal())
             } else if (valueHolderForColorsTmpElement_0 instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx1  = valueHolderForColorsTmpElement_0 as number
                 valueSerializer.writeNumber(valueHolderForColorsTmpElement_0ForIdx1)
             } else if (valueHolderForColorsTmpElement_0 instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx2  = valueHolderForColorsTmpElement_0 as string
                 valueSerializer.writeString(valueHolderForColorsTmpElement_0ForIdx2)
             } else if (valueHolderForColorsTmpElement_0 instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorsTmpElement_0ForIdx3  = valueHolderForColorsTmpElement_0 as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0ForIdx3)
             }
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForColorsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
@@ -16626,52 +16857,52 @@ export class SweepGradientOptions_serializer {
         const centerTmpBufValue1 : Length = (centerTmpBufValue1TempBuf as string | number | Resource)
         const centerTmpResult : [ Length, Length ] = ([centerTmpBufValue0, centerTmpBufValue1] as [ Length, Length ])
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let startTmpBuf : number | string | undefined = undefined
+        let startTmpBuf : double | string | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const startTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let startTmpBuf_ : number | string | undefined
+            let startTmpBuf_ : double | string | undefined
             if (startTmpBuf_UnionSelector == (0).toChar()) {
-                startTmpBuf_ = (valueDeserializer.readNumber() as number)
+                startTmpBuf_ = valueDeserializer.readFloat64()
             } else if (startTmpBuf_UnionSelector == (1).toChar()) {
                 startTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for startTmpBuf_ has to be chosen through deserialisation.")
             }
-            startTmpBuf = (startTmpBuf_ as number | string)
+            startTmpBuf = (startTmpBuf_ as double | string)
         }
-        const startTmpResult : number | string | undefined = startTmpBuf
+        const startTmpResult : double | string | undefined = startTmpBuf
         const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let endTmpBuf : number | string | undefined = undefined
+        let endTmpBuf : double | string | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const endTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let endTmpBuf_ : number | string | undefined
+            let endTmpBuf_ : double | string | undefined
             if (endTmpBuf_UnionSelector == (0).toChar()) {
-                endTmpBuf_ = (valueDeserializer.readNumber() as number)
+                endTmpBuf_ = valueDeserializer.readFloat64()
             } else if (endTmpBuf_UnionSelector == (1).toChar()) {
                 endTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for endTmpBuf_ has to be chosen through deserialisation.")
             }
-            endTmpBuf = (endTmpBuf_ as number | string)
+            endTmpBuf = (endTmpBuf_ as double | string)
         }
-        const endTmpResult : number | string | undefined = endTmpBuf
+        const endTmpResult : double | string | undefined = endTmpBuf
         const rotationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let rotationTmpBuf : number | string | undefined = undefined
+        let rotationTmpBuf : double | string | undefined = undefined
         if ((rotationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const rotationTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let rotationTmpBuf_ : number | string | undefined
+            let rotationTmpBuf_ : double | string | undefined
             if (rotationTmpBuf_UnionSelector == (0).toChar()) {
-                rotationTmpBuf_ = (valueDeserializer.readNumber() as number)
+                rotationTmpBuf_ = valueDeserializer.readFloat64()
             } else if (rotationTmpBuf_UnionSelector == (1).toChar()) {
                 rotationTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for rotationTmpBuf_ has to be chosen through deserialisation.")
             }
-            rotationTmpBuf = (rotationTmpBuf_ as number | string)
+            rotationTmpBuf = (rotationTmpBuf_ as double | string)
         }
         const rotationTmpResult : number | string | undefined = rotationTmpBuf
         const colorsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
+        let colorsTmpBuf : Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
@@ -16687,10 +16918,10 @@ export class SweepGradientOptions_serializer {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
             const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
-            const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
+            const colorsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
+            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
-        const colorsTmpResult : Array<[ ResourceColor, number ]> = colorsTmpBuf
+        const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -16708,7 +16939,7 @@ export class TipsOptions_serializer {
         if (valueHolderForAppearingTime !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAppearingTimeTmpValue  = valueHolderForAppearingTime!
-            valueSerializer.writeNumber(valueHolderForAppearingTimeTmpValue)
+            valueSerializer.writeInt32(valueHolderForAppearingTimeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16716,7 +16947,7 @@ export class TipsOptions_serializer {
         if (valueHolderForDisappearingTime !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDisappearingTimeTmpValue  = valueHolderForDisappearingTime!
-            valueSerializer.writeNumber(valueHolderForDisappearingTimeTmpValue)
+            valueSerializer.writeInt32(valueHolderForDisappearingTimeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16724,7 +16955,7 @@ export class TipsOptions_serializer {
         if (valueHolderForAppearingTimeWithContinuousOperation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAppearingTimeWithContinuousOperationTmpValue  = valueHolderForAppearingTimeWithContinuousOperation!
-            valueSerializer.writeNumber(valueHolderForAppearingTimeWithContinuousOperationTmpValue)
+            valueSerializer.writeInt32(valueHolderForAppearingTimeWithContinuousOperationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16732,7 +16963,7 @@ export class TipsOptions_serializer {
         if (valueHolderForDisappearingTimeWithContinuousOperation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDisappearingTimeWithContinuousOperationTmpValue  = valueHolderForDisappearingTimeWithContinuousOperation!
-            valueSerializer.writeNumber(valueHolderForDisappearingTimeWithContinuousOperationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDisappearingTimeWithContinuousOperationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16757,15 +16988,15 @@ export class TipsOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowWidthTmpValue  = valueHolderForArrowWidth!
             if (valueHolderForArrowWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx0  = valueHolderForArrowWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowWidthTmpValueForIdx0)
             } else if (valueHolderForArrowWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx1  = valueHolderForArrowWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowWidthTmpValueForIdx1)
             } else if (valueHolderForArrowWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx2  = valueHolderForArrowWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowWidthTmpValueForIdx2)
             }
@@ -16777,15 +17008,15 @@ export class TipsOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowHeightTmpValue  = valueHolderForArrowHeight!
             if (valueHolderForArrowHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx0  = valueHolderForArrowHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowHeightTmpValueForIdx0)
             } else if (valueHolderForArrowHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx1  = valueHolderForArrowHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowHeightTmpValueForIdx1)
             } else if (valueHolderForArrowHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx2  = valueHolderForArrowHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowHeightTmpValueForIdx2)
             }
@@ -16796,29 +17027,29 @@ export class TipsOptions_serializer {
     public static read(buffer: DeserializerBase): TipsOptions {
         let valueDeserializer : DeserializerBase = buffer
         const appearingTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let appearingTimeTmpBuf : number | undefined = undefined
+        let appearingTimeTmpBuf : int32 | undefined = undefined
         if ((appearingTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            appearingTimeTmpBuf = (valueDeserializer.readNumber() as number)
+            appearingTimeTmpBuf = valueDeserializer.readInt32()
         }
-        const appearingTimeTmpResult : number | undefined = appearingTimeTmpBuf
+        const appearingTimeTmpResult : int32 | undefined = appearingTimeTmpBuf
         const disappearingTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let disappearingTimeTmpBuf : number | undefined = undefined
+        let disappearingTimeTmpBuf : int32 | undefined = undefined
         if ((disappearingTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            disappearingTimeTmpBuf = (valueDeserializer.readNumber() as number)
+            disappearingTimeTmpBuf = valueDeserializer.readInt32()
         }
-        const disappearingTimeTmpResult : number | undefined = disappearingTimeTmpBuf
+        const disappearingTimeTmpResult : int32 | undefined = disappearingTimeTmpBuf
         const appearingTimeWithContinuousOperationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let appearingTimeWithContinuousOperationTmpBuf : number | undefined = undefined
+        let appearingTimeWithContinuousOperationTmpBuf : int32 | undefined = undefined
         if ((appearingTimeWithContinuousOperationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            appearingTimeWithContinuousOperationTmpBuf = (valueDeserializer.readNumber() as number)
+            appearingTimeWithContinuousOperationTmpBuf = valueDeserializer.readInt32()
         }
-        const appearingTimeWithContinuousOperationTmpResult : number | undefined = appearingTimeWithContinuousOperationTmpBuf
+        const appearingTimeWithContinuousOperationTmpResult : int32 | undefined = appearingTimeWithContinuousOperationTmpBuf
         const disappearingTimeWithContinuousOperationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let disappearingTimeWithContinuousOperationTmpBuf : number | undefined = undefined
+        let disappearingTimeWithContinuousOperationTmpBuf : int32 | undefined = undefined
         if ((disappearingTimeWithContinuousOperationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            disappearingTimeWithContinuousOperationTmpBuf = (valueDeserializer.readNumber() as number)
+            disappearingTimeWithContinuousOperationTmpBuf = valueDeserializer.readInt32()
         }
-        const disappearingTimeWithContinuousOperationTmpResult : number | undefined = disappearingTimeWithContinuousOperationTmpBuf
+        const disappearingTimeWithContinuousOperationTmpResult : int32 | undefined = disappearingTimeWithContinuousOperationTmpBuf
         const enableArrowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableArrowTmpBuf : boolean | undefined = undefined
         if ((enableArrowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -16877,27 +17108,27 @@ export class BorderImageOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSliceTmpValue  = valueHolderForSlice!
             if (valueHolderForSliceTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSliceTmpValueForIdx0  = valueHolderForSliceTmpValue as Length
                 if (valueHolderForSliceTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForSliceTmpValueForIdx0ForIdx0  = valueHolderForSliceTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForSliceTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForSliceTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForSliceTmpValueForIdx0ForIdx1  = valueHolderForSliceTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForSliceTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForSliceTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForSliceTmpValueForIdx0ForIdx2  = valueHolderForSliceTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForSliceTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForSliceTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSliceTmpValueForIdx1  = valueHolderForSliceTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForSliceTmpValueForIdx1)
             } else if (valueHolderForSliceTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSliceTmpValueForIdx2  = valueHolderForSliceTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForSliceTmpValueForIdx2)
             }
@@ -16917,15 +17148,15 @@ export class BorderImageOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSourceTmpValue  = valueHolderForSource!
             if (valueHolderForSourceTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSourceTmpValueForIdx0  = valueHolderForSourceTmpValue as string
                 valueSerializer.writeString(valueHolderForSourceTmpValueForIdx0)
             } else if (valueHolderForSourceTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSourceTmpValueForIdx1  = valueHolderForSourceTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSourceTmpValueForIdx1)
             } else if (valueHolderForSourceTmpValue instanceof LinearGradientOptions) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSourceTmpValueForIdx2  = valueHolderForSourceTmpValue as LinearGradientOptions
                 LinearGradientOptions_serializer.write(valueSerializer, valueHolderForSourceTmpValueForIdx2)
             }
@@ -16937,27 +17168,27 @@ export class BorderImageOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as Length
                 if (valueHolderForWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForWidthTmpValueForIdx0ForIdx0  = valueHolderForWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForWidthTmpValueForIdx0ForIdx1  = valueHolderForWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForWidthTmpValueForIdx0ForIdx2  = valueHolderForWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForWidthTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -16969,27 +17200,27 @@ export class BorderImageOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOutsetTmpValue  = valueHolderForOutset!
             if (valueHolderForOutsetTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOutsetTmpValueForIdx0  = valueHolderForOutsetTmpValue as Length
                 if (valueHolderForOutsetTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForOutsetTmpValueForIdx0ForIdx0  = valueHolderForOutsetTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForOutsetTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForOutsetTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForOutsetTmpValueForIdx0ForIdx1  = valueHolderForOutsetTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForOutsetTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForOutsetTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForOutsetTmpValueForIdx0ForIdx2  = valueHolderForOutsetTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForOutsetTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForOutsetTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOutsetTmpValueForIdx1  = valueHolderForOutsetTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForOutsetTmpValueForIdx1)
             } else if (valueHolderForOutsetTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForOutsetTmpValueForIdx2  = valueHolderForOutsetTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForOutsetTmpValueForIdx2)
             }
@@ -17156,15 +17387,15 @@ export class ContextMenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowOffsetTmpValue  = valueHolderForArrowOffset!
             if (valueHolderForArrowOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx0  = valueHolderForArrowOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowOffsetTmpValueForIdx0)
             } else if (valueHolderForArrowOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx1  = valueHolderForArrowOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowOffsetTmpValueForIdx1)
             } else if (valueHolderForArrowOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx2  = valueHolderForArrowOffsetTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowOffsetTmpValueForIdx2)
             }
@@ -17176,11 +17407,11 @@ export class ContextMenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPreviewTmpValue  = valueHolderForPreview!
             if (valueHolderForPreviewTmpValue instanceof MenuPreviewMode) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewTmpValueForIdx0  = valueHolderForPreviewTmpValue as MenuPreviewMode
                 valueSerializer.writeInt32(valueHolderForPreviewTmpValueForIdx0.valueOf())
             } else if (valueHolderForPreviewTmpValue instanceof CustomBuilder) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewTmpValueForIdx1  = valueHolderForPreviewTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValueForIdx1))
             }
@@ -17192,27 +17423,27 @@ export class ContextMenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPreviewBorderRadiusTmpValue  = valueHolderForPreviewBorderRadius!
             if (valueHolderForPreviewBorderRadiusTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewBorderRadiusTmpValueForIdx0  = valueHolderForPreviewBorderRadiusTmpValue as Length
                 if (valueHolderForPreviewBorderRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx0  = valueHolderForPreviewBorderRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForPreviewBorderRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx1  = valueHolderForPreviewBorderRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForPreviewBorderRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx2  = valueHolderForPreviewBorderRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForPreviewBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewBorderRadiusTmpValueForIdx1  = valueHolderForPreviewBorderRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForPreviewBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForPreviewBorderRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPreviewBorderRadiusTmpValueForIdx2  = valueHolderForPreviewBorderRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForPreviewBorderRadiusTmpValueForIdx2)
             }
@@ -17224,27 +17455,27 @@ export class ContextMenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
             if (valueHolderForBorderRadiusTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as Length
                 if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx0  = valueHolderForBorderRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx1  = valueHolderForBorderRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx2  = valueHolderForBorderRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForBorderRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
@@ -17304,19 +17535,19 @@ export class ContextMenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -17368,27 +17599,27 @@ export class ContextMenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOutlineColorTmpValue  = valueHolderForOutlineColor!
             if (valueHolderForOutlineColorTmpValue instanceof ResourceColor) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOutlineColorTmpValueForIdx0  = valueHolderForOutlineColorTmpValue as ResourceColor
                 if (valueHolderForOutlineColorTmpValueForIdx0 instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx0  = valueHolderForOutlineColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForOutlineColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx1  = valueHolderForOutlineColorTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForOutlineColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx2  = valueHolderForOutlineColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForOutlineColorTmpValueForIdx0ForIdx2)
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx3  = valueHolderForOutlineColorTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForOutlineColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForOutlineColorTmpValue instanceof EdgeColors) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOutlineColorTmpValueForIdx1  = valueHolderForOutlineColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForOutlineColorTmpValueForIdx1)
             }
@@ -17400,23 +17631,23 @@ export class ContextMenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOutlineWidthTmpValue  = valueHolderForOutlineWidth!
             if (valueHolderForOutlineWidthTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOutlineWidthTmpValueForIdx0  = valueHolderForOutlineWidthTmpValue as Dimension
                 if (valueHolderForOutlineWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForOutlineWidthTmpValueForIdx0ForIdx0  = valueHolderForOutlineWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForOutlineWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForOutlineWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForOutlineWidthTmpValueForIdx0ForIdx1  = valueHolderForOutlineWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForOutlineWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForOutlineWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForOutlineWidthTmpValueForIdx0ForIdx2  = valueHolderForOutlineWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForOutlineWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForOutlineWidthTmpValue instanceof EdgeOutlineWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOutlineWidthTmpValueForIdx1  = valueHolderForOutlineWidthTmpValue as EdgeOutlineWidths
                 EdgeOutlineWidths_serializer.write(valueSerializer, valueHolderForOutlineWidthTmpValueForIdx1)
             }
@@ -17762,21 +17993,21 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPopupColorTmpValue  = valueHolderForPopupColor!
             if (valueHolderForPopupColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPopupColorTmpValueForIdx0  = valueHolderForPopupColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPopupColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPopupColorTmpValueForIdx1  = valueHolderForPopupColorTmpValue as string
                 valueSerializer.writeString(valueHolderForPopupColorTmpValueForIdx1)
             } else if (valueHolderForPopupColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPopupColorTmpValueForIdx2  = valueHolderForPopupColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPopupColorTmpValueForIdx2)
-            } else if (valueHolderForPopupColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((3).toChar())
-                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForPopupColorTmpValueForIdx3)
+            } else if (valueHolderForPopupColorTmpValue instanceof int64) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as int64
+                valueSerializer.writeInt64(valueHolderForPopupColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -17810,15 +18041,15 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowOffsetTmpValue  = valueHolderForArrowOffset!
             if (valueHolderForArrowOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx0  = valueHolderForArrowOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowOffsetTmpValueForIdx0)
             } else if (valueHolderForArrowOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx1  = valueHolderForArrowOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowOffsetTmpValueForIdx1)
             } else if (valueHolderForArrowOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx2  = valueHolderForArrowOffsetTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowOffsetTmpValueForIdx2)
             }
@@ -17838,11 +18069,11 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaskTmpValue  = valueHolderForMask!
             if (valueHolderForMaskTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaskTmpValueForIdx0  = valueHolderForMaskTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForMaskTmpValueForIdx0)
             } else if (valueHolderForMaskTmpValue instanceof PopupMaskType) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaskTmpValueForIdx1  = valueHolderForMaskTmpValue as PopupMaskType
                 PopupMaskType_serializer.write(valueSerializer, valueHolderForMaskTmpValueForIdx1)
             }
@@ -17854,15 +18085,15 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTargetSpaceTmpValue  = valueHolderForTargetSpace!
             if (valueHolderForTargetSpaceTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx0  = valueHolderForTargetSpaceTmpValue as string
                 valueSerializer.writeString(valueHolderForTargetSpaceTmpValueForIdx0)
             } else if (valueHolderForTargetSpaceTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx1  = valueHolderForTargetSpaceTmpValue as number
                 valueSerializer.writeNumber(valueHolderForTargetSpaceTmpValueForIdx1)
             } else if (valueHolderForTargetSpaceTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx2  = valueHolderForTargetSpaceTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTargetSpaceTmpValueForIdx2)
             }
@@ -17882,15 +18113,15 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -17910,15 +18141,15 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowWidthTmpValue  = valueHolderForArrowWidth!
             if (valueHolderForArrowWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx0  = valueHolderForArrowWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowWidthTmpValueForIdx0)
             } else if (valueHolderForArrowWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx1  = valueHolderForArrowWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowWidthTmpValueForIdx1)
             } else if (valueHolderForArrowWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx2  = valueHolderForArrowWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowWidthTmpValueForIdx2)
             }
@@ -17930,15 +18161,15 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowHeightTmpValue  = valueHolderForArrowHeight!
             if (valueHolderForArrowHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx0  = valueHolderForArrowHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowHeightTmpValueForIdx0)
             } else if (valueHolderForArrowHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx1  = valueHolderForArrowHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowHeightTmpValueForIdx1)
             } else if (valueHolderForArrowHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx2  = valueHolderForArrowHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowHeightTmpValueForIdx2)
             }
@@ -17950,15 +18181,15 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
             if (valueHolderForRadiusTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as number
                 valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx1)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForRadiusTmpValueForIdx2  = valueHolderForRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx2)
             }
@@ -17970,11 +18201,11 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -18010,11 +18241,11 @@ export class CustomPopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOnWillDismissTmpValue  = valueHolderForOnWillDismiss!
             if (valueHolderForOnWillDismissTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0  = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
             } else if (valueHolderForOnWillDismissTmpValue instanceof ((value0: DismissPopupAction) => void)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1  = valueHolderForOnWillDismissTmpValue as ((value0: DismissPopupAction) => void)
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
             }
@@ -18067,10 +18298,10 @@ export class CustomPopupOptions_serializer {
         }
         const placementTmpResult : Placement | undefined = placementTmpBuf
         const popupColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let popupColorTmpBuf : Color | string | Resource | number | undefined = undefined
+        let popupColorTmpBuf : Color | string | Resource | int64 | undefined = undefined
         if ((popupColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let popupColorTmpBuf_ : Color | string | Resource | number | undefined
+            let popupColorTmpBuf_ : Color | string | Resource | int64 | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
                 popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
@@ -18078,13 +18309,13 @@ export class CustomPopupOptions_serializer {
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {
                 popupColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else if (popupColorTmpBuf_UnionSelector == (3).toChar()) {
-                popupColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                popupColorTmpBuf_ = valueDeserializer.readInt64()
             } else {
                 throw new Error("One of the branches for popupColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | number)
+            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | int64)
         }
-        const popupColorTmpResult : Color | string | Resource | number | undefined = popupColorTmpBuf
+        const popupColorTmpResult : Color | string | Resource | int64 | undefined = popupColorTmpBuf
         const enableArrowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableArrowTmpBuf : boolean | undefined = undefined
         if ((enableArrowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -18438,15 +18669,15 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowOffsetTmpValue  = valueHolderForArrowOffset!
             if (valueHolderForArrowOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx0  = valueHolderForArrowOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowOffsetTmpValueForIdx0)
             } else if (valueHolderForArrowOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx1  = valueHolderForArrowOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowOffsetTmpValueForIdx1)
             } else if (valueHolderForArrowOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx2  = valueHolderForArrowOffsetTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowOffsetTmpValueForIdx2)
             }
@@ -18458,11 +18689,11 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPreviewTmpValue  = valueHolderForPreview!
             if (valueHolderForPreviewTmpValue instanceof MenuPreviewMode) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewTmpValueForIdx0  = valueHolderForPreviewTmpValue as MenuPreviewMode
                 valueSerializer.writeInt32(valueHolderForPreviewTmpValueForIdx0.valueOf())
             } else if (valueHolderForPreviewTmpValue instanceof CustomBuilder) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewTmpValueForIdx1  = valueHolderForPreviewTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValueForIdx1))
             }
@@ -18474,27 +18705,27 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPreviewBorderRadiusTmpValue  = valueHolderForPreviewBorderRadius!
             if (valueHolderForPreviewBorderRadiusTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewBorderRadiusTmpValueForIdx0  = valueHolderForPreviewBorderRadiusTmpValue as Length
                 if (valueHolderForPreviewBorderRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx0  = valueHolderForPreviewBorderRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForPreviewBorderRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx1  = valueHolderForPreviewBorderRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForPreviewBorderRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx2  = valueHolderForPreviewBorderRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForPreviewBorderRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForPreviewBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewBorderRadiusTmpValueForIdx1  = valueHolderForPreviewBorderRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForPreviewBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForPreviewBorderRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPreviewBorderRadiusTmpValueForIdx2  = valueHolderForPreviewBorderRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForPreviewBorderRadiusTmpValueForIdx2)
             }
@@ -18506,27 +18737,27 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
             if (valueHolderForBorderRadiusTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as Length
                 if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx0  = valueHolderForBorderRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx1  = valueHolderForBorderRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx2  = valueHolderForBorderRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForBorderRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
@@ -18586,19 +18817,19 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -18650,27 +18881,27 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOutlineColorTmpValue  = valueHolderForOutlineColor!
             if (valueHolderForOutlineColorTmpValue instanceof ResourceColor) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOutlineColorTmpValueForIdx0  = valueHolderForOutlineColorTmpValue as ResourceColor
                 if (valueHolderForOutlineColorTmpValueForIdx0 instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx0  = valueHolderForOutlineColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForOutlineColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx1  = valueHolderForOutlineColorTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForOutlineColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx2  = valueHolderForOutlineColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForOutlineColorTmpValueForIdx0ForIdx2)
                 } else if (valueHolderForOutlineColorTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForOutlineColorTmpValueForIdx0ForIdx3  = valueHolderForOutlineColorTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForOutlineColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForOutlineColorTmpValue instanceof EdgeColors) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOutlineColorTmpValueForIdx1  = valueHolderForOutlineColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForOutlineColorTmpValueForIdx1)
             }
@@ -18682,23 +18913,23 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOutlineWidthTmpValue  = valueHolderForOutlineWidth!
             if (valueHolderForOutlineWidthTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOutlineWidthTmpValueForIdx0  = valueHolderForOutlineWidthTmpValue as Dimension
                 if (valueHolderForOutlineWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForOutlineWidthTmpValueForIdx0ForIdx0  = valueHolderForOutlineWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForOutlineWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForOutlineWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForOutlineWidthTmpValueForIdx0ForIdx1  = valueHolderForOutlineWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForOutlineWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForOutlineWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForOutlineWidthTmpValueForIdx0ForIdx2  = valueHolderForOutlineWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForOutlineWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForOutlineWidthTmpValue instanceof EdgeOutlineWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOutlineWidthTmpValueForIdx1  = valueHolderForOutlineWidthTmpValue as EdgeOutlineWidths
                 EdgeOutlineWidths_serializer.write(valueSerializer, valueHolderForOutlineWidthTmpValueForIdx1)
             }
@@ -18718,11 +18949,11 @@ export class MenuOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTitleTmpValue  = valueHolderForTitle!
             if (valueHolderForTitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTitleTmpValueForIdx0  = valueHolderForTitleTmpValue as string
                 valueSerializer.writeString(valueHolderForTitleTmpValueForIdx0)
             } else if (valueHolderForTitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTitleTmpValueForIdx1  = valueHolderForTitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTitleTmpValueForIdx1)
             }
@@ -19114,15 +19345,15 @@ export class PickerDialogButtonStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
             if (valueHolderForFontSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForFontSizeTmpValueForIdx0)
             } else if (valueHolderForFontSizeTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontSizeTmpValueForIdx1)
             } else if (valueHolderForFontSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontSizeTmpValueForIdx2  = valueHolderForFontSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx2)
             }
@@ -19134,19 +19365,19 @@ export class PickerDialogButtonStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
             if (valueHolderForFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
             } else if (valueHolderForFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
@@ -19158,15 +19389,15 @@ export class PickerDialogButtonStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
             if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0.valueOf())
             } else if (valueHolderForFontWeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx1)
             } else if (valueHolderForFontWeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as string
                 valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2)
             }
@@ -19186,11 +19417,11 @@ export class PickerDialogButtonStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontFamilyTmpValue  = valueHolderForFontFamily!
             if (valueHolderForFontFamilyTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx0  = valueHolderForFontFamilyTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontFamilyTmpValueForIdx0)
             } else if (valueHolderForFontFamilyTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx1  = valueHolderForFontFamilyTmpValue as string
                 valueSerializer.writeString(valueHolderForFontFamilyTmpValueForIdx1)
             }
@@ -19202,19 +19433,19 @@ export class PickerDialogButtonStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -19226,23 +19457,23 @@ export class PickerDialogButtonStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
             if (valueHolderForBorderRadiusTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as Length
                 if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx0  = valueHolderForBorderRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx1  = valueHolderForBorderRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx2  = valueHolderForBorderRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx1)
             }
@@ -19415,19 +19646,19 @@ export class PickerTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -19490,19 +19721,19 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPopupColorTmpValue  = valueHolderForPopupColor!
             if (valueHolderForPopupColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPopupColorTmpValueForIdx0  = valueHolderForPopupColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPopupColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPopupColorTmpValueForIdx1  = valueHolderForPopupColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForPopupColorTmpValueForIdx1)
             } else if (valueHolderForPopupColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPopupColorTmpValueForIdx2  = valueHolderForPopupColorTmpValue as string
                 valueSerializer.writeString(valueHolderForPopupColorTmpValueForIdx2)
             } else if (valueHolderForPopupColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPopupColorTmpValueForIdx3)
             }
@@ -19538,15 +19769,15 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowOffsetTmpValue  = valueHolderForArrowOffset!
             if (valueHolderForArrowOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx0  = valueHolderForArrowOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowOffsetTmpValueForIdx0)
             } else if (valueHolderForArrowOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx1  = valueHolderForArrowOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowOffsetTmpValueForIdx1)
             } else if (valueHolderForArrowOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx2  = valueHolderForArrowOffsetTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowOffsetTmpValueForIdx2)
             }
@@ -19566,11 +19797,11 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaskTmpValue  = valueHolderForMask!
             if (valueHolderForMaskTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaskTmpValueForIdx0  = valueHolderForMaskTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForMaskTmpValueForIdx0)
             } else if (valueHolderForMaskTmpValue instanceof PopupMaskType) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaskTmpValueForIdx1  = valueHolderForMaskTmpValue as PopupMaskType
                 PopupMaskType_serializer.write(valueSerializer, valueHolderForMaskTmpValueForIdx1)
             }
@@ -19582,15 +19813,15 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTargetSpaceTmpValue  = valueHolderForTargetSpace!
             if (valueHolderForTargetSpaceTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx0  = valueHolderForTargetSpaceTmpValue as string
                 valueSerializer.writeString(valueHolderForTargetSpaceTmpValueForIdx0)
             } else if (valueHolderForTargetSpaceTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx1  = valueHolderForTargetSpaceTmpValue as number
                 valueSerializer.writeNumber(valueHolderForTargetSpaceTmpValueForIdx1)
             } else if (valueHolderForTargetSpaceTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx2  = valueHolderForTargetSpaceTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTargetSpaceTmpValueForIdx2)
             }
@@ -19610,15 +19841,15 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -19638,15 +19869,15 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowWidthTmpValue  = valueHolderForArrowWidth!
             if (valueHolderForArrowWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx0  = valueHolderForArrowWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowWidthTmpValueForIdx0)
             } else if (valueHolderForArrowWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx1  = valueHolderForArrowWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowWidthTmpValueForIdx1)
             } else if (valueHolderForArrowWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx2  = valueHolderForArrowWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowWidthTmpValueForIdx2)
             }
@@ -19658,15 +19889,15 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowHeightTmpValue  = valueHolderForArrowHeight!
             if (valueHolderForArrowHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx0  = valueHolderForArrowHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowHeightTmpValueForIdx0)
             } else if (valueHolderForArrowHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx1  = valueHolderForArrowHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowHeightTmpValueForIdx1)
             } else if (valueHolderForArrowHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx2  = valueHolderForArrowHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowHeightTmpValueForIdx2)
             }
@@ -19678,15 +19909,15 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
             if (valueHolderForRadiusTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as number
                 valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx1)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForRadiusTmpValueForIdx2  = valueHolderForRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx2)
             }
@@ -19698,11 +19929,11 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -19738,11 +19969,11 @@ export class PopupCommonOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOnWillDismissTmpValue  = valueHolderForOnWillDismiss!
             if (valueHolderForOnWillDismissTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0  = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
             } else if (valueHolderForOnWillDismissTmpValue instanceof ((value0: DismissPopupAction) => void)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1  = valueHolderForOnWillDismissTmpValue as ((value0: DismissPopupAction) => void)
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
             }
@@ -20042,19 +20273,19 @@ export class PopupMessageOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextColorTmpValue  = valueHolderForTextColor!
             if (valueHolderForTextColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextColorTmpValueForIdx0  = valueHolderForTextColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForTextColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForTextColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextColorTmpValueForIdx1  = valueHolderForTextColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForTextColorTmpValueForIdx1)
             } else if (valueHolderForTextColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTextColorTmpValueForIdx2  = valueHolderForTextColorTmpValue as string
                 valueSerializer.writeString(valueHolderForTextColorTmpValueForIdx2)
             } else if (valueHolderForTextColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForTextColorTmpValueForIdx3  = valueHolderForTextColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTextColorTmpValueForIdx3)
             }
@@ -20109,19 +20340,19 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -20165,22 +20396,22 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof SheetSize) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as SheetSize
                 valueSerializer.writeInt32(valueHolderForHeightTmpValueForIdx0.valueOf())
             } else if (valueHolderForHeightTmpValue instanceof Length) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as Length
                 if (valueHolderForHeightTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForHeightTmpValueForIdx1ForIdx0  = valueHolderForHeightTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForHeightTmpValueForIdx1 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForHeightTmpValueForIdx1ForIdx1  = valueHolderForHeightTmpValueForIdx1 as number
                     valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1ForIdx1)
                 } else if (valueHolderForHeightTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForHeightTmpValueForIdx1ForIdx2  = valueHolderForHeightTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx1ForIdx2)
                 }
@@ -20201,19 +20432,19 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaskColorTmpValue  = valueHolderForMaskColor!
             if (valueHolderForMaskColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaskColorTmpValueForIdx0  = valueHolderForMaskColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForMaskColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForMaskColorTmpValueForIdx1)
             } else if (valueHolderForMaskColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMaskColorTmpValueForIdx2  = valueHolderForMaskColorTmpValue as string
                 valueSerializer.writeString(valueHolderForMaskColorTmpValueForIdx2)
             } else if (valueHolderForMaskColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForMaskColorTmpValueForIdx3  = valueHolderForMaskColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMaskColorTmpValueForIdx3)
             }
@@ -20224,83 +20455,165 @@ export class SheetOptions_serializer {
         if (valueHolderForDetents !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDetentsTmpValue  = valueHolderForDetents!
-            const valueHolderForDetentsTmpValue_0  = valueHolderForDetentsTmpValue[0]
-            if (valueHolderForDetentsTmpValue_0 instanceof SheetSize) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForDetentsTmpValue_0ForIdx0  = valueHolderForDetentsTmpValue_0 as SheetSize
-                valueSerializer.writeInt32(valueHolderForDetentsTmpValue_0ForIdx0.valueOf())
-            } else if (valueHolderForDetentsTmpValue_0 instanceof Length) {
-                valueSerializer.writeInt8((1).toChar())
-                const valueHolderForDetentsTmpValue_0ForIdx1  = valueHolderForDetentsTmpValue_0 as Length
-                if (valueHolderForDetentsTmpValue_0ForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const valueHolderForDetentsTmpValue_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValue_0ForIdx1 as string
-                    valueSerializer.writeString(valueHolderForDetentsTmpValue_0ForIdx1ForIdx0)
-                } else if (valueHolderForDetentsTmpValue_0ForIdx1 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const valueHolderForDetentsTmpValue_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValue_0ForIdx1 as number
-                    valueSerializer.writeNumber(valueHolderForDetentsTmpValue_0ForIdx1ForIdx1)
-                } else if (valueHolderForDetentsTmpValue_0ForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const valueHolderForDetentsTmpValue_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValue_0ForIdx1 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValue_0ForIdx1ForIdx2)
-                }
-            }
-            const valueHolderForDetentsTmpValue_1  = valueHolderForDetentsTmpValue[1]
-            if (valueHolderForDetentsTmpValue_1 !== undefined) {
-                valueSerializer.writeInt8(RuntimeType.OBJECT)
-                const valueHolderForDetentsTmpValue_1TmpValue  = valueHolderForDetentsTmpValue_1!
-                if (valueHolderForDetentsTmpValue_1TmpValue instanceof SheetSize) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const valueHolderForDetentsTmpValue_1TmpValueForIdx0  = valueHolderForDetentsTmpValue_1TmpValue as SheetSize
-                    valueSerializer.writeInt32(valueHolderForDetentsTmpValue_1TmpValueForIdx0.valueOf())
-                } else if (valueHolderForDetentsTmpValue_1TmpValue instanceof Length) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const valueHolderForDetentsTmpValue_1TmpValueForIdx1  = valueHolderForDetentsTmpValue_1TmpValue as Length
-                    if (valueHolderForDetentsTmpValue_1TmpValueForIdx1 instanceof string) {
-                        valueSerializer.writeInt8((0).toChar())
-                        const valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValue_1TmpValueForIdx1 as string
-                        valueSerializer.writeString(valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx0)
-                    } else if (valueHolderForDetentsTmpValue_1TmpValueForIdx1 instanceof number) {
-                        valueSerializer.writeInt8((1).toChar())
-                        const valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValue_1TmpValueForIdx1 as number
-                        valueSerializer.writeNumber(valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx1)
-                    } else if (valueHolderForDetentsTmpValue_1TmpValueForIdx1 instanceof Resource) {
-                        valueSerializer.writeInt8((2).toChar())
-                        const valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValue_1TmpValueForIdx1 as Resource
-                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx2)
+            if (valueHolderForDetentsTmpValue instanceof SingleLengthDetent) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForDetentsTmpValueForIdx0  = valueHolderForDetentsTmpValue as SingleLengthDetent
+                const valueHolderForDetentsTmpValueForIdx0_0  = valueHolderForDetentsTmpValueForIdx0[0]
+                if (valueHolderForDetentsTmpValueForIdx0_0 instanceof SheetSize) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForDetentsTmpValueForIdx0_0ForIdx0  = valueHolderForDetentsTmpValueForIdx0_0 as SheetSize
+                    valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx0_0ForIdx0.valueOf())
+                } else if (valueHolderForDetentsTmpValueForIdx0_0 instanceof Length) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForDetentsTmpValueForIdx0_0ForIdx1  = valueHolderForDetentsTmpValueForIdx0_0 as Length
+                    if (valueHolderForDetentsTmpValueForIdx0_0ForIdx1 instanceof string) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx0_0ForIdx1 as string
+                        valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx0)
+                    } else if (valueHolderForDetentsTmpValueForIdx0_0ForIdx1 instanceof number) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx0_0ForIdx1 as number
+                        valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx1)
+                    } else if (valueHolderForDetentsTmpValueForIdx0_0ForIdx1 instanceof Resource) {
+                        valueSerializer.writeInt8((2).toByte())
+                        const valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx0_0ForIdx1 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2)
                     }
                 }
-            } else {
-                valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-            }
-            const valueHolderForDetentsTmpValue_2  = valueHolderForDetentsTmpValue[2]
-            if (valueHolderForDetentsTmpValue_2 !== undefined) {
-                valueSerializer.writeInt8(RuntimeType.OBJECT)
-                const valueHolderForDetentsTmpValue_2TmpValue  = valueHolderForDetentsTmpValue_2!
-                if (valueHolderForDetentsTmpValue_2TmpValue instanceof SheetSize) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const valueHolderForDetentsTmpValue_2TmpValueForIdx0  = valueHolderForDetentsTmpValue_2TmpValue as SheetSize
-                    valueSerializer.writeInt32(valueHolderForDetentsTmpValue_2TmpValueForIdx0.valueOf())
-                } else if (valueHolderForDetentsTmpValue_2TmpValue instanceof Length) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const valueHolderForDetentsTmpValue_2TmpValueForIdx1  = valueHolderForDetentsTmpValue_2TmpValue as Length
-                    if (valueHolderForDetentsTmpValue_2TmpValueForIdx1 instanceof string) {
-                        valueSerializer.writeInt8((0).toChar())
-                        const valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValue_2TmpValueForIdx1 as string
-                        valueSerializer.writeString(valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx0)
-                    } else if (valueHolderForDetentsTmpValue_2TmpValueForIdx1 instanceof number) {
-                        valueSerializer.writeInt8((1).toChar())
-                        const valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValue_2TmpValueForIdx1 as number
-                        valueSerializer.writeNumber(valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx1)
-                    } else if (valueHolderForDetentsTmpValue_2TmpValueForIdx1 instanceof Resource) {
-                        valueSerializer.writeInt8((2).toChar())
-                        const valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValue_2TmpValueForIdx1 as Resource
-                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx2)
+            } else if (valueHolderForDetentsTmpValue instanceof DoubleLengthDetents) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForDetentsTmpValueForIdx1  = valueHolderForDetentsTmpValue as DoubleLengthDetents
+                const valueHolderForDetentsTmpValueForIdx1_0  = valueHolderForDetentsTmpValueForIdx1[0]
+                if (valueHolderForDetentsTmpValueForIdx1_0 instanceof SheetSize) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForDetentsTmpValueForIdx1_0ForIdx0  = valueHolderForDetentsTmpValueForIdx1_0 as SheetSize
+                    valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx1_0ForIdx0.valueOf())
+                } else if (valueHolderForDetentsTmpValueForIdx1_0 instanceof Length) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForDetentsTmpValueForIdx1_0ForIdx1  = valueHolderForDetentsTmpValueForIdx1_0 as Length
+                    if (valueHolderForDetentsTmpValueForIdx1_0ForIdx1 instanceof string) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx1_0ForIdx1 as string
+                        valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx0)
+                    } else if (valueHolderForDetentsTmpValueForIdx1_0ForIdx1 instanceof number) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx1_0ForIdx1 as number
+                        valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx1)
+                    } else if (valueHolderForDetentsTmpValueForIdx1_0ForIdx1 instanceof Resource) {
+                        valueSerializer.writeInt8((2).toByte())
+                        const valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx1_0ForIdx1 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx2)
                     }
                 }
-            } else {
-                valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                const valueHolderForDetentsTmpValueForIdx1_1  = valueHolderForDetentsTmpValueForIdx1[1]
+                if (valueHolderForDetentsTmpValueForIdx1_1 !== undefined) {
+                    valueSerializer.writeInt8(RuntimeType.OBJECT)
+                    const valueHolderForDetentsTmpValueForIdx1_1TmpValue  = valueHolderForDetentsTmpValueForIdx1_1!
+                    if (valueHolderForDetentsTmpValueForIdx1_1TmpValue instanceof SheetSize) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx0  = valueHolderForDetentsTmpValueForIdx1_1TmpValue as SheetSize
+                        valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx0.valueOf())
+                    } else if (valueHolderForDetentsTmpValueForIdx1_1TmpValue instanceof Length) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1  = valueHolderForDetentsTmpValueForIdx1_1TmpValue as Length
+                        if (valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 instanceof string) {
+                            valueSerializer.writeInt8((0).toByte())
+                            const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 as string
+                            valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx0)
+                        } else if (valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 instanceof number) {
+                            valueSerializer.writeInt8((1).toByte())
+                            const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 as number
+                            valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx1)
+                        } else if (valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 instanceof Resource) {
+                            valueSerializer.writeInt8((2).toByte())
+                            const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 as Resource
+                            Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx2)
+                        }
+                    }
+                } else {
+                    valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                }
+            } else if (valueHolderForDetentsTmpValue instanceof TripleLengthDetents) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForDetentsTmpValueForIdx2  = valueHolderForDetentsTmpValue as TripleLengthDetents
+                const valueHolderForDetentsTmpValueForIdx2_0  = valueHolderForDetentsTmpValueForIdx2[0]
+                if (valueHolderForDetentsTmpValueForIdx2_0 instanceof SheetSize) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForDetentsTmpValueForIdx2_0ForIdx0  = valueHolderForDetentsTmpValueForIdx2_0 as SheetSize
+                    valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx2_0ForIdx0.valueOf())
+                } else if (valueHolderForDetentsTmpValueForIdx2_0 instanceof Length) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForDetentsTmpValueForIdx2_0ForIdx1  = valueHolderForDetentsTmpValueForIdx2_0 as Length
+                    if (valueHolderForDetentsTmpValueForIdx2_0ForIdx1 instanceof string) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx2_0ForIdx1 as string
+                        valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx0)
+                    } else if (valueHolderForDetentsTmpValueForIdx2_0ForIdx1 instanceof number) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx2_0ForIdx1 as number
+                        valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx1)
+                    } else if (valueHolderForDetentsTmpValueForIdx2_0ForIdx1 instanceof Resource) {
+                        valueSerializer.writeInt8((2).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx2_0ForIdx1 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx2)
+                    }
+                }
+                const valueHolderForDetentsTmpValueForIdx2_1  = valueHolderForDetentsTmpValueForIdx2[1]
+                if (valueHolderForDetentsTmpValueForIdx2_1 !== undefined) {
+                    valueSerializer.writeInt8(RuntimeType.OBJECT)
+                    const valueHolderForDetentsTmpValueForIdx2_1TmpValue  = valueHolderForDetentsTmpValueForIdx2_1!
+                    if (valueHolderForDetentsTmpValueForIdx2_1TmpValue instanceof SheetSize) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx0  = valueHolderForDetentsTmpValueForIdx2_1TmpValue as SheetSize
+                        valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx0.valueOf())
+                    } else if (valueHolderForDetentsTmpValueForIdx2_1TmpValue instanceof Length) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1  = valueHolderForDetentsTmpValueForIdx2_1TmpValue as Length
+                        if (valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 instanceof string) {
+                            valueSerializer.writeInt8((0).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 as string
+                            valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx0)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 instanceof number) {
+                            valueSerializer.writeInt8((1).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 as number
+                            valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx1)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 instanceof Resource) {
+                            valueSerializer.writeInt8((2).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 as Resource
+                            Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx2)
+                        }
+                    }
+                } else {
+                    valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                }
+                const valueHolderForDetentsTmpValueForIdx2_2  = valueHolderForDetentsTmpValueForIdx2[2]
+                if (valueHolderForDetentsTmpValueForIdx2_2 !== undefined) {
+                    valueSerializer.writeInt8(RuntimeType.OBJECT)
+                    const valueHolderForDetentsTmpValueForIdx2_2TmpValue  = valueHolderForDetentsTmpValueForIdx2_2!
+                    if (valueHolderForDetentsTmpValueForIdx2_2TmpValue instanceof SheetSize) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx0  = valueHolderForDetentsTmpValueForIdx2_2TmpValue as SheetSize
+                        valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx0.valueOf())
+                    } else if (valueHolderForDetentsTmpValueForIdx2_2TmpValue instanceof Length) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1  = valueHolderForDetentsTmpValueForIdx2_2TmpValue as Length
+                        if (valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 instanceof string) {
+                            valueSerializer.writeInt8((0).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 as string
+                            valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx0)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 instanceof number) {
+                            valueSerializer.writeInt8((1).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 as number
+                            valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx1)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 instanceof Resource) {
+                            valueSerializer.writeInt8((2).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 as Resource
+                            Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx2)
+                        }
+                    }
+                } else {
+                    valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                }
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -20318,11 +20631,11 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShowCloseTmpValue  = valueHolderForShowClose!
             if (valueHolderForShowCloseTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShowCloseTmpValueForIdx0  = valueHolderForShowCloseTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForShowCloseTmpValueForIdx0)
             } else if (valueHolderForShowCloseTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShowCloseTmpValueForIdx1  = valueHolderForShowCloseTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForShowCloseTmpValueForIdx1)
             }
@@ -20342,11 +20655,11 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTitleTmpValue  = valueHolderForTitle!
             if (valueHolderForTitleTmpValue instanceof SheetTitleOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTitleTmpValueForIdx0  = valueHolderForTitleTmpValue as SheetTitleOptions
                 SheetTitleOptions_serializer.write(valueSerializer, valueHolderForTitleTmpValueForIdx0)
             } else if (valueHolderForTitleTmpValue instanceof CustomBuilder) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTitleTmpValueForIdx1  = valueHolderForTitleTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForTitleTmpValueForIdx1))
             }
@@ -20390,15 +20703,15 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -20410,27 +20723,27 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
             if (valueHolderForBorderWidthTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as Dimension
                 if (valueHolderForBorderWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx0  = valueHolderForBorderWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx1  = valueHolderForBorderWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx2  = valueHolderForBorderWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderWidthTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx1)
             } else if (valueHolderForBorderWidthTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
@@ -20442,31 +20755,31 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
             if (valueHolderForBorderColorTmpValue instanceof ResourceColor) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as ResourceColor
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx0ForIdx2)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx3  = valueHolderForBorderColorTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForBorderColorTmpValue instanceof EdgeColors) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx1)
             } else if (valueHolderForBorderColorTmpValue instanceof LocalizedEdgeColors) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as LocalizedEdgeColors
                 LocalizedEdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx2)
             }
@@ -20478,11 +20791,11 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderStyleTmpValue  = valueHolderForBorderStyle!
             if (valueHolderForBorderStyleTmpValue instanceof BorderStyle) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx0  = valueHolderForBorderStyleTmpValue as BorderStyle
                 valueSerializer.writeInt32(valueHolderForBorderStyleTmpValueForIdx0.valueOf())
             } else if (valueHolderForBorderStyleTmpValue instanceof EdgeStyles) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx1  = valueHolderForBorderStyleTmpValue as EdgeStyles
                 EdgeStyles_serializer.write(valueSerializer, valueHolderForBorderStyleTmpValueForIdx1)
             }
@@ -20494,11 +20807,11 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -20597,7 +20910,7 @@ export class SheetOptions_serializer {
         if (valueHolderForEffectEdge !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEffectEdgeTmpValue  = valueHolderForEffectEdge!
-            valueSerializer.writeNumber(valueHolderForEffectEdgeTmpValue)
+            valueSerializer.writeInt32(valueHolderForEffectEdgeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -20606,15 +20919,15 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
             if (valueHolderForRadiusTmpValue instanceof LengthMetrics) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as LengthMetrics
                 LengthMetrics_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx1)
             } else if (valueHolderForRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForRadiusTmpValueForIdx2  = valueHolderForRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx2)
             }
@@ -20626,22 +20939,22 @@ export class SheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDetentSelectionTmpValue  = valueHolderForDetentSelection!
             if (valueHolderForDetentSelectionTmpValue instanceof SheetSize) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDetentSelectionTmpValueForIdx0  = valueHolderForDetentSelectionTmpValue as SheetSize
                 valueSerializer.writeInt32(valueHolderForDetentSelectionTmpValueForIdx0.valueOf())
             } else if (valueHolderForDetentSelectionTmpValue instanceof Length) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForDetentSelectionTmpValueForIdx1  = valueHolderForDetentSelectionTmpValue as Length
                 if (valueHolderForDetentSelectionTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForDetentSelectionTmpValueForIdx1ForIdx0  = valueHolderForDetentSelectionTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForDetentSelectionTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForDetentSelectionTmpValueForIdx1 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForDetentSelectionTmpValueForIdx1ForIdx1  = valueHolderForDetentSelectionTmpValueForIdx1 as number
                     valueSerializer.writeNumber(valueHolderForDetentSelectionTmpValueForIdx1ForIdx1)
                 } else if (valueHolderForDetentSelectionTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForDetentSelectionTmpValueForIdx1ForIdx2  = valueHolderForDetentSelectionTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForDetentSelectionTmpValueForIdx1ForIdx2)
                 }
@@ -20827,84 +21140,163 @@ export class SheetOptions_serializer {
         }
         const maskColorTmpResult : ResourceColor | undefined = maskColorTmpBuf
         const detentsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let detentsTmpBuf : TripleLengthDetents | undefined = undefined
+        let detentsTmpBuf : SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents | undefined = undefined
         if ((detentsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const detentsTmpBuf_Value0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-            let detentsTmpBuf_Value0TempBuf : SheetSize | Length | undefined
-            if (detentsTmpBuf_Value0TempBufUnionSelector == (0).toChar()) {
-                detentsTmpBuf_Value0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
-            } else if (detentsTmpBuf_Value0TempBufUnionSelector == (1).toChar()) {
-                const detentsTmpBuf_Value0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let detentsTmpBuf_Value0TempBufBufU : string | number | Resource | undefined
-                if (detentsTmpBuf_Value0TempBufBufUUnionSelector == (0).toChar()) {
-                    detentsTmpBuf_Value0TempBufBufU = (valueDeserializer.readString() as string)
-                } else if (detentsTmpBuf_Value0TempBufBufUUnionSelector == (1).toChar()) {
-                    detentsTmpBuf_Value0TempBufBufU = (valueDeserializer.readNumber() as number)
-                } else if (detentsTmpBuf_Value0TempBufBufUUnionSelector == (2).toChar()) {
-                    detentsTmpBuf_Value0TempBufBufU = Resource_serializer.read(valueDeserializer)
+            const detentsTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let detentsTmpBuf_ : SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents | undefined
+            if (detentsTmpBuf_UnionSelector == (0).toChar()) {
+                const detentsTmpBuf_BufUValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let detentsTmpBuf_BufUValue0TempBuf : SheetSize | Length | undefined
+                if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (0).toChar()) {
+                    detentsTmpBuf_BufUValue0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
+                } else if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (1).toChar()) {
+                    const detentsTmpBuf_BufUValue0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue0TempBufBufU : string | number | Resource | undefined
+                    if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readString() as string)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (1).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readNumber() as number)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (2).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = Resource_serializer.read(valueDeserializer)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBufBufU has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue0TempBuf = (detentsTmpBuf_BufUValue0TempBufBufU as string | number | Resource)
                 } else {
-                    throw new Error("One of the branches for detentsTmpBuf_Value0TempBufBufU has to be chosen through deserialisation.")
+                    throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBuf has to be chosen through deserialisation.")
                 }
-                detentsTmpBuf_Value0TempBuf = (detentsTmpBuf_Value0TempBufBufU as string | number | Resource)
+                const detentsTmpBuf_BufUValue0 : SheetSize | Length = (detentsTmpBuf_BufUValue0TempBuf as SheetSize | Length)
+                detentsTmpBuf_ = ([detentsTmpBuf_BufUValue0] as SingleLengthDetent)
+            } else if (detentsTmpBuf_UnionSelector == (1).toChar()) {
+                const detentsTmpBuf_BufUValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let detentsTmpBuf_BufUValue0TempBuf : SheetSize | Length | undefined
+                if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (0).toChar()) {
+                    detentsTmpBuf_BufUValue0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
+                } else if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (1).toChar()) {
+                    const detentsTmpBuf_BufUValue0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue0TempBufBufU : string | number | Resource | undefined
+                    if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readString() as string)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (1).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readNumber() as number)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (2).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = Resource_serializer.read(valueDeserializer)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBufBufU has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue0TempBuf = (detentsTmpBuf_BufUValue0TempBufBufU as string | number | Resource)
+                } else {
+                    throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBuf has to be chosen through deserialisation.")
+                }
+                const detentsTmpBuf_BufUValue0 : SheetSize | Length = (detentsTmpBuf_BufUValue0TempBuf as SheetSize | Length)
+                const detentsTmpBuf_BufUValue1TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+                let detentsTmpBuf_BufUValue1TempBuf : SheetSize | Length | undefined = undefined
+                if ((detentsTmpBuf_BufUValue1TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                    const detentsTmpBuf_BufUValue1TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue1TempBuf_ : SheetSize | Length | undefined
+                    if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue1TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
+                    } else if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (1).toChar()) {
+                        const detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                        let detentsTmpBuf_BufUValue1TempBuf_BufU : string | number | Resource | undefined
+                        if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (0).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readString() as string)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (1).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readNumber() as number)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (2).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = Resource_serializer.read(valueDeserializer)
+                        } else {
+                            throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_BufU has to be chosen through deserialisation.")
+                        }
+                        detentsTmpBuf_BufUValue1TempBuf_ = (detentsTmpBuf_BufUValue1TempBuf_BufU as string | number | Resource)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_ has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue1TempBuf = (detentsTmpBuf_BufUValue1TempBuf_ as SheetSize | Length)
+                }
+                const detentsTmpBuf_BufUValue1 : SheetSize | Length | undefined = detentsTmpBuf_BufUValue1TempBuf
+                detentsTmpBuf_ = ([detentsTmpBuf_BufUValue0, detentsTmpBuf_BufUValue1] as DoubleLengthDetents)
+            } else if (detentsTmpBuf_UnionSelector == (2).toChar()) {
+                const detentsTmpBuf_BufUValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let detentsTmpBuf_BufUValue0TempBuf : SheetSize | Length | undefined
+                if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (0).toChar()) {
+                    detentsTmpBuf_BufUValue0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
+                } else if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (1).toChar()) {
+                    const detentsTmpBuf_BufUValue0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue0TempBufBufU : string | number | Resource | undefined
+                    if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readString() as string)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (1).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readNumber() as number)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (2).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = Resource_serializer.read(valueDeserializer)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBufBufU has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue0TempBuf = (detentsTmpBuf_BufUValue0TempBufBufU as string | number | Resource)
+                } else {
+                    throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBuf has to be chosen through deserialisation.")
+                }
+                const detentsTmpBuf_BufUValue0 : SheetSize | Length = (detentsTmpBuf_BufUValue0TempBuf as SheetSize | Length)
+                const detentsTmpBuf_BufUValue1TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+                let detentsTmpBuf_BufUValue1TempBuf : SheetSize | Length | undefined = undefined
+                if ((detentsTmpBuf_BufUValue1TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                    const detentsTmpBuf_BufUValue1TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue1TempBuf_ : SheetSize | Length | undefined
+                    if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue1TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
+                    } else if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (1).toChar()) {
+                        const detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                        let detentsTmpBuf_BufUValue1TempBuf_BufU : string | number | Resource | undefined
+                        if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (0).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readString() as string)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (1).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readNumber() as number)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (2).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = Resource_serializer.read(valueDeserializer)
+                        } else {
+                            throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_BufU has to be chosen through deserialisation.")
+                        }
+                        detentsTmpBuf_BufUValue1TempBuf_ = (detentsTmpBuf_BufUValue1TempBuf_BufU as string | number | Resource)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_ has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue1TempBuf = (detentsTmpBuf_BufUValue1TempBuf_ as SheetSize | Length)
+                }
+                const detentsTmpBuf_BufUValue1 : SheetSize | Length | undefined = detentsTmpBuf_BufUValue1TempBuf
+                const detentsTmpBuf_BufUValue2TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+                let detentsTmpBuf_BufUValue2TempBuf : SheetSize | Length | undefined = undefined
+                if ((detentsTmpBuf_BufUValue2TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                    const detentsTmpBuf_BufUValue2TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue2TempBuf_ : SheetSize | Length | undefined
+                    if (detentsTmpBuf_BufUValue2TempBuf_UnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue2TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
+                    } else if (detentsTmpBuf_BufUValue2TempBuf_UnionSelector == (1).toChar()) {
+                        const detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                        let detentsTmpBuf_BufUValue2TempBuf_BufU : string | number | Resource | undefined
+                        if (detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector == (0).toChar()) {
+                            detentsTmpBuf_BufUValue2TempBuf_BufU = (valueDeserializer.readString() as string)
+                        } else if (detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector == (1).toChar()) {
+                            detentsTmpBuf_BufUValue2TempBuf_BufU = (valueDeserializer.readNumber() as number)
+                        } else if (detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector == (2).toChar()) {
+                            detentsTmpBuf_BufUValue2TempBuf_BufU = Resource_serializer.read(valueDeserializer)
+                        } else {
+                            throw new Error("One of the branches for detentsTmpBuf_BufUValue2TempBuf_BufU has to be chosen through deserialisation.")
+                        }
+                        detentsTmpBuf_BufUValue2TempBuf_ = (detentsTmpBuf_BufUValue2TempBuf_BufU as string | number | Resource)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue2TempBuf_ has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue2TempBuf = (detentsTmpBuf_BufUValue2TempBuf_ as SheetSize | Length)
+                }
+                const detentsTmpBuf_BufUValue2 : SheetSize | Length | undefined = detentsTmpBuf_BufUValue2TempBuf
+                detentsTmpBuf_ = ([detentsTmpBuf_BufUValue0, detentsTmpBuf_BufUValue1, detentsTmpBuf_BufUValue2] as TripleLengthDetents)
             } else {
-                throw new Error("One of the branches for detentsTmpBuf_Value0TempBuf has to be chosen through deserialisation.")
+                throw new Error("One of the branches for detentsTmpBuf_ has to be chosen through deserialisation.")
             }
-            const detentsTmpBuf_Value0 : SheetSize | Length = (detentsTmpBuf_Value0TempBuf as SheetSize | Length)
-            const detentsTmpBuf_Value1TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-            let detentsTmpBuf_Value1TempBuf : SheetSize | Length | undefined = undefined
-            if ((detentsTmpBuf_Value1TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                const detentsTmpBuf_Value1TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-                let detentsTmpBuf_Value1TempBuf_ : SheetSize | Length | undefined
-                if (detentsTmpBuf_Value1TempBuf_UnionSelector == (0).toChar()) {
-                    detentsTmpBuf_Value1TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
-                } else if (detentsTmpBuf_Value1TempBuf_UnionSelector == (1).toChar()) {
-                    const detentsTmpBuf_Value1TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                    let detentsTmpBuf_Value1TempBuf_BufU : string | number | Resource | undefined
-                    if (detentsTmpBuf_Value1TempBuf_BufUUnionSelector == (0).toChar()) {
-                        detentsTmpBuf_Value1TempBuf_BufU = (valueDeserializer.readString() as string)
-                    } else if (detentsTmpBuf_Value1TempBuf_BufUUnionSelector == (1).toChar()) {
-                        detentsTmpBuf_Value1TempBuf_BufU = (valueDeserializer.readNumber() as number)
-                    } else if (detentsTmpBuf_Value1TempBuf_BufUUnionSelector == (2).toChar()) {
-                        detentsTmpBuf_Value1TempBuf_BufU = Resource_serializer.read(valueDeserializer)
-                    } else {
-                        throw new Error("One of the branches for detentsTmpBuf_Value1TempBuf_BufU has to be chosen through deserialisation.")
-                    }
-                    detentsTmpBuf_Value1TempBuf_ = (detentsTmpBuf_Value1TempBuf_BufU as string | number | Resource)
-                } else {
-                    throw new Error("One of the branches for detentsTmpBuf_Value1TempBuf_ has to be chosen through deserialisation.")
-                }
-                detentsTmpBuf_Value1TempBuf = (detentsTmpBuf_Value1TempBuf_ as SheetSize | Length)
-            }
-            const detentsTmpBuf_Value1 : SheetSize | Length | undefined = detentsTmpBuf_Value1TempBuf
-            const detentsTmpBuf_Value2TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-            let detentsTmpBuf_Value2TempBuf : SheetSize | Length | undefined = undefined
-            if ((detentsTmpBuf_Value2TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                const detentsTmpBuf_Value2TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-                let detentsTmpBuf_Value2TempBuf_ : SheetSize | Length | undefined
-                if (detentsTmpBuf_Value2TempBuf_UnionSelector == (0).toChar()) {
-                    detentsTmpBuf_Value2TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
-                } else if (detentsTmpBuf_Value2TempBuf_UnionSelector == (1).toChar()) {
-                    const detentsTmpBuf_Value2TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                    let detentsTmpBuf_Value2TempBuf_BufU : string | number | Resource | undefined
-                    if (detentsTmpBuf_Value2TempBuf_BufUUnionSelector == (0).toChar()) {
-                        detentsTmpBuf_Value2TempBuf_BufU = (valueDeserializer.readString() as string)
-                    } else if (detentsTmpBuf_Value2TempBuf_BufUUnionSelector == (1).toChar()) {
-                        detentsTmpBuf_Value2TempBuf_BufU = (valueDeserializer.readNumber() as number)
-                    } else if (detentsTmpBuf_Value2TempBuf_BufUUnionSelector == (2).toChar()) {
-                        detentsTmpBuf_Value2TempBuf_BufU = Resource_serializer.read(valueDeserializer)
-                    } else {
-                        throw new Error("One of the branches for detentsTmpBuf_Value2TempBuf_BufU has to be chosen through deserialisation.")
-                    }
-                    detentsTmpBuf_Value2TempBuf_ = (detentsTmpBuf_Value2TempBuf_BufU as string | number | Resource)
-                } else {
-                    throw new Error("One of the branches for detentsTmpBuf_Value2TempBuf_ has to be chosen through deserialisation.")
-                }
-                detentsTmpBuf_Value2TempBuf = (detentsTmpBuf_Value2TempBuf_ as SheetSize | Length)
-            }
-            const detentsTmpBuf_Value2 : SheetSize | Length | undefined = detentsTmpBuf_Value2TempBuf
-            detentsTmpBuf = ([detentsTmpBuf_Value0, detentsTmpBuf_Value1, detentsTmpBuf_Value2] as TripleLengthDetents)
+            detentsTmpBuf = (detentsTmpBuf_ as SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents)
         }
-        const detentsTmpResult : TripleLengthDetents | undefined = detentsTmpBuf
+        const detentsTmpResult : SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents | undefined = detentsTmpBuf
         const blurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurStyleTmpBuf : BlurStyle | undefined = undefined
         if ((blurStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21124,23 +21516,23 @@ export class SheetOptions_serializer {
         }
         const shadowTmpResult : ShadowOptions | ShadowStyle | undefined = shadowTmpBuf
         const onHeightDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onHeightDidChangeTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onHeightDidChangeTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onHeightDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onHeightDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onHeightDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onHeightDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onHeightDidChangeTmpBuf = (value0: number):void => {
+            onHeightDidChangeTmpBuf = (value0: int32):void => {
                 const onHeightDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writeInt32(onHeightDidChangeTmpBuf_BufResource.resourceId);
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writePointer(onHeightDidChangeTmpBuf_BufCall);
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writePointer(onHeightDidChangeTmpBuf_BufCallSync);
-                onHeightDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onHeightDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onHeightDidChangeTmpBuf_BufArgsSerializer.length());
+                onHeightDidChangeTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onHeightDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onHeightDidChangeTmpBuf_BufArgsSerializer.length());
                 onHeightDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onHeightDidChangeTmpResult : ((value0: number) => void) | undefined = onHeightDidChangeTmpBuf
+        const onHeightDidChangeTmpResult : ((value0: int32) => void) | undefined = onHeightDidChangeTmpBuf
         const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let modeTmpBuf : SheetMode | undefined = undefined
         if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21154,41 +21546,41 @@ export class SheetOptions_serializer {
         }
         const scrollSizeModeTmpResult : ScrollSizeMode | undefined = scrollSizeModeTmpBuf
         const onDetentsDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDetentsDidChangeTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onDetentsDidChangeTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onDetentsDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDetentsDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDetentsDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDetentsDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDetentsDidChangeTmpBuf = (value0: number):void => {
+            onDetentsDidChangeTmpBuf = (value0: int32):void => {
                 const onDetentsDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writeInt32(onDetentsDidChangeTmpBuf_BufResource.resourceId);
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writePointer(onDetentsDidChangeTmpBuf_BufCall);
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writePointer(onDetentsDidChangeTmpBuf_BufCallSync);
-                onDetentsDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onDetentsDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDetentsDidChangeTmpBuf_BufArgsSerializer.length());
+                onDetentsDidChangeTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onDetentsDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDetentsDidChangeTmpBuf_BufArgsSerializer.length());
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDetentsDidChangeTmpResult : ((value0: number) => void) | undefined = onDetentsDidChangeTmpBuf
+        const onDetentsDidChangeTmpResult : ((value0: int32) => void) | undefined = onDetentsDidChangeTmpBuf
         const onWidthDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWidthDidChangeTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onWidthDidChangeTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onWidthDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onWidthDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWidthDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWidthDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWidthDidChangeTmpBuf = (value0: number):void => {
+            onWidthDidChangeTmpBuf = (value0: int32):void => {
                 const onWidthDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writeInt32(onWidthDidChangeTmpBuf_BufResource.resourceId);
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writePointer(onWidthDidChangeTmpBuf_BufCall);
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writePointer(onWidthDidChangeTmpBuf_BufCallSync);
-                onWidthDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onWidthDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onWidthDidChangeTmpBuf_BufArgsSerializer.length());
+                onWidthDidChangeTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onWidthDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onWidthDidChangeTmpBuf_BufArgsSerializer.length());
                 onWidthDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onWidthDidChangeTmpResult : ((value0: number) => void) | undefined = onWidthDidChangeTmpBuf
+        const onWidthDidChangeTmpResult : ((value0: int32) => void) | undefined = onWidthDidChangeTmpBuf
         const onTypeDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onTypeDidChangeTmpBuf : ((value0: SheetType) => void) | undefined = undefined
         if ((onTypeDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21238,18 +21630,18 @@ export class SheetOptions_serializer {
         }
         const offsetTmpResult : Position | undefined = offsetTmpBuf
         const effectEdgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let effectEdgeTmpBuf : number | undefined = undefined
+        let effectEdgeTmpBuf : int32 | undefined = undefined
         if ((effectEdgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            effectEdgeTmpBuf = (valueDeserializer.readNumber() as number)
+            effectEdgeTmpBuf = valueDeserializer.readInt32()
         }
-        const effectEdgeTmpResult : number | undefined = effectEdgeTmpBuf
+        const effectEdgeTmpResult : int32 | undefined = effectEdgeTmpBuf
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radiusTmpBuf : LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined = undefined
         if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let radiusTmpBuf_ : LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined
             if (radiusTmpBuf_UnionSelector == (0).toChar()) {
-                radiusTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                radiusTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
                 radiusTmpBuf_ = BorderRadiuses_serializer.read(valueDeserializer)
             } else if (radiusTmpBuf_UnionSelector == (2).toChar()) {
@@ -21405,15 +21797,15 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowOffsetTmpValue  = valueHolderForArrowOffset!
             if (valueHolderForArrowOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx0  = valueHolderForArrowOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowOffsetTmpValueForIdx0)
             } else if (valueHolderForArrowOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx1  = valueHolderForArrowOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowOffsetTmpValueForIdx1)
             } else if (valueHolderForArrowOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowOffsetTmpValueForIdx2  = valueHolderForArrowOffsetTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowOffsetTmpValueForIdx2)
             }
@@ -21433,11 +21825,11 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaskTmpValue  = valueHolderForMask!
             if (valueHolderForMaskTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaskTmpValueForIdx0  = valueHolderForMaskTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForMaskTmpValueForIdx0)
             } else if (valueHolderForMaskTmpValue instanceof PopupMaskType) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaskTmpValueForIdx1  = valueHolderForMaskTmpValue as PopupMaskType
                 PopupMaskType_serializer.write(valueSerializer, valueHolderForMaskTmpValueForIdx1)
             }
@@ -21457,15 +21849,15 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTargetSpaceTmpValue  = valueHolderForTargetSpace!
             if (valueHolderForTargetSpaceTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx0  = valueHolderForTargetSpaceTmpValue as string
                 valueSerializer.writeString(valueHolderForTargetSpaceTmpValueForIdx0)
             } else if (valueHolderForTargetSpaceTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx1  = valueHolderForTargetSpaceTmpValue as number
                 valueSerializer.writeNumber(valueHolderForTargetSpaceTmpValueForIdx1)
             } else if (valueHolderForTargetSpaceTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTargetSpaceTmpValueForIdx2  = valueHolderForTargetSpaceTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTargetSpaceTmpValueForIdx2)
             }
@@ -21493,21 +21885,21 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPopupColorTmpValue  = valueHolderForPopupColor!
             if (valueHolderForPopupColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPopupColorTmpValueForIdx0  = valueHolderForPopupColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForPopupColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForPopupColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPopupColorTmpValueForIdx1  = valueHolderForPopupColorTmpValue as string
                 valueSerializer.writeString(valueHolderForPopupColorTmpValueForIdx1)
             } else if (valueHolderForPopupColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPopupColorTmpValueForIdx2  = valueHolderForPopupColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPopupColorTmpValueForIdx2)
-            } else if (valueHolderForPopupColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((3).toChar())
-                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForPopupColorTmpValueForIdx3)
+            } else if (valueHolderForPopupColorTmpValue instanceof int64) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as int64
+                valueSerializer.writeInt64(valueHolderForPopupColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -21525,15 +21917,15 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -21553,15 +21945,15 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowWidthTmpValue  = valueHolderForArrowWidth!
             if (valueHolderForArrowWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx0  = valueHolderForArrowWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowWidthTmpValueForIdx0)
             } else if (valueHolderForArrowWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx1  = valueHolderForArrowWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowWidthTmpValueForIdx1)
             } else if (valueHolderForArrowWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowWidthTmpValueForIdx2  = valueHolderForArrowWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowWidthTmpValueForIdx2)
             }
@@ -21573,15 +21965,15 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowHeightTmpValue  = valueHolderForArrowHeight!
             if (valueHolderForArrowHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx0  = valueHolderForArrowHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowHeightTmpValueForIdx0)
             } else if (valueHolderForArrowHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx1  = valueHolderForArrowHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForArrowHeightTmpValueForIdx1)
             } else if (valueHolderForArrowHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowHeightTmpValueForIdx2  = valueHolderForArrowHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForArrowHeightTmpValueForIdx2)
             }
@@ -21593,15 +21985,15 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
             if (valueHolderForRadiusTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as number
                 valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx1)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForRadiusTmpValueForIdx2  = valueHolderForRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx2)
             }
@@ -21613,11 +22005,11 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -21645,11 +22037,11 @@ export class PopupOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOnWillDismissTmpValue  = valueHolderForOnWillDismiss!
             if (valueHolderForOnWillDismissTmpValue instanceof boolean) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0  = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
             } else if (valueHolderForOnWillDismissTmpValue instanceof ((value0: DismissPopupAction) => void)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1  = valueHolderForOnWillDismissTmpValue as ((value0: DismissPopupAction) => void)
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
             }
@@ -21794,10 +22186,10 @@ export class PopupOptions_serializer {
         }
         const offsetTmpResult : Position | undefined = offsetTmpBuf
         const popupColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let popupColorTmpBuf : Color | string | Resource | number | undefined = undefined
+        let popupColorTmpBuf : Color | string | Resource | int64 | undefined = undefined
         if ((popupColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let popupColorTmpBuf_ : Color | string | Resource | number | undefined
+            let popupColorTmpBuf_ : Color | string | Resource | int64 | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
                 popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
@@ -21805,13 +22197,13 @@ export class PopupOptions_serializer {
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {
                 popupColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else if (popupColorTmpBuf_UnionSelector == (3).toChar()) {
-                popupColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                popupColorTmpBuf_ = valueDeserializer.readInt64()
             } else {
                 throw new Error("One of the branches for popupColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | number)
+            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | int64)
         }
-        const popupColorTmpResult : Color | string | Resource | number | undefined = popupColorTmpBuf
+        const popupColorTmpResult : Color | string | Resource | int64 | undefined = popupColorTmpBuf
         const autoCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let autoCancelTmpBuf : boolean | undefined = undefined
         if ((autoCancelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21970,12 +22362,12 @@ export class PopupOptions_serializer {
 }
 export interface AccessibilityHoverEvent {
     type: AccessibilityHoverType
-    x: number
-    y: number
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
+    x: double
+    y: double
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
 }
 export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
     get type(): AccessibilityHoverType {
@@ -21984,40 +22376,40 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     set type(type: AccessibilityHoverType) {
         this.setType(type)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
     constructor(peerPtr: KPointer) {
@@ -22044,51 +22436,51 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         this.setType_serialize(type_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
@@ -22099,61 +22491,62 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     private setType_serialize(type: AccessibilityHoverType): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setType(this.peer!.ptr, type.valueOf())
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setY(this.peer!.ptr, y)
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
 }
 export interface AxisEvent {
     action: AxisAction
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
-    x: number
-    y: number
-    scrollStep?: number | undefined
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
+    x: double
+    y: double
+    scrollStep?: int32 | undefined
     propagation(): void
-    getHorizontalAxisValue(): number
-    getVerticalAxisValue(): number
+    getHorizontalAxisValue(): double
+    getVerticalAxisValue(): double
+    hasAxis(axisType: AxisType): boolean
 }
 export class AxisEventInternal extends BaseEventInternal implements MaterializedBase,AxisEvent {
     get action(): AxisAction {
@@ -22162,47 +22555,47 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     set action(action: AxisAction) {
         this.setAction(action)
     }
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
-    get scrollStep(): number | undefined {
+    get scrollStep(): int32 | undefined {
         return this.getScrollStep()
     }
-    set scrollStep(scrollStep: number | undefined) {
-        const scrollStep_NonNull  = (scrollStep as number)
+    set scrollStep(scrollStep: int32 | undefined) {
+        const scrollStep_NonNull  = (scrollStep as int32)
         this.setScrollStep(scrollStep_NonNull)
     }
     public propagation(): void {
@@ -22225,11 +22618,15 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     public static fromPtr(ptr: KPointer): AxisEventInternal {
         return new AxisEventInternal(ptr)
     }
-    public getHorizontalAxisValue(): number {
+    public getHorizontalAxisValue(): double {
         return this.getHorizontalAxisValue_serialize()
     }
-    public getVerticalAxisValue(): number {
+    public getVerticalAxisValue(): double {
         return this.getVerticalAxisValue_serialize()
+    }
+    public hasAxis(axisType: AxisType): boolean {
+        const axisType_casted = axisType as (AxisType)
+        return this.hasAxis_serialize(axisType_casted)
     }
     private getAction(): AxisAction {
         return this.getAction_serialize()
@@ -22239,67 +22636,71 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setAction_serialize(action_casted)
         return
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
-    private getScrollStep(): number | undefined {
+    private getScrollStep(): int32 | undefined {
         return this.getScrollStep_serialize()
     }
-    private setScrollStep(scrollStep: number | undefined): void {
-        const scrollStep_casted = scrollStep as (number | undefined)
+    private setScrollStep(scrollStep: int32 | undefined): void {
+        const scrollStep_casted = scrollStep as (int32 | undefined)
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
-    getHorizontalAxisValue_serialize(): number {
+    getHorizontalAxisValue_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
     }
-    getVerticalAxisValue_serialize(): number {
+    hasAxis_serialize(axisType: AxisType): boolean {
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_hasAxis(this.peer!.ptr, axisType.valueOf())
+        return retval
+    }
+    getVerticalAxisValue_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getVerticalAxisValue(this.peer!.ptr)
         return retval
     }
@@ -22310,65 +22711,65 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     private setAction_serialize(action: AxisAction): void {
         ArkUIGeneratedNativeModule._AxisEvent_setAction(this.peer!.ptr, action.valueOf())
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setWindowY(this.peer!.ptr, windowY)
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._AxisEvent_setY(this.peer!.ptr, y)
     }
-    private getScrollStep_serialize(): number | undefined {
+    private getScrollStep_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getScrollStep(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setScrollStep_serialize(scrollStep: number | undefined): void {
+    private setScrollStep_serialize(scrollStep: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (scrollStep !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const scrollStepTmpValue  = scrollStep!
-            thisSerializer.writeNumber(scrollStepTmpValue)
+            thisSerializer.writeInt32(scrollStepTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -22380,50 +22781,50 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     }
 }
 export interface ClickEvent {
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
-    x: number
-    y: number
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
+    x: double
+    y: double
     hand?: InteractionHand | undefined
     preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
     get hand(): InteractionHand | undefined {
@@ -22453,51 +22854,51 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     public static fromPtr(ptr: KPointer): ClickEventInternal {
         return new ClickEventInternal(ptr)
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
@@ -22509,46 +22910,46 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand_serialize(hand_casted)
         return
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setWindowY(this.peer!.ptr, windowY)
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._ClickEvent_setY(this.peer!.ptr, y)
     }
     private getHand_serialize(): InteractionHand | undefined {
@@ -22579,14 +22980,14 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     }
 }
 export interface FocusAxisEvent {
-    axisMap: Map<AxisModel, number>
+    axisMap: Map<AxisModel, double>
     stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
-    get axisMap(): Map<AxisModel, number> {
+    get axisMap(): Map<AxisModel, double> {
         return this.getAxisMap()
     }
-    set axisMap(axisMap: Map<AxisModel, number>) {
+    set axisMap(axisMap: Map<AxisModel, double>) {
         this.setAxisMap(axisMap)
     }
     public stopPropagation(): void {
@@ -22609,36 +23010,36 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     public static fromPtr(ptr: KPointer): FocusAxisEventInternal {
         return new FocusAxisEventInternal(ptr)
     }
-    private getAxisMap(): Map<AxisModel, number> {
+    private getAxisMap(): Map<AxisModel, double> {
         return this.getAxisMap_serialize()
     }
-    private setAxisMap(axisMap: Map<AxisModel, number>): void {
-        const axisMap_casted = axisMap as (Map<AxisModel, number>)
+    private setAxisMap(axisMap: Map<AxisModel, double>): void {
+        const axisMap_casted = axisMap as (Map<AxisModel, double>)
         this.setAxisMap_serialize(axisMap_casted)
         return
     }
-    private getAxisMap_serialize(): Map<AxisModel, number> {
+    private getAxisMap_serialize(): Map<AxisModel, double> {
         const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getAxisMap(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferSizeVar : int32 = retvalDeserializer.readInt32()
-        let buffer : Map<AxisModel, number> = new Map<AxisModel, number>()
+        let buffer : Map<AxisModel, double> = new Map<AxisModel, double>()
         // TODO: TS map resize
         for (let bufferIVar = 0; bufferIVar < bufferSizeVar; bufferIVar++) {
             const bufferKeyVar : AxisModel = AxisModel.fromValue(retvalDeserializer.readInt32())
-            const bufferValueVar : number = (retvalDeserializer.readNumber() as number)
+            const bufferValueVar : double = retvalDeserializer.readFloat64()
             buffer.set(bufferKeyVar, bufferValueVar)
         }
-        const returnResult : Map<AxisModel, number> = buffer
+        const returnResult : Map<AxisModel, double> = buffer
         return returnResult
     }
-    private setAxisMap_serialize(axisMap: Map<AxisModel, number>): void {
+    private setAxisMap_serialize(axisMap: Map<AxisModel, double>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((axisMap.size).toInt())
         for (const pair of axisMap) {
             const axisMapKeyVar = pair[0]
             const axisMapValueVar = pair[1]
             thisSerializer.writeInt32(axisMapKeyVar.valueOf())
-            thisSerializer.writeNumber(axisMapValueVar)
+            thisSerializer.writeFloat64(axisMapValueVar)
         }
         ArkUIGeneratedNativeModule._FocusAxisEvent_setAxisMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -22648,55 +23049,55 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     }
 }
 export interface HoverEvent {
-    x?: number | undefined
-    y?: number | undefined
-    windowX?: number | undefined
-    windowY?: number | undefined
-    displayX?: number | undefined
-    displayY?: number | undefined
+    x?: double | undefined
+    y?: double | undefined
+    windowX?: double | undefined
+    windowY?: double | undefined
+    displayX?: double | undefined
+    displayY?: double | undefined
     stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
-    get x(): number | undefined {
+    get x(): double | undefined {
         return this.getX()
     }
-    set x(x: number | undefined) {
-        const x_NonNull  = (x as number)
+    set x(x: double | undefined) {
+        const x_NonNull  = (x as double)
         this.setX(x_NonNull)
     }
-    get y(): number | undefined {
+    get y(): double | undefined {
         return this.getY()
     }
-    set y(y: number | undefined) {
-        const y_NonNull  = (y as number)
+    set y(y: double | undefined) {
+        const y_NonNull  = (y as double)
         this.setY(y_NonNull)
     }
-    get windowX(): number | undefined {
+    get windowX(): double | undefined {
         return this.getWindowX()
     }
-    set windowX(windowX: number | undefined) {
-        const windowX_NonNull  = (windowX as number)
+    set windowX(windowX: double | undefined) {
+        const windowX_NonNull  = (windowX as double)
         this.setWindowX(windowX_NonNull)
     }
-    get windowY(): number | undefined {
+    get windowY(): double | undefined {
         return this.getWindowY()
     }
-    set windowY(windowY: number | undefined) {
-        const windowY_NonNull  = (windowY as number)
+    set windowY(windowY: double | undefined) {
+        const windowY_NonNull  = (windowY as double)
         this.setWindowY(windowY_NonNull)
     }
-    get displayX(): number | undefined {
+    get displayX(): double | undefined {
         return this.getDisplayX()
     }
-    set displayX(displayX: number | undefined) {
-        const displayX_NonNull  = (displayX as number)
+    set displayX(displayX: double | undefined) {
+        const displayX_NonNull  = (displayX as double)
         this.setDisplayX(displayX_NonNull)
     }
-    get displayY(): number | undefined {
+    get displayY(): double | undefined {
         return this.getDisplayY()
     }
-    set displayY(displayY: number | undefined) {
-        const displayY_NonNull  = (displayY as number)
+    set displayY(displayY: double | undefined) {
+        const displayY_NonNull  = (displayY as double)
         this.setDisplayY(displayY_NonNull)
     }
     public stopPropagation(): void {
@@ -22719,186 +23120,186 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     public static fromPtr(ptr: KPointer): HoverEventInternal {
         return new HoverEventInternal(ptr)
     }
-    private getX(): number | undefined {
+    private getX(): double | undefined {
         return this.getX_serialize()
     }
-    private setX(x: number | undefined): void {
-        const x_casted = x as (number | undefined)
+    private setX(x: double | undefined): void {
+        const x_casted = x as (double | undefined)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number | undefined {
+    private getY(): double | undefined {
         return this.getY_serialize()
     }
-    private setY(y: number | undefined): void {
-        const y_casted = y as (number | undefined)
+    private setY(y: double | undefined): void {
+        const y_casted = y as (double | undefined)
         this.setY_serialize(y_casted)
         return
     }
-    private getWindowX(): number | undefined {
+    private getWindowX(): double | undefined {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number | undefined): void {
-        const windowX_casted = windowX as (number | undefined)
+    private setWindowX(windowX: double | undefined): void {
+        const windowX_casted = windowX as (double | undefined)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number | undefined {
+    private getWindowY(): double | undefined {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number | undefined): void {
-        const windowY_casted = windowY as (number | undefined)
+    private setWindowY(windowY: double | undefined): void {
+        const windowY_casted = windowY as (double | undefined)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getDisplayX(): number | undefined {
+    private getDisplayX(): double | undefined {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number | undefined): void {
-        const displayX_casted = displayX as (number | undefined)
+    private setDisplayX(displayX: double | undefined): void {
+        const displayX_casted = displayX as (double | undefined)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number | undefined {
+    private getDisplayY(): double | undefined {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number | undefined): void {
-        const displayY_casted = displayY as (number | undefined)
+    private setDisplayY(displayY: double | undefined): void {
+        const displayY_casted = displayY as (double | undefined)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getX_serialize(): number | undefined {
+    private getX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setX_serialize(x: number | undefined): void {
+    private setX_serialize(x: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (x !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const xTmpValue  = x!
-            thisSerializer.writeNumber(xTmpValue)
+            thisSerializer.writeFloat64(xTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getY_serialize(): number | undefined {
+    private getY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setY_serialize(y: number | undefined): void {
+    private setY_serialize(y: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (y !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const yTmpValue  = y!
-            thisSerializer.writeNumber(yTmpValue)
+            thisSerializer.writeFloat64(yTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getWindowX_serialize(): number | undefined {
+    private getWindowX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setWindowX_serialize(windowX: number | undefined): void {
+    private setWindowX_serialize(windowX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (windowX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const windowXTmpValue  = windowX!
-            thisSerializer.writeNumber(windowXTmpValue)
+            thisSerializer.writeFloat64(windowXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setWindowX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getWindowY_serialize(): number | undefined {
+    private getWindowY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setWindowY_serialize(windowY: number | undefined): void {
+    private setWindowY_serialize(windowY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (windowY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const windowYTmpValue  = windowY!
-            thisSerializer.writeNumber(windowYTmpValue)
+            thisSerializer.writeFloat64(windowYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setWindowY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getDisplayX_serialize(): number | undefined {
+    private getDisplayX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setDisplayX_serialize(displayX: number | undefined): void {
+    private setDisplayX_serialize(displayX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (displayX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const displayXTmpValue  = displayX!
-            thisSerializer.writeNumber(displayXTmpValue)
+            thisSerializer.writeFloat64(displayXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getDisplayY_serialize(): number | undefined {
+    private getDisplayY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setDisplayY_serialize(displayY: number | undefined): void {
+    private setDisplayY_serialize(displayY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (displayY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const displayYTmpValue  = displayY!
-            thisSerializer.writeNumber(displayYTmpValue)
+            thisSerializer.writeFloat64(displayYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -22912,15 +23313,15 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
 export interface MouseEvent {
     button: MouseButton
     action: MouseAction
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
-    x: number
-    y: number
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
+    x: double
+    y: double
     stopPropagation: (() => void)
-    rawDeltaX?: number | undefined
-    rawDeltaY?: number | undefined
+    rawDeltaX?: double | undefined
+    rawDeltaY?: double | undefined
     pressedButtons?: Array<MouseButton> | undefined
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
@@ -22936,40 +23337,40 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     set action(action: MouseAction) {
         this.setAction(action)
     }
-    get displayX(): number {
+    get displayX(): double {
         return this.getDisplayX()
     }
-    set displayX(displayX: number) {
+    set displayX(displayX: double) {
         this.setDisplayX(displayX)
     }
-    get displayY(): number {
+    get displayY(): double {
         return this.getDisplayY()
     }
-    set displayY(displayY: number) {
+    set displayY(displayY: double) {
         this.setDisplayY(displayY)
     }
-    get windowX(): number {
+    get windowX(): double {
         return this.getWindowX()
     }
-    set windowX(windowX: number) {
+    set windowX(windowX: double) {
         this.setWindowX(windowX)
     }
-    get windowY(): number {
+    get windowY(): double {
         return this.getWindowY()
     }
-    set windowY(windowY: number) {
+    set windowY(windowY: double) {
         this.setWindowY(windowY)
     }
-    get x(): number {
+    get x(): double {
         return this.getX()
     }
-    set x(x: number) {
+    set x(x: double) {
         this.setX(x)
     }
-    get y(): number {
+    get y(): double {
         return this.getY()
     }
-    set y(y: number) {
+    set y(y: double) {
         this.setY(y)
     }
     get stopPropagation(): (() => void) {
@@ -22978,18 +23379,18 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
     }
-    get rawDeltaX(): number | undefined {
+    get rawDeltaX(): double | undefined {
         return this.getRawDeltaX()
     }
-    set rawDeltaX(rawDeltaX: number | undefined) {
-        const rawDeltaX_NonNull  = (rawDeltaX as number)
+    set rawDeltaX(rawDeltaX: double | undefined) {
+        const rawDeltaX_NonNull  = (rawDeltaX as double)
         this.setRawDeltaX(rawDeltaX_NonNull)
     }
-    get rawDeltaY(): number | undefined {
+    get rawDeltaY(): double | undefined {
         return this.getRawDeltaY()
     }
-    set rawDeltaY(rawDeltaY: number | undefined) {
-        const rawDeltaY_NonNull  = (rawDeltaY as number)
+    set rawDeltaY(rawDeltaY: double | undefined) {
+        const rawDeltaY_NonNull  = (rawDeltaY as double)
         this.setRawDeltaY(rawDeltaY_NonNull)
     }
     get pressedButtons(): Array<MouseButton> | undefined {
@@ -23031,51 +23432,51 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setAction_serialize(action_casted)
         return
     }
-    private getDisplayX(): number {
+    private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
         this.setDisplayX_serialize(displayX_casted)
         return
     }
-    private getDisplayY(): number {
+    private getDisplayY(): double {
         return this.getDisplayY_serialize()
     }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
         this.setDisplayY_serialize(displayY_casted)
         return
     }
-    private getWindowX(): number {
+    private getWindowX(): double {
         return this.getWindowX_serialize()
     }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
         this.setWindowX_serialize(windowX_casted)
         return
     }
-    private getWindowY(): number {
+    private getWindowY(): double {
         return this.getWindowY_serialize()
     }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
         this.setWindowY_serialize(windowY_casted)
         return
     }
-    private getX(): number {
+    private getX(): double {
         return this.getX_serialize()
     }
-    private setX(x: number): void {
-        const x_casted = x as (number)
+    private setX(x: double): void {
+        const x_casted = x as (double)
         this.setX_serialize(x_casted)
         return
     }
-    private getY(): number {
+    private getY(): double {
         return this.getY_serialize()
     }
-    private setY(y: number): void {
-        const y_casted = y as (number)
+    private setY(y: double): void {
+        const y_casted = y as (double)
         this.setY_serialize(y_casted)
         return
     }
@@ -23087,19 +23488,19 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
-    private getRawDeltaX(): number | undefined {
+    private getRawDeltaX(): double | undefined {
         return this.getRawDeltaX_serialize()
     }
-    private setRawDeltaX(rawDeltaX: number | undefined): void {
-        const rawDeltaX_casted = rawDeltaX as (number | undefined)
+    private setRawDeltaX(rawDeltaX: double | undefined): void {
+        const rawDeltaX_casted = rawDeltaX as (double | undefined)
         this.setRawDeltaX_serialize(rawDeltaX_casted)
         return
     }
-    private getRawDeltaY(): number | undefined {
+    private getRawDeltaY(): double | undefined {
         return this.getRawDeltaY_serialize()
     }
-    private setRawDeltaY(rawDeltaY: number | undefined): void {
-        const rawDeltaY_casted = rawDeltaY as (number | undefined)
+    private setRawDeltaY(rawDeltaY: double | undefined): void {
+        const rawDeltaY_casted = rawDeltaY as (double | undefined)
         this.setRawDeltaY_serialize(rawDeltaY_casted)
         return
     }
@@ -23125,51 +23526,72 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     private setAction_serialize(action: MouseAction): void {
         ArkUIGeneratedNativeModule._MouseEvent_setAction(this.peer!.ptr, action.valueOf())
     }
-    private getDisplayX_serialize(): number {
+    private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayX(this.peer!.ptr)
         return retval
     }
-    private setDisplayX_serialize(displayX: number): void {
+    private setDisplayX_serialize(displayX: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setDisplayX(this.peer!.ptr, displayX)
     }
-    private getDisplayY_serialize(): number {
+    private getDisplayY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayY(this.peer!.ptr)
         return retval
     }
-    private setDisplayY_serialize(displayY: number): void {
+    private setDisplayY_serialize(displayY: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setDisplayY(this.peer!.ptr, displayY)
     }
-    private getWindowX_serialize(): number {
+    private getWindowX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getWindowX(this.peer!.ptr)
         return retval
     }
-    private setWindowX_serialize(windowX: number): void {
+    private setWindowX_serialize(windowX: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setWindowX(this.peer!.ptr, windowX)
     }
-    private getWindowY_serialize(): number {
+    private getWindowY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getWindowY(this.peer!.ptr)
         return retval
     }
-    private setWindowY_serialize(windowY: number): void {
+    private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setWindowY(this.peer!.ptr, windowY)
     }
-    private getX_serialize(): number {
+    private getX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getX(this.peer!.ptr)
         return retval
     }
-    private setX_serialize(x: number): void {
+    private setX_serialize(x: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setX(this.peer!.ptr, x)
     }
-    private getY_serialize(): number {
+    private getY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setY_serialize(y: number): void {
+    private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
+        let buffer: (() => void) | undefined = undefined
+        
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
+            
+            buffer = (): void => {
+                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        
+        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
+        return returnResult;
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -23177,46 +23599,46 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getRawDeltaX_serialize(): number | undefined {
+    private getRawDeltaX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRawDeltaX_serialize(rawDeltaX: number | undefined): void {
+    private setRawDeltaX_serialize(rawDeltaX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rawDeltaX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rawDeltaXTmpValue  = rawDeltaX!
-            thisSerializer.writeNumber(rawDeltaXTmpValue)
+            thisSerializer.writeFloat64(rawDeltaXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MouseEvent_setRawDeltaX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getRawDeltaY_serialize(): number | undefined {
+    private getRawDeltaY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRawDeltaY_serialize(rawDeltaY: number | undefined): void {
+    private setRawDeltaY_serialize(rawDeltaY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rawDeltaY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rawDeltaYTmpValue  = rawDeltaY!
-            thisSerializer.writeNumber(rawDeltaYTmpValue)
+            thisSerializer.writeFloat64(rawDeltaYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }

@@ -23,6 +23,11 @@ interface routerInfo {
 let routerData: routerInfo[] = [
   { url: 'pages/Scroll/friction', info: 'friction' },
   { url: 'pages/Scroll/scrollSnap', info: 'scrollSnap' },
+  { url: "pages/Scroll/LayoutConstraints/OneItem", info: "高：单子组件" },
+  { url: "pages/Scroll/LayoutConstraints/TwoItem", info: "高：多子组件" },
+  { url: "pages/Scroll/LayoutConstraints/WidthOneItem", info: "宽：单子组件" },
+  { url: "pages/Scroll/LayoutConstraints/WidthTwoItem", info: "宽：多子组件" },
+  { url: "pages/Scroll/LayoutConstraints/OriOneItem", info: "文本10w+" }
 ]
 
 @Entry

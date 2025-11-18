@@ -1852,7 +1852,7 @@ std::pair<TwoAlignedValues, TwoAlignedValues> RelativeContainerLayoutAlgorithm::
     TwoAlignedValues verticalValues;
     for (const auto& alignRule : alignRules) {
         bool horizontalCheckTwoSidesAligned = horizontalValues.first.has_value() && horizontalValues.second.has_value();
-        bool verticalCheckTwoSidesAligned = verticalValues.second.has_value() && verticalValues.second.has_value();
+        bool verticalCheckTwoSidesAligned = verticalValues.first.has_value() && verticalValues.second.has_value();
         if (horizontalCheckTwoSidesAligned && verticalCheckTwoSidesAligned) {
             break;
         }

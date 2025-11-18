@@ -23,6 +23,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -38,6 +39,44 @@ constexpr int32_t PRIMARY_PAGE_NODE_THRESHOLD = 100;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr Dimension APP_ICON_SIZE = 64.0_vp;
 const std::vector<std::string> PRIMARY_PAGE_PREFIX = {"main", "home", "index", "root"};
+
+class PlaceholderPattern : public StackPattern {
+    DECLARE_ACE_TYPE(PlaceholderPattern, StackPattern);
+public:
+    PlaceholderPattern() = default;
+    ~PlaceholderPattern() override = default;
+
+    void OnColorConfigurationUpdate() override;
+    void OnAttachToMainTree() override;
+    void RefreshBackgroundColor();
+};
+
+void PlaceholderPattern::OnColorConfigurationUpdate()
+{
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::OnAttachToMainTree()
+{
+    StackPattern::OnAttachToMainTree();
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::RefreshBackgroundColor()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Color bgColor;
+    if (navManager->GetSystemColor(BG_COLOR_SYS_RES_NAME, bgColor)) {
+        renderContext->UpdateBackgroundColor(bgColor);
+    }
+}
 }
 
 void ParallelPageRouterManager::NotifyForceFullScreenChangeIfNeeded(
@@ -69,6 +108,7 @@ void ParallelPageRouterManager::LoadPage(
         return;
     }
     NotifyForceFullScreenChangeIfNeeded(target.url, PipelineContext::GetCurrentContext());
+    LoadCompleteManagerStartCollect(target.url);
     auto pageNode = CreatePage(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
@@ -134,6 +174,7 @@ void ParallelPageRouterManager::LoadPageExtender(
         return;
     }
     NotifyForceFullScreenChangeIfNeeded(target.url, PipelineContext::GetCurrentContext());
+    LoadCompleteManagerStartCollect(target.url);
     auto pageNode = CreatePageExtender(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
@@ -281,7 +322,7 @@ RefPtr<FrameNode> ParallelPageRouterManager::LoadPlaceHolderPage()
 
     int32_t stackId = ElementRegister::GetInstance()->MakeUniqueId();
     auto stackNode = FrameNode::GetOrCreateFrameNode(
-        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
     CHECK_NULL_RETURN(stackNode, nullptr);
     stackNode->MountToParent(placeHolderPageNode);
     auto stackContext = stackNode->GetRenderContext();
@@ -467,5 +508,13 @@ bool ParallelPageRouterManager::StartPop()
         }
     }
     return PageRouterManager::StartPop();
+}
+
+void ParallelPageRouterManager::LoadCompleteManagerStartCollect(const std::string& url)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pageRouterStack_.empty() && pipelineContext) {
+        pipelineContext->GetLoadCompleteManager()->StartCollect(url);
+    }
 }
 } // namespace OHOS::Ace::NG

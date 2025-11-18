@@ -170,6 +170,8 @@ public:
     }
 
     void OnColorModeChange(uint32_t colorMode) override;
+    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
 private:
     void OnAttachToFrameNode() override;

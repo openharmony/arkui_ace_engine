@@ -26,7 +26,10 @@ class ACE_EXPORT RectModelNG : public OHOS::Ace::RectModel {
 public:
     void Create() override;
     void SetRadiusWidth(const Dimension& value) override;
+    void SetRadiusWidth(const RefPtr<ResourceObject>& radiusWidthResObj) override;
     void SetRadiusHeight(const Dimension& value) override;
+    void SetRadiusHeight(const RefPtr<ResourceObject>& radiusHeightResObj) override;
+    void SetRadius(const RefPtr<ResourceObject>& radiusResObj) override;
     void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
     void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, const RefPtr<ResourceObject>& radiusXResObj,
         const RefPtr<ResourceObject>& radiusYResObj, int32_t index) override;
@@ -34,7 +37,10 @@ public:
     void SetShapeRectRadius(
         const RefPtr<ShapeRect>& shapeRect, const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
     static void SetRadiusWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetRadiusWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusWidthResObj);
     static void SetRadiusHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetRadiusHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusHeightResObj);
+    static void SetRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusResObj);
     static void SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
     static void SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY,
         const RefPtr<ResourceObject>& radiusXResObj, const RefPtr<ResourceObject>& radiusYResObj, int32_t index);

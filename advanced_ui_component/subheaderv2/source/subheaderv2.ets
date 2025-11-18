@@ -44,8 +44,8 @@ const ARROW_ICON_WIDTH = lazyInit<number>(() => {
 const SINGLE_ICON_ZONE_SIZE = lazyInit<number>(() => {
   return getResourceValue('sys.float.subheader_right_icon_zone_size');
 });
-const RIGHT_SINGLE_ICON_SIZE = lazyInit<number>(() => {
-  return getResourceValue('sys.float.subheader_right_icon_size');
+const RIGHT_SINGLE_ICON_SIZE = lazyInit<string>(() => {
+  return getResourceValue('sys.float.subheader_right_icon_size') + 'vp';
 });
 const DEFAULT_FOCUS_STYLE = lazyInit<number>(() => {
   return getResourceValue('sys.float.subheader_right_button_default_focus_style');
@@ -352,8 +352,8 @@ export struct SubHeaderV2 {
       } else {
         Image($$.iconOptions as ResourceStr)
           .fillColor(this.subHeaderV2Theme.leftIconColor)
-          .width(getResourceValue('sys.float.subheader_left_icon_size'))
-          .height(getResourceValue('sys.float.subheader_left_icon_size'))
+          .width(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
+          .height(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
           .margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) })
           .draggable(false)
           .flexShrink(0)
@@ -755,7 +755,7 @@ export struct SubHeaderV2 {
   ArrowStyle(): void {
     Row() {
       SymbolGlyph($r('sys.symbol.chevron_right'))
-        .fontSize(OPERATE_ITEM_LENGTH())
+        .fontSize(OPERATE_ITEM_LENGTH() + 'vp')
         .fontColor([this.subHeaderV2Theme.iconArrowColor])
         .draggable(false)
         .width(ARROW_ICON_WIDTH())
@@ -829,7 +829,7 @@ export struct SubHeaderV2 {
       Row() {
         Button({ type: ButtonType.Normal, stateEffect: false }) {
           SymbolGlyph($r('sys.symbol.chevron_right'))
-            .fontSize(OPERATE_ITEM_LENGTH())
+            .fontSize(OPERATE_ITEM_LENGTH() + 'vp')
             .fontColor([this.subHeaderV2Theme.iconArrowColor])
             .draggable(false)
             .focusable(true)
@@ -1159,7 +1159,7 @@ struct SymbolGlyphChild {
   build() {
     Column() {
       SymbolGlyph(this.icon as Resource)
-        .fontSize(getResourceValue('sys.float.subheader_left_icon_size'))
+        .fontSize(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
         .fontColor(this.fontColor)
         .attributeModifier(this.icon as SymbolGlyphModifier)
         .margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) })
@@ -1290,6 +1290,7 @@ struct SingleIconStyle {
           .draggable(false)
           .borderRadius(getResourceValue('sys.float.subheader_right_image_radius'))
           .padding(getResourceValue('sys.float.subheader_right_image_padding'))
+          .attributeModifier(!DEFAULT_FOCUS_STYLE() ? undefined : new DefaultImageButtonFocusStyle())
       }
     }
   }
@@ -1584,5 +1585,16 @@ class DefaultFocusStyleModifier implements AttributeModifier<ButtonAttribute> {
       .onBlur(() => {
         this.stateStyleAction && this.stateStyleAction(false);
       })
+  }
+}
+
+class DefaultImageButtonFocusStyle implements AttributeModifier<ImageAttribute> {
+  applyNormalAttribute(instance: ImageAttribute): void {
+    if (!instance) {
+      return;
+    }
+    instance
+      .borderRadius(getResourceValue('sys.float.padding_level2'))
+      .focusBox({margin: LengthMetrics.vp(getResourceValue('sys.float.padding_level4'))})
   }
 }

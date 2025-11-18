@@ -47,7 +47,7 @@ class BuilderNodeCommonBase extends Disposable {
     return ret;
   }
   public dispose(): void {
-    if (this.isDisposed_) {
+    if (this.isDisposed()) {
       return;
     }
     super.dispose();
@@ -291,6 +291,9 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     __JSScopeUtil__.restoreInstanceId();
   }
   public updateConfiguration(): void {
+    if (this === undefined) {
+        return;
+    }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
     try {
@@ -580,7 +583,7 @@ class ReactiveBuilderNode extends BuilderNodeCommonBase {
     this._JSBuilderNode.build(builder, params, options);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
-  public flushState() {
+  public flushState(): void {
     if (this._JSBuilderNode instanceof ReactiveBuilderNodeBase) {
       (this._JSBuilderNode as ReactiveBuilderNodeBase)?.flushState();
     }
@@ -594,7 +597,8 @@ class ReactiveBuilderNodeBase extends JSBuilderNode {
   }
   protected buildWithNestingBuilder(builder: WrappedBuilder<Object[]>, supportLazyBuild: boolean): void {
     if (this.isArray(this.params_)) {
-      this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_ as Array<Object>, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+      this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_ as Array<Object>,
+                                            this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     }
   }
   public __isReactiveBuilderNode__ViewBuildNodeBase__Internal(): boolean {

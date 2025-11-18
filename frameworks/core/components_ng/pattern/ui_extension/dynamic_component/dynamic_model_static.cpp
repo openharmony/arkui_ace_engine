@@ -27,6 +27,13 @@ RefPtr<FrameNode> DynamicModelStatic::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+void* DynamicModelStatic::CreateFrameNodeByIncRefCount(int32_t nodeId)
+{
+    auto frameNode = NG::DynamicModelStatic::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void DynamicModelStatic::SetDynamicParam(FrameNode* frameNode, const DynamicParam& param)
 {
     CHECK_NULL_VOID(frameNode);

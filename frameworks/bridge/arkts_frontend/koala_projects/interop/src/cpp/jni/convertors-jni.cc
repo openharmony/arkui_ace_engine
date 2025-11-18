@@ -93,7 +93,7 @@ const std::vector<std::tuple<std::string, std::string, void*>>& JniExports::getM
     auto it = implementations.find(module);
     if (it == implementations.end()) {
         LOGE("Module %s is not registered", module.c_str());
-        INTEROP_FATAL("Fatal error: not registered module %s", module.c_str());
+        abort();
     }
     return it->second;
 }

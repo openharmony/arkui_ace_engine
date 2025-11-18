@@ -129,6 +129,7 @@ void FfiOHOSAceFrameworkSpanSetOnClick(void (*callback)(CJClickInfo clickInfo))
 
     auto onClick = [lambda](const BaseEventInfo* info) {
         const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+        CHECK_NULL_VOID(clickInfo);
         auto newInfo = *clickInfo;
         lambda(newInfo);
     };

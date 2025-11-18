@@ -67,6 +67,16 @@ void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
 }
 
 template<>
+void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& src)
+{
+    switch (src) {
+        case ARK_WEB_ROTATE_EFFECT_TOPLEFT_EFFECT: dst = WebRotateEffect::TOPLEFT_EFFECT; break;
+        case ARK_WEB_ROTATE_EFFECT_RESIZE_COVER_EFFECT: dst = WebRotateEffect::RESIZE_COVER_EFFECT; break;
+        default: LOGE("Unexpected enum value in Ark_WebRotateEffect: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
 {
     switch (src) {
@@ -853,6 +863,18 @@ void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
         case ARK_CONTENT_TYPE_NICKNAME: dst = TextContentType::NICKNAME; break;
         case ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET: dst = TextContentType::DETAIL_INFO_WITHOUT_STREET; break;
         case ARK_CONTENT_TYPE_FORMAT_ADDRESS: dst = TextContentType::FORMAT_ADDRESS; break;
+        case ARK_CONTENT_TYPE_PASSPORT_NUMBER: dst = TextContentType::PASSPORT_NUMBER; break;
+        case ARK_CONTENT_TYPE_VALIDITY: dst = TextContentType::VALIDITY; break;
+        case ARK_CONTENT_TYPE_ISSUE_AT: dst = TextContentType::ISSUE_AT; break;
+        case ARK_CONTENT_TYPE_ORGANIZATION: dst = TextContentType::ORGANIZATION; break;
+        case ARK_CONTENT_TYPE_TAX_ID: dst = TextContentType::TAX_ID; break;
+        case ARK_CONTENT_TYPE_ADDRESS_CITY_AND_STATE: dst = TextContentType::ADDRESS_CITY_AND_STATE; break;
+        case ARK_CONTENT_TYPE_FLIGHT_NUMBER: dst = TextContentType::FLIGHT_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_NUMBER: dst = TextContentType::LICENSE_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_FILE_NUMBER: dst = TextContentType::LICENSE_FILE_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_PLATE: dst = TextContentType::LICENSE_PLATE; break;
+        case ARK_CONTENT_TYPE_ENGINE_NUMBER: dst = TextContentType::ENGINE_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_CHASSIS_NUMBER: dst = TextContentType::LICENSE_CHASSIS_NUMBER; break;
         default: LOGE("Unexpected enum value in Ark_ContentType: %{public}d", src);
     }
 }
@@ -875,6 +897,7 @@ void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
         case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
         case ARK_STICKY_STYLE_HEADER: dst = V2::StickyStyle::HEADER; break;
         case ARK_STICKY_STYLE_FOOTER: dst = V2::StickyStyle::FOOTER; break;
+        case ARK_STICKY_STYLE_BOTH: dst = V2::StickyStyle::BOTH; break;
         default: LOGE("Unexpected enum value in Ark_StickyStyle: %{public}d", src);
     }
 }
@@ -997,6 +1020,8 @@ void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src
         case ARK_ANIMATION_MODE_CONTENT_FIRST: dst = TabAnimateMode::CONTENT_FIRST; break;
         case ARK_ANIMATION_MODE_ACTION_FIRST: dst = TabAnimateMode::ACTION_FIRST; break;
         case ARK_ANIMATION_MODE_NO_ANIMATION: dst = TabAnimateMode::NO_ANIMATION; break;
+        case ARK_ANIMATION_MODE_CONTENT_FIRST_WITH_JUMP: dst = TabAnimateMode::CONTENT_FIRST_WITH_JUMP; break;
+        case ARK_ANIMATION_MODE_ACTION_FIRST_WITH_JUMP: dst = TabAnimateMode::ACTION_FIRST_WITH_JUMP; break;
         default: LOGE("Unexpected enum value in Ark_AnimationMode: %{public}d", src);
     }
 }
@@ -1111,6 +1136,27 @@ void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_Accessib
         case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT: dst = AccessibilityHoverAction::HOVER_EXIT; break;
         case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL: dst = AccessibilityHoverAction::HOVER_CANCEL; break;
         default: LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AccessibilityInterfaceAction>& dst, const Ark_AccessibilityAction& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION: dst = AccessibilityInterfaceAction::UNDEFINED_ACTION; break;
+        case ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK: dst = AccessibilityInterfaceAction::ACCESSIBILITY_CLICK; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityAction: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst, const Ark_AccessibilityActionInterceptResult& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_INTERCEPT: dst = AccessibilityActionInterceptResult::ACTION_INTERCEPT; break;
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_CONTINUE: dst = AccessibilityActionInterceptResult::ACTION_CONTINUE; break;
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_RISE: dst = AccessibilityActionInterceptResult::ACTION_RISE; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityActionInterceptResult: %{public}d", src);
     }
 }
 
@@ -1835,6 +1881,20 @@ void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
 }
 
 template<>
+void AssignCast(std::optional<ResponseRegionSupportedTool>& dst, const Ark_ResponseRegionSupportedTool& src)
+{
+    switch (src) {
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_ALL: dst = ResponseRegionSupportedTool::ALL; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_FINGER: dst = ResponseRegionSupportedTool::FINGER; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_PEN: dst = ResponseRegionSupportedTool::PEN; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_MOUSE: dst = ResponseRegionSupportedTool::MOUSE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ResponseRegionSupportedTool: %{public}d", src);
+        }
+    }
+}
+
+template<>
 void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src)
 {
     switch (src) {
@@ -2227,6 +2287,8 @@ void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src)
         case ARK_SOURCE_TYPE_UNKNOWN: dst = SourceType::NONE; break;
         case ARK_SOURCE_TYPE_MOUSE: dst = SourceType::MOUSE; break;
         case ARK_SOURCE_TYPE_TOUCH_SCREEN: dst = SourceType::TOUCH; break;
+        case ARK_SOURCE_TYPE_KEY: dst = SourceType::KEYBOARD; break;
+        case ARK_SOURCE_TYPE_JOYSTICK: dst = SourceType::JOYSTICK; break;
         default: LOGE("Unexpected enum value in Ark_SourceType: %{public}d", src);
     }
 }

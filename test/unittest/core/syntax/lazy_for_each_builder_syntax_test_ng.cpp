@@ -186,12 +186,12 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataBulkChangedTest001, TestSize.
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
 
-    lazyForEachNode->OnDataAdded(INDEX_GREATER_THAN_END_INDEX);
-    lazyForEachNode->OnDataBulkChanged(INDEX_EQUAL_WITH_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
-
     lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->children_.push_back(CreateNode(V2::TEXT_ETS_TAG));
     lazyForEachNode->OnDataAdded(INDEX_EQUAL_WITH_START_INDEX);
     lazyForEachNode->OnDataBulkChanged(INDEX_EQUAL_WITH_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
 }
 
 /**
@@ -231,9 +231,12 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataMoveToNewPlaceTest001, TestSi
     lazyForEachNode->OnDataMoveToNewPlace(INDEX_GREATER_THAN_END_INDEX, INDEX_GREATER_THAN_END_INDEX);
 
     lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->children_.push_back(CreateNode(V2::TEXT_ETS_TAG));
     lazyForEachNode->OnDataAdded(INDEX_EQUAL_WITH_START_INDEX);
     lazyForEachNode->OnDataMoveToNewPlace(INDEX_EQUAL_WITH_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
     lazyForEachNode->OnDataMoveToNewPlace(INDEX_EQUAL_WITH_START_INDEX, INDEX_EQUAL_WITH_START_INDEX);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
 }
 
 /**
@@ -273,7 +276,13 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest001, TestSize.Le
     lazyForEachNode->OnDataAdded(INDEX_GREATER_THAN_END_INDEX);
     lazyForEachNode->OnDatasetChange(DataOperations);
     lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->children_.push_back(CreateNode(V2::TEXT_ETS_TAG));
     lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
 }
 
 /**

@@ -42,7 +42,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t MAX_POINTS = 10;
-    constexpr int32_t DEFAULT_ALLOWABLE_MOVEMENT = 15;
+    constexpr double DEFAULT_ALLOWABLE_MOVEMENT = 15.0;
     constexpr int32_t API_TARGET_VERSION_MASK = 1000;
 }
 ArkUIGesture* createPanGesture(
@@ -915,16 +915,18 @@ ArkUI_Int32 setGestureRecognizerLimitFingerCount(ArkUIGesture* gesture, bool lim
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 setLongPressGestureAllowableMovement(ArkUIGesture* gesture, int32_t allowableMovement)
+ArkUI_Int32 setLongPressGestureAllowableMovement(ArkUIGesture* gesture, double allowableMovement)
 {
     auto longPressGesture = Referenced::Claim(reinterpret_cast<LongPressGesture*>(gesture));
     CHECK_NULL_RETURN(longPressGesture, ERROR_CODE_PARAM_INVALID);
-    longPressGesture->SetAllowableMovement(allowableMovement <= 0 ? DEFAULT_ALLOWABLE_MOVEMENT : allowableMovement);
+    longPressGesture->SetAllowableMovement(
+        LessOrEqual(allowableMovement, 0.0) ? DEFAULT_ALLOWABLE_MOVEMENT : allowableMovement);
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 getLongPressGestureAllowableMovement(ArkUIGesture* gesture, int32_t* allowableMovement)
+ArkUI_Int32 getLongPressGestureAllowableMovement(ArkUIGesture* gesture, double* allowableMovement)
 {
+    CHECK_NULL_RETURN(allowableMovement, ERROR_CODE_PARAM_INVALID);
     auto longPressGesture = Referenced::Claim(reinterpret_cast<LongPressGesture*>(gesture));
     CHECK_NULL_RETURN(longPressGesture, ERROR_CODE_PARAM_INVALID);
     *allowableMovement = longPressGesture->GetAllowableMovement();
@@ -1460,5 +1462,27 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
         ret->rawPointerEvent = &inputEvent;
     }
 }
+
+ArkUITouchTestInfoItemHandle CreateTouchTestInfoItem(const TouchTestInfo& info)
+{
+    ArkUITouchTestInfoItem* touchTestInfo = nullptr;
+    touchTestInfo = new ArkUITouchTestInfoItem();
+    CHECK_NULL_RETURN(touchTestInfo, nullptr);
+    touchTestInfo->nodeX = info.subCmpPoint.GetX();
+    touchTestInfo->nodeY = info.subCmpPoint.GetY();
+    touchTestInfo->windowX = info.windowPoint.GetX();
+    touchTestInfo->windowY = info.windowPoint.GetY();
+    touchTestInfo->parentNodeX = info.currentCmpPoint.GetX();
+    touchTestInfo->parentNodeY = info.currentCmpPoint.GetY();
+    ArkUIRect rect;
+    rect.x = info.subRect.GetX();
+    rect.y = info.subRect.GetY();
+    rect.width = info.subRect.Width();
+    rect.height = info.subRect.Height();
+    touchTestInfo->rect = rect;
+    touchTestInfo->id = info.id.c_str();
+    return touchTestInfo;
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

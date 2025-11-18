@@ -526,15 +526,52 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest023, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<ParticlePattern>(1); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    // constrcuct params
+    /**
+     * @tc.steps: step2. Call OnDynamicRangeModeUpdate with STANDARD mode (default)
+     * @tc.expected: isHdr_ should remain false, HDR not enabled.
+     */
     DynamicRangeMode dynamicRangeMode = DynamicRangeMode::STANDARD;
     rosenRenderContext->OnDynamicRangeModeUpdate(dynamicRangeMode);
     EXPECT_EQ(rosenRenderContext->isHdr_, false);
+
+    /**
+     * @tc.steps: step3. Call with HIGH mode
+     * @tc.expected: isHdr_ should change to true, HDR is enabled.
+     */
     dynamicRangeMode = DynamicRangeMode::HIGH;
     rosenRenderContext->OnDynamicRangeModeUpdate(dynamicRangeMode);
     EXPECT_EQ(rosenRenderContext->isHdr_, true);
+
+    /**
+     * @tc.steps: step4. Call again with HIGH mode (same as current)
+     * @tc.expected: No redundant HDR toggling, isHdr_ remains true.
+     */
+    rosenRenderContext->OnDynamicRangeModeUpdate(dynamicRangeMode);
+    EXPECT_EQ(rosenRenderContext->isHdr_, true);
+
+    /**
+     * @tc.steps: step5. Call with CONSTRAINT mode (> STANDARD)
+     * @tc.expected: isHdr_ remains true because it only turns false when STANDARD.
+     */
+    dynamicRangeMode = DynamicRangeMode::CONSTRAINT;
+    rosenRenderContext->OnDynamicRangeModeUpdate(dynamicRangeMode);
+    EXPECT_EQ(rosenRenderContext->isHdr_, true);
+
+    /**
+     * @tc.steps: step6. Call with STANDARD mode again after HDR is on
+     * @tc.expected: isHdr_ should turn false, HDR disabled.
+     */
+    dynamicRangeMode = DynamicRangeMode::STANDARD;
     rosenRenderContext->OnDynamicRangeModeUpdate(dynamicRangeMode);
     EXPECT_EQ(rosenRenderContext->isHdr_, false);
+
+    /**
+     * @tc.steps: step7. Call with a mode < STANDARD (simulate invalid or lower than STANDARD)
+     * @tc.expected: Should enable HDR again, as per "if (dynamicRangeMode < STANDARD && !isHdr_)"
+     */
+    dynamicRangeMode = static_cast<DynamicRangeMode>(static_cast<int>(DynamicRangeMode::STANDARD) - 1);
+    rosenRenderContext->OnDynamicRangeModeUpdate(dynamicRangeMode);
+    EXPECT_EQ(rosenRenderContext->isHdr_, true);
 }
 
 /**
@@ -2387,5 +2424,28 @@ HWTEST_F(RosenRenderContextTest, OnZindexUpdate001, TestSize.Level1)
     pipeline->taskScheduler_->FlushTask();
     positionZ = stagingProperties.GetPositionZ();
     EXPECT_EQ(positionZ, 3);
+}
+
+/**
+ * @tc.name: IsOnRenderTreeTest001
+ * @tc.desc: Test IsOnRenderTree Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, IsOnRenderTreeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get RenderContext.
+     * @tc.expected: step1. RenderContext is not null .
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    /**
+     * @tc.steps: step2. get isOnRenderTree.
+     * @tc.expected: step1. isOnRenderTree is false .
+     */
+    auto isOnRenderTree = rosenRenderContext->IsOnRenderTree();
+    EXPECT_EQ(isOnRenderTree, false);
 }
 } // namespace OHOS::Ace::NG

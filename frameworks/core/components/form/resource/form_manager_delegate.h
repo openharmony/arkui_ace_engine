@@ -74,6 +74,7 @@ public:
     using LockFormCallback = std::function<void(const bool lock)>;
     using UpdateFormDoneCallback = std::function<void(const int64_t formId)>;
     using DueControlFormCallback = std::function<void(const bool isDisablePolicy, const bool isControl)>;
+    using FormRenderDiedCallback = std::function<void()>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -126,7 +127,8 @@ public:
     void AddEnableFormCallback(EnableFormCallback&& callback);
     void AddLockFormCallback(LockFormCallback&& callback);
     void AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback);
-    void AddDueControlFormCallback(DueControlFormCallback &&callback);
+    void AddDueControlFormCallback(DueControlFormCallback&& callback);
+    void AddFormRenderDiedCallback(FormRenderDiedCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -200,6 +202,24 @@ private:
     void CheckWhetherSurfaceChangeFailed();
     void UpdateFormSizeWantCache(float width, float height, float formViewScale, float borderWidth);
     void HandleDueControlForm(bool isDisablePolicy, bool isControl);
+    
+    inline void SetFormRendererDispatcher(sptr<IFormRendererDispatcher> &rendererDispatcher)
+    {
+        std::lock_guard<std::mutex> lock(formRenderDispatcherMutex_);
+        formRendererDispatcher_ = rendererDispatcher;
+    }
+
+    inline void ClearFormRendererDispatcher()
+    {
+        std::lock_guard<std::mutex> lock(formRenderDispatcherMutex_);
+        formRendererDispatcher_ = nullptr;
+    }
+
+    inline sptr<IFormRendererDispatcher> GetFormRendererDispatcher()
+    {
+        std::lock_guard<std::mutex> lock(formRenderDispatcherMutex_);
+        return formRendererDispatcher_;
+    }
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
@@ -219,6 +239,7 @@ private:
     LockFormCallback lockFormCallback_;
     UpdateFormDoneCallback updateFormDoneCallback_;
     DueControlFormCallback dueControlFormCallback_;
+    FormRenderDiedCallback onFormRenderDiedCallback_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;
@@ -244,6 +265,7 @@ private:
     sptr<FormRendererDelegateImpl> renderDelegate_;
     sptr<IFormRendererDispatcher> formRendererDispatcher_;
     AppExecFwk::FormJsInfo formJsInfo_;
+    std::mutex formRenderDispatcherMutex_;
 #endif
 };
 

@@ -27,6 +27,7 @@
 #include <unordered_map>
 
 #include "base/geometry/calc_dimension.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -83,6 +84,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"
@@ -178,7 +180,7 @@ const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
 enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT,
-    AI_WRITER, TRANSLATE, SHARE, SEARCH, ASK_CELIA };
+    AI_WRITER, TRANSLATE, SHARE, SEARCH, ASK_CELIA, AI_MENU_OPTION };
 enum class BackgroundType { CUSTOM_BUILDER, COLOR };
 
 const int32_t NUM_0 = 0;
@@ -1721,6 +1723,11 @@ MenuItemType StringToMenuItemType(std::string_view id)
         { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
         { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
         { "OH_DEFAULT_ASK_CELIA", MenuItemType::ASK_CELIA },
+        { "OH_DEFAULT_AI_MENU_PHONE", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_URL", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_EMAIL", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_ADDRESS", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_DATETIME", MenuItemType::AI_MENU_OPTION }
     };
 
     auto item = keyMenuItemMap.find(id);
@@ -1768,6 +1775,9 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
             break;
         case MenuItemType::ASK_CELIA:
             menuOptionsParam.symbolId = theme->GetAskCeliaSymbolId();
+            break;
+        case MenuItemType::AI_MENU_OPTION:
+            menuOptionsParam.symbolId = theme->GetAIMenuSymbolId();
             break;
         default:
             menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
@@ -2381,6 +2391,101 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->SetHeight(value);
     }
     return true;
+}
+
+void JSViewAbstract::ParseResponseRegionTool(const JSRef<JSVal>& jsValue, NG::ResponseRegionSupportedTool& tool)
+{
+    if (!jsValue->IsNumber()) {
+        return ;
+    }
+    auto typeNum = jsValue->ToNumber<int32_t>();
+    if (0 <= typeNum && typeNum < static_cast<int32_t>(NG::ResponseRegionSupportedTool::TOOLCNT)) {
+        tool = static_cast<NG::ResponseRegionSupportedTool>(typeNum);
+    } else {
+        tool = NG::ResponseRegionSupportedTool::ALL;
+    }
+}
+
+bool JSViewAbstract::ParseJsResponseRegionListRect(const JSRef<JSVal>& jsValue, NG::ResponseRegionSupportedTool& type, CalcDimensionRect& result)
+{
+    type = NG::ResponseRegionSupportedTool::ALL;
+    result.SetWidth(CalcDimension(1, DimensionUnit::PERCENT));
+    result.SetHeight(CalcDimension(1, DimensionUnit::PERCENT));
+    result.SetX(CalcDimension(0, DimensionUnit::VP));
+    result.SetY(CalcDimension(0, DimensionUnit::VP));
+
+    if (!jsValue->IsObject()) {
+        return true;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
+
+    CalcDimension xDimen = result.GetX();
+    CalcDimension yDimen = result.GetY();
+    CalcDimension widthDimen = result.GetWidth();
+    CalcDimension heightDimen = result.GetHeight();
+
+    if (obj->HasProperty("tool")) {
+        JSRef<JSVal> tool = obj->GetProperty("tool");
+        ParseResponseRegionTool(tool, type);
+    }
+    if (obj->HasProperty("x")) {
+        JSRef<JSVal> x = obj->GetProperty("x");
+        if (ParseLengthMetricsToDimension(x, xDimen)) {
+            result.SetX(xDimen);
+        }
+    }
+    if (obj->HasProperty("y")) {
+        JSRef<JSVal> y = obj->GetProperty("y");
+        if (ParseLengthMetricsToDimension(y, yDimen)) {
+            result.SetY(yDimen);
+        }
+    }
+    if (obj->HasProperty("width")) {
+        JSRef<JSVal> width = obj->GetProperty("width");
+        if (ParseLengthMetricsToDimension(width, widthDimen, DimensionUnit::VP)) {
+            result.SetWidth(widthDimen);
+        }
+    }
+    if (obj->HasProperty("height")) {
+        JSRef<JSVal> height = obj->GetProperty("height");
+        if (ParseLengthMetricsToDimension(height, heightDimen, DimensionUnit::VP)) {
+            result.SetHeight(heightDimen);
+        }
+    }
+    return true;
+}
+
+bool JSViewAbstract::ParseJsResponseRegionListArray(const JSRef<JSVal>& jsValue,
+    std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& result)
+{
+    if (!jsValue->IsArray() && !jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        auto type = NG::ResponseRegionSupportedTool::ALL;
+        CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+        if (ParseJsResponseRegionListRect(array->GetValueAt(i), type, dimenRect)) {
+            result[type].emplace_back(dimenRect);
+        }
+    }
+    return true;
+}
+
+
+void JSViewAbstract::JsResponseRegionList(const JSCallbackInfo& info)
+{
+    std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> result;
+    if (!JSViewAbstract::ParseJsResponseRegionListArray(info[0], result)) {
+        ViewAbstractModel::GetInstance()->SetResponseRegionList({});
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetResponseRegionList(result);
 }
 
 void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
@@ -3872,9 +3977,13 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type)
 {
-    ViewAbstractModel::GetInstance()->ResetResObj("margin");
-    ViewAbstractModel::GetInstance()->ResetResObj("padding");
-    ViewAbstractModel::GetInstance()->ResetResObj("safeAreaPadding");
+    if (type == EdgeType::MARGIN) {
+        ViewAbstractModel::GetInstance()->ResetResObj("margin");
+    } else if (type == EdgeType::PADDING) {
+        ViewAbstractModel::GetInstance()->ResetResObj("padding");
+    } else if (type == EdgeType::SAFE_AREA_PADDING) {
+        ViewAbstractModel::GetInstance()->ResetResObj("safeAreaPadding");
+    }
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER };
     auto jsVal = info[0];
@@ -5197,6 +5306,7 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->ResetResObj("borderRadius");
+    SetCornerApplyType(info);
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -5205,6 +5315,23 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
         return;
     }
     ParseBorderRadius(jsVal);
+}
+
+void JSViewAbstract::SetCornerApplyType(const JSCallbackInfo& info)
+{
+    if (info.Length() < NUM2) {
+        return;
+    }
+    auto type = info[NUM1];
+    CornerApplyType cornerApplyType = CornerApplyType::FAST;
+    if (type->IsNumber()) {
+        int32_t typeNumber = type->ToNumber<int32_t>();
+        if (typeNumber >= static_cast<int32_t>(CornerApplyType::FAST) &&
+            typeNumber < static_cast<int32_t>(CornerApplyType::MAX)) {
+            cornerApplyType = static_cast<CornerApplyType>(typeNumber);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetCornerApplyType(cornerApplyType);
 }
 
 NG::BorderRadiusProperty JSViewAbstract::GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
@@ -6018,6 +6145,16 @@ void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj,
     CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
 }
 
+void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue)
+{
+    type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
+    if (type->IsNumber()) {
+        resTypeValue = type->ToNumber<int32_t>();
+    } else {
+        resTypeValue = UNKNOWN_RESOURCE_TYPE;
+    }
+}
+
 void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName,
     std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue)
 {
@@ -6026,21 +6163,17 @@ void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::st
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
     ResourceType resType = ResourceType::UNKNOWN;
 
-    JSRef<JSVal> type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
-    if (type->IsNumber()) {
-        resTypeValue = type->ToNumber<int32_t>();
-    } else {
-        resTypeValue = UNKNOWN_RESOURCE_TYPE;
-    }
-
     std::string targetModule;
     std::string resName;
+    JSRef<JSVal> type;
     if (resId->IsString()) {
+        GetResourceObjectType(jsObj, type, resTypeValue);
         if (!ParseDollarResource(resId, targetModule, resType, resName, resTypeValue == UNKNOWN_RESOURCE_TYPE)) {
             return;
         }
         CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
+        GetResourceObjectType(jsObj, type, resTypeValue);
         resIdValue = resId->ToNumber<int32_t>();
         if (resIdValue == -1 || resTypeValue == UNKNOWN_RESOURCE_TYPE) {
             CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
@@ -6409,22 +6542,22 @@ bool JSViewAbstract::ParseColorMetricsToColor(
     return false;
 }
 
-bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit unit)
 {
     RefPtr<ResourceObject> resObj;
-    return ParseLengthMetricsToDimension(jsValue, result, resObj);
+    return ParseLengthMetricsToDimension(jsValue, result, resObj, unit);
 }
 
 bool JSViewAbstract::ParseLengthMetricsToDimension(
-    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj)
+    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj, DimensionUnit unit)
 {
     if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
+        result = CalcDimension(jsValue->ToNumber<double>(), unit);
         return true;
     }
     if (jsValue->IsString()) {
         auto value = jsValue->ToString();
-        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
+        return StringUtils::StringToCalcDimensionNG(value, result, false, unit);
     }
     if (jsValue->IsObject()) {
         auto jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -6621,7 +6754,10 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
 bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
     RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
 {
-
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        return false;
+    }
     resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
         GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
@@ -6827,6 +6963,7 @@ void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& cu
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     auto resourceObject = GetResourceObject(jsObj);
+    CHECK_NULL_VOID(resourceObject);
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
     auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
@@ -9309,6 +9446,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSViewAbstract>::StaticMethod("height", &JSViewAbstract::JsHeight);
     JSClass<JSViewAbstract>::StaticMethod("toolbar", &JSViewAbstract::JsToolbar);
+    JSClass<JSViewAbstract>::StaticMethod("responseRegionList", &JSViewAbstract::JsResponseRegionList);
     JSClass<JSViewAbstract>::StaticMethod("responseRegion", &JSViewAbstract::JsResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("mouseResponseRegion", &JSViewAbstract::JsMouseResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
@@ -9531,7 +9669,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
-    JSClass<JSViewAbstract>::StaticMethod("cornerApplyType", &JSViewAbstract::JSCornerApplyType);
 
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
@@ -11448,22 +11585,6 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
 }
 
-void JSViewAbstract::JSCornerApplyType(const JSCallbackInfo& info)
-{
-    if (info.Length() != 1) {
-        return;
-    }
-    CornerApplyType cornerApplyType = CornerApplyType::FAST;
-    if (info[0]->IsNumber()) {
-        int32_t typeNumber = info[0]->ToNumber<int32_t>();
-        if (typeNumber >= static_cast<int32_t>(CornerApplyType::FAST) &&
-            typeNumber <= static_cast<int32_t>(CornerApplyType::MAX)) {
-            cornerApplyType = static_cast<CornerApplyType>(typeNumber);
-        }
-    }
-    ViewAbstractModel::GetInstance()->SetCornerApplyType(cornerApplyType);
-}
-
 bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
 {
     if (!jsValue->IsObject() || jsValue->IsString()) {
@@ -12828,8 +12949,12 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_ParseResourceObject(void* value)
         return nullptr;
     }
     JSRef<JSVal> jsVal = JsConverter::ConvertNapiValueToJsVal(napiValue);
+    if (!jsVal->IsObject()) {
+        return nullptr;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
     auto resourceObject = JSViewAbstract::GetResourceObject(jsObj);
+    CHECK_NULL_RETURN(resourceObject, nullptr);
     resourceObject->IncRefCount();
     return reinterpret_cast<void*>(AceType::RawPtr(resourceObject));
 }

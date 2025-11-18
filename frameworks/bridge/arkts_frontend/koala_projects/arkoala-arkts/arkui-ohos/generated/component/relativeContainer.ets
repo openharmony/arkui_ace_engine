@@ -64,15 +64,27 @@ export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RelativeContainerAttribute_setGuideLine(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBarrierAttribute(value: Array<BarrierStyle> | undefined): void {
+    setBarrierAttribute(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeInt32((valueTmpValue.length).toInt())
-            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
-                const valueTmpValueTmpElement : BarrierStyle = valueTmpValue[valueTmpValueCounterI]
-                BarrierStyle_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            if (TypeChecker.isArray_BarrierStyle(valueTmpValue)) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Array<BarrierStyle>
+                thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
+                for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
+                    const valueTmpValueForIdx0TmpElement : BarrierStyle = valueTmpValueForIdx0[valueTmpValueForIdx0CounterI]
+                    BarrierStyle_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
+                }
+            } else if (TypeChecker.isArray_LocalizedBarrierStyle(valueTmpValue)) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Array<LocalizedBarrierStyle>
+                thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
+                for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
+                    const valueTmpValueForIdx1TmpElement : LocalizedBarrierStyle = valueTmpValueForIdx1[valueTmpValueForIdx1CounterI]
+                    LocalizedBarrierStyle_serializer.write(thisSerializer, valueTmpValueForIdx1TmpElement)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -119,7 +131,7 @@ export interface RelativeContainerAttribute extends CommonMethod {
     guideLine(value: Array<GuideLineStyle> | undefined): this {
         throw new Error("Unimplemented method guideLine")
     }
-    barrier(value: Array<BarrierStyle> | undefined): this {
+    barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined): this {
         throw new Error("Unimplemented method barrier")
     }
     attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -154,6 +166,7 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
     public setRelativeContainerOptions(): this {
         if (this.checkPriority("setRelativeContainerOptions")) {
             this.getPeer()?.setRelativeContainerOptionsAttribute()
+            this.applyOptionsFinish('RelativeContainerAttribute');
             return this
         }
         return this
@@ -166,9 +179,9 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    public barrier(value: Array<BarrierStyle> | undefined): this {
+    public barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined): this {
         if (this.checkPriority("barrier")) {
-            const value_casted = value as (Array<BarrierStyle> | undefined)
+            const value_casted = value as (Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined)
             this.getPeer()?.setBarrierAttribute(value_casted)
             return this
         }
@@ -181,6 +194,9 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -230,6 +246,36 @@ export class BarrierStyle_serializer {
         return value
     }
 }
+
+export class LocalizedBarrierStyle_serializer {
+    public static write(buffer: SerializerBase, value: LocalizedBarrierStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForId  = value.id
+        valueSerializer.writeString(valueHolderForId)
+        const valueHolderForLocalizedDirection  = value.localizedDirection
+        valueSerializer.writeInt32(valueHolderForLocalizedDirection.valueOf())
+        const valueHolderForReferencedId  = value.referencedId
+        valueSerializer.writeInt32((valueHolderForReferencedId.length).toInt())
+        for (let valueHolderForReferencedIdCounterI = 0; valueHolderForReferencedIdCounterI < valueHolderForReferencedId.length; valueHolderForReferencedIdCounterI++) {
+            const valueHolderForReferencedIdTmpElement : string = valueHolderForReferencedId[valueHolderForReferencedIdCounterI]
+            valueSerializer.writeString(valueHolderForReferencedIdTmpElement)
+        }
+    }
+    public static read(buffer: DeserializerBase): LocalizedBarrierStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        const idTmpResult : string = (valueDeserializer.readString() as string)
+        const localizedDirectionTmpResult : LocalizedBarrierDirection = LocalizedBarrierDirection.fromValue(valueDeserializer.readInt32())
+        const referencedIdTmpBufLength : int32 = valueDeserializer.readInt32()
+        let referencedIdTmpBuf : Array<string> = new Array<string>(referencedIdTmpBufLength)
+        for (let referencedIdTmpBufBufCounterI = 0; referencedIdTmpBufBufCounterI < referencedIdTmpBufLength; referencedIdTmpBufBufCounterI++) {
+            referencedIdTmpBuf[referencedIdTmpBufBufCounterI] = (valueDeserializer.readString() as string)
+        }
+        const referencedIdTmpResult : Array<string> = referencedIdTmpBuf
+        let value : LocalizedBarrierStyle = ({id: idTmpResult, localizedDirection: localizedDirectionTmpResult, referencedId: referencedIdTmpResult} as LocalizedBarrierStyle)
+        return value
+    }
+}
+
 export class GuideLinePosition_serializer {
     public static write(buffer: SerializerBase, value: GuideLinePosition): void {
         let valueSerializer : SerializerBase = buffer
@@ -238,15 +284,15 @@ export class GuideLinePosition_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
             if (valueHolderForStartTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as string
                 valueSerializer.writeString(valueHolderForStartTmpValueForIdx0)
             } else if (valueHolderForStartTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStartTmpValueForIdx1)
             } else if (valueHolderForStartTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStartTmpValueForIdx2  = valueHolderForStartTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStartTmpValueForIdx2)
             }
@@ -258,15 +304,15 @@ export class GuideLinePosition_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
             if (valueHolderForEndTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as string
                 valueSerializer.writeString(valueHolderForEndTmpValueForIdx0)
             } else if (valueHolderForEndTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as number
                 valueSerializer.writeNumber(valueHolderForEndTmpValueForIdx1)
             } else if (valueHolderForEndTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForEndTmpValueForIdx2  = valueHolderForEndTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForEndTmpValueForIdx2)
             }

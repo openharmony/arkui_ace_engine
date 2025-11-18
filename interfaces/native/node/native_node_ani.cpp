@@ -20,8 +20,8 @@
 #include "base/error/error_code.h"
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "core/interfaces/native/implementation/node_content_peer.h"
+#include "core/components_ng/syntax/node_content_peer.h"
+#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 
 namespace {
 constexpr char NAV_PATH_STACK_CLASS[] = "Larkui/component/navigation/NavPathStack;";
@@ -45,7 +45,7 @@ int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHO
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
-    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(frameNodePeerPtr);
+    auto* frameNodePeer = reinterpret_cast<OHOS::Ace::FrameNodePeer*>(frameNodePeerPtr);
     if (frameNodePeer == nullptr) {
         LOGE("fail to get frameNodePeer value in builderNode");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -201,7 +201,7 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
-    auto* nodeContentPeer = reinterpret_cast<NodeContentPeer*>(nodeContentPeerPtr);
+    auto* nodeContentPeer = reinterpret_cast<OHOS::Ace::NodeContentPeer*>(nodeContentPeerPtr);
     if (nodeContentPeer == nullptr) {
         LOGE("fail to get nodeContentPeer");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;

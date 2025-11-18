@@ -14,19 +14,18 @@
  */
 
 #include <optional>
-
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_pattern.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"

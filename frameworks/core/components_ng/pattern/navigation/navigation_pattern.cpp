@@ -29,6 +29,7 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
@@ -42,6 +43,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "base/log/ace_checker.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -153,6 +155,27 @@ int32_t TriggerNavDestinationTransition(const RefPtr<NavDestinationGroupNode>& n
 {
     CHECK_NULL_RETURN(navDestination, INVALID_ANIMATION_ID);
     return navDestination->DoTransition(operation, isEnter);
+}
+
+void BuildConfigParams(const RefPtr<NavDestinationNodeBase>& node, PageViewportConfigParams& params)
+{
+    auto statusBarConfig = node->GetStatusBarConfig();
+    auto navIndicatorConfig = node->GetNavigationIndicatorConfig();
+    std::optional<bool> enableStatusBar;
+    std::optional<bool> statusBarAnimated;
+    if (statusBarConfig.has_value()) {
+        enableStatusBar = statusBarConfig.value().first;
+        statusBarAnimated = statusBarConfig.value().second;
+    }
+    std::optional<bool> enableNavIndicator;
+    if (navIndicatorConfig.has_value()) {
+        enableNavIndicator = navIndicatorConfig.value();
+    }
+
+    params.orientation = node->GetOrientation();
+    params.enableStatusBar = enableStatusBar;
+    params.statusBarAnimation = statusBarAnimated;
+    params.enableNavIndicator = enableNavIndicator;
 }
 } // namespace
 
@@ -870,6 +893,12 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
     }
 }
 
+void NavigationPattern::OnDpiConfigurationUpdate()
+{
+    // dpi change, recalculate mix/max navbarwidth and min contentwidth.
+    SetIfNeedInit(true);
+}
+
 int32_t NavigationPattern::GetFirstNewDestinationIndex(const NavPathList& preList, const NavPathList& curList)
 {
     struct Hash {
@@ -1014,7 +1043,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         static_cast<int32_t>(navigationStack_->GetAllPathName().size()));
     GetVisibleNodes(true, preVisibleNodes_);
     if (runningTransitionCount_ <= 0) {
-        isTransitionAnimationAborted_ = false;
+        windowSizeChangedDuringTransition_ = false;
     }
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
@@ -1045,9 +1074,18 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     auto topNavPath = navigationStack_->GetTopNavPath();
     FireInterceptionBeforeLifeCycleEvent(topNavPath, toIndex);
     needSyncWithJsStack_ = false;
+    SetStartTime(GetSysTimestamp());
     UpdateNavPathList();
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto replaceValue = navigationStack_->GetReplaceValue();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        std::string pageUrl = "";
+        if (newTopNavPath.has_value()) {
+            pageUrl = newTopNavPath->first;
+        }
+        pipeline->GetLoadCompleteManager()->StartCollect(pageUrl);
+    }
     if (preTopNavPath_ != newTopNavPath || replaceValue == 1) {
         isReplace_ = replaceValue != 0;
         UpdateIsAnimation(preTopNavPath_);
@@ -2197,9 +2235,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void NavigationPattern::AbortAnimation(RefPtr<NavigationGroupNode>& hostNode)
 {
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Aborting navigation animations");
-    if (runningTransitionCount_ > 0) {
-        isTransitionAnimationAborted_ = true;
-    }
     if (!hostNode->GetPushAnimations().empty()) {
         auto pushAnimations = hostNode->GetPushAnimations();
         for (const auto& animation : pushAnimations) {
@@ -2798,6 +2833,7 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             // this flag will be update in cancelTransition or finishTransition
             ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE, true);
+            pattern->LoadCompleteManagerStopCollect();
             if (proxy->GetIsSuccess()) {
                 pattern->ClearRecoveryList();
                 pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
@@ -2832,6 +2868,7 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         proxy->StartAnimation();
     } else {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+        LoadCompleteManagerStartCollect();
         ClearRecoveryList();
         OnStartOneTransitionAnimation();
         navigationTransition.transition(proxy);
@@ -3564,6 +3601,21 @@ bool NavigationPattern::GetHomeDestinationName(const RefPtr<FrameNode>& hostNode
     return true;
 }
 
+void NavigationPattern::TriggerPerformanceCheck(
+    const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath)
+{
+    if (AceChecker::IsPerformanceCheckEnabled()) {
+        CHECK_NULL_VOID(topDestination);
+        std::string path = topDestination->GetNavDestinationPathInfo();
+        std::string moduleName = topDestination->GetNavDestinationModuleName();
+        int64_t endTime = GetSysTimestamp();
+        PerformanceCheckNodeMap nodeMap;
+        topDestination->GetPerformanceCheckData(nodeMap);
+        AceScopedPerformanceCheck::RecordPerformanceCheckData(
+            nodeMap, endTime - startTime_, path, fromPath, moduleName, true);
+    }
+}
+
 void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible)
@@ -3657,8 +3709,10 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         NotifyDialogLifecycle(NavDestinationLifecycle::ON_WILL_SHOW, true);
         topDestination->SetNodeFreeze(false);
     }
+    std::string fromPath = "";
     if (preDestination) {
         preDestination->SetNodeFreeze(false);
+        fromPath = preDestination->GetNavDestinationPathInfo();
     }
     UpdatePageViewportConfigIfNeeded(preDestination, topDestination);
     pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this)]() {
@@ -3672,13 +3726,22 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         prePrimaryNodes_.clear();
         primaryNodesToBeRemoved_.clear();
         RemoveRedundantPrimaryNavDestination();
+        pipeline->AddAfterLayoutTask(
+            [weakPattern = WeakClaim(this), weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
+                fromPath]() {
+                auto navigationPattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(navigationPattern);
+                auto topDestination = weakTopDestination.Upgrade();
+                navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
+                navigationPattern->LoadCompleteManagerStopCollect();
+            });
         return;
     }
 
     pipeline->AddAfterLayoutTask([weakNavigation = WeakClaim(this),
         weakPreDestination = WeakPtr<NavDestinationGroupNode>(preDestination),
         weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
-        isPopPage, isNeedVisible]() {
+        isPopPage, isNeedVisible, fromPath]() {
         auto navigationPattern = AceType::DynamicCast<NavigationPattern>(weakNavigation.Upgrade());
         CHECK_NULL_VOID(navigationPattern);
         auto preDestination = weakPreDestination.Upgrade();
@@ -3690,6 +3753,8 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
             ((preDestination && preDestination->GetNavDestinationType() == NavDestinationType::HOME) ||
             (topDestination && topDestination->GetNavDestinationType() == NavDestinationType::HOME))) {
             navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
+            navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
+            navigationPattern->LoadCompleteManagerStopCollect();
             navigationPattern->TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
             navigationPattern->prePrimaryNodes_.clear();
             navigationPattern->primaryNodesToBeRemoved_.clear();
@@ -3698,6 +3763,8 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         }
 
         navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, true);
+        navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
+        navigationPattern->LoadCompleteManagerStopCollect();
         navigationPattern->TransitionWithAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         navigationPattern->prePrimaryNodes_.clear();
         navigationPattern->primaryNodesToBeRemoved_.clear();
@@ -3966,6 +4033,10 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
 
 void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type)
 {
+    if (runningTransitionCount_ > 0) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "window size changed[type:%{public}d] during transition.", (int32_t)type);
+        windowSizeChangedDuringTransition_ = true;
+    }
     if (WindowSizeChangeReason::ROTATION == type) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
@@ -4136,6 +4207,7 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         // update pre navigation stack
         ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+        pattern->LoadCompleteManagerStopCollect();
         pattern->ClearRecoveryList();
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
         pattern->RemoveProxyById(proxyId);
@@ -4740,31 +4812,35 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
 
     auto preNodeOri = preFirstVisibleNode->GetOrientation();
     auto curNodeOri = curFirstVisibleNode->GetOrientation();
-    if (curNodeOri == preNodeOri) {
+    if (!preNodeOri.has_value() && !curNodeOri.has_value()) {
         return;
     }
 
-    auto statusBarConfig = curFirstVisibleNode->GetStatusBarConfig();
-    auto navIndicatorConfig = curFirstVisibleNode->GetNavigationIndicatorConfig();
-    std::optional<bool> enableStatusBar;
-    std::optional<bool> statusBarAnimated;
-    if (statusBarConfig.has_value()) {
-        enableStatusBar = statusBarConfig.value().first;
-        statusBarAnimated = statusBarConfig.value().second;
-    }
-    std::optional<bool> enableNavIndicator;
-    if (navIndicatorConfig.has_value()) {
-        enableNavIndicator = navIndicatorConfig.value();
-    }
-    auto currConfig = manager->GetCurrentViewportConfig();
-    auto config = manager->GetTargetViewportConfig(curNodeOri, enableStatusBar, statusBarAnimated, enableNavIndicator);
-    if (!currConfig || !config) {
+    /**
+     * During the NavDestination transition with page-level orientation, the orientation should be locked.
+     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * the end of the locking.
+     * @see SetRequestedOrientationIfNeeded
+     */
+    enableLockOrientation_ = true;
+    RefPtr<PageViewportConfig> currentConfig = nullptr;
+    RefPtr<PageViewportConfig> targetConfig = nullptr;
+    PageViewportConfigParams currentParams;
+    BuildConfigParams(preFirstVisibleNode, currentParams);
+    PageViewportConfigParams targetParams;
+    BuildConfigParams(curFirstVisibleNode, targetParams);
+    auto ret = manager->GetPageViewportConfig(currentParams, currentConfig, targetParams, targetConfig);
+    if (!ret || !currentConfig || !targetConfig) {
+        TAG_LOGE(ACE_NAVIGATION, "failed to get pageViewportConfig");
         return;
     }
 
     auto curDisplayOrientation = container->GetCurrentDisplayOrientation();
-    auto targetDisplayOrientation = config->GetOrientation();
+    auto targetDisplayOrientation = targetConfig->GetOrientation();
     auto angle = CalcRotateAngleWithDisplayOrientation(curDisplayOrientation, targetDisplayOrientation);
+    TAG_LOGI(ACE_NAVIGATION, "curOri:%{public}d, targetOri:%{public}d, rotateAngle:%{public}s",
+        curDisplayOrientation, targetDisplayOrientation,
+        (angle.has_value() ? (std::to_string(angle.value()).c_str()) : "NA"));
     if (!angle.has_value()) {
         return;
     }
@@ -4773,11 +4849,11 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
     if (pageNode) {
         auto pageConfig = pageNode->GetPageViewportConfig();
         if (!pageConfig) {
-            pageNode->SetPageViewportConfig(currConfig->Clone());
+            pageNode->SetPageViewportConfig(currentConfig->Clone());
         }
     }
     if (!viewportConfig_) {
-        SetPageViewportConfig(currConfig->Clone());
+        SetPageViewportConfig(currentConfig->Clone());
     }
 
     for (auto& weakNode : preVisibleNodes_) {
@@ -4785,14 +4861,14 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         CHECK_NULL_CONTINUE(node);
         auto preConfig = node->GetPageViewportConfig();
         if (!preConfig) {
-            node->SetPageViewportConfig(currConfig->Clone());
+            node->SetPageViewportConfig(currentConfig->Clone());
             node->SetPageRotateAngle(ROTATION_0);
         }
     }
     for (auto& weakNode : newVisibleNodes) {
         auto node = weakNode.Upgrade();
         CHECK_NULL_CONTINUE(node);
-        node->SetPageViewportConfig(config->Clone());
+        node->SetPageViewportConfig(targetConfig->Clone());
         node->SetPageRotateAngle(angle);
         node->SetIsRotated(false);
     }
@@ -4804,7 +4880,7 @@ bool NavigationPattern::IsPageLevelConfigEnabled(bool considerSize)
         return false;
     }
 
-    if (!IsEquivalentToStackMode()) {
+    if (!IsRealStackDisplay()) {
         return false;
     }
     if (considerSize && !isFullPageNavigation_) {
@@ -4888,14 +4964,22 @@ void NavigationPattern::GetAllNodes(
 
 void NavigationPattern::OnAllTransitionAnimationFinish()
 {
-    bool animationAborted = isTransitionAnimationAborted_;
-    isTransitionAnimationAborted_ = false;
-    if (!IsPageLevelConfigEnabled()) {
+    ShowOrRestoreSystemBarIfNeeded();
+    SetRequestedOrientationIfNeeded();
+}
+
+void NavigationPattern::SetRequestedOrientationIfNeeded()
+{
+    bool enableLockOrientation = enableLockOrientation_;
+    enableLockOrientation_ = false;
+    bool windowSizeChanged = windowSizeChangedDuringTransition_;
+    windowSizeChangedDuringTransition_ = false;
+    if (!IsPageLevelConfigEnabled() || !enableLockOrientation) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, don't set Orientation");
         ClearPageAndNavigationConfig();
         return;
     }
 
-    ShowOrRestoreSystemBarIfNeeded();
     std::vector<WeakPtr<NavDestinationNodeBase>> invisibleNodes;
     std::vector<WeakPtr<NavDestinationNodeBase>> visibleNodes;
     GetAllNodes(invisibleNodes, visibleNodes);
@@ -4920,7 +5004,8 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     auto windowMgr = context->GetWindowManager();
     CHECK_NULL_VOID(windowMgr);
     auto targetOrientation = firstVisibleNode->GetOrientation();
-    auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this), animationAborted]() {
+    auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this), windowSizeChanged]() {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "restore Navigation RenderContext");
         ACE_SCOPED_TRACE("NavigationPattern restoreTask");
         for (auto& weakNode : nodes) {
             auto node = weakNode.Upgrade();
@@ -4931,20 +5016,33 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ClearPageAndNavigationConfig();
-        if (!animationAborted) {
+        if (!windowSizeChanged) {
             return;
         }
         auto pageNode = pattern->GetNavBasePageNode();
         CHECK_NULL_VOID(pageNode);
         auto geometryNode = pageNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
+        /**
+         * During the transition process, the page size is forcibly maintained unchanged.
+         * Therefore, if the window size changes during the transition, the page size needs to be forcibly
+         * refreshed upon the completion of the transition.
+         */
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset Page Constraint");
         geometryNode->ResetParentLayoutConstraint();
     };
     if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
         restoreTask();
-        return;
+    } else {
+        navigationMgr->AddBeforeOrientationChangeTask(std::move(restoreTask));
     }
-    navigationMgr->AddBeforeOrientationChangeTask(std::move(restoreTask));
+    /**
+     * During the NavDestination transition with page-level orientation, the orientation should be locked.
+     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * the end of the locking.
+     * GetPageViewportConfig and SetRequestedOrientation have a one-to-one or multi-to-one relationship.
+     * @see UpdatePageViewportConfigIfNeeded
+     */
     windowMgr->SetRequestedOrientation(targetOrientation, false);
 }
 
@@ -5116,7 +5214,7 @@ void NavigationPattern::ShowOrRestoreSystemBarIfNeeded()
     }
 }
 
-bool NavigationPattern::IsEquivalentToStackMode()
+bool NavigationPattern::IsRealStackDisplay()
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navigationNode, false);
@@ -5124,20 +5222,23 @@ bool NavigationPattern::IsEquivalentToStackMode()
     CHECK_NULL_RETURN(property, false);
     auto userNavMode = property->GetUsrNavigationModeValue(NavigationMode::AUTO);
     auto hideNavBar = property->GetHideNavBarValue(false);
-    if (userNavMode == NavigationMode::STACK || hideNavBar) {
+    if (userNavMode == NavigationMode::SPLIT) {
+        return false;
+    }
+    if (userNavMode == NavigationMode::STACK || hideNavBar || navigationMode_ == NavigationMode::STACK) {
         return true;
     }
-    auto homeDest = AceType::DynamicCast<FrameNode>(navigationNode->GetHomeDestinationNode());
-    if (homeDest) {
-        return navigationMode_ == NavigationMode::STACK;
+    if (navigationMode_ == NavigationMode::AUTO) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "treat as stack display before firstTime layout.");
+        return true;
     }
-    auto navBarNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarNode());
-    CHECK_NULL_RETURN(navBarNode, false);
-    auto navBarProperty = navBarNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(navBarProperty, false);
-    auto geometry = navBarNode->GetGeometryNode();
+    auto node = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarOrHomeDestinationNode());
+    CHECK_NULL_RETURN(node, false);
+    auto nodeProperty = node->GetLayoutProperty();
+    CHECK_NULL_RETURN(nodeProperty, false);
+    auto geometry = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, false);
-    auto visibility = navBarProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    auto visibility = nodeProperty->GetVisibilityValue(VisibleType::VISIBLE);
     auto size = geometry->GetFrameSize();
     return visibility != VisibleType::VISIBLE || NearEqual(size.Width(), 0.0f) || NearEqual(size.Height(), 0.0f);
 }
@@ -5869,5 +5970,21 @@ void NavigationPattern::UpdateCanForceSplitLayout(const SizeF& frameSize)
         "canForceSplitLayout_:%{public}d", isMainWindow,
         isInAppMainPage, isInSplitScreenMode, ignoreOrientation,
         DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), canForceSplitLayout_);
+}
+
+void NavigationPattern::LoadCompleteManagerStartCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StartCollect("");
+    }
+}
+
+void NavigationPattern::LoadCompleteManagerStopCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StopCollect();
+    }
 }
 } // namespace OHOS::Ace::NG

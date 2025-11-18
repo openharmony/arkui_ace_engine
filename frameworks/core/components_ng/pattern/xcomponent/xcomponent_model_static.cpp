@@ -292,7 +292,8 @@ void XComponentStaticPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(renderContextForSurface_);
-    renderContextForSurface_->UpdateRenderFit(renderContext->GetRenderFit().value_or(RenderFit::RESIZE_FILL));
+    renderFit_ = renderContext->GetRenderFit().value_or(RenderFit::RESIZE_FILL);
+    renderContextForSurface_->UpdateRenderFit(renderFit_);
 }
 
 void XComponentStaticPattern::DumpInfo()

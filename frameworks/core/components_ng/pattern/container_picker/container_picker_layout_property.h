@@ -25,22 +25,30 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
-enum class IndicatorType {
-    DIVIDER = 0,
-    BACKGROUND,
+enum class PickerIndicatorType {
+    BACKGROUND = 0,
+    DIVIDER
 };
 
 struct PickerIndicatorStyle {
     int32_t type;
-    std::optional<Dimension> dividerWidth;
+    std::optional<Dimension> strokeWidth;
     std::optional<Color> dividerColor;
     std::optional<Dimension> startMargin;
     std::optional<Dimension> endMargin;
     std::optional<Color> backgroundColor;
     std::optional<BorderRadiusProperty> borderRadius;
+    bool isDefaultDividerWidth = true;
+    bool isDefaultDividerColor = true;
+    bool isDefaultStartMargin = true;
+    bool isDefaultEndMargin = true;
+    bool isDefaultBackgroundColor = true;
+    bool isDefaultBorderRadius = true;
+    RefPtr<ResourceObject> borderRadiusResObj;
 };
 
 class ACE_EXPORT ContainerPickerLayoutProperty : public LayoutProperty {
@@ -81,11 +89,11 @@ public:
         Dimension defaultDividerWidth = pickerTheme->GetDividerThickness();
         Color defaultDividerColor = pickerTheme->GetDividerColor();
         Color defaultIndicatorBackgroundColor = pickerTheme->GetSelectedBackgroundColor();
-        Dimension defaultIndicatorBorderRadius = *pickerTheme->GetSelectedBorderRadius().radiusTopLeft;
+        Dimension defaultIndicatorBorderRadius = 12.0_vp;
 
         auto pickerIndicatorStyle = JsonUtil::Create(true);
         pickerIndicatorStyle->Put("type", std::to_string(GetIndicatorType().value_or(0)).c_str());
-        pickerIndicatorStyle->Put("dividerWidth",
+        pickerIndicatorStyle->Put("strokeWidth",
             GetIndicatorDividerWidth().value_or(defaultDividerWidth).ToString().c_str());
         pickerIndicatorStyle->Put("dividerColor",
             GetIndicatorDividerColor().value_or(defaultDividerColor).ColorToString().c_str());

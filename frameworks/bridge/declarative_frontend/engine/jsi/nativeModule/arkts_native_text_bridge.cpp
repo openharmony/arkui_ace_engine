@@ -1934,6 +1934,26 @@ ArkUINativeModuleValue SetShaderStyleSetLinear(ArkUIRuntimeCallInfo* runtimeCall
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SetShaderStyleSetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTextModifier()->resetColorShaderColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTextModifier()->setColorShaderColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(colorResObj));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1972,9 +1992,7 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
     } else if (colorsArg->BooleaValue(vm)) {
         SetShaderStyleSetLinear(runtimeCallInfo);
     } else if (colorArg->BooleaValue(vm)) {
-        Color color;
-        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color);
-        GetArkUINodeModifiers()->getTextModifier()->setColorShaderColor(nativeNode, color.GetValue());
+        SetShaderStyleSetColor(runtimeCallInfo);
     } else {
         GetArkUINodeModifiers()->getTextModifier()->resetTextGradient(nativeNode);
     }

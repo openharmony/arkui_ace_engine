@@ -406,9 +406,11 @@ RefreshStatus RenderRefresh::GetNextStatus()
             }
             break;
         case RefreshStatus::OVER_DRAG:
-            if (!refreshEvent_ && !context->GetIsDeclarative()) {
-                nextStatus = RefreshStatus::DONE;
-                break;
+            if (context != nullptr) {
+                if (!refreshEvent_ && !context->GetIsDeclarative()) {
+                    nextStatus = RefreshStatus::DONE;
+                    break;
+                }
             }
             if (scrollableOffset_.GetY() > triggerRefreshDistance_) {
                 nextStatus = RefreshStatus::OVER_DRAG;

@@ -35,9 +35,9 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     applyDisabledAttribute(instance: RatingAttribute): void { }
     applySelectedAttribute(instance: RatingAttribute): void { }
     _stars_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _stars_0_0value?: number | undefined
+    _stars_0_0value?: int32 | undefined
     _stepSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _stepSize_0_0value?: number | undefined
+    _stepSize_0_0value?: double | undefined
     _starStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _starStyle_0_0value?: StarStyleOptions | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -49,7 +49,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             switch (this._stars_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStarsAttribute((this._stars_0_0value as number | undefined));
+                    peer.setStarsAttribute((this._stars_0_0value as int32 | undefined));
                     this._stars_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -59,7 +59,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
                 default: {
                     this._stars_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStarsAttribute((undefined as number | undefined));
+                    peer.setStarsAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -67,7 +67,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             switch (this._stepSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStepSizeAttribute((this._stepSize_0_0value as number | undefined));
+                    peer.setStepSizeAttribute((this._stepSize_0_0value as double | undefined));
                     this._stepSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -77,7 +77,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                 }
                 default: {
                     this._stepSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStepSizeAttribute((undefined as number | undefined));
+                    peer.setStepSizeAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -129,7 +129,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                     break;
                 }
                 default: {
-                    this.stars((undefined as number | undefined));
+                    this.stars((undefined as int32 | undefined));
                 }
             }
         }
@@ -142,7 +142,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
                     break;
                 }
                 default: {
-                    this.stepSize((undefined as number | undefined));
+                    this.stepSize((undefined as double | undefined));
                 }
             }
         }
@@ -173,7 +173,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
             }
         }
     }
-    stars(value: number | undefined): this {
+    stars(value: int32 | undefined): this {
         if (((this._stars_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._stars_0_0value) !== (value)))
         {
             this._stars_0_flag = AttributeUpdaterFlag.UPDATE
@@ -184,7 +184,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         }
         return this
     }
-    stepSize(value: number | undefined): this {
+    stepSize(value: double | undefined): this {
         if (((this._stepSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._stepSize_0_0value) !== (value)))
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.UPDATE

@@ -220,6 +220,7 @@ private:
     void InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitCaretTargetSizeAndPosition();
     void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow, LayoutWrapper* layoutWrapper);
+    void InitBubbleArrow(const RefPtr<BubbleLayoutProperty>& layoutProp, LayoutWrapper* layoutWrapper);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacementNew(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);

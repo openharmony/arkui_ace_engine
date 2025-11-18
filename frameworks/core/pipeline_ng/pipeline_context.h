@@ -75,6 +75,10 @@ namespace OHOS::Rosen {
   class RSUIDirector;
 }
 
+namespace OHOS::Ace {
+    class ResSchedTouchOptimizer;
+}
+
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
@@ -83,6 +87,7 @@ using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uin
 using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 class NodeRenderStatusMonitor;
 class MagnifierController;
+class LoadCompleteManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1003,6 +1008,8 @@ public:
         return toolbarManager_;
     }
 
+    const std::shared_ptr<LoadCompleteManager>& GetLoadCompleteManager() const;
+
     void ChangeSensitiveNodes(bool flag) override
     {
         privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
@@ -1121,7 +1128,18 @@ public:
         isNeedReloadDensity_ = isNeedReloadDensity;
     }
 
+    void GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>& root, std::shared_ptr<JsonValue>& overlayContent,
+        std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& overlayArray) const;
+
+    bool IsTagInOverlay(const std::string& tag) const;
+
+    void GetComponentOverlayInspector(
+        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const override;
+
+    void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const override;
+
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
+
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);
@@ -1299,6 +1317,8 @@ public:
         return window_->GetIsRequestFrame();
     }
 
+    const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
+
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
 protected:
@@ -1451,8 +1471,7 @@ private:
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
-    void RSTransactionBegin(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
-    void RSTransactionCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
+    void RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
@@ -1661,6 +1680,8 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
+    std::shared_ptr<LoadCompleteManager> loadCompleteMgr_;
+    std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
 };
 
 /**

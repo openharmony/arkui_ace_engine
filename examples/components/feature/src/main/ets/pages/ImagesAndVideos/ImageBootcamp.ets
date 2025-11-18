@@ -677,6 +677,12 @@ export struct ImageBootcamp {
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
+  @State config: DragSpringLoadingConfiguration = {
+    stillTimeLimit: 200,
+    updateInterval: 300,
+    updateNotifyCount: 4,
+    updateToFinishInterval: 300
+  };
   scroller: Scroller = new Scroller()
 
   compMaskColorChange() {
@@ -1423,7 +1429,20 @@ export struct ImageBootcamp {
             .onFinish(() => {
               this.compEventTriggeredLog('svg动效播放完成onFinish触发')
             })
-
+            .onDragSpringLoading((context: SpringLoadingContext) => {
+              if (context.state = 0) {
+                this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.BEGIN触发')
+              } else if(context.state = 1) {
+                this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.UPDATE触发')
+              } else if(context.state = 2) {
+                this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.END触发')
+              } else if(context.state = 3) {
+                this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.CANCEL触发')
+              }
+              if (context.currentNotifySequence = 5) {
+                this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.currentNotifySequence触发')
+              }
+            }, this.config)
 
         }
 

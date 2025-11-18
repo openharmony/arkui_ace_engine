@@ -31,8 +31,8 @@ export class AttributeUpdater<T> implements AttributeModifier<T> {
     public set attribute(value: T) {
         this.value = value
     }
-    public get attribute(): T {
-        return this.value!
+    public get attribute(): T | undefined {
+        return this.value
     }
     public set updateConstructorParams(constructorParams: Initializer<T>) {
         this.constructorParams = constructorParams;

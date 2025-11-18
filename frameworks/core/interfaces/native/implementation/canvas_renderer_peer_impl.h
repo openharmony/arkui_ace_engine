@@ -123,10 +123,12 @@ public:
     void SetGlobalAlpha(double alpha);
     void SetGlobalCompositeOperation(const std::string& compositeStr);
     void SetFillStyle(const std::string& colorStr);
+    void SetFillStyle(const std::optional<Color>& color);
     void SetFillStyle(const uint32_t colorNum);
     void SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient);
     void SetFillStyle(const int32_t id);
     void SetStrokeStyle(const std::string& colorStr);
+    void SetStrokeStyle(const std::optional<Color>& color);
     void SetStrokeStyle(const uint32_t colorNum);
     void SetStrokeStyle(const std::shared_ptr<Ace::Gradient>& gradient);
     void SetStrokeStyle(const int32_t id);

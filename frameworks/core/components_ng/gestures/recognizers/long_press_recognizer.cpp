@@ -31,7 +31,7 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 500;
 } // namespace
 
 LongPressRecognizer::LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat, bool isForDrag,
-    bool isDisableMouseLeft, bool isLimitFingerCount, int32_t allowableMovement)
+    bool isDisableMouseLeft, bool isLimitFingerCount, double allowableMovement)
     : MultiFingersRecognizer(fingers, isLimitFingerCount), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
       isDisableMouseLeft_(isDisableMouseLeft), allowableMovement_(allowableMovement)
 {
@@ -490,7 +490,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     }
 
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
-        curr->priorityMask_ != priorityMask_) {
+        curr->priorityMask_ != priorityMask_ || !NearEqual(curr->allowableMovement_, allowableMovement_)) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
             ACE_SCOPED_TRACE("LongPressRecognizer onActionCancel");
             SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);

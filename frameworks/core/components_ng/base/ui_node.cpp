@@ -21,10 +21,12 @@
 #include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
@@ -169,6 +171,9 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
+    if (child->IsAdopted()) {
+        return;
+    }
     if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
@@ -371,6 +376,18 @@ void UINode::RemoveChildAtIndex(int32_t index)
     RemoveChild(*iter);
 }
 
+bool UINode::RemoveAdoptedChild(const RefPtr<FrameNode>& child)
+{
+    auto iter = std::find(adoptedChildren_.begin(), adoptedChildren_.end(), child);
+    if (iter == adoptedChildren_.end()) {
+        return false;
+    }
+    adoptedChildren_.erase(iter);
+    child->SetIsAdopted(false);
+    child->SetAdoptParent(nullptr);
+    return true;
+}
+
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
     auto& children = GetChildren();
@@ -458,6 +475,15 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
         SetHostPageId(parent->GetPageId());
     }
     AfterMountToParent();
+}
+
+int32_t UINode::GetHostPageId() const
+{
+    if (tag_ == V2::PAGE_ETS_TAG) {
+        return hostPageId_;
+    }
+    auto parent = GetParent();
+    return parent ? parent->GetHostPageId() : hostPageId_;
 }
 
 void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
@@ -640,6 +666,50 @@ void UINode::UpdateForceDarkAllowedNode(const RefPtr<UINode>& child)
     }
 }
 
+void UINode::AdoptChild(const RefPtr<FrameNode>& child, bool silently, bool addDefaultTransition)
+{
+    if (child->GetParent()) {
+        return;
+    }
+    auto prevParent = child->GetAdoptParent();
+    if (child->IsAdopted() && prevParent && prevParent->GetId() != this->GetId()) {
+        prevParent->RemoveAdoptedChild(child);
+    }
+    adoptedChildren_.emplace_back(child);
+    child->SetAdoptParent(WeakClaim(this));
+    child->SetIsAdopted(true);
+
+    child->SetDepth(depth_ + 1);
+
+    if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
+        child->UpdateNodeStatus(nodeStatus_);
+    }
+
+    if (!silently && onMainTree_) {
+        child->AttachToMainTree(!addDefaultTransition, context_);
+    }
+    ProcessIsInDestroyingForReuseableNode(child);
+
+    child->SetActive(true);
+}
+
+void UINode::UpdateBuilderNodeColorMode(const RefPtr<UINode>& child)
+{
+    if (!SystemProperties::ConfigChangePerform() || !context_ ||
+        (child->nodeStatus_ != NodeStatus::BUILDER_NODE_ON_MAINTREE && !child->isCNode_ &&
+        !child->IsArkTsFrameNode())) {
+        return;
+    }
+    auto colorMode = static_cast<int32_t>(context_->GetColorMode());
+    if (child->CheckIsDarkMode() != colorMode) {
+        context_->SetIsSystemColorChange(true);
+        SetRerenderable(true);
+        SetMeasureAnyway(true);
+        SetShouldClearCache(true);
+        NotifyColorModeChange(colorMode);
+    }
+}
+
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
@@ -673,18 +743,6 @@ void UINode::DoAddChild(
     }
     MarkNeedSyncRenderTree(true);
     ProcessIsInDestroyingForReuseableNode(child);
-    // Forced update colormode when builderNode attach to main tree.
-    if (SystemProperties::ConfigChangePerform() && child->nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE &&
-        context_) {
-        auto colorMode = static_cast<int32_t>(context_->GetColorMode());
-        if (child->CheckIsDarkMode() != colorMode) {
-            context_->SetIsSystemColorChange(true);
-            SetRerenderable(true);
-            SetMeasureAnyway(true);
-            SetShouldClearCache(true);
-            NotifyColorModeChange(colorMode);
-        }
-    }
     UpdateForceDarkAllowedNode(child);
 }
 
@@ -871,6 +929,8 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
+    // Forced update colormode when builderNode attach to main tree.
+    UpdateBuilderNodeColorMode(Claim(this));
     isRemoving_ = false;
     if (isThreadSafeNode_) {
         isFree_ = false;
@@ -882,6 +942,9 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
+    }
+    for (const auto& adoptChild : GetAdoptedChildren()) {
+        adoptChild->AttachToMainTree(isRecursive, context);
     }
     if (context && context->IsOpenInvisibleFreeze()) {
         auto parent = GetParent();
@@ -948,9 +1011,13 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
     std::list<RefPtr<UINode>> children = GetChildren();
+    std::list<RefPtr<FrameNode>> adoptedChildren = GetAdoptedChildren();
     bool needCheckChild = CheckThreadSafeNodeTree(needCheckThreadSafeNodeTree);
     for (const auto& child : children) {
         child->DetachFromMainTree(isRecursive, needCheckChild);
+    }
+    for (const auto& adoptChild : adoptedChildren) {
+        adoptChild->DetachFromMainTree(isRecursive, needCheckChild);
     }
     if (isThreadSafeNode_) {
         ElementRegister::GetInstance()->RemoveItemSilently(GetId());
@@ -1000,8 +1067,12 @@ void UINode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVa
 void UINode::FireCustomDisappear()
 {
     std::list<RefPtr<UINode>> children = GetChildren();
+    std::list<RefPtr<FrameNode>> adoptedChildren = GetAdoptedChildren();
     for (const auto& child : children) {
         child->FireCustomDisappear();
+    }
+    for (const auto& adoptChild : adoptedChildren) {
+        adoptChild->FireCustomDisappear();
     }
 }
 

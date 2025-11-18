@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/indexer/indexer_layout_algorithm.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 

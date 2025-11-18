@@ -107,7 +107,9 @@ Scrollable::~Scrollable()
             nodeTag_).c_str());
         if (!context_.Invalid()) {
             auto context = context_.Upgrade();
-            context->SetUiDvsyncSwitch(false);
+            if (context != nullptr) {
+                context->SetUiDvsyncSwitch(false);
+            }
         }
     }
     StopFrictionAnimation();
@@ -543,7 +545,7 @@ void Scrollable::HandleTouchUp()
         return;
     }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
-    if (outBoundaryCallback_ && outBoundaryCallback_()) {
+    if (outBoundaryCallback_ && outBoundaryCallback_(false)) {
         if (state_ != AnimationState::SPRING && scrollOverCallback_) {
             if (onScrollStartRec_) {
                 onScrollStartRec_(static_cast<float>(axis_));
@@ -1669,7 +1671,7 @@ bool Scrollable::UpdateScrollPosition(const double offset, int32_t source) const
 
 void Scrollable::ProcessScrollOverCallback(double velocity)
 {
-    if (outBoundaryCallback_ && !outBoundaryCallback_() && !canOverScroll_) {
+    if (outBoundaryCallback_ && !outBoundaryCallback_(true) && !canOverScroll_) {
         return;
     }
     // In the case of chain animation enabled, you need to switch the control point first,

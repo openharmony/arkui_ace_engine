@@ -35,10 +35,10 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 export interface UIExtensionProxy {
     send(data: Record<string, RecordData>): void
     sendSync(data: Record<string, RecordData>): Record<string, RecordData>
-    onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
-    onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
-    offAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
-    offSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
+    onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
+    onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
+    offAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
+    offSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
 }
 export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionProxy {
     peer?: Finalizable | undefined = undefined
@@ -70,22 +70,22 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         const data_casted = data as (Record<string, RecordData>)
         return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data_casted)
     }
-    public onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
         this.onAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
         this.onSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offAsyncReceiverRegisterAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
         this.offAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offSyncReceiverRegisterSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
         this.offSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
@@ -297,6 +297,7 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
             const want_casted = want as (Want)
             const options_casted = options as (UIExtensionOptions | undefined)
             this.getPeer()?.setUIExtensionComponentOptionsAttribute(want_casted, options_casted)
+            this.applyOptionsFinish('UIExtensionComponentAttribute');
             return this
         }
         return this
@@ -348,6 +349,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

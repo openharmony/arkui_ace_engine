@@ -96,6 +96,10 @@ std::list<std::shared_ptr<UIObserverListener>> UIObserver::textChangeEventListen
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedTextChangeEventListeners_;
 
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedSwiperContentListeners_;
+std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedSwiperContentListeners_;
+
 template<typename ListenerList, typename... Args>
 void SafeIterateListeners(const ListenerList& listeners, void (UIObserverListener::*callback)(Args...), Args... args)
 {
@@ -662,7 +666,7 @@ void UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInst
         holder.end());
 }
 
-void UIObserver::HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info)
+void UIObserver::HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const WindowSizeBreakpoint& info)
 {
     auto iter = specifiedWinSizeLayoutBreakpointListeners_.find(instanceId);
     if (iter == specifiedWinSizeLayoutBreakpointListeners_.end()) {
@@ -2032,6 +2036,100 @@ void UIObserver::UnRegisterTextChangeEventCallback(const std::string& id, napi_v
         holder.end()
     );
 }
+
+void UIObserver::RegisterSwiperContentUpdateCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(unspecifiedSwiperContentListeners_.begin(), unspecifiedSwiperContentListeners_.end(), listener) !=
+        unspecifiedSwiperContentListeners_.end()) {
+        return;
+    }
+    unspecifiedSwiperContentListeners_.emplace_back(listener);
+}
+
+void UIObserver::RegisterSwiperContentUpdateCallback(
+    const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
+{
+    auto iter = specifiedSwiperContentListeners_.find(id);
+    if (iter == specifiedSwiperContentListeners_.end()) {
+        specifiedSwiperContentListeners_.emplace(
+            id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterSwiperContentUpdateCallback(napi_value callback)
+{
+    // remove all anonymous callback in unspecifiedSwiperContentListeners_
+    if (callback == nullptr) {
+        unspecifiedSwiperContentListeners_.clear();
+        return;
+    }
+    // remove specified callback in unspecifiedSwiperContentListeners_
+    unspecifiedSwiperContentListeners_.erase(
+        std::remove_if(
+            unspecifiedSwiperContentListeners_.begin(),
+            unspecifiedSwiperContentListeners_.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }
+        ),
+        unspecifiedSwiperContentListeners_.end()
+    );
+}
+
+void UIObserver::UnRegisterSwiperContentUpdateCallback(const std::string& id, napi_value callback)
+{
+    auto iter = specifiedSwiperContentListeners_.find(id);
+    if (iter == specifiedSwiperContentListeners_.end()) {
+        return;
+    }
+    if (callback == nullptr) {
+        specifiedSwiperContentListeners_.erase(iter);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "erase all observer of id: %{public}s", id.c_str());
+        return;
+    }
+    auto& holder = iter->second;
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end()
+    );
+}
+
+void UIObserver::HandleSwiperContentUpdate(const NG::SwiperContentInfo& info)
+{
+    // use copy instead of origin listeners to avoid listeners_ change during callback executing
+    auto unspecifiedSwiperContentListeners = unspecifiedSwiperContentListeners_;
+    auto specifiedSwiperContentListeners = specifiedSwiperContentListeners_;
+    for (const auto& listener : unspecifiedSwiperContentListeners) {
+        listener->HandleSwiperContentUpdate(info);
+    }
+
+    auto iter = specifiedSwiperContentListeners.find(info.id);
+    if (iter == specifiedSwiperContentListeners.end()) {
+        return;
+    }
+
+    auto holder = iter->second;
+    for (const auto& listener : holder) {
+        listener->HandleSwiperContentUpdate(info);
+    }
+}
+
+bool UIObserver::IsSwiperContentObserverEmpty()
+{
+    return unspecifiedSwiperContentListeners_.empty() && specifiedSwiperContentListeners_.empty();
+}
+
 
 void UIObserver::HandleTextChangeEvent(const NG::TextChangeEventInfo& info)
 {

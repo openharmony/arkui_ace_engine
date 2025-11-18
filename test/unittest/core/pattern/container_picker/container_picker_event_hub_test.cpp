@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -47,13 +48,16 @@ public:
 void ContainerPickerEventHubTest::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
+    auto theme = AceType::MakeRefPtr<ContainerPickerTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
 }
 
 void ContainerPickerEventHubTest::TearDownTestSuite()
 {
+    MockPipelineContext::TearDown();
     TestNG::TearDownTestSuite();
 }
 

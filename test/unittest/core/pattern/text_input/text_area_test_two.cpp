@@ -863,4 +863,31 @@ HWTEST_F(TextAreaTestTwo, CalcMeasureContentWithMinLines003, TestSize.Level1)
     minLinesContentSize = geometryNode->GetContentSize();
     EXPECT_EQ(minLinesContentSize.Height(), 200);
 }
+
+/**
+ * @tc.name: TextAreaReMeasureContentForPlaceHolder
+ * @tc.desc: test should re-measure placeholder when counter is visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, ShouldReMeasurePlaceholder, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {});
+    layoutProperty_->UpdateShowCounter(true);
+    layoutProperty_->UpdateMaxLength(100);
+    auto localParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*localParagraph, GetLineCount()).WillRepeatedly([]() { return 5; });
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    textAreaLayoutAlgorithm->paragraph_ = localParagraph;
+    textAreaLayoutAlgorithm->isPlaceHolderOverSize_ = true;
+    auto counterDecorator = AccessibilityManager::MakeRefPtr<CounterDecorator>(pattern_->GetHost());
+    pattern_->counterDecorator_ = counterDecorator;
+    counterDecorator->BuildDecorator();
+    auto textNode = counterDecorator->textNode_.Upgrade();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent("1/10");
+    auto ret = textAreaLayoutAlgorithm->ShouldReMeasurePlaceholder(pattern_);
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS::Ace::NG

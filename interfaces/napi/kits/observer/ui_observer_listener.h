@@ -44,7 +44,7 @@ public:
         const std::string& id, int32_t uniqueId, NG::ScrollEventType eventType, float offset, Ace::Axis axis);
     void OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo);
     void OnDensityChange(double density);
-    void OnWinSizeLayoutBreakpointChange(const NG::WindowSizeBreakpoint info);
+    void OnWinSizeLayoutBreakpointChange(const WindowSizeBreakpoint info);
     void OnWillClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
         const RefPtr<NG::FrameNode> frameNode);
     void OnDidClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
@@ -59,6 +59,7 @@ public:
     void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     void OnTextChangeEvent(const NG::TextChangeEventInfo& info);
+    void HandleSwiperContentUpdate(const NG::SwiperContentInfo& info);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
 

@@ -887,6 +887,9 @@ HWTEST_F(SelectModelStaticTestNg, SetArrowModifierApply, TestSize.Level1)
     selectModelInstance.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
+    /**
+     * @tc.steps: step2. Get Select pattern.
+     */
     auto pattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     SelectModelStatic::SetArrowModifierApply(select, nullptr);

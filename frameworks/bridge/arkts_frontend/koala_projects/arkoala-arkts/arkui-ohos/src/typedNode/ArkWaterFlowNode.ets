@@ -13,11 +13,25 @@
  * limitations under the License.
  */
 
-import { RuntimeType, runtimeType } from "@koalaui/interop";
-import { ArkScrollableNode } from "./ArkScrollableNode";
-import { WaterFlowAttribute, ArkWaterFlowPeer, WaterFlowOptions, ConstraintSizeOptions, Length, FlexDirection, NestedScrollOptions,
-    OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback } from "../framework";
-import { Resource } from "global.resource"
+import { int32 } from '@koalaui/common';
+import { RuntimeType, runtimeType } from '@koalaui/interop';
+import { ArkScrollableNode } from './ArkScrollableNode';
+import {
+  WaterFlowAttribute,
+  ArkWaterFlowPeer,
+  WaterFlowOptions,
+  ConstraintSizeOptions,
+  Length,
+  FlexDirection,
+  NestedScrollOptions,
+  OnScrollFrameBeginCallback,
+  OnWillScrollCallback,
+  OnScrollCallback,
+  AttributeModifier,
+  ScrollableCommonMethod,
+  CommonMethod
+} from '../framework';
+import { Resource } from 'global.resource'
 export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -41,7 +55,7 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         return this;
     }
     allowChildTypes(): string[] {
-        return ["FlowItem"];
+        return ['FlowItem'];
     }
     columnsTemplate(value: string | undefined): this {
         const value_casted = value as (string | undefined)
@@ -91,39 +105,41 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         this.markDirty()
         return this
     }
-    friction(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    friction(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setFrictionAttribute(value_casted)
         this.markDirty()
         return this
     }
-    cachedCount(count: number | undefined, show?: boolean): this {
+    cachedCount(count: int32 | undefined, show?: boolean): this {
         const count_type = runtimeType(count)
         const show_type = runtimeType(show)
-        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == show_type)) {
-            const value_casted = count as (number | undefined)
+        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+            (RuntimeType.UNDEFINED == show_type)) {
+            const value_casted = count as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             this.markDirty()
             return this
         }
-        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
-            const count_casted = count as (number | undefined)
+        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+            ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
+            const count_casted = count as (int32 | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
             this.markDirty()
             return this
         }
-        throw new Error("Can not select appropriate overload")
+        throw new Error('Can not select appropriate overload')
     }
-    cachedCount(value: number | undefined): this {
+    cachedCount(value: int32 | undefined): this {
         const count_type = runtimeType(value)
         if ((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             this.markDirty()
             return this
         }
-        throw new Error("Can not select appropriate overload")
+        throw new Error('Can not select appropriate overload')
     }
     onReachStart(value: (() => void) | undefined): this {
         const value_casted = value as ((() => void) | undefined)
@@ -143,8 +159,8 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         this.markDirty()
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
-        const value_casted = value as (((first: number,last: number) => void) | undefined)
+    onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
+        const value_casted = value as (((first: int32,last: int32) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
         this.markDirty()
         return this
@@ -160,5 +176,9 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         this.getPeer()?.setOnDidScrollAttribute(value_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }

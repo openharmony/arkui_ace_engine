@@ -79,7 +79,7 @@ RefPtr<RichEditorPattern> RichEditorEventTestNg::GetRichEditorPattern()
  * @tc.desc: test AddSpanHoverEven
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, AddSpanHoverEvent001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, AddSpanHoverEvent001, TestSize.Level0)
 {
     // 0: Get richEditor Node and richEditor Pattern
     ASSERT_NE(richEditorNode_, nullptr);
@@ -113,7 +113,7 @@ HWTEST_F(RichEditorEventTestNg, AddSpanHoverEvent001, TestSize.Level1)
  * @tc.desc: test HandleBlurEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, HandleBlurEvent001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, HandleBlurEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -150,7 +150,7 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent001, TestSize.Level1)
  * @tc.desc: test HandleBlurEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, HandleBlurEvent002, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, HandleBlurEvent002, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -166,7 +166,7 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent002, TestSize.Level1)
  * @tc.desc: test HandleBlurEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, HandleBlurEvent003, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, HandleBlurEvent003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -205,7 +205,7 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent003, TestSize.Level1)
  * @tc.desc: test HandleUserGestureEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, HandleUserGestureEvent001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, HandleUserGestureEvent001, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -233,7 +233,7 @@ HWTEST_F(RichEditorEventTestNg, HandleUserGestureEvent001, TestSize.Level1)
  * @tc.desc: test SetGestureOptions
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, SetGestureOptions001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, SetGestureOptions001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -253,7 +253,7 @@ HWTEST_F(RichEditorEventTestNg, SetGestureOptions001, TestSize.Level1)
  * @tc.desc: test HandleFocusEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -312,7 +312,7 @@ HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level1)
  * @tc.desc: test HandleFocusEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, HandleFocusEvent002, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, HandleFocusEvent002, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -326,7 +326,7 @@ HWTEST_F(RichEditorEventTestNg, HandleFocusEvent002, TestSize.Level1)
  * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -346,7 +346,7 @@ HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback001, TestSize.Level1)
  * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback002, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -360,7 +360,7 @@ HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback002, TestSize.Level1)
  * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback003, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -374,7 +374,7 @@ HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback003, TestSize.Level1)
  * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback004, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -388,7 +388,7 @@ HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback004, TestSize.Level1)
  * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback005, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -417,7 +417,7 @@ HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback005, TestSize.Level1)
  * @tc.desc: test ExpandDefaultResponseRegion
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, ExpandDefaultResponseRegion001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, ExpandDefaultResponseRegion001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -433,7 +433,7 @@ HWTEST_F(RichEditorEventTestNg, ExpandDefaultResponseRegion001, TestSize.Level1)
  * @tc.desc: test IsResponseRegionExpandingNeededForStylus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -450,7 +450,7 @@ HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus001, Tes
  * @tc.desc: test IsResponseRegionExpandingNeededForStylus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus002, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -467,7 +467,7 @@ HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus002, Tes
  * @tc.desc: test IsResponseRegionExpandingNeededForStylus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus003, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -485,7 +485,7 @@ HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus003, Tes
  * @tc.desc: test IsResponseRegionExpandingNeededForStylus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus004, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -503,7 +503,7 @@ HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus004, Tes
  * @tc.desc: test IsResponseRegionExpandingNeededForStylus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus005, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -557,7 +557,7 @@ HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus006, Tes
  * @tc.desc: test get insert
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, RichEditorEventHub001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set insert value
@@ -577,7 +577,7 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub001, TestSize.Level1)
  * @tc.desc: test span result
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, RichEditorEventHub002, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set span result
@@ -621,7 +621,7 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub002, TestSize.Level1)
  * @tc.desc: test edit change event
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, RichEditorEventHub003, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set OnEditingChange func
@@ -657,7 +657,7 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub003, TestSize.Level1)
  * @tc.desc: test GetDragExtraParams
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, RichEditorEventHub004, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -702,7 +702,7 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub004, TestSize.Level1)
  * @tc.desc: test fire event
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init eventHub
@@ -725,6 +725,7 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level1)
     eventHub->FireOnDidChange(value);
     eventHub->FireOnCut(event);
     eventHub->FireOnCopy(event);
+    EXPECT_FALSE(event.IsPreventDefault());
     EXPECT_TRUE(eventHub->FireOnWillChange(value));
     EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
 
@@ -734,11 +735,51 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorEventHub006
+ * @tc.desc: test fire event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub006, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onPaste = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(true);
+        return;
+    };
+    auto onCut = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(false);
+        return;
+    };
+    auto onCopy = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(true);
+        return;
+    };
+    eventHub->SetOnPaste(onPaste);
+    eventHub->SetOnCut(onCut);
+    eventHub->SetOnCopy(onCopy);
+    TextCommonEvent event;
+    EXPECT_FALSE(event.IsPreventDefault());
+    eventHub->FireOnPaste(event);
+    EXPECT_TRUE(event.IsPreventDefault());
+    eventHub->FireOnCut(event);
+    EXPECT_FALSE(event.IsPreventDefault());
+    eventHub->FireOnCopy(event);
+    EXPECT_TRUE(event.IsPreventDefault());
+}
+
+/**
  * @tc.name: OnWillAttachIME001
  * @tc.desc: test OnWillAttachIME001.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, OnWillAttachIME001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, OnWillAttachIME001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -777,7 +818,7 @@ HWTEST_F(RichEditorEventTestNg, OnWillAttachIME001, TestSize.Level1)
  * @tc.desc: test OnWillAttachIME002.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, OnWillAttachIME002, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, OnWillAttachIME002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -814,7 +855,7 @@ HWTEST_F(RichEditorEventTestNg, OnWillAttachIME002, TestSize.Level1)
  * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, PreventDefault001, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, PreventDefault001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -841,6 +882,20 @@ HWTEST_F(RichEditorEventTestNg, PreventDefault001, TestSize.Level1)
     info2.localLocation_ = Offset(0, 0);
     richEditorPattern->HandleClickEvent(info2);
     EXPECT_FALSE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: test OnAttachToMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->OnAttachToMainTreeMultiThread();
+    EXPECT_NE(richEditorPattern->richEditorInstanceId_, -2);
 }
 
 }

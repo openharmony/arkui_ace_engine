@@ -818,6 +818,68 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperIndicatorPattern021
+ * @tc.desc: Test HandleDragEnd method on RTL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern021, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    /**
+     * @tc.steps: step1. Set direction to HORIZONTAL and layout direction to RTL
+     * @tc.expected: HandleDragEnd correctly handles RTL layout case
+     */
+    layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
+    pattern_->isIndicatorLongPress_ = true;
+    indicatorPattern->HandleTouchDown();
+    /**
+     * @tc.steps: step2. Set AutoPlay to true and call HandleDragEnd
+     * @tc.expected: HandleDragEnd correctly handles AutoPlay case
+     */
+    swiperPaintProperty->UpdateAutoPlay(true);
+    indicatorPattern->HandleDragEnd(0.0);
+    EXPECT_EQ(pattern_->turnPageRate_, -1.0f);
+    EXPECT_EQ(pattern_->groupTurnPageRate_, -1.0f);
+}
+
+/**
+ * @tc.name: SwiperIndicatorPattern022
+ * @tc.desc: Test CheckIsTouchBottom on RTL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern022, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->dragStartPoint_.SetX(0.0f);
+    indicatorPattern->dragStartPoint_.SetY(0.0f);
+    layoutProperty_->UpdateLoop(false);
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchLocationInfo.SetLocalLocation(Offset(100.f, 100.f));
+    /**
+     * @tc.steps: step1. Set currentIndex to 0, set horizontal and right-to-left, and call with positive touch offset
+     * @tc.expected: CheckIsTouchBottom returns true and touchBottomType is set to END
+     */
+    layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    pattern_->currentIndex_ = 0;
+    auto result = indicatorPattern->CheckIsTouchBottom(touchLocationInfo);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(indicatorPattern->touchBottomType_, TouchBottomType::END);
+    EXPECT_EQ(pattern_->turnPageRate_, -1.0f);
+    EXPECT_EQ(pattern_->groupTurnPageRate_, -1.0f);
+}
+
+/**
  * @tc.name: UpdateOverlongPaintMethod001
  * @tc.desc: Test UpdateOverlongPaintMethod
  * @tc.type: FUNC

@@ -73,6 +73,9 @@ ani_double Fp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanc
 ani_double Px2fp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId);
+ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj);
+ani_int getWindowHeightBreakpoint(ani_env* env, ani_object obj);
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer);
 void* CreateKeyEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
 void* CreateEventTargetInfoAccessor(ani_env* env, [[maybe_unused]] ani_object obj);
@@ -114,6 +117,7 @@ void SetImageRawDataCacheSize(
 ani_status GetAniEnv(ani_vm* vm, ani_env** env);
 ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr);
 ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr);
+void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int themeScopeId);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

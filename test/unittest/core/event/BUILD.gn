@@ -26,7 +26,10 @@ ace_unittest("event_manager_test_ng") {
     "event_manager_test_ng.cpp",
     "event_manager_test_ng_issuse.cpp",
     "event_manager_test_ng_new.cpp",
+    "event_manager_test_ng_three.cpp",
     "event_manager_test_ng_two.cpp",
+    "event_manager_test_three_ng.cpp",
+    "event_manager_test_ng_two_issuse.cpp",
   ]
 }
 
@@ -89,10 +92,15 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/page_focus_switch_test.cpp",
     "focus_core/passive_last_focus_test.cpp",
     "focus_hub_test_ng.cpp",
+    "focus_hub_test_ng_three.cpp",
+    "focus_hub_test_ng_two.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
     "focus_hub_test_ng_for_paint_focus_state.cpp",
     "focus_hub_test_ng_for_property_config.cpp",
+    "focus_hub_test_ng_for_property_config_two.cpp",
     "focus_hub_test_ng_new.cpp",
+    "focus_hub_test_ng_new_three.cpp",
+    "focus_hub_test_ng_new_two.cpp",
   ]
 }
 
@@ -105,6 +113,9 @@ ace_unittest("gesture_event_hub_test_ng") {
     "gesture_event_hub_test_ng_property_config.cpp",
     "gesture_event_hub_test_three_ng.cpp",
     "gesture_event_hub_test_two_ng.cpp",
+    "gesture_event_hub_test_five_ng.cpp",
+    "gesture_event_hub_test_six_ng.cpp",
+    "gesture_event_hub_test_ng_two_property_config.cpp",
   ]
 }
 

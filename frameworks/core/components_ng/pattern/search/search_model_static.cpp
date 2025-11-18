@@ -170,8 +170,16 @@ void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<I
 void SearchModelStatic::SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        SearchModelNG::SetSearchButtonFontSize(frameNode, value.value());
+    auto searchTheme = SearchModelStatic::GetTheme(frameNode);
+    if (searchTheme || value.has_value()) {
+        Dimension fontSize;
+        if (searchTheme) {
+            fontSize = searchTheme->GetButtonFontSize();
+        }
+        if (value.has_value()) {
+            fontSize = value.value();
+        }
+        SearchModelNG::SetSearchButtonFontSize(frameNode, fontSize);
         auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
         CHECK_NULL_VOID(buttonFrameNode);
         auto textNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
@@ -294,10 +302,12 @@ void SearchModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<
         return;
     }
     CHECK_NULL_VOID(frameNode);
-    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFrameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, textFrameNode);
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto caretWidth = textFieldTheme->GetCursorWidth();
+    SearchModelNG::SetCaretWidth(frameNode, caretWidth);
 }
 
 void SearchModelStatic::ResetCaretColor(FrameNode* frameNode)

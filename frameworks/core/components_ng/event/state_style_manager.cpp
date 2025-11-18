@@ -62,7 +62,8 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         if ((type == TouchType::MOVE) &&
             (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
-            if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
+            int32_t sourceTool = static_cast<int32_t>(touches.front().GetSourceTool());
+            if (stateStyleMgr->IsOutOfPressedRegion(sourceType, sourceTool, lastPoint.GetGlobalLocation())) {
                 auto frameNode = stateStyleMgr->GetFrameNode();
                 CHECK_NULL_VOID(frameNode);
                 TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Move out of node pressed region: %{public}s",
@@ -159,11 +160,11 @@ bool StateStyleManager::IsExcludeInner(UIState handlingState)
     return (userSubscribersExcludeConfigs_ & handlingState) == handlingState;
 }
 
-void StateStyleManager::AddSupportedUIStateWithCallback(
+bool StateStyleManager::AddSupportedUIStateWithCallback(
     UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
 {
     if (state == UI_STATE_NORMAL) {
-        return;
+        return false;
     }
     if (!HasStateStyle(state)) {
         supportedStates_ = supportedStates_ | state;
@@ -171,7 +172,7 @@ void StateStyleManager::AddSupportedUIStateWithCallback(
     if (isInner) {
         innerStateStyleSubscribers_.first |= state;
         innerStateStyleSubscribers_.second = callback;
-        return;
+        return true;
     }
     userStateStyleSubscribers_.first |= state;
     userStateStyleSubscribers_.second = callback;
@@ -180,12 +181,13 @@ void StateStyleManager::AddSupportedUIStateWithCallback(
     } else {
         userSubscribersExcludeConfigs_ &= ~state;
     }
+    return true;
 }
 
-void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
+bool StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
 {
     if (state == UI_STATE_NORMAL) {
-        return;
+        return false;
     }
     if (isInner) {
         innerStateStyleSubscribers_.first &= ~state;
@@ -203,6 +205,7 @@ void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
     if ((temp & state) != state) {
         supportedStates_ = supportedStates_ & ~state;
     }
+    return true;
 }
 
 void StateStyleManager::HandleStateChangeInternal(
@@ -461,11 +464,11 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
     localPointF.SetY(temp.GetY());
 }
 
-bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const
+bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, int32_t sourceTool, const Offset& location) const
 {
     auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
-    if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
+    if (IsOutOfPressedRegionWithoutClip(node, sourceType, sourceTool, location)) {
         return true;
     }
     auto parent = node->GetAncestorNodeOfFrame(true);
@@ -477,7 +480,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
         }
         // If the parent node has a "clip" attribute, the press region should be re-evaluated.
         auto clip = renderContext->GetClipEdge().value_or(false);
-        if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
+        if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, sourceTool, location)) {
             return true;
         }
         parent = parent->GetAncestorNodeOfFrame(true);
@@ -485,7 +488,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
     return false;
 }
 
-bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
+bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType, int32_t sourceTool,
     const Offset& location) const
 {
     CHECK_NULL_RETURN(node, false);
@@ -493,7 +496,7 @@ bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, 
     CHECK_NULL_RETURN(renderContext, false);
 
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
-    auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType);
+    auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType, sourceTool);
     Offset offset = { paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() };
     PointF current = { location.GetX(), location.GetY() };
     NGGestureRecognizer::Transform(current, node);

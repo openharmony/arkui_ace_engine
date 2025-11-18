@@ -85,7 +85,7 @@ int32_t RichEditorEditTestNg::CheckMaxLines(int32_t maxLines)
  * @tc.desc: test calc insert value object
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -106,7 +106,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue001, TestSize.Level1)
  * @tc.desc: test insert value last
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -152,7 +152,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue002, TestSize.Level1)
  * @tc.desc: test insert value between text span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue003, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -173,7 +173,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue003, TestSize.Level1)
  * @tc.desc: test insert value first
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue004, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -193,7 +193,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue004, TestSize.Level1)
  * @tc.desc: test insert value if the insert char is line separator
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -222,7 +222,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
  * @tc.desc: test GetAllChildren
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorGetAllChildren001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorGetAllChildren001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -239,7 +239,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorGetAllChildren001, TestSize.Level1)
  * @tc.desc: test CursorMoveLineBegin
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorCursorMoveLineBegin001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCursorMoveLineBegin001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -270,7 +270,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCursorMoveLineBegin001, TestSize.Le
  * @tc.desc: test CalcLineEndPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineEndPosition001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineEndPosition001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -292,7 +292,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineEndPosition001, TestSize.Le
  * @tc.desc: test CalcMoveUpPos
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcMoveUpPos001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcMoveUpPos001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -316,7 +316,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcMoveUpPos001, TestSize.Level1)
  * @tc.desc: test CalcLineInfoByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineInfoByPosition001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineInfoByPosition001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -336,7 +336,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineInfoByPosition001, TestSize
  * @tc.desc: test GetTextPaintOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorGetTextPaintOffset001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorGetTextPaintOffset001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -356,7 +356,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorGetTextPaintOffset001, TestSize.Lev
  * @tc.desc: test BeforeChangeText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -379,7 +379,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText001, TestSize.Level
  * @tc.desc: test CalcInsertValueObj
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -407,7 +407,7 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level1)
  * @tc.desc: test CalcInsertValueObj
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -442,7 +442,7 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
  * @tc.desc: test CalcInsertValueObj
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj003, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -477,7 +477,7 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj003, TestSize.Level1)
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -535,7 +535,7 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level1)
  * @tc.desc: test get paragraphStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetTextSpansInfo, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetTextSpansInfo, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -592,7 +592,7 @@ HWTEST_F(RichEditorEditTestNg, GetTextSpansInfo, TestSize.Level1)
  * @tc.desc: test image span layoutStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetImageSpansInfo, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetImageSpansInfo, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -636,7 +636,7 @@ HWTEST_F(RichEditorEditTestNg, GetImageSpansInfo, TestSize.Level1)
  * @tc.desc: test get paragraph nodes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetParagraphNodes001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetParagraphNodes001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -691,7 +691,7 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphNodes001, TestSize.Level1)
  * @tc.desc: test get paragraph nodes with multiple placeholders
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetParagraphNodes002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetParagraphNodes002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -724,7 +724,7 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphNodes002, TestSize.Level1)
  * @tc.desc: test get paragraph nodes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetParagraphNodes003, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetParagraphNodes003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -751,7 +751,7 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphNodes003, TestSize.Level1)
  * @tc.desc: test calculate spans range after get paragraph nodes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, CalcSpansRange001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, CalcSpansRange001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -782,7 +782,7 @@ HWTEST_F(RichEditorEditTestNg, CalcSpansRange001, TestSize.Level1)
  * @tc.desc: test calculate spans range
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, CalcSpansRange002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, CalcSpansRange002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -826,7 +826,7 @@ HWTEST_F(RichEditorEditTestNg, CalcSpansRange002, TestSize.Level1)
  * @tc.desc: test get paragraph length
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetParagraphLength001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetParagraphLength001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -853,7 +853,7 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphLength001, TestSize.Level1)
  * @tc.desc: test GetLeftTextOfCursor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -884,7 +884,7 @@ HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor001, TestSize.Level1)
  * @tc.desc: test get left text of cursor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -899,7 +899,7 @@ HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor002, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -930,7 +930,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder001, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder002, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -953,7 +953,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder002, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder003, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder003, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -975,7 +975,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder003, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder004, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder004, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -997,7 +997,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder004, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder005, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder005, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -1019,7 +1019,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder005, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder006, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder006, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -1041,7 +1041,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder006, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder007, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder007, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -1057,7 +1057,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder007, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder008, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder008, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -1073,7 +1073,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder008, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder009, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder009, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -1089,7 +1089,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder009, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder010, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder010, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -1105,7 +1105,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder010, TestSize.Level1)
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder011, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder011, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
@@ -1121,7 +1121,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder011, TestSize.Level1)
  * @tc.desc: Test IsHint.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, IsHint001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, IsHint001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get pattern
@@ -1158,7 +1158,7 @@ HWTEST_F(RichEditorEditTestNg, IsHint001, TestSize.Level1)
  * @tc.desc: test provide placeholder information to inputmethod function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, ProvidePlaceHolderText, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, ProvidePlaceHolderText, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1182,7 +1182,7 @@ HWTEST_F(RichEditorEditTestNg, ProvidePlaceHolderText, TestSize.Level1)
  * @tc.desc: test InsertValueOperation
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, InsertValueOperation001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, InsertValueOperation001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1210,7 +1210,7 @@ HWTEST_F(RichEditorEditTestNg, InsertValueOperation001, TestSize.Level1)
  * @tc.desc: test InsertValueOperation
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, InsertValueOperation002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, InsertValueOperation002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1234,7 +1234,7 @@ HWTEST_F(RichEditorEditTestNg, InsertValueOperation002, TestSize.Level1)
  * @tc.desc: test ProcessInsertValue
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, ProcessInsertValue001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, ProcessInsertValue001, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -1252,7 +1252,7 @@ HWTEST_F(RichEditorEditTestNg, ProcessInsertValue001, TestSize.Level1)
  * @tc.desc: test ProcessInsertValue
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, ProcessInsertValue002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, ProcessInsertValue002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1272,7 +1272,7 @@ HWTEST_F(RichEditorEditTestNg, ProcessInsertValue002, TestSize.Level1)
  * @tc.desc: test BeforeChangeText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -1302,7 +1302,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText002, TestSize.Level
  * @tc.desc: test BeforeChangeText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, BeforeChangeText001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, BeforeChangeText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1321,7 +1321,7 @@ HWTEST_F(RichEditorEditTestNg, BeforeChangeText001, TestSize.Level1)
  * @tc.desc: test BeforeChangeText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, BeforeChangeText002, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, BeforeChangeText002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1343,7 +1343,7 @@ HWTEST_F(RichEditorEditTestNg, BeforeChangeText002, TestSize.Level1)
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1392,7 +1392,7 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset001, TestSize.Level1)
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset003, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1407,7 +1407,7 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset003, TestSize.Level1)
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset004, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1441,7 +1441,7 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset004, TestSize.Level1)
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset005, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

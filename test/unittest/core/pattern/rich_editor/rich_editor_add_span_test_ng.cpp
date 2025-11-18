@@ -75,7 +75,7 @@ void RichEditorAddSpanTestNg::TearDownTestSuite()
  * @tc.desc: test add image span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -133,7 +133,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan001, TestSize.Level1)
  * @tc.desc: test add image span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern and controller
@@ -183,11 +183,18 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level1)
  * @tc.desc: test AddImageSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan003, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan003, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. add image span
+     */
     ImageSpanOptions options;
     int32_t res = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, true, 0, false);
     ASSERT_EQ(res, 0);
@@ -198,13 +205,20 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan003, TestSize.Level1)
  * @tc.desc: test AddImageSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add image span
+     */
     ImageSpanOptions options;
     options.image = IMAGE_VALUE;
     options.bundleName = BUNDLE_NAME;
@@ -231,7 +245,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level1)
  * @tc.desc: test add text span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -264,7 +278,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level1)
  * @tc.desc: test add symbol span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -305,7 +319,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan001, TestSize.Level1)
  * @tc.desc: test add symbol span for custom symbol
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan002, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -351,7 +365,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan002, TestSize.Level1)
  * @tc.desc: test get symbol span info
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan003, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -418,7 +432,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan003, TestSize.Level1)
  * @tc.desc: test delete symbol span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan004, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -499,7 +513,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan004, TestSize.Level1)
  * @tc.desc: test use span & imagespan & symbolspan together
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSpans001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSpans001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -576,7 +590,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans001, TestSize.Level1)
  * @tc.desc: test add many spans
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSpans002, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSpans002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -618,7 +632,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans002, TestSize.Level1)
  * @tc.desc: Test the function AddTextSpan.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSpans003, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSpans003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -653,7 +667,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans003, TestSize.Level1)
  * @tc.desc: Test add span by pasteData.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -692,7 +706,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData001, TestSize.Level1)
  * @tc.desc: test AddSpanByPasteData
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData002, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -723,7 +737,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData002, TestSize.Level1)
  * @tc.desc: test RichEditorPattern AddSpansByPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSpansByPaste001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSpansByPaste001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern and controller
@@ -753,7 +767,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpansByPaste001, TestSize.Level1)
  * @tc.desc: test AddSpansAndReplacePlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, AddSpansAndReplacePlaceholder001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, AddSpansAndReplacePlaceholder001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -804,7 +818,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpansAndReplacePlaceholder001, TestSize.Lev
  * @tc.desc: test ResetSelectionAfterAddSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, ResetSelectionAfterAddSpan001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, ResetSelectionAfterAddSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -821,7 +835,7 @@ HWTEST_F(RichEditorAddSpanTestNg, ResetSelectionAfterAddSpan001, TestSize.Level1
  * @tc.desc: test ResetFirstNodeStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAddSpanTestNg, ResetFirstNodeStyle001, TestSize.Level1)
+HWTEST_F(RichEditorAddSpanTestNg, ResetFirstNodeStyle001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller

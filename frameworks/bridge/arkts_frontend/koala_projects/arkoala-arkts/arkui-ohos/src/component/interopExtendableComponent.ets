@@ -28,7 +28,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
     dynamicComponent: ESValue;
     originComponent?: WeakRef<ExtendableComponent>;
     private onActiveChange: ESValue = ESValue.wrap((active: boolean): void => {
-        this.setActive(active);
+        this.__setActive__Internal(active);
     });
     constructor(dynamicComponent: ESValue) {
         super();
@@ -45,13 +45,13 @@ export class InteropExtendableComponent extends ExtendableComponent {
         });
     }
 
-    public setActive(active: boolean): void {
-        this.propagateToChild(active, false);
+    public __setActive__Internal(active: boolean): void {
+        this.__propagateToChild__Internal(active, false);
     }
 
     /** @memo */ build(): void {}
 
-    override findProvidedVarV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
+    override __findProvidedVarV2__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
         const createStaticProvider = (value: Object, viewV2: Object): ProviderDecoratedVariable<Object> => {
             const result = new ProviderDecoratedVariable<Object>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, value);
             result.viewV2 = viewV2;
@@ -64,22 +64,22 @@ export class InteropExtendableComponent extends ExtendableComponent {
         return provider as IProviderDecoratedVariable<T>;
     }
 
-    override findProvideV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | null {
-        const result = this.findProvidedVarV2(providedPropName);
+    override __findProvider__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
+        const result = this.__findProvidedVarV2__Internal(providedPropName);
         if (result == undefined) {
-            return null;
+            return undefined;
         }
         return result as IProviderDecoratedVariable<T>;
     }
 
-    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+    override __findProvide__Internal<T>(providedPropName: string): IProvideDecoratedVariable<T> | undefined {
         const value = this.dynamicComponent.invokeMethod('findProvidePU__', ESValue.wrap(providedPropName));
         if (value.unwrap() == undefined) {
-            return null;
+            return undefined;
         }
         const getProxy = value.invokeMethod('getProxy').unwrap();
         if (getProxy === undefined && ExtendableComponent.current) {
-            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T, false);
+            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as T, false);
             provideVar.setProxy(value);
             value.invokeMethod('setProxy', ESValue.wrap(provideVar));
             const setProxyValue = ((newVal: T): void => {
@@ -106,7 +106,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
         }
     }
 
-    public get localStorage_(): LocalStorage {
+    public get __localStorage__Internal(): LocalStorage {
         const dynamicLocalStorage_ = this.dynamicComponent.getProperty('localStorage_');
         const proxy = dynamicLocalStorage_.invokeMethod('getProxy');
         if (proxy.isNull() || proxy.isUndefined()) {
@@ -118,9 +118,9 @@ export class InteropExtendableComponent extends ExtendableComponent {
         return proxy.unwrap() as LocalStorage;
     }
 
-    override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
+    override __addProvide__Internal<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {}
 
-    override isViewActive(): boolean {
+    override __isViewActive__Internal(): boolean {
         return this.dynamicComponent.invokeMethod('isViewActive').unwrap() as boolean;
     }
 }
@@ -151,9 +151,9 @@ export function registerResetInteropExtendableComponent(): void {
 export function createInteropView(staticComponent: ExtendableComponent): ESValue {
     const createState = ESValue.getGlobal().getProperty('createStateVariable');
     const findProvidePU = (providedPropName: string): Object | null => {
-        let provide = staticComponent.findProvide<Object>(providedPropName);
-        if ((provide === null)) {
-            return provide;
+        let provide = staticComponent.__findProvide__Internal<Object>(providedPropName);
+        if (!provide) {
+            return null;
         }
         let state = provide as ProvideDecoratedVariable<Object>;
         if (state.getProxy() === undefined) {
@@ -179,9 +179,9 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
     const createDummyViewV2 = ESValue.getGlobal().getProperty('createDummyViewV2');
     const findProvider = (varName: string) => {
         const result = (
-            staticComponent.findProvidedVarV2<Object>(varName) ||
-            staticComponent.findProvideV2<Object>(varName)
-        ) as ProviderDecoratedVariable<Object> | undefined | null;
+            staticComponent.__findProvidedVarV2__Internal<Object>(varName) ||
+            staticComponent.__findProvider__Internal<Object>(varName)
+        ) as ProviderDecoratedVariable<Object> | undefined;
         if (result == undefined) {
             return undefined;
         }
@@ -193,7 +193,7 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
         return [result.viewV2, varName];
     };
     const findLocalStorageInterop = (): Object => {
-        const staticLocalStorage_ = staticComponent.localStorage_;
+        const staticLocalStorage_ = staticComponent.__localStorage__Internal;
         if (staticLocalStorage_.getProxy() === undefined) {
             staticLocalStorage_.setProxy();
         }

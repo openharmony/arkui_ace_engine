@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 #include "gtest/gtest.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -554,6 +555,75 @@ HWTEST_F(FrameNodeTestNg, FrameNodeNotifyVisibleChange009, TestSize.Level1)
     FRAME_NODE2->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     FRAME_NODE2->Clean();
     EXPECT_NE(FRAME_NODE2, nullptr);
+}
+
+/**
+ * @tc.name: TransformPosition
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TransformPositionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(node, nullptr);
+
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    OffsetF offset;
+    offset.Reset();
+    auto newOffset = node->GetPositionToWindowWithTransform(offset);
+    EXPECT_EQ(newOffset, OffsetF());
+}
+
+/**
+ * @tc.name: GetRectToScreenTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetRectToScreenTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(node, nullptr);
+
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    RectF rect;
+    rect.Reset();
+    auto newRect = node->GetRectToScreen(rect);
+    EXPECT_EQ(newRect, RectF());
+}
+
+/**
+ * @tc.name: GetRectToWindowWithTransformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetRectToWindowWithTransformTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(node, nullptr);
+
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    RectF rect;
+    rect.Reset();
+    auto newRect = node->GetRectToWindowWithTransform(rect);
+    EXPECT_EQ(newRect, RectF());
 }
 
 /**

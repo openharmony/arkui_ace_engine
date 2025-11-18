@@ -158,7 +158,9 @@ std::string ArcSwiperPattern::GetArcDotIndicatorStyle() const
     auto swiperParameters = GetSwiperArcDotParameters();
     CHECK_NULL_RETURN(swiperParameters, "");
     auto jsonValue = JsonUtil::Create(true);
-    auto pipelineContext = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, "");
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, "");
@@ -187,7 +189,9 @@ std::shared_ptr<SwiperArcDotParameters> ArcSwiperPattern::GetSwiperArcDotParamet
 {
     if (swiperArcDotParameters_ == nullptr) {
         swiperArcDotParameters_ = std::make_shared<SwiperArcDotParameters>();
-        auto pipelineContext = GetHost()->GetContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, swiperArcDotParameters_);
+        auto pipelineContext = host->GetContext();
         CHECK_NULL_RETURN(pipelineContext, swiperArcDotParameters_);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
 

@@ -58,7 +58,7 @@ void RichEditorChangeReasonTest::TearDownTestSuite()
  * @tc.desc: test AddTextSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeReasonTest, ControllerAddTextSpan001, TestSize.Level1)
+HWTEST_F(RichEditorChangeReasonTest, ControllerAddTextSpan001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -86,7 +86,7 @@ HWTEST_F(RichEditorChangeReasonTest, ControllerAddTextSpan001, TestSize.Level1)
  * @tc.desc: test AddImageSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeReasonTest, ControllerAddImageSpan001, TestSize.Level1)
+HWTEST_F(RichEditorChangeReasonTest, ControllerAddImageSpan001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -114,7 +114,7 @@ HWTEST_F(RichEditorChangeReasonTest, ControllerAddImageSpan001, TestSize.Level1)
  * @tc.desc: test AddSymbolSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeReasonTest, ControllerAddSymbolSpan001, TestSize.Level1)
+HWTEST_F(RichEditorChangeReasonTest, ControllerAddSymbolSpan001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -142,7 +142,7 @@ HWTEST_F(RichEditorChangeReasonTest, ControllerAddSymbolSpan001, TestSize.Level1
  * @tc.desc: test DeleteSpans
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeReasonTest, ControllerDeleteSpans001, TestSize.Level1)
+HWTEST_F(RichEditorChangeReasonTest, ControllerDeleteSpans001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -174,7 +174,7 @@ HWTEST_F(RichEditorChangeReasonTest, ControllerDeleteSpans001, TestSize.Level1)
  * @tc.desc: test DeleteSpans
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeReasonTest, DeleteRange001, TestSize.Level1)
+HWTEST_F(RichEditorChangeReasonTest, DeleteRange001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -201,7 +201,7 @@ HWTEST_F(RichEditorChangeReasonTest, DeleteRange001, TestSize.Level1)
  * @tc.desc: test DeleteSpans
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeReasonTest, DeleteBackwardForward001, TestSize.Level1)
+HWTEST_F(RichEditorChangeReasonTest, DeleteBackwardForward001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();

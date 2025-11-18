@@ -48,7 +48,7 @@ const std::string XCOMPONENT_ID = "xcomponent";
 const std::string XCOMPONENT_LIBRARY_NAME = "native_render";
 const std::string XCOMPONENT_SO_PATH = "com.example.xcomponentmultihap/entry";
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
-ArkUI_XComponent_Params params;
+ArkUI_XComponent_Params g_params;
 const int32_t MIN_RATE = 30;
 const int32_t MAX_RATE = 120;
 const int32_t EXPECTED_RATE = 120;
@@ -66,10 +66,10 @@ protected:
 
 RefPtr<FrameNode> XComponentTestSetRateRange::CreateXComponentNode()
 {
-    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &g_params));
     return frameNode;
 }
 

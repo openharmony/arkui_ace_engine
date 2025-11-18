@@ -13,11 +13,24 @@
  * limitations under the License.
  */
 
-import { ArkBaseNode } from "./ArkBaseNode";
-import { ScrollableCommonMethod, ArkScrollableCommonMethodPeer, BarState, Color, NestedScrollOptions, ContentClipMode,
-    CrownSensitivity, EdgeEffect, EdgeEffectOptions, FadingEdgeOptions } from "../framework";
-import { RectShape } from "@ohos.arkui.shape"
-import { Resource } from "global.resource"
+import { int32 } from '@koalaui/common'
+import { ArkBaseNode } from './ArkBaseNode';
+import {
+  ScrollableCommonMethod,
+  ArkScrollableCommonMethodPeer,
+  BarState,
+  Color,
+  NestedScrollOptions,
+  ContentClipMode,
+  CrownSensitivity,
+  EdgeEffect,
+  EdgeEffectOptions,
+  FadingEdgeOptions,
+  AttributeModifier,
+  CommonMethod
+} from '../framework';
+import { RectShape } from '@ohos.arkui.shape'
+import { Resource } from 'global.resource'
 export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMethod {
     getPeer() : ArkScrollableCommonMethodPeer {
         return this.peer as ArkScrollableCommonMethodPeer
@@ -28,14 +41,14 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
         this.markDirty()
         return this
     }
-    scrollBarColor(value: Color | number | string | undefined): this {
-        const value_casted = value as (Color | number | string | undefined)
+    scrollBarColor(value: Color | int32 | string | undefined): this {
+        const value_casted = value as (Color | int32 | string | undefined)
         this.getPeer()?.setScrollBarColorAttribute(value_casted)
         this.markDirty()
         return this
     }
-    scrollBarWidth(value: number | string | undefined): this {
-        const value_casted = value as (number | string | undefined)
+    scrollBarWidth(value: double | string | undefined): this {
+        const value_casted = value as (double | string | undefined)
         this.getPeer()?.setScrollBarWidthAttribute(value_casted)
         this.markDirty()
         return this
@@ -52,8 +65,8 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
         this.markDirty()
         return this
     }
-    friction(value: number | Resource | undefined): this {
-        const value_casted = value as (number | Resource | undefined)
+    friction(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setFrictionAttribute(value_casted)
         this.markDirty()
         return this
@@ -82,8 +95,8 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
         this.markDirty()
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    flingSpeedLimit(value: double | undefined): this {
+        const value_casted = value as (double | undefined)
         this.getPeer()?.setFlingSpeedLimitAttribute(value_casted)
         this.markDirty()
         return this
@@ -119,5 +132,9 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
         this.getPeer()?.setFadingEdgeAttribute(enabled_casted, options_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }

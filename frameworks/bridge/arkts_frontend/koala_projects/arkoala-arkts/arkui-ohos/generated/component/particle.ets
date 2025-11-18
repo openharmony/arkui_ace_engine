@@ -176,11 +176,11 @@ export class PointParticleParameters_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
         if (valueHolderForRadius instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForRadiusForIdx0  = valueHolderForRadius as string
             valueSerializer.writeString(valueHolderForRadiusForIdx0)
         } else if (valueHolderForRadius instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForRadiusForIdx1  = valueHolderForRadius as number
             valueSerializer.writeNumber(valueHolderForRadiusForIdx1)
         }
@@ -206,40 +206,40 @@ export class ImageParticleParameters_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForSrc  = value.src
         if (valueHolderForSrc instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSrcForIdx0  = valueHolderForSrc as string
             valueSerializer.writeString(valueHolderForSrcForIdx0)
         } else if (valueHolderForSrc instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSrcForIdx1  = valueHolderForSrc as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
         }
         const valueHolderForSize  = value.size
         const valueHolderForSize_0  = valueHolderForSize[0]
         if (valueHolderForSize_0 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSize_0ForIdx0  = valueHolderForSize_0 as string
             valueSerializer.writeString(valueHolderForSize_0ForIdx0)
         } else if (valueHolderForSize_0 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSize_0ForIdx1  = valueHolderForSize_0 as number
             valueSerializer.writeNumber(valueHolderForSize_0ForIdx1)
         } else if (valueHolderForSize_0 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForSize_0ForIdx2  = valueHolderForSize_0 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSize_0ForIdx2)
         }
         const valueHolderForSize_1  = valueHolderForSize[1]
         if (valueHolderForSize_1 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSize_1ForIdx0  = valueHolderForSize_1 as string
             valueSerializer.writeString(valueHolderForSize_1ForIdx0)
         } else if (valueHolderForSize_1 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSize_1ForIdx1  = valueHolderForSize_1 as number
             valueSerializer.writeNumber(valueHolderForSize_1ForIdx1)
         } else if (valueHolderForSize_1 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForSize_1ForIdx2  = valueHolderForSize_1 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSize_1ForIdx2)
         }
@@ -306,11 +306,11 @@ export class EmitterParticleOptions_serializer {
         valueSerializer.writeInt32(valueHolderForType.getOrdinal())
         const valueHolderForConfig  = value.config
         if (valueHolderForConfig instanceof PointParticleParameters) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForConfigForIdx0  = valueHolderForConfig as PointParticleParameters
             PointParticleParameters_serializer.write(valueSerializer, valueHolderForConfigForIdx0)
         } else if (valueHolderForConfig instanceof ImageParticleParameters) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForConfigForIdx1  = valueHolderForConfig as ImageParticleParameters
             ImageParticleParameters_serializer.write(valueSerializer, valueHolderForConfigForIdx1)
         }

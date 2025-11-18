@@ -77,6 +77,9 @@ private:
     void CalcContentExpandWidth(std::optional<LayoutConstraintF>& layoutConstraint,
         float contentWidth, float leftRowWidth, float rightRowWidth);
     float CalcSelfHeight(float itemHeight, float bordersHeight);
+    bool NeedLimitRightRowWidth(LayoutWrapper* layoutWrapper);
+    void CalcLeftRowMinWidth(LayoutWrapper* layoutWrapper);
+    float GetLeftRowMinWidth(LayoutWrapper* layoutWrapper);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;

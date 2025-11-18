@@ -344,6 +344,7 @@
       OHOS::Ace::DumpLog::*;
       OHOS::Ace::NG::UIExtensionAdapter::*;
       OHOS::Ace::NG::UIExtensionStatic::*;
+      OHOS::Ace::NG::SecurityUIExtensionStatic::*;
       OHOS::Ace::NG::DynamicModelStatic::*;
       OHOS::Ace::NG::DynamicParam::*;
 

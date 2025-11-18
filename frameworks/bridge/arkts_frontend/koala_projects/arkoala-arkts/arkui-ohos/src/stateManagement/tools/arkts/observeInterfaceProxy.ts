@@ -29,9 +29,11 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     private ____V1RenderId: RenderIdType = 0;
     private allowDeep_: boolean;
     private _target: Object;
-    constructor(target: Object, allowDeep: boolean) {
+    private isAPI_: boolean;
+    constructor(target: Object, allowDeep: boolean, isAPI: boolean) {
         this._target = target;
         this.allowDeep_ = allowDeep;
+        this.isAPI_ = isAPI;
     }
     public addWatchSubscriber(watchId: WatchIdType): void {
         this.subscribedWatches.addWatchSubscriber(watchId);
@@ -53,7 +55,22 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
         if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
-        return uiUtils.makeObserved(value, this.allowDeep_);
+        const makeObserved = uiUtils.makeObservedEntrance(value, this.allowDeep_, this.isAPI_);
+        if (makeObserved === value) {
+            return value;
+        }
+        const varName = method.getName().substring(5);
+        const SETTER_PREFIX = '<set>';
+        const targetType = Type.of(this._target) as ClassType;
+        try {
+            const setter = targetType.getMethodByName(SETTER_PREFIX + varName);
+            if (setter) {
+                setter.invoke(this._target, [makeObserved]);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        return makeObserved;
     }
     set (target: Object, method: reflect.InstanceMethod, newValue: Any): void {
         const varName = method.getName().substring(5);

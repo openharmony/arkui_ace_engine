@@ -94,6 +94,18 @@ public:
     }
 };
 
+class MockScreenReaderCallback : public AccessibilityScreenReaderObserverCallback {
+public:
+    explicit MockScreenReaderCallback(int64_t accessibilityId)
+        : AccessibilityScreenReaderObserverCallback(accessibilityId)
+    {}
+    ~MockScreenReaderCallback() override = default;
+    bool OnState(bool state) override
+    {
+        return true;
+    }
+};
+
 class MockStageManager : public StageManager {
 public:
     explicit MockStageManager(const RefPtr<FrameNode>& stage)
@@ -858,6 +870,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager017, TestSize.Level1)
     /**
      * @tc.steps: step2. test RegisterInteractionOperation
      */
+    jsAccessibilityManager->Register(true);
     auto ret = jsAccessibilityManager->RegisterInteractionOperation(0);
     EXPECT_EQ(ret, false);
 }
@@ -1589,34 +1602,45 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     MockJsAccessibilityManager mockJsManger;
     mockJsManger.SetPipelineContext(context);
     mockJsManger.Register(true);
-
     AccessibilityEvent event;
     event.nodeId = 1;
-    AccessibilityWorkMode accessibilityWorkMode;
-    accessibilityWorkMode.isTouchExplorationEnabled = false;
+
     /**
-     * @tc.steps: step2. test IsEventIgnoredByWorkMode return true
+     * @tc.steps: step2. test ScreenReadEnabled true
      */
-    event.type = AccessibilityEventType::FOCUS;
-    EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
-        .WillRepeatedly(Return(accessibilityWorkMode));
-    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
-    
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
     event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
-    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
-
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::COMPONENT_CHANGE;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
     event.type = AccessibilityEventType::TEXT_CHANGE;
-    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
-
-    /**
-     * @tc.steps: step3. test IsEventIgnoredByWorkMode return false
-     */
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::FOCUS;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::SCROLLING_EVENT;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
     event.type = AccessibilityEventType::CLICK;
     EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::KEYBOARD_SPACE;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
 
-    accessibilityWorkMode.isTouchExplorationEnabled = true;
-    EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
-        .WillOnce(Return(accessibilityWorkMode));
+    /**
+     * @tc.steps: step3. test ScreenReadEnabled false
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
+    event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::COMPONENT_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::FOCUS;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::SCROLLING_EVENT;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::CLICK;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::KEYBOARD_SPACE;
     EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
 }
 
@@ -2303,7 +2327,8 @@ HWTEST_F(JsAccessibilityManagerTest, GetComponentTypeAndPageIdByNodeIdTest001, T
     /**
      * @tc.steps: step2. check get infos by nodeId
      */
-    jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(root->GetAccessibilityId(), root->GetContextRefPtr(), infoOfNode);
+    jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(
+        root->GetAccessibilityId(), root->GetContextRefPtr(), infoOfNode);
 
     EXPECT_EQ(infoOfNode.componentType, root->GetTag());
 }
@@ -4105,6 +4130,52 @@ HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.
     ASSERT_EQ(prevNode, nullptr);
 }
 
+/**
+ * @tc.name: RegisterScreenReaderObserverCallback
+ * @tc.desc: Test UIExtensionManager RegisterScreenReaderObserverCallback/DeregisterScreenReaderObserverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, RegisterScreenReaderObserverCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    EXPECT_EQ(0, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+
+    /**
+     * @tc.steps: step2. test RegisterScreenReaderObserverCallback
+     */
+    int64_t elementId0 = 0;
+
+    auto callback0 = std::make_shared<MockScreenReaderCallback>(0);
+    jsAccessibilityManager->RegisterScreenReaderObserverCallback(elementId0, callback0);
+    EXPECT_EQ(1, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+    EXPECT_EQ(callback0, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId0]);
+    int64_t elementId1 = 1;
+    auto callback1 = std::make_shared<MockScreenReaderCallback>(1);
+    jsAccessibilityManager->RegisterScreenReaderObserverCallback(elementId1, callback1);
+    EXPECT_EQ(2, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+    EXPECT_EQ(callback1, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId1]);
+
+    int64_t elementId2 = 2;
+    auto callback2 = std::make_shared<MockScreenReaderCallback>(2);
+    jsAccessibilityManager->RegisterScreenReaderObserverCallback(elementId2, callback2);
+    EXPECT_EQ(3, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+    EXPECT_EQ(callback2, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId2]);
+
+    /**
+     * @tc.steps: step3. test DeregisterScreenReaderObserverCallback
+     */
+    jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId2);
+    EXPECT_EQ(2, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+
+    jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId1);
+    EXPECT_EQ(1, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+    EXPECT_EQ(callback0, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId0]);
+    jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId0);
+    EXPECT_EQ(0, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+}
 
 /**
  * @tc.name: JsAccessibilityManager021
@@ -4122,5 +4193,39 @@ HWTEST_F(JsAccessibilityManagerTest, sendAccessibilitEvent001, TestSize.Level1)
     frameNode->OnAccessibilityEvent(
             AccessibilityEventType::CLICK, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(accessibilityEnableBackup);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager021
+ * @tc.desc: dump event test  DumpProcessEventParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode1, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    // not virtual
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_FALSE(nodeInfo.HasAccessibilityFocus());
+    // is virtual，but no parent
+    AccessibilityElementInfo nodeInfo1;
+    frameNode->SetAccessibilityNodeVirtual();
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
+    ASSERT_FALSE(nodeInfo1.HasAccessibilityFocus());
+    // is virtual，with parent
+    frameNode->SetAccessibilityVirtualNodeParent(frameNode1);
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
+    ASSERT_TRUE(nodeInfo1.HasAccessibilityFocus());
 }
 } // namespace OHOS::Ace::NG

@@ -17,9 +17,15 @@ ace_unittest("select_test_ng") {
   type = "new"
   sources = [
     "select_model_static_test_ng.cpp",
+    "select_one_test_ng.cpp",
+    "select_pattern_one_test_ng.cpp",
     "select_pattern_test_controlsize_ng.cpp",
     "select_pattern_test_ng.cpp",
+    "select_pattern_two_test_ng.cpp",
+    "select_pattern_test_one_controlsize_ng.cpp",
+    "select_pattern_three_test_ng.cpp",
     "select_test_controlsize_ng.cpp",
     "select_test_ng.cpp",
+    "select_two_test_ng.cpp",
   ]
 }

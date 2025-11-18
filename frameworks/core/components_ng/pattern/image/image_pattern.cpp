@@ -29,6 +29,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -422,13 +423,26 @@ void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t sta
     ImagePerf::GetPerfMonitor()->EndRecordImageLoadStat(accessibilityId, srcType, size, state);
 }
 
+void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
+{
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(host->GetId());
+    }
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ReportCompleteLoadEvent(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    {
+        ACE_IMAGE_SCOPED_TRACE(
+            "report image load success event %d, %" PRId64 "", imageDfxConfig_.GetNodeId(), GetSysTimestamp());
+    }
 
     image_ = loadingCtx_->MoveCanvasImage();
     if (!image_) {
@@ -624,6 +638,10 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg, const ImageError
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ReportCompleteLoadEvent(host);
+    // report fail event
+    ACE_IMAGE_SCOPED_TRACE(
+        "report image load fail event %d, %" PRId64 "", imageDfxConfig_.GetNodeId(), GetSysTimestamp());
     const auto& geometryNode = host->GetGeometryNode();
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
@@ -821,7 +839,16 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     }
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
-    if (loadingCtx_) {
+    LoadingContext();
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
+    }
+    return image_ || altErrorImage_ || altImage_;
+}
+
+void ImagePattern::LoadingContext()
+{
+    if (loadingCtx_ && loadingCtx_->GetImageObject() != nullptr) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
@@ -829,7 +856,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                 loadingCtx_->GetFrameCount());
         }
     }
-    if (altErrorCtx_) {
+    if (altErrorCtx_ && altErrorCtx_->GetImageObject() != nullptr) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altErrorImage_) {
@@ -838,7 +865,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                 altErrorCtx_->GetSrc(), altErrorCtx_->GetFrameCount());
         }
     }
-    if (altLoadingCtx_) {
+    if (altLoadingCtx_ && altLoadingCtx_->GetImageObject() != nullptr) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altImage_) {
@@ -847,10 +874,6 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                 altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
         }
     }
-    if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
-    }
-    return image_ || altErrorImage_ || altImage_;
 }
 
 void ImagePattern::CreateObscuredImage()
@@ -922,6 +945,14 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     }
     ClearReloadFlagsAfterLoad();
     ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        if (pipeline) {
+            pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
+        }
+    }
     loadingCtx_->LoadImageData();
 }
 
@@ -1051,21 +1082,27 @@ void ImagePattern::UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& ne
             [weak, nodeId, result]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                auto imageLayoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
-                CHECK_NULL_VOID(imageLayoutProperty);
-                auto&& layoutConstraint = imageLayoutProperty->GetCalcLayoutConstraint();
-                if (!layoutConstraint && !layoutConstraint->selfIdealSize.has_value()) {
-                    CalcSize realSize = { CalcLength(result.imageWidth_), CalcLength(result.imageHeight_) };
-                    imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
-                    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                }
-                pattern->DrawableRegisterUpdateCallback();
-                pattern->AnimatedDrawableControllAnimation(nodeId);
+                pattern->InitializeStatus(result);
             },
             "AceImageUpdateDrawableDescriptor");
     });
+}
+
+void ImagePattern::InitializeStatus(DrawableDescriptorLoadResult result)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    imageSize_.SetWidth(static_cast<float>(result.imageWidth_));
+    imageSize_.SetHeight(static_cast<float>(result.imageHeight_));
+    if (isMeasured_) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        isMeasured_ = false;
+    }
+    DrawableRegisterUpdateCallback();
+    AnimatedDrawableControllAnimation(nodeId);
 }
 
 void ImagePattern::AnimatedDrawableControllAnimation(const int32_t id)
@@ -1110,6 +1147,29 @@ void ImagePattern::ResetDrawableDescriptor()
     renderContext->RemoveContentModifier(contentMod_);
 }
 
+void ImagePattern::SetImageType(ImageType imageType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (imageType_ == ImageType::ANIMATED_DRAWABLE && imageType != ImageType::ANIMATED_DRAWABLE) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (imageType_ != ImageType::ANIMATED_DRAWABLE && imageType == ImageType::ANIMATED_DRAWABLE) {
+        isMeasured_ = true;
+    }
+    imageType_ = imageType;
+}
+
+ImageType ImagePattern::GetImageType() const
+{
+    return imageType_;
+}
+
+bool ImagePattern::GetIsAnimation() const
+{
+    return imageType_ == ImageType::ANIMATED_DRAWABLE;
+}
+
 void ImagePattern::InitOnKeyEvent()
 {
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) || keyEventCallback_) {
@@ -1152,12 +1212,16 @@ void ImagePattern::OnKeyEvent(const KeyEvent& event)
 std::optional<SizeF> ImagePattern::GetImageSizeForMeasure()
 {
     if ((!loadingCtx_ || !loadingCtx_->GetImageSize().IsPositive()) &&
+        (!altErrorCtx_ || !altErrorCtx_->GetImageSize().IsPositive()) &&
         (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
         return std::nullopt;
     }
     auto rawImageSize = SizeF(-1.0, -1.0);
     if (loadingCtx_) {
         rawImageSize = loadingCtx_->GetImageSize();
+    }
+    if (rawImageSize.IsNegative() && altErrorCtx_) {
+        rawImageSize = altErrorCtx_->GetImageSize();
     }
     if (rawImageSize.IsNegative() && altLoadingCtx_) {
         rawImageSize = altLoadingCtx_->GetImageSize();
@@ -1503,6 +1567,10 @@ void ImagePattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->DeleteLoadComponent(host->GetId());
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     if (isNeedReset_) {
         ResetImageAndAlt();
@@ -2048,16 +2116,38 @@ void ImagePattern::OnConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    /*
+     * Regenerate the cache key for the image source. This ensures that
+     * configuration changes (e.g., color mode, density, theme parameters)
+     * trigger correct cache matching or resource reloading.
+     */
+    src.GenerateCacheKey();
     UpdateInternalResource(src);
     bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
                       imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
     LoadImage(src, needLayout);
-    if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
-        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+    if (loadingCtx_->NeedAlt() && ((imageLayoutProperty->GetAltPlaceholder()) || imageLayoutProperty->GetAlt())) {
+        ImageSourceInfo altImageSourceInfo;
+        if (imageLayoutProperty->GetAltPlaceholder()) {
+            altImageSourceInfo = imageLayoutProperty->GetAltPlaceholder().value_or(ImageSourceInfo(""));
+            isLoadAlt_ = false;
+        } else if (imageLayoutProperty->GetAlt()) {
+            altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+            isLoadAlt_ = true;
+        }
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
+        altImageSourceInfo.GenerateCacheKey();
         LoadAltImage(altImageSourceInfo);
+    }
+    if (imageLayoutProperty->GetAltError()) {
+        auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+        if (altErrorCtx_ && altErrorCtx_->GetSourceInfo() == altImageSourceInfo) {
+            altErrorCtx_.Reset();
+        }
+        altImageSourceInfo.GenerateCacheKey();
+        LoadAltErrorImage(altImageSourceInfo);
     }
 }
 
@@ -2576,6 +2666,7 @@ void ImagePattern::LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceI
             altErrorImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altErrorImageDfxConfig_);
         CHECK_NULL_VOID(altErrorCtx_);
         altErrorCtx_->FinishMeasure();
+        altErrorCtx_->SetSupportSvg2(supportSvg2_);
         altErrorCtx_->LoadImageData();
     }
 }
@@ -2606,8 +2697,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAltError()
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             return;
         }
+        bool autoResize = imageLayoutProperty->GetAutoResize().value_or(pattern->autoResizeDefault_);
         pattern->altErrorCtx_->MakeCanvasImageIfNeed(
-            geometryNode->GetContentSize(), true, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
+            geometryNode->GetContentSize(), autoResize, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
     };
 }
 
@@ -2633,8 +2725,8 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAltError()
         pattern->altErrorImage_ = pattern->altErrorCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(pattern->altErrorImage_);
         pattern->altErrorImage_->SetImageDfxConfig(pattern->altErrorImageDfxConfig_);
-        pattern->altErrorDstRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetSrcRect());
-        pattern->altErrorSrcRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetDstRect());
+        pattern->altErrorSrcRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetSrcRect());
+        pattern->altErrorDstRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altErrorImage_, *pattern->altErrorSrcRect_, *pattern->altErrorDstRect_,
             pattern->altErrorCtx_->GetSourceInfo(), pattern->altErrorCtx_->GetFrameCount());
 

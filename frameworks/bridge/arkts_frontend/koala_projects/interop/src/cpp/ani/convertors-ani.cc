@@ -123,6 +123,7 @@ const std::vector<std::tuple<std::string, std::string, void*, int>>& AniExports:
     auto it = implementations.find(module);
     if (it == implementations.end()) {
         LOGE("Module %s is not registered", module.c_str());
+        abort();
     }
     return it->second;
 }
@@ -195,9 +196,5 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) 
 }
 
 ani_env* getKoalaANIContext(void* hint) {
-    if (currentContext) {
-        return currentContext;
-    } else {
-        return reinterpret_cast<ani_env*>(hint);
-    }
+    return reinterpret_cast<ani_env*>(hint);
 }

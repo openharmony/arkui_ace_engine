@@ -45,16 +45,16 @@ ArkUI_DrawableDescriptor* OH_ArkUI_DrawableDescriptor_CreateFromAnimatedPixelMap
     drawableDescriptor->pixelMapArray = array;
     drawableDescriptor->size = size;
     auto* drawable = OHOS::Ace::NodeModel::CreateDrawable(ANIMATED_TYPE);
-    std::vector<void*> rawPixelMaps;
+    std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps;
     for (int32_t index = 0; index < size; index++) {
         if (!array[index]) {
             continue;
         }
-        auto pixelMap = array[index]->GetInnerPixelmap();
-        rawPixelMaps.push_back(reinterpret_cast<void*>(&pixelMap));
+        pixelMaps.push_back(array[index]->GetInnerPixelmap());
     }
     int32_t duration = -1;
     int32_t iteration = 1;
+    OHOS::Ace::NodeModel::SetPixelMaps(drawable, pixelMaps);
     OHOS::Ace::NodeModel::SetTotalDuration(drawable, duration);
     OHOS::Ace::NodeModel::SetIterations(drawable, iteration);
     OHOS::Ace::NodeModel::IncreaseRefDrawable(drawable);
@@ -64,6 +64,7 @@ ArkUI_DrawableDescriptor* OH_ArkUI_DrawableDescriptor_CreateFromAnimatedPixelMap
 
 void OH_ArkUI_DrawableDescriptor_Dispose(ArkUI_DrawableDescriptor* drawableDescriptor)
 {
+    CHECK_NULL_VOID(drawableDescriptor);
     if (drawableDescriptor->newDrawableDescriptor) {
         OHOS::Ace::NodeModel::DecreaseRefDrawable(drawableDescriptor->newDrawableDescriptor);
     }

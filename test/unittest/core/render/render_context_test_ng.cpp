@@ -23,6 +23,7 @@
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 #undef private
@@ -101,7 +102,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest001, TestSize.Level1)
      * @tc.steps: step1. Build a object renderContext.
      */
     NG::RenderContext renderContext;
-    auto requestFrame = []() {
+    auto requestFrame = [](bool isOffScreenNode) {
         srcimages = "common/images/mmm.jpg";
     };
 
@@ -125,7 +126,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest002, TestSize.Level1)
      * @tc.steps: step1. Build a object renderContext.
      */
     NG::RenderContext renderContext;
-    auto requestFrame = []() {
+    auto requestFrame = [](bool isOffScreenNode) {
         srcimages = "common/images/mmm.jpg";
     };
 
@@ -353,7 +354,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level1)
     auto frameNode = NG::FrameNode::CreateFrameNode(TAG_ROOT, 0, AceType::MakeRefPtr<NG::LinearLayoutPattern>(false));
     frameNode->UpdateInspectorId("123");
     auto renderContext = frameNode->GetRenderContext();
-    renderContext->requestFrame_ = []() {};
+    renderContext->requestFrame_ = [](bool) {};
     NG::BorderWidthProperty borderWidth = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
     auto layoutProperty = AceType::MakeRefPtr<NG::LayoutProperty>();
     layoutProperty->UpdateBorderWidth(borderWidth);
@@ -472,5 +473,36 @@ HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level1)
     jsonThree->Put("clip", "true");
     renderContextThree.FromJson(jsonThree);
     EXPECT_TRUE(renderContextThree.GetClipEdge().value());
+}
+
+/**
+ * @tc.name: RenderContextTest013
+ * @tc.desc: Test cast to RenderContextTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContext;
+    auto requestFrame = [](bool isOffScreenNode) {
+        srcimages = "common/images/mmm.jpg";
+    };
+
+    /**
+     * @tc.steps: step2. callback RequestNextFrame.
+     * @tc.expected: step2. The renderContext.requestFrame_ is null.
+     */
+    renderContext.SetRequestFrame(requestFrame);
+    ASSERT_NE(renderContext.requestFrame_, nullptr);
+
+    /**
+     * @tc.steps: step3. callback RequestNextFrame.
+     * @tc.expected: step3. The renderContext.requestFrame_ is not null.
+     */
+    renderContext.RequestNextFrame(true);
+    EXPECT_EQ(srcimages, "common/images/mmm.jpg");
+    ASSERT_NE(renderContext.requestFrame_, nullptr);
 }
 } // namespace OHOS::Ace

@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -115,11 +116,12 @@ void SetShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
+    auto optValue = Converter::OptConvertPtr<CheckBoxStyle>(value);
     if (!optValue) {
         CheckBoxModelStatic::SetCheckboxStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
         return;
     }
+    CheckBoxModelStatic::SetCheckboxStyle(frameNode, *optValue);
 }
 void SetUnselectedColorImpl(Ark_NativePointer node,
                             const Opt_ResourceColor* value)
@@ -143,15 +145,15 @@ void SetMarkImpl(Ark_NativePointer node,
         CheckBoxModelStatic::SetCheckMarkColor(frameNode, color.value());
     }
 
-    auto size = Converter::OptConvert<Dimension>(optValue->size);
-    if (size) {
-        CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
-    }
-
-    auto width = Converter::OptConvert<Dimension>(optValue->strokeWidth);
-    if (width) {
-        CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width.value());
-    }
+    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size, DimensionUnit::VP);
+    Validator::ValidateNonPercent(size);
+    Validator::ValidateNonNegative(size);
+    CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
+    auto width =
+        Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->strokeWidth, DimensionUnit::VP);
+    Validator::ValidateNonPercent(width);
+    Validator::ValidateNonNegative(width);
+    CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_OnCheckboxChangeCallback* value)

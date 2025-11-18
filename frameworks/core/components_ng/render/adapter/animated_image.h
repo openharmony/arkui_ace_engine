@@ -157,6 +157,8 @@ public:
     ~AnimatedPixmap() override = default;
     RefPtr<PixelMap> GetPixelMap() const override;
 
+    RefPtr<PixelMap> GetFirstPixelMap() override;
+
     RefPtr<CanvasImage> Clone() override
     {
         return Claim(this);

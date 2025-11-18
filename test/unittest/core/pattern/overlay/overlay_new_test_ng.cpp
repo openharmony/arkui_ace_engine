@@ -1580,7 +1580,7 @@ HWTEST_F(OverlayNewTestNg, GetFrameChildByIndex001, TestSize.Level1)
      * @tc.steps: step2. create empty builder.
      */
 
-    auto builderFunc = []() -> RefPtr<UINode> { return nullptr; };
+    auto builderFunc = [](int32_t id) -> RefPtr<UINode> { return nullptr; };
     auto buildTitleNodeFunc = []() -> RefPtr<UINode> { return nullptr; };
 
     /**
@@ -1599,7 +1599,7 @@ HWTEST_F(OverlayNewTestNg, GetFrameChildByIndex001, TestSize.Level1)
     /**
      * @tc.steps: step4. create not empty builder.
      */
-    auto builderFunc_new = []() -> RefPtr<UINode> {
+    auto builderFunc_new = [](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });

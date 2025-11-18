@@ -23,6 +23,7 @@
 #include "core/components_ng/base/transparent_node_detector.h"
 #endif
 
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -752,9 +753,14 @@ void NavigationGroupNode::CreateAnimationWithPop(const TransitionUnitInfo& preIn
         finishCallback);
     pattern->OnStartOneTransitionAnimation();
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, curNode, isNavBarOrHomeDestination, preUseCustomTransition, curUseCustomTransition, pattern]() {
+        this, preNode, curNode, isNavBarOrHomeDestination, preUseCustomTransition, curUseCustomTransition, pattern,
+        weakNavigation = WeakClaim(this)]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            auto navigation = weakNavigation.Upgrade();
+            if (navigation) {
+                navigation->LoadCompleteManagerStartCollect();
+            }
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start: animationId: %{public}d",
                 static_cast<int32_t>(animationId_));
 
@@ -832,6 +838,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
+            navigation->LoadCompleteManagerStopCollect();
             navigation->isOnAnimation_ = false;
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
@@ -955,9 +962,14 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
     NavigationTitleUtil::SetTitleAnimationElapsedTime(option, curNode);
     pattern->OnStartOneTransitionAnimation();
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
-        preNode, curNode, isNavBarOrHomeDestination, preUseCustomTransition, curUseCustomTransition, pattern]() {
+        preNode, curNode, isNavBarOrHomeDestination, preUseCustomTransition, curUseCustomTransition, pattern,
+        weakNavigation = WeakClaim(this)]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            auto navigation = weakNavigation.Upgrade();
+            if (navigation) {
+                navigation->LoadCompleteManagerStartCollect();
+            }
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
             if ((isNavBarOrHomeDestination && !pattern->IsForceSplitSuccess()) ||
                 (preNode && !preUseCustomTransition)) {
@@ -1051,6 +1063,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation end");
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
+            navigation->LoadCompleteManagerStopCollect();
             auto pattern = navigation->GetPattern<NavigationPattern>();
             CHECK_NULL_VOID(pattern);
             auto preNode = weakPreNode.Upgrade();
@@ -1138,30 +1151,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     isOnAnimation_ = true;
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     CHECK_NULL_VOID(curNavDestination);
-    auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-    std::string fromPath = "";
-    if (AceChecker::IsPerformanceCheckEnabled()) {
-        if (preNavDestination) {
-        fromPath = preNavDestination->GetNavDestinationPathInfo();
-        }
-        int64_t startTime = GetSysTimestamp();
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(GetContextWithCheck());
-        CHECK_NULL_VOID(pipeline);
-        // After completing layout tasks at all nodes on the page, perform performance testing and management
-        pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime,
-                                         path = curNavDestination->GetNavDestinationPathInfo(), fromPath,
-                                         moduleName = curNavDestination->GetNavDestinationModuleName()]() {
-            auto navigation = weakNav.Upgrade();
-            CHECK_NULL_VOID(navigation);
-            auto curNode = weakNode.Upgrade();
-            int64_t endTime = GetSysTimestamp();
-            CHECK_NULL_VOID(curNode);
-            PerformanceCheckNodeMap nodeMap;
-            curNode->GetPerformanceCheckData(nodeMap);
-            AceScopedPerformanceCheck::RecordPerformanceCheckData(
-                nodeMap, endTime - startTime, path, fromPath, moduleName, true);
-        });
-    }
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());
@@ -1191,7 +1180,7 @@ std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(co
                 auto context = weakRender.Upgrade();
                 CHECK_NULL_VOID(context);
                 context->SetActualForegroundColor(Color::TRANSPARENT);
-            });
+            }, nullptr /* finishCallback */, nullptr /* repeatCallback */, GetContextRefPtr());
     }
     renderContext->SetActualForegroundColor(Color::TRANSPARENT);
     return AnimationUtils::StartAnimation(
@@ -1238,6 +1227,7 @@ void NavigationGroupNode::TransitionWithReplace(
         CHECK_NULL_VOID(preNode);
         auto navigationNode = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigationNode);
+        navigationNode->LoadCompleteManagerStopCollect();
         navigationNode->isOnAnimation_ = false;
         auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
         navigationNode->OnAccessibilityEvent(
@@ -1288,10 +1278,14 @@ void NavigationGroupNode::TransitionWithReplace(
     pattern->OnStartOneTransitionAnimation();
     AnimationUtils::Animate(
         option,
-        [curNode, curUseCustomTransition]() {
+        [curNode, curUseCustomTransition, weakNavigation = WeakClaim(this)]() {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation start");
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            auto navigation = weakNavigation.Upgrade();
+            if (navigation) {
+                navigation->LoadCompleteManagerStartCollect();
+            }
             auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
             if (curNavDestination && curNavDestination->IsNeedContentTransition() && !curUseCustomTransition) {
                 curNode->GetRenderContext()->UpdateOpacity(1.0f);
@@ -1712,6 +1706,7 @@ void NavigationGroupNode::CreateAnimationWithDialogPop(const AnimationFinishCall
             // do preNode transition
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
+            navigation->LoadCompleteManagerStartCollect();
             for (auto iter: preNavList) {
                 auto preNode = iter.Upgrade();
                 CHECK_NULL_VOID(preNode);
@@ -1756,6 +1751,7 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
+            navigation->LoadCompleteManagerStopCollect();
             navigation->isOnAnimation_ = false;
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
@@ -1810,6 +1806,7 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation start");
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
+            navigation->LoadCompleteManagerStartCollect();
 
             // preNode do EXIT PUSH animation
             for (auto iter : prevNavList) {
@@ -1895,6 +1892,7 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation end");
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
+            navigation->LoadCompleteManagerStopCollect();
             for (auto iter : prevNavList) {
                 auto preNode = iter.Upgrade();
                 if (!preNode) {
@@ -2390,8 +2388,13 @@ void NavigationGroupNode::SoftTransitionAnimationPush(const RefPtr<FrameNode>& p
     CHECK_NULL_VOID(pattern);
     pattern->OnStartOneTransitionAnimation();
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
-        preNode, curNode, isNavBar, preUseCustomTransition, curUseCustomTransition]() {
+        preNode, curNode, isNavBar, preUseCustomTransition, curUseCustomTransition,
+        weakNavigation = WeakClaim(this)]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            auto navigation = weakNavigation.Upgrade();
+            if (navigation) {
+                navigation->LoadCompleteManagerStartCollect();
+            }
             if (isNavBar) {
                 auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
                 CHECK_NULL_VOID(navBarNode);
@@ -2481,8 +2484,13 @@ void NavigationGroupNode::SoftTransitionAnimationPop(const RefPtr<FrameNode>& pr
     auto pattern = GetPattern<NavigationPattern>();
     pattern->OnStartOneTransitionAnimation();
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, curNode, isNavBar, preUseCustomTransition, curUseCustomTransition]() {
+        this, preNode, curNode, isNavBar, preUseCustomTransition, curUseCustomTransition,
+        weakNavigation = WeakClaim(this)]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            auto navigation = weakNavigation.Upgrade();
+            if (navigation) {
+                navigation->LoadCompleteManagerStartCollect();
+            }
             if (curNode) {
                 if (isNavBar) {
                     auto curNavBar = AceType::DynamicCast<NavBarNode>(curNode);
@@ -2598,5 +2606,21 @@ bool NavigationGroupNode::IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGro
     CHECK_NULL_RETURN(navigationManager, false);
     return navigationManager->IsForceSplitEnable() && navigationPattern->CanForceSplitLayout() &&
         !navigationPattern->IsTopFullScreenPage();
+}
+
+void NavigationGroupNode::LoadCompleteManagerStartCollect()
+{
+    auto context = GetContextWithCheck();
+    if (context) {
+        context->GetLoadCompleteManager()->StartCollect("");
+    }
+}
+
+void NavigationGroupNode::LoadCompleteManagerStopCollect()
+{
+    auto context = GetContextWithCheck();
+    if (context) {
+        context->GetLoadCompleteManager()->StopCollect();
+    }
 }
 } // namespace OHOS::Ace::NG

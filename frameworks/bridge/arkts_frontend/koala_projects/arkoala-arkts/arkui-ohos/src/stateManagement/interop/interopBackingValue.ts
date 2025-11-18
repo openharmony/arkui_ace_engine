@@ -1,7 +1,7 @@
-import { staticStateBindObservedObject } from "../../component/interop";
-import { DecoratorBackingValue } from "../base/backingValue";
-import { ObserveSingleton } from "../base/observeSingleton";
-import { IMutableStateMeta, STATE_MGMT_FACTORY } from "../decorator";
+import { staticStateBindObservedObject } from '../../component/interop';
+import { DecoratorBackingValue } from '../base/backingValue';
+import { ObserveSingleton } from '../base/observeSingleton';
+import { IMutableStateMeta, STATE_MGMT_FACTORY } from '../decorator';
 
 export class InteropDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
     trackProperties: Map<string, IMutableStateMeta> = new Map<string, IMutableStateMeta>();
@@ -17,18 +17,12 @@ export class InteropDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
     }
 
     public onTrackPropertyRead(property: string, isTracked: boolean): void {
-        if (!isTracked) {
-            if (ObserveSingleton.instance.renderingId != ObserveSingleton.InvalidRenderId) {
-                throw new Error(`Illegal usage of not @Track'ed property '${property}' on UI!`);
-            }
-        } else {
-            let record = this.trackProperties.get(property);
-            if (!record) {
-                record = STATE_MGMT_FACTORY.makeMutableStateMeta() as IMutableStateMeta;
-                this.trackProperties.set(property, record);    
-            }
-            record!.addRef();
+        let record = this.trackProperties.get(property);
+        if (!record) {
+            record = STATE_MGMT_FACTORY.makeMutableStateMeta() as IMutableStateMeta;
+            this.trackProperties.set(property, record);    
         }
+        record!.addRef();
     }
 
     public onTrackPropertyChange(property: string): void {

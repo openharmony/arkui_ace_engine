@@ -221,15 +221,12 @@ void SetShaderInputBufferImpl(Ark_NativePointer node,
         // no need reset value
         return;
     }
-    int32_t length = shaderInputVec->size();
-    if (length <= 0) {
-        return;
-    }
+    uint32_t length = shaderInputVec->size();
     auto buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
     if (!buffer->Alloc(length)) {
         return;
     }
-    for (int32_t i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++) {
         buffer->Update(shaderInputVec->at(i), i);
     }
     ModelViewNG::AddShaderInputBuffer(frameNode, buffer);

@@ -734,7 +734,11 @@ void NavigationToolbarUtil::SetToolbarOptions(
     CHECK_NULL_VOID(nodeBase);
     auto pattern = nodeBase->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj("navigation.navigationToolbarOptions", resObj, std::move(updateFunc));
+    if (resObj) {
+        pattern->AddResObj("navigation.navigationToolbarOptions", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("navigation.navigationToolbarOptions");
+    }
 }
 
 void NavigationToolbarUtil::SetToolbarMoreButtonOptions(

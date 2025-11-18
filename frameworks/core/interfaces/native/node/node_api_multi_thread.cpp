@@ -15,8 +15,9 @@
 
 #include "core/interfaces/native/node/node_api_multi_thread.h"
 
-#include "core/common/multi_thread_build_manager.h"
 #include "base/error/error_code.h"
+#include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
 void SetIsThreadSafeNodeScope(ArkUI_Bool isThreadSafeNodeScope)
@@ -28,6 +29,15 @@ int32_t CheckNodeOnValidThread(ArkUINodeHandle node)
 {
     UINode* currentNode = reinterpret_cast<UINode*>(node);
     return static_cast<int32_t>(MultiThreadBuildManager::CheckNodeOnValidThread(currentNode));
+}
+
+void ExecuteAfterAttachTasks(ArkUINodeHandle node)
+{
+    UINode* currentNode = reinterpret_cast<UINode*>(node);
+    if (currentNode && currentNode->IsThreadSafeNode()) {
+        currentNode->SetIsFree(false);
+        currentNode->ExecuteAfterAttachMainTreeTasks();
+    }
 }
 
 int32_t CheckOnUIThread()
@@ -94,6 +104,7 @@ const ArkUIMultiThreadManagerAPI* GetMultiThreadManagerAPI()
         .postAsyncUITask = PostAsyncUITask,
         .postUITask = PostUITask,
         .postUITaskAndWait = PostUITaskAndWait,
+        .executeAfterAttachTasks = ExecuteAfterAttachTasks,
     };
     return &multiThreadImpl;
 }

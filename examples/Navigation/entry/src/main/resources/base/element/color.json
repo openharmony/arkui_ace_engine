@@ -1,6 +1,970 @@
 {
   "color": [
     {
+      "name": "Pink",
+      "value": "#FF69B4"
+    },
+    {
+      "name": "brand_color",
+      "value": "#ff0000"
+    },
+    {
+      "name": "extended_color",
+      "value": "#DD761C"
+    },
+    {
+      "name": "customTextColor1",
+      "value": "#ff049404"
+    },
+    {
+      "name": "customTextColor2",
+      "value": "#fff32b3c"
+    },
+    {
+      "name": "brandGreenColor",
+      "value": "#ff049404"
+    },
+    {
+      "name": "brandRedColor",
+      "value": "#fff32b3c"
+    },
+    {
+      "name": "errorColor1",
+      "value": "#FFA40000"
+    },
+    {
+      "name": "errorColor2",
+      "value": "#FFA48000"
+    },
+    {
+      "name": "customTextColor3",
+      "value": "#FF001388"
+    },
+    {
+      "name": "themeMgmtBackgroundPrimary",
+      "value": "#FF74CEF8"
+    },
+    {
+      "name": "themeMgmtCompForegroundPrimary",
+      "value": "#FF0536E5"
+    },
+    {
+      "name": "themeMgmtIconOnPrimary",
+      "value": "#FFACF2FC"
+    },
+    {
+      "name": "themeMgmtIconFourth",
+      "value": "#FF0536E5"
+    },
+    {
+      "name": "themeMgmtIconSecondary",
+      "value": "#FF0536E6"
+    },
+    {
+      "name": "themeMgmtCompBackgroundNeutral",
+      "value": "#FF74CEF8"
+    },
+    {
+      "name": "themeMgmtCompDivider",
+      "value": "#FF0536E5"
+    },
+    {
+      "name": "themeMgmtCompBackgroundTertiary",
+      "value": "#FF74CEF8"
+    },
+    {
+      "name": "BadgeWarningColorYellow",
+      "value": "#FFF4A900"
+    },
+    {
+      "name": "BadgeWarningColorGreen",
+      "value": "#FF33FF33"
+    },
+    {
+      "name": "BadgeFontOnPrimaryColorYellow",
+      "value": "#FFFFFF00"
+    },
+    {
+      "name": "BadgeFontOnPrimaryColorGreen",
+      "value": "#FF1E5945"
+    },
+    {
+      "name": "badgeColorMagenta",
+      "value": "#d3b2f0"
+    },
+    {
+      "name": "badgeBorderColorMagenta",
+      "value": "#FF7024b3"
+    },
+    {
+      "name": "badgeBadgeColorMagenta",
+      "value": "#FFa033ff"
+    },
+    {
+      "name": "badgeColorBlue",
+      "value": "#FF3ee7f0"
+    },
+    {
+      "name": "badgeBorderColorBlue",
+      "value": "#FF3e5cf0"
+    },
+    {
+      "name": "badgeBadgeColorBlue",
+      "value": "#FF3e83f0"
+    },
+    {
+      "name": "qrCodeInteractiveFocusGreen",
+      "value": "#FF7C10F5"
+    },
+    {
+      "name": "qrCodeBackgroundPrimaryGreen",
+      "value": "#FFDCFAE6"
+    },
+    {
+      "name": "qrCodeCompForegroundPrimaryGreen",
+      "value": "#ff00ff00"
+    },
+    {
+      "name": "qrCodeInteractiveFocusRed",
+      "value": "#FF7C10F5"
+    },
+    {
+      "name": "qrCodeBackgroundPrimaryRed",
+      "value": "#FFFCD5D5"
+    },
+    {
+      "name": "qrCodeCompForegroundPrimaryRed",
+      "value": "#FFFF0000"
+    },
+    {
+      "name": "qrCodeCustomColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "qrCodeCustomBackgroundColorOrange",
+      "value": "#CCDDDD00"
+    },
+    {
+      "name": "qrCodeCustomFontColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "qrCodeCustomColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "qrCodeCustomBackgroundColorMagenta",
+      "value": "#FFFFC0CB"
+    },
+    {
+      "name": "qrCodeCustomFontColorMagenta",
+      "value": "#FFFFC0CB"
+    },
+    {
+      "name": "radioIconOnPrimaryGreen",
+      "value": "#FFD1FCC7"
+    },
+    {
+      "name": "radioIconFourthGreen",
+      "value": "#FF00D000"
+    },
+    {
+      "name": "radioCompBackgroundEmphasizeGreen",
+      "value": "#FF00D000"
+    },
+    {
+      "name": "radioIconOnPrimaryRed",
+      "value": "#FFFFD7D7"
+    },
+    {
+      "name": "radioIconFourthRed",
+      "value": "#FFD00000"
+    },
+    {
+      "name": "radioCompBackgroundEmphasizeRed",
+      "value": "#FFD00000"
+    },
+    {
+      "name": "radioFontColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "radioCheckedBackgroundColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "radioUncheckedBackgroundColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "radioIndicatorColorOrange",
+      "value": "#FFFDFDB0"
+    },
+    {
+      "name": "radioFontColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "radioCheckedBackgroundColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "radioUncheckedBackgroundColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "radioIndicatorColorMagenta",
+      "value": "#FFFFC0CB"
+    },
+    {
+      "name": "searchFontPrimaryGreen",
+      "value": "#FF049404"
+    },
+    {
+      "name": "searchFontSecondaryGreen",
+      "value": "#FF859D85"
+    },
+    {
+      "name": "searchIconSecondaryGreen",
+      "value": "#FF05A705"
+    },
+    {
+      "name": "searchBrandGreen",
+      "value": "#FF2BFFCE"
+    },
+    {
+      "name": "searchFontEmphasizeGreen",
+      "value": "#FF05A705"
+    },
+    {
+      "name": "searchCompBackgroundTertiaryGreen",
+      "value": "#FFEFFFEF"
+    },
+    {
+      "name": "searchFontPrimaryRed",
+      "value": "#FFF32B3C"
+    },
+    {
+      "name": "searchFontSecondaryRed",
+      "value": "#FFE29393"
+    },
+    {
+      "name": "searchIconSecondaryRed",
+      "value": "#FFAE3737"
+    },
+    {
+      "name": "searchBrandRed",
+      "value": "#FFFF5EBD"
+    },
+    {
+      "name": "searchFontEmphasizeRed",
+      "value": "#FFF32B3C"
+    },
+    {
+      "name": "searchCompBackgroundTertiaryRed",
+      "value": "#FFFFF2F3"
+    },
+    {
+      "name": "searchFontColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "searchPlaceholderColorOrange",
+      "value": "#FFF6DAA7"
+    },
+    {
+      "name": "searchSearchIconColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "searchCancelIconColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "searchCaretColorOrange",
+      "value": "#FF9B6403"
+    },
+    {
+      "name": "searchSearchButtonFontColorOrange",
+      "value": "#FFF67607"
+    },
+    {
+      "name": "searchSelectedBackgroundColorOrange",
+      "value": "#FFEE972E"
+    },
+    {
+      "name": "searchBackgroundColorOrange",
+      "value": "#FFFFF4E5"
+    },
+    {
+      "name": "searchFontColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "searchPlaceholderColorMagenta",
+      "value": "#FFFCCCD4"
+    },
+    {
+      "name": "searchSearchIconColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "searchCancelIconColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "searchCaretColorMagenta",
+      "value": "#FF5102E5"
+    },
+    {
+      "name": "searchSearchButtonFontColorMagenta",
+      "value": "#FFA103C4"
+    },
+    {
+      "name": "searchSelectedBackgroundColorMagenta",
+      "value": "#FFAF60FD"
+    },
+    {
+      "name": "searchBackgroundColorMagenta",
+      "value": "#FFFFF7FF"
+    },
+    {
+      "name": "indexerFontPrimary",
+      "value": "#f77f00"
+    },
+    {
+      "name": "indexerFontSecondary",
+      "value": "#003049"
+    },
+    {
+      "name": "indexerFontEmphasize",
+      "value": "#d62828"
+    },
+    {
+      "name": "indexerCompBackgroundTertiary",
+      "value": "#eae2b7"
+    },
+    {
+      "name": "indexerCompEmphasizeSecondary",
+      "value": "#fcbf49"
+    },
+    {
+      "name": "indexerCustomColor1Scheme",
+      "value": "#d67524"
+    },
+    {
+      "name": "indexerCustomSelectedColor1Scheme",
+      "value": "#c32700"
+    },
+    {
+      "name": "indexerCustomPopupColor1Scheme",
+      "value": "#c32700"
+    },
+    {
+      "name": "indexerCustomPopupUnselectedColor1Scheme",
+      "value": "#c7ae88"
+    },
+    {
+      "name": "indexerCustomPopupTitleBackgroundColor1Scheme",
+      "value": "#e1b80d"
+    },
+    {
+      "name": "indexerCustomSelectedBackgroundColor1Scheme",
+      "value": "#83d6bb"
+    },
+    {
+      "name": "indexerCustomColor2Scheme",
+      "value": "#e35000"
+    },
+    {
+      "name": "indexerCustomSelectedColor2Scheme",
+      "value": "#1f3c40"
+    },
+    {
+      "name": "indexerCustomPopupColor2Scheme",
+      "value": "#1f3c40"
+    },
+    {
+      "name": "indexerCustomPopupUnselectedColor2Scheme",
+      "value": "#3d8ebf"
+    },
+    {
+      "name": "indexerCustomPopupTitleBackgroundColor2Scheme",
+      "value": "#77dd83"
+    },
+    {
+      "name": "indexerCustomSelectedBackgroundColor2Scheme",
+      "value": "#e1ae0f"
+    },
+    {
+      "name": "loadingProgressFontColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "loadingProgressFontColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "swiperForeground",
+      "value": "#FFFF60D0"
+    },
+    {
+      "name": "swiperBackground",
+      "value": "#FF00ADFF"
+    },
+    {
+      "name": "pickerFontEmphasizeGreen",
+      "value": "#FF049404"
+    },
+    {
+      "name": "pickerFontEmphasizeRed",
+      "value": "#FFAE3737"
+    },
+    {
+      "name": "pickerFontPrimaryGreen",
+      "value": "#FF859D85"
+    },
+    {
+      "name": "pickerFontPrimaryRed",
+      "value": "#FFF32B3C"
+    },
+    {
+      "name": "pickerNormalColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "pickerSelectedColorMagenta",
+      "value": "#FF5102E5"
+    },
+    {
+      "name": "pickerDisappearColorMagenta",
+      "value": "#FFAF60FD"
+    },
+    {
+      "name": "pickerNormalColorBlue",
+      "value": "#A40A64A4"
+    },
+    {
+      "name": "pickerSelectedColorBlue",
+      "value": "#FF1049A9"
+    },
+    {
+      "name": "pickerDisappearColorBlue",
+      "value": "#FF4479D4"
+    },
+    {
+      "name": "patternLockCompBackgroundNeutral1",
+      "value": "#02343F"
+    },
+    {
+      "name": "patternLockCompDivider1",
+      "value": "#F0EDCC"
+    },
+    {
+      "name": "patternLockCompBackgroundNeutral2",
+      "value": "#A4193D"
+    },
+    {
+      "name": "patternLockCompDivider2",
+      "value": "#FFDFB9"
+    },
+    {
+      "name": "patternLockCustomRegularColor1",
+      "value": "#3c1518"
+    },
+    {
+      "name": "patternLockCustomActiveColor1",
+      "value": "#69140e"
+    },
+    {
+      "name": "patternLockCustomSelectedColor1",
+      "value": "#a44200"
+    },
+    {
+      "name": "patternLockCustomPathColor1",
+      "value": "#d58936"
+    },
+    {
+      "name": "patternLockCustomRegularColor2",
+      "value": "#054a91"
+    },
+    {
+      "name": "patternLockCustomActiveColor2",
+      "value": "#3e7cb1"
+    },
+    {
+      "name": "patternLockCustomSelectedColor2",
+      "value": "#81a4cd"
+    },
+    {
+      "name": "patternLockCustomPathColor2",
+      "value": "#dbe4ee"
+    },
+    {
+      "name": "checkboxSelected",
+      "value": "#FFFF60D0"
+    },
+    {
+      "name": "checkboxUnSelected",
+      "value": "#FF00ADFF"
+    },
+    {
+      "name": "checkboxMarkStroke",
+      "value": "#FF6E6A1D"
+    },
+    {
+      "name": "checkboxIconOnPrimary1",
+      "value": "#ffffc0c0"
+    },
+    {
+      "name": "checkboxIconFourth1",
+      "value": "#ffd00000"
+    },
+    {
+      "name": "checkboxCompBgEmph1",
+      "value": "#ffff5050"
+    },
+    {
+      "name": "checkboxIconOnPrimary2",
+      "value": "#ffc0ffc0"
+    },
+    {
+      "name": "checkboxIconFourth2",
+      "value": "#FF00D000"
+    },
+    {
+      "name": "checkboxCompBgEmph2",
+      "value": "#ff50ff50"
+    },
+    {
+      "name": "progressBackgroundColorOrange",
+      "value": "#FFFFE3B3"
+    },
+    {
+      "name": "progressColorOrange",
+      "value": "#FFFFA000"
+    },
+    {
+      "name": "progressBorderColorOrange",
+      "value": "#FFA94F02"
+    },
+    {
+      "name": "progressFontColorOrange",
+      "value": "#FFFFA500"
+    },
+    {
+      "name": "progressBackgroundColorMagenta",
+      "value": "#CCFFC4FF"
+    },
+    {
+      "name": "progressColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "progressBorderColorMagenta",
+      "value": "#CC330369"
+    },
+    {
+      "name": "progressFontColorMagenta",
+      "value": "#CCDD00DD"
+    },
+    {
+      "name": "progressCompEmphasizeSecondaryRed",
+      "value": "#FFFA797A"
+    },
+    {
+      "name": "progressCompBackgroundTertiaryRed",
+      "value": "#44FF2222"
+    },
+    {
+      "name": "progressBackgroundEmphasizeRed",
+      "value": "#FFDD1111"
+    },
+    {
+      "name": "progressCompEmphasizeSecondaryGreen",
+      "value": "#FF00541F"
+    },
+    {
+      "name": "progressCompBackgroundTertiaryGreen",
+      "value": "#DDB9F8B9"
+    },
+    {
+      "name": "progressBackgroundEmphasizeGreen",
+      "value": "#FF18B04F"
+    },
+    {
+      "name": "sliderCompBackgroundSecondaryRed",
+      "value": "#33FF1111"
+    },
+    {
+      "name": "sliderCompBackgroundPrimaryContraryRed",
+      "value": "#FFFF2222"
+    },
+    {
+      "name": "sliderBackgroundEmphasizeRed",
+      "value": "#FFD00000"
+    },
+    {
+      "name": "sliderCompBackgroundSecondaryGreen",
+      "value": "#3322FF22"
+    },
+    {
+      "name": "sliderCompBackgroundPrimaryContraryGreen",
+      "value": "#FF11FF11"
+    },
+    {
+      "name": "sliderBackgroundEmphasizeGreen",
+      "value": "#FF00541F"
+    },
+    {
+      "name": "sliderCompBackgroundSecondaryBrown",
+      "value": "#33556B55"
+    },
+    {
+      "name": "sliderCompBackgroundPrimaryContraryBrown",
+      "value": "#ffcd7044"
+    },
+    {
+      "name": "sliderBackgroundEmphasizeBrown",
+      "value": "#FF8B6B5C"
+    },
+    {
+      "name": "toggleCompBackgroundEmphasizeGreen",
+      "value": "#FF00541F"
+    },
+    {
+      "name": "toggleCompEmphasizeSecondaryGreen",
+      "value": "#330AF731"
+    },
+    {
+      "name": "toggleCompBackgroundTertiaryGreen",
+      "value": "#33B6FDC1"
+    },
+    {
+      "name": "toggleCompBackgroundPrimaryGreen",
+      "value": "#FFB3CCBC"
+    },
+    {
+      "name": "toggleCompBackgroundSecondaryGreen",
+      "value": "#33B6FDC1"
+    },
+    {
+      "name": "toggleFontPrimaryGreen",
+      "value": "#FF00541F"
+    },
+    {
+      "name": "toggleCompBackgroundEmphasizeRed",
+      "value": "#FFD00000"
+    },
+    {
+      "name": "toggleCompEmphasizeSecondaryRed",
+      "value": "#33F70ACF"
+    },
+    {
+      "name": "toggleCompBackgroundTertiaryRed",
+      "value": "#33FDB6F1"
+    },
+    {
+      "name": "toggleCompBackgroundPrimaryRed",
+      "value": "#FFF1B3B3"
+    },
+    {
+      "name": "toggleCompBackgroundSecondaryRed",
+      "value": "#33FDB6F1"
+    },
+    {
+      "name": "toggleFontPrimaryRed",
+      "value": "#FFD00000"
+    },
+    {
+      "name": "menuFontPrimaryRed",
+      "value": "#FF670707"
+    },
+    {
+      "name": "menuFontPrimaryGreen",
+      "value": "#FF3B5D03"
+    },
+    {
+      "name": "menuIconPrimaryRed",
+      "value": "#FFEE0812"
+    },
+    {
+      "name": "menuIconPrimaryGreen",
+      "value": "#FFA9EF04"
+    },
+    {
+      "name": "menuCompDividerRed",
+      "value": "#FFC11C2F"
+    },
+    {
+      "name": "menuCompDividerGreen",
+      "value": "#FF468336"
+    },
+    {
+      "name": "menuCompBackgroundPrimaryRed",
+      "value": "#FFE3787C"
+    },
+    {
+      "name": "menuCompBackgroundPrimaryGreen",
+      "value": "#FFB5D982"
+    },
+    {
+      "name": "menuFontTertiaryRed",
+      "value": "#FFBE1C55"
+    },
+    {
+      "name": "menuFontTertiaryGreen",
+      "value": "#FF3C9D57"
+    },
+    {
+      "name": "menuCustomFontColor1",
+      "value": "#FF5E0867"
+    },
+    {
+      "name": "menuCustomFontColor2",
+      "value": "#FF054C5F"
+    },
+    {
+      "name": "menuCustomBgColor1",
+      "value": "#FFD091D7"
+    },
+    {
+      "name": "menuCustomBgColor2",
+      "value": "#FF83D7E5"
+    },
+    {
+      "name": "menuCustomLabelColor1",
+      "value": "#FF9207E9"
+    },
+    {
+      "name": "menuCustomLabelColor2",
+      "value": "#FF29987D"
+    },
+    {
+      "name": "menuCustomMenuFontColor1",
+      "value": "#FF2F0D5D"
+    },
+    {
+      "name": "menuCustomMenuFontColor2",
+      "value": "#FF054C3E"
+    },
+    {
+      "name": "toolBarFontPrimaryRed",
+      "value": "#FFCA0505"
+    },
+    {
+      "name": "toolBarFontPrimaryGreen",
+      "value": "#FF188800"
+    },
+    {
+      "name": "toolBarFontEmphasizeRed",
+      "value": "#FFCF7B01"
+    },
+    {
+      "name": "toolBarFontEmphasizeGreen",
+      "value": "#FF00788D"
+    },
+    {
+      "name": "toolBarIconEmphasizeRed",
+      "value": "#FFFFC100"
+    },
+    {
+      "name": "toolBarIconEmphasizeGreen",
+      "value": "#FF00DFEA"
+    },
+    {
+      "name": "editableTitleBarIconPrimaryRed",
+      "value": "#FF8B059D"
+    },
+    {
+      "name": "editableTitleBarIconPrimaryGreen",
+      "value": "#FF07BFBA"
+    },
+    {
+      "name": "editableTitleBarFontPrimaryRed",
+      "value": "#FFC80606"
+    },
+    {
+      "name": "editableTitleBarFontPrimaryGreen",
+      "value": "#FF054A1C"
+    },
+    {
+      "name": "editableTitleBarFontSecondaryRed",
+      "value": "#FFFF4F4F"
+    },
+    {
+      "name": "editableTitleBarFontSecondaryGreen",
+      "value": "#FF05A720"
+    },
+    {
+      "name": "editableTitleBarInteractivePressedRed",
+      "value": "#FFECAFC2"
+    },
+    {
+      "name": "editableTitleBarInteractivePressedGreen",
+      "value": "#FF78EED6"
+    },
+    {
+      "name": "composeListItemFontPrimaryGreen",
+      "value": "#FF024E05"
+    },
+    {
+      "name": "composeListItemFontPrimaryRed",
+      "value": "#FFF80000"
+    },
+    {
+      "name": "composeListItemFontSecondaryGreen",
+      "value": "#FF229905"
+    },
+    {
+      "name": "composeListItemFontSecondaryRed",
+      "value": "#FFFF5600"
+    },
+    {
+      "name": "composeListItemFontTertiaryGreen",
+      "value": "#FF8DEA57"
+    },
+    {
+      "name": "composeListItemFontTertiaryRed",
+      "value": "#FFF8E100"
+    },
+    {
+      "name": "composeListItemInteractiveGreen",
+      "value": "#FFDCEF9B"
+    },
+    {
+      "name": "composeListItemInteractiveRed",
+      "value": "#FFD2986B"
+    },
+    {
+      "name": "ff0000ff",
+      "value": "#ff0000ff"
+    },
+    {
+      "name": "ff0000",
+      "value": "#ff0000"
+    },
+    {
+      "name": "Attribute_color_text",
+      "value": "#ff0000"
+    },
+    {
+      "name": "Attribute_color_Color",
+      "value": "#0000FF"
+    },
+    {
+      "name": "gaugeColors",
+      "value": "#00FF00"
+    },
+    {
+      "name": "list_divider",
+      "value": "#ff0000ff"
+    },
+    {
+      "name": "CommonShape_stroke_color",
+      "value": "#f7f9e9"
+    },
+    {
+      "name": "QRCode_color",
+      "value": "#000000"
+    },
+    {
+      "name": "QRCode_backgroundColor",
+      "value": "#ff0000ff"
+    },
+    {
+      "name": "marquee_fontColor",
+      "value": "#ff0000ff"
+    },
+    {
+      "name": "LoadingProgress_color",
+      "value": "#ff834511"
+    },
+    {
+      "name": "commonShape_fill",
+      "value": "#00FF00"
+    },
+    {
+      "name": "textTimer_fontColor",
+      "value": "#00FF00"
+    },
+    {
+      "name": "category_background",
+      "value": "#F1F3F5"
+    },
+    {
+      "name": "tab_text_activated",
+      "value": "#007DFF"
+    },
+    {
+      "name": "grid_text_background",
+      "value": "#0C000000"
+    },
+    {
+      "name": "list_text_normal",
+      "value": "#182431"
+    },
+    {
+      "name": "tab_text_normal",
+      "value": "#99182431"
+    },
+    {
+      "name": "search_placeholder",
+      "value": "#99182431"
+    },
+    {
+      "name": "sub_text",
+      "value": "#9900ff00"
+    },
+    {
+      "name": "divider",
+      "value": "#0C000000"
+    },
+    {
+      "name": "list_item_text",
+      "value": "#FF182431"
+    },
+    {
+      "name": "caretColor",
+      "value": "#ff834511"
+    },
+    {
+      "name": "divider_test",
+      "value": "#ffff00"
+    },
+    {
+      "name": "ff0000ffs",
+      "value": "#ff0000ff"
+    },
+    {
+      "name": "Attribute_color_texts",
+      "value": "#ffff00"
+    },
+    {
+      "name": "LoadingProgress_colors",
+      "value": "#FFFFDDDB"
+    },
+    {
+      "name": "tab_text_activateds",
+      "value": "#aaabbbbb"
+    },
+    {
+      "name": "list_text_normals",
+      "value": "#aaaaaa"
+    },
+    {
+      "name": "caretColors",
+      "value": "#ffccaaf1"
+    },
+    {
+      "name": "dividerColor",
+      "value": "#ff0000ff"
+    },
+    {
+      "name": "dividerColor1",
+      "value": "#FF21DE0B"
+    },
+    {
       "name": "start_window_background",
       "value": "#FFFFFF"
     }

@@ -17,7 +17,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 #ifdef WEB_SUPPORTED
-#include "base/web/webview/arkweb_utils/arkweb_utils.h"
+#include "arkweb_utils.h"
 #include "core/components_ng/pattern/web/ani/web_model_static.h"
 #include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
@@ -77,6 +77,21 @@ ScriptItems Convert(const Array_ScriptItem& src)
         }
     }
     return scriptItems;
+}
+
+template<>
+ScriptItemsByOrder Convert(const Array_ScriptItem& src)
+{
+    auto items = Converter::Convert<std::vector<ScriptItem>>(src);
+    ScriptItemsByOrder scriptItemsByOrder;
+    std::unordered_set<std::string> temp;
+    for (auto item : items) {
+
+        if (temp.insert(item.first).second) {
+            scriptItemsByOrder.push_back(item.first);
+        }
+    }
+    return scriptItemsByOrder;
 }
 
 template<>
@@ -177,6 +192,8 @@ void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src)
         case ThreatType::FRAUD: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_FRAUD; break;
         case ThreatType::RISK: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_RISK; break;
         case ThreatType::WARNING: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_WARNING; break;
+        case ThreatType::NONE: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_NONE; break;
+        case ThreatType::UNPROCESSED: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_UNPROCESSED; break;
         default: dst = static_cast<Ark_ThreatType>(-1);
             LOGE("Unexpected enum value in ThreatType: %{public}d", src);
     }
@@ -234,6 +251,8 @@ void SetWebOptionsImpl(Ark_NativePointer node,
     WebModelStatic::SetIncognitoMode(frameNode, incognitoMode);
     auto sharedRenderProcessToken = Converter::OptConvert<std::string>(value->sharedRenderProcessToken);
     WebModelStatic::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
+    auto emulateTouchFromMouseEvent = Converter::OptConvert<bool>(value->emulateTouchFromMouseEvent);
+    WebModelStatic::SetEmulateTouchFromMouseEvent(frameNode, emulateTouchFromMouseEvent);
 #endif // WEB_SUPPORTED
 }
 } // WebInterfaceModifier
@@ -551,18 +570,42 @@ void SetOnPageBeginImpl(Ark_NativePointer node,
 void SetOnLoadStartedImpl(Ark_NativePointer node,
                           const Opt_Callback_OnLoadStartedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetOnLoadStarted(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onLoadStarted = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnLoadStarted(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnLoadStarted(frameNode, onLoadStarted);
+#endif // WEB_SUPPORTED
 }
 void SetOnLoadFinishedImpl(Ark_NativePointer node,
                            const Opt_Callback_OnLoadFinishedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetOnLoadFinished(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onLoadFinished = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnLoadFinished(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnLoadFinished(frameNode, onLoadFinished);
+#endif // WEB_SUPPORTED
 }
 void SetOnProgressChangeImpl(Ark_NativePointer node,
                              const Opt_Callback_OnProgressChangeEvent_Void* value)
@@ -983,7 +1026,7 @@ void SetOnHttpAuthRequestImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
+                               const Opt_Type_WebAttribute_onInterceptRequest* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2224,7 +2267,12 @@ void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue);
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
@@ -2273,7 +2321,7 @@ void InitCallbackParams_(FrameNode* frameNode,
     const std::shared_ptr<WebPreviewSelectionMenuParam>& dst, const Ark_SelectionMenuOptionsExt& options)
 {
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto arkOnDisappear = Converter::OptConvert<Callback_Void>(options.onDisappear);
+    auto arkOnDisappear = Converter::OptConvert<VoidCallback>(options.onDisappear);
     if (arkOnDisappear) {
         auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -2281,7 +2329,7 @@ void InitCallbackParams_(FrameNode* frameNode,
         };
         dst->menuParam.onDisappear = std::move(onDisappear);
     }
-    auto arkOnAppear = Converter::OptConvert<Callback_Void>(options.onAppear);
+    auto arkOnAppear = Converter::OptConvert<VoidCallback>(options.onAppear);
     if (arkOnAppear) {
         auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -2289,14 +2337,14 @@ void InitCallbackParams_(FrameNode* frameNode,
         };
         dst->menuParam.onAppear = std::move(onAppear);
     }
-    auto arkOnMenuShow = Converter::OptConvert<Callback_Void>(options.onMenuShow);
+    auto arkOnMenuShow = Converter::OptConvert<VoidCallback>(options.onMenuShow);
     if (arkOnMenuShow) {
         dst->onMenuShow = [arkCallback = CallbackHelper(arkOnMenuShow.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto arkOnMenuHide = Converter::OptConvert<Callback_Void>(options.onMenuHide);
+    auto arkOnMenuHide = Converter::OptConvert<VoidCallback>(options.onMenuHide);
     if (arkOnMenuHide) {
         dst->onMenuHide = [arkCallback = CallbackHelper(arkOnMenuHide.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -2417,11 +2465,33 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
 void SetRotateRenderEffectImpl(Ark_NativePointer node,
                                const Opt_WebRotateEffect* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<WebRotateEffect>(*value);
+    WebModelStatic::SetRotateRenderEffect(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 
 void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
                                 const Opt_OnOverrideErrorPageCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onOverrideErrorPage = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> std::string {
+        return OnOverrideErrorPage(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnOverrideErrorPage(frameNode, onOverrideErrorPage);
+#endif // WEB_SUPPORTED
 }
 
 void SetOnPdfScrollAtBottomImpl(Ark_NativePointer node,
@@ -2469,6 +2539,22 @@ void SetOnPdfLoadEventImpl(Ark_NativePointer node,
 void SetOnSafeBrowsingCheckFinishImpl(Ark_NativePointer node,
                                       const Opt_OnSafeBrowsingCheckResultCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onSafeBrowsingCheckFinish = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnSafeBrowsingCheckFinish(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetSafeBrowsingCheckFinishId(frameNode, std::move(onSafeBrowsingCheckFinish));
+#endif // WEB_SUPPORTED
 }
 
 void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,
@@ -2494,6 +2580,21 @@ void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,
 void SetOnNativeEmbedObjectParamChangeImpl(Ark_NativePointer node,
                                            const Opt_OnNativeEmbedObjectParamChangeCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    auto onNativeEmbedObjectParamChange = [callback = CallbackHelper(*optValue), instanceId](
+        const BaseEventInfo* info) {
+        OnNativeEmbedObjectParamChange(callback, instanceId, info);
+    };
+    WebModelStatic::SetNativeEmbedObjectParamChangeId(frameNode, onNativeEmbedObjectParamChange);
+#endif // WEB_SUPPORTED
 }
 
 void SetEnableDataDetectorImpl(Ark_NativePointer node,
@@ -2569,6 +2670,16 @@ void SetGestureFocusModeImpl(Ark_NativePointer node,
 void SetForceEnableZoomImpl(Ark_NativePointer node,
                             const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::SetForceEnableZoom(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 
 void SetBackToTopImpl(Ark_NativePointer node,
@@ -2671,6 +2782,16 @@ void SetZoomControlAccessImpl(Ark_NativePointer node,
 void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
                                        const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        WebModelStatic::SetEnableSelectedDataDetector(frameNode, true);
+        return;
+    }
+    WebModelStatic::SetEnableSelectedDataDetector(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()

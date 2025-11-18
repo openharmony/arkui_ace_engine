@@ -22,16 +22,16 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions_serializer, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { extractors, AttributeModifier, hookBaseSpanAttributeModifier, AttributeUpdater, hookSpanAttributeModifier } from "#handwritten"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions_serializer, ShadowOptions, ClickEvent, HoverCallback, HoverEvent, BaseEvent, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { LengthMetrics } from "arkui.Graphics"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, Font, ResourceColor, Length, Dimension, BorderRadiuses, BorderRadiuses_serializer } from "./units"
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
-import { Color, FontStyle, FontWeight, TextCase } from "./enums"
+import { Color, FontStyle, FontWeight, TextCase, InteractionHand } from "./enums"
 import { Resource } from "global.resource"
+import { AttributeModifier, hookBaseSpanAttributeModifier, AttributeUpdater, hookSpanAttributeModifier } from "#handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { BaseSpanModifier } from "./../BaseSpanModifier"
@@ -74,7 +74,7 @@ export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export class ArkSpanPeer extends ArkBaseSpanPeer {
+export class ArkSpanPeer extends PeerNode {
     attributeSet?: SpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -89,11 +89,11 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
     setSpanOptionsAttribute(value: string | Resource): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as string
             thisSerializer.writeString(valueForIdx0)
         } else if (value instanceof Resource) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as Resource
             Resource_serializer.write(thisSerializer, valueForIdx1)
         }
@@ -118,19 +118,19 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -146,15 +146,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -182,15 +182,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -206,11 +206,11 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -238,11 +238,11 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
@@ -270,15 +270,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -294,11 +294,11 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ShadowOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (TypeChecker.isArray_ShadowOptions(valueTmpValue)) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Array<ShadowOptions>
                 thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
                 for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
@@ -310,6 +310,97 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SpanAttribute_setTextShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setTextBackgroundStyleAttribute(value: TextBackgroundStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextBackgroundStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setTextBackgroundStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBaselineOffsetAttribute(value: LengthMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setBaselineOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setKeyAttribute(value: string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setKey(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setIdAttribute(value: string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnClick0Attribute(value: ((value0: ClickEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setOnClick0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnHoverAttribute(value: HoverCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setOnHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnClick1Attribute(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (event !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const eventTmpValue  = event!
+            thisSerializer.holdAndWriteCallback(eventTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (distanceThreshold !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const distanceThresholdTmpValue  = distanceThreshold!
+            thisSerializer.writeFloat64(distanceThresholdTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SpanAttribute_setOnClick1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -341,7 +432,7 @@ export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
         throw new Error("Not implemented")
     }
 }
-export interface SpanAttribute extends BaseSpan {
+export interface SpanAttribute {
     setSpanOptions(value: string | Resource): this {
         throw new Error("Unimplemented method setSpanOptions")
     }
@@ -378,11 +469,32 @@ export interface SpanAttribute extends BaseSpan {
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         throw new Error("Unimplemented method textShadow")
     }
-    attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        throw new Error("Unimplemented method textBackgroundStyle")
+    }
+    baselineOffset(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method baselineOffset")
+    }
+    key(value: string | undefined): this {
+        throw new Error("Unimplemented method key")
+    }
+    id(value: string | undefined): this {
+        throw new Error("Unimplemented method id")
+    }
+    onClick(value: ((value0: ClickEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    onHover(value: HoverCallback | undefined): this {
+        throw new Error("Unimplemented method onHover")
+    }
+    onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
-export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
+export class ArkSpanStyle implements SpanAttribute {
     font_value?: Font | undefined
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: double | string | Resource | undefined
@@ -394,7 +506,13 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     textCase_value?: TextCase | undefined
     lineHeight_value?: Length | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
-    attributeModifier_value?: AttributeModifier<SpanAttribute> | AttributeModifier<CommonMethod> | undefined
+    textBackgroundStyle_value?: TextBackgroundStyle | undefined
+    baselineOffset_value?: LengthMetrics | undefined
+    key_value?: string | undefined
+    id_value?: string | undefined
+    onClick_value?: ((value0: ClickEvent) => void) | undefined
+    onHover_value?: HoverCallback | undefined
+    attributeModifier_value?: AttributeModifier<SpanAttribute> | undefined
     setSpanOptions(value: string | Resource): this {
         return this
     }
@@ -431,7 +549,28 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         return this
     }
-    public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        return this
+    }
+    baselineOffset(value: LengthMetrics | undefined): this {
+        return this
+    }
+    key(value: string | undefined): this {
+        return this
+    }
+    id(value: string | undefined): this {
+        return this
+    }
+    onClick(value: ((value0: ClickEvent) => void) | undefined): this {
+        return this
+    }
+    onHover(value: HoverCallback | undefined): this {
+        return this
+    }
+    onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error("Not implemented")
     }
 }
@@ -467,8 +606,11 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
-export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttribute {
+export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
     getPeer(): ArkSpanPeer {
         if (!this.peer) {
             throw new Error("Attribute function should be called in memo context")
@@ -479,6 +621,7 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         if (this.checkPriority("setSpanOptions")) {
             const value_casted = value as (string | Resource)
             this.getPeer()?.setSpanOptionsAttribute(value_casted)
+            this.applyOptionsFinish('SpanAttribute');
             return this
         }
         return this
@@ -571,13 +714,73 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+    public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        if (this.checkPriority("textBackgroundStyle")) {
+            const value_casted = value as (TextBackgroundStyle | undefined)
+            this.getPeer()?.setTextBackgroundStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public baselineOffset(value: LengthMetrics | undefined): this {
+        if (this.checkPriority("baselineOffset")) {
+            const value_casted = value as (LengthMetrics | undefined)
+            this.getPeer()?.setBaselineOffsetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public key(value: string | undefined): this {
+        if (this.checkPriority("key")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.setKeyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public id(value: string | undefined): this {
+        if (this.checkPriority("id")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.setIdAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onClick(value: ((value0: ClickEvent) => void) | undefined): this {
+        if (this.checkPriority("onClick")) {
+            const value_casted = value as (((value0: ClickEvent) => void) | undefined)
+            this.getPeer()?.setOnClick0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onHover(value: HoverCallback | undefined): this {
+        if (this.checkPriority("onHover")) {
+            const value_casted = value as (HoverCallback | undefined)
+            this.getPeer()?.setOnHoverAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onClick(event: ((value0: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        if (this.checkPriority("onClick")) {
+            const event_casted = event as (((value0: ClickEvent) => void) | undefined)
+            const distanceThreshold_casted = distanceThreshold as (double | undefined)
+            this.getPeer()?.setOnClick1Attribute(event_casted, distanceThreshold_casted)
+            return this
+        }
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         hookSpanAttributeModifier(this, value);
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -607,19 +810,19 @@ export class TextBackgroundStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -631,23 +834,23 @@ export class TextBackgroundStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
             if (valueHolderForRadiusTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as Dimension
                 if (valueHolderForRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForRadiusTmpValueForIdx0ForIdx0  = valueHolderForRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForRadiusTmpValueForIdx0ForIdx1  = valueHolderForRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForRadiusTmpValueForIdx0ForIdx2  = valueHolderForRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx1)
             }

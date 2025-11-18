@@ -1,0 +1,19 @@
+{
+  "name": "arkbreakpoint",
+  "version": "0.0.1",
+  "description": "ACE 2.0 ark breakpoint",
+  "main": "./dist/WindowSizeLayoutBreakpoint.js",
+  "dependencies": {
+    "pegjs": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^15.0.1",
+    "json5": "^2.2.3",
+    "typescript": "^4.2.4"
+  },
+  "scripts": {
+    "build": " tsc --build tsconfig.json && node generateGni.js"
+  },
+  "author": "",
+  "license": "Apache-2.0"
+}

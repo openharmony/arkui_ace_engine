@@ -65,6 +65,32 @@ void StepperPattern::OnModifyDone()
     SetAccessibilityAction();
 }
 
+void StepperPattern::OnHostChildUpdateDone()
+{
+    Pattern::OnHostChildUpdateDone();
+    auto hostNode = DynamicCast<StepperNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto swiperNode =
+        DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
+    CHECK_NULL_VOID(swiperNode);
+    index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
+    auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    maxIndex_ = TotalCount();
+    if (index_ > maxIndex_) {
+        index_ = 0;
+        hostNode->GetLayoutProperty<StepperLayoutProperty>()->UpdateIndex(index_);
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(index_);
+        swiperNode->MarkModifyDone();
+        swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    InitSwiperChangeEvent(swiperEventHub);
+    UpdateOrCreateLeftButtonNode(index_);
+    UpdateOrCreateRightButtonNode(index_);
+    InitButtonClickEvent();
+    SetAccessibilityAction();
+}
+
 void StepperPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();

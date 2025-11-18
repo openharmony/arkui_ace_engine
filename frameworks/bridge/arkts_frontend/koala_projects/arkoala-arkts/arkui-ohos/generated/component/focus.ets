@@ -20,7 +20,6 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { extractors } from "#handwritten"
 import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
 import { TypeChecker } from "#components"
@@ -72,19 +71,19 @@ export class FocusBoxStyle_serializer {
         const marginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let marginTmpBuf : LengthMetrics | undefined = undefined
         if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            marginTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            marginTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const marginTmpResult : LengthMetrics | undefined = marginTmpBuf
         const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeColorTmpBuf : ColorMetrics | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+            strokeColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
         }
         const strokeColorTmpResult : ColorMetrics | undefined = strokeColorTmpBuf
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
         let value : FocusBoxStyle = ({margin: marginTmpResult, strokeColor: strokeColorTmpResult, strokeWidth: strokeWidthTmpResult} as FocusBoxStyle)

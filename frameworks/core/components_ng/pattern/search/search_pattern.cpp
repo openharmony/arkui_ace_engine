@@ -29,6 +29,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -2018,6 +2019,12 @@ void SearchPattern::UpdateDividerColorMode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerColorSetByUser = layoutProperty->GetDividerColorSetByUser().value_or(false);
+    if (dividerColorSetByUser) {
+        return;
+    }
     auto dividerFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
     CHECK_NULL_VOID(dividerFrameNode);
     auto searchTheme = GetTheme();
@@ -2063,14 +2070,32 @@ void SearchPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto searchTheme = GetTheme();
-    CHECK_NULL_VOID(searchTheme);
+    if (!SystemProperties::ConfigChangePerform()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    } else {
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (!layoutProperty->GetIsUserSetBackgroundColor()) {
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        }
+    }
     UpdateCancelButtonColorMode();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) ||
         !SystemProperties::IsNeedSymbol()) {
         UpdateImageIconNode(IMAGE_INDEX);
         UpdateImageIconNode(CANCEL_IMAGE_INDEX);
     }
+    UpdateDividerColorMode();
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateSearchSymbol();
+    }
+    UpdateTextFieldColor();
+}
+
+void SearchPattern::UpdateTextFieldColor()
+{
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
     auto buttonNode = buttonNode_.Upgrade();
     if (buttonNode) {
         auto buttonRenderContext = buttonNode->GetRenderContext();
@@ -2092,12 +2117,45 @@ void SearchPattern::OnColorConfigurationUpdate()
     if (textField) {
         auto textFieldLayoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(textFieldLayoutProperty);
-        textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
-        textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+        auto textFieldPaintProperty = textField->GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(textFieldPaintProperty);
+        if (!textFieldPaintProperty->HasTextColorFlagByUser()) {
+            textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
+        }
+        if (!textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false)) {
+            textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+        }
         textField->MarkModifyDone();
         textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    UpdateDividerColorMode();
+}
+
+void SearchPattern::UpdateSearchSymbol()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
+    if (searchIconUsingThemeColor_ && iconFrameNode && iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        if (!symbolLayoutProperty->GetTextColorFlagByUserValue(false)) {
+            symbolLayoutProperty->UpdateSymbolColorList({ Color(searchTheme->GetSymbolIconColor()) });
+            iconFrameNode->MarkModifyDone();
+            iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    if (cancelIconUsingThemeColor_ && cancelIconFrameNode && cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        if (!symbolLayoutProperty->GetTextColorFlagByUserValue(false)) {
+            symbolLayoutProperty->UpdateSymbolColorList({ Color(searchTheme->GetSymbolIconColor()) });
+            cancelIconFrameNode->MarkModifyDone();
+            cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -2265,6 +2323,7 @@ void SearchPattern::InitSearchIconColorSize()
     GetSearchNode()->SetSearchSymbolIconSize(searchTheme->GetSymbolIconHeight());
     GetSearchNode()->SetSearchImageIconColor(Color(searchTheme->GetSearchIconColor()));
     GetSearchNode()->SetSearchImageIconSize(searchTheme->GetIconHeight());
+    searchIconUsingThemeColor_ = true;
 }
 
 void SearchPattern::InitCancelIconColorSize()
@@ -2275,6 +2334,7 @@ void SearchPattern::InitCancelIconColorSize()
     GetSearchNode()->SetCancelSymbolIconSize(SYMBOL_ICON_HEIGHT);
     GetSearchNode()->SetCancelImageIconColor(Color(searchTheme->GetSearchIconColor()));
     GetSearchNode()->SetCancelImageIconSize(searchTheme->GetIconHeight());
+    cancelIconUsingThemeColor_ = true;
 }
 
 void SearchPattern::CreateSearchIcon(const std::string& src, bool forceUpdate)
@@ -2455,6 +2515,7 @@ void SearchPattern::SetSearchIconColor(const Color& color)
     CHECK_NULL_VOID(iconFrameNode);
     if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         GetSearchNode()->SetSearchSymbolIconColor(Color(color));
+        searchIconUsingThemeColor_ = false;
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateSymbolColorList({color});
@@ -2529,6 +2590,7 @@ void SearchPattern::SetCancelIconColor(const Color& color)
     CHECK_NULL_VOID(cancelIconFrameNode);
     if (cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         GetSearchNode()->SetCancelSymbolIconColor(Color(color));
+        cancelIconUsingThemeColor_ = false;
         auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateSymbolColorList({color});
@@ -2575,6 +2637,7 @@ void SearchPattern::SetRightIconSrcPath(const std::string& src)
 
 void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
 {
+    CHECK_NULL_VOID(GetSearchNode());
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
@@ -2891,6 +2954,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (!GreatOrEqual(realValue->Value(), 0.0) || realValue->Unit() == DimensionUnit::PERCENT) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetButtonFontSize();
+                    }
                     pattern->UpdateSearchButtonFontSizeResource(*realValue);
                     prop->UpdateSearchButtonFontSize(*realValue);
                 }
@@ -2941,6 +3009,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     realValue->SetUnit(DimensionUnit::VP);
+                    if (LessNotEqual(realValue->Value(), 0.0) || realValue->Unit() == DimensionUnit::PERCENT) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetIconHeight();
+                    }
                     pattern->SetCancelIconSize(*realValue);
                     prop->UpdateCancelButtonUDSize(*realValue);
                 }
@@ -2968,6 +3041,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (!GreatOrEqual(realValue->Value(), 0.0) || realValue->Unit() == DimensionUnit::PERCENT) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetFontSize();
+                    }
                     pattern->UpdateFontSizeResource(*realValue);
                 }
             }
@@ -2991,10 +3069,20 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             }
         },
 
-        {"caretWidth", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+        { "caretWidth",
+            [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (LessNotEqual(realValue->Value(), 0.0)) {
+                        auto host = pattern->GetHost();
+                        CHECK_NULL_VOID(host);
+                        auto pipeline = host->GetContext();
+                        CHECK_NULL_VOID(pipeline);
+                        auto theme = pipeline->GetTheme<TextFieldTheme>();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetCursorWidth();
+                    }
                     pattern->UpdateCaretWidthResource(*realValue);
                 }
             }
@@ -3027,10 +3115,23 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             }
         },
 
+        { "dividerColor",
+            [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateDividerColorResource(*realValue);
+                }
+            }
+        },
+
         {"minFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
             if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (realValue->IsNegative()) {
+                        *realValue = CalcDimension();
+                    }
                     pattern->UpdateMinFontSizeResource(*realValue);
                 }
             }
@@ -3040,6 +3141,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (realValue->IsNegative()) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetTextStyle().GetAdaptMaxFontSize();
+                    }
                     pattern->UpdateMaxFontSizeResource(*realValue);
                 }
             }
@@ -3058,6 +3164,9 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (realValue->IsNegative()) {
+                        realValue->Reset();
+                    }
                     pattern->UpdateLineHeightResource(*realValue);
                 }
             }
@@ -3288,6 +3397,19 @@ void SearchPattern::UpdateDecorationColorResource(const Color& value)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchPattern::UpdateDividerColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+
+    dividerRenderProperty->UpdateDividerColor(value);
+    dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SearchPattern::UpdateMinFontSizeResource(const Dimension& value)
 {
     auto frameNode = GetHost();
@@ -3481,12 +3603,5 @@ void SearchPattern::InitMargin(const RefPtr<SearchLayoutProperty>& property)
         margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
     }
     property->UpdateMargin(margin);
-}
-
-void SearchPattern::OnAttachToMainTree()
-{
-    auto host = GetHost();
-    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 } // namespace OHOS::Ace::NG

@@ -40,6 +40,7 @@
 #include "base/window/foldable_window.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
@@ -51,6 +52,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -2091,5 +2093,81 @@ HWTEST_F(OverlayManagerToastTestNg, OnWindowSizeChanged001, TestSize.Level1)
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     toastPattern->OnWindowSizeChanged(0, 0,  WindowSizeChangeReason::DRAG_MOVE);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread in a simulated multi-thread environment.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toast node in UI thread environment.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto frameNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate non-UI thread environment and call OnAttachToMainTree.
+     * @tc.expected: The call is routed to OnAttachToMainTreeMultiThread, which calls OnAttachToFrameNodeImpl.
+     */
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+
+    pattern->OnAttachToMainTree();
+    pattern->OnAttachToMainTreeMultiThread();
+
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+
+    /**
+     * @tc.steps: step3. Verify the effect of OnAttachToFrameNodeImpl.
+     * @tc.expected: The property should be set correctly.
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->IsAccessibilityGroup());
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread001
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread to verify callback unregistration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toast node and attach it to register callbacks.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto frameNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Attach to register callbacks and get valid IDs.
+    pattern->OnAttachToMainTree();
+    // After registration, the ID should be a non-zero value.
+    EXPECT_NE(pattern->rowKeyboardCallbackId_, 0);
+
+    /**
+     * @tc.steps: step2. Simulate non-UI thread environment and call OnDetachFromMainTree.
+     * @tc.expected: The call is routed to OnDetachFromMainTreeMultiThread, which unregisters callbacks.
+     */
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+
+    pattern->OnDetachFromMainTree();
+    pattern->OnDetachFromMainTreeMultiThread();
+
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+    EXPECT_NE(pattern->rowKeyboardCallbackId_, 0);
 }
 } // namespace OHOS::Ace::NG

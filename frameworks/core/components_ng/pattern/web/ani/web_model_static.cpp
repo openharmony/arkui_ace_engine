@@ -134,6 +134,15 @@ void WebModelStatic::SetSharedRenderProcessToken(FrameNode* frameNode,
     webPatternStatic->SetSharedRenderProcessToken(sharedRenderProcessToken.value_or(""));
 }
 
+void WebModelStatic::SetEmulateTouchFromMouseEvent(FrameNode* frameNode,
+    const std::optional<bool>& emulateTouchFromMouseEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetEmulateTouchFromMouseEvent(emulateTouchFromMouseEvent.value_or(false));
+}
+
 void WebModelStatic::SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController)
 {
     CHECK_NULL_VOID(frameNode);
@@ -339,10 +348,14 @@ void WebModelStatic::JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptI
     webPatternStatic->JavaScriptOnDocumentEnd(scriptItems);
 }
 
-void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems)
+void WebModelStatic::JavaScriptOnHeadEnd(
+    FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
-    (void)frameNode;
-    (void)scriptItems;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
@@ -699,6 +712,24 @@ void WebModelStatic::SetOnPageStart(FrameNode* frameNode, std::function<void(con
     webEventHub->SetOnPageStartedEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetOnLoadStarted(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadStartedEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetOnLoadFinished(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadFinishedEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetOnProgressChange(FrameNode* frameNode,
     std::function<void(const BaseEventInfo* info)>&& callback)
 {
@@ -950,6 +981,18 @@ void WebModelStatic::SetOnInterceptRequest(
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnInterceptRequestEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetOnOverrideErrorPage(
+    FrameNode* frameNode, std::function<std::string(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> std::string {
+        return func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnOverrideErrorPageEvent(std::move(uiCallback));
 }
 
 void WebModelStatic::SetPermissionRequestEventId(
@@ -1245,6 +1288,36 @@ void WebModelStatic::SetNativeEmbedVisibilityChangeId(
     webEventHub->SetOnNativeEmbedVisibilityChangeEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetNativeEmbedObjectParamChangeId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedObjectParamChangeEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isForceEnableZoom)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateForceEnableZoom(isForceEnableZoom);
+}
+
+void WebModelStatic::SetRotateRenderEffect(FrameNode* frameNode, const std::optional<WebRotateEffect>& effect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (effect) {
+        webPatternStatic->UpdateRotateRenderEffect(effect.value());
+    } else {
+        webPatternStatic->ResetRotateRenderEffect();
+    }
+}
+
 void WebModelStatic::SetNativeEmbedGestureEventId(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {
@@ -1361,6 +1434,14 @@ void WebModelStatic::SetBackToTop(FrameNode* frameNode, bool isEnabled)
     webPatternStatic->UpdateBackToTop(isEnabled);
 }
 
+void WebModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableSelectedDataDetector(isEnabled);
+}
+
 void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
@@ -1445,5 +1526,19 @@ void WebModelStatic::SetActivateContentEventId(
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinishId));
+}
+
+void WebModelStatic::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetJavaScriptProxy");
 }
 } // namespace OHOS::Ace::NG

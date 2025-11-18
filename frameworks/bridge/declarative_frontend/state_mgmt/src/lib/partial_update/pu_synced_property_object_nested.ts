@@ -41,8 +41,8 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     owningChildView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningChildView, propertyName);
     this.createSourceDependency(obsObject);
-    this.setValueInternal(obsObject);
     this.setDecoratorInfo("@ObjectLink");
+    this.setValueInternal(obsObject);
   }
 
   /*

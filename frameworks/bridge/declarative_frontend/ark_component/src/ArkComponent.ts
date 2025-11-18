@@ -3256,6 +3256,64 @@ class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangl
     }
   }
 }
+class ResponseRegionListModifier extends ModifierWithKey<Array<ArkResponseRegionList> | ArkResponseRegionList> {
+  constructor(value: Array<ArkResponseRegionList> | ArkResponseRegionList) {
+    super(value);
+  }
+  static identity = Symbol('responseRegionList');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetResponseRegionList(node);
+    } else {
+      let responseRegion: (number | LengthMetrics | string)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].tool ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.tool ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      getUINativeModule().common.setResponseRegionList(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].tool, this.value[i].tool) &&
+            isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.tool, this.value.tool) &&
+        isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return false;
+    }
+  }
+}
 class FlexGrowModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -4307,6 +4365,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
+    return this;
+  }
+
+  responseRegionList(value: Array<ArkResponseRegionList>): this {
+    modifierWithKey(this._modifiersWithKeys, ResponseRegionListModifier.identity,
+      ResponseRegionListModifier, value);
     return this;
   }
 

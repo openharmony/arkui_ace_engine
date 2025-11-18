@@ -68,6 +68,7 @@ function createDynamicUpdatableBuilder(
               ViewStackProcessor.push(stateMeta[0]);
               ViewStackProcessor.pop();
           } else {
+              Object.values(args).forEach(arg =>arg);
               stateMeta[1]()
           }
           ObserveV2.getObserve().__interopInStaticRendering_internal_ = false;
@@ -77,13 +78,33 @@ function createDynamicUpdatableBuilder(
 }
 
 function enableCompatibleObservedV2ForStatic(value: Object, 
-  createFunc: Function, recordFunc: Function, updateFunc: Function) {
+  createFunc: Function, recordFunc: Function, updateFunc: Function): void {
   value['__staticCompatibleFunc__'] = [createFunc, recordFunc, updateFunc]
 }
 
 function createCompatibleStateMetaForStaticObservedV2(): [()=>void, ()=>void] {
   let stateMeta = UIUtilsImpl.instance().makeObserved({value: 1});
-  let addRef = () => { stateMeta.value }
-  let fireChange = () => { stateMeta.value++ }
+  let addRef = (): void => { stateMeta.value }
+  let fireChange = (): void => { stateMeta.value++ }
   return [addRef, fireChange]
+}
+
+function isDynamicBuilderProxy(value: Object): boolean {
+    return !!(value && value['__builder_param_get_target']);
+}
+
+function getBuilderParamProxyEntries(value: Object): any[] {
+    const res: any[] = [];
+    if (isDynamicBuilderProxy(value)) {
+        const raw = value['__builder_param_get_target'];
+        if (raw instanceof Map) {
+            const entries = Array.from(raw.entries());
+            entries.forEach((entry)=>{
+                if(typeof entry[1] === 'function') {
+                    res.push([entry[0], entry[1]()]);
+                }
+            })
+        }
+    }
+    return res;
 }

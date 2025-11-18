@@ -325,7 +325,6 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptions001, TestSize.Level1)
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     layoutAlgorithm->info_.crossCount_ = 4;
-    layoutAlgorithm->crossCount_ = 4;
     layoutAlgorithm->GetTargetIndexInfoWithBenchMark(AccessibilityManager::RawPtr(frameNode_), false, 5);
     EXPECT_EQ(layoutAlgorithm->info_.startMainLineIndex_, 1);
 }
@@ -351,7 +350,6 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptions002, TestSize.Level1)
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     layoutAlgorithm->info_.crossCount_ = 4;
-    layoutAlgorithm->crossCount_ = 4;
     layoutAlgorithm->GetTargetIndexInfoWithBenchMark(AccessibilityManager::RawPtr(frameNode_), false, 5);
     EXPECT_EQ(layoutAlgorithm->info_.startMainLineIndex_, 5);
 }
@@ -386,7 +384,6 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptions003, TestSize.Level1)
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     layoutAlgorithm->info_.crossCount_ = 5;
-    layoutAlgorithm->crossCount_ = 5;
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(3, option, 1), std::make_pair(0, 2));
 }
 
@@ -420,7 +417,6 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptions004, TestSize.Level1)
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     layoutAlgorithm->info_.crossCount_ = 6;
-    layoutAlgorithm->crossCount_ = 6;
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(3, option, 1), std::make_pair(0, 2));
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(2, option, 1), std::make_pair(3, 2));
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(1, option, 1), std::make_pair(1, 2));
@@ -451,7 +447,6 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptions005, TestSize.Level1)
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     layoutAlgorithm->info_.crossCount_ = 4;
-    layoutAlgorithm->crossCount_ = 4;
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(3, option, 1), std::make_pair(2, 2));
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(2, option, 1), std::make_pair(0, 2));
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(1, option, 1), std::make_pair(1, 2));
@@ -482,7 +477,6 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptions006, TestSize.Level1)
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     layoutAlgorithm->info_.crossCount_ = 4;
-    layoutAlgorithm->crossCount_ = 4;
     EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(4, option, 1), std::make_pair(2, 2));
 }
 

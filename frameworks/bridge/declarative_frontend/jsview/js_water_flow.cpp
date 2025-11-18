@@ -117,22 +117,27 @@ void UpdateSections(
     }
     auto id = Container::CurrentId();
     auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections)),
-                        weakNode = AceType::WeakClaim(frameNode)](
-                        size_t start, size_t deleteCount, std::vector<NG::WaterFlowSections::Section>& newSections) {
+                        weakNode = AceType::WeakClaim(frameNode)](size_t start, size_t deleteCount,
+                        std::vector<NG::WaterFlowSections::Section>& newSections,
+                        const std::vector<NG::WaterFlowSections::Section>& allSections) {
         ContainerScope scope(id);
         auto node = weakNode.Upgrade();
         CHECK_NULL_VOID(node);
         auto context = node->GetContext();
         CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weak]() {
+        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weak, all = allSections]() {
             auto nodeSection = weak.Upgrade();
             CHECK_NULL_VOID(nodeSection);
             nodeSection->ChangeData(start, deleteCount, change);
+            if (nodeSection->GetSectionInfo().size() != all.size()) {
+                nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);
+            }
         });
         context->RequestFrame();
     };
     section->SetOnSectionChangedCallback(frameNode, callback);
-
+    // Used for makeObserved to listen and refresh status.
+    sectionsObject->GetProperty("changeFlag");
     auto allSections = sectionsObject->GetProperty("sectionArray");
     CHECK_NULL_VOID(allSections->IsArray());
     ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
@@ -293,7 +298,13 @@ void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
         return;
     }
     CalcDimension colGap;
-    if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(info[0], colGap, resObj) || colGap.Value() < 0) {
+            colGap.SetValue(0.0);
+        }
+        WaterFlowModel::GetInstance()->ParseResObjColumnsGap(resObj);
+    } else if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
         colGap.SetValue(0.0);
     }
     WaterFlowModel::GetInstance()->SetColumnsGap(colGap);
@@ -305,7 +316,13 @@ void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
         return;
     }
     CalcDimension rowGap;
-    if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(info[0], rowGap, resObj) || rowGap.Value() < 0) {
+            rowGap.SetValue(0.0);
+        }
+        WaterFlowModel::GetInstance()->ParseResObjRowsGap(resObj);
+    } else if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
         rowGap.SetValue(0.0);
     }
     WaterFlowModel::GetInstance()->SetRowsGap(rowGap);
@@ -330,17 +347,22 @@ void JSWaterFlow::SetLayoutDirection(const JSCallbackInfo& info)
 
 void JSWaterFlow::SetColumnsTemplate(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         auto fillTypeParam = jsObj->GetProperty("fillType");
         if (!fillTypeParam->IsNull()) {
             auto type = JSScrollable::ParsePresetFillType(fillTypeParam);
             if (type.has_value()) {
                 WaterFlowModel::GetInstance()->SetItemFillPolicy(type.value());
             } else {
-                WaterFlowModel::GetInstance()->SetColumnsTemplate("");
+                WaterFlowModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
             }
+        } else {
+            WaterFlowModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
         }
     } else {
         WaterFlowModel::GetInstance()->SetColumnsTemplate(jsValue->ToString());
@@ -355,28 +377,39 @@ void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
+    RefPtr<ResourceObject> resObjMinWidth;
+    RefPtr<ResourceObject> resObjMaxWidth;
+    RefPtr<ResourceObject> resObjMinHeight;
+    RefPtr<ResourceObject> resObjMaxHeight;
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
     CalcDimension minWidth;
-    if (ParseJsDimensionVp(minWidthValue, minWidth)) {
+    if (ParseJsDimensionVp(minWidthValue, minWidth, resObjMinWidth)) {
         WaterFlowModel::GetInstance()->SetItemMinWidth(minWidth);
     }
 
     JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
     CalcDimension maxWidth;
-    if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+    if (ParseJsDimensionVp(maxWidthValue, maxWidth, resObjMaxWidth)) {
         WaterFlowModel::GetInstance()->SetItemMaxWidth(maxWidth);
     }
 
     JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
     CalcDimension minHeight;
-    if (ParseJsDimensionVp(minHeightValue, minHeight)) {
+    if (ParseJsDimensionVp(minHeightValue, minHeight, resObjMinHeight)) {
         WaterFlowModel::GetInstance()->SetItemMinHeight(minHeight);
     }
 
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
-    if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+    if (ParseJsDimensionVp(maxHeightValue, maxHeight, resObjMaxHeight)) {
         WaterFlowModel::GetInstance()->SetItemMaxHeight(maxHeight);
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModel::GetInstance()->ParseResObjItemMinWidth(resObjMinWidth);
+        WaterFlowModel::GetInstance()->ParseResObjItemMaxWidth(resObjMaxWidth);
+        WaterFlowModel::GetInstance()->ParseResObjItemMinHeight(resObjMinHeight);
+        WaterFlowModel::GetInstance()->ParseResObjItemMaxHeight(resObjMaxHeight);
     }
 }
 

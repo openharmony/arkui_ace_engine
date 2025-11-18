@@ -61,6 +61,9 @@ void AddBuilderNode(ArkUINodeHandle node, ArkUINodeHandle child)
     CHECK_NULL_VOID(currentNode);
     auto* childNode = reinterpret_cast<UINode*>(child);
     CHECK_NULL_VOID(childNode);
+    if (childNode->IsAdopted()) {
+        return;
+    }
     auto childRef = Referenced::Claim<UINode>(childNode);
     CHECK_NULL_VOID(childRef);
     auto parentNode = childRef->GetParent();

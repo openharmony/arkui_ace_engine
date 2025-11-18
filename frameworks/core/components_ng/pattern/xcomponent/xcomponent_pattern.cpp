@@ -90,40 +90,6 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
     RegisterSurfaceCallbackModeEvent();
 }
 
-std::string XComponentPattern::XComponentTypeToString(XComponentType type)
-{
-    switch (type) {
-        case XComponentType::UNKNOWN:
-            return "unknown";
-        case XComponentType::SURFACE:
-            return "surface";
-        case XComponentType::COMPONENT:
-            return "component";
-        case XComponentType::TEXTURE:
-            return "texture";
-        case XComponentType::NODE:
-            return "node";
-        default:
-            return "unknown";
-    }
-}
-
-std::string XComponentPattern::XComponentNodeTypeToString(XComponentNodeType type)
-{
-    switch (type) {
-        case XComponentNodeType::UNKNOWN:
-            return "unknown";
-        case XComponentNodeType::TYPE_NODE:
-            return "type_node";
-        case XComponentNodeType::DECLARATIVE_NODE:
-            return "declarative_node";
-        case XComponentNodeType::CNODE:
-            return "cnode";
-        default:
-            return "unknown";
-    }
-}
-
 void XComponentPattern::AdjustNativeWindowSize(float width, float height)
 {
     auto host = GetHost();
@@ -266,9 +232,6 @@ void XComponentPattern::Initialize()
             InitNativeNodeCallbacks();
         }
     }
-    if (!isTypedNode_) {
-        InitializeAccessibility();
-    }
 }
 
 void XComponentPattern::OnAttachToMainTree()
@@ -324,7 +287,7 @@ void XComponentPattern::OnDetachFromMainTree()
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
 }
 
-void XComponentPattern::InitializeRenderContext()
+void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
 {
     renderContextForSurface_ = RenderContext::Create();
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -334,6 +297,11 @@ void XComponentPattern::InitializeRenderContext()
 #else
     RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
                                           GetId() + "Surface", RenderContext::PatternType::XCOM };
+    if (isThreadSafeNode) {
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Create SurfaceNode[%{public}s] with SkipCheckInMultiInstance",
+            GetId().c_str());
+        param.isSkipCheckInMultiInstance = true;
+    }
 #endif
 
     renderContextForSurface_->InitContext(false, param);
@@ -393,13 +361,14 @@ void XComponentPattern::RequestFocus()
 
 void XComponentPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    if (host) {
+        nodeId_ = std::to_string(host->GetId());
+    }
     Initialize();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    nodeId_ = std::to_string(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -480,9 +449,9 @@ void XComponentPattern::OnRebuildFrame()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     SetSurfaceNodeToGraphic();
 }
 
@@ -491,7 +460,6 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     UnregisterNode();
     CHECK_NULL_VOID(frameNode);
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
-    UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
             HandleSurfaceDestroyed(frameNode);
@@ -582,6 +550,9 @@ void XComponentPattern::OnAttachContext(PipelineContext* context)
         }
         initialContext_ = nullptr;
     }
+    if (!isTypedNode_) {
+        InitializeAccessibility();
+    }
 }
 
 void XComponentPattern::OnDetachContext(PipelineContext* context)
@@ -589,6 +560,7 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UninitializeAccessibility(host.GetRawPtr());
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
@@ -675,7 +647,8 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
 void XComponentPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_.value_or("no id")));
-    DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(XComponentTypeToString(type_)));
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(
+        XComponentUtils::XComponentTypeToString(type_)));
     DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_.value_or("no library name")));
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
@@ -1378,9 +1351,9 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
-    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     host->MarkModifyDone();
@@ -1546,9 +1519,9 @@ bool XComponentPattern::StopTextureExport()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     renderContext->ClearChildren();
-    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     renderContext->SetIsNeedRebuildRSTree(true);
     return true;
 }
@@ -1569,6 +1542,7 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
 bool XComponentPattern::ExportTextureAvailable()
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto parnetNodeContainer = host->GetNodeContainer();
     CHECK_NULL_RETURN(parnetNodeContainer, false);
     auto parent = parnetNodeContainer->GetAncestorNodeOfFrame(false);
@@ -2091,7 +2065,9 @@ void XComponentPattern::CreateAnalyzerOverlay()
 
 void XComponentPattern::UpdateAnalyzerOverlay()
 {
-    auto context = GetHost()->GetRenderContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(pixelMap);
@@ -2147,7 +2123,7 @@ void XComponentPattern::SetRenderFit(RenderFit renderFit)
 void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("xcomponentId", id_.value_or("no id").c_str());
-    json->Put("xcomponentType", XComponentTypeToString(type_).c_str());
+    json->Put("xcomponentType", XComponentUtils::XComponentTypeToString(type_).c_str());
     json->Put("libraryName", libraryname_.value_or("no library name").c_str());
     json->Put("surfaceId", surfaceId_.c_str());
     json->Put("surfaceRect", paintRect_.ToString().c_str());

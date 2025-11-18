@@ -811,9 +811,49 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
     return dataSize;
 }
 
-bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
+std::optional<Msdp::DeviceStatus::DragData> EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
+    std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos,
+    std::string& udKey, DragSummaryInfo& dragSummaryInfo, int32_t dragNumber)
+{
+    CHECK_NULL_RETURN(asyncCtx, std::nullopt);
+    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        dragNumber = badgeNumber.value();
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Use custom badge number, value is %{public}d", dragNumber);
+    }
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_RETURN(container, std::nullopt);
+    auto windowId = container->GetWindowId();
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    arkExtraInfoJson->Put("scale", asyncCtx->scale);
+    arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
+    arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
+    NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
+    auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
+    return Msdp::DeviceStatus::DragData { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
+        asyncCtx->dragPointerEvent.sourceType, dragNumber, asyncCtx->dragPointerEvent.pointerId,
+        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
+        windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag };
+}
+
+void SetDragSizeAndData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     std::optional<Msdp::DeviceStatus::DragData>& dragData, std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
+    CHECK_NULL_VOID(asyncCtx);
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_VOID(container);
+    std::string udKey;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
+    int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
+    dragData = EnvelopedDragData(asyncCtx, shadowInfos, udKey, dragSummaryInfo, recordSize);
+}
+
+bool ValidateDragParameters(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
+    std::optional<Msdp::DeviceStatus::DragData>& dragData, std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (shadowInfos.empty()) {
@@ -840,27 +880,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         TAG_LOGE(AceLogTag::ACE_DRAG, "can not find current pointerId or not in press");
         return false;
     }
-    std::string udKey;
-    DragSummaryInfo dragSummaryInfo;
-    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
-    int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
-    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
-    if (badgeNumber.has_value()) {
-        recordSize = badgeNumber.value();
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Use custom badge number, value is %{public}d", recordSize);
-    }
-    auto windowId = container->GetWindowId();
-    auto arkExtraInfoJson = JsonUtil::Create(true);
-    arkExtraInfoJson->Put("scale", asyncCtx->scale);
-    arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
-    arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
-    NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
-    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
-        asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
-        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY,
-        asyncCtx->dragPointerEvent.displayId, windowId, true, false, dragSummaryInfo.summary, false,
-        dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
-        dragSummaryInfo.totalSize, dragSummaryInfo.tag };
+    SetDragSizeAndData(asyncCtx, dragData, shadowInfos);
     return true;
 }
 
@@ -954,6 +974,7 @@ bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     CHECK_NULL_RETURN(asyncCtx, false);
     CHECK_NULL_RETURN(pixelMap, false);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
@@ -973,6 +994,7 @@ bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
     if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
         auto overlayManager = dragNodePipeline->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, false);
         auto imageNode = overlayManager->GetPixelMapContentNode();
         scale = scaleData->scale * asyncCtx->windowScale;
         data.previewScale = scale;
@@ -1055,7 +1077,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     }
     asyncCtx->scale = data.previewScale;
     std::optional<Msdp::DeviceStatus::DragData> dragData;
-    if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
+    if (!ValidateDragParameters(asyncCtx, dragData, shadowInfos)) {
         return false;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
@@ -1191,14 +1213,9 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
 {
     CHECK_NULL_RETURN(asyncCtx, false);
     CHECK_NULL_RETURN(asyncCtx->pixelMap, false);
-    int32_t dataSize = 1;
     std::string udKey;
     DragSummaryInfo dragSummaryInfo;
-    dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
-    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
-    if (badgeNumber.has_value()) {
-        dataSize = badgeNumber.value();
-    }
+    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
@@ -1208,18 +1225,10 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         napi_close_handle_scope(asyncCtx->env, scope);
         return false;
     }
-    auto arkExtraInfoJson = JsonUtil::Create(true);
-    arkExtraInfoJson->Put("scale", asyncCtx->scale);
-    arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
-    arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
-    NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
-    auto windowId = container->GetWindowId();
-    dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams,
-        arkExtraInfoJson->ToString(), asyncCtx->dragPointerEvent.sourceType, dataSize,
-        asyncCtx->dragPointerEvent.pointerId, asyncCtx->dragPointerEvent.displayX,
-        asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
-        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag };
+
+    std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
+    shadowInfos.push_back(shadowInfo);
+    dragData = EnvelopedDragData(asyncCtx, shadowInfos, udKey, dragSummaryInfo, dataSize).value();
     return true;
 }
 

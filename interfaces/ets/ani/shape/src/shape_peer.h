@@ -32,5 +32,8 @@ struct PathPeer {
 struct RectPeer {
     OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect> rectShape;
 };
+struct BasicPeer {
+    OHOS::Ace::RefPtr<OHOS::Ace::BasicShape> basicShape;
+};
 } // namespace OHOS::Ace
 #endif // OHOS_ANI_ACE_SHAPE_PEER_H

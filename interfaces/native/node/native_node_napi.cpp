@@ -242,7 +242,7 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     ArkUI_DrawableDescriptor* drawable =
         new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
     napi_value typeName;
-    napi_get_named_property(env, value, "typename", &typeName);
+    napi_get_named_property(env, value, "typeName", &typeName);
     std::string typenameStr;
     GetStringFromNapiValue(env, typeName, typenameStr);
     if (typenameStr == "AnimatedDrawableDescriptor") {

@@ -21,7 +21,7 @@ interface routerInfo {
 }
 
 let routerData: routerInfo[] = [
-  { url: 'pages/waterflow/demo01/waterFlowFriction', info: 'Friction' },
+  { url: 'pages/waterflow/demo01/waterFlowFriction', info: 'Friction' }
 ]
 
 @Entry

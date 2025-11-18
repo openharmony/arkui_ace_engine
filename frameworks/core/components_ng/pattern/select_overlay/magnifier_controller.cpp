@@ -164,6 +164,14 @@ void MagnifierController::OpenMagnifier()
 {
     auto rootUINode = GetRootNode();
     CHECK_NULL_VOID(rootUINode);
+    if (colorModeChange_ && magnifierFrameNode_) {
+        if (auto parentNode = magnifierFrameNode_->GetParent(); parentNode) {
+            parentNode->RemoveChild(magnifierFrameNode_);
+            parentNode->MarkNeedSyncRenderTree();
+            parentNode->RebuildRenderContextTree();
+            magnifierFrameNode_ = nullptr;
+        }
+    }
     if ((!magnifierFrameNode_) || (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1) ||
         (colorModeChange_)) {
         colorModeChange_ = false;

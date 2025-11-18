@@ -32,11 +32,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceResponseAccessor {
 void DestroyPeerImpl(Ark_WebResourceResponse peer)
 {
+    auto convContextPtr = reinterpret_cast<Converter::ConvContext*>(peer->convContext);
+    delete convContextPtr;
     delete peer;
 }
 Ark_WebResourceResponse ConstructImpl()
 {
-    return new WebResourceResponsePeer();
+    Ark_WebResourceResponse peer = new WebResourceResponsePeer();
+    CHECK_NULL_RETURN(peer, nullptr);
+    peer->handler = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::WebResponse>();
+    peer->convContext = reinterpret_cast<uintptr_t>(new Converter::ConvContext());
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -62,19 +68,21 @@ Opt_Union_String_I32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceRespon
                 return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Int32>(
                     peer->handler->GetFileHandle());
             case RESPONSE_DATA_TYPE_RESOURCE:
-                if (peer->responseDataResEx) {
-                    return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Resource>(
-                        peer->responseDataResEx.value());
-                }
-                break;
+                return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Resource>(
+                    peer->responseDataResEx);
             case RESPONSE_DATA_TYPE_BUFFER:
-                return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Buffer>(
-                    peer->handler->GetData(), Converter::FC);
+                result = Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_Buffer>(
+                    peer->handler->GetBuffer(), Converter::FC);
+                result.value.value2.resource.resourceId = 0;
+                result.value.value2.resource.hold = [](int id) { return; };
+                result.value.value2.resource.release = [](int id) { return; };
+                return result;
             default:
                 break;
         }
     }
-    return result;
+    return Converter::ArkUnion<Opt_Union_String_I32_Buffer_Resource, Ark_String>(
+        "undefined", Converter::FC);;
 }
 Ark_String GetResponseEncodingImpl(Ark_WebResourceResponse peer)
 {
@@ -139,9 +147,41 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
                 auto np = resourceUrl.value().find_first_of("/");
                 url = (np == std::string::npos) ? resourceUrl.value() : resourceUrl.value().erase(np, 1);
             }
+            auto convContextPtr = reinterpret_cast<Converter::ConvContext*>(peer->convContext);
             peer->handler->SetResourceUrl(url);
             peer->responseDataType = RESPONSE_DATA_TYPE_RESOURCE;
-            peer->responseDataResEx = responseData;
+
+            peer->responseDataResEx.bundleName =
+                Converter::ArkValue<Ark_String>(responseData.bundleName, convContextPtr);
+            peer->responseDataResEx.moduleName =
+                Converter::ArkValue<Ark_String>(responseData.moduleName, convContextPtr);
+            peer->responseDataResEx.id = Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(responseData.id));
+            auto resType = Converter::OptConvert<int32_t>(responseData.type);
+            if (!resType.has_value()) {
+                LOGE("resType has_value failed");
+                return;
+            }
+            auto typeValue = resType.value();
+            if (typeValue == static_cast<int32_t>(ResourceType::RAWFILE)) {
+                auto optParams =
+                    Converter::OptConvert<std::vector<Ark_Union_String_I32_I64_F64_Resource>>(responseData.params);
+                if (!optParams.has_value() || optParams->size() < 1) {
+                    LOGE("optParams has_value failed");
+                    return;
+                }
+                auto params = optParams.value();
+                if (params[0].selector != 0) {
+                    LOGE("params get value failed");
+                    return;
+                }
+                auto params0 = Converter::Convert<std::string>(params[0].value0);
+                std::vector<Ark_Union_String_I32_I64_F64_Resource> paramsArray;
+                paramsArray.push_back(
+                    Converter::ArkUnion<Ark_Union_String_I32_I64_F64_Resource, Ark_String>(params0, convContextPtr));
+                peer->responseDataResEx.params =
+                    Converter::ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(paramsArray, convContextPtr);
+            }
+            peer->responseDataResEx.type = Converter::ArkValue<Opt_Int32>(static_cast<int32_t>(typeValue));
         },
         [peer](const Ark_Buffer& responseData) {
             int32_t bufferSize = static_cast<int32_t>(responseData.length);

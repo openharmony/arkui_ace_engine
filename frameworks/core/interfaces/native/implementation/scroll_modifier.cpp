@@ -142,8 +142,8 @@ void SetOnWillScrollImpl(Ark_NativePointer node,
                 TwoDimensionScrollResult,
                 Opt_OffsetResult,
                 Callback_Opt_OffsetResult_Void>(
-                Converter::ArkValue<Ark_Number>(xOffset),
-                Converter::ArkValue<Ark_Number>(yOffset),
+                Converter::ArkValue<Ark_Float64>(xOffset),
+                Converter::ArkValue<Ark_Float64>(yOffset),
                 Converter::ArkValue<Ark_ScrollState>(scrollState),
                 Converter::ArkValue<Ark_ScrollSource>(scrollSource)
             );
@@ -165,8 +165,8 @@ void SetOnDidScrollImpl(Ark_NativePointer node,
     auto call = [arkCallback = CallbackHelper(*optValue)](
         Dimension xIn, Dimension yIn, ScrollState stateIn) {
             auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
-            auto x = Converter::ArkValue<Ark_Number>(xIn);
-            auto y = Converter::ArkValue<Ark_Number>(yIn);
+            auto x = Converter::ArkValue<Ark_Float64>(xIn);
+            auto y = Converter::ArkValue<Ark_Float64>(yIn);
             arkCallback.Invoke(x, y, state);
     };
     ScrollModelStatic::SetOnDidScroll(frameNode, std::move(call));
@@ -226,7 +226,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollModelStatic::SetScrollBar(frameNode, displayMode);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_Number_String* value)
+                           const Opt_Union_Color_I32_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -234,7 +234,7 @@ void SetScrollBarColorImpl(Ark_NativePointer node,
     ScrollModelStatic::SetScrollBarColor(frameNode, colorVal);
 }
 void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String* value)
+                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -256,7 +256,7 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
         Dimension dimension, ScrollState state) -> ScrollFrameResult {
         ScrollFrameResult result;
-        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);
+        Ark_Float64 arkValue = Converter::ArkValue<Ark_Float64>(dimension);
         Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
         return callback.InvokeWithOptConvertResult<
             ScrollFrameResult, Ark_OnScrollFrameBeginHandlerResult,
@@ -292,7 +292,7 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     ScrollModelStatic::SetScrollEnabled(frameNode, *convValue);
 }
 void SetFrictionImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_Resource* value)
+                     const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

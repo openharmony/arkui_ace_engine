@@ -48,7 +48,7 @@ struct KStringPtrImpl {
         assign((const char*)str, len);
     }
     KStringPtrImpl(const char* str) : _value(nullptr), _owned(true) {
-        int len = str ? interop_strlen(str) : 0;
+        int len = str ? static_cast<int>(interop_strlen(str)) : 0;
         assign(str, len);
     }
     KStringPtrImpl(const char* str, int len, bool owned) : _value(nullptr), _owned(owned) {

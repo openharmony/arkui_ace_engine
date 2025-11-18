@@ -27,6 +27,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -524,5 +525,325 @@ HWTEST_F(ShapeContainerPatternTestNg, MeasureLayoutPolicySize003, TestSize.Level
 HWTEST_F(ShapeContainerPatternTestNg, SetStrokeTest, TestSize.Level1)
 {
     CheckStroke(true);
+}
+
+/**
+ * @tc.name: SetStroke001
+ * @tc.desc: test SetStroke
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStroke001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetStroke(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStroke());
+    EXPECT_EQ(paintProperty->GetStrokeValue(), Color::TRANSPARENT);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_COLOR, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetStroke(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStroke());
+    EXPECT_EQ(paintProperty->GetStrokeValue(), Color::BLUE);
+
+    shapeModelNG.SetStroke(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetFill001
+ * @tc.desc: test SetFill
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetFill001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetFill(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasFill());
+    EXPECT_EQ(paintProperty->GetFillValue(), Color::BLACK);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_COLOR, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetFill(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasFill());
+    EXPECT_EQ(paintProperty->GetFillValue(), Color::BLUE);
+
+    shapeModelNG.SetFill(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetForegroundColor001
+ * @tc.desc: test SetForegroundColor
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetForegroundColor001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetForegroundColor(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasFill());
+    EXPECT_EQ(paintProperty->GetFillValue(), Color::BLACK);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_COLOR, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetForegroundColor(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasFill());
+    EXPECT_EQ(paintProperty->GetFillValue(), Color::BLUE);
+
+    shapeModelNG.SetForegroundColor(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetStrokeDashOffset001
+ * @tc.desc: test SetStrokeDashOffset
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeDashOffset001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetStrokeDashOffset(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeDashOffset());
+    EXPECT_EQ(paintProperty->GetStrokeDashOffset()->ConvertToPx(), 0.0f);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_DASH_OFFSET, Dimension(DASHOFFSET));
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_DASH_OFFSET, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetStrokeDashOffset(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeDashOffset());
+    EXPECT_EQ(paintProperty->GetStrokeDashOffset()->ConvertToPx(), DASHOFFSET);
+
+    shapeModelNG.SetStrokeDashOffset(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetStrokeMiterLimit001
+ * @tc.desc: test SetStrokeMiterLimit
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeMiterLimit001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetStrokeMiterLimit(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeMiterLimit());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeMiterLimitValue()), DEFAULT_STROKE_LIMIT);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_STROKE_LIMIT, STROKE_LIMIT);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_STROKE_LIMIT, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetStrokeMiterLimit(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeMiterLimit());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeMiterLimitValue()), STROKE_LIMIT);
+
+    shapeModelNG.SetStrokeMiterLimit(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetStrokeOpacity001
+ * @tc.desc: test SetStrokeOpacity
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeOpacity001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetStrokeOpacity(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeOpacity());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeOpacityValue()), 1.0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_OPACITY, OPACITY);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_OPACITY, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetStrokeOpacity(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeOpacity());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeOpacityValue()), OPACITY);
+
+    shapeModelNG.SetStrokeOpacity(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetFillOpacity001
+ * @tc.desc: test SetFillOpacity
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetFillOpacity001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetFillOpacity(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasFillOpacity());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetFillOpacityValue()), 1.0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_OPACITY, OPACITY);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_OPACITY, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetFillOpacity(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasFillOpacity());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetFillOpacityValue()), OPACITY);
+
+    shapeModelNG.SetFillOpacity(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetStrokeWidth001
+ * @tc.desc: test SetStrokeWidth
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeWidth001, TestSize.Level1)
+{
+    auto shapeModelNG = ShapeModelNG();
+    shapeModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    shapeModelNG.SetStrokeWidth(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeWidth());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeWidthValue().ConvertToVp()), 1.0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_STROKE_WIDTH, Dimension(STROKE_WIDTH));
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_STROKE_WIDTH, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+    shapeModelNG.SetStrokeWidth(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(paintProperty->HasStrokeWidth());
+    EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeWidthValue().ConvertToPx()), STROKE_WIDTH);
+
+    shapeModelNG.SetStrokeWidth(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

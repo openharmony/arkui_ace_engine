@@ -92,6 +92,12 @@ public:
 
     virtual void ResetSections() {}
     virtual void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjItemMinWidth(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjItemMinHeight(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjItemMaxWidth(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjItemMaxHeight(const RefPtr<ResourceObject>& resObj) {};
 
     virtual void SetSyncLoad(bool syncLoad) {}
     virtual void ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};

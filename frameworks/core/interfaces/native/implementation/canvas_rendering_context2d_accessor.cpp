@@ -75,38 +75,36 @@ void StopImageAnalyzerImpl(Ark_CanvasRenderingContext2D peer)
     CHECK_NULL_VOID(peer);
     peer->StopImageAnalyzer();
 }
-void OnOnAttachImpl(Ark_VMContext vmContext,
-                    Ark_CanvasRenderingContext2D peer,
-                    const Callback_Void* callback_)
+void OnAttachImpl(Ark_CanvasRenderingContext2D peer,
+                  const VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
     auto arkCallback = CallbackHelper(*callback_);
     peer->On(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_ATTACH);
 }
-void OffOnAttachImpl(Ark_VMContext vmContext,
-                     Ark_CanvasRenderingContext2D peer,
-                     const Opt_Callback_Void* callback_)
+void OffAttachImpl(Ark_CanvasRenderingContext2D peer,
+                   const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto optCallback = Converter::GetOptPtr(callback_);
-    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
+    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<VoidCallback>();
     peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
-void OnOnDetachImpl(Ark_CanvasRenderingContext2D peer,
-                    const Callback_Void* callback_)
+void OnDetachImpl(Ark_CanvasRenderingContext2D peer,
+                  const VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
     auto arkCallback = CallbackHelper(*callback_);
     peer->On(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
 }
-void OffOnDetachImpl(Ark_CanvasRenderingContext2D peer,
-                     const Opt_Callback_Void* callback_)
+void OffDetachImpl(Ark_CanvasRenderingContext2D peer,
+                   const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto optCallback = Converter::GetOptPtr(callback_);
-    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
+    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<VoidCallback>();
     peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
 }
 Ark_Number GetHeightImpl(Ark_CanvasRenderingContext2D peer)
@@ -145,10 +143,10 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::ToDataURLImpl,
         CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,
         CanvasRenderingContext2DAccessor::StopImageAnalyzerImpl,
-        CanvasRenderingContext2DAccessor::OnOnAttachImpl,
-        CanvasRenderingContext2DAccessor::OffOnAttachImpl,
-        CanvasRenderingContext2DAccessor::OnOnDetachImpl,
-        CanvasRenderingContext2DAccessor::OffOnDetachImpl,
+        CanvasRenderingContext2DAccessor::OnAttachImpl,
+        CanvasRenderingContext2DAccessor::OffAttachImpl,
+        CanvasRenderingContext2DAccessor::OnDetachImpl,
+        CanvasRenderingContext2DAccessor::OffDetachImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
         CanvasRenderingContext2DAccessor::SetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,

@@ -837,7 +837,7 @@ int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* reco
  * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_LongPressGesture_SetAllowableMovement(
-    ArkUI_GestureRecognizer* recognizer, int32_t allowableMovement);
+    ArkUI_GestureRecognizer* recognizer, double allowableMovement);
 
 /**
 * @brief Obtains the maximum moving distance for gestures to be recognized by a long press gesture recognizer.
@@ -851,7 +851,7 @@ ArkUI_ErrorCode OH_ArkUI_LongPressGesture_SetAllowableMovement(
 * @since 22
 */
 int32_t OH_ArkUI_LongPressGesture_GetAllowableMovement(
-    ArkUI_GestureRecognizer* recognizer, int32_t* allowableMovement);
+    ArkUI_GestureRecognizer* recognizer, double* allowableMovement);
 
 /**
 * @brief Sets the minimum movement distance thresholds for gestures to be recognized by a gesture recognizer.

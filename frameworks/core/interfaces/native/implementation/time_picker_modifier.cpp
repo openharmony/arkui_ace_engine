@@ -179,11 +179,12 @@ void SetDateTimeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto dateTimeOptions = Converter::OptConvertPtr<DateTimeType>(value);
-    // Implement Reset value
     if (dateTimeOptions) {
         TimePickerModelNG::SetDateTimeOptions(frameNode, dateTimeOptions->hourType,
             dateTimeOptions->minuteType, dateTimeOptions->secondType);
+        return;
     }
+    TimePickerModelStatic::ResetDateTimeOptions(frameNode);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_OnTimePickerChangeCallback* value)

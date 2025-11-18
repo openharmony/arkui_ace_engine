@@ -32,7 +32,7 @@ export namespace dragController {
     }
 
     export interface AnimationOptions {
-        duration?: number;
+        duration?: int;
         curve?: Curve | ICurve;
     }
 
@@ -41,10 +41,35 @@ export namespace dragController {
         animate(options: AnimationOptions, handler: () =>void): void;
     }
 
+    class Cleaner {
+        private ptr: KPointer = 0;
+        private className: string;
+        constructor(className: string, ptr: KPointer) {
+            this.ptr = ptr;
+            this.className = className;
+        }
+        public clean(): void {
+            if (this.className == "DragAction") {
+                ArkUIAniModule._DragController_cleanDragAction(this.ptr);
+            } else if (this.className == "DragPreview") {
+                ArkUIAniModule._DragController_cleanDragPreview(this.ptr);
+            }
+        }
+    }
+
+    export function callback(cleaner: Cleaner): void {
+        cleaner.clean()
+    }
+
+    let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
+    let unregisterToken = new object()
+
     class DragPreviewInner implements DragPreview {
         dragPreview:KPointer = 0;
+        private cleaner: Cleaner | null = null;
         constructor(result:KPointer) {
             this.dragPreview = result;
+            this.registerCleaner(this.dragPreview)
         }
         public setForegroundColor(color: ResourceColor) {
             ArkUIAniModule._DragController_setForegroundColor(color, this.dragPreview);
@@ -52,10 +77,18 @@ export namespace dragController {
         public animate(options: AnimationOptions, handler: () =>void) {
             ArkUIAniModule._DragController_animate(options, handler, this.dragPreview);
         }
+
+        registerCleaner(ptr: KPointer): void {
+            this.cleaner = new Cleaner("DragPreview", ptr);
+            destroyRegister.register(this, this.cleaner!, unregisterToken);
+        }
+        unregisterCleaner(): void {
+            destroyRegister.unregister(unregisterToken);
+        }
     }
     
     export interface DragInfo {
-        pointerId: number;
+        pointerId: int;
         data?: UnifiedData;
         extraParams?: string;
         touchPoint?: TouchPoint;
@@ -107,24 +140,33 @@ export namespace dragController {
 
     export interface DragAction {
         startDrag(): Promise<void>;
-        on(type: string, callback: Callback<DragAndDropInfo>): void;
-        off(type: string, callback?: Callback<DragAndDropInfo>): void;
+        onStatusChange(callback: Callback<DragAndDropInfo>): void;
+        offStatusChange(callback?: Callback<DragAndDropInfo>): void;
     }
 
     export class DragActionInner implements DragAction {
         dragAction:KPointer;
+        private cleaner: Cleaner | null = null;
         constructor(result:KPointer) {
             this.dragAction = result;
+            this.registerCleaner(this.dragAction)
         }
         public startDrag(): Promise<void> {
             let promise = ArkUIAniModule._DragController_startDrag(this.dragAction);
             return promise;
         }
-        public on(type: string, callback: Callback<DragAndDropInfo>) {
-            ArkUIAniModule._DragController_on(type, callback, this.dragAction);
+        public onStatusChange(callback: Callback<DragAndDropInfo>) {
+            ArkUIAniModule._DragController_on(callback, this.dragAction);
         }
-        public off(type: string, callback?: Callback<DragAndDropInfo>) {
-            ArkUIAniModule._DragController_off(type, callback, this.dragAction);
+        public offStatusChange(callback?: Callback<DragAndDropInfo>) {
+            ArkUIAniModule._DragController_off(callback, this.dragAction);
+        }
+        registerCleaner(ptr: KPointer): void {
+            this.cleaner = new Cleaner("DragAction", ptr);
+            destroyRegister.register(this, this.cleaner!, unregisterToken);
+        }
+        unregisterCleaner(): void {
+            destroyRegister.unregister(unregisterToken);
         }
     }
 }

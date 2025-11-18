@@ -148,4 +148,8 @@ std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> ModelViewNG::GetShad
     return paintProperty->CloneModelShaderInputBuffer();
 }
 
+void ModelViewNG::SetBackgroundColor(uint32_t argb)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, BackgroundColor, argb);
+}
 } // namespace OHOS::Ace::NG

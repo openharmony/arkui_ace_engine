@@ -31,7 +31,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceStr, Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater, hookGetConfigInRouteMap } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CustomBuilder } from "./builder"
@@ -96,7 +96,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
         return new NavDestinationContextInternal(ptr)
     }
     public getConfigInRouteMap(): RouteMapConfig | undefined {
-        return this.getConfigInRouteMap_serialize()
+        return hookGetConfigInRouteMap(this)
     }
     private getPathInfo(): NavPathInfo {
         return this.getPathInfo_serialize()
@@ -487,23 +487,23 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
             } else if (valueTmpValue instanceof NavDestinationCommonTitle) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as NavDestinationCommonTitle
                 NavDestinationCommonTitle_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof NavDestinationCustomTitle) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as NavDestinationCustomTitle
                 NavDestinationCustomTitle_serializer.write(thisSerializer, valueTmpValueForIdx3)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((4).toChar())
+                thisSerializer.writeInt8((4).toByte())
                 const valueTmpValueForIdx4  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx4)
             }
@@ -545,23 +545,23 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const iconTmpValue  = icon!
             if (iconTmpValue instanceof ResourceStr) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const iconTmpValueForIdx0  = iconTmpValue as ResourceStr
                 if (iconTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const iconTmpValueForIdx0ForIdx0  = iconTmpValueForIdx0 as string
                     thisSerializer.writeString(iconTmpValueForIdx0ForIdx0)
                 } else if (iconTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const iconTmpValueForIdx0ForIdx1  = iconTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, iconTmpValueForIdx0ForIdx1)
                 }
             } else if (iconTmpValue instanceof image.PixelMap) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const iconTmpValueForIdx1  = iconTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, iconTmpValueForIdx1)
             } else if (iconTmpValue instanceof SymbolGlyphModifier) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const iconTmpValueForIdx2  = iconTmpValue as SymbolGlyphModifier
                 SymbolGlyphModifier_serializer.write(thisSerializer, iconTmpValueForIdx2)
             }
@@ -572,11 +572,11 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const accessibilityTextTmpValue  = accessibilityText!
             if (accessibilityTextTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const accessibilityTextTmpValueForIdx0  = accessibilityTextTmpValue as string
                 thisSerializer.writeString(accessibilityTextTmpValueForIdx0)
             } else if (accessibilityTextTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const accessibilityTextTmpValueForIdx1  = accessibilityTextTmpValue as Resource
                 Resource_serializer.write(thisSerializer, accessibilityTextTmpValueForIdx1)
             }
@@ -592,7 +592,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const itemsTmpValue  = items!
             if (TypeChecker.isArray_NavigationMenuItem(itemsTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const itemsTmpValueForIdx0  = itemsTmpValue as Array<NavigationMenuItem>
                 thisSerializer.writeInt32((itemsTmpValueForIdx0.length).toInt())
                 for (let itemsTmpValueForIdx0CounterI = 0; itemsTmpValueForIdx0CounterI < itemsTmpValueForIdx0.length; itemsTmpValueForIdx0CounterI++) {
@@ -600,7 +600,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
                     NavigationMenuItem_serializer.write(thisSerializer, itemsTmpValueForIdx0TmpElement)
                 }
             } else if (itemsTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const itemsTmpValueForIdx1  = itemsTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(itemsTmpValueForIdx1))
             }
@@ -623,7 +623,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const toolbarParamTmpValue  = toolbarParam!
             if (TypeChecker.isArray_ToolbarItem(toolbarParamTmpValue)) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const toolbarParamTmpValueForIdx0  = toolbarParamTmpValue as Array<ToolbarItem>
                 thisSerializer.writeInt32((toolbarParamTmpValueForIdx0.length).toInt())
                 for (let toolbarParamTmpValueForIdx0CounterI = 0; toolbarParamTmpValueForIdx0CounterI < toolbarParamTmpValueForIdx0.length; toolbarParamTmpValueForIdx0CounterI++) {
@@ -631,7 +631,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
                     ToolbarItem_serializer.write(thisSerializer, toolbarParamTmpValueForIdx0TmpElement)
                 }
             } else if (toolbarParamTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const toolbarParamTmpValueForIdx1  = toolbarParamTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(toolbarParamTmpValueForIdx1))
             }
@@ -756,9 +756,9 @@ export interface NestedScrollInfo {
 }
 export interface NavDestinationTransition {
     onTransitionEnd?: (() => void);
-    duration?: number;
+    duration?: int32;
     curve?: curves.Curve;
-    delay?: number;
+    delay?: int32;
     event: (() => void);
 }
 export interface NavDestinationAttribute extends CommonMethod {
@@ -1003,6 +1003,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         if (this.checkPriority("setNavDestinationOptions")) {
             const moduleInfo_casted = moduleInfo as (NavDestinationModuleInfo | undefined)
             this.getPeer()?.setNavDestinationOptionsAttribute(moduleInfo_casted)
+            this.applyOptionsFinish('NavDestinationAttribute');
             return this
         }
         return this
@@ -1271,6 +1272,9 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -1322,7 +1326,7 @@ export class NavDestinationTransition_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1338,7 +1342,7 @@ export class NavDestinationTransition_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1365,11 +1369,11 @@ export class NavDestinationTransition_serializer {
         }
         const onTransitionEndTmpResult : (() => void) | undefined = onTransitionEndTmpBuf
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1377,11 +1381,11 @@ export class NavDestinationTransition_serializer {
         }
         const curveTmpResult : curves.Curve | undefined = curveTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const eventTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const eventTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const eventTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
@@ -1438,21 +1442,21 @@ export class NavDestinationCommonTitle_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForMain  = value.main
         if (valueHolderForMain instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForMainForIdx0  = valueHolderForMain as string
             valueSerializer.writeString(valueHolderForMainForIdx0)
         } else if (valueHolderForMain instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForMainForIdx1  = valueHolderForMain as Resource
             Resource_serializer.write(valueSerializer, valueHolderForMainForIdx1)
         }
         const valueHolderForSub  = value.sub
         if (valueHolderForSub instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSubForIdx0  = valueHolderForSub as string
             valueSerializer.writeString(valueHolderForSubForIdx0)
         } else if (valueHolderForSub instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSubForIdx1  = valueHolderForSub as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSubForIdx1)
         }
@@ -1501,22 +1505,22 @@ export class NavDestinationCustomTitle_serializer {
         valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForBuilder))
         const valueHolderForHeight  = value.height
         if (valueHolderForHeight instanceof TitleHeight) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForHeightForIdx0  = valueHolderForHeight as TitleHeight
             valueSerializer.writeInt32(valueHolderForHeightForIdx0.valueOf())
         } else if (valueHolderForHeight instanceof Length) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForHeightForIdx1  = valueHolderForHeight as Length
             if (valueHolderForHeightForIdx1 instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightForIdx1ForIdx0  = valueHolderForHeightForIdx1 as string
                 valueSerializer.writeString(valueHolderForHeightForIdx1ForIdx0)
             } else if (valueHolderForHeightForIdx1 instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as number
                 valueSerializer.writeNumber(valueHolderForHeightForIdx1ForIdx1)
             } else if (valueHolderForHeightForIdx1 instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightForIdx1ForIdx2  = valueHolderForHeightForIdx1 as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightForIdx1ForIdx2)
             }

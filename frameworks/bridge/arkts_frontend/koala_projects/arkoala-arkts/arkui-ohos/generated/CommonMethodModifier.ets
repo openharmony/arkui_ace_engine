@@ -16,10 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, extractors, GestureModifier } from "#handwritten"
+import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, DrawModifier, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
@@ -32,7 +32,7 @@ import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder } from "./component/builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, Gesture, GestureGroup, GestureMask } from "./component/gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask } from "./component/gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
@@ -46,12 +46,12 @@ export class CommonMethodModifier implements CommonMethod {
     _width_0_0value?: Length | LayoutPolicy | undefined
     _height_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _height_0_0value?: Length | LayoutPolicy | undefined
-    _drawModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _drawModifier_0_0value?: DrawModifier | undefined
     _responseRegion_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _responseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
     _mouseResponseRegion_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _mouseResponseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
+    _responseRegionList_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _responseRegionList_0_0value?: Array<ResponseRegion> | undefined
     _size_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _size_0_0value?: SizeOptions | undefined
     _constraintSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -93,7 +93,7 @@ export class CommonMethodModifier implements CommonMethod {
     _compositingFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compositingFilter_0_0value?: uiEffect.Filter | undefined
     _opacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _opacity_0_0value?: number | Resource | undefined
+    _opacity_0_0value?: double | Resource | undefined
     _border_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _border_0_0value?: BorderOptions | undefined
     _borderStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -126,6 +126,8 @@ export class CommonMethodModifier implements CommonMethod {
     _onHoverMove_0_0value?: ((value0: HoverEvent) => void) | undefined
     _onAccessibilityHover_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAccessibilityHover_0_0value?: AccessibilityCallback | undefined
+    _onAccessibilityHoverTransparent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAccessibilityHoverTransparent_0_0value?: AccessibilityTransparentCallback | undefined
     _hoverEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hoverEffect_0_0value?: HoverEffect | undefined
     _onMouse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -133,7 +135,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onTouch_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onTouch_0_0value?: ((event: TouchEvent) => void) | undefined
     _onKeyEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onKeyEvent_0_0value?: ((event: KeyEvent) => void) | undefined
+    _onKeyEvent_0_0value?: ((event: KeyEvent) => boolean) | undefined
     _onDigitalCrown_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDigitalCrown_0_0value?: ((value0: CrownEvent) => void) | undefined
     _onKeyPreIme_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -155,7 +157,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onBlur_0_0value?: (() => void) | undefined
     _tabIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _tabIndex_0_0value?: number | undefined
+    _tabIndex_0_0value?: int32 | undefined
     _defaultFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _defaultFocus_0_0value?: boolean | undefined
     _groupDefaultFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -171,21 +173,21 @@ export class CommonMethodModifier implements CommonMethod {
     _motionBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _motionBlur_0_0value?: MotionBlurOptions | undefined
     _brightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _brightness_0_0value?: number | undefined
+    _brightness_0_0value?: double | undefined
     _contrast_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contrast_0_0value?: number | undefined
+    _contrast_0_0value?: double | undefined
     _grayscale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _grayscale_0_0value?: number | undefined
+    _grayscale_0_0value?: double | undefined
     _colorBlend_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _colorBlend_0_0value?: Color | string | Resource | undefined
     _saturate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _saturate_0_0value?: number | undefined
+    _saturate_0_0value?: double | undefined
     _sepia_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _sepia_0_0value?: number | undefined
+    _sepia_0_0value?: double | undefined
     _invert_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _invert_0_0value?: number | InvertOptions | undefined
+    _invert_0_0value?: double | InvertOptions | undefined
     _hueRotate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _hueRotate_0_0value?: number | string | undefined
+    _hueRotate_0_0value?: double | string | undefined
     _useShadowBatching_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _useShadowBatching_0_0value?: boolean | undefined
     _useEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -227,7 +229,7 @@ export class CommonMethodModifier implements CommonMethod {
     _displayPriority_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _displayPriority_0_0value?: number | undefined
     _zIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _zIndex_0_0value?: number | undefined
+    _zIndex_0_0value?: int32 | undefined
     _direction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _direction_0_0value?: Direction | undefined
     _align_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -241,9 +243,7 @@ export class CommonMethodModifier implements CommonMethod {
     _enabled_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enabled_0_0value?: boolean | undefined
     _alignRules_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_0_0value?: AlignRuleOption | undefined
-    _alignRules_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_1_0value?: LocalizedAlignRuleOptions | undefined
+    _alignRules_0_0value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     _aspectRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _aspectRatio_0_0value?: number | undefined
     _clickEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -260,6 +260,8 @@ export class CommonMethodModifier implements CommonMethod {
     _onDrop_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     _onDragEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDragEnd_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
+    _allowDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | undefined
     _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _draggable_0_0value?: boolean | undefined
     _dragPreview_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -291,11 +293,11 @@ export class CommonMethodModifier implements CommonMethod {
     _geometryTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _geometryTransition_0_0value?: string | undefined
     _restoreId_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _restoreId_0_0value?: number | undefined
+    _restoreId_0_0value?: int32 | undefined
     _sphericalEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _sphericalEffect_0_0value?: number | undefined
+    _sphericalEffect_0_0value?: double | undefined
     _lightUpEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lightUpEffect_0_0value?: number | undefined
+    _lightUpEffect_0_0value?: double | undefined
     _pixelStretchEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pixelStretchEffect_0_0value?: PixelStretchEffectOptions | undefined
     _accessibilityGroup_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -316,6 +318,8 @@ export class CommonMethodModifier implements CommonMethod {
     _accessibilityRole_0_0value?: AccessibilityRoleType | undefined
     _onAccessibilityFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAccessibilityFocus_0_0value?: AccessibilityFocusCallback | undefined
+    _onAccessibilityActionIntercept_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAccessibilityActionIntercept_0_0value?: AccessibilityActionInterceptCallback | undefined
     _accessibilityTextHint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _accessibilityTextHint_0_0value?: string | undefined
     _accessibilityDescription_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -381,7 +385,7 @@ export class CommonMethodModifier implements CommonMethod {
     _foregroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
     _onClick_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_1_0value?: ((event: ClickEvent) => void) | undefined
-    _onClick_1_1value?: number | undefined
+    _onClick_1_1value?: double | undefined
     _focusScopeId_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _focusScopeId_0_0value?: string | undefined
     _focusScopeId_0_1value?: boolean | undefined
@@ -393,18 +397,18 @@ export class CommonMethodModifier implements CommonMethod {
     _transition_1_0value?: TransitionEffect | undefined
     _transition_1_1value?: TransitionFinishCallback | undefined
     _blur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _blur_0_0value?: number | undefined
+    _blur_0_0value?: double | undefined
     _blur_0_1value?: BlurOptions | undefined
     _blur_0_2value?: SystemAdaptiveOptions | undefined
     _linearGradientBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _linearGradientBlur_0_0value?: number | undefined
+    _linearGradientBlur_0_0value?: double | undefined
     _linearGradientBlur_0_1value?: LinearGradientBlurOptions | undefined
     _systemBarEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _useEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _useEffect_1_0value?: boolean | undefined
     _useEffect_1_1value?: EffectType | undefined
     _backdropBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backdropBlur_0_0value?: number | undefined
+    _backdropBlur_0_0value?: double | undefined
     _backdropBlur_0_1value?: BlurOptions | undefined
     _backdropBlur_0_2value?: SystemAdaptiveOptions | undefined
     _sharedTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -419,6 +423,9 @@ export class CommonMethodModifier implements CommonMethod {
     _dragPreview_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dragPreview_1_0value?: CustomBuilder | DragItemInfo | string | undefined
     _dragPreview_1_1value?: PreviewConfiguration | undefined
+    _dragPreviewOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dragPreviewOptions_0_0value?: DragPreviewOptions | undefined
+    _dragPreviewOptions_0_1value?: DragInteractionOptions | undefined
     _overlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _overlay_0_0value?: string | CustomBuilder | ComponentContent | undefined
     _overlay_0_1value?: OverlayOptions | undefined
@@ -465,7 +472,7 @@ export class CommonMethodModifier implements CommonMethod {
     _bindSheet_0_1value?: CustomBuilder | undefined
     _bindSheet_0_2value?: SheetOptions | undefined
     _onVisibleAreaChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onVisibleAreaChange_0_0value?: Array<number> | undefined
+    _onVisibleAreaChange_0_0value?: Array<double> | undefined
     _onVisibleAreaChange_0_1value?: VisibleAreaChangeCallback | undefined
     _onVisibleAreaApproximateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onVisibleAreaApproximateChange_0_0value?: VisibleAreaEventOptions | undefined
@@ -518,24 +525,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (this._drawModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._drawModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDrawModifierAttribute((this._drawModifier_0_0value as DrawModifier | undefined));
-                    this._drawModifier_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._drawModifier_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._drawModifier_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDrawModifierAttribute((undefined as DrawModifier | undefined));
-                }
-            }
-        }
         if (this._responseRegion_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._responseRegion_0_flag) {
@@ -569,6 +558,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._mouseResponseRegion_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setMouseResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
+                }
+            }
+        }
+        if (this._responseRegionList_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._responseRegionList_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setResponseRegionListAttribute((this._responseRegionList_0_0value as Array<ResponseRegion> | undefined));
+                    this._responseRegionList_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._responseRegionList_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._responseRegionList_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setResponseRegionListAttribute((undefined as Array<ResponseRegion> | undefined));
                 }
             }
         }
@@ -936,7 +943,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._opacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOpacityAttribute((this._opacity_0_0value as number | Resource | undefined));
+                    peer.setOpacityAttribute((this._opacity_0_0value as double | Resource | undefined));
                     this._opacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -946,7 +953,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._opacity_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOpacityAttribute((undefined as number | Resource | undefined));
+                    peer.setOpacityAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1238,6 +1245,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (this._onAccessibilityHoverTransparent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAccessibilityHoverTransparent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAccessibilityHoverTransparentAttribute((this._onAccessibilityHoverTransparent_0_0value as AccessibilityTransparentCallback | undefined));
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAccessibilityHoverTransparentAttribute((undefined as AccessibilityTransparentCallback | undefined));
+                }
+            }
+        }
         if (this._hoverEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hoverEffect_0_flag) {
@@ -1296,7 +1321,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._onKeyEvent_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnKeyEventAttribute((this._onKeyEvent_0_0value as ((event: KeyEvent) => void) | undefined));
+                    peer.setOnKeyEventAttribute((this._onKeyEvent_0_0value as ((event: KeyEvent) => boolean) | undefined));
                     this._onKeyEvent_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1306,7 +1331,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._onKeyEvent_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnKeyEventAttribute((undefined as ((event: KeyEvent) => void) | undefined));
+                    peer.setOnKeyEventAttribute((undefined as ((event: KeyEvent) => boolean) | undefined));
                 }
             }
         }
@@ -1494,7 +1519,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._tabIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTabIndexAttribute((this._tabIndex_0_0value as number | undefined));
+                    peer.setTabIndexAttribute((this._tabIndex_0_0value as int32 | undefined));
                     this._tabIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1504,7 +1529,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._tabIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTabIndexAttribute((undefined as number | undefined));
+                    peer.setTabIndexAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -1638,7 +1663,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._brightness_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBrightnessAttribute((this._brightness_0_0value as number | undefined));
+                    peer.setBrightnessAttribute((this._brightness_0_0value as double | undefined));
                     this._brightness_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1648,7 +1673,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._brightness_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBrightnessAttribute((undefined as number | undefined));
+                    peer.setBrightnessAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1656,7 +1681,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._contrast_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContrastAttribute((this._contrast_0_0value as number | undefined));
+                    peer.setContrastAttribute((this._contrast_0_0value as double | undefined));
                     this._contrast_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1666,7 +1691,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._contrast_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContrastAttribute((undefined as number | undefined));
+                    peer.setContrastAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1674,7 +1699,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._grayscale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setGrayscaleAttribute((this._grayscale_0_0value as number | undefined));
+                    peer.setGrayscaleAttribute((this._grayscale_0_0value as double | undefined));
                     this._grayscale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1684,7 +1709,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._grayscale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setGrayscaleAttribute((undefined as number | undefined));
+                    peer.setGrayscaleAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1710,7 +1735,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._saturate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSaturateAttribute((this._saturate_0_0value as number | undefined));
+                    peer.setSaturateAttribute((this._saturate_0_0value as double | undefined));
                     this._saturate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1720,7 +1745,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._saturate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSaturateAttribute((undefined as number | undefined));
+                    peer.setSaturateAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1728,7 +1753,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._sepia_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSepiaAttribute((this._sepia_0_0value as number | undefined));
+                    peer.setSepiaAttribute((this._sepia_0_0value as double | undefined));
                     this._sepia_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1738,7 +1763,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._sepia_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSepiaAttribute((undefined as number | undefined));
+                    peer.setSepiaAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1746,7 +1771,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._invert_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setInvertAttribute((this._invert_0_0value as number | InvertOptions | undefined));
+                    peer.setInvertAttribute((this._invert_0_0value as double | InvertOptions | undefined));
                     this._invert_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1756,7 +1781,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._invert_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setInvertAttribute((undefined as number | InvertOptions | undefined));
+                    peer.setInvertAttribute((undefined as double | InvertOptions | undefined));
                 }
             }
         }
@@ -1764,7 +1789,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._hueRotate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setHueRotateAttribute((this._hueRotate_0_0value as number | string | undefined));
+                    peer.setHueRotateAttribute((this._hueRotate_0_0value as double | string | undefined));
                     this._hueRotate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1774,7 +1799,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._hueRotate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setHueRotateAttribute((undefined as number | string | undefined));
+                    peer.setHueRotateAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -2142,7 +2167,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._zIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setZIndexAttribute((this._zIndex_0_0value as number | undefined));
+                    peer.setZIndexAttribute((this._zIndex_0_0value as int32 | undefined));
                     this._zIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2152,7 +2177,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._zIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setZIndexAttribute((undefined as number | undefined));
+                    peer.setZIndexAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -2268,7 +2293,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._alignRules_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((this._alignRules_0_0value as AlignRuleOption | undefined));
+                    peer.setAlignRulesAttribute((this._alignRules_0_0value as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                     this._alignRules_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2278,25 +2303,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._alignRules_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (this._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((this._alignRules_1_0value as LocalizedAlignRuleOptions | undefined));
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((undefined as LocalizedAlignRuleOptions | undefined));
+                    peer.setAlignRulesAttribute((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -2441,6 +2448,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._onDragEnd_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnDragEndAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                }
+            }
+        }
+        if (this._allowDrop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._allowDrop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    this._allowDrop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._allowDrop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._allowDrop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
                 }
             }
         }
@@ -2718,7 +2743,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._restoreId_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRestoreIdAttribute((this._restoreId_0_0value as number | undefined));
+                    peer.setRestoreIdAttribute((this._restoreId_0_0value as int32 | undefined));
                     this._restoreId_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2728,7 +2753,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._restoreId_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRestoreIdAttribute((undefined as number | undefined));
+                    peer.setRestoreIdAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -2736,7 +2761,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._sphericalEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSphericalEffectAttribute((this._sphericalEffect_0_0value as number | undefined));
+                    peer.setSphericalEffectAttribute((this._sphericalEffect_0_0value as double | undefined));
                     this._sphericalEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2746,7 +2771,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._sphericalEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSphericalEffectAttribute((undefined as number | undefined));
+                    peer.setSphericalEffectAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -2754,7 +2779,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._lightUpEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLightUpEffectAttribute((this._lightUpEffect_0_0value as number | undefined));
+                    peer.setLightUpEffectAttribute((this._lightUpEffect_0_0value as double | undefined));
                     this._lightUpEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2764,7 +2789,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._lightUpEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLightUpEffectAttribute((undefined as number | undefined));
+                    peer.setLightUpEffectAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -2945,6 +2970,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._onAccessibilityFocus_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnAccessibilityFocusAttribute((undefined as AccessibilityFocusCallback | undefined));
+                }
+            }
+        }
+        if (this._onAccessibilityActionIntercept_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAccessibilityActionIntercept_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAccessibilityActionInterceptAttribute((this._onAccessibilityActionIntercept_0_0value as AccessibilityActionInterceptCallback | undefined));
+                    this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAccessibilityActionInterceptAttribute((undefined as AccessibilityActionInterceptCallback | undefined));
                 }
             }
         }
@@ -3438,7 +3481,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._onClick_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as number | undefined));
+                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
                     this._onClick_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3448,7 +3491,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._onClick_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as number | undefined));
+                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
@@ -3510,7 +3553,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._blur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBlurAttribute((this._blur_0_0value as number | undefined), (this._blur_0_1value as BlurOptions | undefined | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBlurAttribute((this._blur_0_0value as double | undefined), (this._blur_0_1value as BlurOptions | undefined | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._blur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3520,7 +3563,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._blur_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBlurAttribute((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -3528,7 +3571,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._linearGradientBlur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLinearGradientBlurAttribute((this._linearGradientBlur_0_0value as number | undefined), (this._linearGradientBlur_0_1value as LinearGradientBlurOptions | undefined));
+                    peer.setLinearGradientBlurAttribute((this._linearGradientBlur_0_0value as double | undefined), (this._linearGradientBlur_0_1value as LinearGradientBlurOptions | undefined));
                     this._linearGradientBlur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3538,7 +3581,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._linearGradientBlur_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLinearGradientBlurAttribute((undefined as number | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                    peer.setLinearGradientBlurAttribute((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
                 }
             }
         }
@@ -3582,7 +3625,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._backdropBlur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as number | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as double | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._backdropBlur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3592,7 +3635,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._backdropBlur_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackdropBlurAttribute((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBackdropBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -3665,6 +3708,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._dragPreview_1_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setDragPreview1Attribute((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined | undefined));
+                }
+            }
+        }
+        if (this._dragPreviewOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dragPreviewOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookDragPreviewOptions(peer, (this._dragPreviewOptions_0_0value as DragPreviewOptions | undefined), (this._dragPreviewOptions_0_1value as DragInteractionOptions | undefined | undefined));
+                    this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookDragPreviewOptions(peer, (undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined | undefined));
                 }
             }
         }
@@ -3888,7 +3949,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._onVisibleAreaChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<number> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
                     this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3898,7 +3959,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<number> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
@@ -4002,19 +4063,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (modifier._drawModifier_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._drawModifier_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.drawModifier(modifier._drawModifier_0_0value);
-                    break;
-                }
-                default: {
-                    this.drawModifier((undefined as DrawModifier | undefined));
-                }
-            }
-        }
         if (modifier._responseRegion_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._responseRegion_0_flag) {
@@ -4038,6 +4086,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.mouseResponseRegion((undefined as Array<Rectangle> | Rectangle | undefined));
+                }
+            }
+        }
+        if (modifier._responseRegionList_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._responseRegionList_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.responseRegionList(modifier._responseRegionList_0_0value);
+                    break;
+                }
+                default: {
+                    this.responseRegionList((undefined as Array<ResponseRegion> | undefined));
                 }
             }
         }
@@ -4310,7 +4371,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.opacity((undefined as number | Resource | undefined));
+                    this.opacity((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -4522,6 +4583,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._onAccessibilityHoverTransparent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAccessibilityHoverTransparent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAccessibilityHoverTransparent(modifier._onAccessibilityHoverTransparent_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAccessibilityHoverTransparent((undefined as AccessibilityTransparentCallback | undefined));
+                }
+            }
+        }
         if (modifier._hoverEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hoverEffect_0_flag) {
@@ -4570,7 +4644,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onKeyEvent((undefined as ((event: KeyEvent) => void) | undefined));
+                    this.onKeyEvent((undefined as ((event: KeyEvent) => boolean) | undefined));
                 }
             }
         }
@@ -4713,7 +4787,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.tabIndex((undefined as number | undefined));
+                    this.tabIndex((undefined as int32 | undefined));
                 }
             }
         }
@@ -4817,7 +4891,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.brightness((undefined as number | undefined));
+                    this.brightness((undefined as double | undefined));
                 }
             }
         }
@@ -4830,7 +4904,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.contrast((undefined as number | undefined));
+                    this.contrast((undefined as double | undefined));
                 }
             }
         }
@@ -4843,7 +4917,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.grayscale((undefined as number | undefined));
+                    this.grayscale((undefined as double | undefined));
                 }
             }
         }
@@ -4869,7 +4943,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.saturate((undefined as number | undefined));
+                    this.saturate((undefined as double | undefined));
                 }
             }
         }
@@ -4882,7 +4956,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sepia((undefined as number | undefined));
+                    this.sepia((undefined as double | undefined));
                 }
             }
         }
@@ -4895,7 +4969,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.invert((undefined as number | InvertOptions | undefined));
+                    this.invert((undefined as double | InvertOptions | undefined));
                 }
             }
         }
@@ -4908,7 +4982,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.hueRotate((undefined as number | string | undefined));
+                    this.hueRotate((undefined as double | string | undefined));
                 }
             }
         }
@@ -5181,7 +5255,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.zIndex((undefined as number | undefined));
+                    this.zIndex((undefined as int32 | undefined));
                 }
             }
         }
@@ -5272,20 +5346,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.alignRules((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (modifier._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.alignRules(modifier._alignRules_1_0value);
-                    break;
-                }
-                default: {
-                    this.alignRules((undefined as LocalizedAlignRuleOptions | undefined));
+                    this.alignRules((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -5393,6 +5454,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._allowDrop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._allowDrop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.allowDrop(modifier._allowDrop_0_0value);
+                    break;
+                }
+                default: {
+                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                }
+            }
+        }
         if (modifier._draggable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._draggable_0_flag) {
@@ -5416,6 +5490,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.dragPreview((undefined as CustomBuilder | DragItemInfo | string | undefined));
+                }
+            }
+        }
+        if (modifier._dragPreviewOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dragPreviewOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dragPreviewOptions(modifier._dragPreviewOptions_0_0value, modifier._dragPreviewOptions_0_1value);
+                    break;
+                }
+                default: {
+                    this.dragPreviewOptions((undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined | undefined));
                 }
             }
         }
@@ -5597,7 +5684,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.restoreId((undefined as number | undefined));
+                    this.restoreId((undefined as int32 | undefined));
                 }
             }
         }
@@ -5610,7 +5697,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.sphericalEffect((undefined as number | undefined));
+                    this.sphericalEffect((undefined as double | undefined));
                 }
             }
         }
@@ -5623,7 +5710,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.lightUpEffect((undefined as number | undefined));
+                    this.lightUpEffect((undefined as double | undefined));
                 }
             }
         }
@@ -5754,6 +5841,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.onAccessibilityFocus((undefined as AccessibilityFocusCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onAccessibilityActionIntercept_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAccessibilityActionIntercept_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAccessibilityActionIntercept(modifier._onAccessibilityActionIntercept_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAccessibilityActionIntercept((undefined as AccessibilityActionInterceptCallback | undefined));
                 }
             }
         }
@@ -6117,7 +6217,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as number | undefined));
+                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
@@ -6169,7 +6269,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.blur((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    this.blur((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -6182,7 +6282,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.linearGradientBlur((undefined as number | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                    this.linearGradientBlur((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
                 }
             }
         }
@@ -6221,7 +6321,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backdropBlur((undefined as number | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    this.backdropBlur((undefined as double | undefined), (undefined as BlurOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
                 }
             }
         }
@@ -6442,7 +6542,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onVisibleAreaChange((undefined as Array<number> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
@@ -6521,17 +6621,6 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    drawModifier(value: DrawModifier | undefined): this {
-        if (((this._drawModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._drawModifier_0_flag = AttributeUpdaterFlag.UPDATE
-            this._drawModifier_0_0value = value
-        } else
-        {
-            this._drawModifier_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
     responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         if (((this._responseRegion_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -6551,6 +6640,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._mouseResponseRegion_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        if (((this._responseRegionList_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._responseRegionList_0_flag = AttributeUpdaterFlag.UPDATE
+            this._responseRegionList_0_0value = value
+        } else
+        {
+            this._responseRegionList_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -6774,7 +6874,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    opacity(value: number | Resource | undefined): this {
+    opacity(value: double | Resource | undefined): this {
         if (((this._opacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._opacity_0_flag = AttributeUpdaterFlag.UPDATE
@@ -6961,6 +7061,17 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        if (((this._onAccessibilityHoverTransparent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAccessibilityHoverTransparent_0_0value = value
+        } else
+        {
+            this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     hoverEffect(value: HoverEffect | undefined): this {
         if (((this._hoverEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -6994,7 +7105,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (((this._onKeyEvent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onKeyEvent_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7115,7 +7226,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         if (((this._tabIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._tabIndex_0_0value) !== (value)))
         {
             this._tabIndex_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7203,7 +7314,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    brightness(value: number | undefined): this {
+    brightness(value: double | undefined): this {
         if (((this._brightness_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._brightness_0_0value) !== (value)))
         {
             this._brightness_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7214,7 +7325,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    contrast(value: number | undefined): this {
+    contrast(value: double | undefined): this {
         if (((this._contrast_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contrast_0_0value) !== (value)))
         {
             this._contrast_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7225,7 +7336,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    grayscale(value: number | undefined): this {
+    grayscale(value: double | undefined): this {
         if (((this._grayscale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._grayscale_0_0value) !== (value)))
         {
             this._grayscale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7247,7 +7358,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    saturate(value: number | undefined): this {
+    saturate(value: double | undefined): this {
         if (((this._saturate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._saturate_0_0value) !== (value)))
         {
             this._saturate_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7258,7 +7369,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    sepia(value: number | undefined): this {
+    sepia(value: double | undefined): this {
         if (((this._sepia_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._sepia_0_0value) !== (value)))
         {
             this._sepia_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7269,7 +7380,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    invert(value: number | InvertOptions | undefined): this {
+    invert(value: double | InvertOptions | undefined): this {
         if (((this._invert_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._invert_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7280,7 +7391,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    hueRotate(value: number | string | undefined): this {
+    hueRotate(value: double | string | undefined): this {
         if (((this._hueRotate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hueRotate_0_0value) !== (value)))
         {
             this._hueRotate_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7511,7 +7622,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         if (((this._zIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._zIndex_0_0value) !== (value)))
         {
             this._zIndex_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7588,7 +7699,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    alignRules(value: AlignRuleOption | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         if (((this._alignRules_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7596,17 +7707,6 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
-        if (((this._alignRules_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.UPDATE
-            this._alignRules_1_0value = value
-        } else
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -7695,6 +7795,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._onDragEnd_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+        if (((this._allowDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._allowDrop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._allowDrop_0_0value = value
+        } else
+        {
+            this._allowDrop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -7863,7 +7974,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         if (((this._restoreId_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._restoreId_0_0value) !== (value)))
         {
             this._restoreId_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7874,7 +7985,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    sphericalEffect(value: number | undefined): this {
+    sphericalEffect(value: double | undefined): this {
         if (((this._sphericalEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._sphericalEffect_0_0value) !== (value)))
         {
             this._sphericalEffect_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7885,7 +7996,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    lightUpEffect(value: number | undefined): this {
+    lightUpEffect(value: double | undefined): this {
         if (((this._lightUpEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._lightUpEffect_0_0value) !== (value)))
         {
             this._lightUpEffect_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8003,6 +8114,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._onAccessibilityFocus_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        if (((this._onAccessibilityActionIntercept_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAccessibilityActionIntercept_0_0value = value
+        } else
+        {
+            this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -8312,7 +8434,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         if (((this._onClick_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold)))
         {
             this._onClick_1_flag = AttributeUpdaterFlag.UPDATE
@@ -8374,7 +8496,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         if (((this._linearGradientBlur_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._linearGradientBlur_0_0value) !== (value)) || (true))
         {
             this._linearGradientBlur_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8408,7 +8530,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (((this._backdropBlur_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._backdropBlur_0_0value) !== (radius)) || (true) || (true))
         {
             this._backdropBlur_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8466,6 +8588,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._dragPreview_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+        if (((this._dragPreviewOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dragPreviewOptions_0_0value = value
+            this._dragPreviewOptions_0_1value = options
+        } else
+        {
+            this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -8622,7 +8756,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         if (((this._onVisibleAreaChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._onVisibleAreaChange_0_0value) !== (ratios)) || (true))
         {
             this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.UPDATE

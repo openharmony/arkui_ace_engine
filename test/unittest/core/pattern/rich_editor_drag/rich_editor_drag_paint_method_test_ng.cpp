@@ -81,7 +81,7 @@ void RichEditorDragPaintMethodTestNG::InitDate()
  * @tc.desc: Test function UpdateContentModifier.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragPaintMethodTestNG, UpdateContentModifier001, TestSize.Level1)
+HWTEST_F(RichEditorDragPaintMethodTestNG, UpdateContentModifier001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init frameNode_ 、pattern_ and richGragPaintMethod_.
@@ -105,7 +105,7 @@ HWTEST_F(RichEditorDragPaintMethodTestNG, UpdateContentModifier001, TestSize.Lev
  * @tc.desc: Test function GetContentModifier.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragPaintMethodTestNG, GetContentModifier001, TestSize.Level1)
+HWTEST_F(RichEditorDragPaintMethodTestNG, GetContentModifier001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init frameNode_ 、pattern_ and richGragPaintMethod_.

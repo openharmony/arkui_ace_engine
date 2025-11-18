@@ -19,8 +19,10 @@ COMMON_SRC = [
   "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
   "grid_accessibility_test_ng.cpp",
   "grid_common_test_ng.cpp",
+  "grid_common_testtwo_ng.cpp",
   "grid_option_layout_test_ng.cpp",
   "grid_scroller_test_ng.cpp",
+  "grid_scroller_testtwo_ng.cpp",
   "grid_test_ng.cpp",
   "grid_cache_layout_test_ng.cpp",
   "grid_pattern_test_ng.cpp",
@@ -31,13 +33,18 @@ ace_unittest("grid_test_regular") {
   sources = COMMON_SRC
   sources += [
     "grid_attr_test_ng.cpp",
+    "grid_attr_testtwo_ng.cpp",
     "grid_event_test_ng.cpp",
     "grid_focus_test_ng.cpp",
     "grid_layout_test_ng.cpp",
+    "grid_pattern_testthree_ng.cpp",
     "grid_pattern_testtwo_ng.cpp",
     "grid_scroll_layout_test_ng.cpp",
+    "grid_scroll_layout_testfour_ng.cpp",
+    "grid_scroll_layout_testthree_ng.cpp",
     "grid_scroll_layout_testtwo_ng.cpp",
     "grid_scroller_event_test_ng.cpp",
+    "grid_scroller_event_testtwo_ng.cpp",
     "grid_sync_load_test_ng.cpp",
   ]
 }
@@ -49,6 +56,7 @@ ace_unittest("grid_test_ng") {
   sources += [
     "irregular/grid_irregular_filler_test.cpp",
     "irregular/grid_irregular_layout_test.cpp",
+    "irregular/grid_irregular_layout_testtwo.cpp",
     "irregular/grid_layout_range_solver_test.cpp",
     "irregular/irregular_matrics.cpp",
     "layout_info_test.cpp",

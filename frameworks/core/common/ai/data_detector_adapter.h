@@ -86,8 +86,8 @@ public:
     }
     bool ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text);
     void PreprocessTextDetect();
-    void InitTextDetect(int32_t startPos, std::string detectText);
-    void HandleTextUrlDetect();
+    void InitTextDetect(int32_t startPos, std::string detectText, uint64_t taskId = 0);
+    void HandleTextUrlDetect(uint64_t taskId);
     void HandleUrlResult(std::vector<UrlEntity> urlEntities);
     void SetTextDetectTypes(const std::string& types);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
@@ -119,12 +119,18 @@ public:
     void SetUpdateAISelectMenuCallBack(std::function<void()>&& task);
     void UpdateAISelectMenu();
     void SelectAIDetect(const std::u16string& targetDetectText);
+    bool CheckTaskId(uint64_t taskId)
+    {
+        return taskId == taskId_;
+    }
+    bool IsAskCeliaSupported();
+
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;
     friend class NG::TextFieldPattern;
 
-    std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
+    std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap, uint64_t taskId);
     std::function<void()> GetPreviewMenuOptionCallback(TextDataDetectType type, const std::string& content);
     void OnClickAIMenuOption(const AISpan& aiSpan, const std::pair<std::string, FuncVariant>& menuOption,
         const RefPtr<NG::FrameNode>& targetNode = nullptr);
@@ -160,6 +166,7 @@ private:
     std::string textDetectConfigStr_;
     std::function<void()> parseSelectAIResCallBack_ = nullptr;
     std::function<void()> updateAISelectMenuCallBack_ = nullptr;
+    volatile uint64_t taskId_ = 0;
 };
 } // namespace OHOS::Ace
 

@@ -326,53 +326,6 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
     modifier->getDragAniModifier()->setDragPreview(frameNode, info);
 }
 
-ani_object CreateImagePeer(ani_env* env, void* ptr)
-{
-    CHECK_NULL_RETURN(env, nullptr);
-    CHECK_NULL_RETURN(ptr, nullptr);
-    static const char* className = "arkui.component.image.ImageUtils";
-    ani_status status;
-    ani_class cls;
-    status = env->FindClass(className, &cls);
-    if (ANI_OK != status) {
-        HILOGE("AceDrag: find class ArkImagePeer failed status = %{public}d", static_cast<int32_t>(status));
-        return nullptr;
-    }
-    ani_ref imagePeer;
-    status = env->Class_CallStaticMethodByName_Ref(cls, "createImagePeerFromPtr",
-        "l:C{arkui.component.image.ArkImagePeer}", &imagePeer, reinterpret_cast<ani_long>(ptr));
-    if (ANI_OK != status) {
-        HILOGE("AceDrag: create ArkImagePeer failed  status = %{public}d", static_cast<int32_t>(status));
-        return nullptr;
-    }
-    return static_cast<ani_object>(imagePeer);
-}
-
-ani_object CreateImageModifier(ani_env* env)
-{
-    CHECK_NULL_RETURN(env, nullptr);
-    static const char* className = "arkui.ImageModifier.ImageModifier";
-    ani_class cls;
-    ani_status status = env->FindClass(className, &cls);
-    if (ANI_OK != status) {
-        HILOGE("AceDrag: FindClass ImageModifier failed  status = %{public}d", static_cast<int32_t>(status));
-        return nullptr;
-    }
-    ani_method method;
-    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
-    if (ANI_OK != status) {
-        HILOGE("AceDrag: Find ImageModifier constructor failed  status = %{public}d", static_cast<int32_t>(status));
-        return nullptr;
-    }
-    ani_object imageModifier;
-    status = env->Object_New(cls, method, &imageModifier);
-    if (ANI_OK != status) {
-        HILOGE("AceDrag: Create ImageModifier failed  status = %{public}d", static_cast<int32_t>(status));
-        return nullptr;
-    }
-    return imageModifier;
-}
-
 bool ParsePreviewOptionMode(
     ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object dragPreviewMode, bool& isAuto)
 {
@@ -454,6 +407,30 @@ bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, 
     return true;
 }
 
+void ApplyModifierToNode(ani_env* env, ani_object modifier, ani_long node)
+{
+    CHECK_NULL_VOID(env);
+    CHECK_NULL_VOID(node);
+    ani_module module;
+    auto status = env->FindModule("arkui.ApplyModifierToNode", &module);
+    if (ANI_OK != status) {
+        HILOGE("AceDrag: find ApplyModifierToNode module failed status = %{public}d", static_cast<int32_t>(status));
+        return;
+    }
+    ani_function applyModifierFunc;
+    status = env->Module_FindFunction(module, "applyImageModifierToNode", "C{arkui.ImageModifier.ImageModifier}l:",
+        &applyModifierFunc);
+    if (ANI_OK != status) {
+        HILOGE("AceDrag: find applyImageModifierToNode failed status = %{public}d", static_cast<int32_t>(status));
+        return;
+    }
+
+    status = env->Function_Call_Void(applyModifierFunc, modifier, node);
+    if (ANI_OK != status) {
+        HILOGE("AceDrag: ApplyModifier failed status = %{public}d", static_cast<int32_t>(status));
+    }
+}
+
 bool ParseDragPreviewModifier(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object value)
 {
     CHECK_NULL_RETURN(env, false);
@@ -465,18 +442,6 @@ bool ParseDragPreviewModifier(ani_env* env, ArkUIDragPreviewOption& previewOptio
     if (AniUtils::IsUndefined(env, modifier)) {
         return true;
     }
-    ani_type type;
-    env->Object_GetType(modifier, &type);
-    ani_method modifierFunc;
-    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "applyModifierPatch",
-        "C{arkui.component.image.ArkImagePeer}:", &modifierFunc)) {
-        return false;
-    }
-    ani_method mergeFunc;
-    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "mergeModifier",
-        "C{arkui.ImageModifier.ImageModifier}:", &mergeFunc)) {
-        return false;
-    }
 
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
@@ -487,22 +452,18 @@ bool ParseDragPreviewModifier(ani_env* env, ArkUIDragPreviewOption& previewOptio
     });
     env->WeakReference_Create(modifier, weakRef.get());
 
-    previewOptions.modifier = [vm, weakRef, modifierFunc, mergeFunc](void* ptr) {
+    previewOptions.modifier = [vm, weakRef](void* ptr) {
         CHECK_NULL_VOID(vm);
         ani_env* env = nullptr;
         if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
             return;
         }
         CHECK_NULL_VOID(env);
-        ani_object imagePeer = CreateImagePeer(env, ptr);
-        CHECK_NULL_VOID(imagePeer);
         ani_boolean released;
         ani_ref localRef;
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
-            auto imageModifier = CreateImageModifier(env);
-            env->Object_CallMethod_Void(imageModifier, mergeFunc, static_cast<ani_object>(localRef));
-            env->Object_CallMethod_Void(imageModifier, modifierFunc, imagePeer);
+            ApplyModifierToNode(env, static_cast<ani_object>(localRef), reinterpret_cast<ani_long>(ptr));
         }
     };
     return true;
@@ -527,14 +488,14 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
         }
         return true;
     }
-    if (!AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Numeric")) {
+    if (!AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Long")) {
         return false;
     }
-    ani_double numberValue;
-    if ((ANI_OK != env->Object_CallMethodByName_Double(numberBadgeObj, "unboxed", ":d", &numberValue))) {
+    ani_long numberValue;
+    if (ANI_OK != env->Object_CallMethodByName_Long(numberBadgeObj, "toLong", ":l", &numberValue)) {
         return false;
     }
-    auto number = static_cast<double>(numberValue);
+    auto number = static_cast<int64_t>(numberValue);
     if (number < 0 || number > INT_MAX) {
         previewOptions.isNumber = false;
         previewOptions.isShowBadge = true;
@@ -654,12 +615,11 @@ ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_obje
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
     ani_boolean isUnifiedData;
     ani_class dataClass;
-    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
+    env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.UnifiedData", &dataClass);
     env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
     if (!isUnifiedData) {
         return result_obj;
     }
     return unifiedData_obj;
-    return {};
 }
 } // namespace OHOS::Ace::Ani

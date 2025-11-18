@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
+#include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -131,4 +132,31 @@ void JsAccessibilityManager::UpdateUserAccessibilityElementInfo(
     UpdateCheckedSelectedElementInfo(accessibilityProperty, nodeInfo, nodeInfo.IsEnabled());
 }
 
+void JsAccessibilityManager::UpdateHasChildText(
+    const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_EQUAL_VOID(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled(), false);
+    auto belongTreeId = nodeInfo.GetBelongTreeId();
+    if (belongTreeId <= 0) {
+        return;
+    }
+
+    NG::FindCondition condition = [](const RefPtr<NG::FrameNode>& node) {
+        CHECK_NULL_RETURN(node, false);
+        auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        auto hasText = !NG::AccessibilityPropertyUtils::GetContent(accessibilityProperty).empty();
+        auto hasHint = !accessibilityProperty->GetHintText().empty();
+        auto hasAccessibilityText =
+            !NG::AccessibilityPropertyUtils::GetAccessibilityText(accessibilityProperty).empty();
+        auto hasAccessibilityDescription = !accessibilityProperty->GetAccessibilityDescription().empty();
+        return hasText || hasHint || hasAccessibilityText || hasAccessibilityDescription;
+    };
+    auto childNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
+    CHECK_NULL_VOID(childNode);
+    ExtraElementInfo extraElementInfo = nodeInfo.GetExtraElement();
+    extraElementInfo.SetExtraElementInfo("childText", "true"); // flag for child tree scene
+    nodeInfo.SetExtraElement(extraElementInfo);
+}
 } // namespace OHOS::Ace::Framework

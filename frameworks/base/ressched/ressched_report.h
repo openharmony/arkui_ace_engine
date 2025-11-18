@@ -53,8 +53,14 @@ using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
 using ReportSyncEventFunc = int32_t (*)(const uint32_t resType, const int64_t value,
     const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply);
 
+using SetNotifyForceExpandStateFunc = void (*)(void (*)(int32_t, bool, uint64_t));
+using NotifyAppSceneFunc = void (*)(uint32_t, int64_t, const std::unordered_map<std::string, std::string>&);
+void NotifyForceExpandStateFunc(int32_t state, bool isTid, uint64_t tid);
+
 ReportDataFunc ACE_EXPORT LoadReportDataFunc();
 ReportSyncEventFunc ACE_EXPORT LoadReportSyncEventFunc();
+SetNotifyForceExpandStateFunc ACE_EXPORT LoadSetNotifyForceExpandStateFunc();
+NotifyAppSceneFunc ACE_EXPORT LoadNotifyAppSceneFunc();
 
 class ACE_EXPORT ResSchedReport final {
 public:
@@ -109,9 +115,13 @@ private:
 
     void RecordAxisEvent(const AxisEvent& axisEvent, bool enforce = false);
     double GetAxisUpVelocity(const ResEventInfo& lastAxisEvent, const ResEventInfo& curAxisEvent);
+    void NotifyAppScene(uint32_t resType, int64_t value,
+        const std::unordered_map<std::string, std::string>& payload);
 
     ReportDataFunc reportDataFunc_ = nullptr;
     ReportSyncEventFunc reportSyncEventFunc_ = nullptr;
+    SetNotifyForceExpandStateFunc setNotifyForceExpandStateFunc_ = nullptr;
+    NotifyAppSceneFunc notifyAppSceneFunc_ = nullptr;
     CancelableCallback<void()> delayTask_;
     bool loadPageOn_ = false;
     bool loadPageRequestFrameOn_ = false;

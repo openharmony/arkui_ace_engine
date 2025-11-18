@@ -48,15 +48,6 @@ std::optional<Dimension> OptConvertFromOptNumStrRes(const Opt_Dimension value)
     return convValue;
 }
 
-std::optional<Dimension> OptConvertFromOptLength(const Opt_Length value, DimensionUnit defaultUnit)
-{
-    std::optional<Dimension> convValue = std::nullopt;
-    if (value.tag != INTEROP_TAG_UNDEFINED) {
-        convValue = Converter::OptConvertFromArkLength(value.value, defaultUnit);
-    }
-    return convValue;
-}
-
 std::optional<DimensionOffset> ConvertDimensionOffsetFromOptOffset(Opt_Offset offset)
 {
     if (offset.tag == INTEROP_TAG_UNDEFINED) {
@@ -89,13 +80,17 @@ std::optional<BorderRadiusProperty> ConvertBorderRadiusPropertyFromOptBorderRadi
         },
         [&optValue](const Ark_BorderRadiuses& src) {
             BorderRadiusProperty borderRadius;
-            borderRadius.radiusTopLeft = OptConvertFromOptLength(src.topLeft, DimensionUnit::VP);
+            borderRadius.radiusTopLeft =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.topLeft, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusTopLeft);
-            borderRadius.radiusTopRight = OptConvertFromOptLength(src.topRight, DimensionUnit::VP);
+            borderRadius.radiusTopRight =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.topRight, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusTopRight);
-            borderRadius.radiusBottomLeft = OptConvertFromOptLength(src.bottomLeft, DimensionUnit::VP);
+            borderRadius.radiusBottomLeft =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.bottomLeft, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusBottomLeft);
-            borderRadius.radiusBottomRight = OptConvertFromOptLength(src.bottomRight, DimensionUnit::VP);
+            borderRadius.radiusBottomRight =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.bottomRight, DimensionUnit::VP);
             Validator::ValidateNonNegative(borderRadius.radiusBottomRight);
             borderRadius.multiValued = true;
             optValue = borderRadius;
@@ -116,7 +111,7 @@ std::optional<DimensionRect> ConvertDimensionRectFromOptRectangle(const Opt_Rect
     dst.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
 
     auto src = rect.value;
-    if (auto dim = OptConvertFromOptLength(src.width, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.width, DimensionUnit::VP); dim) {
         if (dim.has_value()) {
             if (dim.value().IsNegative()) {
                 dst.SetWidth(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
@@ -125,7 +120,7 @@ std::optional<DimensionRect> ConvertDimensionRectFromOptRectangle(const Opt_Rect
             }
         }
     }
-    if (auto dim = OptConvertFromOptLength(src.height, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.height, DimensionUnit::VP); dim) {
         if (dim.has_value()) {
             if (dim.value().IsNegative()) {
                 dst.SetHeight(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
@@ -135,10 +130,10 @@ std::optional<DimensionRect> ConvertDimensionRectFromOptRectangle(const Opt_Rect
         }
     }
     auto offset = dst.GetOffset();
-    if (auto dim = OptConvertFromOptLength(src.x, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.x, DimensionUnit::VP); dim) {
         offset.SetX(*dim);
     }
-    if (auto dim = OptConvertFromOptLength(src.y, DimensionUnit::VP); dim) {
+    if (auto dim = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.y, DimensionUnit::VP); dim) {
         offset.SetY(*dim);
     }
     dst.SetOffset(offset);
@@ -168,13 +163,17 @@ std::optional<BorderWidthProperty> ConvertBorderWidthPropertyFromOptEdgeWidths(
         },
         [&optValue](const Ark_EdgeWidths& src) {
             BorderWidthProperty widthProperty;
-            widthProperty.topDimen = OptConvertFromOptLength(src.top, DimensionUnit::VP);
+            widthProperty.topDimen =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.top, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.topDimen);
-            widthProperty.leftDimen = OptConvertFromOptLength(src.left, DimensionUnit::VP);
+            widthProperty.leftDimen =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.left, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.leftDimen);
-            widthProperty.bottomDimen = OptConvertFromOptLength(src.bottom, DimensionUnit::VP);
+            widthProperty.bottomDimen =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.bottom, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.bottomDimen);
-            widthProperty.rightDimen = OptConvertFromOptLength(src.right, DimensionUnit::VP);
+            widthProperty.rightDimen =
+                Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.right, DimensionUnit::VP);
             Validator::ValidateNonNegative(widthProperty.rightDimen);
             widthProperty.multiValued = true;
             optValue = widthProperty;
@@ -301,7 +300,7 @@ Opt_Boolean CustomDialogControllerPeerImpl::GetCustomStyle()
     return Converter::ArkValue<Opt_Boolean>(dialogProperties_.customStyle);
 }
 
-void CustomDialogControllerPeerImpl::SetGridCount(Opt_Number gridCount)
+void CustomDialogControllerPeerImpl::SetGridCount(Opt_Int32 gridCount)
 {
     auto result = Converter::OptConvert<int32_t>(gridCount);
     if (result) {
@@ -557,7 +556,7 @@ void CustomDialogControllerPeerImpl::SetLevelMode(Opt_Boolean showInSubWindow, O
     }
 }
 
-void CustomDialogControllerPeerImpl::SetLevelUniqueId(Opt_Number levelUniqueId)
+void CustomDialogControllerPeerImpl::SetLevelUniqueId(Opt_Int32 levelUniqueId)
 {
     auto result = Converter::OptConvert<int32_t>(levelUniqueId);
     if (result.has_value()) {
@@ -577,6 +576,12 @@ void CustomDialogControllerPeerImpl::SetLevelOrder(Opt_LevelOrder levelOrder)
 {
     // the levelOrder is accessor in C-API v.132
     auto result = Converter::OptConvert<double>(levelOrder);
+    dialogProperties_.levelOrder = result.value_or(NG::LevelOrder::ORDER_DEFAULT);
+}
+
+void CustomDialogControllerPeerImpl::SetLevelOrderExtender(Opt_LevelOrderExtender levelOrderExtender)
+{
+    auto result = Converter::OptConvert<double>(levelOrderExtender);
     dialogProperties_.levelOrder = result.value_or(NG::LevelOrder::ORDER_DEFAULT);
 }
 

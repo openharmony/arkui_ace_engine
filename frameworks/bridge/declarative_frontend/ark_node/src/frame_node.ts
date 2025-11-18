@@ -48,7 +48,22 @@ declare enum EventQueryType {
   ON_CLICK = 0,
 }
 
+const ERROR_CODE_NO_ERROR = 0;
+const ERROR_CODE_NODE_IS_ADOPTED = 106206;
+const ERROR_CODE_NODE_HAS_PARENT = 106207;
+const ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208;
+const ERROR_CODE_NODE_CAN_NOT_ADOPT_TO = 106209;
+const ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN = 106210;
+
+const errorMap_: Map<number, string> = new Map<number, string>();
+errorMap_.set(ERROR_CODE_NODE_IS_ADOPTED, "The parameter 'child' is invalid: the node has already been adopted.");
+errorMap_.set(ERROR_CODE_NODE_HAS_PARENT, "The parameter 'child' is invalid: the child already has a parent node.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED, "The parameter 'child' is invalid: the node cannot be adopted.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the node cannot adopt children.');
+errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
+
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
+declare type UIStatesChangeHandlerCallback = (currentUIStates: number) => void;
 
 function getFrameNodeRawPtr(frameNode: FrameNode): number {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
@@ -70,6 +85,8 @@ class FrameNode extends Disposable {
   public nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
+  protected statesChangeHandler_: UIStatesChangeHandlerCallback | undefined;
+  protected supportedStates_: number;
   constructor(uiContext: UIContext, type: string, options?: object) {
     super();
     if (uiContext === undefined) {
@@ -181,7 +198,7 @@ class FrameNode extends Disposable {
     }
   }
   dispose(): void {
-    if (this.isDisposed_) {
+    if (this.isDisposed()) {
       return;
     }
     super.dispose();
@@ -195,10 +212,10 @@ class FrameNode extends Disposable {
     this._nativeRef = null;
     this.nodePtr_ = null;
   }
-  
+
   isDisposed(): boolean {
-    return super.isDisposed() && (this._nativeRef === undefined ||
-     this._nativeRef === null || this._nativeRef instanceof NativeWeakRef && this._nativeRef.invalid());
+    let node = this.getNodePtr();
+    return super.isDisposed() && (node === undefined || node === null);
   }
 
   static disposeTreeRecursively(node: FrameNode | null): void {
@@ -272,7 +289,10 @@ class FrameNode extends Disposable {
     let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
     getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
-    if (!flag) {
+    if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
+      throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
+    }
+    if (flag !== ERROR_CODE_NO_ERROR) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     this._childList.set(node._nodeId, node);
@@ -289,7 +309,7 @@ class FrameNode extends Disposable {
     let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
     getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, content.getNodePtr());
     __JSScopeUtil__.restoreInstanceId();
-    if (!flag) {
+    if (flag !== ERROR_CODE_NO_ERROR) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     } else {
       content.setAttachedParent(new WeakRef<FrameNode>(this));
@@ -314,7 +334,7 @@ class FrameNode extends Disposable {
     if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
-    let flag = true;
+    let flag = 0;
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     if (sibling === undefined || sibling === null) {
       flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
@@ -323,7 +343,10 @@ class FrameNode extends Disposable {
     }
     getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
-    if (!flag) {
+    if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
+      throw { message: "The parameter 'child' is invalid: the node has already been adopted.", code: 100025 };
+    }
+    if (flag === undefined || flag !== ERROR_CODE_NO_ERROR) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     this._childList.set(child._nodeId, child);
@@ -360,8 +383,11 @@ class FrameNode extends Disposable {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
+    let result = getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
     __JSScopeUtil__.restoreInstanceId();
+    if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+      throw { message: 'The current node has already been adopted.', code: 100027 };
+    }
     if (oldParent) {
       oldParent._childList.delete(this._nodeId);
     }
@@ -443,7 +469,7 @@ class FrameNode extends Disposable {
 
   getChildrenCount(isExpanded?: boolean): number {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.getNodePtr(), isExpanded);
     __JSScopeUtil__.restoreInstanceId();
     return childrenCount;
   }
@@ -712,18 +738,122 @@ class FrameNode extends Disposable {
   recycle(): void {
     this.triggerOnRecycle();
   }
-  addSupportedUIStates(uistates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
+  addSupportedUIStates(uiStates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates: number)=>{
-      statesChangeHandler(this, currentUIStates);
-    }, excludeInner);
+    this.statesChangeHandler_ = (currentUIStates: number)=>{
+      if (statesChangeHandler !== undefined && statesChangeHandler !== null) {
+        statesChangeHandler(this, currentUIStates);
+      }
+    }
+    let result = getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uiStates,
+      this.statesChangeHandler_, excludeInner);
+    if (result === true) {
+      this.supportedStates_ |= uiStates;
+    } else {
+      JSXNodeLogConsole.warn('add supported uistates fail');
+    }
     __JSScopeUtil__.restoreInstanceId();
   }
   removeSupportedUIStates(uiStates: number): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    let result = getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    if (result === true) {
+      this.supportedStates_ &= ~uiStates;
+      if (this.supportedStates_ === UIState.NORMAL) {
+        this.statesChangeHandler_ = undefined;
+      }
+    } else {
+      JSXNodeLogConsole.warn('remove supported uistates fail');
+    }
     __JSScopeUtil__.restoreInstanceId();
   }
+  invalidateAttributes(): void {
+    if (this.getNodePtr()) {
+      getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
+    }
+  }
+  isTransferred(): boolean {
+    return false;
+  }
+  convertPosition(position, targetNode): Position {
+    if (targetNode === null) {
+        throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
+    }
+    if (targetNode === undefined) {
+        throw { message: "The parameter 'targetNode' is invalid: it cannot be undefined.", code: 100025 };
+    }
+    if (targetNode.isDisposed()) {
+        throw { message: "The parameter 'targetNode' is invalid: the node has already been disposed. Check the node's status with 'isDisposed()' before passing it.", code: 100025 };
+    }
+    if (position === undefined) {
+        throw { message: "The parameter 'position' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 100025 };
+    }
+    if (position === null) {
+        throw { message: "The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.", code: 100025 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const offsetPosition = getUINativeModule().frameNode.convertPoint(
+        this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
+    __JSScopeUtil__.restoreInstanceId();
+    if (offsetPosition[0] === 0) {
+        throw { message: 'The current FrameNode and the target FrameNode do not have a common ancestor node.', code: 100024 };
+    }
+    return { x: offsetPosition[1], y: offsetPosition[2] };
+  }
+  adoptChild(child: FrameNode): void{
+    if (child === undefined || child === null) {
+      return;
+    }
+    if (this.isDisposed()) {
+      throw { message: 'The current node has been disposed.', code: 100026 };
+    }
+    if (!this.checkValid() || !this.isModifiable()) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    if (!child.checkValid() || !child.isModifiable()) {
+      throw { message: 'The child node is not modifiable.', code: 100021 };
+    }
+    if (child.isDisposed()) {
+      throw { message: 'The child node has been disposed.', code: 100026 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    let result = getUINativeModule().frameNode.adoptChild(this.getNodePtr(), child.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    let errorInfo = errorMap_.get(result);
+    if (errorInfo !== undefined) {
+      throw { message: errorInfo, code: 100025 };
+    }
+  }
+    removeAdoptedChild(child: FrameNode): void {
+    if (child === undefined || child === null) {
+      return;
+    }
+    if (this.isDisposed()) {
+      throw { message: 'The current node has been disposed.', code: 100026 };
+    }
+    if (!this.checkValid() || !this.isModifiable()) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    if (!child.checkValid() || !child.isModifiable()) {
+      throw { message: 'The child node is not modifiable.', code: 100021 };
+    }
+    if (child.isDisposed()) {
+      throw { message: 'The child node has been disposed.', code: 100026 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    let result = getUINativeModule().frameNode.removeAdoptedChild(this.getNodePtr(), child.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    let errorInfo = errorMap_.get(result);
+    if (errorInfo !== undefined) {
+      throw { message: errorInfo, code: 100025 };
+    }
+  }
+   isInRenderState() :boolean {
+        if (this.getNodePtr()) {
+            return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
+        }
+        return false;
+    }
 }
 
 class ImmutableFrameNode extends FrameNode {

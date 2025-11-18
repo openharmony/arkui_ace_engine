@@ -18,6 +18,7 @@
 #include <atomic>
 
 #include "base/utils/multi_thread.h"
+#include "core/common/layout_inspector.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
@@ -37,6 +38,7 @@ public:
 
     bool AddUINode(const RefPtr<NG::UINode>& node);
     bool Exists(ElementIdType elementId);
+    std::vector<RefPtr<NG::UINode>> GetUINodesFromItemMap(const std::vector<std::int32_t>& keys);
 
     /**
      * When a custom node is created from recycle, update its element id.
@@ -273,13 +275,48 @@ NG::FrameNode* ElementRegisterImpl::GetFrameNodePtrById(ElementIdType elementId)
     return AceType::RawPtr(node); // warning: returning an unsafe rawptr !!!
 }
 
+std::vector<RefPtr<NG::UINode>> ElementRegisterImpl::GetUINodesFromItemMap(
+    const std::vector<std::int32_t>& keys)
+{
+    std::vector<RefPtr<NG::UINode>> children;
+    for (auto& iter : itemMap_) {
+        if (std::find(keys.begin(), keys.end(), iter.first) == keys.end()) {
+            auto uiNode = GetUINodeById(iter.first);
+            CHECK_NULL_CONTINUE(uiNode);
+            children.emplace_back(uiNode);
+        }
+    }
+    return children;
+}
+ 
+void TriggerRsProfilerNodeMountCallbackIfExist(const RefPtr<NG::UINode>& node)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
+    if (callback) {
+        int32_t parentId = -1;
+        if (node->GetParent()) {
+            parentId = node->GetParent()->GetId();
+        }
+        uint64_t rsNodeId = 0;
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+        if (frameNode != nullptr) {
+            CHECK_NULL_VOID(frameNode->GetRenderContext());
+            rsNodeId = frameNode->GetRenderContext()->GetNodeId();
+        }
+        FrameNodeInfo info { rsNodeId, node->GetId(), node->GetTag(), node->GetDebugLine(), parentId };
+        callback(info);
+    }
+#endif
+}
+
 bool ElementRegisterImpl::AddUINode(const RefPtr<NG::UINode>& node)
 {
     FREE_NODE_CHECK(node, ElementRegisterMultiThread::GetInstance()->AddUINode, node);
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
         return false;
     }
-
+    TriggerRsProfilerNodeMountCallbackIfExist(node);
     return AddReferenced(node->GetId(), node);
 }
 
@@ -385,7 +422,7 @@ RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::s
             continue;
         }
         auto depOfNode = uiNode->GetDepth();
-        bool withInScope = willGetAll || (!willGetAll && uiNode->IsOnMainTree());
+        bool withInScope = willGetAll || uiNode->IsOnMainTree();
         if (withInScope && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
             depth = depOfNode;
             frameNode = uiNode;
@@ -499,6 +536,12 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
     DELEGATE(AddUINode(node), false);
+}
+
+std::vector<RefPtr<NG::UINode>> ElementRegister::GetUINodesFromItemMap(const std::vector<std::int32_t>& keys)
+{
+    std::vector<RefPtr<NG::UINode>> children;
+    DELEGATE(GetUINodesFromItemMap(keys), children);
 }
 
 bool ElementRegister::Exists(ElementIdType elementId)

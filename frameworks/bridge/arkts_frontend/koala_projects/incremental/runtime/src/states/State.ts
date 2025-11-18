@@ -22,7 +22,7 @@ import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { ReadonlyTreeNode } from "../tree/ReadonlyTreeNode"
 import { GlobalStateManager } from "./GlobalStateManager"
-import { State, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
+import { ReadableState as State, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
 
 export const CONTEXT_ROOT_SCOPE = "ohos.koala.context.root.scope"
 export const CONTEXT_ROOT_NODE = "ohos.koala.context.root.node"
@@ -172,7 +172,7 @@ export interface InternalScope<Value> extends IncrementalScope<Value> {
     /** @returns internal value updated after the computation */
     recache(newValue?: Value): Value
     /** @returns internal state for parameter */
-    param<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
+    param<V>(index: int32, value: V): State<V>
     paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
 }
 
@@ -1140,8 +1140,8 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return this.myValue as Value
     }
 
-    param<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V> {
-        return this.paramEx(index, value, equivalent, name, contextLocal)
+    param<V>(index: int32, value: V): State<V> {
+        return this.paramEx(index, value, undefined, undefined, undefined)
     }
 
     paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V> {
@@ -1176,6 +1176,9 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true
+            if (scope.node?.disabledStateUpdates) {
+                break // do not invalidate parent scope
+            }
             const parent = scope.parent
             if (parent) {
                 // Improve:/DEBUG: investigate a case when invalid node has valid parent
@@ -1230,12 +1233,12 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         } catch (cause) {
             error = cause as Error
         }
-        this.node?.dispose() // dispose parent before its children
         for (let child = this.child; child; child = child!.next) {
             this.recycleOrDispose(child!!)
         }
         this.child = undefined
         this.parentScope = undefined
+        this.node?.dispose()
         this.node = undefined
         this.nodeRef = undefined
         this.scopeInternal = undefined

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
@@ -140,7 +141,6 @@ void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& co
     }
     const auto& [offsetChanged, sizeChanged] = UpdateSurfaceRect();
     HandleSurfaceChangeEvent(offsetChanged, sizeChanged, config.frameOffsetChange);
-    AddAfterLayoutTaskForExportTexture();
     host->MarkNeedSyncRenderTree();
 }
 
@@ -279,7 +279,7 @@ void XComponentPatternV2::InitSurface()
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
     renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
-        InitializeRenderContext();
+        InitializeRenderContext(host->IsThreadSafeNode());
         renderSurface_->SetRenderContext(renderContextForSurface_);
         renderContext->AddChild(renderContextForSurface_, 0);
     } else if (type_ == XComponentType::TEXTURE) {
@@ -333,6 +333,7 @@ void XComponentPatternV2::DisposeSurface()
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContext->RemoveChild(renderContextForSurface_);
     renderContextForSurface_ = nullptr;
+    handlingSurfaceRenderContext_ = renderContextForSurface_;
 #ifdef ENABLE_ROSEN_BACKEND
     FlushImplicitTransaction(host);
 #endif
@@ -497,17 +498,25 @@ void XComponentPatternV2::OnRebuildFrame()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(renderContextForSurface_);
+    auto pipeline = host->GetContext();
+    renderContextForSurface_->SetRSUIContext(pipeline);
     renderContext->AddChild(renderContextForSurface_, 0);
 }
 
-void XComponentPatternV2::InitializeRenderContext()
+void XComponentPatternV2::InitializeRenderContext(bool isThreadSafeNode)
 {
     if (renderContextForSurface_) {
         return;
     }
     renderContextForSurface_ = RenderContext::Create();
+    handlingSurfaceRenderContext_ = renderContextForSurface_;
     RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface",
         RenderContext::PatternType::XCOM };
+    if (isThreadSafeNode) {
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Create SurfaceNode[%{public}s] with SkipCheckInMultiInstance",
+            GetId().c_str());
+        param.isSkipCheckInMultiInstance = true;
+    }
     renderContextForSurface_->InitContext(false, param);
     if (!paintRect_.IsEmpty()) {
         renderContextForSurface_->SetBounds(
@@ -551,9 +560,9 @@ void XComponentPatternV2::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("autoInitialize: ").append(BoolToString(autoInitialize_)));
     DumpLog::GetInstance().AddDesc(std::string("isInitialized: ").append(BoolToString(isInitialized_)));
     DumpLog::GetInstance().AddDesc(
-        std::string("xcomponentNodeType: ").append(XComponentPattern::XComponentNodeTypeToString(nodeType_)));
+        std::string("xcomponentNodeType: ").append(XComponentUtils::XComponentNodeTypeToString(nodeType_)));
     DumpLog::GetInstance().AddDesc(
-        std::string("xcomponentType: ").append(XComponentPattern::XComponentTypeToString(type_)));
+        std::string("xcomponentType: ").append(XComponentUtils::XComponentTypeToString(type_)));
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("isOpaque: ").append(isOpaque_ ? "true" : "false"));

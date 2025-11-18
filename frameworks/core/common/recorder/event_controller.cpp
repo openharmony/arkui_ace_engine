@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 #include "core/common/recorder/event_controller.h"
+
 #include <cstdint>
 #include <vector>
 
 #include "base/thread/background_task_executor.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"

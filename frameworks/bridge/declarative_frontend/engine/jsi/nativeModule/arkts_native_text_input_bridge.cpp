@@ -1932,6 +1932,28 @@ ArkUINativeModuleValue TextInputBridge::ResetSelectAll(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
+void TextInputBridge::ParseCounterTextColor(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    ArkUIShowCountOptions* showCountOptions, RefPtr<ResourceObject> resourceObjectTextColor,
+    RefPtr<ResourceObject> resourceObjectTextOverflowColor)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> counterTextColorArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> counterTextOverflowColorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Color counterTextColor;
+    Color counterTextOverflowColor;
+    if (!ArkTSUtils::ParseColorMetricsToColor(vm, counterTextColorArg, counterTextColor, resourceObjectTextColor)) {
+        showCountOptions->counterTextColor = -1;
+    } else {
+        showCountOptions->counterTextColor = counterTextColor.GetValue();
+    }
+    if (!ArkTSUtils::ParseColorMetricsToColor(
+        vm, counterTextOverflowColorArg, counterTextOverflowColor, resourceObjectTextOverflowColor)) {
+        showCountOptions->counterTextOverflowColor = -1;
+    } else {
+        showCountOptions->counterTextOverflowColor = counterTextOverflowColor.GetValue();
+    }
+}
+
 ArkUINativeModuleValue TextInputBridge::SetShowCounter(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1940,8 +1962,6 @@ ArkUINativeModuleValue TextInputBridge::SetShowCounter(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> showCounterArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     Local<JSValueRef> highlightBorderArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
     Local<JSValueRef> thresholdArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
-    Local<JSValueRef> counterTextColorArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    Local<JSValueRef> counterTextOverflowColorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ArkUIShowCountOptions showCountOptions;
@@ -1962,21 +1982,9 @@ ArkUINativeModuleValue TextInputBridge::SetShowCounter(ArkUIRuntimeCallInfo* run
             showCountOptions.open = false;
         }
     }
-    Color counterTextColor;
-    Color counterTextOverflowColor;
     RefPtr<ResourceObject> resourceObjectTextColor;
     RefPtr<ResourceObject> resourceObjectTextOverflowColor;
-    auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseColorMetricsToColor(vm, counterTextColorArg, counterTextColor, resourceObjectTextColor)) {
-        counterTextColor = textFieldTheme->GetCountTextStyle().GetTextColor();
-    }
-    if (!ArkTSUtils::ParseColorMetricsToColor(
-        vm, counterTextOverflowColorArg, counterTextOverflowColor, resourceObjectTextOverflowColor)) {
-        counterTextOverflowColor = textFieldTheme->GetOverCountTextStyle().GetTextColor();
-    }
-    showCountOptions.counterTextColor = counterTextColor.GetValue();
-    showCountOptions.counterTextOverflowColor = counterTextOverflowColor.GetValue();
+    ParseCounterTextColor(runtimeCallInfo, &showCountOptions, resourceObjectTextColor, resourceObjectTextOverflowColor);
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowCounter(nativeNode, &showCountOptions,
         AceType::RawPtr(resourceObjectTextColor), AceType::RawPtr(resourceObjectTextOverflowColor));
 

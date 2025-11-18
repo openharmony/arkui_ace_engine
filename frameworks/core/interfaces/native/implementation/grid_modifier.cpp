@@ -34,7 +34,7 @@ inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_GridLayoutOpt
 }
 
 template<>
-inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Array_Number& src)
+inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Array_Int32& src)
 {
     auto length = static_cast<int32_t>(src.length);
     std::set<int32_t> indexesSet;
@@ -62,7 +62,7 @@ inline void AssignCast(std::optional<GridItemAlignment>& dst, const Ark_GridItem
 }
 
 template<>
-inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_Tuple_Number_Number& src)
+inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_Tuple_I32_I32& src)
 {
     auto rows = Converter::Convert<int32_t>(src.value0);
     auto columns = Converter::Convert<int32_t>(src.value1);
@@ -70,7 +70,7 @@ inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_Tuple_Number_
 }
 
 template<>
-inline void AssignCast(std::optional<GridItemRect>& dst, const Ark_Tuple_Number_Number_Number_Number& src)
+inline void AssignCast(std::optional<GridItemRect>& dst, const Ark_Tuple_I32_I32_I32_I32& src)
 {
     auto rowStart = Converter::Convert<int32_t>(src.value0);
     auto columnStart = Converter::Convert<int32_t>(src.value1);
@@ -129,25 +129,25 @@ void SetGridOptionsImpl(Ark_NativePointer node,
         if (irrIndex) {
             options.irregularIndexes = irrIndex.value();
         }
-        auto onGetIrregularSizeByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number>
+        auto onGetIrregularSizeByIndex = Converter::OptConvert<::Callback_I32_Tuple_I32_I32>
                                     (layoutOptionsOpt.value().onGetIrregularSizeByIndex);
         if (onGetIrregularSizeByIndex) {
             auto modelCallback = [callback = CallbackHelper(*onGetIrregularSizeByIndex)]
                                             (int32_t value) -> GridItemSize {
-                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
+                Ark_Int32 param = Converter::ArkValue<Ark_Int32>(value);
                 auto resultOpt = callback.InvokeWithOptConvertResult
-                                    <GridItemSize, Ark_Tuple_Number_Number, Callback_Tuple_Number_Number_Void>(param);
+                                    <GridItemSize, Ark_Tuple_I32_I32, Callback_Tuple_I32_I32_Void>(param);
                 return resultOpt.value_or(GridItemSize());
             };
             options.getSizeByIndex = modelCallback;
         }
-        auto onGetRectByIndex = Converter::OptConvert<::Callback_Number_Tuple_Number_Number_Number_Number>
+        auto onGetRectByIndex = Converter::OptConvert<::Callback_I32_Tuple_I32_I32_I32_I32>
                                     (layoutOptionsOpt.value().onGetRectByIndex);
         if (onGetRectByIndex) {
             auto modelCallback = [callback = CallbackHelper(*onGetRectByIndex)](int32_t value) -> GridItemRect {
-                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
-                auto resOpt = callback.InvokeWithOptConvertResult<GridItemRect, Ark_Tuple_Number_Number_Number_Number,
-                                     Callback_Tuple_Number_Number_Number_Number_Void>(param);
+                Ark_Int32 param = Converter::ArkValue<Ark_Int32>(value);
+                auto resOpt = callback.InvokeWithOptConvertResult<GridItemRect, Ark_Tuple_I32_I32_I32_I32,
+                                     Callback_Tuple_I32_I32_I32_I32_Void>(param);
                 return resOpt.value_or(GridItemRect());
             };
             options.getRectByIndex = modelCallback;
@@ -201,7 +201,7 @@ void SetRowsGapImpl(Ark_NativePointer node,
     GridModelStatic::SetRowsGap(frameNode, convValue);
 }
 void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String* value)
+                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -211,7 +211,7 @@ void SetScrollBarWidthImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_Number_String* value)
+                           const Opt_Union_Color_I32_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -227,7 +227,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Number_ComputedBarAttribute* value)
+                              const Opt_Callback_I32_F64_ComputedBarAttribute* value)
 {
     using namespace Converter;
     using ResType = std::pair<std::optional<float>, std::optional<float>>;
@@ -240,8 +240,8 @@ void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
     }
     auto onScrollBarUpdate =
         [callback = CallbackHelper(*optValue)](int32_t index, const Dimension& offset) -> ResType {
-        auto arkIndex = ArkValue<Ark_Number>(index);
-        auto arkOffset = ArkValue<Ark_Number>(offset);
+        auto arkIndex = ArkValue<Ark_Int32>(index);
+        auto arkOffset = ArkValue<Ark_Float64>(offset);
         auto arkResult = callback.InvokeWithObtainResult<Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
             arkIndex, arkOffset);
         auto totalOffset = Convert<Dimension>(arkResult.totalOffset).ConvertToPx();
@@ -251,7 +251,7 @@ void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
     GridModelStatic::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
 }
 void SetOnScrollIndexImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Number_Void* value)
+                          const Opt_Callback_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -261,14 +261,14 @@ void SetOnScrollIndexImpl(Ark_NativePointer node,
         return;
     }
     auto onScrollIndex = [arkCallback = CallbackHelper(*optValue)](const int32_t first, const int32_t last) {
-        auto arkFirst = Converter::ArkValue<Ark_Number>(first);
-        auto arkLast = Converter::ArkValue<Ark_Number>(last);
+        auto arkFirst = Converter::ArkValue<Ark_Int32>(first);
+        auto arkLast = Converter::ArkValue<Ark_Int32>(last);
         arkCallback.Invoke(arkFirst, arkLast);
     };
     GridModelStatic::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
 void SetCachedCount0Impl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -304,7 +304,7 @@ void SetMultiSelectableImpl(Ark_NativePointer node,
     GridModelStatic::SetMultiSelectable(frameNode, *convValue);
 }
 void SetMaxCountImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -316,7 +316,7 @@ void SetMaxCountImpl(Ark_NativePointer node,
     GridModelStatic::SetMaxCount(frameNode, *convValue);
 }
 void SetMinCountImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -328,7 +328,7 @@ void SetMinCountImpl(Ark_NativePointer node,
     GridModelStatic::SetMinCount(frameNode, *convValue);
 }
 void SetCellLengthImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -365,13 +365,13 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        GridModelStatic::SetOnItemDragStart(frameNode, nullptr);
+        GridModelStatic::ResetOnItemDragStart(frameNode);
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
                                const ItemDragInfo& dragInfo, int32_t itemIndex) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
+        auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
         auto builderOpt = callback.InvokeWithOptConvertResult<CustomNodeBuilder, Opt_CustomNodeBuilder,
             Callback_Opt_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
         if (builderOpt.has_value()) {
@@ -400,7 +400,7 @@ void SetOnItemDragEnterImpl(Ark_NativePointer node,
     GridModelStatic::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
 }
 void SetOnItemDragMoveImpl(Ark_NativePointer node,
-                           const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
+                           const Opt_Callback_ItemDragInfo_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -413,14 +413,14 @@ void SetOnItemDragMoveImpl(Ark_NativePointer node,
         const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex
     ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
+        auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
+        auto arkInsertIndex = Converter::ArkValue<Ark_Int32>(insertIndex);
         arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex);
     };
     GridModelStatic::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
 }
 void SetOnItemDragLeaveImpl(Ark_NativePointer node,
-                            const Opt_Callback_ItemDragInfo_Number_Void* value)
+                            const Opt_Callback_ItemDragInfo_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -433,14 +433,14 @@ void SetOnItemDragLeaveImpl(Ark_NativePointer node,
         const ItemDragInfo& dragInfo, int32_t itemIndex
     ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
+        auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
         arkCallback.Invoke(arkDragInfo, arkItemIndex);
     };
 
     GridModelStatic::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
 }
 void SetOnItemDropImpl(Ark_NativePointer node,
-                       const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+                       const Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -453,8 +453,8 @@ void SetOnItemDropImpl(Ark_NativePointer node,
         const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess
     ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
-        auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
-        auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
+        auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
+        auto arkInsertIndex = Converter::ArkValue<Ark_Int32>(insertIndex);
         auto arkIsSuccess = Converter::ArkValue<Ark_Boolean>(isSuccess);
         arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex, arkIsSuccess);
     };
@@ -467,7 +467,7 @@ void SetNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::GetOptPtr(value);
     if (!convValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetNestedScroll(frameNode, std::nullopt, std::nullopt);
         return;
     }
     auto forward = Converter::OptConvert<NestedScrollMode>(convValue->scrollForward);
@@ -481,14 +481,14 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridModelStatic::SetScrollEnabled(frameNode, std::nullopt);
         return;
     }
     auto scrollEnabled = *convValue;
     GridModelStatic::SetScrollEnabled(frameNode, scrollEnabled);
 }
 void SetFrictionImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_Resource* value)
+                     const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -514,7 +514,7 @@ void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
     }
     auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
         Dimension dimension, ScrollState state) -> ScrollFrameResult {
-        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);
+        Ark_Float64 arkValue = Converter::ArkValue<Ark_Float64>(dimension);
         Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
         ScrollFrameResult result { .offset = dimension};
         return callback.InvokeWithOptConvertResult<
@@ -543,13 +543,13 @@ void SetOnDidScrollImpl(Ark_NativePointer node,
     auto onDidScroll = [arkCallback = CallbackHelper(callValue.value())](
         Dimension oIn, ScrollState stateIn) {
             auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
-            auto scrollOffset = Converter::ArkValue<Ark_Number>(oIn);
+            auto scrollOffset = Converter::ArkValue<Ark_Float64>(oIn);
             arkCallback.Invoke(scrollOffset, state);
     };
     ScrollableModelStatic::SetOnDidScroll(frameNode, std::move(onDidScroll));
 }
 void SetCachedCount1Impl(Ark_NativePointer node,
-                         const Opt_Number* count,
+                         const Opt_Int32* count,
                          const Opt_Boolean* show)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

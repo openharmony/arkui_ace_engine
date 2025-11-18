@@ -1823,17 +1823,24 @@ export class Filter extends ViewPU {
     refreshFloatFilterBarText() {
         this.floatFilterBarText = '';
         this.floatFilterBarAccessibilityText = '';
-        if (this.selectedFilters) {
-            const b24 = this.selectedFilters?.filter(d24 => d24?.value).map((c24) => {
-                if (typeof c24.value !== 'string') {
-                    return getContext()?.resourceManager?.getStringSync(c24.value?.id);
-                }
-                else {
-                    return c24.value;
-                }
-            });
-            this.floatFilterBarText = b24.join('/');
-            this.floatFilterBarAccessibilityText = b24.join(' ');
+        try {
+            if (this.selectedFilters) {
+                const b24 = this.selectedFilters?.filter(d24 => d24?.value).map((c24) => {
+                    if (typeof c24.value !== 'string') {
+                        return getContext()?.resourceManager?.getStringSync(c24.value?.id);
+                    }
+                    else {
+                        return c24.value;
+                    }
+                });
+                this.floatFilterBarText = b24.join('/');
+                this.floatFilterBarAccessibilityText = b24.join(' ');
+            }
+        }
+        catch (x23) {
+            let y23 = x23?.code;
+            let z23 = x23?.message;
+            hilog.error(0x3900, 'Ace', `Filter selectedValueFilters error, code: ${y23}, message: ${z23}`);
         }
     }
     getFloatAccessibilityText(s23, t23) {

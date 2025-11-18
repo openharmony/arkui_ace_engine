@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -114,12 +115,15 @@ void SetMarkImpl(Ark_NativePointer node,
     if (auto color = Converter::OptConvert<Color>(optValue->strokeColor); color) {
         CheckBoxGroupModelStatic::SetCheckMarkColor(frameNode, color);
     }
-    if (auto size = Converter::OptConvert<Dimension>(optValue->size); size) {
-        CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
-    }
-    if (auto strokeWidth = Converter::OptConvert<Dimension>(optValue->strokeWidth); strokeWidth) {
-        CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, strokeWidth);
-    }
+    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size, DimensionUnit::VP);
+    Validator::ValidateNonPercent(size);
+    Validator::ValidateNonNegative(size);
+    CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
+    auto strokeWidth =
+        Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->strokeWidth, DimensionUnit::VP);
+    Validator::ValidateNonPercent(strokeWidth);
+    Validator::ValidateNonNegative(strokeWidth);
+    CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, strokeWidth);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_OnCheckboxGroupChangeCallback* value)

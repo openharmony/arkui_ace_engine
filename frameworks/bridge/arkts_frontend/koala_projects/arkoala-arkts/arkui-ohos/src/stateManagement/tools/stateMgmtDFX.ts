@@ -15,6 +15,7 @@
 import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { DecoratedV1VariableBase, DecoratedV2VariableBase } from '../decoratorImpl/decoratorBase';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
+import { AceTrace } from '../../base/AceTrace';
 
 export class StateMgmtConsole {
     static log(str: string): void {
@@ -50,6 +51,14 @@ export class DumpInfo {
 }
 
 export class StateMgmtDFX {
+    public static enableDebug: boolean = false;
+
+    public static functionTrace(content: string): boolean {
+        AceTrace.begin(content); 
+        AceTrace.end();
+        return true;
+    }
+    
     static getDecoratedVariableInfo(view: Any, dumpInfo: DumpInfo, isV2: boolean): void {
         if (isV2) {
             StateMgmtDFX.dumpV2VariableInfo(view, dumpInfo);

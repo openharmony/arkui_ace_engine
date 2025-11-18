@@ -237,11 +237,11 @@ public:
     {
         return false;
     }
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return false;
     }
-    bool OutBoundaryCallback() override
+    bool OutBoundaryCallback(bool useCurrentDelta = true) override
     {
         return false;
     }
@@ -429,10 +429,130 @@ HWTEST_F(WebPatternFocusTestNg, OnTextSelected_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->overlayCreating_ = false;
     webPattern->awaitingOnTextSelected_ = true;
+    webPattern->imageOverlayStatus_ = ImageOverlayStatus::HOLD_CREATE;
     webPattern->OnTextSelected();
     ASSERT_NE(webPattern->delegate_, nullptr);
     EXPECT_TRUE(webPattern->overlayCreating_);
     EXPECT_FALSE(webPattern->awaitingOnTextSelected_);
+    EXPECT_EQ(webPattern->imageOverlayStatus_, ImageOverlayStatus::TOUCH_HOLD);
+    // not touch holding OnTextSelected
+    webPattern->overlayCreating_ = false;
+    webPattern->awaitingOnTextSelected_ = true;
+    webPattern->imageOverlayStatus_ = ImageOverlayStatus::NONE;
+    webPattern->OnTextSelected();
+    EXPECT_FALSE(webPattern->overlayCreating_);
+    EXPECT_FALSE(webPattern->awaitingOnTextSelected_);
+#endif
+}
+
+/**
+ * @tc.name: OnTextSelected_002
+ * @tc.desc: OnTextSelected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, OnTextSelected_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->awaitingOnTextSelected_ = false;
+    webPattern->overlayCreating_ = true;
+    webPattern->imageOverlayStatus_ = ImageOverlayStatus::NONE;
+    webPattern->OnTextSelected();
+
+    webPattern->overlayCreating_ = false;
+    webPattern->OnTextSelected();
+
+    webPattern->imageOverlayStatus_ = ImageOverlayStatus::TOUCH_HOLD;
+    webPattern->OnTextSelected();
+    EXPECT_EQ(webPattern->imageOverlayStatus_, ImageOverlayStatus::NONE);
+#endif
+}
+
+/**
+ * @tc.name: DestroyOverlayOnNoResponse_001
+ * @tc.desc: DestroyOverlayOnNoResponse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, DestroyOverlayOnNoResponse_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->awaitingOnTextSelected_ = false;
+    webPattern->overlayCreating_ = true;
+    webPattern->DestroyOverlayOnNoResponse();
+    EXPECT_TRUE(webPattern->overlayCreating_);
+
+    webPattern->awaitingOnTextSelected_ = true;
+    webPattern->DestroyOverlayOnNoResponse();
+    EXPECT_FALSE(webPattern->overlayCreating_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateImageOverlayStatus_001
+ * @tc.desc: UpdateImageOverlayStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, UpdateImageOverlayStatus_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // TOUCH_HOLD
+    webPattern->imageOverlayStatus_ = ImageOverlayStatus::NONE;
+    webPattern->UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_PRESS);
+    webPattern->UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_PRESS);
+    EXPECT_EQ(webPattern->imageOverlayStatus_, ImageOverlayStatus::TOUCH_HOLD);
+
+    // TOUCH_RELEASE
+    webPattern->UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_RELEASE);
+    EXPECT_EQ(webPattern->imageOverlayStatus_, ImageOverlayStatus::NONE);
+
+    // CREATE_OVERLAY
+    webPattern->imageOverlayStatus_ = ImageOverlayStatus::TOUCH_HOLD;
+    webPattern->UpdateImageOverlayStatus(ImageOverlayEvent::CREATE_OVERLAY);
+    webPattern->UpdateImageOverlayStatus(ImageOverlayEvent::CREATE_OVERLAY);
+    EXPECT_EQ(webPattern->imageOverlayStatus_, ImageOverlayStatus::HOLD_CREATE);
+
+    // CREATE_OVERLAY_RELEASE
+    webPattern->UpdateImageOverlayStatus(ImageOverlayEvent::CREATE_OVERLAY_RELEASE);
+    webPattern->UpdateImageOverlayStatus(ImageOverlayEvent::CREATE_OVERLAY_RELEASE);
+    EXPECT_EQ(webPattern->imageOverlayStatus_, ImageOverlayStatus::TOUCH_HOLD);
+
+    // INVALID
+    webPattern->imageOverlayStatus_ = ImageOverlayStatus::HOLD_CREATE;
+    webPattern->UpdateImageOverlayStatus(static_cast<ImageOverlayEvent>(100));
+    EXPECT_EQ(webPattern->imageOverlayStatus_, ImageOverlayStatus::HOLD_CREATE);
+
 #endif
 }
 

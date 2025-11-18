@@ -90,6 +90,8 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback) {
 
 void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback) {}
 
+void FormManagerDelegate::AddFormRenderDiedCallback(FormRenderDiedCallback&& callback) {}
+
 void FormManagerDelegate::ResetForm() {}
 
 void FormManagerDelegate::ReleaseForm() {}
@@ -154,5 +156,14 @@ bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, con
     const int32_t dimension, const bool isDisablePolicy)
 {
     return false;
+}
+
+void SetFormRendererDispatcher(sptr<IFormRendererDispatcher> &rendererDispatcher) {}
+
+void ClearFormRendererDispatcher() {}
+
+sptr<IFormRendererDispatcher> GetFormRendererDispatcher()
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

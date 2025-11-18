@@ -252,7 +252,7 @@ ani_object WrapBusinessError(ani_env* env, const char *msg, ani_int code)
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         return nullptr;
     }
@@ -365,6 +365,24 @@ bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
         return false;
     }
     result = static_cast<double>(aniResult);
+    return true;
+}
+
+bool AniUtils::GetOptionalInt(ani_env* env, ani_ref value, int32_t& result)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(value, &isUndefined) != ANI_OK) {
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+    ani_int aniResult;
+    if (env->Object_CallMethodByName_Int(static_cast<ani_object>(value), "toInt", ":i", &aniResult) != ANI_OK) {
+        return false;
+    }
+    result = static_cast<int32_t>(aniResult);
     return true;
 }
 

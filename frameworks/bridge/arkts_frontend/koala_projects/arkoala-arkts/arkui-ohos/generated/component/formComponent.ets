@@ -135,7 +135,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._FormComponentAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnRouterAttribute(value: ((value0: Object) => void) | undefined): void {
+    setOnRouterAttribute(value: ((value0: RouterCallbackInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -217,10 +217,12 @@ export interface FormInfo {
     want?: Want;
     renderingMode?: FormRenderingMode;
     shape?: FormShape;
+    exemptAppLock?: boolean;
 }
 export interface FormCallbackInfo {
     id: int64;
     idString: string;
+    isLocked?: boolean;
 }
 export interface FormSize {
     width: double;
@@ -229,6 +231,13 @@ export interface FormSize {
 export interface ErrorInformation {
     errcode: int32;
     msg: string;
+}
+export interface RouterCallbackInfo {
+    action: string;
+    bundleName: string;
+    moduleName: string;
+    abilityName: string;
+    params: string;
 }
 export interface FormComponentAttribute extends CommonMethod {
     setFormComponentOptions(value: FormInfo): this {
@@ -251,7 +260,7 @@ export interface FormComponentAttribute extends CommonMethod {
     onError(value: ((value0: ErrorInformation) => void) | undefined): this {
         throw new Error("Unimplemented method onError")
     }
-    onRouter(value: ((value0: Object) => void) | undefined): this {
+    onRouter(value: ((value0: RouterCallbackInfo) => void) | undefined): this {
         throw new Error("Unimplemented method onRouter")
     }
     onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
@@ -275,7 +284,7 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     visibility_value?: Visibility | undefined
     onAcquired_value?: ((value0: FormCallbackInfo) => void) | undefined
     onError_value?: ((value0: ErrorInformation) => void) | undefined
-    onRouter_value?: ((value0: Object) => void) | undefined
+    onRouter_value?: ((value0: RouterCallbackInfo) => void) | undefined
     onUninstall_value?: ((value0: FormCallbackInfo) => void) | undefined
     onLoad_value?: VoidCallback | undefined
     onUpdate_value?: ((value0: FormCallbackInfo) => void) | undefined
@@ -304,7 +313,7 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     onError(value: ((value0: ErrorInformation) => void) | undefined): this {
         return this
     }
-    onRouter(value: ((value0: Object) => void) | undefined): this {
+    onRouter(value: ((value0: RouterCallbackInfo) => void) | undefined): this {
         return this
     }
     onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
@@ -332,6 +341,7 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setFormComponentOptions")) {
             const value_casted = value as (FormInfo)
             this.getPeer()?.setFormComponentOptionsAttribute(value_casted)
+            this.applyOptionsFinish('FormComponentAttribute');
             return this
         }
         return this
@@ -392,9 +402,9 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    public onRouter(value: ((value0: Object) => void) | undefined): this {
+    public onRouter(value: ((value0: RouterCallbackInfo) => void) | undefined): this {
         if (this.checkPriority("onRouter")) {
-            const value_casted = value as (((value0: Object) => void) | undefined)
+            const value_casted = value as (((value0: RouterCallbackInfo) => void) | undefined)
             this.getPeer()?.setOnRouterAttribute(value_casted)
             return this
         }
@@ -431,6 +441,9 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -484,6 +497,31 @@ export class ErrorInformation_serializer {
         return value
     }
 }
+export class RouterCallbackInfo_serializer {
+    public static write(buffer: SerializerBase, value: RouterCallbackInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAction = value.action;
+        valueSerializer.writeString(valueHolderForAction);
+        const valueHolderForBundleName = value.bundleName;
+        valueSerializer.writeString(valueHolderForBundleName);
+        const valueHolderForModuleName = value.moduleName;
+        valueSerializer.writeString(valueHolderForModuleName);
+        const valueHolderForAbilityName = value.abilityName;
+        valueSerializer.writeString(valueHolderForAbilityName);
+        const valueHolderForParams = value.params;
+        valueSerializer.writeString(valueHolderForParams);
+    }
+    public static read(buffer: DeserializerBase): RouterCallbackInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const actionTmpResult = (valueDeserializer.readString() as string)
+        const bundleNameTmpResult = (valueDeserializer.readString() as string)
+        const moduleNameTmpResult = (valueDeserializer.readString() as string)
+        const abilityNameTmpResult = (valueDeserializer.readString() as string)
+        const paramsTmpResult = (valueDeserializer.readString() as string)
+        let value : RouterCallbackInfo = ({action: actionTmpResult, bundleName: bundleNameTmpResult, moduleName: moduleNameTmpResult, abilityName: abilityNameTmpResult, params: paramsTmpResult} as RouterCallbackInfo)
+        return value
+    }
+}
 export class FormCallbackInfo_serializer {
     public static write(buffer: SerializerBase, value: FormCallbackInfo): void {
         let valueSerializer : SerializerBase = buffer
@@ -491,12 +529,15 @@ export class FormCallbackInfo_serializer {
         valueSerializer.writeInt64(valueHolderForId)
         const valueHolderForIdString  = value.idString
         valueSerializer.writeString(valueHolderForIdString)
+        const valueHolderIsLocked  = value.isLocked
+        valueSerializer.writeBoolean(valueHolderIsLocked)
     }
     public static read(buffer: DeserializerBase): FormCallbackInfo {
         let valueDeserializer : DeserializerBase = buffer
         const idTmpResult : int64 = valueDeserializer.readInt64()
         const idStringTmpResult : string = (valueDeserializer.readString() as string)
-        let value : FormCallbackInfo = ({id: idTmpResult, idString: idStringTmpResult} as FormCallbackInfo)
+        const isLockedTmpResult : boolean = valueDeserializer.readBoolean()
+        let value : FormCallbackInfo = ({id: idTmpResult, idString: idStringTmpResult, isLocked: isLockedTmpResult} as FormCallbackInfo)
         return value
     }
 }
@@ -505,11 +546,11 @@ export class FormInfo_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForId  = value.id
         if (valueHolderForId instanceof int64) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForIdForIdx0  = valueHolderForId as int64
             valueSerializer.writeInt64(valueHolderForIdForIdx0)
         } else if (valueHolderForId instanceof string) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForIdForIdx1  = valueHolderForId as string
             valueSerializer.writeString(valueHolderForIdForIdx1)
         }
@@ -561,6 +602,14 @@ export class FormInfo_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForExemptAppLock  = value.exemptAppLock
+        if (valueHolderForExemptAppLock !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForExemptAppLockTmpValue  = valueHolderForExemptAppLock!
+            valueSerializer.writeBoolean(valueHolderForExemptAppLockTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): FormInfo {
         let valueDeserializer : DeserializerBase = buffer
@@ -608,7 +657,13 @@ export class FormInfo_serializer {
             shapeTmpBuf = FormShape.fromValue(valueDeserializer.readInt32())
         }
         const shapeTmpResult : FormShape | undefined = shapeTmpBuf
-        let value : FormInfo = ({id: idTmpResult, name: nameTmpResult, bundle: bundleTmpResult, ability: abilityTmpResult, module: moduleTmpResult, dimension: dimensionTmpResult, temporary: temporaryTmpResult, want: wantTmpResult, renderingMode: renderingModeTmpResult, shape: shapeTmpResult} as FormInfo)
+        const exemptAppLockTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let exemptAppLockTmpBuf : boolean | undefined = undefined
+        if ((exemptAppLockTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            exemptAppLockTmpBuf = valueDeserializer.readBoolean()
+        }
+        const exemptAppLockTmpResult : boolean | undefined = exemptAppLockTmpBuf
+        let value : FormInfo = ({id: idTmpResult, name: nameTmpResult, bundle: bundleTmpResult, ability: abilityTmpResult, module: moduleTmpResult, dimension: dimensionTmpResult, temporary: temporaryTmpResult, want: wantTmpResult, renderingMode: renderingModeTmpResult, shape: shapeTmpResult, exemptAppLock: exemptAppLockTmpResult} as FormInfo)
         return value
     }
 }

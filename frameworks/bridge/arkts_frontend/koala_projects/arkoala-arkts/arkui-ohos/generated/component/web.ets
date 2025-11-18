@@ -20,7 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, AttributeModifier, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
 import { default as webview } from "@ohos.web.webview"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
@@ -1238,19 +1238,19 @@ export class WebResourceResponse implements MaterializedBase {
     setResponseData_serialize(data: string | int32 | Resource | ArrayBuffer): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (data instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const dataForIdx0  = data as string
             thisSerializer.writeString(dataForIdx0)
         } else if (data instanceof int32) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const dataForIdx1  = data as int32
             thisSerializer.writeInt32(dataForIdx1)
         } else if (data instanceof Resource) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const dataForIdx2  = data as Resource
             Resource_serializer.write(thisSerializer, dataForIdx2)
         } else if (data instanceof ArrayBuffer) {
-            thisSerializer.writeInt8((3).toChar())
+            thisSerializer.writeInt8((3).toByte())
             const dataForIdx3  = data as ArrayBuffer
             thisSerializer.writeBuffer(dataForIdx3)
         }
@@ -1869,7 +1869,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnHttpAuthRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): void {
+    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2507,11 +2507,11 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof NestedScrollOptions) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as NestedScrollOptions
                 NestedScrollOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof NestedScrollOptionsExt) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as NestedScrollOptionsExt
                 NestedScrollOptionsExt_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -3107,7 +3107,9 @@ export enum ThreatType {
     THREAT_ILLEGAL = 0,
     THREAT_FRAUD = 1,
     THREAT_RISK = 2,
-    THREAT_WARNING = 3
+    THREAT_WARNING = 3,
+    THREAT_NONE = 4,
+    THREAT_UNPROCESSED = 5
 }
 export interface WebMediaOptions {
     resumeInterval?: int32;
@@ -3119,8 +3121,8 @@ export interface ScreenCaptureConfig {
 }
 export interface FullScreenEnterEvent {
     handler: FullScreenExitHandler;
-    videoWidth?: number;
-    videoHeight?: number;
+    videoWidth?: int32;
+    videoHeight?: int32;
 }
 export type OnFullScreenEnterCallback = (event: FullScreenEnterEvent) => void;
 export type MouseInfoCallback = (event: NativeEmbedMouseInfo) => void;
@@ -3201,7 +3203,7 @@ export enum ContextMenuInputFieldType {
     PlainText = 1,
     PASSWORD = 2,
     Password = 2,
-    NUMBER = 3,
+    NUMBER_DATA = 3,
     Number = 3,
     TELEPHONE = 4,
     Telephone = 4,
@@ -3248,6 +3250,7 @@ export interface WebOptions {
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
+    emulateTouchFromMouseEvent?: boolean;
 }
 export interface ScriptItem {
     script: string;
@@ -3527,13 +3530,13 @@ export enum PdfLoadResult {
     PARSE_ERROR_HANDLER = 4
 }
 export interface SelectionMenuOptionsExt {
-    onAppear?: (() => void);
-    onDisappear?: (() => void);
+    onAppear?: VoidCallback;
+    onDisappear?: VoidCallback;
     preview?: CustomBuilder;
     menuType?: MenuType;
     previewMenuOptions?: PreviewMenuOptions;
-    onMenuShow?: (() => void);
-    onMenuHide?: (() => void);
+    onMenuShow?: VoidCallback;
+    onMenuHide?: VoidCallback;
 }
 export interface BlankScreenDetails {
     detectedContentfulNodesCount?: int32;
@@ -3702,7 +3705,7 @@ export interface WebAttribute extends CommonMethod {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         throw new Error("Unimplemented method onHttpAuthRequest")
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         throw new Error("Unimplemented method onInterceptRequest")
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -4027,7 +4030,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onFullScreenEnter_value?: OnFullScreenEnterCallback | undefined
     onScaleChange_value?: ((value0: OnScaleChangeEvent) => void) | undefined
     onHttpAuthRequest_value?: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined
-    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined
+    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined
     onPermissionRequest_value?: ((value0: OnPermissionRequestEvent) => void) | undefined
     onScreenCaptureRequest_value?: ((value0: OnScreenCaptureRequestEvent) => void) | undefined
     onContextMenuShow_value?: ((value0: OnContextMenuShowEvent) => boolean) | undefined
@@ -4261,7 +4264,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         return this
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         return this
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -4574,6 +4577,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("setWebOptions")) {
             const value_casted = value as (WebOptions)
             this.getPeer()?.setWebOptionsAttribute(value_casted)
+            this.applyOptionsFinish('WebAttribute');
             return this
         }
         return this
@@ -4652,9 +4656,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     }
     public javaScriptProxy(value: JavaScriptProxy | undefined): this {
         if (this.checkPriority("javaScriptProxy")) {
-            const value_casted = value as (JavaScriptProxy | undefined)
-            this.getPeer()?.setJavaScriptProxyAttribute(value_casted)
-            return this
+            hookJavaScriptProxy(this, value)
         }
         return this
     }
@@ -4954,9 +4956,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         if (this.checkPriority("onInterceptRequest")) {
-            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined)
+            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined)
             this.getPeer()?.setOnInterceptRequestAttribute(value_casted)
             return this
         }
@@ -5694,6 +5696,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -6321,7 +6326,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoWidthTmpValue  = valueHolderForVideoWidth!
-            valueSerializer.writeNumber(valueHolderForVideoWidthTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6329,7 +6334,7 @@ export class FullScreenEnterEvent_serializer {
         if (valueHolderForVideoHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForVideoHeightTmpValue  = valueHolderForVideoHeight!
-            valueSerializer.writeNumber(valueHolderForVideoHeightTmpValue)
+            valueSerializer.writeInt32(valueHolderForVideoHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6338,17 +6343,17 @@ export class FullScreenEnterEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const handlerTmpResult : FullScreenExitHandler = (FullScreenExitHandler_serializer.read(valueDeserializer) as FullScreenExitHandler)
         const videoWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoWidthTmpBuf : number | undefined = undefined
+        let videoWidthTmpBuf : int32 | undefined = undefined
         if ((videoWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoWidthTmpBuf = (valueDeserializer.readNumber() as number)
+            videoWidthTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoWidthTmpResult : number | undefined = videoWidthTmpBuf
+        const videoWidthTmpResult : int32 | undefined = videoWidthTmpBuf
         const videoHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let videoHeightTmpBuf : number | undefined = undefined
+        let videoHeightTmpBuf : int32 | undefined = undefined
         if ((videoHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoHeightTmpBuf = (valueDeserializer.readNumber() as number)
+            videoHeightTmpBuf = (valueDeserializer.readInt32() as int32)
         }
-        const videoHeightTmpResult : number | undefined = videoHeightTmpBuf
+        const videoHeightTmpResult : int32 | undefined = videoHeightTmpBuf
         let value : FullScreenEnterEvent = ({handler: handlerTmpResult, videoWidth: videoWidthTmpResult, videoHeight: videoHeightTmpResult} as FullScreenEnterEvent)
         return value
     }
@@ -7548,11 +7553,11 @@ export class WebOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForSrc  = value.src
         if (valueHolderForSrc instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSrcForIdx0  = valueHolderForSrc as string
             valueSerializer.writeString(valueHolderForSrcForIdx0)
         } else if (valueHolderForSrc instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSrcForIdx1  = valueHolderForSrc as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
         }
@@ -7579,6 +7584,14 @@ export class WebOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSharedRenderProcessTokenTmpValue  = valueHolderForSharedRenderProcessToken!
             valueSerializer.writeString(valueHolderForSharedRenderProcessTokenTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEmulateTouchFromMouseEvent  = value.emulateTouchFromMouseEvent
+        if (valueHolderForEmulateTouchFromMouseEvent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmulateTouchFromMouseEventTmpValue  = valueHolderForEmulateTouchFromMouseEvent!
+            valueSerializer.writeBoolean(valueHolderForEmulateTouchFromMouseEventTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7614,7 +7627,15 @@ export class WebOptions_serializer {
             sharedRenderProcessTokenTmpBuf = (valueDeserializer.readString() as string)
         }
         const sharedRenderProcessTokenTmpResult : string | undefined = sharedRenderProcessTokenTmpBuf
-        let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult, incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult} as WebOptions)
+        const emulateTouchFromMouseEventTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let emulateTouchFromMouseEventTmpBuf : boolean | undefined = undefined
+        if ((emulateTouchFromMouseEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            emulateTouchFromMouseEventTmpBuf = valueDeserializer.readBoolean()
+        }
+        const emulateTouchFromMouseEventTmpResult : boolean | undefined = emulateTouchFromMouseEventTmpBuf
+        let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult,
+            incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult,
+            emulateTouchFromMouseEvent: emulateTouchFromMouseEventTmpResult} as WebOptions)
         return value
     }
 }
@@ -7711,7 +7732,7 @@ export class SelectionMenuOptionsExt_serializer {
     public static read(buffer: DeserializerBase): SelectionMenuOptionsExt {
         let valueDeserializer : DeserializerBase = buffer
         const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onAppearTmpBuf : (() => void) | undefined = undefined
+        let onAppearTmpBuf : VoidCallback | undefined = undefined
         if ((onAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7721,14 +7742,14 @@ export class SelectionMenuOptionsExt_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
+        const onAppearTmpResult : VoidCallback | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDisappearTmpBuf : (() => void) | undefined = undefined
+        let onDisappearTmpBuf : VoidCallback | undefined = undefined
         if ((onDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7738,12 +7759,12 @@ export class SelectionMenuOptionsExt_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
+        const onDisappearTmpResult : VoidCallback | undefined = onDisappearTmpBuf
         const previewTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let previewTmpBuf : CustomBuilder | undefined = undefined
         if ((previewTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -7774,7 +7795,7 @@ export class SelectionMenuOptionsExt_serializer {
         }
         const previewMenuOptionsTmpResult : PreviewMenuOptions | undefined = previewMenuOptionsTmpBuf
         const onMenuShowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onMenuShowTmpBuf : (() => void) | undefined = undefined
+        let onMenuShowTmpBuf : VoidCallback | undefined = undefined
         if ((onMenuShowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onMenuShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7784,14 +7805,14 @@ export class SelectionMenuOptionsExt_serializer {
                 onMenuShowTmpBuf_BufArgsSerializer.writeInt32(onMenuShowTmpBuf_BufResource.resourceId);
                 onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCall);
                 onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onMenuShowTmpBuf_BufArgsSerializer.asBuffer(), onMenuShowTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onMenuShowTmpBuf_BufArgsSerializer.asBuffer(), onMenuShowTmpBuf_BufArgsSerializer.length());
                 onMenuShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onMenuShowTmpResult : (() => void) | undefined = onMenuShowTmpBuf
+        const onMenuShowTmpResult : VoidCallback | undefined = onMenuShowTmpBuf
         const onMenuHideTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onMenuHideTmpBuf : (() => void) | undefined = undefined
+        let onMenuHideTmpBuf : VoidCallback | undefined = undefined
         if ((onMenuHideTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onMenuHideTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuHideTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7801,12 +7822,12 @@ export class SelectionMenuOptionsExt_serializer {
                 onMenuHideTmpBuf_BufArgsSerializer.writeInt32(onMenuHideTmpBuf_BufResource.resourceId);
                 onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCall);
                 onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onMenuHideTmpBuf_BufArgsSerializer.asBuffer(), onMenuHideTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onMenuHideTmpBuf_BufArgsSerializer.asBuffer(), onMenuHideTmpBuf_BufArgsSerializer.length());
                 onMenuHideTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onMenuHideTmpResult : (() => void) | undefined = onMenuHideTmpBuf
+        const onMenuHideTmpResult : VoidCallback | undefined = onMenuHideTmpBuf
         let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult, onMenuShow: onMenuShowTmpResult, onMenuHide: onMenuHideTmpResult} as SelectionMenuOptionsExt)
         return value
     }

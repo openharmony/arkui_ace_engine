@@ -28,16 +28,17 @@ import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
 import { setUIDetachedRootCreator } from "./CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./base"
-import { checkEvents, wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
+import { checkEvents, registerApiEventHandler, wrapSystemCallback, KUint8ArrayPtr } from '@koalaui/interop'
 import { Routed } from "./base"
 import router from "@ohos/router"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
 import { updateLazyItems } from "arkui/base/LazyForEachImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
-import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
+import { deserializeAndCallCallback, registerArkuiApiHandler } from './framework/peers/CallbackDeserializeCall'
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
-import { StateUpdateLoop } from './stateManagement'
+import { StateMgmtDFX, StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
+import { flushBuilderRootNode } from './BuilderNode'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -223,6 +224,7 @@ export class Application {
         this.startParam = startParam
         this.userView = userView
         this.entryPoint = entryPoint
+        setUIDetachedRootCreator(createUiDetachedRoot)
     }
 
     static createMemoRootState(manager: StateManager,
@@ -252,6 +254,7 @@ export class Application {
     start(plugin: boolean): pointer {
         InteropNativeModule._NativeLog("ArkTS Application.start plugin: " + plugin)
         this.plugin = plugin
+        AceTrace.updateAttributeSetTraceEnabled()
         RuntimeProfiler.initTrace(AceTrace.begin, AceTrace.end)
         RuntimeProfiler.initNativeLog(InteropNativeModule._NativeLog)
         if (this.withLog) UserView.startNativeLog(1)
@@ -396,7 +399,7 @@ export class Application {
             detachedRoot.compute()
         }
         updateLazyItems()
-        // flushBuilderRootNode()
+        flushBuilderRootNode()
         this.uiContext!.updateParallelizeItemNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
@@ -475,6 +478,9 @@ export class Application {
             }
         }
         leaveForeignContext()
+        if (this.uiContext && this.uiContext!.isUpdateConfiguration()) {
+            this.uiContext!.setUpdateConfiguration(false);
+        }
         return this.exitApp
     }
 
@@ -525,6 +531,19 @@ export class Application {
         return "0"
     }
 
+    notifyConfigurationChange() {
+        if (!this.uiContext || !this.manager) {
+            console.warn("Arkoala haven't been initialized !");
+            return;
+        }
+        this.uiContext!.setUpdateConfiguration(true);
+        let uiContextRouter = this.uiContext!.getRouter();
+        let rootState = uiContextRouter.getStateRoot();
+        rootState?.forceCompleteRerender();
+        this.manager!.syncChanges();
+        this.manager!.updateSnapshot();
+    }
+
     static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined): Application {
         if (!userView && !entryPoint && startUrl != "__INTEROP__") {
             throw new Error(`Invalid EntryPoint`)
@@ -535,10 +554,29 @@ export class Application {
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         wrapSystemApiHandlerCallback()
         if (Application.firstRegisterArkuiApiHandler) {
-            registerArkuiApiHandler()
+            registerApiEventHandler(10, (thisDeserializer: DeserializerBase): void => {
+                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    deserializeAndCallCallback(thisDeserializer);
+                });
+            });
             Application.firstRegisterArkuiApiHandler = false
         }
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
+    }
+
+    static createApplication(param: ApplicationConstructorParam): Application {
+        if (param.enableDebug) {
+            console.log('StateMgmt set enableDebug true');
+            StateMgmtDFX.enableDebug = param.enableDebug;
+        }
+        return Application.createApplication(
+            param.startUrl,
+            param.startParams,
+            param.useNativeLog,
+            param.moduleName,
+            param.userView,
+            param.entryPoint
+        );
     }
     static registerNativeModulePreloader(): void {
         registerNativeModuleLibraryName('InteropNativeModule', 'ArkoalaNative_ark.z');
@@ -557,4 +595,31 @@ function makeClickEvent(x: number, y: number): ClickEvent {
     result.x = x
     result.y = y
     return result
+}
+
+class ApplicationConstructorParam {
+    public startUrl: string;
+    public startParams: string;
+    public useNativeLog: boolean;
+    public moduleName: string;
+    public userView: UserView | undefined;
+    public entryPoint: EntryPoint | undefined;
+    public enableDebug: boolean;
+    constructor(
+        startUrl: string,
+        startParams: string,
+        useNativeLog: boolean,
+        moduleName: string,
+        userView: UserView | undefined,
+        entryPoint: EntryPoint | undefined,
+        enableDebug: boolean
+    ) {
+        this.startUrl = startUrl;
+        this.startParams = startParams;
+        this.useNativeLog = useNativeLog;
+        this.moduleName = moduleName;
+        this.userView = userView;
+        this.entryPoint = entryPoint;
+        this.enableDebug = enableDebug;
+    }
 }

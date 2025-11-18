@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { ArkBaseNode } from "./ArkBaseNode";
-import { FlowItemAttribute, ArkFlowItemPeer } from "../component/flowItem";
+import { ArkBaseNode } from './ArkBaseNode';
+import { FlowItemAttribute, ArkFlowItemPeer, AttributeModifier, CommonMethod } from '../component/flowItem';
 export class ArkFlowItemNode extends ArkBaseNode implements FlowItemAttribute {
     constructParam(...param: Object[]): this {
         this.getPeer()?.setFlowItemOptionsAttribute()
@@ -31,5 +31,8 @@ export class ArkFlowItemNode extends ArkBaseNode implements FlowItemAttribute {
     }
     allowChildCount(): number {
         return 1;
+    }
+    attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }

@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -95,12 +96,13 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
             return StyledPlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
         }
         contentSize = PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
-        if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
-            paragraph_->GetLineCount() > 1 && isPlaceHolderOverSize_ &&
-            pattern->IsTextArea() && !pattern->IsNormalInlineState()) {
-                contentSize = ReMeasureContentForPlaceholder(textFieldContentConstraint, layoutWrapper,
-                    textStyle, textFieldContentConstraint);
-            }
+        contentSize = ShouldReMeasurePlaceholder(pattern) ?
+            ReMeasureContentForPlaceholder(
+                textFieldContentConstraint,
+                layoutWrapper,
+                textStyle,
+                textFieldContentConstraint) :
+            contentSize;
     } else {
         contentSize = TextAreaMeasureContent(textFieldContentConstraint, layoutWrapper);
     }
@@ -108,6 +110,16 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         CalcMeasureContentWithMinLines(contentSize, layoutWrapper, contentConstraint);
     }
     return contentSize;
+}
+
+bool TextAreaLayoutAlgorithm::ShouldReMeasurePlaceholder(const RefPtr<TextFieldPattern>& pattern) const
+{
+    CHECK_NULL_RETURN(pattern, false);
+    auto property = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    return property && property->GetShowCounterValue(false) && property->HasMaxLength() &&
+           paragraph_->GetLineCount() > 1 && isPlaceHolderOverSize_ && pattern->IsTextArea() &&
+           !pattern->IsNormalInlineState() && DynamicCast<CounterDecorator>(pattern->GetCounterDecorator()) &&
+           DynamicCast<CounterDecorator>(pattern->GetCounterDecorator())->HasContent();
 }
 
 std::optional<SizeF> TextAreaLayoutAlgorithm::ReMeasureContentForPlaceholder(

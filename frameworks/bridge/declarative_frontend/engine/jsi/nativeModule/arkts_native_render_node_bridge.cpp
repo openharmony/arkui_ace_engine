@@ -183,6 +183,17 @@ ArkUINativeModuleValue RenderNodeBridge::CreateRenderNode(ArkUIRuntimeCallInfo* 
     return NativeUtilsBridge::CreateStrongRef(vm, frameNode);
 }
 
+ArkUINativeModuleValue RenderNodeBridge::CreateRenderNodeWithPtrVal(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    int64_t ptr = secondArg->IntegerValue(vm);
+    FrameNode* nodePtr = reinterpret_cast<FrameNode*>(ptr);
+    auto frameNode = AceType::Claim(nodePtr);
+    RenderNodeBridge::SetOnDraw(frameNode, runtimeCallInfo);
+    return NativeUtilsBridge::CreateStrongRef(vm, frameNode);
+}
+
 void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal<panda::ObjectRef>> object,
     NG::DrawingContext& context, Local<panda::StringRef> funcName)
 {
@@ -275,6 +286,11 @@ ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto childNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
+    auto* childNativeUINode = reinterpret_cast<UINode*>(childNativeNode);
+    CHECK_NULL_RETURN(childNativeUINode, panda::JSValueRef::Undefined(vm));
+    if (childNativeUINode->IsAdopted()) {
+        return panda::NumberRef::New(vm, ERROR_CODE_NODE_IS_ADOPTED);
+    }
     GetArkUINodeModifiers()->getRenderNodeModifier()->appendChild(nativeNode, childNativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -286,6 +302,11 @@ ArkUINativeModuleValue RenderNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto child = nodePtr(secondArg->ToNativePointer(vm)->Value());
+    auto* childNativeUINode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(childNativeUINode, panda::JSValueRef::Undefined(vm));
+    if (childNativeUINode->IsAdopted()) {
+        return panda::NumberRef::New(vm, ERROR_CODE_NODE_IS_ADOPTED);
+    }
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
     if (thirdArg.IsNull()) {
         GetArkUINodeModifiers()->getRenderNodeModifier()->insertChildAfter(nativeNode, child, nullptr);

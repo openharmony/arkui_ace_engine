@@ -265,7 +265,8 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& textDetectTypes)
 
 bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origin text entry");
+    TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: Parse origin text entry, id: %{public}i",
+        GetHost() ? GetHost()->GetId() : -1);
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(Container::CurrentId());
     CHECK_NULL_RETURN(runtimeContext, false);
     if (runtimeContext->GetBundleName() != entityJson->GetString("bundleName")) {
@@ -276,7 +277,7 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
     }
     auto aiSpanArray = entityJson->GetValue("entity");
     if (aiSpanArray->IsNull() || !aiSpanArray->IsArray()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT, "Wrong AI entity");
+        TAG_LOGW(AceLogTag::ACE_TEXT, "TextAI: Wrong AI entity");
         return false;
     }
 
@@ -300,7 +301,7 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
         GetAIEntityMenu();
     }
 
-    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origin text successful");
+    TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: Parse origin text successful");
     return true;
 }
 
@@ -319,7 +320,7 @@ void DataDetectorAdapter::PreprocessTextDetect()
     }
 }
 
-void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText)
+void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText, uint64_t taskId)
 {
     CHECK_NULL_VOID(!textDetectTypes_.empty());
     TextDataDetectInfo info;
@@ -330,16 +331,20 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     CHECK_NULL_VOID(context);
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this),
-        instanceID, startPos, detectTypesSet = textDetectTypesSet_](const TextDataDetectResult result) {
+        instanceID, startPos, detectTypesSet = textDetectTypesSet_, taskId](const TextDataDetectResult result) {
         ContainerScope scope(instanceID);
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        TAG_LOGD(AceLogTag::ACE_TEXT, "detectBackgroundTaskCallback, taskId=%{public}" PRIu64 "", taskId);
         CHECK_NULL_VOID(context);
+        auto dataDetectorAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
-            [result, weak, instanceID, startPos, detectTypesSet] {
+            [result, weak, instanceID, startPos, detectTypesSet, taskId] {
+                TAG_LOGD(AceLogTag::ACE_TEXT, "detectParseResult, taskId=%{public}" PRIu64 "", taskId);
                 ContainerScope scope(instanceID);
                 auto dataDetectorAdapter = weak.Upgrade();
-                CHECK_NULL_VOID(dataDetectorAdapter);
+                CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
                 if (detectTypesSet != dataDetectorAdapter->textDetectTypesSet_) {
                     return;
                 }
@@ -353,9 +358,10 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
-        [info, textFunc] {
+        [info, textFunc, taskId] {
             TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::InitTextDetect, start AI detect, length: %{public}zu",
                 info.text.size());
+            TAG_LOGD(AceLogTag::ACE_TEXT, "detectBackgroundTask, taskId=%{public}" PRIu64 "", taskId);
             DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
         },
         "ArkUITextInitDataDetect");
@@ -387,22 +393,26 @@ void DataDetectorAdapter::UpdateAISelectMenu()
     }
 }
 
-void DataDetectorAdapter::HandleTextUrlDetect()
+void DataDetectorAdapter::HandleTextUrlDetect(uint64_t taskId)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this),
-        instanceID, detectTypesSet = textDetectTypesSet_](const std::vector<UrlEntity>& urlEntities) {
+        instanceID, detectTypesSet = textDetectTypesSet_, taskId](const std::vector<UrlEntity>& urlEntities) {
         ContainerScope scope(instanceID);
+        TAG_LOGD(AceLogTag::ACE_TEXT, "urlBackgroundTaskCallback, taskId=%{public}" PRIu64 "", taskId);
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
+        auto dataDetectorAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
-            [urlEntities, weak, instanceID, detectTypesSet] {
+            [urlEntities, weak, instanceID, detectTypesSet, taskId] {
                 ContainerScope scope(instanceID);
                 auto dataDetectorAdapter = weak.Upgrade();
-                CHECK_NULL_VOID(dataDetectorAdapter);
+                CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
+                TAG_LOGD(AceLogTag::ACE_TEXT, "urlParseResult, taskId=%{public}" PRIu64 "", taskId);
                 if (detectTypesSet != dataDetectorAdapter->textDetectTypesSet_) {
                     return;
                 }
@@ -414,8 +424,10 @@ void DataDetectorAdapter::HandleTextUrlDetect()
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
-        [text = UtfUtils::Str16DebugToStr8(textForAI_), func = std::move(textFunc)] {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "Start url entity detect using AI");
+        [text = UtfUtils::Str16DebugToStr8(textForAI_), func = std::move(textFunc), taskId] {
+            TAG_LOGI(AceLogTag::ACE_TEXT,
+                "TextAI: Start url entity detect using AI, length: %{public}zu", text.length());
+            TAG_LOGD(AceLogTag::ACE_TEXT, "urlBackgroundTask, taskId=%{public}" PRIu64 "", taskId);
             func(DataUrlAnalyzerMgr::GetInstance().AnalyzeUrls(text));
         },
         "ArkUITextInitUrlDetect");
@@ -423,6 +435,8 @@ void DataDetectorAdapter::HandleTextUrlDetect()
 
 void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::HandleUrlResult, id: %{public}i",
+        GetHost() ? GetHost()->GetId() : -1);
     for (const auto& entity : urlEntities) {
         auto iter = aiSpanMap_.find(entity.charOffset);
         if (iter != aiSpanMap_.end() && iter->second.content.length() >= entity.text.length()) {
@@ -435,6 +449,7 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
         aiSpan.content = entity.text;
         aiSpan.type = TextDataDetectType::URL;
         aiSpanMap_[aiSpan.start] = aiSpan;
+        TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: the url entity length is: %{public}zu", aiSpan.content.length());
     }
     if (textDetectResult_.menuOptionAndAction.empty()) {
         GetAIEntityMenu();
@@ -467,6 +482,8 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
 
 void DataDetectorAdapter::FireFinalResult()
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "TextAI: FireFinalResult, id: %{public}i", GetHost() ? GetHost()->GetId() : -1);
     aiDetectInitialized_ = true;
     auto entityJsonArray = JsonUtil::CreateArray(true);
     // process with overlapping entities, leaving only the earlier ones
@@ -498,7 +515,7 @@ void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos)
 {
     if (!jsonValue || !jsonValue->IsArray()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT, "Wrong AI result");
+        TAG_LOGW(AceLogTag::ACE_TEXT, "TextAI: Wrong AI result");
         return;
     }
 
@@ -531,7 +548,7 @@ void DataDetectorAdapter::ParseAIJson(
         item->Put("costTime", costTime.count());
         item->Put("resultCode", textDetectResult_.code);
         entityJson_[start] = item->ToString();
-        TAG_LOGI(AceLogTag::ACE_TEXT, "size of the entity json is: %{public}zu", entityJson_[start].size());
+        TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: length of the entity oriText is: %{public}zu", oriText.length());
 
         AISpan aiSpan;
         aiSpan.start = start;
@@ -545,11 +562,15 @@ void DataDetectorAdapter::ParseAIJson(
     }
 }
 
-std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap)
+std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap,
+    uint64_t taskId)
 {
-    return [aiSpanMap, weak = WeakClaim(this)]() {
+    return [aiSpanMap, weak = WeakClaim(this), taskId]() {
+        TAG_LOGD(AceLogTag::ACE_TEXT, "startDetectDelayTask, taskId=%{public}" PRIu64 "", taskId);
         auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter && !dataDetectorAdapter->textForAI_.empty());
+        CHECK_NULL_VOID(dataDetectorAdapter);
+        dataDetectorAdapter->aiSpanMap_.clear();
+        CHECK_NULL_VOID(!dataDetectorAdapter->textForAI_.empty());
         TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter, delayed whole task executed, id: %{public}i",
             dataDetectorAdapter->GetHost() ? dataDetectorAdapter->GetHost()->GetId() : -1);
         dataDetectorAdapter->lastTextForAI_ = dataDetectorAdapter->textForAI_;
@@ -577,7 +598,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
                 ++aiSpanMapIt;
             }
             if (!isSameDetectText) {
-                dataDetectorAdapter->InitTextDetect(startPos, detectText);
+                dataDetectorAdapter->InitTextDetect(startPos, detectText, taskId);
                 if (detectTextIdx < dataDetectorAdapter->detectTexts_.size()) {
                     dataDetectorAdapter->detectTexts_[detectTextIdx] = detectText;
                 } else {
@@ -588,7 +609,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         } while (startPos + AI_TEXT_GAP < wTextForAILength && (!dataDetectorAdapter->textDetectTypes_.empty()));
         if (dataDetectorAdapter->hasUrlType_) {
-            dataDetectorAdapter->HandleTextUrlDetect();
+            dataDetectorAdapter->HandleTextUrlDetect(taskId);
         }
         if (hasSame) {
             dataDetectorAdapter->MarkDirtyNode();
@@ -598,6 +619,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
 
 void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::StartAITask, prepare to post task");
     if (!isSelectDetect && (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_))) {
         MarkDirtyNode();
         return;
@@ -612,17 +634,16 @@ void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
         aiSpanMapCopy = aiSpanMap_;
     }
     detectTexts_.clear();
-    if (clearAISpanMap) {
-        aiSpanMap_.clear();
-    }
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    ++taskId_;
+    TAG_LOGD(AceLogTag::ACE_TEXT, "StartAITask, taskId=%{public}" PRIu64 "", taskId_);
     aiDetectDelayTask_.Cancel();
-    aiDetectDelayTask_.Reset(GetDetectDelayTask(aiSpanMapCopy));
+    aiDetectDelayTask_.Reset(GetDetectDelayTask(aiSpanMapCopy, taskId_));
     TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::StartAITask, post whole task, id: %{public}i",
         GetHost() ? GetHost()->GetId() : -1);
     taskExecutor->PostDelayedTask(
@@ -638,4 +659,10 @@ void DataDetectorAdapter::MarkDirtyNode() const
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->OnPropertyChangeMeasure();
 }
+
+bool DataDetectorAdapter::IsAskCeliaSupported()
+{
+    return DataDetectorMgr::GetInstance().IsAskCeliaSupported();
+}
+
 } // namespace OHOS::Ace

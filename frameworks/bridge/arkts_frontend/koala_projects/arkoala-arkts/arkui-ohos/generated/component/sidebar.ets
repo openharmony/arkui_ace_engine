@@ -64,11 +64,11 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -120,23 +120,23 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Length) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Length
                 if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof Bindable<Length>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<Length>
                 Bindable_Arkui_Component_Units_Length_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -152,15 +152,15 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -176,15 +176,15 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -236,15 +236,15 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -274,10 +274,10 @@ export interface ButtonIconOptions {
     switching?: string | image.PixelMap | Resource;
 }
 export interface ButtonStyle {
-    left?: number;
-    top?: number;
-    width?: number;
-    height?: number;
+    left?: double;
+    top?: double;
+    width?: double;
+    height?: double;
     icons?: ButtonIconOptions;
 }
 export interface SideBarContainerAttribute extends CommonMethod {
@@ -385,6 +385,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         if (this.checkPriority("setSideBarContainerOptions")) {
             const type_casted = type as (SideBarContainerType | undefined)
             this.getPeer()?.setSideBarContainerOptionsAttribute(type_casted)
+            this.applyOptionsFinish('SideBarContainerAttribute');
             return this
         }
         return this
@@ -485,6 +486,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -510,29 +514,29 @@ export class ButtonIconOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForShown  = value.shown
         if (valueHolderForShown instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForShownForIdx0  = valueHolderForShown as string
             valueSerializer.writeString(valueHolderForShownForIdx0)
         } else if (valueHolderForShown instanceof image.PixelMap) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForShownForIdx1  = valueHolderForShown as image.PixelMap
             image_PixelMap_serializer.write(valueSerializer, valueHolderForShownForIdx1)
         } else if (valueHolderForShown instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForShownForIdx2  = valueHolderForShown as Resource
             Resource_serializer.write(valueSerializer, valueHolderForShownForIdx2)
         }
         const valueHolderForHidden  = value.hidden
         if (valueHolderForHidden instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForHiddenForIdx0  = valueHolderForHidden as string
             valueSerializer.writeString(valueHolderForHiddenForIdx0)
         } else if (valueHolderForHidden instanceof image.PixelMap) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForHiddenForIdx1  = valueHolderForHidden as image.PixelMap
             image_PixelMap_serializer.write(valueSerializer, valueHolderForHiddenForIdx1)
         } else if (valueHolderForHidden instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForHiddenForIdx2  = valueHolderForHidden as Resource
             Resource_serializer.write(valueSerializer, valueHolderForHiddenForIdx2)
         }
@@ -541,15 +545,15 @@ export class ButtonIconOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSwitchingTmpValue  = valueHolderForSwitching!
             if (valueHolderForSwitchingTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSwitchingTmpValueForIdx0  = valueHolderForSwitchingTmpValue as string
                 valueSerializer.writeString(valueHolderForSwitchingTmpValueForIdx0)
             } else if (valueHolderForSwitchingTmpValue instanceof image.PixelMap) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSwitchingTmpValueForIdx1  = valueHolderForSwitchingTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(valueSerializer, valueHolderForSwitchingTmpValueForIdx1)
             } else if (valueHolderForSwitchingTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSwitchingTmpValueForIdx2  = valueHolderForSwitchingTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSwitchingTmpValueForIdx2)
             }
@@ -611,7 +615,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForLeft !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeftTmpValue  = valueHolderForLeft!
-            valueSerializer.writeNumber(valueHolderForLeftTmpValue)
+            valueSerializer.writeFloat64(valueHolderForLeftTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -619,7 +623,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForTop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTopTmpValue  = valueHolderForTop!
-            valueSerializer.writeNumber(valueHolderForTopTmpValue)
+            valueSerializer.writeFloat64(valueHolderForTopTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -627,7 +631,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
-            valueSerializer.writeNumber(valueHolderForWidthTmpValue)
+            valueSerializer.writeFloat64(valueHolderForWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -635,7 +639,7 @@ export class ButtonStyle_serializer {
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            valueSerializer.writeNumber(valueHolderForHeightTmpValue)
+            valueSerializer.writeFloat64(valueHolderForHeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -651,29 +655,29 @@ export class ButtonStyle_serializer {
     public static read(buffer: DeserializerBase): ButtonStyle {
         let valueDeserializer : DeserializerBase = buffer
         const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let leftTmpBuf : number | undefined = undefined
+        let leftTmpBuf : double | undefined = undefined
         if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            leftTmpBuf = (valueDeserializer.readNumber() as number)
+            leftTmpBuf = valueDeserializer.readFloat64()
         }
-        const leftTmpResult : number | undefined = leftTmpBuf
+        const leftTmpResult : double | undefined = leftTmpBuf
         const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let topTmpBuf : number | undefined = undefined
+        let topTmpBuf : double | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topTmpBuf = (valueDeserializer.readNumber() as number)
+            topTmpBuf = valueDeserializer.readFloat64()
         }
-        const topTmpResult : number | undefined = topTmpBuf
+        const topTmpResult : double | undefined = topTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : number | undefined = undefined
+        let widthTmpBuf : double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            widthTmpBuf = (valueDeserializer.readNumber() as number)
+            widthTmpBuf = valueDeserializer.readFloat64()
         }
-        const widthTmpResult : number | undefined = widthTmpBuf
+        const widthTmpResult : double | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : number | undefined = undefined
+        let heightTmpBuf : double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            heightTmpBuf = (valueDeserializer.readNumber() as number)
+            heightTmpBuf = valueDeserializer.readFloat64()
         }
-        const heightTmpResult : number | undefined = heightTmpBuf
+        const heightTmpResult : double | undefined = heightTmpBuf
         const iconsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let iconsTmpBuf : ButtonIconOptions | undefined = undefined
         if ((iconsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

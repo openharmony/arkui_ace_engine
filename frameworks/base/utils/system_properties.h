@@ -385,6 +385,11 @@ public:
         return layoutTraceEnable_.load();
     }
 
+    static bool GetAttributeSetTraceEnabled()
+    {
+        return attributeSetTraceEnable_.load();
+    }
+
     static bool GetSyncDebugTraceEnabled()
     {
         return syncDebugTraceEnable_;
@@ -796,6 +801,7 @@ public:
 
     static int32_t GetDragDropFrameworkStatus();
     static int32_t GetTouchAccelarate();
+    static int32_t GetPageLoadTimethreshold();
 
     static bool IsSuperFoldDisplayDevice();
 
@@ -845,6 +851,7 @@ private:
     static bool developerModeOn_;
     static bool svgTraceEnable_;
     static std::atomic<bool> layoutTraceEnable_;
+    static std::atomic<bool> attributeSetTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool dynamicDetectionTraceEnable_;
@@ -938,6 +945,7 @@ private:
     static bool multiInstanceEnabled_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
+    static int32_t pageLoadTimethreshold_;
     static bool pageTransitionFrzEnabled_;
     static bool forcibleLandscapeEnabled_;
     static bool softPagetransition_;

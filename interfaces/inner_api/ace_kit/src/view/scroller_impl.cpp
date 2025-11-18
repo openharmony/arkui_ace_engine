@@ -303,4 +303,13 @@ RefPtr<FrameNode> ScrollerImpl::GetBindingFrameNode()
     host->SetKitNode(kitNode);
     return kitNode;
 }
+
+void ScrollerImpl::SetCanOverScroll(bool canOverScroll)
+{
+    auto scrollablePattern = GetScrollablePattern(jsScroller_);
+    if (!scrollablePattern) {
+        return;
+    }
+    scrollablePattern->SetCanOverScroll(canOverScroll);
+}
 } // namespace OHOS::Ace::Kit

@@ -20,6 +20,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
@@ -3618,6 +3619,84 @@ HWTEST_F(ListLayoutTestNg, FadingEdge007, TestSize.Level1)
         gradient = gradientProp->GetLinearGradientValue();
     }
     EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+}
+
+/**
+ * @tc.name: FadingEdge008
+ * @tc.desc: Test FadingEdge with padding, content less than list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge and padding
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(10.f));
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(2);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. UpdateContentModifier
+     * @tc.expected: no linear gradient.
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
+    auto renderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(renderContext);
+    auto& gradientProp = renderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 0);
+}
+
+/**
+ * @tc.name: FadingEdge009
+ * @tc.desc: Test FadingEdge with padding, content large than list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge and padding
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(10.f));
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. UpdateContentModifier
+     * @tc.expected: Fading top and both top and bottom have gradient.
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    auto renderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(renderContext);
+    auto& gradientProp = renderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4);
+    EXPECT_EQ(gradient.GetColors()[0].GetDimension().Value(), 0);
+    EXPECT_TRUE(gradient.GetColors()[0].GetColor() == Color::TRANSPARENT);
+    EXPECT_EQ(gradient.GetColors()[1].GetDimension().Value(), 0);
+    EXPECT_TRUE(gradient.GetColors()[1].GetColor() == Color::WHITE);
 }
 
 /**

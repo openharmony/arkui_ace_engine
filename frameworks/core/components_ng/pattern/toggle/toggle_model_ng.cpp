@@ -125,11 +125,11 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     }
 
     if (!selectedColor.has_value()) {
-        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
-        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, false);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, false, frameNode);
     } else {
-        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color);
-        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, true);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, true, frameNode);
     }
 }
 
@@ -483,7 +483,9 @@ void ToggleModelNG::SetUnselectedColor(FrameNode* frameNode, const Color& unsele
 
 void ToggleModelNG::SetUnselectedColorSetByUser(FrameNode* frameNode, const bool flag)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, UnselectedColorSetByUser, flag, frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateUnselectedColorSetByUser(flag);
 }
 
 void ToggleModelNG::SetTrackBorderRadius(const Dimension& borderRadius)
@@ -602,7 +604,9 @@ void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optiona
 
 void ToggleModelNG::SetSwitchPointColorSetByUser(FrameNode* frameNode, const bool flag)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColorSetByUser, flag, frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateSwitchPointColorSetByUser(flag);
 }
 
 void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -661,18 +665,20 @@ void ToggleModelNG::SetToggleState(FrameNode* frameNode, bool isOn)
 
 Color ToggleModelNG::GetSelectedColor(FrameNode* frameNode)
 {
-    Color value;
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SwitchPaintProperty, SelectedColor, value, frameNode, Color(DEFAULT_COLOR));
-    return value;
+    Color value = Color(DEFAULT_COLOR);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(property, value);
+    return property->GetSelectedColorValue(value);
 }
 
 Color ToggleModelNG::GetSwitchPointColor(FrameNode* frameNode)
 {
-    Color value;
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SwitchPaintProperty, SwitchPointColor, value, frameNode, Color(DEFAULT_COLOR));
-    return value;
+    Color value = Color(DEFAULT_COLOR);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(property, value);
+    return property->GetSwitchPointColorValue(value);
 }
 
 void ToggleModelNG::SetSwitchIsOn(FrameNode* frameNode, bool isOn)
@@ -681,7 +687,9 @@ void ToggleModelNG::SetSwitchIsOn(FrameNode* frameNode, bool isOn)
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+    auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(property);
+    property->UpdateIsOn(isOn);
 }
 
 void ToggleModelNG::CreateWithColorResourceObj(
@@ -703,14 +711,20 @@ void ToggleModelNG::SetSwitchDefaultColor(FrameNode* frameNode, const ToggleColo
     CHECK_NULL_VOID(theme);
     Color color;
     switch (type) {
-        case ToggleColorType::SELECTED_COLOR:
+        case ToggleColorType::SELECTED_COLOR: {
             color = theme->GetActiveColor();
-            ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
+            auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+            CHECK_NULL_VOID(property);
+            property->UpdateSelectedColor(color);
             break;
-        case ToggleColorType::SWITCH_POINT_COLOR:
+        }
+        case ToggleColorType::SWITCH_POINT_COLOR: {
             color = theme->GetPointColor();
-            ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, color, frameNode);
+            auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+            CHECK_NULL_VOID(property);
+            property->UpdateSwitchPointColor(color);
             break;
+        }
         case ToggleColorType::UN_SELECTED_COLOR:
             color = theme->GetInactiveColor();
             SetUnselectedColor(frameNode, color);
@@ -776,7 +790,9 @@ void ToggleModelNG::SetCheckboxDefaultColor(FrameNode* frameNode, const ToggleCo
         auto theme = pipeline->GetTheme<CheckboxTheme>();
         CHECK_NULL_VOID(theme);
         auto color = theme->GetActiveColor();
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
+        auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+        CHECK_NULL_VOID(property);
+        property->UpdateSelectedColor(color);
     } else if (type == ToggleColorType::BACKGROUND_COLOR) {
         Color color = Color::TRANSPARENT;
         ToggleButtonModelNG::SetBackgroundColor(frameNode, color, false);
@@ -824,7 +840,9 @@ void ToggleModelNG::SetButtonDefaultColor(FrameNode* frameNode, const ToggleColo
         auto theme = pipeline->GetTheme<ToggleTheme>();
         CHECK_NULL_VOID(theme);
         auto color = theme->GetCheckedColor();
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
+        auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+        CHECK_NULL_VOID(property);
+        property->UpdateSelectedColor(color);
     } else if (type == ToggleColorType::BACKGROUND_COLOR) {
         Color color = Color::TRANSPARENT;
         ToggleButtonModelNG::SetBackgroundColor(frameNode, color, false);
@@ -986,16 +1004,18 @@ bool ToggleModelNG::GetSwitchIsOn(FrameNode* frameNode)
 {
     bool value = false;
     CHECK_NULL_RETURN(frameNode, value);
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwitchPaintProperty, IsOn, value, frameNode, value);
-    return value;
+    auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(property, value);
+    return property->GetIsOnValue(value);
 }
 
 Color ToggleModelNG::GetUnselectedColor(FrameNode* frameNode)
 {
-    Color value;
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SwitchPaintProperty, UnselectedColor, value, frameNode, Color(DEFAULT_COLOR));
-    return value;
+    Color value = Color(DEFAULT_COLOR);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(property, value);
+    return property->GetUnselectedColorValue(value);
 }
 
 void ToggleModelNG::SetIsUserSetMargin(bool isUserSet)

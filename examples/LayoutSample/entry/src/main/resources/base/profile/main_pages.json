@@ -1,0 +1,24 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/native",
+    "pages/node",
+    "pages/nativeTest/layoutConstraintTest",
+    "pages/nativeTest/alignRuleOptionExample",
+    "pages/nativeTest/barrierOptionExample",
+    "pages/nativeTest/guidelineOptionExample",
+    "pages/nativeTest/itemAlignmentExample",
+    "pages/nativeTest/listChildrenMainSizeExample",
+    "pages/nativeTest/relativeLayoutChainExample",
+    "pages/nodeTest/createColumnExample",
+    "pages/nodeTest/createFlexExample",
+    "pages/nodeTest/createLayoutPositionExample",
+    "pages/nodeTest/createRefreshOffsetEventExample",
+    "pages/nodeTest/createRowExample",
+    "pages/nodeTest/createSafeAreaExample",
+    "pages/nodeTest/createStackExample",
+    "pages/nodeTest/createLayoutPolicyExample",
+    "pages/nativeTest/positionEdgesExample",
+    "pages/nativeTest/pixelRoundExample"
+  ]
+}

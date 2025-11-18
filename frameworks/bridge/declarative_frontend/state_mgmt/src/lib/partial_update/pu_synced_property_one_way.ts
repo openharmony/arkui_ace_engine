@@ -209,6 +209,10 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_,
         this.notifyPropertyHasChangedPU,
         this.notifyTrackedObjectPropertyHasChanged, this);
+      // for interop
+      if (InteropConfigureStateMgmt.needsInterop()) {
+        InteropExtractorModule.setStaticValueForInterop(this, newValue);
+      }
     }
   }
 
@@ -258,6 +262,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return value true only if localCopyObservedObject_ has been changed
   */
   private resetLocalValue(newObservedObjectValue: C, needCopyObject: boolean): boolean {
+    // for interop
+    if (InteropConfigureStateMgmt.needsInterop() && newObservedObjectValue && typeof newObservedObjectValue === 'object' && isStaticProxy(newObservedObjectValue)) {
+      throw new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
+    }
+
     // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
     // here because the object might still be the same, but some property of it has changed
     // this is added for stability test: Target of target is not Object/is not callable/

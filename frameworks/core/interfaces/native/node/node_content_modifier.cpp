@@ -26,6 +26,10 @@ ArkUI_Int32 AddChild(ArkUINodeContentHandle content, ArkUINodeHandle child)
     CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     auto* uiNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(uiNode, ERROR_CODE_PARAM_INVALID);
+    if (uiNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
+    }
     nodeContent->AddNode(uiNode);
     return ERROR_CODE_NO_ERROR;
 }
@@ -36,6 +40,10 @@ ArkUI_Int32 InsertChild(ArkUINodeContentHandle content, ArkUINodeHandle child, A
     CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     auto* uiNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(uiNode, ERROR_CODE_PARAM_INVALID);
+    if (uiNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
+    }
     nodeContent->AddNode(uiNode, position);
     return ERROR_CODE_NO_ERROR;
 }

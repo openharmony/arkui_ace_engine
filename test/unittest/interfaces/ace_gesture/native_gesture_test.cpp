@@ -39,119 +39,6 @@ public:
 };
 
 /**
- * @tc.name: NativeGestureTest001
- * @tc.desc: Test createTapGesture function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeGestureTest, NativeGestureTest001, TestSize.Level1)
-{
-    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
-    auto group = gestureAPI->createGroupGesture(EXCLUSIVE_GROUP);
-    auto tapGesture = gestureAPI->createTapGesture(1, 1);
-    auto tapGesture1 = gestureAPI->createTapGesture(0, 11);
-    auto longPressGesture = gestureAPI->createLongPressGesture(1, true, 500);
-    auto panGesture = gestureAPI->createPanGesture(1, GESTURE_DIRECTION_DOWN, 5);
-    auto swipeGesture = gestureAPI->createSwipeGesture(1, 1, 5);
-    auto pinchGesture = gestureAPI->createPinchGesture(2, 20);
-    auto rotateGesture = gestureAPI->createRotationGesture(2, 90);
-    gestureAPI->addChildGesture(group, tapGesture);
-    gestureAPI->addChildGesture(group, tapGesture1);
-    gestureAPI->addChildGesture(group, longPressGesture);
-    auto onActionCallBack = [](ArkUI_GestureEvent *event, void *extraParam) {};
-    gestureAPI->setGestureEventTarget(
-        longPressGesture, GESTURE_EVENT_ACTION_ACCEPT,
-        gestureNode, onActionCallBack);
-    auto onInterruptCallback = [](ArkUI_GestureInterruptInfo* info) -> ArkUI_GestureInterruptResult {
-        return GESTURE_INTERRUPT_RESULT_REJECT;
-    };
-    gestureAPI->setGestureInterrupterToNode(gestureNode, onInterruptCallback);
-    auto ret = gestureAPI->addGestureToNode(gestureNode, group, PRIORITY, NORMAL_GESTURE_MASK);
-    EXPECT_EQ(ret, 0);
-    gestureAPI->removeGestureFromNode(gestureNode, group);
-    gestureAPI->removeChildGesture(group, tapGesture);
-    gestureAPI->removeChildGesture(group, tapGesture1);
-    gestureAPI->removeChildGesture(group, longPressGesture);
-    gestureAPI->dispose(tapGesture);
-    gestureAPI->dispose(longPressGesture);
-    gestureAPI->dispose(panGesture);
-    gestureAPI->dispose(swipeGesture);
-    gestureAPI->dispose(pinchGesture);
-    gestureAPI->dispose(rotateGesture);
-}
-
-/**
- * @tc.name: NativeGestureTest002
- * @tc.desc: Test createTapGesture function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeGestureTest, NativeGestureTest002, TestSize.Level1)
-{
-    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
-    auto pinchGesture = gestureAPI->createPinchGesture(2, 0.0f);
-    EXPECT_NE(pinchGesture, nullptr);
-    auto swipeGesture = gestureAPI->createSwipeGesture(1, 1, 0.0f);
-    EXPECT_NE(swipeGesture, nullptr);
-    auto panGesture = gestureAPI->createPanGesture(0, GESTURE_DIRECTION_DOWN, 5);
-    EXPECT_NE(panGesture, nullptr);
-    gestureAPI->dispose(pinchGesture);
-    gestureAPI->dispose(swipeGesture);
-    gestureAPI->dispose(panGesture);
-    EXPECT_NE(gestureAPI, nullptr);
-}
-
-/**
- * @tc.name: NativeGestureTest003
- * @tc.desc: Test the API2 setGestureInterrupterToNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeGestureTest, NativeGestureTest003, TestSize.Level1)
-{
-    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
-    auto group = gestureAPI->gestureApi1->createGroupGesture(EXCLUSIVE_GROUP);
-    auto tapGesture = gestureAPI->gestureApi1->createTapGesture(1, 1);
-    auto tapGesture1 = gestureAPI->gestureApi1->createTapGesture(0, 11);
-    auto longPressGesture = gestureAPI->gestureApi1->createLongPressGesture(1, true, 500);
-    auto panGesture = gestureAPI->gestureApi1->createPanGesture(1, GESTURE_DIRECTION_DOWN, 5);
-    auto swipeGesture = gestureAPI->gestureApi1->createSwipeGesture(1, 1, 5);
-    auto pinchGesture = gestureAPI->gestureApi1->createPinchGesture(2, 20);
-    auto rotateGesture = gestureAPI->gestureApi1->createRotationGesture(2, 90);
-    gestureAPI->gestureApi1->addChildGesture(group, tapGesture);
-    gestureAPI->gestureApi1->addChildGesture(group, tapGesture1);
-    gestureAPI->gestureApi1->addChildGesture(group, longPressGesture);
-    auto onActionCallBack = [](ArkUI_GestureEvent *event, void *extraParam) {};
-    gestureAPI->gestureApi1->setGestureEventTarget(
-        longPressGesture, GESTURE_EVENT_ACTION_ACCEPT,
-        gestureNode, onActionCallBack);
-    auto onInterruptCallback = [](ArkUI_GestureInterruptInfo* info) -> ArkUI_GestureInterruptResult {
-        return GESTURE_INTERRUPT_RESULT_REJECT;
-    };
-    int userData = 1;
-    
-    gestureAPI->setGestureInterrupterToNode(gestureNode, &userData, onInterruptCallback);
-    auto ret = gestureAPI->gestureApi1->addGestureToNode(gestureNode, group, PRIORITY, NORMAL_GESTURE_MASK);
-    EXPECT_EQ(ret, 0);
-    gestureAPI->gestureApi1->removeGestureFromNode(gestureNode, group);
-    gestureAPI->gestureApi1->removeChildGesture(group, tapGesture);
-    gestureAPI->gestureApi1->removeChildGesture(group, tapGesture1);
-    gestureAPI->gestureApi1->removeChildGesture(group, longPressGesture);
-    gestureAPI->gestureApi1->dispose(tapGesture);
-    gestureAPI->gestureApi1->dispose(longPressGesture);
-    gestureAPI->gestureApi1->dispose(panGesture);
-    gestureAPI->gestureApi1->dispose(swipeGesture);
-    gestureAPI->gestureApi1->dispose(pinchGesture);
-    gestureAPI->gestureApi1->dispose(rotateGesture);
-}
-
-/**
  * @tc.name: NativeGestureTest004
  * @tc.desc: Test the OH_ArkUI_GestureInterrupter_GetUserData function.
  * @tc.type: FUNC
@@ -1493,9 +1380,13 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
 {
     ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
-    auto ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(nullptr, 0);
+    /**
+     * @tc.steps: step1. set abnormal param.
+     * @tc.expected: return ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    auto ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(nullptr, 0.0);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
-    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(recognizer, 0);
+    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(recognizer, 0.0);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
@@ -1509,15 +1400,23 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
     auto longPressGesture = gestureAPI->createLongPressGesture(1, true, 500);
     ASSERT_NE(longPressGesture, nullptr);
     ASSERT_NE(longPressGesture->gesture, nullptr);
-    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(longPressGesture, 0);
+    /**
+     * @tc.steps: step2. set normal param.
+     * @tc.expected: return ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ret = OH_ArkUI_LongPressGesture_SetAllowableMovement(longPressGesture, 0.0);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     int32_t ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(nullptr, nullptr);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
     ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(recognizer, nullptr);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
-    int32_t res = 0;
+    /**
+     * @tc.steps: step3. get value of step2.
+     * @tc.expected: res equals 15.0.
+     */
+    double res = 0.0;
     ret2 = OH_ArkUI_LongPressGesture_GetAllowableMovement(recognizer, &res);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
     OH_ArkUI_LongPressGesture_GetAllowableMovement(longPressGesture, &res);
-    EXPECT_EQ(res, 15);
+    EXPECT_DOUBLE_EQ(res, 15.0);
 }

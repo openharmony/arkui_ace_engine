@@ -104,6 +104,7 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto mainProperty = DynamicCast<ModelPaintProperty>(host->GetPaintProperty<ModelPaintProperty>());
     auto widthScale = mainProperty->GetRenderWidth().value_or(1.0);
     auto heightScale = mainProperty->GetRenderHeight().value_or(1.0);
+    auto backgroundColor = mainProperty->GetBackgroundColor().value_or(0x00000000);
 
     auto contentSize = geometryNode->GetContentSize();
     auto contentOffset = geometryNode->GetContentOffset();
@@ -116,7 +117,7 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         contentOffset.GetX(), contentOffset.GetY(),
         width, height,
         scale, widthScale, heightScale,
-        config.contentSizeChange, modelAdapter_->GetSurfaceType(), rotation_,
+        config.contentSizeChange, modelAdapter_->GetSurfaceType(), rotation_, backgroundColor
     };
     modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
     host->MarkNeedSyncRenderTree();

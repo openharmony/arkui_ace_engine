@@ -66,7 +66,7 @@ void SetEnableDecImpl(Ark_NativePointer node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    CounterModelNG::SetEnableDec(frameNode, *convValue);
+    CounterModelNG::SetEnableDec(frameNode, convValue.value_or(true));
 }
 void SetEnableIncImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -74,7 +74,7 @@ void SetEnableIncImpl(Ark_NativePointer node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    CounterModelNG::SetEnableInc(frameNode, *convValue);
+    CounterModelNG::SetEnableInc(frameNode, convValue.value_or(true));
 }
 } // CounterAttributeModifier
 const GENERATED_ArkUICounterModifier* GetCounterModifier()

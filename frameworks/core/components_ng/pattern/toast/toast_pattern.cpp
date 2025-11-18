@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -104,6 +105,7 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
 {
     auto hoverModeArea = toastProps->GetHoverModeAreaValue(HoverModeAreaType::TOP_SCREEN);
     auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_VOID(container);
     float foldCreaseTop = 0.0f;
     float foldCreaseBottom = 0.0f;
     auto displayInfo = container->GetDisplayInfo();
@@ -480,9 +482,8 @@ void ToastPattern::OnAttachToFrameNodeImpl()
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode, node);
+    CHECK_NULL_VOID(node);
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
     OnDetachFromFrameNodeImpl(node);
 }
 

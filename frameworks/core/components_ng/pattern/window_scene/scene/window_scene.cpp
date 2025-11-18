@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "parameters.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -37,6 +38,8 @@ const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
+const uint64_t REMOVE_WINDOW_PRELAUNCH_DELAY_TIME_MS =
+    system::GetIntParameter<int>("persist.sys.window.prelaunchDelayTime", 250);
 std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
 } // namespace
 
@@ -409,6 +412,8 @@ void WindowScene::BufferAvailableCallback()
             self->session_->SetLeashWindowAlpha(false);
             self->session_->SetBufferAvailable(true, true);
         }
+        self->session_->EditSessionInfo().isPrelaunch_ = false;
+        self->isPrelaunch_ = false;
         auto surfaceNode = self->session_->GetSurfaceNode();
         bool isWindowSizeEqual = self->IsWindowSizeEqual();
         if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
@@ -472,6 +477,7 @@ void WindowScene::BufferAvailableCallback()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    CHECK_EQUAL_VOID(CheckPrelaunchForBufferAvailableCallback(removeStartingWindowTask_, uiTask), true);
     if (!isAbilityHook && session_->GetEnableRemoveStartingWindow() && !session_->GetAppBufferReady()) {
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -537,13 +543,17 @@ void WindowScene::SetSubSessionVisible()
 void WindowScene::BufferAvailableCallbackForSnapshot()
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "BufferAvailableCallbackForSnapshot id:%{public}d", session_->GetPersistentId());
+        "BufferAvailableCallbackForSnapshot id:%{public}d, isAppLockControl:%{public}d",
+        session_->GetPersistentId(), session_->GetAppLockControl());
+    CHECK_EQUAL_VOID(session_->GetAppLockControl(), true);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForSnapshot");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->snapshotWindow_);
+        self->session_->EditSessionInfo().isPrelaunch_ = false;
+        self->isPrelaunch_ = false;
         if (self->isBlankForSnapshot_) {
             self->SetOpacityAnimation(self->snapshotWindow_);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "blank animation id %{public}d, name %{public}s",
@@ -561,6 +571,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    CHECK_EQUAL_VOID(CheckPrelaunchForBufferAvailableCallback(removeSnapshotWindowTask_, uiTask), true);
     if (Rosen::SceneSessionManager::GetInstance().GetDelayRemoveSnapshot()) {
         Rosen::SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(false);
         removeSnapshotWindowTask_.Cancel();
@@ -573,6 +584,22 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         pipelineContext->PostAsyncEvent(
             std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallbackForSnapshot", TaskExecutor::TaskType::UI);
     }
+}
+
+bool WindowScene::CheckPrelaunchForBufferAvailableCallback(CancelableCallback<void()>& task,
+    const std::function<void()>& uiTask)
+{
+    CHECK_EQUAL_RETURN(isPrelaunch_, false, false);
+    task.Cancel();
+    task.Reset(uiTask);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckPrelaunchForBufferAvailableCallback delay:%{public}" PRIu64,
+        REMOVE_WINDOW_PRELAUNCH_DELAY_TIME_MS);
+    taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI,
+        REMOVE_WINDOW_PRELAUNCH_DELAY_TIME_MS, "ArkUIWindowSceneBufferAvailableDelayedCallback");
+    return true;
 }
 
 void WindowScene::OnActivation()
@@ -609,7 +636,13 @@ void WindowScene::OnActivation()
             self->snapshotWindow_.Reset();
             self->session_->SetNeedSnapshot(true);
             self->SetSubSessionVisible();
-            self->CreateStartingWindow();
+            if (self->session_->IsPrelaunch()) {
+                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnActivation CreateBlankWindow");
+                self->CreateBlankWindow(self->startingWindow_);
+                self->isPrelaunch_ = true;
+            } else {
+                self->CreateStartingWindow();
+            }
             self->AddChild(host, self->startingWindow_, self->startingWindowName_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else if (self->startingWindow_ &&
@@ -636,7 +669,9 @@ void WindowScene::OnActivation()
 void WindowScene::DisposeSnapshotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "DisposeSnapshotAndBlankWindow id: %{public}d", session_->GetPersistentId());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "DisposeSnapshotAndBlankWindow id: %{public}d, isAppLockControl:%{public}d",
+        session_->GetPersistentId(), session_->GetAppLockControl());
+    CHECK_EQUAL_VOID(session_->GetAppLockControl(), true);
     if (session_->GetBlank()) {
         return;
     }
@@ -951,6 +986,7 @@ void WindowScene::OnPreLoadStartingWindowFinished()
 
 void WindowScene::OnRestart()
 {
+    CHECK_EQUAL_VOID(session_->GetSessionInfo().isRestartInSameProcess_, false);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::OnRestart");
         auto self = weakThis.Upgrade();
@@ -972,11 +1008,12 @@ void WindowScene::OnRestart()
         self->SetSubSessionVisible();
 
         self->CreateAppWindow();
+        CHECK_NULL_VOID(self->appWindow_);
         self->CreateStartingWindow();
         self->AddChild(host, self->startingWindow_, self->startingWindowName_);
         auto surfaceNode = self->session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
-        auto context = self->GetContextByDisableDelegator(false, false);
+        auto context = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
 

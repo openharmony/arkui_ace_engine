@@ -18,10 +18,27 @@
 #include "base/ressched/ressched_report.h"
 #include <unistd.h>
 #include <sys/syscall.h>
+#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/common/utils/utils.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace {
 namespace {
 const std::string RES_SCHED_CLIENT_SO = "libressched_client.z.so";
+const std::string SMART_GC_SO = "libsmart_gc_plugin.z.so";
+}
+
+void NotifyForceExpandStateFunc(int32_t state, bool isTid, uint64_t tid)
+{
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+    CHECK_NULL_VOID(engine);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    if (isTid) {
+        nativeEngine->NotifyForceExpandState(tid, state);
+    } else {
+        nativeEngine->NotifyForceExpandState(state);
+    }
 }
 
 ReportDataFunc LoadReportDataFunc()
@@ -49,6 +66,34 @@ ReportSyncEventFunc LoadReportSyncEventFunc()
         return nullptr;
     }
     LOGI("dlsym function ReportSyncEvent success.");
+    return func;
+}
+
+SetNotifyForceExpandStateFunc LoadSetNotifyForceExpandStateFunc()
+{
+    auto handle = dlopen(SMART_GC_SO.c_str(), RTLD_NOW);
+    CHECK_NULL_RETURN(handle, nullptr);
+    auto func = reinterpret_cast<SetNotifyForceExpandStateFunc>(dlsym(handle, "SetNotifyForceExpandStateFunc"));
+    if (func == nullptr) {
+        LOGW("dlsym function SetNotifyForceExpandStateFunc failed!");
+        dlclose(handle);
+        return nullptr;
+    }
+    LOGI("dlsym function SetNotifyForceExpandStateFunc success.");
+    return func;
+}
+
+NotifyAppSceneFunc LoadNotifyAppSceneFunc()
+{
+    auto handle = dlopen(SMART_GC_SO.c_str(), RTLD_NOW);
+    CHECK_NULL_RETURN(handle, nullptr);
+    auto func = reinterpret_cast<NotifyAppSceneFunc>(dlsym(handle, "NotifyAppSceneFunc"));
+    if (func == nullptr) {
+        LOGW("dlsym function NotifyAppSceneFunc failed!");
+        dlclose(handle);
+        return nullptr;
+    }
+    LOGI("dlsym function NotifyAppSceneFunc success.");
     return func;
 }
 

@@ -17,8 +17,12 @@ ace_unittest("dialog_test_ng") {
   type = "new"
   sources = [
     "dialog_layout_test_ng.cpp",
+    "dialog_layout_test_two_ng.cpp",
     "dialog_model_test_ng.cpp",
+    "dialog_model_test_two_ng.cpp",
     "dialog_pattern_test_ng.cpp",
+    "dialog_pattern_test_two_ng.cpp",
     "dialog_test_ng.cpp",
+    "dialog_test_two_ng.cpp",
   ]
 }

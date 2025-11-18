@@ -1722,6 +1722,25 @@ void OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(ArkUI_RenderNodeClipOp
     delete option;
 }
 
+int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle* renderNode)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    ArkUIRenderNodeHandle renderNodeHandle;
+    int renderNodeId = 0;
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNode(
+        node->uiNodeHandle, &renderNodeHandle, &renderNodeId);
+    if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        auto iter = g_renderNodeMap.find(renderNodeId);
+        if (iter == g_renderNodeMap.end()) {
+            g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(renderNodeId, renderNodeHandle));
+        }
+        *renderNode = new ArkUI_RenderNode({ renderNodeHandle });
+    }
+    return result;
+}
+
 #ifdef __cplusplus
 };
 #endif

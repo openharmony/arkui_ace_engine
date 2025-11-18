@@ -474,6 +474,13 @@ void TabsModelNG::SetOnUnselected(std::function<void(const BaseEventInfo* info)>
     tabPattern->SetOnUnselectedEvent(std::move(onUnselected));
 }
 
+void TabsModelNG::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    SetOnContentDidScroll(tabsNode, std::move(onContentDidScroll));
+}
+
 void TabsModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -793,6 +800,18 @@ void TabsModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const
     auto pattern = frameNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnUnselectedEvent(std::move(onUnselected));
+}
+
+void TabsModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
 void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divider)

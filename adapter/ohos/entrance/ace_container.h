@@ -316,10 +316,10 @@ public:
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
 
-    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const;
-    RefPtr<PageViewportConfig> GetTargetViewportConfig(
-        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) const;
+    bool GetPageViewportConfig(
+        const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+        const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig) const;
+    void PrintCachedCurrentViewportConfig() const;
 
     uint64_t GetDisplayId() const override
     {
@@ -358,6 +358,9 @@ public:
     bool DumpExistDarkRes(const std::vector<std::string>& params);
 
     bool OnDumpInfo(const std::vector<std::string>& params);
+
+    void DumpSimplifyTreeWithParamConfig(
+        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) override;
 
     void TriggerGarbageCollection() override;
 

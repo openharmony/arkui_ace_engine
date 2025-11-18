@@ -242,7 +242,7 @@ class SwiperDisplayCountModifier extends ModifierWithKey<ArkDisplayCount> {
         getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
 
         if (typeof this.value.value === 'object') {
-          if ('minsize' in this.value.value) {
+          if ('minSize' in this.value.value) {
             let minSize = (this.value.value as SwiperAutoFill).minSize.toString();
             getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, 'minSize');
           } else {

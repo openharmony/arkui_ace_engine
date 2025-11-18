@@ -142,6 +142,7 @@ void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<B
     ButtonInfo buttonInfo = { .text = theme->GetCancelText(), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto curExecutor = context->GetTaskExecutor();
     dialogProperties.onCancel = [callback, taskExecutor = curExecutor] {
         taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },

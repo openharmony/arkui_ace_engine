@@ -244,6 +244,16 @@ class UIObserver {
         this.ohos_observer?.removeGlobalGestureListener(...args);
         __JSScopeUtil__.restoreInstanceId();
     }
+    onSwiperContentUpdate(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.onSwiperContentUpdate(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    offSwiperContentUpdate(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.offSwiperContentUpdate(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class MeasureUtils {
@@ -291,7 +301,47 @@ class UIContext {
      * @since 10
      */
     constructor(instanceId) {
-        this.instanceId_ = instanceId;
+        this.instanceId_ = instanceId ?? -1;
+    }
+
+    static getCallingScopeUIContext() {
+        let containerId = __JSScopeUtil__.getCallingScopeUIContext();
+        if (containerId < 0) {
+            return undefined;
+        }
+        return new UIContext(containerId);
+    }
+
+    static getLastFocusedUIContext() {
+        let containerId = __JSScopeUtil__.getLastFocusedUIContext();
+        if (containerId < 0) {
+            return undefined;
+        }
+        return new UIContext(containerId);
+    }
+
+    static getLastForegroundUIContext() {
+        let containerId = __JSScopeUtil__.getLastForegroundUIContext();
+        if (containerId < 0) {
+            return undefined;
+        }
+        return new UIContext(containerId);
+    }
+
+    static getAllUIContexts() {
+        let allContainerId = __JSScopeUtil__.getAllUIContexts();
+        let contextArray = new Array();
+        for (let item of allContainerId) {
+            if (item >= 0) {
+                contextArray.push(new UIContext(item));
+            }
+        }
+        return contextArray;
+    }
+
+    static resolveUIContext() {
+        let contextInfo = __JSScopeUtil__.resolveUIContext();
+        return new ResolvedUIContext(contextInfo[0], contextInfo[1]);
     }
 
     static createUIContextWithoutWindow(context) {
@@ -913,6 +963,13 @@ class UIContext {
     }
 }
 
+class ResolvedUIContext extends UIContext {
+    constructor(instanceId, strategy) {
+        super(instanceId);
+        this.strategy = strategy;
+    }
+}
+
 class DynamicSyncScene {
     /**
      * Construct new instance of DynamicSyncScene.
@@ -1140,7 +1197,7 @@ class ComponentUtils {
         if (typeof this.ohos_componentUtils.getRectangleById !== 'function'){
             throw Error('getRectangleById is not callable');
         }
-        let componentInformation = this.ohos_componentUtils?.getRectangleById?.(id);
+        let componentInformation = this.ohos_componentUtils?.getRectangleById?.(id, this.instanceId_);
         __JSScopeUtil__.restoreInstanceId();
         return componentInformation;
     }

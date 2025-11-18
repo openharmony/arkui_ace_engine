@@ -18,11 +18,13 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -150,6 +152,10 @@ static int32_t g_containerModalTitleHeight = 0;
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
 
 // mock_pipeline_context =======================================================
+MockPipelineContext::MockPipelineContext() = default;
+
+MockPipelineContext::~MockPipelineContext() = default;
+
 void MockPipelineContext::SetUp()
 {
     pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
@@ -172,6 +178,11 @@ void MockPipelineContext::TearDown()
     predictTasks_.clear();
 }
 
+const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
+{
+    return touchOptimizer_;
+}
+
 std::string PipelineContext::GetBundleName()
 {
     return "";
@@ -180,6 +191,11 @@ std::string PipelineContext::GetBundleName()
 std::string PipelineContext::GetModuleName()
 {
     return "";
+}
+
+const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
+{
+    return loadCompleteMgr_;
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -213,6 +229,11 @@ void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
     g_isContainerCustomTitleVisible = visible;
 }
 
+void PipelineContext::GetComponentOverlayInspector(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {}
+
+void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {}
+
 void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
 {
     g_isContainerControlButtonVisible = visible;
@@ -237,6 +258,9 @@ PipelineContext::PipelineContext()
     }
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (loadCompleteMgr_) {
+        loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     }
 }
 
@@ -1539,41 +1563,19 @@ const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
-
-WidthBreakpoint PipelineBase::GetCalcWidthBreakpoint(double width)
-{
-    WidthBreakpoint breakpoint;
-    if (LessNotEqual(width, 600)) {
-        breakpoint = WidthBreakpoint::WIDTH_SM;
-    } else if (GreatNotEqual(width, 840)) {
-        breakpoint = WidthBreakpoint::WIDTH_LG;
-    } else {
-        breakpoint = WidthBreakpoint::WIDTH_MD;
-    }
-    return breakpoint;
-}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
 
 // WindowManager ===============================================================
 namespace OHOS::Ace {
-RefPtr<PageViewportConfig> WindowManager::GetCurrentViewportConfig()
+bool WindowManager::GetPageViewportConfig(
+    const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+    const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig)
 {
-    if (getCurrentViewportConfigCallback_) {
-        return getCurrentViewportConfigCallback_();
+    if (getPageViewportConfigCallback_) {
+        return getPageViewportConfigCallback_(currentParams, currentConfig, targetParams, targetConfig);
     }
-    return nullptr;
-}
-
-RefPtr<PageViewportConfig> WindowManager::GetTargetViewportConfig(
-    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator)
-{
-    if (getTargetViewportConfigCallback_) {
-        return getTargetViewportConfigCallback_(
-            orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
-    }
-    return nullptr;
+    return false;
 }
 } // namespace OHOS::Ace
 // WindowManager ===============================================================

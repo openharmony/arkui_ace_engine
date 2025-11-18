@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components_ng/pattern/waterflow/water_flow_sections.h"
 
+#include "base/log/log.h"
+
 namespace OHOS::Ace::NG {
 // push: start, 0, newSection
 // update: start, 0, newSection

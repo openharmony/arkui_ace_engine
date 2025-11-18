@@ -228,7 +228,6 @@ public:
     virtual void SetEnableDataDetector(bool isEnabled) {};
     virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetEnableSelectedDataDetector(bool isEnabled) {};
-    virtual void SetSelectedDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
     virtual void SetDefaultBackgroundColor() {};
     virtual void SetGestureFocusMode(GestureFocusMode mode) {}

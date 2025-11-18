@@ -507,4 +507,78 @@ HWTEST_F(DatePickerTestToss, OnDetachFromMainTreeMultiThread001, TestSize.Level1
 
     EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
 }
+
+/**
+ * @tc.name: PickerColumnPatternHandleDragStartAndMoveAllBranch
+ * @tc.desc: Cover HandleDragStart start branch and HandleDragMove early-return and normal branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, PickerColumnPatternHandleDragStartAndMoveAllBranch001, TestSize.Level1)
+{
+    // Step1: create DatePicker and get a concrete column pattern
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto toss = columnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+
+    // Case 1: HandleDragStart sets toss start / yLast_ and pressed_
+    GestureEvent startEvent;
+    // local Y will be used by HandleDragStart
+    const float localY = 15.0f;
+    startEvent.SetLocalLocation(Offset(0.0f, localY));
+    startEvent.SetMainVelocity(123.0);
+    // Call HandleDragStart and verify state
+    columnPattern->HandleDragStart(startEvent);
+    EXPECT_FLOAT_EQ(toss->yStart_, localY);
+    EXPECT_FLOAT_EQ(columnPattern->yLast_, localY);
+    EXPECT_TRUE(columnPattern->pressed_);
+
+    // Case 2: HandleDragMove early-return when offsetY nearly equals yLast_
+    // Set pressed_ true and yLast_ to some known value
+    columnPattern->pressed_ = true;
+    columnPattern->yLast_ = 20.0;
+    // Record previous yEnd_
+    double prevYEnd = toss->yEnd_;
+    GestureEvent moveEventEarly;
+    moveEventEarly.SetInputEventType(InputEventType::AXIS);
+    moveEventEarly.SetSourceTool(SourceTool::FINGER);
+    // local location yields offsetY == yLast_
+    moveEventEarly.SetLocalLocation(Offset(0.0f, static_cast<float>(columnPattern->yLast_)));
+    moveEventEarly.SetOffsetY(0.0);
+    columnPattern->HandleDragMove(moveEventEarly);
+    // toss->yEnd_ should remain unchanged for early-return
+    EXPECT_DOUBLE_EQ(toss->yEnd_, prevYEnd);
+
+    // Case 3: HandleDragMove normal path (different offsetY)
+    columnPattern->pressed_ = true;
+    columnPattern->yLast_ = 0.0;
+    GestureEvent moveEventNormal;
+    moveEventNormal.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    moveEventNormal.SetSourceTool(SourceTool::FINGER);
+    const float newLocalY = 5.5f;
+    moveEventNormal.SetLocalLocation(Offset(0.0f, newLocalY));
+    moveEventNormal.SetOffsetY(0.0);
+    // Call HandleDragMove and expect toss->yEnd_ to be set to newLocalY
+    columnPattern->HandleDragMove(moveEventNormal);
+    EXPECT_FLOAT_EQ(toss->yEnd_, newLocalY);
+
+    // Case 4: HandleDragMove when not pressed_ should return early without changing yEnd_
+    columnPattern->pressed_ = false;
+    double prevYEndNotPressed = toss->yEnd_;
+    GestureEvent moveEventNotPressed;
+    moveEventNotPressed.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    moveEventNotPressed.SetSourceTool(SourceTool::FINGER);
+    moveEventNotPressed.SetLocalLocation(Offset(0.0f, 30.0f));
+    moveEventNotPressed.SetOffsetY(0.0);
+    columnPattern->HandleDragMove(moveEventNotPressed);
+    // Expect toss->yEnd_ unchanged because pressed_ == false
+    EXPECT_DOUBLE_EQ(toss->yEnd_, prevYEndNotPressed);
+}
 } // namespace OHOS::Ace::NG

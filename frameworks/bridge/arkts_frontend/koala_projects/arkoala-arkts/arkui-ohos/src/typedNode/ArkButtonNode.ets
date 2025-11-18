@@ -42,9 +42,9 @@ export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
             }
         }
         if (content_casted && options_casted) {
-            this.getPeer().setButtonOptionsAttribute(content_casted, options_casted);
+            this.getPeer().setButtonOptions0Attribute(content_casted, options_casted);
         } else if (!content_casted && options_casted) {
-            this.getPeer().setButtonOptionsAttribute(options_casted);
+            this.getPeer().setButtonOptions1Attribute(options_casted);
         }
         this.markDirty();
         return this;
@@ -59,13 +59,13 @@ export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
     initializeWithChild(options: ButtonOptions): this {
         const options_casted = options as (ButtonOptions);
         this.markDirty();
-        this.getPeer()?.setButtonOptionsAttribute(options_casted);
+        this.getPeer()?.setButtonOptions1Attribute(options_casted);
         return this;
     }
     initializeWithLabel(label: ResourceStr, options?: ButtonOptions): this {
         const label_casted = label as (ResourceStr);
         const options_casted = options as (ButtonOptions | undefined);
-        this.getPeer()?.setButtonOptionsAttribute(label_casted, options_casted);
+        this.getPeer()?.setButtonOptions0Attribute(label_casted, options_casted);
         this.markDirty();
         return this;
     }
@@ -111,8 +111,8 @@ export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
         this.markDirty();
         return this;
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
-        const value_casted = value as (number | FontWeight | string | undefined);
+    fontWeight(value: int | FontWeight | string | undefined): this {
+        const value_casted = value as (int | FontWeight | string | undefined);
         this.getPeer()?.setFontWeightAttribute(value_casted);
         this.markDirty();
         return this;

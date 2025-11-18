@@ -96,6 +96,16 @@ void TextFieldModelStatic::SetShowCounterBorder(FrameNode* frameNode, const std:
     TextFieldModelNG::SetShowCounterBorder(frameNode, optValue.value_or(true));
 }
 
+void TextFieldModelStatic::SetShowCounter(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    if (optValue) {
+        TextFieldModelNG::SetShowCounter(frameNode, optValue.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ShowCounter,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
 void TextFieldModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     NG::ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
@@ -486,6 +496,16 @@ void TextFieldModelStatic::SetPasswordRules(FrameNode* frameNode, const std::opt
     }
 }
 
+void TextFieldModelStatic::SetFontFeature(FrameNode* frameNode, const std::optional<FONT_FEATURES_LIST>& optValue)
+{
+    if (optValue) {
+        TextFieldModelNG::SetFontFeature(frameNode, optValue.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, FontFeature,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
 void TextFieldModelStatic::SetShowError(FrameNode* frameNode, const std::optional<std::u16string>& errorText,
     bool visible)
 {
@@ -784,11 +804,14 @@ void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
     CHECK_NULL_VOID(theme);
 
     CalcDimension iconSize = theme->GetCancelIconSize();
-    Color color = theme->GetCancelButtonIconColor();
     std::string srcStr = "";
 
     TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
-    TextFieldModelNG::SetCancelIconColor(frameNode, color);
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModelNG::SetCancelIconColor(frameNode, Color());
+    }
     TextFieldModelNG::SetCanacelIconSrc(frameNode, srcStr);
 }
 
@@ -880,4 +903,16 @@ void TextFieldModelStatic::SetBackBorder(FrameNode* frameNode)
             TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value(), frameNode);
     }
 }
+
+void TextFieldModelStatic::SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc,
+    bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    if (textFieldPattern) {
+        textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
+        textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
 } // namespace OHOS::Ace::NG

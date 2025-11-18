@@ -15,6 +15,7 @@
 
 #include "list_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #define private public
 #define protected public
@@ -1901,5 +1902,35 @@ HWTEST_F(ListScrollerTestNg, SetAutoScale001, TestSize.Level1)
     itemModel.SetAutoScale(Referenced::RawPtr(frameNode), false);
     itemModel.CreateFrameNode(0, true);
     EXPECT_EQ(pattern->GetListItemStyle(), V2::ListItemStyle::CARD);
+}
+
+/**
+ * @tc.name: BigItemScrollWithScrollbar
+ * @tc.desc: Test BigItemScrollWithScrollbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, BigItemScrollWithScrollbar, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollBar(DisplayMode::ON);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
+    SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(1000));
+    CreateDone();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-2000.f);
+    scrollBar->HandleDragUpdate(info);
+    auto scrollableEvent = pattern_->GetScrollableEvent();
+    ASSERT_NE(scrollableEvent, nullptr);
+    auto scrollable = scrollableEvent->GetScrollable();
+    EXPECT_NE(scrollable->callback_, nullptr);
+    scrollable->HandleTouchUp();
+
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 }
 } // namespace OHOS::Ace::NG

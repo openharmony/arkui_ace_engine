@@ -24,6 +24,7 @@
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
@@ -554,8 +555,8 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest011, TestSize.Level1)
      * @tc.expected: yLast_ is changed.
      */
     info.SetSourceTool(SourceTool::FINGER);
-    Point globalPoint(1.0f, 1.0f);
-    info.SetGlobalPoint(globalPoint);
+    Offset point(1.0f, 1.0f);
+    info.SetLocalLocation(point);
     info.SetOffsetX(1.0f);
     info.SetOffsetY(1.0f);
     columnPattern_->yLast_ = 0.0f;

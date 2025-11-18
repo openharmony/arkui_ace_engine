@@ -65,14 +65,14 @@ void ContainerModalToolBar::InitToolBarManager()
 void ContainerModalToolBar::SetOnChangeCallback()
 {
     CHECK_NULL_VOID(toolbarManager_);
-    if (!hasSetOnchangeCallback_) {
+    if (!hasSetOnChangeCallback_) {
         std::function<void()> func = [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnToolBarLayoutChange();
         };
         toolbarManager_->SetToolBarChangeCallback(std::move(func));
-        hasSetOnchangeCallback_ = true;
+        hasSetOnChangeCallback_ = true;
     }
     if (!isFloating_ && !hasSetUpdateSideTitleBgColor_) {
         std::function<void(const Color&, const Color&, const BlurStyle&)> func =
@@ -167,6 +167,7 @@ void ContainerModalToolBar::ParsePlacementType(const RefPtr<FrameNode>& node)
         }
     }
     if (hasItem) {
+        AdjustTitleNodeWidth();
         AddToolbarItemToContainer();
         OnToolBarLayoutChange();
     }
@@ -756,7 +757,7 @@ void ContainerModalToolBar::UpdateToolbarShow(bool isTitleShow, bool customTitle
     if (!isTitleShow || customTitleSettedShow) {
         UpdateTitleLayout();
     } else if (!customTitleSettedShow) {
-        pattern->SetControlButtonsRowHeight(CONTAINER_TITLE_HEIGHT);
+        pattern->SetControlButtonsRowHeight();
     }
 }
 
@@ -764,10 +765,13 @@ void ContainerModalToolBar::AdjustContainerModalTitleHeight()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    if (!hasNavOrSideBarNodes_) {
+        return;
+    }
 
     if (itemsOnTree_.empty()) {
-        pattern->titleHeight_ = CONTAINER_TITLE_HEIGHT;
-        pattern->SetContainerModalTitleHeight(CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        pattern->toolBarTitleHeight_ = CONTAINER_TITLE_HEIGHT;
+        pattern->SetToolbarTitleHeight();
         ResetExpandStackNode();
         hasNavOrSideBarNodes_ = false;
         return;
@@ -775,15 +779,15 @@ void ContainerModalToolBar::AdjustContainerModalTitleHeight()
 
     auto rowHeight = toolbarItemMaxHeight_ + ROW_TOTAL_MARGIN;
     if (NearEqual(toolbarItemMaxHeight_, 0.0f)) {
-        pattern->titleHeight_ = CONTAINER_TITLE_HEIGHT;
+        pattern->toolBarTitleHeight_ = CONTAINER_TITLE_HEIGHT;
     } else if (LessOrEqual(rowHeight, TITLE_ITEM_HEIGT_S)) {
-        pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP);
+        pattern->toolBarTitleHeight_ = Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP);
     } else if (GreatNotEqual(rowHeight, TITLE_ITEM_HEIGT_S) && LessOrEqual(rowHeight, TITLE_ITEM_HEIGT_M)) {
-        pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP);
+        pattern->toolBarTitleHeight_ = Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP);
     } else if (GreatNotEqual(rowHeight, TITLE_ITEM_HEIGT_M)) {
-        pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP);
+        pattern->toolBarTitleHeight_ = Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP);
     }
-    pattern->SetContainerModalTitleHeight(pattern->titleHeight_.ConvertToPx());
+    pattern->SetToolbarTitleHeight();
     UpdateTargetNodesBarMargin();
 }
 

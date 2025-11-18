@@ -31,12 +31,14 @@
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/video/video_theme.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/gradient_property.h"
+
 
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/common/ace_view.h"
@@ -644,10 +646,19 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
             eventHub->FirePauseEvent();
             break;
         case PlaybackStatus::STOPPED:
+            isStop_ = true;
             CHECK_NULL_VOID(eventHub);
             eventHub->FireStopEvent();
             break;
         case PlaybackStatus::PREPARED: {
+            auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+            if (layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                auto pipeline = host->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+            }
             ContainerScope scope(instanceId_);
             if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
                 return;
@@ -704,6 +715,9 @@ void VideoPattern::OnError(int32_t code, const std::string& message)
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
+    if (!GetIsPrepared()) {
+        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(hostId_);
+    }
 
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1022,13 +1036,16 @@ void VideoPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (pipeline && layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+        pipeline->GetLoadCompleteManager()->AddLoadComponent(hostId_);
+    }
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoFullScreenPattern>(this)) {
         SetMethodCall();
     }
-    hostId_ = host->GetId();
-    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(hostId_);
 }
@@ -1037,12 +1054,16 @@ void VideoPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    auto id = host->GetId();
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (pipeline && layoutProperty && !layoutProperty->GetPosterImageInfo().value().IsValid()) {
+        pipeline->GetLoadCompleteManager()->DeleteLoadComponent(id);
+    }
     if (host->GetNodeStatus() == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         Pause();
     }
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
-    auto id = host->GetId();
-    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
 }
@@ -1632,7 +1653,9 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 
 RefPtr<FrameNode> VideoPattern::CreateSVG()
 {
-    auto pipelineContext = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -1865,7 +1888,6 @@ void VideoPattern::Stop()
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer stop", hostId_);
     OnCurrentTimeChange(0);
     mediaPlayer_->Stop();
-    isStop_ = true;
     SetIsSeeking(false);
 }
 
@@ -2450,6 +2472,7 @@ void VideoPattern::UpdateBackgroundColor()
 void VideoPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
+    hostId_ = host->GetId();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -2461,7 +2484,9 @@ void VideoPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host)
                                                  RenderContext::PatternType::VIDEO };
 #else
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
-                                                 RenderContext::PatternType::VIDEO };
+                                                 RenderContext::PatternType::VIDEO, true };
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Create MediaPlayer SurfaceNode with SkipCheckInMultiInstance",
+        hostId_);
 #endif
     renderContextForMediaPlayer_->InitContext(false, param);
 

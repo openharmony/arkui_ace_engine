@@ -216,7 +216,6 @@ public:
     static void EnableDataDetector(const JSCallbackInfo& args);
     static void DataDetectorConfig(const JSCallbackInfo& args);
     static void EnableSelectedDataDetector(const JSCallbackInfo& args);
-    static void SelectedDataDetectorConfig(const JSCallbackInfo& args);
     static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
     static void OnLoadStarted(const JSCallbackInfo& args);
     static void OnLoadFinished(const JSCallbackInfo& args);

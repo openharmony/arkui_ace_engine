@@ -320,11 +320,20 @@ void JSXComponentController::GetXComponentSurfaceRotation(const JSCallbackInfo& 
 
 void JSXComponentController::LockCanvas(const JSCallbackInfo& args)
 {
-    CHECK_NULL_VOID(xcomponentController_);
+    if (xcomponentController_ == nullptr) {
+        args.SetReturnValue(JSVal::Null());
+        return;
+    }
     auto rsCanvas = xcomponentController_->LockCanvas();
-    CHECK_NULL_VOID(rsCanvas);
+    if (rsCanvas == nullptr) {
+        args.SetReturnValue(JSVal::Null());
+        return;
+    }
     auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
+    if (engine == nullptr) {
+        args.SetReturnValue(JSVal::Null());
+        return;
+    }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     ScopeRAII scope(env);

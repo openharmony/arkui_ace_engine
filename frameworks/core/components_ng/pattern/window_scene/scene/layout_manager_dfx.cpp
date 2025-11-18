@@ -70,7 +70,7 @@ void LayoutManagerDfx::RecordUIParams(TraverseResult res)
     if (!uiParams_.empty()) {
         for (auto it = uiParams_.begin(); it != uiParams_.end();) {
             if (!res.uiParams.count(it->first)) {
-                TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "window:%{public}d hide", it->first);
+                TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "window:%{public}d hide", it->first);
                 it = uiParams_.erase(it);
             } else {
                 ++it;
@@ -79,7 +79,7 @@ void LayoutManagerDfx::RecordUIParams(TraverseResult res)
     }
     for (const auto& [winId, uiParam] : res.uiParams) {
         if (!uiParams_.count(winId)) {
-            TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "window:%{public}d show", winId);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "window:%{public}d show", winId);
         } else if (!NearEqual(uiParams_[winId].scaleX_, uiParam.scaleX_) ||
             !NearEqual(uiParams_[winId].scaleY_, uiParam.scaleY_)) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "%{public}d|scale:%{public}f,%{public}f->%{public}f,%{public}f",

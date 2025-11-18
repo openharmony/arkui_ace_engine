@@ -69,7 +69,6 @@ void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetCaretColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
@@ -83,6 +82,7 @@ void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colo
             pattern->RegisterResource<Color>("caretColor", resObj, result);
         }
     }
+    TextFieldModelNG::SetCaretColor(frameNode, result);
 }
 
 void ResetTextInputCaretColor(ArkUINodeHandle node)
@@ -137,7 +137,6 @@ void SetTextInputPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetPlaceholderColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
@@ -151,6 +150,7 @@ void SetTextInputPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void
             pattern->RegisterResource<Color>("placeholderColor", resObj, result);
         }
     }
+    TextFieldModelNG::SetPlaceholderColor(frameNode, result);
 }
 
 void ResetTextInputPlaceholderColor(ArkUINodeHandle node)
@@ -728,7 +728,6 @@ void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 colo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
@@ -742,6 +741,7 @@ void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 colo
             pattern->RegisterResource<Color>("selectedBackgroundColor", resObj, result);
         }
     }
+    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, result);
 }
 
 void ResetTextInputSelectedBackgroundColor(ArkUINodeHandle node)
@@ -872,7 +872,6 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetTextColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -886,6 +885,7 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
             pattern->RegisterResource<Color>("fontColor", resObj, result);
         }
     }
+    TextFieldModelNG::SetTextColor(frameNode, result);
 }
 
 void ResetTextInputFontColor(ArkUINodeHandle node)
@@ -1265,19 +1265,19 @@ void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetBackgroundColor(frameNode, result);
+    RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
+    }
+    TextFieldModelNG::SetBackgroundColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (resObj) {
-            pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
-        }
+        pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
     }
 }
 
@@ -1622,27 +1622,27 @@ void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* va
     }
     if (hasValues[CALL_ARG_0]) {
         Color result = Color(values[CALL_ARG_0]);
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->typingColorObj : nullptr, result, "underlineColorTyping");
         userColor.typing = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->typingColorObj, result,
-            "underlineColorTyping");
     }
     if (hasValues[CALL_ARG_1]) {
         Color result = Color(values[CALL_ARG_1]);
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->normalColorObj : nullptr, result, "underlineColorNormal");
         userColor.normal = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->normalColorObj, result,
-            "underlineColorNormal");
     }
     if (hasValues[CALL_ARG_2]) {
         Color result = Color(values[CALL_ARG_2]);
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->errorColorObj : nullptr, result, "underlineColorError");
         userColor.error = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->errorColorObj, result,
-            "underlineColorError");
     }
     if (hasValues[CALL_ARG_3]) {
         Color result = Color(values[CALL_ARG_3]);
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->disableColorObj : nullptr, result, "underlineColorDisable");
         userColor.disable = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->disableColorObj, result,
-            "underlineColorDisable");
     }
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }

@@ -21,7 +21,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_F64_serializer } from "./common"
 import { ContentModifier, AttributeModifier, hookRatingContentModifier, hookRatingAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -56,24 +56,24 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RatingInterface_setRatingOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStarsAttribute(value: number | undefined): void {
+    setStarsAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RatingAttribute_setStars(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStepSizeAttribute(value: number | undefined): void {
+    setStepSizeAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -106,7 +106,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RatingOptions {
-    rating: number | Bindable<number> | undefined;
+    rating: double | Bindable<double> | undefined;
     indicator?: boolean;
 }
 export interface StarStyleOptions {
@@ -115,21 +115,21 @@ export interface StarStyleOptions {
     secondaryUri?: ResourceStr;
 }
 export interface RatingConfiguration extends CommonConfiguration<RatingConfiguration> {
-    rating: number;
+    rating: double;
     indicator: boolean;
-    stars: number;
-    stepSize: number;
-    triggerChange: ((value0: number) => void);
+    stars: int32;
+    stepSize: double;
+    triggerChange: ((value0: double) => void);
 }
-export type OnRatingChangeCallback = (rating: number) => void;
+export type OnRatingChangeCallback = (rating: double) => void;
 export interface RatingAttribute extends CommonMethod {
     setRatingOptions(options?: RatingOptions): this {
         throw new Error("Unimplemented method setRatingOptions")
     }
-    stars(value: number | undefined): this {
+    stars(value: int32 | undefined): this {
         throw new Error("Unimplemented method stars")
     }
-    stepSize(value: number | undefined): this {
+    stepSize(value: double | undefined): this {
         throw new Error("Unimplemented method stepSize")
     }
     starStyle(value: StarStyleOptions | undefined): this {
@@ -146,8 +146,8 @@ export interface RatingAttribute extends CommonMethod {
     }
 }
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
-    stars_value?: number | undefined
-    stepSize_value?: number | undefined
+    stars_value?: int32 | undefined
+    stepSize_value?: double | undefined
     starStyle_value?: StarStyleOptions | undefined
     onChange_value?: OnRatingChangeCallback | undefined
     contentModifier_value?: ContentModifier<RatingConfiguration> | undefined
@@ -155,10 +155,10 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     setRatingOptions(options?: RatingOptions): this {
         return this
     }
-    stars(value: number | undefined): this {
+    stars(value: int32 | undefined): this {
         return this
     }
-    stepSize(value: number | undefined): this {
+    stepSize(value: double | undefined): this {
         return this
     }
     starStyle(value: StarStyleOptions | undefined): this {
@@ -186,21 +186,22 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         if (this.checkPriority("setRatingOptions")) {
             const options_casted = options as (RatingOptions | undefined)
             this.getPeer()?.setRatingOptionsAttribute(options_casted)
+            this.applyOptionsFinish('RatingAttribute');
             return this
         }
         return this
     }
-    public stars(value: number | undefined): this {
+    public stars(value: int32 | undefined): this {
         if (this.checkPriority("stars")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setStarsAttribute(value_casted)
             return this
         }
         return this
     }
-    public stepSize(value: number | undefined): this {
+    public stepSize(value: double | undefined): this {
         if (this.checkPriority("stepSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setStepSizeAttribute(value_casted)
             return this
         }
@@ -236,6 +237,9 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -264,13 +268,13 @@ export class RatingConfiguration_serializer {
         const valueHolderForContentModifier  = value.contentModifier
         valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
         const valueHolderForRating  = value.rating
-        valueSerializer.writeNumber(valueHolderForRating)
+        valueSerializer.writeFloat64(valueHolderForRating)
         const valueHolderForIndicator  = value.indicator
         valueSerializer.writeBoolean(valueHolderForIndicator)
         const valueHolderForStars  = value.stars
-        valueSerializer.writeNumber(valueHolderForStars)
+        valueSerializer.writeInt32(valueHolderForStars)
         const valueHolderForStepSize  = value.stepSize
-        valueSerializer.writeNumber(valueHolderForStepSize)
+        valueSerializer.writeFloat64(valueHolderForStepSize)
         const valueHolderForTriggerChange  = value.triggerChange
         valueSerializer.holdAndWriteCallback(valueHolderForTriggerChange)
     }
@@ -278,20 +282,20 @@ export class RatingConfiguration_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const enabledTmpResult : boolean = valueDeserializer.readBoolean()
         const contentModifierTmpResult : ContentModifier<RatingConfiguration> = (valueDeserializer.readObject() as ContentModifier<RatingConfiguration>)
-        const ratingTmpResult : number = (valueDeserializer.readNumber() as number)
+        const ratingTmpResult : double = valueDeserializer.readFloat64()
         const indicatorTmpResult : boolean = valueDeserializer.readBoolean()
-        const starsTmpResult : number = (valueDeserializer.readNumber() as number)
-        const stepSizeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const starsTmpResult : int32 = valueDeserializer.readInt32()
+        const stepSizeTmpResult : double = valueDeserializer.readFloat64()
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : ((value0: number) => void) = (value0: number):void => {
+        const triggerChangeTmpResult : ((value0: double) => void) = (value0: double):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
-            triggerChangeTmpBufBufArgsSerializer.writeNumber(value0);
-            InteropNativeModule._CallCallbackSync(10, 36519084, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            triggerChangeTmpBufBufArgsSerializer.writeFloat64(value0);
+            InteropNativeModule._CallCallbackSync(10, -949162837, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -306,14 +310,14 @@ export class RatingOptions_serializer {
         if (valueHolderForRating !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRatingTmpValue  = valueHolderForRating!
-            if (valueHolderForRatingTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForRatingTmpValueForIdx0  = valueHolderForRatingTmpValue as number
-                valueSerializer.writeNumber(valueHolderForRatingTmpValueForIdx0)
-            } else if (valueHolderForRatingTmpValue instanceof Bindable<number>) {
-                valueSerializer.writeInt8((1).toChar())
-                const valueHolderForRatingTmpValueForIdx1  = valueHolderForRatingTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(valueSerializer, valueHolderForRatingTmpValueForIdx1)
+            if (valueHolderForRatingTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForRatingTmpValueForIdx0  = valueHolderForRatingTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRatingTmpValueForIdx0)
+            } else if (valueHolderForRatingTmpValue instanceof Bindable<double>) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForRatingTmpValueForIdx1  = valueHolderForRatingTmpValue as Bindable<double>
+                Bindable_F64_serializer.write(valueSerializer, valueHolderForRatingTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -330,20 +334,20 @@ export class RatingOptions_serializer {
     public static read(buffer: DeserializerBase): RatingOptions {
         let valueDeserializer : DeserializerBase = buffer
         const ratingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let ratingTmpBuf : number | Bindable<number> | undefined = undefined
+        let ratingTmpBuf : double | Bindable<double> | undefined = undefined
         if ((ratingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const ratingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let ratingTmpBuf_ : number | Bindable<number> | undefined
+            let ratingTmpBuf_ : double | Bindable<double> | undefined
             if (ratingTmpBuf_UnionSelector == (0).toChar()) {
-                ratingTmpBuf_ = (valueDeserializer.readNumber() as number)
+                ratingTmpBuf_ = valueDeserializer.readFloat64()
             } else if (ratingTmpBuf_UnionSelector == (1).toChar()) {
-                ratingTmpBuf_ = Bindable_Number_serializer.read(valueDeserializer)
+                ratingTmpBuf_ = Bindable_F64_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for ratingTmpBuf_ has to be chosen through deserialisation.")
             }
-            ratingTmpBuf = (ratingTmpBuf_ as number | Bindable<number>)
+            ratingTmpBuf = (ratingTmpBuf_ as double | Bindable<double>)
         }
-        const ratingTmpResult : number | Bindable<number> | undefined = ratingTmpBuf
+        const ratingTmpResult : double | Bindable<double> | undefined = ratingTmpBuf
         const indicatorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let indicatorTmpBuf : boolean | undefined = undefined
         if ((indicatorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -359,21 +363,21 @@ export class StarStyleOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForBackgroundUri  = value.backgroundUri
         if (valueHolderForBackgroundUri instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForBackgroundUriForIdx0  = valueHolderForBackgroundUri as string
             valueSerializer.writeString(valueHolderForBackgroundUriForIdx0)
         } else if (valueHolderForBackgroundUri instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForBackgroundUriForIdx1  = valueHolderForBackgroundUri as Resource
             Resource_serializer.write(valueSerializer, valueHolderForBackgroundUriForIdx1)
         }
         const valueHolderForForegroundUri  = value.foregroundUri
         if (valueHolderForForegroundUri instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForForegroundUriForIdx0  = valueHolderForForegroundUri as string
             valueSerializer.writeString(valueHolderForForegroundUriForIdx0)
         } else if (valueHolderForForegroundUri instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForForegroundUriForIdx1  = valueHolderForForegroundUri as Resource
             Resource_serializer.write(valueSerializer, valueHolderForForegroundUriForIdx1)
         }
@@ -382,11 +386,11 @@ export class StarStyleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSecondaryUriTmpValue  = valueHolderForSecondaryUri!
             if (valueHolderForSecondaryUriTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSecondaryUriTmpValueForIdx0  = valueHolderForSecondaryUriTmpValue as string
                 valueSerializer.writeString(valueHolderForSecondaryUriTmpValueForIdx0)
             } else if (valueHolderForSecondaryUriTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSecondaryUriTmpValueForIdx1  = valueHolderForSecondaryUriTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSecondaryUriTmpValueForIdx1)
             }

@@ -32,7 +32,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // HyperlinkModifier
 namespace HyperlinkInterfaceModifier {
 void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                             const Ark_Union_String_Resource* address,
+                             const Opt_Union_String_Resource* address,
                              const Opt_Union_String_Resource* content)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -40,9 +40,7 @@ void SetHyperlinkOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(address);
     auto convAddress = Converter::OptConvert<std::string>(*address);
     auto convContent = Converter::OptConvertPtr<std::string>(content);
-    if (convAddress.has_value()) {
-        HyperlinkModelStatic::SetTextStyle(frameNode, convAddress.value(), convContent);
-    }
+    HyperlinkModelStatic::SetTextStyle(frameNode, convAddress.value_or(""), convContent);
 }
 } // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {

@@ -28,21 +28,27 @@ final class CONSTANT {
 export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     public store_: Map<K, V>;
     // Use public access to enable unit testing.
+    @JSONStringifyIgnore
     protected meta_: IMutableKeyedStateMeta;
     // support for @Watch
+    @JSONStringifyIgnore
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
+    @JSONStringifyIgnore
     private ____V1RenderId: RenderIdType = 0;
+    @JSONStringifyIgnore
     private allowDeep_: boolean;
+    private isAPI_ : boolean;
     /**
      * Constructs a Map from another Map
      * @param map another map
      */
-    constructor(map: Map<K, V>, allowDeep: boolean) {
+    constructor(map: Map<K, V>, allowDeep: boolean, isAPI: boolean = false) {
         // Create without parameters to avoid call back to WrappedMap before "this" is fully constructed!
         super();
         this.store_ = map;
         this.allowDeep_ = allowDeep;
+        this.isAPI_ = isAPI;
         this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedMap');
     }
 
@@ -172,7 +178,9 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
                 this.meta_.addRef(CONSTANT.OB_LENGTH);
             }
         }
-        return uiUtils.makeObserved(this.store_.get(key), this.allowDeep_);
+        const makeobserved = uiUtils.makeObservedEntrance(this.store_.get(key), this.allowDeep_, this.isAPI_) as V;
+        this.store_.set(key, makeobserved);
+        return this.store_.get(key);
     }
 
     /**

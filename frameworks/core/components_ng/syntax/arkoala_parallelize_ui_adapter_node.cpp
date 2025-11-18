@@ -22,7 +22,6 @@ namespace OHOS::Ace::NG {
 int32_t ParallelizeUIAdapterNode::FrameCount() const
 {
     auto value = getCount_ ? getCount_() : 0;
-    LOGE("ParallelizeUIAdapterNode::FrameCount  %{public}d %{public}d", getCount_ ? 1 : 0, value);
     return value;
 }
 
@@ -60,15 +59,33 @@ const std::list<RefPtr<UINode>>& ParallelizeUIAdapterNode::GetChildren(bool notD
             children_.emplace_back(value);
         }
     }
-    ACE_SCOPED_TRACE("ParallelizeUIAdapterNode::GetChildren siez: %zu", children_.size());
     return children_;
 }
 
 void ParallelizeUIAdapterNode::Reset()
 {
-    LOGE("ParallelizeUIAdapterNode::FrameCount  Reset");
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void ParallelizeUIAdapterNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
+{
+    if (start_ == start && end_ == end) {
+        return;
+    }
+    UINode::MarkNeedSyncRenderTree(false);
+    start_ = start;
+    end_ = end;
+
+    for (const auto& [key, value] : childMap_) {
+        ACE_SCOPED_TRACE("%d", key);
+        if (key <= end_ && key >= start_) {
+            value->SetActive(true);
+        } else {
+            value->SetActive(false);
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

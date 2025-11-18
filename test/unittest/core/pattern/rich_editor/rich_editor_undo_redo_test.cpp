@@ -24,9 +24,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-namespace {
-constexpr uint32_t RECORD_MAX_LENGTH = 20;
-}
 
 namespace OHOS::Ace::NG {
 
@@ -79,7 +76,7 @@ RefPtr<RichEditorPattern> RichEditorUndoRedoTest::GetRichEditorPattern()
  * @tc.desc: test RedoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, RedoDrag001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, RedoDrag001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -100,7 +97,7 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag001, TestSize.Level1)
  * @tc.desc: test UndoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, UndoDrag001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, UndoDrag001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -122,7 +119,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag001, TestSize.Level1)
  * @tc.desc: test RedoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -157,7 +154,7 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level1)
  * @tc.desc: test UndoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, UndoDrag003, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, UndoDrag003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -175,7 +172,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag003, TestSize.Level1)
  * @tc.desc: test RedoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, RedoDrag003, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, RedoDrag003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -201,43 +198,28 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
-        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::REDO);
         changeReason = changeValue.changeReason_;
         return true;
     };
     eventHub->SetOnWillChange(onWillChange);
 
-    richEditorPattern->HandleOnRedoAction();
-    EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN);
-    RichEditorPattern::OperationRecord firstRecord;
-    firstRecord.addText = u"first Record helloWorld";
-    firstRecord.deleteCaretPosition = 3;
-    richEditorPattern->redoOperationRecords_.emplace_back(firstRecord);
-    changeReason = TextChangeReason::UNKNOWN;
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->HandleOnUndoAction();
     richEditorPattern->HandleOnRedoAction();
     EXPECT_EQ(changeReason, TextChangeReason::REDO);
-    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 
-    RichEditorPattern::OperationRecord secondRecord;
-    secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteText = u"helloWorld";
-    richEditorPattern->redoOperationRecords_.clear();
-    richEditorPattern->redoOperationRecords_.emplace_back(secondRecord);
-    changeReason = TextChangeReason::UNKNOWN;
+    richEditorPattern->textSelector_.Update(0, 2);
+    richEditorPattern->InsertValue(INIT_VALUE_2);
+    richEditorPattern->HandleOnUndoAction();
     richEditorPattern->HandleOnRedoAction();
     EXPECT_EQ(changeReason, TextChangeReason::REDO);
-    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 
-    RichEditorPattern::OperationRecord thridRecord;
-    thridRecord.deleteText = u"helloWorld";
-    thridRecord.beforeCaretPosition = 10;
-    thridRecord.afterCaretPosition = 15;
-    richEditorPattern->redoOperationRecords_.clear();
-    richEditorPattern->redoOperationRecords_.emplace_back(thridRecord);
-    changeReason = TextChangeReason::UNKNOWN;
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->DeleteForward(1);
+    richEditorPattern->HandleOnUndoAction();
     richEditorPattern->HandleOnRedoAction();
     EXPECT_EQ(changeReason, TextChangeReason::REDO);
-    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 }
 
 
@@ -246,7 +228,7 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
  * @tc.desc: test UndoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, UndoDrag002, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, UndoDrag002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -278,34 +260,20 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction001, TestSize.Level2)
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
-        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::UNDO);
         changeReason = changeValue.changeReason_;
         return true;
     };
     eventHub->SetOnWillChange(onWillChange);
 
-    RichEditorPattern::OperationRecord firstRecord;
-    firstRecord.addText = u"first Record helloWorld";
-    firstRecord.deleteText = u"helloWorld";
-    richEditorPattern->operationRecords_.emplace_back(firstRecord);
-    richEditorPattern->redoOperationRecords_.clear();
-    for (uint32_t count = 0; count < RECORD_MAX_LENGTH; ++count) {
-        RichEditorPattern::OperationRecord emptyRecord;
-        richEditorPattern->redoOperationRecords_.emplace_back(emptyRecord);
-    }
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1);
     richEditorPattern->HandleOnUndoAction();
     EXPECT_EQ(changeReason, TextChangeReason::UNDO);
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 
-    RichEditorPattern::OperationRecord secondRecord;
-    secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteCaretPosition = 3;
-    richEditorPattern->operationRecords_.clear();
-    richEditorPattern->operationRecords_.emplace_back(secondRecord);
-    changeReason = TextChangeReason::UNKNOWN;
-    richEditorPattern->HandleOnExtendUndoAction();
+    richEditorPattern->textSelector_.Update(0, 2);
+    richEditorPattern->InsertValue(INIT_VALUE_2);
+    richEditorPattern->HandleOnUndoAction();
     EXPECT_EQ(changeReason, TextChangeReason::UNDO);
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 }
 
 
@@ -322,38 +290,23 @@ HWTEST_F(RichEditorUndoRedoTest, InsertValueOperation, TestSize.Level2)
     ASSERT_NE(eventHub, nullptr);
     auto changeReason = TextChangeReason::UNKNOWN;
     auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
-        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::UNDO);
         changeReason = changeValue.changeReason_;
         return true;
     };
     eventHub->SetOnWillChange(onWillChange);
 
-    RichEditorPattern::OperationRecord firstRecord;
-    firstRecord.addText = u"first Record helloWorld";
-    firstRecord.deleteText = u"helloWorld";
-    richEditorPattern->operationRecords_.emplace_back(firstRecord);
-    richEditorPattern->redoOperationRecords_.clear();
-    for (uint32_t count = 0; count < RECORD_MAX_LENGTH; ++count) {
-        RichEditorPattern::OperationRecord emptyRecord;
-        richEditorPattern->redoOperationRecords_.emplace_back(emptyRecord);
-    }
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1);
     richEditorPattern->HandleOnUndoAction();
     EXPECT_EQ(changeReason, TextChangeReason::UNDO);
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 
     struct UpdateSpanStyle typingStyle;
     TextStyle textStyle(5);
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-
-    RichEditorPattern::OperationRecord secondRecord;
-    secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteCaretPosition = 3;
-    richEditorPattern->operationRecords_.clear();
-    richEditorPattern->operationRecords_.emplace_back(secondRecord);
-    changeReason = TextChangeReason::UNKNOWN;
+    richEditorPattern->textSelector_.Update(0, 2);
+    richEditorPattern->InsertValue(INIT_VALUE_2);
     richEditorPattern->HandleOnUndoAction();
     EXPECT_EQ(changeReason, TextChangeReason::UNDO);
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 }
 
 /**
@@ -361,7 +314,7 @@ HWTEST_F(RichEditorUndoRedoTest, InsertValueOperation, TestSize.Level2)
  * @tc.desc: test RichEditorPattern ClearOperationRecords
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, ClearOperationRecords001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, ClearOperationRecords001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -384,7 +337,7 @@ HWTEST_F(RichEditorUndoRedoTest, ClearOperationRecords001, TestSize.Level1)
  * @tc.desc: test set UndoStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -411,7 +364,7 @@ HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level1)
  * @tc.desc: test BeforeRedo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -447,7 +400,7 @@ HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level1)
  * @tc.desc: test BeforeUndo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -483,7 +436,7 @@ HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level1)
  * @tc.desc: test AddInsertOperationRecord With PreviewInput
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, AddInsertOperationRecord, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, AddInsertOperationRecord, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

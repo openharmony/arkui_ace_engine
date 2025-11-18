@@ -83,7 +83,7 @@ RefPtr<RichEditorPattern> RichEditorSelectionTestNg::GetRichEditorPattern()
  * @tc.desc: test SetSelection and GetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     AddSpan(INIT_VALUE_1);
@@ -132,7 +132,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection001, TestSize.Level1)
  * @tc.desc: test SetSelection and GetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection002, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     AddSpan(INIT_VALUE_1);
@@ -192,7 +192,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection002, TestSize.Level1)
  * @tc.desc: test SetSelection and GetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection003, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     AddSpan(INIT_VALUE_1);
@@ -243,7 +243,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection003, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection004, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection004, TestSize.Level0)
 {
     /**
      * @tc.step: step1. Add text span and get richeditor pattern.
@@ -304,7 +304,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection004, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection005, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection005, TestSize.Level0)
 {
     /**
      * @tc.step: step1. Add text span and get richeditor pattern.
@@ -356,7 +356,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection005, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection006, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection006, TestSize.Level0)
 {
     /**
      * @tc.step: step1. Add text span and get richeditor pattern.
@@ -393,7 +393,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection006, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection007, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection007, TestSize.Level0)
 {
     /**
      * @tc.step: step1. Add text span and get richeditor pattern.
@@ -439,7 +439,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection007, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection008, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection008, TestSize.Level0)
 {
     /**
      * @tc.step: step1. Add text span and get richeditor pattern.
@@ -476,7 +476,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection008, TestSize.Level1)
  * @tc.desc: test Set Selection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection009, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection009, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -509,7 +509,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection009, TestSize.Level1)
  * @tc.desc: test Set Selection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection010, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection010, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -538,7 +538,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection010, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection011, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection011, TestSize.Level0)
 {
     /**
      * @tc.step: step1. Add text span and get richeditor pattern.
@@ -584,7 +584,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection011, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection012, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection012, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -645,7 +645,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection012, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection013, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection013, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -675,7 +675,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection013, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection014, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection014, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -702,7 +702,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection014, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection015, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection015, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -731,7 +731,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection015, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection016, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection016, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -770,7 +770,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection016, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection017, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection017, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -811,7 +811,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection017, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection018, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection018, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -851,7 +851,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection018, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection019, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection019, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -883,7 +883,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection019, TestSize.Level1)
  * @tc.desc: test SetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection020, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection020, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -921,7 +921,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection020, TestSize.Level1)
  * @tc.desc: test set selection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, SetSelection021, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, SetSelection021, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -946,7 +946,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection021, TestSize.Level1)
  * @tc.desc: test InitSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, InitSelection001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, InitSelection001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -962,7 +962,7 @@ HWTEST_F(RichEditorSelectionTestNg, InitSelection001, TestSize.Level1)
  * @tc.desc: test InitSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, InitSelection002, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, InitSelection002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -980,7 +980,7 @@ HWTEST_F(RichEditorSelectionTestNg, InitSelection002, TestSize.Level1)
  * @tc.desc: test InitSelection003
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, InitSelection003, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, InitSelection003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1009,7 +1009,7 @@ HWTEST_F(RichEditorSelectionTestNg, InitSelection003, TestSize.Level1)
  * @tc.desc: test InitSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, InitSelection004, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, InitSelection004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1037,7 +1037,7 @@ HWTEST_F(RichEditorSelectionTestNg, InitSelection004, TestSize.Level1)
  * @tc.desc: test AdjustPlaceholderSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1068,7 +1068,7 @@ HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection001, TestSize.Leve
  * @tc.desc: test AdjustPlaceholderSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection002, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1124,7 +1124,7 @@ HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection002, TestSize.Leve
  * @tc.desc: test AdjustWordSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, AdjustWordSelection001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, AdjustWordSelection001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1141,7 +1141,7 @@ HWTEST_F(RichEditorSelectionTestNg, AdjustWordSelection001, TestSize.Level1)
  * @tc.desc: test HandleClickSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, HandleClickSelection001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, HandleClickSelection001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1156,7 +1156,7 @@ HWTEST_F(RichEditorSelectionTestNg, HandleClickSelection001, TestSize.Level1)
  * @tc.desc: test selectArea inVisible
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, IsSelectAreaVisible001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, IsSelectAreaVisible001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1182,7 +1182,7 @@ HWTEST_F(RichEditorSelectionTestNg, IsSelectAreaVisible001, TestSize.Level1)
  * @tc.desc: test selectArea Visible
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, IsSelectAreaVisible002, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, IsSelectAreaVisible002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1208,7 +1208,7 @@ HWTEST_F(RichEditorSelectionTestNg, IsSelectAreaVisible002, TestSize.Level1)
  * @tc.desc: test GetSelectedSpanText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, GetSelectedSpanText001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, GetSelectedSpanText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1234,7 +1234,7 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectedSpanText001, TestSize.Level1)
  * @tc.desc: test get select span text
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, GetSelectedSpanText002, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, GetSelectedSpanText002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1251,7 +1251,7 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectedSpanText002, TestSize.Level1)
  * @tc.desc: test CaretPositionSelectEmoji
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1266,7 +1266,7 @@ HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji001, TestSize.Level1
  * @tc.desc: test CaretPositionSelectEmoji
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji002, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1281,7 +1281,7 @@ HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji002, TestSize.Level1
  * @tc.desc: test CaretPositionSelectEmoji
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji003, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1296,7 +1296,7 @@ HWTEST_F(RichEditorSelectionTestNg, CaretPositionSelectEmoji003, TestSize.Level1
  * @tc.desc: test GetSelectSpansPositionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1338,7 +1338,7 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo001, TestSize.Leve
  * @tc.desc: test GetSelectSpansPositionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo002, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo002, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -1385,7 +1385,7 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo002, TestSize.Leve
  * @tc.desc: test GetSelectSpansPositionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo003, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo003, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -1420,7 +1420,7 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo003, TestSize.Leve
  * @tc.desc: test RichEditorPattern JudgeSelectType
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, JudgeSelectType001, TestSize.Level1)
+HWTEST_F(RichEditorSelectionTestNg, JudgeSelectType001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

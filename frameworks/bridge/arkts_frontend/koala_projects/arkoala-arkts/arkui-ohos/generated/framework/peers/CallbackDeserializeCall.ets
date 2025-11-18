@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
+import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityActionInterceptCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
 import { image_PixelMap_serializer } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, Length, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
@@ -26,14 +26,14 @@ import { CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serial
 import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, StyledString_serializer, UserDataSpan_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
 import { DismissDialogAction_serializer, DismissDialogAction } from "./../../component/actionSheet"
 import { DrawContext_serializer, Size_serializer } from "./../../Graphics"
-import { ErrorInformation_serializer, FormCallbackInfo_serializer, ErrorInformation, FormCallbackInfo } from "./../../component/formComponent"
+import { ErrorInformation_serializer, FormCallbackInfo_serializer, RouterCallbackInfo_serializer, ErrorInformation, FormCallbackInfo, RouterCallbackInfo } from "./../../component/formComponent"
 import { FullscreenInfo_serializer, PlaybackInfo_serializer, PreparedInfo_serializer, FullscreenInfo, PlaybackInfo, PreparedInfo } from "./../../component/video"
 import { GestureEvent_serializer, GestureInfo_serializer, BaseGestureEvent_serializer, GestureRecognizer_serializer, GestureEvent, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer } from "./../../component/gesture"
 import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAlertEvent_serializer, OnAudioStateChangedEvent_serializer, OnBeforeUnloadEvent_serializer, OnClientAuthenticationEvent_serializer, OnConfirmEvent_serializer, OnConsoleEvent_serializer, OnContextMenuShowEvent_serializer, OnDataResubmittedEvent_serializer, OnDownloadStartEvent_serializer, OnErrorReceiveEvent_serializer, OnFaviconReceivedEvent_serializer, OnFirstContentfulPaintEvent_serializer, OnGeolocationShowEvent_serializer, OnHttpAuthRequestEvent_serializer, OnHttpErrorReceiveEvent_serializer, OnInterceptRequestEvent_serializer, WebResourceResponse_serializer, OnLoadFinishedEvent_serializer, OnLoadInterceptEvent_serializer, OnLoadStartedEvent_serializer, OnOverScrollEvent_serializer, OnPageBeginEvent_serializer, OnPageEndEvent_serializer, OnPageVisibleEvent_serializer, OnPdfLoadEvent_serializer, OnPdfScrollEvent_serializer, OnPermissionRequestEvent_serializer, OnProgressChangeEvent_serializer, OnPromptEvent_serializer, OnRefreshAccessedHistoryEvent_serializer, OnRenderExitedEvent_serializer, OnResourceLoadEvent_serializer, OnScaleChangeEvent_serializer, OnScreenCaptureRequestEvent_serializer, OnScrollEvent_serializer, OnSearchResultReceiveEvent_serializer, OnShowFileSelectorEvent_serializer, OnSslErrorEventReceiveEvent_serializer, OnTitleReceiveEvent_serializer, OnTouchIconUrlReceivedEvent_serializer, OnWindowNewEvent_serializer, WebKeyboardOptions_serializer, NativeEmbedMouseInfo_serializer, AdsBlockedDetails_serializer, BlankScreenDetectionEventInfo_serializer, FirstMeaningfulPaint_serializer, FullScreenEnterEvent_serializer, IntelligentTrackingPreventionDetails_serializer, LargestContentfulPaint_serializer, NativeEmbedParamDataInfo_serializer, NativeEmbedVisibilityInfo_serializer, LoadCommittedDetails_serializer, WebResourceRequest_serializer, RenderProcessNotRespondingData_serializer, SslErrorEvent_serializer, WebKeyboardCallbackInfo_serializer, NativeEmbedDataInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, OnContextMenuShowEvent, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, WebResourceResponse, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, WebKeyboardOptions, MouseInfoCallback, NativeEmbedMouseInfo, OnAdsBlockedCallback, AdsBlockedDetails, OnContextMenuHideCallback, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnFullScreenEnterCallback, FullScreenEnterEvent, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnOverrideErrorPageCallback, OnOverrideUrlLoadingCallback, WebResourceRequest, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, ThreatType, OnSslErrorEventCallback, SslErrorEvent, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo } from "./../../component/web"
 import { NavDestinationContext_serializer, NavDestinationTransition_serializer, NavDestinationActiveReason, NavDestinationContext, NavDestinationTransition, NavDestinationTransitionDelegate } from "./../../component/navDestination"
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, NavContentInfo_serializer, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, InterceptionModeCallback, InterceptionShowCallback, NavBar, NavigationOperation, NavContentInfo, UpdateTransitionCallback } from "./../../component/navigation"
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollFrameBeginHandlerResult, OffsetResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../../component/scroll"
-import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
+import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentDidScrollCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
 import { SurfaceRect_serializer, NativeXComponentPointer, SurfaceRect } from "./../../component/xcomponent"
 import { SwiperContentTransitionProxy_serializer, SwiperContentWillScrollResult_serializer, SwiperAnimationEvent_serializer, SwiperContentTransitionProxy, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../../component/swiper"
 import { Resource_serializer } from "./../resource"
@@ -87,6 +87,26 @@ import { TextFieldValueCallback } from "./../textFieldOps"
 import { TypeChecker } from "#components"
 import { CallbackKind } from "./CallbackKind"
 import { ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
+export function deserializeAndCallAccessibilityActionInterceptCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityActionInterceptCallback)
+    let action : AccessibilityAction = AccessibilityAction.fromValue(thisDeserializer.readInt32())
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: AccessibilityActionInterceptResult) => void) = (value: AccessibilityActionInterceptResult):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeInt32(value.valueOf());
+        InteropNativeModule._CallCallbackSync(10, -1365174832, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(action)
+    continuationResult(_callResult)
+}
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityCallback)
@@ -99,6 +119,12 @@ export function deserializeAndCallAccessibilityFocusCallback(thisDeserializer: D
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityFocusCallback)
     let isFocus : boolean = thisDeserializer.readBoolean()
     _call(isFocus)
+}
+export function deserializeAndCallAccessibilityTransparentCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityTransparentCallback)
+    let event : TouchEvent = (TouchEvent_serializer.read(thisDeserializer) as TouchEvent)
+    _call(event)
 }
 export function deserializeAndCallArcScrollIndexHandler(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -157,9 +183,15 @@ export function deserializeAndCallButtonModifierBuilder(thisDeserializer: Deseri
 export function deserializeAndCallButtonTriggerClickCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ButtonTriggerClickCallback)
-    let xPos : number = (thisDeserializer.readNumber() as number)
-    let yPos : number = (thisDeserializer.readNumber() as number)
+    let xPos : double = thisDeserializer.readFloat64()
+    let yPos : double = thisDeserializer.readFloat64()
     _call(xPos, yPos)
+}
+export function deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: AccessibilityActionInterceptResult) => void))
+    let value : AccessibilityActionInterceptResult = AccessibilityActionInterceptResult.fromValue(thisDeserializer.readInt32())
+    _call(value)
 }
 export function deserializeAndCallCallback_Area_Area_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -471,6 +503,19 @@ export function deserializeAndCallCallback_F64_F64_Void(thisDeserializer: Deseri
     let totalOffsetY : double = thisDeserializer.readFloat64()
     _call(totalOffsetX, totalOffsetY)
 }
+export function deserializeAndCallCallback_F64_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((offset: double) => void))
+    let offset : double = thisDeserializer.readFloat64()
+    _call(offset)
+}
+export function deserializeAndCallCallback_F64_SliderChangeMode_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: double,mode: SliderChangeMode) => void))
+    let value : double = thisDeserializer.readFloat64()
+    let mode : SliderChangeMode = SliderChangeMode.fromValue(thisDeserializer.readInt32())
+    _call(value, mode)
+}
 export function deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: FocusAxisEvent) => void))
@@ -540,12 +585,118 @@ export function deserializeAndCallCallback_HoverEvent_Void(thisDeserializer: Des
     let value0 : HoverEvent = (HoverEvent_serializer.read(thisDeserializer) as HoverEvent)
     _call(value0)
 }
+export function deserializeAndCallCallback_I32_F64_ComputedBarAttribute(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((index: int32,offset: double) => ComputedBarAttribute))
+    let index : int32 = thisDeserializer.readInt32()
+    let offset : double = thisDeserializer.readFloat64()
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: ComputedBarAttribute) => void) = (value: ComputedBarAttribute):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        ComputedBarAttribute_serializer.write(continuationBufferBufArgsSerializer, value);
+        InteropNativeModule._CallCallbackSync(10, -1270343661, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(index, offset)
+    continuationResult(_callResult)
+}
+export function deserializeAndCallCallback_I32_I32_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((from: int32,to: int32) => boolean))
+    let from : int32 = thisDeserializer.readInt32()
+    let to : int32 = thisDeserializer.readInt32()
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeBoolean(value0);
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(from, to)
+    continuationResult(_callResult)
+}
+export function deserializeAndCallCallback_I32_I32_I32_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((start: int32,end: int32,center: int32) => void))
+    let start : int32 = thisDeserializer.readInt32()
+    let end : int32 = thisDeserializer.readInt32()
+    let center : int32 = thisDeserializer.readInt32()
+    _call(start, end, center)
+}
 export function deserializeAndCallCallback_I32_I32_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((selectionStart: int32,selectionEnd: int32) => void))
-    let selectionStart : int32 = thisDeserializer.readInt32()
-    let selectionEnd : int32 = thisDeserializer.readInt32()
-    _call(selectionStart, selectionEnd)
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((first: int32,last: int32) => void))
+    let first : int32 = thisDeserializer.readInt32()
+    let last : int32 = thisDeserializer.readInt32()
+    _call(first, last)
+}
+export function deserializeAndCallCallback_I32_Tuple_I32_I32(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((index: int32) => [ int32, int32 ]))
+    let index : int32 = thisDeserializer.readInt32()
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: [ int32, int32 ]) => void) = (value: [ int32, int32 ]):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        const value_0  = value[0];
+        continuationBufferBufArgsSerializer.writeInt32(value_0);
+        const value_1  = value[1];
+        continuationBufferBufArgsSerializer.writeInt32(value_1);
+        InteropNativeModule._CallCallbackSync(10, -1321460777, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(index)
+    continuationResult(_callResult)
+}
+export function deserializeAndCallCallback_I32_Tuple_I32_I32_I32_I32(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((index: int32) => [ int32, int32, int32, int32 ]))
+    let index : int32 = thisDeserializer.readInt32()
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: [ int32, int32, int32, int32 ]) => void) = (value: [ int32, int32, int32, int32 ]):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        const value_0  = value[0];
+        continuationBufferBufArgsSerializer.writeInt32(value_0);
+        const value_1  = value[1];
+        continuationBufferBufArgsSerializer.writeInt32(value_1);
+        const value_2  = value[2];
+        continuationBufferBufArgsSerializer.writeInt32(value_2);
+        const value_3  = value[3];
+        continuationBufferBufArgsSerializer.writeInt32(value_3);
+        InteropNativeModule._CallCallbackSync(10, 1381083927, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(index)
+    continuationResult(_callResult)
+}
+export function deserializeAndCallCallback_I32_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: int32) => void))
+    let value0 : int32 = thisDeserializer.readInt32()
+    _call(value0)
 }
 export function deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -573,28 +724,28 @@ export function deserializeAndCallCallback_InsertValue_Void(thisDeserializer: De
     let value0 : InsertValue = InsertValue_serializer.read(thisDeserializer)
     _call(value0)
 }
-export function deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_ItemDragInfo_I32_I32_Boolean_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void))
     let event : ItemDragInfo = ItemDragInfo_serializer.read(thisDeserializer)
-    let itemIndex : number = (thisDeserializer.readNumber() as number)
-    let insertIndex : number = (thisDeserializer.readNumber() as number)
+    let itemIndex : int32 = thisDeserializer.readInt32()
+    let insertIndex : int32 = thisDeserializer.readInt32()
     let isSuccess : boolean = thisDeserializer.readBoolean()
     _call(event, itemIndex, insertIndex, isSuccess)
 }
-export function deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_ItemDragInfo_I32_I32_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void))
     let event : ItemDragInfo = ItemDragInfo_serializer.read(thisDeserializer)
-    let itemIndex : number = (thisDeserializer.readNumber() as number)
-    let insertIndex : number = (thisDeserializer.readNumber() as number)
+    let itemIndex : int32 = thisDeserializer.readInt32()
+    let insertIndex : int32 = thisDeserializer.readInt32()
     _call(event, itemIndex, insertIndex)
 }
-export function deserializeAndCallCallback_ItemDragInfo_Number_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_ItemDragInfo_I32_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo,itemIndex: number) => void))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo,itemIndex: int32) => void))
     let event : ItemDragInfo = ItemDragInfo_serializer.read(thisDeserializer)
-    let itemIndex : number = (thisDeserializer.readNumber() as number)
+    let itemIndex : int32 = thisDeserializer.readInt32()
     _call(event, itemIndex)
 }
 export function deserializeAndCallCallback_ItemDragInfo_Void(thisDeserializer: DeserializerBase): void {
@@ -708,119 +859,12 @@ export function deserializeAndCallCallback_NavigationTransitionProxy_Void(thisDe
     let transitionProxy : NavigationTransitionProxy = (NavigationTransitionProxy_serializer.read(thisDeserializer) as NavigationTransitionProxy)
     _call(transitionProxy)
 }
-export function deserializeAndCallCallback_Number_Number_Boolean(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((from: number,to: number) => boolean))
-    let from : number = (thisDeserializer.readNumber() as number)
-    let to : number = (thisDeserializer.readNumber() as number)
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    const _callResult  = _call(from, to)
-    continuationResult(_callResult)
-}
-export function deserializeAndCallCallback_Number_Number_ComputedBarAttribute(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((index: number,offset: number) => ComputedBarAttribute))
-    let index : number = (thisDeserializer.readNumber() as number)
-    let offset : number = (thisDeserializer.readNumber() as number)
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: ComputedBarAttribute) => void) = (value: ComputedBarAttribute):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        ComputedBarAttribute_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(10, -1270343661, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    const _callResult  = _call(index, offset)
-    continuationResult(_callResult)
-}
-export function deserializeAndCallCallback_Number_Number_Number_Void(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((start: number,end: number,center: number) => void))
-    let start : number = (thisDeserializer.readNumber() as number)
-    let end : number = (thisDeserializer.readNumber() as number)
-    let center : number = (thisDeserializer.readNumber() as number)
-    _call(start, end, center)
-}
 export function deserializeAndCallCallback_Number_Number_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((first: number,last: number) => void))
-    let first : number = (thisDeserializer.readNumber() as number)
-    let last : number = (thisDeserializer.readNumber() as number)
-    _call(first, last)
-}
-export function deserializeAndCallCallback_Number_SliderChangeMode_Void(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: number,mode: SliderChangeMode) => void))
-    let value : number = (thisDeserializer.readNumber() as number)
-    let mode : SliderChangeMode = SliderChangeMode.fromValue(thisDeserializer.readInt32())
-    _call(value, mode)
-}
-export function deserializeAndCallCallback_Number_Tuple_Number_Number(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((index: number) => [ number, number ]))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((prevIndex: number,index: number) => void))
+    let prevIndex : number = (thisDeserializer.readNumber() as number)
     let index : number = (thisDeserializer.readNumber() as number)
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: [ number, number ]) => void) = (value: [ number, number ]):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        const value_0  = value[0];
-        continuationBufferBufArgsSerializer.writeNumber(value_0);
-        const value_1  = value[1];
-        continuationBufferBufArgsSerializer.writeNumber(value_1);
-        InteropNativeModule._CallCallbackSync(10, -607365481, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    const _callResult  = _call(index)
-    continuationResult(_callResult)
-}
-export function deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((index: number) => [ number, number, number, number ]))
-    let index : number = (thisDeserializer.readNumber() as number)
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: [ number, number, number, number ]) => void) = (value: [ number, number, number, number ]):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        const value_0  = value[0];
-        continuationBufferBufArgsSerializer.writeNumber(value_0);
-        const value_1  = value[1];
-        continuationBufferBufArgsSerializer.writeNumber(value_1);
-        const value_2  = value[2];
-        continuationBufferBufArgsSerializer.writeNumber(value_2);
-        const value_3  = value[3];
-        continuationBufferBufArgsSerializer.writeNumber(value_3);
-        InteropNativeModule._CallCallbackSync(10, 148489367, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    const _callResult  = _call(index)
-    continuationResult(_callResult)
+    _call(prevIndex, index)
 }
 export function deserializeAndCallCallback_Number_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1013,26 +1057,6 @@ export function deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(thisDese
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnHttpErrorReceiveEvent) => void))
     let value0 : OnHttpErrorReceiveEvent = OnHttpErrorReceiveEvent_serializer.read(thisDeserializer)
     _call(value0)
-}
-export function deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnInterceptRequestEvent) => WebResourceResponse))
-    let value0 : OnInterceptRequestEvent = OnInterceptRequestEvent_serializer.read(thisDeserializer)
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: WebResourceResponse) => void) = (value: WebResourceResponse):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        WebResourceResponse_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(10, 831645046, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    const _callResult  = _call(value0)
-    continuationResult(_callResult)
 }
 export function deserializeAndCallCallback_OnLoadFinishedEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1393,6 +1417,17 @@ export function deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void
     let value : TabContentAnimatedTransition | undefined = valueTmpBuf
     _call(value)
 }
+export function deserializeAndCallCallback_Opt_WebResourceResponse_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: WebResourceResponse | null) => void))
+    const valueTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let valueTmpBuf : WebResourceResponse | null = null
+    if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        valueTmpBuf = (WebResourceResponse_serializer.read(thisDeserializer) as WebResourceResponse)
+    }
+    let value : WebResourceResponse | null = valueTmpBuf
+    _call(value)
+}
 export function deserializeAndCallCallback_PlaybackInfo_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: PlaybackInfo) => void))
@@ -1428,7 +1463,10 @@ export function deserializeAndCallCallback_RangeUpdate(thisDeserializer: Deseria
     const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_RangeUpdate)
     let start : int32 = thisDeserializer.readInt32()
     let end : int32 = thisDeserializer.readInt32()
-    _call(start, end)
+    let cacheStart : int32 = thisDeserializer.readInt32()
+    let cacheEnd : int32 = thisDeserializer.readInt32()
+    let isLoop : boolean = thisDeserializer.readBoolean()
+    _call(start, end, cacheStart, cacheEnd, isLoop)
 }
 export function deserializeAndCallCallback_RefreshStatus_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1514,6 +1552,12 @@ export function deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisDes
     let value0 : RichEditorTextSpanResult = RichEditorTextSpanResult_serializer.read(thisDeserializer)
     _call(value0)
 }
+export function deserializeAndCallCallback_RouterCallbackInfo_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: RouterCallbackInfo) => void))
+    let value0 : RouterCallbackInfo = RouterCallbackInfo_serializer.read(thisDeserializer)
+    _call(value0)
+}
 export function deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((sheetDismiss: SheetDismiss) => void))
@@ -1541,7 +1585,7 @@ export function deserializeAndCallCallback_SizeResult_Void(thisDeserializer: Des
 export function deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: SpringBackAction) => void))
-    let value0 : SpringBackAction = SpringBackAction_serializer.read(thisDeserializer)
+    let value0 : SpringBackAction = (SpringBackAction_serializer.read(thisDeserializer) as SpringBackAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_StateStylesChange(thisDeserializer: DeserializerBase): void {
@@ -1705,10 +1749,22 @@ export function deserializeAndCallCallback_T_Void_Date(thisDeserializer: Deseria
     let value0 : Date = new Date(thisDeserializer.readInt64())
     _call(value0)
 }
+export function deserializeAndCallCallback_T_Void_F64(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: double) => void))
+    let value0 : double = thisDeserializer.readFloat64()
+    _call(value0)
+}
 export function deserializeAndCallCallback_T_Void_Global_Resource_Resource(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Resource) => void))
     let value0 : Resource = Resource_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_T_Void_I32(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: int32) => void))
+    let value0 : int32 = thisDeserializer.readInt32()
     _call(value0)
 }
 export function deserializeAndCallCallback_T_Void_Number(thisDeserializer: DeserializerBase): void {
@@ -1785,22 +1841,22 @@ export function deserializeAndCallCallback_TouchResult_Void(thisDeserializer: De
     let value : TouchResult = TouchResult_serializer.read(thisDeserializer)
     _call(value)
 }
-export function deserializeAndCallCallback_Tuple_Number_Number_Number_Number_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_Tuple_I32_I32_I32_I32_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: [ number, number, number, number ]) => void))
-    const valueTmpBufValue0 : number = (thisDeserializer.readNumber() as number)
-    const valueTmpBufValue1 : number = (thisDeserializer.readNumber() as number)
-    const valueTmpBufValue2 : number = (thisDeserializer.readNumber() as number)
-    const valueTmpBufValue3 : number = (thisDeserializer.readNumber() as number)
-    let value : [ number, number, number, number ] = ([valueTmpBufValue0, valueTmpBufValue1, valueTmpBufValue2, valueTmpBufValue3] as [ number, number, number, number ])
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: [ int32, int32, int32, int32 ]) => void))
+    const valueTmpBufValue0 : int32 = thisDeserializer.readInt32()
+    const valueTmpBufValue1 : int32 = thisDeserializer.readInt32()
+    const valueTmpBufValue2 : int32 = thisDeserializer.readInt32()
+    const valueTmpBufValue3 : int32 = thisDeserializer.readInt32()
+    let value : [ int32, int32, int32, int32 ] = ([valueTmpBufValue0, valueTmpBufValue1, valueTmpBufValue2, valueTmpBufValue3] as [ int32, int32, int32, int32 ])
     _call(value)
 }
-export function deserializeAndCallCallback_Tuple_Number_Number_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_Tuple_I32_I32_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: [ number, number ]) => void))
-    const valueTmpBufValue0 : number = (thisDeserializer.readNumber() as number)
-    const valueTmpBufValue1 : number = (thisDeserializer.readNumber() as number)
-    let value : [ number, number ] = ([valueTmpBufValue0, valueTmpBufValue1] as [ number, number ])
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: [ int32, int32 ]) => void))
+    const valueTmpBufValue0 : int32 = thisDeserializer.readInt32()
+    const valueTmpBufValue1 : int32 = thisDeserializer.readInt32()
+    let value : [ int32, int32 ] = ([valueTmpBufValue0, valueTmpBufValue1] as [ int32, int32 ])
     _call(value)
 }
 export function deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserializer: DeserializerBase): void {
@@ -1857,12 +1913,6 @@ export function deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeseriali
     let value : WebKeyboardOptions = WebKeyboardOptions_serializer.read(thisDeserializer)
     _call(value)
 }
-export function deserializeAndCallCallback_WebResourceResponse_Void(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: WebResourceResponse) => void))
-    let value : WebResourceResponse = (WebResourceResponse_serializer.read(thisDeserializer) as WebResourceResponse)
-    _call(value)
-}
 export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer))
@@ -1887,10 +1937,10 @@ export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: Dese
 export function deserializeAndCallContentDidScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ContentDidScrollCallback)
-    let selectedIndex : number = (thisDeserializer.readNumber() as number)
-    let index : number = (thisDeserializer.readNumber() as number)
-    let position : number = (thisDeserializer.readNumber() as number)
-    let mainAxisLength : number = (thisDeserializer.readNumber() as number)
+    let selectedIndex : int32 = thisDeserializer.readInt32()
+    let index : int32 = thisDeserializer.readInt32()
+    let position : double = thisDeserializer.readFloat64()
+    let mainAxisLength : double = thisDeserializer.readFloat64()
     _call(selectedIndex, index, position, mainAxisLength)
 }
 export function deserializeAndCallContentWillScrollCallback(thisDeserializer: DeserializerBase): void {
@@ -1913,10 +1963,10 @@ export function deserializeAndCallContentWillScrollCallback(thisDeserializer: De
     const _callResult  = _call(result)
     continuationResult(_callResult)
 }
-export function deserializeAndCallCustomBuilderT_Number(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCustomBuilderT_I32(thisDeserializer: DeserializerBase): void {
     // const _resourceId : int32 = thisDeserializer.readInt32()
-    // const _call  = (ResourceHolder.instance().get(_resourceId) as CustomBuilderT<number>)
-    // let t : number = (thisDeserializer.readNumber() as number)
+    // const _call  = (ResourceHolder.instance().get(_resourceId) as CustomBuilderT<int32>)
+    // let t : int32 = thisDeserializer.readInt32()
     // _call(t)
 }
 export function deserializeAndCallCustomNodeBuilder(thisDeserializer: DeserializerBase): void {
@@ -2035,17 +2085,17 @@ export function deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeseri
 export function deserializeAndCallGetItemMainSizeByIndex(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as GetItemMainSizeByIndex)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((progress: number) => void) = (progress: number):void => {
+    let continuationResult : ((offset: double) => void) = (offset: double):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        continuationBufferBufArgsSerializer.writeNumber(progress);
-        InteropNativeModule._CallCallbackSync(10, 36519084, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.writeFloat64(offset);
+        InteropNativeModule._CallCallbackSync(10, -949162837, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2139,8 +2189,8 @@ export function deserializeAndCallLoadingProgressModifierBuilder(thisDeserialize
 export function deserializeAndCallMenuCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as MenuCallback)
-    let start : number = (thisDeserializer.readNumber() as number)
-    let end : number = (thisDeserializer.readNumber() as number)
+    let start : int32 = (thisDeserializer.readInt32() as int32)
+    let end : int32 = (thisDeserializer.readInt32() as int32)
     _call(start, end)
 }
 export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: DeserializerBase): void {
@@ -2167,8 +2217,8 @@ export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: Dese
 export function deserializeAndCallMenuOnAppearCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as MenuOnAppearCallback)
-    let start : number = (thisDeserializer.readNumber() as number)
-    let end : number = (thisDeserializer.readNumber() as number)
+    let start : int32 = (thisDeserializer.readInt32() as int32)
+    let end : int32 = (thisDeserializer.readInt32() as int32)
     _call(start, end)
 }
 export function deserializeAndCallModifierKeyStateGetter(thisDeserializer: DeserializerBase): void {
@@ -2267,13 +2317,13 @@ export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: Deseria
 export function deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnAlphabetIndexerPopupSelectCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     _call(index)
 }
 export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnAlphabetIndexerRequestPopupDataCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
@@ -2297,7 +2347,7 @@ export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(this
 export function deserializeAndCallOnAlphabetIndexerSelectCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnAlphabetIndexerSelectCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     _call(index)
 }
 export function deserializeAndCallOnCheckboxChangeCallback(thisDeserializer: DeserializerBase): void {
@@ -2419,7 +2469,7 @@ export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: Dese
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnItemDragStartCallback)
     let event : ItemDragInfo = ItemDragInfo_serializer.read(thisDeserializer)
-    let itemIndex : number = (thisDeserializer.readNumber() as number)
+    let itemIndex : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
@@ -2479,8 +2529,8 @@ export function deserializeAndCallOnMenuItemClickCallback(thisDeserializer: Dese
 export function deserializeAndCallOnMoveHandler(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnMoveHandler)
-    let from : number = (thisDeserializer.readNumber() as number)
-    let to : number = (thisDeserializer.readNumber() as number)
+    let from : int32 = thisDeserializer.readInt32()
+    let to : int32 = thisDeserializer.readInt32()
     _call(from, to)
 }
 export function deserializeAndCallOnNativeEmbedObjectParamChangeCallback(thisDeserializer: DeserializerBase): void {
@@ -2557,7 +2607,7 @@ export function deserializeAndCallOnRadioChangeCallback(thisDeserializer: Deseri
 export function deserializeAndCallOnRatingChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnRatingChangeCallback)
-    let rating : number = (thisDeserializer.readNumber() as number)
+    let rating : double = thisDeserializer.readFloat64()
     _call(rating)
 }
 export function deserializeAndCallOnRenderProcessNotRespondingCallback(thisDeserializer: DeserializerBase): void {
@@ -2580,7 +2630,7 @@ export function deserializeAndCallOnSafeBrowsingCheckResultCallback(thisDeserial
 export function deserializeAndCallOnScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnScrollCallback)
-    let scrollOffset : number = (thisDeserializer.readNumber() as number)
+    let scrollOffset : double = thisDeserializer.readFloat64()
     let scrollState : ScrollState = ScrollState.fromValue(thisDeserializer.readInt32())
     _call(scrollOffset, scrollState)
 }
@@ -2593,7 +2643,7 @@ export function deserializeAndCallOnScrollEdgeCallback(thisDeserializer: Deseria
 export function deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnScrollFrameBeginCallback)
-    let offset : number = (thisDeserializer.readNumber() as number)
+    let offset : double = thisDeserializer.readFloat64()
     let state : ScrollState = ScrollState.fromValue(thisDeserializer.readInt32())
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
@@ -2621,7 +2671,7 @@ export function deserializeAndCallOnScrollVisibleContentChangeCallback(thisDeser
 export function deserializeAndCallOnSelectCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnSelectCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     let selectStr : string = (thisDeserializer.readString() as string)
     _call(index, selectStr)
 }
@@ -2641,45 +2691,54 @@ export function deserializeAndCallOnSubmitCallback(thisDeserializer: Deserialize
 export function deserializeAndCallOnSwiperAnimationEndCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnSwiperAnimationEndCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     let extraInfo : SwiperAnimationEvent = SwiperAnimationEvent_serializer.read(thisDeserializer)
     _call(index, extraInfo)
 }
 export function deserializeAndCallOnSwiperAnimationStartCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnSwiperAnimationStartCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
-    let targetIndex : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
+    let targetIndex : int32 = thisDeserializer.readInt32()
     let extraInfo : SwiperAnimationEvent = SwiperAnimationEvent_serializer.read(thisDeserializer)
     _call(index, targetIndex, extraInfo)
 }
 export function deserializeAndCallOnSwiperGestureSwipeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnSwiperGestureSwipeCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     let extraInfo : SwiperAnimationEvent = SwiperAnimationEvent_serializer.read(thisDeserializer)
     _call(index, extraInfo)
 }
 export function deserializeAndCallOnTabsAnimationEndCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsAnimationEndCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     let extraInfo : TabsAnimationEvent = TabsAnimationEvent_serializer.read(thisDeserializer)
     _call(index, extraInfo)
 }
 export function deserializeAndCallOnTabsAnimationStartCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsAnimationStartCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
-    let targetIndex : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
+    let targetIndex : int32 = thisDeserializer.readInt32()
     let extraInfo : TabsAnimationEvent = TabsAnimationEvent_serializer.read(thisDeserializer)
     _call(index, targetIndex, extraInfo)
+}
+export function deserializeAndCallOnTabsContentDidScrollCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsContentDidScrollCallback)
+    let selectedIndex : int32 = thisDeserializer.readInt32()
+    let index : int32 = thisDeserializer.readInt32()
+    let position : double = thisDeserializer.readFloat64()
+    let mainAxisLength : double = thisDeserializer.readFloat64()
+    _call(selectedIndex, index, position, mainAxisLength)
 }
 export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsContentWillChangeCallback)
-    let currentIndex : number = (thisDeserializer.readNumber() as number)
-    let comingIndex : number = (thisDeserializer.readNumber() as number)
+    let currentIndex : int32 = thisDeserializer.readInt32()
+    let comingIndex : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
@@ -2699,7 +2758,7 @@ export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializ
 export function deserializeAndCallOnTabsGestureSwipeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsGestureSwipeCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     let extraInfo : TabsAnimationEvent = TabsAnimationEvent_serializer.read(thisDeserializer)
     _call(index, extraInfo)
 }
@@ -2760,7 +2819,7 @@ export function deserializeAndCallOnViewportFitChangedCallback(thisDeserializer:
 export function deserializeAndCallOnWillScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnWillScrollCallback)
-    let scrollOffset : number = (thisDeserializer.readNumber() as number)
+    let scrollOffset : double = thisDeserializer.readFloat64()
     let scrollState : ScrollState = ScrollState.fromValue(thisDeserializer.readInt32())
     let scrollSource : ScrollSource = ScrollSource.fromValue(thisDeserializer.readInt32())
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
@@ -2801,7 +2860,7 @@ export function deserializeAndCallPageTransitionCallback(thisDeserializer: Deser
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as PageTransitionCallback)
     let type : RouteType = RouteType.fromValue(thisDeserializer.readInt32())
-    let progress : number = (thisDeserializer.readNumber() as number)
+    let progress : double = thisDeserializer.readFloat64()
     _call(type, progress)
 }
 export function deserializeAndCallPasteButtonCallback(thisDeserializer: DeserializerBase): void {
@@ -2962,16 +3021,16 @@ export function deserializeAndCallSaveButtonCallback(thisDeserializer: Deseriali
 export function deserializeAndCallScrollOnScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ScrollOnScrollCallback)
-    let xOffset : number = (thisDeserializer.readNumber() as number)
-    let yOffset : number = (thisDeserializer.readNumber() as number)
+    let xOffset : double = thisDeserializer.readFloat64()
+    let yOffset : double = thisDeserializer.readFloat64()
     let scrollState : ScrollState = ScrollState.fromValue(thisDeserializer.readInt32())
     _call(xOffset, yOffset, scrollState)
 }
 export function deserializeAndCallScrollOnWillScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ScrollOnWillScrollCallback)
-    let xOffset : number = (thisDeserializer.readNumber() as number)
-    let yOffset : number = (thisDeserializer.readNumber() as number)
+    let xOffset : double = thisDeserializer.readFloat64()
+    let yOffset : double = thisDeserializer.readFloat64()
     let scrollState : ScrollState = ScrollState.fromValue(thisDeserializer.readInt32())
     let scrollSource : ScrollSource = ScrollSource.fromValue(thisDeserializer.readInt32())
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
@@ -3071,7 +3130,7 @@ export function deserializeAndCallSliderModifierBuilder(thisDeserializer: Deseri
 export function deserializeAndCallSliderTriggerChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as SliderTriggerChangeCallback)
-    let value : number = (thisDeserializer.readNumber() as number)
+    let value : double = thisDeserializer.readFloat64()
     let mode : SliderChangeMode = SliderChangeMode.fromValue(thisDeserializer.readInt32())
     _call(value, mode)
 }
@@ -3125,8 +3184,8 @@ export function deserializeAndCallSubmitCallback(thisDeserializer: DeserializerB
 export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as TabsCustomContentTransitionCallback)
-    let from : number = (thisDeserializer.readNumber() as number)
-    let to : number = (thisDeserializer.readNumber() as number)
+    let from : int32 = thisDeserializer.readInt32()
+    let to : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
@@ -3334,11 +3393,11 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         if (value instanceof CustomBuilder) {
-            continuationBufferBufArgsSerializer.writeInt8((0).toChar());
+            continuationBufferBufArgsSerializer.writeInt8((0).toByte());
             const valueForIdx0  = value as CustomBuilder;
             continuationBufferBufArgsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueForIdx0));
         } else if (value instanceof DragItemInfo) {
-            continuationBufferBufArgsSerializer.writeInt8((1).toChar());
+            continuationBufferBufArgsSerializer.writeInt8((1).toByte());
             const valueForIdx1  = value as DragItemInfo;
             DragItemInfo_serializer.write(continuationBufferBufArgsSerializer, valueForIdx1);
         }
@@ -3377,17 +3436,43 @@ export function deserializeAndCallType_NavigationAttribute_customNavContentTrans
     const _callResult  = _call(from, to, operation)
     continuationResult(_callResult)
 }
+export function deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null))
+    let value0 : OnInterceptRequestEvent = OnInterceptRequestEvent_serializer.read(thisDeserializer)
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: WebResourceResponse | null) => void) = (value?: WebResourceResponse | null):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        if (value !== null) {
+            continuationBufferBufArgsSerializer.writeInt8(RuntimeType.OBJECT);
+            const valueTmpValue  = value!;
+            WebResourceResponse_serializer.write(continuationBufferBufArgsSerializer, valueTmpValue);
+        } else {
+            continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
+        }
+        InteropNativeModule._CallCallbackSync(10, 1022161794, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(value0)
+    continuationResult(_callResult)
+}
 export function deserializeAndCallUpdateTransitionCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as UpdateTransitionCallback)
-    let progress : number = (thisDeserializer.readNumber() as number)
+    let progress : double = thisDeserializer.readFloat64()
     _call(progress)
 }
 export function deserializeAndCallVisibleAreaChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as VisibleAreaChangeCallback)
     let isExpanding : boolean = thisDeserializer.readBoolean()
-    let currentRatio : number = (thisDeserializer.readNumber() as number)
+    let currentRatio : double = thisDeserializer.readFloat64()
     _call(isExpanding, currentRatio)
 }
 export function deserializeAndCallVoidCallback(thisDeserializer: DeserializerBase): void {
@@ -3424,13 +3509,16 @@ export function deserializeAndCallWorkerEventListener(thisDeserializer: Deserial
 export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): void {
     const kind : int32 = thisDeserializer.readInt32()
     switch ((kind as CallbackKind)) {
+        case CallbackKind.Kind_AccessibilityActionInterceptCallback: return deserializeAndCallAccessibilityActionInterceptCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
+        case CallbackKind.Kind_AccessibilityTransparentCallback: return deserializeAndCallAccessibilityTransparentCallback(thisDeserializer);
         case CallbackKind.Kind_ArcScrollIndexHandler: return deserializeAndCallArcScrollIndexHandler(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisDeserializer);
         case CallbackKind.Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisDeserializer);
+        case CallbackKind.Kind_Callback_AccessibilityActionInterceptResult_Void: return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Array_Number_Void: return deserializeAndCallCallback_Array_Number_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Array_String_Void: return deserializeAndCallCallback_Array_String_Void(thisDeserializer);
@@ -3464,6 +3552,8 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Extender_OnFinish: return deserializeAndCallCallback_Extender_OnFinish(thisDeserializer);
         case CallbackKind.Kind_Callback_Extender_OnProgress: return deserializeAndCallCallback_Extender_OnProgress(thisDeserializer);
         case CallbackKind.Kind_Callback_F64_F64_Void: return deserializeAndCallCallback_F64_F64_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_F64_SliderChangeMode_Void: return deserializeAndCallCallback_F64_SliderChangeMode_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_F64_Void: return deserializeAndCallCallback_F64_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallCallback_FormCallbackInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FullscreenInfo_Void: return deserializeAndCallCallback_FullscreenInfo_Void(thisDeserializer);
@@ -3473,12 +3563,18 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_GestureRecognizer_Void: return deserializeAndCallCallback_GestureRecognizer_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_HitTestMode_Void: return deserializeAndCallCallback_HitTestMode_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_HoverEvent_Void: return deserializeAndCallCallback_HoverEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_I32_F64_ComputedBarAttribute: return deserializeAndCallCallback_I32_F64_ComputedBarAttribute(thisDeserializer);
+        case CallbackKind.Kind_Callback_I32_I32_Boolean: return deserializeAndCallCallback_I32_I32_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_I32_I32_I32_Void: return deserializeAndCallCallback_I32_I32_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_I32_I32_Void: return deserializeAndCallCallback_I32_I32_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_I32_Tuple_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32(thisDeserializer);
+        case CallbackKind.Kind_Callback_I32_Tuple_I32_I32_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32_I32_I32(thisDeserializer);
+        case CallbackKind.Kind_Callback_I32_Void: return deserializeAndCallCallback_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_InsertValue_Boolean: return deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_InsertValue_Void: return deserializeAndCallCallback_InsertValue_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_ItemDragInfo_Number_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ItemDragInfo_I32_I32_Boolean_Void: return deserializeAndCallCallback_ItemDragInfo_I32_I32_Boolean_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ItemDragInfo_I32_I32_Void: return deserializeAndCallCallback_ItemDragInfo_I32_I32_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ItemDragInfo_I32_Void: return deserializeAndCallCallback_ItemDragInfo_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_ItemDragInfo_Void: return deserializeAndCallCallback_ItemDragInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_KeyEvent_Boolean: return deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_KeyEvent_Void: return deserializeAndCallCallback_KeyEvent_Void(thisDeserializer);
@@ -3493,13 +3589,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_NavigationMode_Void: return deserializeAndCallCallback_NavigationMode_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NavigationTitleMode_Void: return deserializeAndCallCallback_NavigationTitleMode_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NavigationTransitionProxy_Void: return deserializeAndCallCallback_NavigationTransitionProxy_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Number_Number_Boolean: return deserializeAndCallCallback_Number_Number_Boolean(thisDeserializer);
-        case CallbackKind.Kind_Callback_Number_Number_ComputedBarAttribute: return deserializeAndCallCallback_Number_Number_ComputedBarAttribute(thisDeserializer);
-        case CallbackKind.Kind_Callback_Number_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Number_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Number_SliderChangeMode_Void: return deserializeAndCallCallback_Number_SliderChangeMode_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Number_Tuple_Number_Number: return deserializeAndCallCallback_Number_Tuple_Number_Number(thisDeserializer);
-        case CallbackKind.Kind_Callback_Number_Tuple_Number_Number_Number_Number: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisDeserializer);
         case CallbackKind.Kind_Callback_Number_Void: return deserializeAndCallCallback_Number_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Object_Void: return deserializeAndCallCallback_Object_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnAlertEvent_Boolean: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer);
@@ -3518,7 +3608,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_OnGeolocationShowEvent_Void: return deserializeAndCallCallback_OnGeolocationShowEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnHttpAuthRequestEvent_Boolean: return deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnHttpErrorReceiveEvent_Void: return deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_OnInterceptRequestEvent_WebResourceResponse: return deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(thisDeserializer);
         case CallbackKind.Kind_Callback_OnLoadFinishedEvent_Void: return deserializeAndCallCallback_OnLoadFinishedEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnLoadStartedEvent_Void: return deserializeAndCallCallback_OnLoadStartedEvent_Void(thisDeserializer);
@@ -3555,6 +3644,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Opt_ScrollResult_Void: return deserializeAndCallCallback_Opt_ScrollResult_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Opt_StyledString_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Opt_TabContentAnimatedTransition_Void: return deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_WebResourceResponse_Void: return deserializeAndCallCallback_Opt_WebResourceResponse_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_PlaybackInfo_Void: return deserializeAndCallCallback_PlaybackInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Pointer_Void: return deserializeAndCallCallback_Pointer_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_PopInfo_Void: return deserializeAndCallCallback_PopInfo_Void(thisDeserializer);
@@ -3568,6 +3658,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_RichEditorRange_Void: return deserializeAndCallCallback_RichEditorRange_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_RichEditorSelection_Void: return deserializeAndCallCallback_RichEditorSelection_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_RichEditorTextSpanResult_Void: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_RouterCallbackInfo_Void: return deserializeAndCallCallback_RouterCallbackInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_SheetDismiss_Void: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_SheetType_Void: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Size_Void: return deserializeAndCallCallback_Size_Void(thisDeserializer);
@@ -3589,7 +3680,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_T_Void_Array_String: return deserializeAndCallCallback_T_Void_Array_String(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Boolean: return deserializeAndCallCallback_T_Void_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Date: return deserializeAndCallCallback_T_Void_Date(thisDeserializer);
+        case CallbackKind.Kind_Callback_T_Void_F64: return deserializeAndCallCallback_T_Void_F64(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Global_Resource_Resource: return deserializeAndCallCallback_T_Void_Global_Resource_Resource(thisDeserializer);
+        case CallbackKind.Kind_Callback_T_Void_I32: return deserializeAndCallCallback_T_Void_I32(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Number: return deserializeAndCallCallback_T_Void_Number(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_String: return deserializeAndCallCallback_T_Void_String(thisDeserializer);
         case CallbackKind.Kind_Callback_TabContentTransitionProxy_Void: return deserializeAndCallCallback_TabContentTransitionProxy_Void(thisDeserializer);
@@ -3600,18 +3693,17 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_TouchEvent_HitTestMode: return deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializer);
         case CallbackKind.Kind_Callback_TouchEvent_Void: return deserializeAndCallCallback_TouchEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_TouchResult_Void: return deserializeAndCallCallback_TouchResult_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Tuple_Number_Number_Number_Number_Void: return deserializeAndCallCallback_Tuple_Number_Number_Number_Number_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Tuple_Number_Number_Void: return deserializeAndCallCallback_Tuple_Number_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Tuple_I32_I32_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_I32_I32_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Void: return deserializeAndCallCallback_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_WebResourceResponse_Void: return deserializeAndCallCallback_WebResourceResponse_Void(thisDeserializer);
         case CallbackKind.Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisDeserializer);
         case CallbackKind.Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
-        case CallbackKind.Kind_CustomBuilderT_Number: return deserializeAndCallCustomBuilderT_Number(thisDeserializer);
+        case CallbackKind.Kind_CustomBuilderT_I32: return deserializeAndCallCustomBuilderT_I32(thisDeserializer);
         case CallbackKind.Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
         case CallbackKind.Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_EditableTextOnChangeCallback: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
@@ -3680,6 +3772,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnSwiperGestureSwipeCallback: return deserializeAndCallOnSwiperGestureSwipeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsAnimationEndCallback: return deserializeAndCallOnTabsAnimationEndCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsAnimationStartCallback: return deserializeAndCallOnTabsAnimationStartCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTabsContentDidScrollCallback: return deserializeAndCallOnTabsContentDidScrollCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsContentWillChangeCallback: return deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsGestureSwipeCallback: return deserializeAndCallOnTabsGestureSwipeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisDeserializer);
@@ -3724,6 +3817,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_TransitionFinishCallback: return deserializeAndCallTransitionFinishCallback(thisDeserializer);
         case CallbackKind.Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer);
         case CallbackKind.Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisDeserializer);
+        case CallbackKind.Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeserializer);
         case CallbackKind.Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);
         case CallbackKind.Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);
         case CallbackKind.Kind_VoidCallback: return deserializeAndCallVoidCallback(thisDeserializer);

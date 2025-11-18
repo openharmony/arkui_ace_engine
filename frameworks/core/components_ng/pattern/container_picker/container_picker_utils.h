@@ -36,8 +36,15 @@ namespace {
 const Dimension PICKER_DEFAULT_HEIGHT = 200.0_vp;
 const Dimension PICKER_HEIGHT_BEFORE_ROTATE = 280.0_vp;
 const Dimension PICKER_ITEM_HEIGHT = 40.0_vp;
+const Dimension FIRST_ADJACENT_ITEM_HEIGHT = 36.3_vp;
+const Dimension SECOND_ADJACENT_ITEM_HEIGHT = 24.9_vp;
+const Dimension THIRD_ADJACENT_ITEM_HEIGHT = 11.4_vp;
 const Dimension MAX_OVERSCROLL_OFFSET = 120.0_vp;
+const Dimension FOCUS_DEFAULT_STROCK_WIDTH = 2.0_vp;
+const Dimension DEFAULT_RADIUS = 12.0_vp;
 const float HALF = 2.0;
+const float FADE_OPACITY = 0.4f;
+const float DISABLE_ALPHA = 0.6f;
 } // namespace
 class ContainerPickerUtils {
 public:

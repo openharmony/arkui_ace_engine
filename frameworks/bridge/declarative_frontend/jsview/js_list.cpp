@@ -308,6 +308,8 @@ void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
     auto listChildrenMainSize = ListModel::GetInstance()->GetOrCreateListChildrenMainSize();
     CHECK_NULL_VOID(listChildrenMainSize);
 
+    // Used for makeObserved to listen and refresh status.
+    childrenSizeObj->GetProperty("changeFlag");
     auto property = childrenSizeObj->GetProperty("getNativeMainSize");
     if (!property->IsFunction()) {
         return;

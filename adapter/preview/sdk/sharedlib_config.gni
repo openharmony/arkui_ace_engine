@@ -121,6 +121,11 @@ common_bin = [
     part_name = "skia"
   },
   {
+    label = "//third_party/libpng:libpng"
+    subsystem_name = "thirdparty"
+    part_name = "libpng"
+  },
+  {
     label = "//arkcompiler/ets_runtime:libark_jsruntime"
     subsystem_name = "arkcompiler"
     part_name = "ets_runtime"

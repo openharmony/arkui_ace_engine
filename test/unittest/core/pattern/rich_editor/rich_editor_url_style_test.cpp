@@ -123,7 +123,7 @@ void RichEditorUrlStyleTest::InitContentChangeCallback()
  * @tc.desc: test add single span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -148,7 +148,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest001, TestSize.Level1)
  * @tc.desc: test add single span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest002, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -185,7 +185,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest002, TestSize.Level1)
  * @tc.desc: test add single span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest003, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -222,7 +222,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest003, TestSize.Level1)
  * @tc.desc: test add single span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest004, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -264,7 +264,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAddTest004, TestSize.Level1)
  * @tc.desc: test add single span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleUpdateTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleUpdateTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -306,7 +306,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleUpdateTest001, TestSize.Level
  * @tc.desc: test for callback onWillchange
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -336,7 +336,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest001, TestSize
  * @tc.desc: test for callback onWillchange
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest002, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -360,7 +360,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest002, TestSize
  * @tc.desc: test for callback onWillchange
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest003, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -389,7 +389,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillChangeTest003, TestSize
  * @tc.desc: test for callback onWillchange
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -413,7 +413,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace001, TestSiz
  * @tc.desc: test for callback onWillchange
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace002, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -438,7 +438,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace002, TestSiz
  * @tc.desc: test for callback onWillchange
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace003, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -463,7 +463,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace003, TestSiz
  * @tc.desc: test for callback onWillchange
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace004, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -488,7 +488,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnWillTestReplace004, TestSiz
  * @tc.desc: test for callback IMEInput
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleIMEInputTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleIMEInputTest001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -524,7 +524,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleIMEInputTest001, TestSize.Lev
  * @tc.desc: test for callback AboutToDelete
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAboutToDeleteTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAboutToDeleteTest001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -564,7 +564,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAboutToDeleteTest001, TestSiz
  * @tc.desc: test for GetSpans
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleGetSpansTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleGetSpansTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -596,7 +596,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleGetSpansTest001, TestSize.Lev
  * @tc.desc: test for GetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleGetSelectionTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleGetSelectionTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -629,7 +629,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleGetSelectionTest001, TestSize
  * @tc.desc: test for OnSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnSelectTest001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnSelectTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -669,7 +669,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnSelectTest001, TestSize.Lev
  * @tc.desc: Test get color in urlSpan theme.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanColor001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanColor001, TestSize.Level0)
 {
     // 0: Get richEditor Node and richEditor Pattern
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -703,7 +703,7 @@ HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanColor001, TestSize.Level1)
  * @tc.desc: Test set urlSpan showShadow
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanShowShadow001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanShowShadow001, TestSize.Level0)
 {
     // 0: Get richEditor Node and richEditor Pattern
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -763,7 +763,7 @@ HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanShowShadow001, TestSize.Level1)
  * @tc.desc: test url Analyzer
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, AnalyzeUrls001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, AnalyzeUrls001, TestSize.Level0)
 {
     MockDataUrlAnalyzerMgr mockDataUrlAnalyzerMgr;
     InitDataUrlAnalyzer(mockDataUrlAnalyzerMgr);
@@ -782,7 +782,7 @@ HWTEST_F(RichEditorUrlStyleTest, AnalyzeUrls001, TestSize.Level1)
  * @tc.desc: Test basic function of UrlSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanString001, TestSize.Level1)
+HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanString001, TestSize.Level0)
 {
     // 0: Create MutableSpanString
     auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");

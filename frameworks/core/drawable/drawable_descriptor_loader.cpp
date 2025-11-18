@@ -51,6 +51,7 @@ MediaData DrawableDescriptorLoader::LoadData(const RefPtr<DrawableDescriptorInfo
             return LoadFileData(info);
         }
         default: {
+            LOGW("src type is undefined, please check input uri.");
             return {};
         }
     }
@@ -65,12 +66,12 @@ MediaData DrawableDescriptorLoader::LoadFileData(const RefPtr<DrawableDescriptor
     std::ifstream file(filePath, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
         LOGW("open file failed: %{public}s", filePath.c_str());
-        return {};
+        return { nullptr, 0 };
     }
     std::streamsize fileSize = file.tellg();
     if (fileSize <= 0) {
         LOGW("file is empty or invalid.");
-        return {};
+        return { nullptr, 0 };
     }
     file.seekg(0, std::ios::beg);
     auto buffer = std::make_unique<uint8_t[]>(fileSize);
@@ -80,7 +81,7 @@ MediaData DrawableDescriptorLoader::LoadFileData(const RefPtr<DrawableDescriptor
     }
     if (!file.read(reinterpret_cast<char*>(buffer.get()), fileSize)) {
         LOGW("read file failed.");
-        return {};
+        return { nullptr, 0 };
     }
     return { std::move(buffer), static_cast<size_t>(fileSize) };
 }
@@ -102,7 +103,7 @@ MediaData DrawableDescriptorLoader::LoadBase64Data(const RefPtr<DrawableDescript
     }
     auto buffer = std::make_unique<uint8_t[]>(decodedData.size());
     if (memcpy_s(buffer.get(), decodedData.size(), decodedData.data(), decodedData.size()) != 0) {
-        LOGW("memcpy failed from decoded data");
+        LOGW("memcpy failed from decoded data!");
         return { nullptr, 0 };
     }
     return { std::move(buffer), decodedData.size() };

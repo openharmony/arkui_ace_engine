@@ -69,6 +69,34 @@ typedef struct ArkUI_UIInputEvent ArkUI_UIInputEvent;
 typedef struct ArkUI_CoastingAxisEvent ArkUI_CoastingAxisEvent;
 
 /**
+ * @brief Defines the touch test info.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TouchTestInfo ArkUI_TouchTestInfo;
+
+/**
+ * @brief Defines the touch test info item.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TouchTestInfoItem ArkUI_TouchTestInfoItem;
+
+/**
+ * @brief Defines the touch test info item handle.
+ *
+ * @since 23
+ */
+typedef ArkUI_TouchTestInfoItem* ArkUI_TouchTestInfoItemHandle;
+
+/**
+ * @brief Defines the gesture recognizer handle array.
+ *
+ * @since 23
+ */
+typedef ArkUI_TouchTestInfoItemHandle* ArkUI_TouchTestInfoItemArray;
+
+/**
  * @brief Enumerates the UI input event types.
  *
  * @since 12
@@ -297,6 +325,24 @@ enum {
     /** The axis event is canceled. */
     UI_AXIS_EVENT_ACTION_CANCEL = 4,
 };
+
+/**
+ * @brief Defines whether the touch event is from the left or right hand.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Custom dispatch has no effect; the system distributes events based on the hit status of the current node. */
+    ARKUI_TOUCH_TEST_STRATEGY_DEFAULT = 0,
+    /** The specified event is forwarded to a particular child node, and the system determines whether to
+     *  distribute the event to other sibling nodes.
+     */
+    ARKUI_TOUCH_TEST_STRATEGY_FORWARD_COMPETITION = 1,
+    /** The specified event is forwarded to a particular child node, and the system no longer distributes
+     *  the event to other sibling nodes.
+     */
+    ARKUI_TOUCH_TEST_STRATEGY_FORWARD = 2,
+} ArkUI_TouchTestStrategy;
 
 /**
  * @brief Defines interaction hand for touch event.
@@ -1400,6 +1446,131 @@ float OH_ArkUI_CoastingAxisEvent_GetDeltaY(ArkUI_CoastingAxisEvent* event);
  * @since 22
  */
 int32_t OH_ArkUI_CoastingAxisEvent_SetPropagation(ArkUI_CoastingAxisEvent* event, bool propagation);
+
+/**
+ * @brief Obtains touch test info item list in the touch test info.
+ *
+ * @param info Indicates the pointer to a touch test info.
+ * @param array Indicates the pointer to the array of touch test info list.
+ * @param size Indicates the size of the array of touch test info list.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_GetTouchTestInfoList(ArkUI_TouchTestInfo* info,
+    ArkUI_TouchTestInfoItemArray* array, int32_t* size);
+
+/**
+ * @brief Obtains the X coordinate relative to the upper left corner of the child component from the touch test
+ * info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @return Returns the X coordinate relative to the upper left corner of the parent component.
+ * returns <b>0</b> if any parameter error occurs.
+ * @since 23
+ */
+float OH_ArkUI_TouchTestInfoItem_GetX(const ArkUI_TouchTestInfoItem* info);
+
+/**
+ * @brief Obtains the Y coordinate relative to the upper left corner of the child component from the touch test
+ * info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @return Returns the Y coordinate relative to the upper left corner of the parent component.
+ * returns <b>0</b> if any parameter error occurs.
+ * @since 23
+ */
+float OH_ArkUI_TouchTestInfoItem_GetY(const ArkUI_TouchTestInfoItem* info);
+
+/**
+ * @brief Obtains the X coordinate relative to the upper left corner of the current application window from the touch
+ * test info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @return Returns the X coordinate relative to the upper left corner of the current application window.
+ * returns <b>0.0f</b> if any parameter error occurs.
+ * @since 23
+ */
+float OH_ArkUI_TouchTestInfoItem_GetWindowX(const ArkUI_TouchTestInfoItem* info);
+
+/**
+ * @brief Obtains the Y coordinate relative to the upper left corner of the current application window from the touch
+ * test info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @return Returns the Y coordinate relative to the upper left corner of the current application window.
+ * returns <b>0.0f</b> if any parameter error occurs.
+ * @since 23
+ */
+float OH_ArkUI_TouchTestInfoItem_GetWindowY(const ArkUI_TouchTestInfoItem* info);
+
+/**
+ * @brief Obtains the X coordinate relative to the upper left corner of the parent component from the touch test
+ * info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @return Returns the X coordinate relative to the upper left corner of the parent component.
+ * returns <b>0</b> if any parameter error occurs.
+ * @since 23
+ */
+float OH_ArkUI_TouchTestInfoItem_GetXRelativeToParent(const ArkUI_TouchTestInfoItem* info);
+
+/**
+ * @brief Obtains the Y coordinate relative to the upper left corner of the parent component from the touch test
+ * info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @return Returns the Y coordinate relative to the upper left corner of the parent component.
+ * returns <b>0</b> if any parameter error occurs.
+ * @since 23
+ */
+float OH_ArkUI_TouchTestInfoItem_GetYRelativeToParent(const ArkUI_TouchTestInfoItem* info);
+
+/**
+ * @brief Obtains the sub component's frame rect info from the touch test info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @param childRect Indicates the pointer to the child frame rect.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildRect(const ArkUI_TouchTestInfoItem* info, ArkUI_Rect* childRect);
+
+/**
+ * @brief Obtains the sub component's name from the touch test info item.
+ *
+ * @param info Indicates the pointer to the touch test info item.
+ * @param buffer Indicates the buffer.
+ * @param bufferSize Indicates the buffer size.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH} if the buffer is not large enough.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildId(const ArkUI_TouchTestInfoItem* info, char* buffer,
+    int32_t bufferSize);
+
+/**
+ * @brief Sets the touch test strategy, that is, how the component and the sub components behave during hit testing.
+ *
+ * @param info Indicates the pointer to a touch test info.
+ * @param strategy The touch test strategy.
+ * @return Result code.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultStrategy(ArkUI_TouchTestInfo* info,
+    ArkUI_TouchTestStrategy strategy);
+
+/**
+ * @brief Sets the sub component's name, that is, which sub components need to be effected during hit testing.
+ *
+ * @param info Indicates the pointer to a touch test info.
+ * @param id The sub component's name.
+ * @return Result code.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultId(ArkUI_TouchTestInfo* info, const char* id);
 
 #ifdef __cplusplus
 };

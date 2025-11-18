@@ -36,6 +36,7 @@ public:
     void SetItemPosition(const ContainerPickerUtils::PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
+        prevItemPosition_ = itemPosition_;
     }
 
     ContainerPickerUtils::PositionMap&& GetItemPosition()
@@ -54,6 +55,16 @@ public:
     void SetTotalItemCount(int32_t realTotalCount)
     {
         totalItemCount_ = realTotalCount;
+    }
+
+    int32_t GetTotalItemCount()
+    {
+        return totalItemCount_;
+    }
+
+    void SetPrevTotalItemCount(int32_t prevTotalCount)
+    {
+        prevTotalItemCount_ = prevTotalCount;
     }
 
     void SetCurrentDelta(float offset)
@@ -95,6 +106,9 @@ public:
 
     void SetSelectedIndex(int32_t index)
     {
+        if (index < 0 || index >= totalItemCount_) {
+            index = 0;
+        }
         selectedIndex_ = index;
     }
 
@@ -143,6 +157,11 @@ public:
         pickerItemHeight_ = height;
     }
 
+    float GetTopPadding() const
+    {
+        return topPadding_;
+    }
+
     void CalcMainAndMiddlePos();
 
     const LayoutConstraintF& GetLayoutConstraint() const
@@ -158,6 +177,7 @@ public:
 private:
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos);
     void HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    void HandleAspectRatio(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
@@ -178,6 +198,7 @@ private:
     void AdjustOffsetOnAbove(float currentStartPos);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
+    void UpdateFadeItems(RefPtr<FrameNode> node, std::pair<int32_t, PickerItemInfo> pos);
 
     LayoutConstraintF childLayoutConstraint_;
     ContainerPickerUtils::PositionMap itemPosition_;
@@ -186,17 +207,17 @@ private:
     Alignment align_ = Alignment::CENTER;
 
     std::optional<int32_t> targetIndex_;
-    std::set<int32_t> measuredItems_;
     std::vector<int32_t> offScreenItemsIndex_;
 
     int32_t totalItemCount_ = 0;
+    int32_t prevTotalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
 
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
-    float height_ = 0.0f;          // usage: record picker real height
-    float contentMainSize_ = 0.0f; // usage: picker content area height
+    float height_ = 0.0f; // usage: record picker real height
+    float contentMainSize_ = 0.0f;  // usage: picker content area height
     float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
     float middleItemEndPos_ = 0.0f;
@@ -211,6 +232,7 @@ private:
     bool measured_ = false;
     bool isLoop_ = false;
     bool canOverScroll_ = true;
+    bool reMeasure_ = false;
 
     std::mutex pickerMutex_;
 };

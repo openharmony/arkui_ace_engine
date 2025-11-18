@@ -45,6 +45,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -1211,6 +1212,11 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
     videoPattern->duration_ = 0;
     videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
+
+    status = PlaybackStatus::STOPPED;
+    videoPattern->isStop_ = false;
+    videoPattern->ChangePlayerStatus(status);
+    EXPECT_TRUE(videoPattern->isStop_);
 }
 
 /**
@@ -1349,23 +1355,23 @@ HWTEST_F(VideoTestExtraAddNg, Stop001, TestSize.Level1)
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
-    videoPattern->isStop_ = false;
+    videoPattern->isSeeking_ = true;
     videoPattern->Stop();
-    EXPECT_TRUE(videoPattern->isStop_);
+    EXPECT_FALSE(videoPattern->isSeeking_);
 
     mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(false));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
-    videoPattern->isStop_ = false;
+    videoPattern->isSeeking_ = true;
     videoPattern->Stop();
-    EXPECT_FALSE(videoPattern->isStop_);
+    EXPECT_TRUE(videoPattern->isSeeking_);
 
     videoPattern->mediaPlayer_ = nullptr;
 
-    videoPattern->isStop_ = false;
+    videoPattern->isSeeking_ = true;
     videoPattern->Stop();
-    EXPECT_FALSE(videoPattern->isStop_);
+    EXPECT_TRUE(videoPattern->isSeeking_);
 }
 
 /**

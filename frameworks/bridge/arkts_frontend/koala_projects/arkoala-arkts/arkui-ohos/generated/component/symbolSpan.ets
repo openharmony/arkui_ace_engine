@@ -22,7 +22,6 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource } from "global.resource"
 import { ResourceColor } from "./units"
 import { Color, FontWeight } from "./enums"
@@ -34,7 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SymbolSpanModifier } from "./../SymbolSpanModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
+export class ArkSymbolSpanPeer extends PeerNode {
     attributeSet?: SymbolSpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -58,15 +57,15 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof double) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -85,19 +84,19 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
             for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
                 const valueTmpValueTmpElement : ResourceColor = valueTmpValue[valueTmpValueCounterI]
                 if (valueTmpValueTmpElement instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
                     thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0.getOrdinal())
                 } else if (valueTmpValueTmpElement instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
                     thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
                 } else if (valueTmpValueTmpElement instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as string
                     thisSerializer.writeString(valueTmpValueTmpElementForIdx2)
                 } else if (valueTmpValueTmpElement instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueTmpElementForIdx3  = valueTmpValueTmpElement as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx3)
                 }
@@ -114,15 +113,15 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             }
@@ -156,8 +155,32 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolSpanAttribute_setRenderingStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setKeyAttribute(value: string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolSpanAttribute_setKey(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setIdAttribute(value: string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolSpanAttribute_setId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
-export interface SymbolSpanAttribute extends CommonMethod {
+export interface SymbolSpanAttribute {
     setSymbolSpanOptions(value: Resource): this {
         throw new Error("Unimplemented method setSymbolSpanOptions")
     }
@@ -176,17 +199,25 @@ export interface SymbolSpanAttribute extends CommonMethod {
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         throw new Error("Unimplemented method renderingStrategy")
     }
-    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+    key(value: string | undefined): this {
+        throw new Error("Unimplemented method key")
+    }
+    id(value: string | undefined): this {
+        throw new Error("Unimplemented method id")
+    }
+    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
-export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSpanAttribute {
+export class ArkSymbolSpanStyle implements SymbolSpanAttribute {
     fontSize_value?: double | string | Resource | undefined
     fontColor_value?: Array<ResourceColor> | undefined
     fontWeight_value?: int32 | FontWeight | string | undefined
     effectStrategy_value?: SymbolEffectStrategy | undefined
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
-    attributeModifier_value?: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined
+    key_value?: string | undefined
+    id_value?: string | undefined
+    attributeModifier_value?: AttributeModifier<SymbolSpanAttribute> | undefined
     setSymbolSpanOptions(value: Resource): this {
         return this
     }
@@ -205,12 +236,18 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         return this
     }
-    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+    key(value: string | undefined): this {
+        return this
+    }
+    id(value: string | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         throw new Error("Not implemented")
     }
 }
 
-export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements SymbolSpanAttribute {
+export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanAttribute {
     getPeer(): ArkSymbolSpanPeer {
         if (!this.peer) {
             throw new Error("Attribute function should be called in memo context")
@@ -221,6 +258,7 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("setSymbolSpanOptions")) {
             const value_casted = value as (Resource)
             this.getPeer()?.setSymbolSpanOptionsAttribute(value_casted)
+            this.applyOptionsFinish('SymbolSpanAttribute');
             return this
         }
         return this
@@ -265,13 +303,32 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+    public key(value: string | undefined): this {
+        if (this.checkPriority("key")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.setKeyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public id(value: string | undefined): this {
+        if (this.checkPriority("id")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.setIdAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         hookSymbolSpanAttributeModifier(this, value);
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -234,6 +234,7 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
     int32_t backgroundType, const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent)
 {
     auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     SecurityComponentElementStyle style = {
         .text = text,
@@ -355,7 +356,9 @@ RefPtr<T> GetChildLayoutProprty(const std::string& tag)
 
 bool SecurityComponentModelNG::IsBackgroundVisible()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, false);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     if (prop) {
@@ -376,7 +379,9 @@ bool SecurityComponentModelNG::IsBackgroundVisible(FrameNode* frameNode)
 
 bool SecurityComponentModelNG::IsArkuiComponent()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, false);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     if (prop && prop->GetIsArkuiComponent().has_value()) {
@@ -387,7 +392,9 @@ bool SecurityComponentModelNG::IsArkuiComponent()
 
 void SecurityComponentModelNG::NotifyFontColorSet()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -426,7 +433,9 @@ void SecurityComponentModelNG::SetIconSize(const NG::CalcSize& value)
 
 void SecurityComponentModelNG::SetIconBorderRadius(const Dimension& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -437,11 +446,30 @@ void SecurityComponentModelNG::SetIconBorderRadius(const Dimension& value)
     }
 }
 
+void SecurityComponentModelNG::SetIconBorderRadius(FrameNode* frameNode,
+    const std::optional<BorderRadiusProperty>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false)) {
+        if (value) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconBorderRadius,
+                value.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconBorderRadius, frameNode);
+        }
+    }
+}
+
 void SecurityComponentModelNG::SetIconBorderRadius(const std::optional<Dimension>& topLeft,
     const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
     const std::optional<Dimension>& bottomRight)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -458,7 +486,9 @@ void SecurityComponentModelNG::SetIconBorderRadius(const std::optional<Dimension
 
 void SecurityComponentModelNG::SetIcon(const ImageSourceInfo& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -496,9 +526,50 @@ void SecurityComponentModelNG::SetIcon(const ImageSourceInfo& value)
     }
 }
 
+void SecurityComponentModelNG::SetIcon(FrameNode* frameNode, const std::optional<ImageSourceInfo>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false) && value.has_value()) {
+        auto secCompTheme = GetTheme();
+        CHECK_NULL_VOID(secCompTheme);
+        bool isButtonVisible = false;
+        if (prop) {
+            isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+        }
+        RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+        if (iconNode == nullptr) {
+            iconNode = FrameNode::CreateFrameNode(
+                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+            iconNode->SetInternal();
+            InternalResource::ResourceId iconId;
+            int32_t iconStyle = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
+            if (SaveButtonModelNG::GetInstance()->GetIconResource(iconStyle, iconId)) {
+                SetDefaultIconStyle(iconNode, iconId, isButtonVisible);
+            }
+            CHECK_NULL_VOID(iconNode);
+            frameNode->AddChild(iconNode);
+
+            prop->UpdateIconStyle(iconStyle);
+        }
+
+        ImageSourceInfo imageSourceInfo = value.value();
+        if (isButtonVisible) {
+            imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
+        } else {
+            imageSourceInfo.SetFillColor(secCompTheme->GetIconColorNoBg());
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, ImageSourceInfo, imageSourceInfo, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetText(const std::string& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -525,6 +596,34 @@ void SecurityComponentModelNG::SetText(const std::string& value)
     }
 }
 
+void SecurityComponentModelNG::SetText(FrameNode* frameNode, const std::optional<std::string>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false) && value.has_value()) {
+        RefPtr<FrameNode> textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+        if (textNode == nullptr) {
+            textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_VOID(textNode);
+            textNode->SetInternal();
+            std::string textStr = value.value();
+            bool isButtonVisible = false;
+            if (prop) {
+                isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+            }
+            SetDefaultTextStyle(textNode, textStr, isButtonVisible);
+            CHECK_NULL_VOID(textNode);
+            frameNode->AddChild(textNode);
+
+            prop->UpdateSecurityComponentDescription(static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD));
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextContent, value.value(), frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -532,6 +631,16 @@ void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::opti
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, value.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, frameNode);
+    }
+}
+
+void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::optional<NG::CalcSize>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconCalcSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconCalcSize, frameNode);
     }
 }
 
@@ -629,7 +738,9 @@ void SecurityComponentModelNG::SetFontColor(const Color& value)
 
 void SecurityComponentModelNG::SetStateEffect(const bool& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -639,9 +750,22 @@ void SecurityComponentModelNG::SetStateEffect(const bool& value)
     }
 }
 
+void SecurityComponentModelNG::SetStateEffect(FrameNode* frameNode, const bool& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (hasPermission.value_or(false)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, StateEffect, value, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetTipPosition(const TipPosition& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -654,6 +778,16 @@ void SecurityComponentModelNG::SetTipPosition(const TipPosition& value)
 void SecurityComponentModelNG::SetUserCancelEvent(const bool& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, value);
+}
+
+void SecurityComponentModelNG::SetUserCancelEvent(FrameNode* frameNode, const std::optional<bool>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
@@ -673,7 +807,9 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
         return;
     }
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
@@ -1069,5 +1205,11 @@ void SecurityComponentModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
 void SecurityComponentModelNG::SetFocusBox()
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FocusBoxFlag, true);
+}
+
+void SecurityComponentModelNG::SetFocusBox(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FocusBoxFlag, true, frameNode);
 }
 } // namespace OHOS::Ace::NG

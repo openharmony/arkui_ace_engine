@@ -18,6 +18,5 @@ group("adapter_unittest") {
   deps = [
     "ohos/capability:capability_unittest",
     "ohos/entrance:entrance_unittest",
-    "ohos/entrance/ui_session:ui_session_stub_unittest",
   ]
 }

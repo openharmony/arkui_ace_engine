@@ -242,4 +242,15 @@ bool DragDropGlobalController::IsCurrentDrag(int32_t requestId) const
     return requestId_ == requestId;
 }
 
+uint64_t DragDropGlobalController::GetStartDragVsyncTime() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return startDragVsyncTime_;
+}
+
+void DragDropGlobalController::SetStartDragVsyncTime(uint64_t startDragVsyncTime)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    startDragVsyncTime_ = startDragVsyncTime;
+}
 } // namespace OHOS::Ace

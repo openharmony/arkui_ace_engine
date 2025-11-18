@@ -80,6 +80,7 @@
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/paste_button.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/path.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/pattern_lock.d.ts" />
+/// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/picker.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/plugin_component.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/polygon.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/polyline.d.ts" />

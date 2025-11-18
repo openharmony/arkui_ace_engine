@@ -29,6 +29,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -1168,5 +1169,20 @@ HWTEST_F(SymbolTestNg, SetSymbolShadow001, TestSize.Level1)
     TextStyle textStyle;
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
     EXPECT_FLOAT_EQ(textStyle.GetSymbolShadow().radius, 10.0f);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest010
+ * @tc.desc: test symbol RegisterSymbolFontColorResource property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, RegisterSymbolFontColorResource001, TestSize.Level1)
+{
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
+    symbolModelNG.RegisterSymbolFontColorResource("fontColor", SYMBOL_COLOR_LIST, resObjArr);
 }
 } // namespace OHOS::Ace::NG

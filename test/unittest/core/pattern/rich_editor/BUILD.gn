@@ -14,6 +14,9 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rich_editor_test_ng") {
+  module_out_path = "ace_engine/Component-RichEditor"
+  module_name = "Component-RichEditor"
+  module_output = ""
   type = "new"
   sources = [
     "paragraph_manager_test_ng.cpp",
@@ -21,8 +24,8 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_add_span_test_ng.cpp",
     "rich_editor_ai_test_ng.cpp",
     "rich_editor_base_test_ng.cpp",
+    "rich_editor_callback_content_no_change_test_ng.cpp",
     "rich_editor_caret_test_ng.cpp",
-    "rich_editor_change_callback_one_test_ng.cpp",
     "rich_editor_change_callback_test_ng.cpp",
     "rich_editor_change_reason_test.cpp",
     "rich_editor_click_test_ng.cpp",
@@ -33,7 +36,6 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_delete_test_ng.cpp",
     "rich_editor_double_click_or_long_press_test_ng.cpp",
     "rich_editor_drag_test_ng.cpp",
-    "rich_editor_edit_one_test_ng.cpp",
     "rich_editor_edit_test_ng.cpp",
     "rich_editor_event_test_ng.cpp",
     "rich_editor_keyboard_shortcut_test_ng.cpp",
@@ -49,20 +51,21 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_preview_text_test_ng.cpp",
     "rich_editor_resource_test.cpp",
     "rich_editor_scroll_test_ng.cpp",
+    "rich_editor_select_action_test_ng.cpp",
     "rich_editor_select_overlay_test_ng.cpp",
-    "rich_editor_selection_one_test_ng.cpp",
     "rich_editor_selection_test_ng.cpp",
+    "rich_editor_span_amend_test_ng.cpp",
     "rich_editor_span_node_test_ng.cpp",
-    "rich_editor_span_one_test.cpp",
     "rich_editor_span_test.cpp",
     "rich_editor_string_undo_test_ng.cpp",
-    "rich_editor_style_one_test_ng.cpp",
+    "rich_editor_style_change_test_ng.cpp",
     "rich_editor_style_test_ng.cpp",
     "rich_editor_styled_string_common_test_ng.cpp",
     "rich_editor_styled_string_extend_test_ng.cpp",
     "rich_editor_styled_string_one_test_ng.cpp",
     "rich_editor_styled_string_test_ng.cpp",
     "rich_editor_styled_undo_test_ng.cpp",
+    "rich_editor_text_cal_test_ng.cpp",
     "rich_editor_theme_test_ng.cpp",
     "rich_editor_touch_test_ng.cpp",
     "rich_editor_typing_style_test.cpp",

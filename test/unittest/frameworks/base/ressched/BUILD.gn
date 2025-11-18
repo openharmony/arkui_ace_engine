@@ -45,5 +45,7 @@ ace_unittest("ressched_report_test") {
     "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
     "ressched_report_test.cpp",
     "ressched_touch_optimizer_test.cpp",
+    "ressched_touch_optimizer_two_test.cpp",
+    "$ace_root/test/mock/base/mock_engine_helper.cpp",
   ]
 }

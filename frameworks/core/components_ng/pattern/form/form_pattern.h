@@ -100,7 +100,7 @@ enum class FormChildNodeType : int32_t {
      * due control text node
      */
     DUE_CONTROL_TEXT_NODE,
- 
+
     /**
      * due control image node
      */
@@ -316,11 +316,13 @@ private:
     float CalculateViewScale(float width, float height, float layoutWidth, float layoutHeight);
     float GetNumberFromParams(const AAFwk::Want& want, const std::string& key, float defaultValue);
     void InitializeFormAccessibility();
-    void SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddeRootNode);
+    void SetMaskRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddeRootNode);
     void SetFormAccessibilityAction();
     void HandleFormDueControl(bool isDisablePolicy, bool isControl);
     bool IsFormDueControl(const std::string &bundleName, const std::string &moduleName, const std::string &abilityName,
         const std::string &formName, const int32_t dimension, const bool isDisablePolicy);
+    void InitFormRenderDiedCallback();
+    void RequestRender();
 
     RefPtr<RenderContext> externalRenderContext_;
 

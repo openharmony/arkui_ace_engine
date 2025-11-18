@@ -124,7 +124,7 @@ public:
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
-    void RegisterGetCurrentPageName();
+    void RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetCurrentInstanceId();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
@@ -132,7 +132,7 @@ public:
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
-    void RegisterExeAppAIFunction();
+    void RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor);
 
     void ChangeSensitiveNodes(bool isSensitive) override;
 
@@ -321,6 +321,7 @@ public:
     void SetContainerModalTitleHeight(int32_t height) override;
     void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
+    void SetFrameMetricsCallBack(std::function<void(FrameMetrics info)>&& callback) override;
     bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) override;
@@ -467,6 +468,9 @@ public:
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
 
+    UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
+
 protected:
     void RunIntentPageIfNeeded();
     void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);
@@ -521,6 +525,7 @@ protected:
     OHOS::sptr<OHOS::Rosen::IWaterfallModeChangeListener> waterfallModeChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWindowRectChangeListener> windowRectChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IDisplayIdChangeListener> displayIdChangeListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IWindowRotationChangeListener> windowRotationChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IDisplayModeListener> foldDisplayModeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;
@@ -581,7 +586,6 @@ protected:
     std::string restoreNavDestinationInfo_;
 
     VMType vmType_ = VMType::NORMAL;
-    NG::WindowSizeBreakpoint lastBreakpoint_ = { WidthBreakpoint::UNDEFINED, HeightBreakpoint::HEIGHT_SM };
 
 private:
     void ProcessWindowSizeLayoutBreakPointChange();

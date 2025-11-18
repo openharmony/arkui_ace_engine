@@ -116,8 +116,10 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     Dimension yOffset;
     auto xOffsetStr = obj->GetProperty("xOffset");
     auto yOffsetStr = obj->GetProperty("yOffset");
-    auto convertFail = (xOffsetStr->IsString() && !std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX)) ||
-                       (yOffsetStr->IsString() && !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX)) ||
+    // The IsString judgment is omitted here to prevent non-numeric and non-string values from being passed in,
+    // which could result in parsing as NaN.
+    auto convertFail = (!std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX)) ||
+                       (!std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX)) ||
                        !ConvertFromJSValue(xOffsetStr, xOffset) || !ConvertFromJSValue(yOffsetStr, yOffset);
     if (convertFail) {
         return;

@@ -222,9 +222,9 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     uiParam.needSync_ = ancestorInfo.notSyncPosition ? false : true;
     auto matrix = globalGeometry->GetAbsMatrix();
     // based on transform scene coordinate system to compute trans pos
-    uiParam.transX_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) -
+    uiParam.transX_ = std::floor(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) -
         (rsNode->GetGlobalPositionX() - ancestorInfo.transScenePosX));
-    uiParam.transY_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) -
+    uiParam.transY_ = std::floor(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) -
         (rsNode->GetGlobalPositionY() - ancestorInfo.transScenePosY));
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
@@ -352,20 +352,6 @@ void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node
         return;
     }
     abnormalNodeDfxSet_.insert(nodeId);
-    auto rsNode = GetRSNode(node);
-    int32_t eventRet = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-        "WINDOW_STATE_ERROR",
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        "PID", getpid(),
-        "PERSISTENT_ID", nodeId,
-        "TYPE", "WINDOW_PATTERN_EXCEPTION",
-        "WINDOW_NAME", GetWindowName(node).c_str(),
-        "FRAME_NODE_ID", node->GetId(),
-        "RS_NODE_ID", rsNode ? rsNode->GetId() : 0,
-        "DISPLAY_ID", GetScreenId(node));
-    TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "ret:%{public}d node:%{public}d name:%{public}s on ui tree not rs tree,"
-        "screenId:%{public}" PRIu64, eventRet, node->GetId(), GetWindowName(node).c_str(), GetScreenId(node));
 }
 
 void WindowSceneLayoutManager::FillTransScenePos(const RefPtr<FrameNode>& node, TraverseInfo& ancestorInfo)
@@ -437,7 +423,7 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "finish TraverseTree winId:%{public}d name:%{public}s"
                 "nodeName:%{public}s tag:%{public}s zorder:%{public}u isAncestorRecent:%{public}d "
                 "isAncestorDirty:%{public}d hasWindowSession:%{public}d, notSyncPosition:%{public}d "
-                "transScenePosX:%{public}d, transScenePosY:%{public}d",
+                "transScenePosX:%{public}f, transScenePosY:%{public}f",
                 GetWindowId(node), GetWindowName(node).c_str(),
                 node->GetInspectorId()->c_str(), node->GetTag().c_str(), res.zOrderCnt,
                 ancestorInfo.isAncestorRecent, ancestorInfo.isAncestorDirty, hasWindowSession,

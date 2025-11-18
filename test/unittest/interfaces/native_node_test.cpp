@@ -1894,6 +1894,18 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_WILL_SCROLL));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_DID_SCROLL, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_DID_SCROLL));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_START, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_START));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_ENTER, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_ENTER));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_MOVE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_MOVE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_LEAVE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_LEAVE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DROP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DROP));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ITEM_ON_SELECT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_SELECT));
 }
 
 /**
@@ -2136,6 +2148,18 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_AXIS);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_AXIS));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_START);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_START));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_ENTER);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_ENTER));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_MOVE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_MOVE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_LEAVE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_LEAVE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DROP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DROP));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_SELECT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ITEM_ON_SELECT));
 }
 
 /**
@@ -8699,6 +8723,79 @@ HWTEST_F(NativeNodeTest, NativeNodeScrollableEdgeEffectTest001, TestSize.Level1)
     }
     nodeAPI->disposeNode(scroll);
     nodeAPI->disposeNode(list);
+    nodeAPI->disposeNode(waterFlow);
+}
+
+/**
+ * @tc.name: NativeNodeListItemFillPolicyTest001
+ * @tc.desc: Test List ItemFillPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeListItemFillPolicyTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    float val100 = 100.0f;
+    int32_t enumValue[] = { ARKUI_ITEMFILLPOLICY_NONE, ARKUI_ITEMFILLPOLICY_DEFAULT, ARKUI_ITEMFILLPOLICY_SM1MD2LG3,
+        ARKUI_ITEMFILLPOLICY_SM2MD3LG5 };
+    for (int32_t i = 0; i < 4; i++) {
+        ArkUI_NumberValue value[] = { { .i32 = enumValue[i] }, { .f32 = val100 } };
+        ArkUI_AttributeItem item = { value, 2 };
+        auto ret = nodeAPI->setAttribute(list, NODE_LIST_LANES_ITEMFILLPOLICY, &item);
+        EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+        auto itemFillPolicyParam = nodeAPI->getAttribute(list, NODE_LIST_LANES_ITEMFILLPOLICY);
+        EXPECT_EQ(itemFillPolicyParam->value[0].i32, enumValue[i]);
+        if (i > 0) {
+            EXPECT_EQ(itemFillPolicyParam->value[1].f32, val100);
+        }
+    }
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeGridItemFillPolicyTest001
+ * @tc.desc: Test Grid ItemFillPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeGridItemFillPolicyTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
+    int32_t enumValue[] = { ARKUI_ITEMFILLPOLICY_NONE, ARKUI_ITEMFILLPOLICY_DEFAULT, ARKUI_ITEMFILLPOLICY_SM1MD2LG3,
+        ARKUI_ITEMFILLPOLICY_SM2MD3LG5 };
+    for (int32_t i = 0; i < 4; i++) {
+        ArkUI_NumberValue value[] = { { .i32 = enumValue[i] }};
+        ArkUI_AttributeItem item = { value, 1 };
+        auto ret = nodeAPI->setAttribute(grid, NODE_GRID_COLUMN_TEMPLATE_ITEMFILLPOLICY, &item);
+        EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+        auto itemFillPolicyParam = nodeAPI->getAttribute(grid, NODE_GRID_COLUMN_TEMPLATE_ITEMFILLPOLICY);
+        EXPECT_EQ(itemFillPolicyParam->value[0].i32, enumValue[i]);
+    }
+    nodeAPI->disposeNode(grid);
+}
+
+/**
+ * @tc.name: NativeNodeWaterFlowItemFillPolicyTest001
+ * @tc.desc: Test WaterFlow ItemFillPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeWaterFlowItemFillPolicyTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto waterFlow = nodeAPI->createNode(ARKUI_NODE_WATER_FLOW);
+    int32_t enumValue[] = { ARKUI_ITEMFILLPOLICY_NONE, ARKUI_ITEMFILLPOLICY_DEFAULT, ARKUI_ITEMFILLPOLICY_SM1MD2LG3,
+        ARKUI_ITEMFILLPOLICY_SM2MD3LG5 };
+    for (int32_t i = 0; i < 4; i++) {
+        ArkUI_NumberValue value[] = { { .i32 = enumValue[i] }};
+        ArkUI_AttributeItem item = { value, 1 };
+        auto ret = nodeAPI->setAttribute(waterFlow, NODE_WATER_FLOW_COLUMN_TEMPLATE_ITEMFILLPOLICY, &item);
+        EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+        auto itemFillPolicyParam = nodeAPI->getAttribute(waterFlow, NODE_WATER_FLOW_COLUMN_TEMPLATE_ITEMFILLPOLICY);
+        EXPECT_EQ(itemFillPolicyParam->value[0].i32, enumValue[i]);
+    }
     nodeAPI->disposeNode(waterFlow);
 }
 

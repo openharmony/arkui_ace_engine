@@ -175,6 +175,9 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
+    static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
+        std::function<void()>& buildFunc, SelectMenuParam& menuParam);
+    static void ResetBindSelectionMenu(FrameNode* frameNode);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
@@ -191,6 +194,7 @@ public:
     static TextDecoration GetDecoration(FrameNode* frameNode);
     static Color GetTextDecorationColor(FrameNode* frameNode);
     static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);
+    static float GetLineThicknessScale(FrameNode* frameNode);
     static TextCase GetTextCase(FrameNode* frameNode);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
@@ -234,6 +238,10 @@ public:
     static bool GetHalfLeading(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static size_t GetLineCount(FrameNode* frameNode);
+    static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle);
+    static PositionWithAffinity GetGlyphPositionAtCoordinate(FrameNode* frameNode, double dx, double dy);
+    static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
@@ -241,6 +249,7 @@ public:
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
+    static Color GetColorShaderStyle(FrameNode* frameNode);
     static NG::Gradient GetGradientStyle(FrameNode* frameNode);
     static void ResetTextGradient(FrameNode* frameNode);
     static void SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign);

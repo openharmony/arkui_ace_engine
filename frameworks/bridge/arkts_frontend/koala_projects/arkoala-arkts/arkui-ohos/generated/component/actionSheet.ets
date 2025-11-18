@@ -98,8 +98,8 @@ export interface ActionSheetButtonOptions {
     action: VoidCallback;
 }
 export interface ActionSheetOffset {
-    dx: number | string | Resource;
-    dy: number | string | Resource;
+    dx: double | string | Resource;
+    dy: double | string | Resource;
 }
 export interface ActionSheetOptions {
     title: string | Resource;
@@ -134,7 +134,7 @@ export interface ActionSheetOptions {
     onWillAppear?: (() => void);
     onWillDisappear?: (() => void);
     levelMode?: LevelMode;
-    levelUniqueId?: number;
+    levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
     levelOrder?: LevelOrder;
 }
@@ -178,11 +178,11 @@ export class ActionSheetButtonOptions_serializer {
         }
         const valueHolderForValue  = value.value
         if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForValueForIdx0  = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
         } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForValueForIdx1  = valueHolderForValue as Resource
             Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
@@ -239,30 +239,30 @@ export class ActionSheetOffset_serializer {
     public static write(buffer: SerializerBase, value: ActionSheetOffset): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForDx  = value.dx
-        if (valueHolderForDx instanceof number) {
-            valueSerializer.writeInt8((0).toChar())
-            const valueHolderForDxForIdx0  = valueHolderForDx as number
-            valueSerializer.writeNumber(valueHolderForDxForIdx0)
+        if (valueHolderForDx instanceof double) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForDxForIdx0  = valueHolderForDx as double
+            valueSerializer.writeFloat64(valueHolderForDxForIdx0)
         } else if (valueHolderForDx instanceof string) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForDxForIdx1  = valueHolderForDx as string
             valueSerializer.writeString(valueHolderForDxForIdx1)
         } else if (valueHolderForDx instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForDxForIdx2  = valueHolderForDx as Resource
             Resource_serializer.write(valueSerializer, valueHolderForDxForIdx2)
         }
         const valueHolderForDy  = value.dy
-        if (valueHolderForDy instanceof number) {
-            valueSerializer.writeInt8((0).toChar())
-            const valueHolderForDyForIdx0  = valueHolderForDy as number
-            valueSerializer.writeNumber(valueHolderForDyForIdx0)
+        if (valueHolderForDy instanceof double) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForDyForIdx0  = valueHolderForDy as double
+            valueSerializer.writeFloat64(valueHolderForDyForIdx0)
         } else if (valueHolderForDy instanceof string) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForDyForIdx1  = valueHolderForDy as string
             valueSerializer.writeString(valueHolderForDyForIdx1)
         } else if (valueHolderForDy instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForDyForIdx2  = valueHolderForDy as Resource
             Resource_serializer.write(valueSerializer, valueHolderForDyForIdx2)
         }
@@ -270,9 +270,9 @@ export class ActionSheetOffset_serializer {
     public static read(buffer: DeserializerBase): ActionSheetOffset {
         let valueDeserializer : DeserializerBase = buffer
         const dxTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let dxTmpBuf : number | string | Resource | undefined
+        let dxTmpBuf : double | string | Resource | undefined
         if (dxTmpBufUnionSelector == (0).toChar()) {
-            dxTmpBuf = (valueDeserializer.readNumber() as number)
+            dxTmpBuf = valueDeserializer.readFloat64()
         } else if (dxTmpBufUnionSelector == (1).toChar()) {
             dxTmpBuf = (valueDeserializer.readString() as string)
         } else if (dxTmpBufUnionSelector == (2).toChar()) {
@@ -280,11 +280,11 @@ export class ActionSheetOffset_serializer {
         } else {
             throw new Error("One of the branches for dxTmpBuf has to be chosen through deserialisation.")
         }
-        const dxTmpResult : number | string | Resource = (dxTmpBuf as number | string | Resource)
+        const dxTmpResult : double | string | Resource = (dxTmpBuf as double | string | Resource)
         const dyTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let dyTmpBuf : number | string | Resource | undefined
+        let dyTmpBuf : double | string | Resource | undefined
         if (dyTmpBufUnionSelector == (0).toChar()) {
-            dyTmpBuf = (valueDeserializer.readNumber() as number)
+            dyTmpBuf = valueDeserializer.readFloat64()
         } else if (dyTmpBufUnionSelector == (1).toChar()) {
             dyTmpBuf = (valueDeserializer.readString() as string)
         } else if (dyTmpBufUnionSelector == (2).toChar()) {
@@ -292,7 +292,7 @@ export class ActionSheetOffset_serializer {
         } else {
             throw new Error("One of the branches for dyTmpBuf has to be chosen through deserialisation.")
         }
-        const dyTmpResult : number | string | Resource = (dyTmpBuf as number | string | Resource)
+        const dyTmpResult : double | string | Resource = (dyTmpBuf as double | string | Resource)
         let value : ActionSheetOffset = ({dx: dxTmpResult, dy: dyTmpResult} as ActionSheetOffset)
         return value
     }
@@ -302,11 +302,11 @@ export class SheetInfo_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTitle  = value.title
         if (valueHolderForTitle instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForTitleForIdx0  = valueHolderForTitle as string
             valueSerializer.writeString(valueHolderForTitleForIdx0)
         } else if (valueHolderForTitle instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForTitleForIdx1  = valueHolderForTitle as Resource
             Resource_serializer.write(valueSerializer, valueHolderForTitleForIdx1)
         }
@@ -315,11 +315,11 @@ export class SheetInfo_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -377,11 +377,11 @@ export class ActionSheetOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTitle  = value.title
         if (valueHolderForTitle instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForTitleForIdx0  = valueHolderForTitle as string
             valueSerializer.writeString(valueHolderForTitleForIdx0)
         } else if (valueHolderForTitle instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForTitleForIdx1  = valueHolderForTitle as Resource
             Resource_serializer.write(valueSerializer, valueHolderForTitleForIdx1)
         }
@@ -390,11 +390,11 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSubtitleTmpValue  = valueHolderForSubtitle!
             if (valueHolderForSubtitleTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSubtitleTmpValueForIdx0  = valueHolderForSubtitleTmpValue as string
                 valueSerializer.writeString(valueHolderForSubtitleTmpValueForIdx0)
             } else if (valueHolderForSubtitleTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSubtitleTmpValueForIdx1  = valueHolderForSubtitleTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSubtitleTmpValueForIdx1)
             }
@@ -403,11 +403,11 @@ export class ActionSheetOptions_serializer {
         }
         const valueHolderForMessage  = value.message
         if (valueHolderForMessage instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForMessageForIdx0  = valueHolderForMessage as string
             valueSerializer.writeString(valueHolderForMessageForIdx0)
         } else if (valueHolderForMessage instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForMessageForIdx1  = valueHolderForMessage as Resource
             Resource_serializer.write(valueSerializer, valueHolderForMessageForIdx1)
         }
@@ -486,19 +486,19 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
             if (valueHolderForBackgroundColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
             } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
@@ -550,27 +550,27 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCornerRadiusTmpValue  = valueHolderForCornerRadius!
             if (valueHolderForCornerRadiusTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx0  = valueHolderForCornerRadiusTmpValue as Dimension
                 if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx0  = valueHolderForCornerRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForCornerRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx1  = valueHolderForCornerRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForCornerRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForCornerRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForCornerRadiusTmpValueForIdx0ForIdx2  = valueHolderForCornerRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForCornerRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx1  = valueHolderForCornerRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx1)
             } else if (valueHolderForCornerRadiusTmpValue instanceof LocalizedBorderRadiuses) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCornerRadiusTmpValueForIdx2  = valueHolderForCornerRadiusTmpValue as LocalizedBorderRadiuses
                 LocalizedBorderRadiuses_serializer.write(valueSerializer, valueHolderForCornerRadiusTmpValueForIdx2)
             }
@@ -582,15 +582,15 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -602,15 +602,15 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
             } else if (valueHolderForHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
@@ -622,27 +622,27 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
             if (valueHolderForBorderWidthTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as Dimension
                 if (valueHolderForBorderWidthTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx0  = valueHolderForBorderWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx1  = valueHolderForBorderWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderWidthTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderWidthTmpValueForIdx0ForIdx2  = valueHolderForBorderWidthTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderWidthTmpValue instanceof EdgeWidths) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as EdgeWidths
                 EdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx1)
             } else if (valueHolderForBorderWidthTmpValue instanceof LocalizedEdgeWidths) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as LocalizedEdgeWidths
                 LocalizedEdgeWidths_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
@@ -654,31 +654,31 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
             if (valueHolderForBorderColorTmpValue instanceof ResourceColor) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as ResourceColor
                 if (valueHolderForBorderColorTmpValueForIdx0 instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx0ForIdx2)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx3  = valueHolderForBorderColorTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForBorderColorTmpValue instanceof EdgeColors) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx1)
             } else if (valueHolderForBorderColorTmpValue instanceof LocalizedEdgeColors) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as LocalizedEdgeColors
                 LocalizedEdgeColors_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx2)
             }
@@ -690,11 +690,11 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderStyleTmpValue  = valueHolderForBorderStyle!
             if (valueHolderForBorderStyleTmpValue instanceof BorderStyle) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx0  = valueHolderForBorderStyleTmpValue as BorderStyle
                 valueSerializer.writeInt32(valueHolderForBorderStyleTmpValueForIdx0.valueOf())
             } else if (valueHolderForBorderStyleTmpValue instanceof EdgeStyles) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderStyleTmpValueForIdx1  = valueHolderForBorderStyleTmpValue as EdgeStyles
                 EdgeStyles_serializer.write(valueSerializer, valueHolderForBorderStyleTmpValueForIdx1)
             }
@@ -706,11 +706,11 @@ export class ActionSheetOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForShadowTmpValue  = valueHolderForShadow!
             if (valueHolderForShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForShadowTmpValueForIdx0  = valueHolderForShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForShadowTmpValueForIdx0)
             } else if (valueHolderForShadowTmpValue instanceof ShadowStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForShadowTmpValueForIdx1  = valueHolderForShadowTmpValue as ShadowStyle
                 valueSerializer.writeInt32(valueHolderForShadowTmpValueForIdx1.valueOf())
             }
@@ -777,7 +777,7 @@ export class ActionSheetOptions_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1198,11 +1198,11 @@ export class ActionSheetOptions_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

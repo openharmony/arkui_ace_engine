@@ -548,8 +548,11 @@ HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure003, TestSize.Level1)
 HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure004, TestSize.Level1)
 {
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NUMBER_PASSWORD); });
+
     pattern_->textObscured_ = true;
+
     pattern_->UpdateObscure(u"a", true);
+
     EXPECT_EQ(pattern_->nakedCharPosition_, -1);
 }
 
@@ -561,8 +564,11 @@ HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure004, TestSize.Level1)
 HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure005, TestSize.Level1)
 {
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NUMBER_PASSWORD); });
+
     pattern_->textObscured_ = true;
+
     pattern_->UpdateObscure(u"aa", true);
+
     EXPECT_EQ(pattern_->nakedCharPosition_, -1);
 }
 

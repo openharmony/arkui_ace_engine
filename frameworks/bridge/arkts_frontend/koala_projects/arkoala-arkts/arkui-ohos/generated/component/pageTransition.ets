@@ -31,21 +31,21 @@ export enum RouteType {
     Pop = 2
 }
 export enum SlideEffect {
-    LEFT = 0,
-    Left = 0,
-    RIGHT = 1,
-    Right = 1,
-    TOP = 2,
-    Top = 2,
-    BOTTOM = 3,
-    Bottom = 3,
+    LEFT = 1, // in backend, 0 means None
+    Left = 1,
+    RIGHT = 2,
+    Right = 2,
+    TOP = 3,
+    Top = 3,
+    BOTTOM = 4,
+    Bottom = 4,
     START = 5,
     END = 6
 }
 export interface PageTransitionOptions {
     type?: RouteType;
-    duration?: number;
+    duration?: int32;
     curve?: curves.Curve | string | curves.ICurve;
-    delay?: number;
+    delay?: int32;
 }
-export type PageTransitionCallback = (type: RouteType, progress: number) => void;
+export type PageTransitionCallback = (type: RouteType, progress: double) => void;

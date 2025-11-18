@@ -36,6 +36,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
@@ -1138,9 +1139,56 @@ RefPtr<FrameNode> RichEditorPattern::GetContentHost() const
     return contentPattern_->GetHost();
 }
 
+void RichEditorPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+    TextPattern::OnAttachToMainTree();
+}
+
+void RichEditorPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    TextPattern::OnDetachFromMainTree();
+}
+
 void RichEditorPattern::OnAttachToFrameNode()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToFrameNode");
+    auto frameNode = GetHost();
+    THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);
+    CHECK_NULL_VOID(frameNode);
+    TextPattern::OnAttachToFrameNode();
+    richEditorInstanceId_ = Container::CurrentIdSafely();
+    frameId_ = frameNode->GetId();
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowSizeChangeCallback(frameId_);
+
+    auto patternCreator = [weak = WeakClaim(this)]() { return AceType::MakeRefPtr<RichEditorContentPattern>(weak); };
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
+    frameNode->AddChild(contentNode);
+    SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
+}
+
+void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromFrameNode");
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
+    CHECK_NULL_VOID(node);
+    TextPattern::OnDetachFromFrameNode(node);
+    ScrollablePattern::OnDetachFromFrameNode(node);
+    ClearOnFocusTextField(node);
+    auto context = pipeline_.Upgrade();
+    IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
+}
+
+void RichEditorPattern::OnAttachToMainTreeMultiThread()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToMainTreeMultiThread");
     TextPattern::OnAttachToFrameNode();
     richEditorInstanceId_ = Container::CurrentIdSafely();
     auto frameNode = GetHost();
@@ -1158,12 +1206,15 @@ void RichEditorPattern::OnAttachToFrameNode()
     SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
 }
 
-void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
+void RichEditorPattern::OnDetachFromMainTreeMultiThread()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToFrameNode");
-    TextPattern::OnDetachFromFrameNode(node);
-    ScrollablePattern::OnDetachFromFrameNode(node);
-    ClearOnFocusTextField(node);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromMainTreeMultiThread");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto frameNode = host.GetRawPtr();
+    TextPattern::OnDetachFromFrameNode(frameNode);
+    ScrollablePattern::OnDetachFromFrameNode(frameNode);
+    ClearOnFocusTextField(frameNode);
     auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
 }
@@ -1627,6 +1678,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
     record.afterCaretPosition = start;
     AddOperationRecord(record);
     UndoRedoRecord styledRecord;
+    styledRecord.deleteDirection = RichEditorDeleteDirection::FORWARD;
     undoManager_->UpdateRecordBeforeChange(start, end - start, styledRecord);
     DeleteSpansOperation(start, end);
     undoManager_->RecordOperationAfterChange(start, 0, styledRecord);
@@ -5480,7 +5532,9 @@ bool RichEditorPattern::UnableStandardInputCrossPlatform(bool isFocusViewChanged
             }
         }
     }
-    value.selection.Update(caretPosition_, caretPosition_);
+    auto start = textSelector_.IsValid() ? textSelector_.GetTextStart() : caretPosition_;
+    auto end = textSelector_.IsValid() ? textSelector_.GetTextEnd() : caretPosition_;
+    value.selection.Update(start, end);
     inputMethodManager->SetEditingState(value, GetInstanceId());
     inputMethodManager->ShowKeyboard(isFocusViewChanged, GetInstanceId());
     return true;
@@ -6499,6 +6553,7 @@ bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length,
         ResetSelection();
         DeleteByDeleteValueInfo(info);
         IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
+        styledRecord.deleteDirection = info.GetRichEditorDeleteDirection();
         undoManager_->RecordOperationAfterChange(currentPosition, 0, styledRecord);
         eventHub->FireOnDeleteComplete();
         OnReportRichEditorEvent("OnDeleteComplete");
@@ -6600,7 +6655,7 @@ void RichEditorPattern::DeleteBackward(int32_t oriLength, TextChangeReason reaso
     }
 }
 
-std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
+std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isIME)
 {
     length = CalculateDeleteLength(length, true);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete length=%{public}d", length);
@@ -6618,7 +6673,7 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     if (caretPosition_ == 0) {
         info.SetLength(0);
-        DoDeleteActions(0, 0, info);
+        DoDeleteActions(0, 0, info, isIME);
         return deleteText;
     }
     info.SetOffset(caretPosition_ - length);
@@ -6626,7 +6681,7 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
     int32_t currentPosition = std::clamp((caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
-        bool doDelete = DoDeleteActions(currentPosition, length, info);
+        bool doDelete = DoDeleteActions(currentPosition, length, info, isIME);
         if (!doDelete) {
             return u"";
         }
@@ -7333,7 +7388,7 @@ bool RichEditorPattern::HandleOnKeyBack()
 void RichEditorPattern::HandleOnUndoAction()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnUndoAction, IsSupportStyledUndo:%{public}d", IsSupportStyledUndo());
-    if (IsSupportStyledUndo()) {
+    if (undoManager_) {
         undoManager_->UndoByRecords();
         return;
     }
@@ -7376,7 +7431,7 @@ void RichEditorPattern::HandleOnUndoAction()
 void RichEditorPattern::HandleOnRedoAction()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnRedoAction, IsSupportStyledUndo:%{public}d", IsSupportStyledUndo());
-    if (IsSupportStyledUndo()) {
+    if (undoManager_) {
         undoManager_->RedoByRecords();
         return;
     }
@@ -12959,7 +13014,6 @@ bool RichEditorPattern::IsShowSearch()
 
 bool RichEditorPattern::IsShowAIWrite()
 {
-    CHECK_NULL_RETURN(!textSelector_.SelectNothing(), false);
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
         return false;

@@ -22,9 +22,11 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace {
+namespace NG {
+class UINode;
+}
 class ACE_EXPORT MultiThreadBuildManager {
 public:
     static MultiThreadBuildManager& GetInstance();

@@ -214,7 +214,7 @@ HWTEST_F(ScrollableTestNg, ProcessScrollOverCallback001, TestSize.Level1)
     RefPtr<Scrollable> scrollable =
         AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
     double number = 4.0;
-    scrollable->outBoundaryCallback_ = []() { return false; };
+    scrollable->outBoundaryCallback_ = [](bool useChainDelta) { return false; };
     scrollable->canOverScroll_ = false;
     scrollable->notifyScrollOverCallback_ = [&number](double velocity) { number += velocity; };
     scrollable->ProcessScrollOverCallback(2.0);
@@ -231,7 +231,7 @@ HWTEST_F(ScrollableTestNg, ProcessScrollOverCallback002, TestSize.Level1)
     RefPtr<Scrollable> scrollable =
         AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
     double number = 4.0;
-    scrollable->outBoundaryCallback_ = []() { return false; };
+    scrollable->outBoundaryCallback_ = [](bool useChainDelta) { return false; };
     scrollable->canOverScroll_ = true;
     scrollable->notifyScrollOverCallback_ = [&number](double velocity) { number += velocity; };
     scrollable->ProcessScrollOverCallback(2.0);
@@ -604,5 +604,20 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity, TestSize.Level1)
     scrollablePattern->currentOffset_ = -15.0f;
     EXPECT_TRUE(scrollablePattern->IsOutOfBoundary());
     EXPECT_FALSE(scrollablePattern->HandleScrollVelocity(-10.0f));
+}
+
+/**
+ * @tc.name: StopHotZoneScrollWithoutAnimation
+ * @tc.desc: Test Scrollable StopHotZoneScroll without animator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, StopHotZoneScrollWithoutAnimator, TestSize.Level1)
+{
+    RefPtr<ScrollPattern> scrollablePattern = AceType::MakeRefPtr<ScrollPattern>();
+    scrollablePattern->isAnimationStop_ = false;
+    scrollablePattern->animator_ = nullptr;
+    EXPECT_FALSE(scrollablePattern->AnimateStoped());
+    scrollablePattern->StopHotzoneScroll();
+    EXPECT_FALSE(scrollablePattern->AnimateStoped());
 }
 } // namespace OHOS::Ace::NG

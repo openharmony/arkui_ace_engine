@@ -316,6 +316,8 @@ public:
 
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     void SetIsNeedRemove(bool isNeedRemove)
     {
         isNeedRemove_ = isNeedRemove;
@@ -408,6 +410,7 @@ protected:
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
     bool isNeedRemove_ = false;
+    bool isCustomTransition_ = false;
 
 #if defined(ENABLE_SPLIT_MODE)
     bool needFireObserver_ = true;

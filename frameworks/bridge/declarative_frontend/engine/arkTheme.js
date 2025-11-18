@@ -147,7 +147,11 @@ globalThis.LazyForEach.getItemGeneratorForThemeSupport = function (paramItemGene
 };
 if (globalThis.WithTheme !== undefined) {
     globalThis.ListItem.getDeepRenderFuncForThemeSupport = function (deepRenderFunction) {
-        const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
+        let themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
+        if (themeScope === undefined) {
+            const listItemElemtId = ViewStackProcessor.GetElmtIdToAccountFor();
+            themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElemtId);
+        }
         if (themeScope === undefined) {
             return deepRenderFunction;
         }

@@ -261,7 +261,7 @@ struct ArkUIDragControllerAsync {
     ArkUIDragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
-    OHOS::Ace::Ani::DragAction* dragAction = nullptr;
+    std::shared_ptr<OHOS::Ace::Ani::DragAction> dragAction = nullptr;
 };
 
 struct ArkUIPreviewStyle {
@@ -398,6 +398,7 @@ struct ArkUIWaterFlowSection {
     std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
 struct ArkUIAniWebModifier {
+    void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferJsGeolocationToStatic)(void* peer, void* nativePtr);
     bool (*transferJsResultToStatic)(void* peer, void* nativePtr);
@@ -502,6 +503,9 @@ struct ArkUIAniCommonModifier {
     ani_double (*px2fp)(ani_double value, ani_int instanceId);
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
+    std::optional<std::string> (*getWindowName)(ani_int instanceId);
+    ani_int (*getWindowWidthBreakpoint)();
+    ani_int (*getWindowHeightBreakpoint)();
     void* (*transferKeyEventPointer)(ani_long nativePtr);
     void* (*createKeyEventAccessorWithPointer)(ani_long nativePtr);
     void* (*createEventTargetInfoAccessor)();
@@ -537,6 +541,7 @@ struct ArkUIAniCommonModifier {
     float (*getPx2VpWithCurrentDensity)(float px);
     void (*setImageCacheCount)(ani_int value, ani_int instanceId);
     void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
+    void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -556,14 +561,16 @@ struct ArkUIAniCustomNodeModifier {
     void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
     bool (*queryNavDestinationInfo1)(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info);
     bool (*queryRouterPageInfo1)(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info);
+    void (*onReuse)(ani_long node);
+    void (*onRecycle)(ani_long node);
 };
 struct ArkUIAniKeyboardAvoidModeModifier {
     ArkUI_Int32 (*getKeyboardAvoidMode)();
     void (*setKeyboardAvoidMode)(int32_t index);
 };
 struct ArkUIAniDrawModifier {
-    void (*setDrawModifier)(ani_long ptr, uint32_t flag,
-        void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun);
+    void (*setDrawModifier)(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* fnDrawContentFun,
+        void* fnDrawFrontFun, void* fnDrawForegroundFun);
     void (*invalidate)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniContentSlotModifier {
@@ -578,6 +585,7 @@ struct ArkUIAniWaterFlowModifier {
         ArkUINodeHandle node, int32_t start, int32_t deleteCount, void* section, ArkUI_Int32 size);
     void (*setWaterFlowFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
     void (*setWaterFlowFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*resetWaterFlowFooter)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
 };
@@ -702,9 +710,12 @@ struct ArkUIAniCanvasModifier {
         ani_double dirtyHeight);
     void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
     ani_int (*getCanvasId)(ArkUICanvasRenderingContext peer);
+    void (*setAttachCallbackId)(ArkUICanvasRenderingContext peer, ani_int attachCallbackId);
+    void (*setDetachCallbackId)(ArkUICanvasRenderingContext peer, ani_int detachCallbackId);
 };
 
 struct ArkUIAniTraceModifier {
+    bool (*getAttributeSetTraceEnabled)();
     void (*traceBegin)(const std::string& traceName);
     void (*traceEnd)();
     void (*asyncTraceBegin)(const std::string& traceName, int taskId);

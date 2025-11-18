@@ -404,7 +404,7 @@ HWTEST_F(WebPatternPartOneTest, ShowPreviewMenu_001, TestSize.Level1)
 
     auto param_ = AceType::MakeRefPtr<MockWebContextMenuParam>();
     webPattern->contextMenuParam_ = param_;
-    EXPECT_CALL(*param_, GetSourceType())
+    EXPECT_CALL(*param_, GetSourceTypeV2())
         .WillOnce(Return(OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE))
         .WillOnce(Return(OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS))
         .WillRepeatedly(Return(OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_NONE));

@@ -17,21 +17,21 @@ import { Position, SizeOptions, Length, ResourceColor }  from './arkui.component
 
 interface ShapeSize {
 
-    width?: number | string;
+    width?: double | string;
 
-    height?: number | string;
+    height?: double | string;
 }
 
 interface RectShapeOptions extends ShapeSize {
 
-    radius?: number | string | Array<number | string>;
+    radius?: double | string | Array<double | string>;
 }
 
 interface RoundRectShapeOptions extends ShapeSize {
 
-    radiusWidth?: number | string;
+    radiusWidth?: double | string;
 
-    radiusHeight?: number | string;
+    radiusHeight?: double | string;
 }
 
 interface PathShapeOptions {
@@ -39,100 +39,100 @@ interface PathShapeOptions {
     commands?: string;
 }
 
-class CommonShapeMethod<T> {
+class CommonShapeMethod {
     static { loadLibrary("shape_ani") }
 
-    public native offset(offset: Position): T;
+    public native offset(offset: Position): this;
 
-    public native fill(color: ResourceColor): T;
+    public native fill(color: ResourceColor): this;
 
-    public native position(position: Position): T;
+    public native position(position: Position): this;
 }
 
-class BaseShape<T> extends CommonShapeMethod<T> {
+class BaseShape extends CommonShapeMethod {
 
-   public native width(width: Length): T;
+   public native width(width: Length): this;
 
-   public native height(height: Length): T;
+   public native height(height: Length): this;
 
-   public native size(size: SizeOptions): T;
+   public native size(size: SizeOptions): this;
 }
 
-export class RectShape extends BaseShape<RectShape> {
-    rectShapeResult:long;
+export class RectShape extends BaseShape {
+    basicShapeResult:long;
 
     public native constructor(options?: RectShapeOptions | RoundRectShapeOptions);
 
-    public native radiusWidth(rWidth: number | string): RectShape;
+    public native radiusWidth(rWidth: double | string): this;
 
-    public native radiusHeight(rHeight: number | string): RectShape;
+    public native radiusHeight(rHeight: double | string): this;
 
-    public native radius(radius: number | string | Array<number | string>): RectShape;
+    public native radius(radius: double | string | Array<double | string>): this;
 
-    public native width(width: Length): RectShape;
+    public native width(width: Length): this;
 
-    public native height(height: Length): RectShape;
+    public native height(height: Length): this;
 
-    public native size(size: SizeOptions): RectShape;
+    public native size(size: SizeOptions): this;
 
-    public native offset(offset: Position): RectShape;
+    public native offset(offset: Position): this;
 
-    public native fill(color: ResourceColor): RectShape;
+    public native fill(color: ResourceColor): this;
 
-    public native position(position: Position): RectShape;
+    public native position(position: Position): this;
 }
 
-export class EllipseShape  extends BaseShape<EllipseShape > {
+export class EllipseShape  extends BaseShape {
 
-    ellipseShapeResult:long;
+    basicShapeResult:long;
 
     public native constructor(options?: ShapeSize);
 
-    public native width(width: Length): EllipseShape;
+    public native width(width: Length): this;
 
-    public native height(height: Length): EllipseShape;
+    public native height(height: Length): this;
 
-    public native size(size: SizeOptions): EllipseShape;
+    public native size(size: SizeOptions): this;
 
-    public native offset(offset: Position): EllipseShape;
+    public native offset(offset: Position): this;
 
-    public native fill(color: ResourceColor): EllipseShape;
+    public native fill(color: ResourceColor): this;
 
-    public native position(position: Position): EllipseShape;
+    public native position(position: Position): this;
 }
 
-export class CircleShape extends BaseShape<CircleShape > {
+export class CircleShape extends BaseShape {
 
-    circleShapeResult:long;
+    basicShapeResult:long;
 
     public native constructor(options?: ShapeSize);
 
-    public native width(width: Length): CircleShape;
+    public native width(width: Length): this;
 
-    public native height(height: Length): CircleShape;
+    public native height(height: Length): this;
 
-    public native size(size: SizeOptions): CircleShape;
+    public native size(size: SizeOptions): this;
 
-    public native offset(offset: Position): CircleShape;
+    public native offset(offset: Position): this;
 
-    public native fill(color: ResourceColor): CircleShape;
+    public native fill(color: ResourceColor): this;
 
-    public native position(position: Position): CircleShape;
+    public native position(position: Position): this;
 }
 
-export class PathShape extends CommonShapeMethod<PathShape> {
+export class PathShape extends CommonShapeMethod {
 
-    pathShapeResult:long;
+    basicShapeResult:long;
 
     public native constructor(options?: PathShapeOptions);
 
-    public native commands(commands: string): PathShape;
+    public native commands(commands: string): this;
 
-    public native offset(offset: Position): PathShape;
+    public native offset(offset: Position): this;
 
-    public native fill(color: ResourceColor): PathShape;
+    public native fill(color: ResourceColor): this;
 
-    public native position(position: Position): PathShape;
+    public native position(position: Position): this;
 }
 
 export class __ShapeInnerMethods__ {

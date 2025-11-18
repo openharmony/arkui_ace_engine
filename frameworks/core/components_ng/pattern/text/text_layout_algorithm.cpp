@@ -641,7 +641,7 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textSt
         if (!DidExceedMaxLines(maxSize)) {
             return {true, suitableSize};
         }
-        if (suitCount % HUNDRED == 0) {
+        if (suitCount % HUNDRED == 0 && suitCount > 0) {
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_RETURN(host, {});
             TAG_LOGW(AceLogTag::ACE_TEXT,
@@ -694,10 +694,10 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeBS(TextStyle& textSt
         } else {
             rightBound = mid - 1;
         }
-        if (suitCount % TWENTY == 0) {
+        if (suitCount % TWENTY == 0 && suitCount > 0) {
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_RETURN(host, {});
-            TAG_LOGI(AceLogTag::ACE_TEXT,
+            TAG_LOGW(AceLogTag::ACE_TEXT,
                 "suit layout:%{public}d, [id:%{public}d, suitSz:%{public}f, stepCount:%{public}d, stepSize:%{public}f]",
                 suitCount, host->GetId(), suitSz, stepCount, stepSize);
         }

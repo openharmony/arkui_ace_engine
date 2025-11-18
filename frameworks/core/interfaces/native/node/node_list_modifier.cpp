@@ -17,7 +17,9 @@
 #include "interfaces/native/node/list_option.h"
 #include "interfaces/native/node/node_model.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/components/list/list_theme.h"
+#include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
@@ -705,17 +707,24 @@ void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize opt
     CHECK_NULL_VOID(option);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    for (uint32_t i = 0; i < option->mainSize.size(); i++) {
+    std::vector<float> tmpMainSize;
+    const size_t arrLength = option->mainSize.size();
+    tmpMainSize.reserve(arrLength);
+    float defaultValue = -1.0f;
+    float defaultSize = 0.0f;
+    for (uint32_t i = 0; i < arrLength; i++) {
         if (option->mainSize[i] > 0) {
-            option->mainSize[i] =
-                Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+            float tmpSize = Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+            tmpMainSize.emplace_back(tmpSize);
+        } else {
+            tmpMainSize.emplace_back(defaultValue);
         }
     }
     if (option->defaultMainSize > 0) {
-        option->defaultMainSize =
-            Dimension(option->defaultMainSize, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+        defaultSize = Dimension(option->defaultMainSize, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
     }
-    ListModelNG::SetListChildrenMainSize(frameNode, option->defaultMainSize, option->mainSize);
+    auto childrenSize = AceType::MakeRefPtr<ListChildrenMainSize>(std::move(tmpMainSize), defaultSize);
+    ListModelNG::SetListChildrenMainSize(frameNode, childrenSize);
 }
 
 void ResetListChildrenMainSize(ArkUINodeHandle node)

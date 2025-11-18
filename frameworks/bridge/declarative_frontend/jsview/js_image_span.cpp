@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/engine/functions/js_event_function.h"
+#include "frameworks/base/image/image_color_filter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
 namespace OHOS::Ace::Framework {
@@ -170,9 +171,9 @@ void JSImageSpan::SetColorFilter(const JSCallbackInfo& info)
             ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
             return;
         }
-        JSColorFilter* colorFilter;
+        ImageColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
-            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
+            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<ImageColorFilter>();
         } else {
             ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
             return;

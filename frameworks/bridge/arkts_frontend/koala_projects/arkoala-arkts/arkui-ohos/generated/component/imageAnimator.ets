@@ -337,6 +337,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
     public setImageAnimatorOptions(): this {
         if (this.checkPriority("setImageAnimatorOptions")) {
             this.getPeer()?.setImageAnimatorOptionsAttribute()
+            this.applyOptionsFinish('ImageAnimatorAttribute');
             return this
         }
         return this
@@ -453,6 +454,9 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -478,15 +482,15 @@ export class ImageFrameInfo_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForSrc  = value.src
         if (valueHolderForSrc instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSrcForIdx0  = valueHolderForSrc as string
             valueSerializer.writeString(valueHolderForSrcForIdx0)
         } else if (valueHolderForSrc instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSrcForIdx1  = valueHolderForSrc as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
         } else if (valueHolderForSrc instanceof image.PixelMap) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForSrcForIdx2  = valueHolderForSrc as image.PixelMap
             image_PixelMap_serializer.write(valueSerializer, valueHolderForSrcForIdx2)
         }
@@ -495,11 +499,11 @@ export class ImageFrameInfo_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
             }
@@ -511,11 +515,11 @@ export class ImageFrameInfo_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
             }
@@ -527,11 +531,11 @@ export class ImageFrameInfo_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTopTmpValue  = valueHolderForTop!
             if (valueHolderForTopTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as number
                 valueSerializer.writeNumber(valueHolderForTopTmpValueForIdx0)
             } else if (valueHolderForTopTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as string
                 valueSerializer.writeString(valueHolderForTopTmpValueForIdx1)
             }
@@ -543,11 +547,11 @@ export class ImageFrameInfo_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeftTmpValue  = valueHolderForLeft!
             if (valueHolderForLeftTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLeftTmpValueForIdx0  = valueHolderForLeftTmpValue as number
                 valueSerializer.writeNumber(valueHolderForLeftTmpValueForIdx0)
             } else if (valueHolderForLeftTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLeftTmpValueForIdx1  = valueHolderForLeftTmpValue as string
                 valueSerializer.writeString(valueHolderForLeftTmpValueForIdx1)
             }

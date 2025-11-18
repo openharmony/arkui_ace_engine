@@ -34,6 +34,34 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
 }
 } // namespace
 
+void ScrollablePaintMethod::UpdateOverlayFadingGradient()
+{
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    if (hasFadingEdge_ && (isFadingTop_ || isFadingBottom_)) {
+        if (isFadingTop_) {
+            gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
+            gradient.AddColor(CreatePercentGradientColor(startPercent_ + percentFading_, Color::WHITE));
+        } else {
+            gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
+            gradient.AddColor(CreatePercentGradientColor(0, Color::WHITE));
+        }
+        if (isFadingBottom_) {
+            gradient.AddColor(CreatePercentGradientColor(endPercent_ - percentFading_, Color::WHITE));
+            gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
+        } else {
+            gradient.AddColor(CreatePercentGradientColor(1, Color::WHITE));
+            gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
+        }
+        if (vertical_) {
+            gradient.GetLinearGradient()->angle = isReverse_
+                ? CalcDimension(LINEAR_GRADIENT_DIRECTION_ANGLE, DimensionUnit::PX)
+                : CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
+        }
+    }
+    overlayRenderContext_->UpdateLinearGradient(gradient);
+}
+
 void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& renderContext)
 {
     if (!needUpdateFadingEdge_) {
@@ -41,31 +69,20 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
     }
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     if (isVerticalReverse_) {
         bool tempFadingValue = isFadingTop_;
         isFadingTop_ = isFadingBottom_;
         isFadingBottom_ = tempFadingValue;
     }
-    float startRange = isFadingTop_ ? percentFading_ : 0.0f;
-    float endRange = isFadingBottom_ ? percentFading_ : 0.0f;
-    if (hasFadingEdge_) {
-        gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(startPercent_ + startRange, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(endPercent_ - endRange, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
-    }
-    if (vertical_) {
-        gradient.GetLinearGradient()->angle = isReverse_
-                                                  ? CalcDimension(LINEAR_GRADIENT_DIRECTION_ANGLE, DimensionUnit::PX)
-                                                  : CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
-    }
     renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
-    overlayRenderContext_->UpdateLinearGradient(gradient);
-    if (!hasFadingEdge_) {
+    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
+        auto paint = weak.Upgrade();
+        CHECK_NULL_VOID(paint);
+        paint->UpdateOverlayFadingGradient();
+    });
+    if (!hasFadingEdge_ || (!isFadingTop_ && !isFadingBottom_)) {
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
         renderContext->UpdateBackBlendMode(BlendMode::NONE);
     } else {

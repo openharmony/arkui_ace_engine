@@ -623,16 +623,6 @@ void RepeatVirtualScroll2Node::RecycleItems(int32_t from, int32_t to)
         "%{public}d to the reusable items cache",
         static_cast<int32_t>(GetId()), from, to, startIndex_, from - startIndex_, to - startIndex_);
 
-    // swap the ViewStackProcessor instance for secondary and push this node
-    // call sequence is C++ -> TS -> JS
-    // for TS -> JS to find 'this' node, we need to put 'this' to the 2nd
-    // ViewStackProcessor
-    NG::ScopedViewStackProcessor scopedViewStackProcessor;
-    auto* viewStack = NG::ViewStackProcessor::GetInstance();
-    viewStack->Push(Referenced::Claim(this));
-
-    onRecycleItems_(from - startIndex_, to - startIndex_);
-    
     prevRecycleFrom_ = from;
     prevRecycleTo_ = to;
 
@@ -865,5 +855,9 @@ void RepeatVirtualScroll2Node::fireOnUpdateDirty()
 void RepeatVirtualScroll2Node::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("VirtualScroll: true");
+    DumpLog::GetInstance().AddDesc(std::string("Length of source data:")
+                                        .append(std::to_string(arrLen_).c_str()));
+    DumpLog::GetInstance().AddDesc(std::string("totalCount of source data:")
+                                        .append(std::to_string(totalCount_).c_str()));
 }
 } // namespace OHOS::Ace::NG

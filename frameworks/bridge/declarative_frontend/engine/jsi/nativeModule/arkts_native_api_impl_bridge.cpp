@@ -143,6 +143,8 @@ void RegisterRenderNodeCommonAttributes(Local<panda::ObjectRef> renderNode, Ecma
 {
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createRenderNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::CreateRenderNode));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createRenderNodeWithPtrVal"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::CreateRenderNodeWithPtrVal));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "appendChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::AppendChild));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "insertChildAfter"),
@@ -952,6 +954,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDragPreview));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragPreview"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDragPreview));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegionList"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetResponseRegionList));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegionList"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetResponseRegionList));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetResponseRegion));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
@@ -1735,6 +1741,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchButton));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchButton"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchButton));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchDividerColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchDividerColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchDividerColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchDividerColor));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFontColor));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
@@ -3361,7 +3371,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterEmbeddedComponentAttributes(object, vm);
 #endif
     RegisterStepperAttributes(object, vm);
-    RegisterContainerAttributes(object, vm);
+    RegisterContainerPickerAttributes(object, vm);
     return object;
 }
 
@@ -4737,6 +4747,13 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPoint"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPoint));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
+
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "adoptChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AdoptChild));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeAdoptedChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveAdoptedChild));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isOnRenderTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsOnRenderTree));
 }
 
 void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -4980,6 +4997,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabOnUnselected));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabOnUnselected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabOnUnselected));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetOnContentDidScroll));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetOnContentDidScroll));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarBackgroundColor));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarBackgroundColor"),
@@ -7091,10 +7112,6 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableSelectedDataDetector));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableSelectedDataDetector"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableSelectedDataDetector));
-    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDataDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetSelectedDataDetectorConfig));
-    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDataDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetSelectedDataDetectorConfig));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSslErrorEventReceive"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSslErrorEventReceive));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSslErrorEventReceive"),
@@ -7417,7 +7434,7 @@ void ArkUINativeModule::RegisterStepperAttributes(Local<panda::ObjectRef> object
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepper"), stepper);
 }
 
-void ArkUINativeModule::RegisterContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+void ArkUINativeModule::RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto containerPicker = panda::ObjectRef::New(vm);
     containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerCanLoop"),
@@ -7445,6 +7462,6 @@ void ArkUINativeModule::RegisterContainerAttributes(Local<panda::ObjectRef> obje
     containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerOnScrollStop"),
         panda::FunctionRef::New(
             const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerOnScrollStop));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, ""), containerPicker);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "containerPicker"), containerPicker);
 }
 } // namespace OHOS::Ace::NG

@@ -20,7 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkFormComponentPeer, FormSize, FormDimension, FormCallbackInfo, ErrorInformation, FormComponentAttribute } from "./component/formComponent"
+import { ArkFormComponentPeer, FormSize, FormDimension, FormCallbackInfo, ErrorInformation, RouterCallbackInfo, FormComponentAttribute } from "./component/formComponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { Visibility } from "./component/enums"
@@ -51,7 +51,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: ((value0: ErrorInformation) => void) | undefined
     _onRouter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onRouter_0_0value?: ((value0: Object) => void) | undefined
+    _onRouter_0_0value?: ((value0: RouterCallbackInfo) => void) | undefined
     _onUninstall_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUninstall_0_0value?: ((value0: FormCallbackInfo) => void) | undefined
     _onLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -191,7 +191,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             switch (this._onRouter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnRouterAttribute((this._onRouter_0_0value as ((value0: Object) => void) | undefined));
+                    peer.setOnRouterAttribute((this._onRouter_0_0value as ((value0: RouterCallbackInfo) => void) | undefined));
                     this._onRouter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -201,7 +201,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
                 }
                 default: {
                     this._onRouter_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnRouterAttribute((undefined as ((value0: Object) => void) | undefined));
+                    peer.setOnRouterAttribute((undefined as ((value0: RouterCallbackInfo) => void) | undefined));
                 }
             }
         }
@@ -362,7 +362,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
                     break;
                 }
                 default: {
-                    this.onRouter((undefined as ((value0: Object) => void) | undefined));
+                    this.onRouter((undefined as ((value0: RouterCallbackInfo) => void) | undefined));
                 }
             }
         }
@@ -483,7 +483,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         }
         return this
     }
-    onRouter(value: ((value0: Object) => void) | undefined): this {
+    onRouter(value: ((value0: RouterCallbackInfo) => void) | undefined): this {
         if (((this._onRouter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onRouter_0_flag = AttributeUpdaterFlag.UPDATE

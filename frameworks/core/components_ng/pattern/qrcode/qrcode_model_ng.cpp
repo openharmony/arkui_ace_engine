@@ -40,16 +40,7 @@ void QRCodeModelNG::Create(const std::string& value)
         pros->ResetQRCodeColorSetByUser();
         pros->ResetQRBackgroundColorSetByUser();
     }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
-    CHECK_NULL_VOID(qrCodeTheme);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, qrCodeTheme->GetQrcodeColor());
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, qrCodeTheme->GetBackgroundColor());
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrCodeTheme->GetBackgroundColor());
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, DEFAULT_OPACITY);
 }
 
 void QRCodeModelNG::SetQRCodeColor(const Color& color)
@@ -77,22 +68,6 @@ RefPtr<FrameNode> QRCodeModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::QRCODE_ETS_TAG, nodeId, AceType::MakeRefPtr<QRCodePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
-    CHECK_NULL_RETURN(qrCodeTheme, nullptr);
-    auto paintPropertyPtr = frameNode->GetPaintPropertyPtr<QRCodePaintProperty>();
-    if (paintPropertyPtr) {
-        paintPropertyPtr->UpdateColor(qrCodeTheme->GetQrcodeColor());
-        paintPropertyPtr->UpdateBackgroundColor(qrCodeTheme->GetBackgroundColor());
-    }
-    const auto& context = frameNode->GetRenderContext();
-    if (context) {
-        context->UpdateBackgroundColor(qrCodeTheme->GetBackgroundColor());
-    }
-    if (paintPropertyPtr) {
-        paintPropertyPtr->UpdateOpacity(DEFAULT_OPACITY);
-    }
     return frameNode;
 }
 
@@ -125,6 +100,8 @@ void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const double opacity
 void HandleCreateResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<ResourceObject>& resObj)
 {
     std::string createKey = "qrcode.create";
+    pattern->RemoveResObj(createKey);
+    CHECK_NULL_VOID(resObj);
     auto&& updateCreateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
                                   const RefPtr<ResourceObject>& resObj) {
         auto pattern = weak.Upgrade();

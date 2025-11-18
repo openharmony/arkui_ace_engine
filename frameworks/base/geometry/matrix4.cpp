@@ -268,7 +268,7 @@ bool Matrix4::operator==(const double (&matrix)[4][4]) const
 
 void Matrix4::CopyMatrix(double (&matrix)[4][4])
 {
-    std::copy_n(&matrix[0][0], MATRIX_LENGTH, &matrix4x4_[0][0]);
+    std::copy_n(&matrix4x4_[0][0], MATRIX_LENGTH, &matrix[0][0]);
 }
 
 Matrix4 Matrix4::operator*(double num)

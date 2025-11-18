@@ -161,6 +161,7 @@ private:
     bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
     bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
     void ConvertTypographyStyle(Rosen::TypographyStyle& style, const ParagraphStyle& paraStyle);
+    void ConvertFontMetrics(FontMetrics& fontMetrics, const Rosen::Drawing::FontMetrics& rsFontMetrics);
 
     std::u16string text_;
     int32_t placeholderCnt_ = 0;

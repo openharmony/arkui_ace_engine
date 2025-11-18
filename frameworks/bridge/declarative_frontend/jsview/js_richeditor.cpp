@@ -1131,6 +1131,10 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
 
 void JSRichEditor::SetSelectDetectEnable(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        RichEditorModel::GetInstance()->ResetSelectDetectEnable();
+        return;
+    }
     if (info[0]->IsBoolean()) {
         auto enabled = info[0]->ToBoolean();
         RichEditorModel::GetInstance()->SetSelectDetectEnable(enabled);
@@ -1139,6 +1143,10 @@ void JSRichEditor::SetSelectDetectEnable(const JSCallbackInfo& info)
 
 void JSRichEditor::SetSelectDetectConfig(const JSCallbackInfo& info)
 {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        RichEditorModel::GetInstance()->ResetSelectDetectConfig();
+        return;
+    }
     std::vector<TextDataDetectType> typesList;
     if (!info[0]->IsObject()) {
         return;
@@ -2964,6 +2972,9 @@ JSRef<JSObject> JSRichEditorBaseController::CreateJsDecorationObj(const struct U
     if (typingStyle.updateTextDecorationStyle.has_value()) {
         decorationObj->SetProperty<int32_t>("style",
             static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
+    }
+    if (typingStyle.updateLineThicknessScale.has_value()) {
+        decorationObj->SetProperty<float>("thicknessScale", typingStyle.updateLineThicknessScale.value());
     }
     return decorationObj;
 }

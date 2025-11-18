@@ -453,13 +453,21 @@ public:
         const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
         Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
 
+    void RegisterScreenReaderObserverCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilityScreenReaderObserverCallback>& callback) override;
+    void DeregisterScreenReaderObserverCallback(int64_t elementId) override;
+
     void DetectElementInfoFocusableThroughAncestor(
-        const Accessibility::AccessibilityElementInfo &info,
-        const int64_t parentId, const int32_t requestId,
+        const Accessibility::AccessibilityElementInfo& info,
+        const Accessibility::AccessibilityFocusMoveParam param, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback &callback, const int32_t windowId);
 
+    void FocusMoveSearchWithConditionForNode(
+        const AccessibilityElementInfo& info, const Accessibility::AccessibilityFocusMoveParam param,
+        const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+
     void FocusMoveSearchWithCondition(
-        const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
+        const AccessibilityElementInfo& info, const Accessibility::AccessibilityFocusMoveParam param,
         const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
 
     bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
@@ -502,10 +510,8 @@ private:
             Accessibility::AccessibilityElementOperatorCallback &callback) override;
         void SetChildTreeIdAndWinId(const int64_t nodeId, const int32_t treeId, const int32_t childWindowId) override;
         void SetBelongTreeId(const int32_t treeId) override;
-        void FocusMoveSearchWithCondition(const int64_t elementId, const AccessibilityFocusMoveParam param,
+        void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
             const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
-        void DetectElementInfoFocusableThroughAncestor(const AccessibilityElementInfo &info,
-            const int64_t parentId, const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -549,10 +555,8 @@ private:
             Accessibility::AccessibilityElementOperatorCallback &callback) override;
         void SetChildTreeIdAndWinId(const int64_t nodeId, const int32_t treeId, const int32_t childWindowId) override;
         void SetBelongTreeId(const int32_t treeId) override;
-        void FocusMoveSearchWithCondition(const int64_t elementId, const AccessibilityFocusMoveParam param,
+        void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
             const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
-        void DetectElementInfoFocusableThroughAncestor(const AccessibilityElementInfo &info,
-            const int64_t parentId, const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -744,6 +748,13 @@ private:
         const CommonProperty& commonProperty, Accessibility::AccessibilityElementInfo& nodeInfo,
         const RefPtr<NG::PipelineContext>& ngPipeline);
 
+    void UpdateElementInfo(
+        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+        AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
+
+    void UpdateHasChildText(
+        const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+
     void UpdateCacheInfoNG(std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
         CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam);
@@ -842,6 +853,7 @@ private:
     void CheckActionTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
     void UpdateUserAccessibilityElementInfo(
         const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo);
+    void NotifyScreenReaderObserverStateChange(bool state);
 
     // focus move
     void ProcessGetScrollAncestorNode(
@@ -879,6 +891,9 @@ private:
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
     mutable std::mutex componentSACallbackMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilitySAObserverCallback>> componentSACallbackMap_;
+    mutable std::mutex componentScreenReaderCallbackMutex_;
+    std::unordered_map<int64_t, std::shared_ptr<AccessibilityScreenReaderObserverCallback>>
+        componentScreenReaderCallbackMap_;
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;

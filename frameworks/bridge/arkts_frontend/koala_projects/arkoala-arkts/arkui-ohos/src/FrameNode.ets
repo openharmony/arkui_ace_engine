@@ -17,16 +17,13 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
-    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, pointer,
-    NativeThunk, SerializerBase
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk
 } from "@koalaui/interop"
 import { finalizerRegister, int32 } from "@koalaui/common"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode } from "./RenderNode"
-import {
-    CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
-    CustomProperty, AnimateParam
-} from './component/common'
+import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
+    CustomProperty, AnimateParam } from './component/common';
 import { ArkButtonNode } from './typedNode/ArkButtonNode'
 import { ButtonOptions, ButtonAttribute, ArkButtonPeer} from './component/button'
 import { ArkCheckboxNode } from './typedNode/ArkCheckboxNode'
@@ -85,8 +82,8 @@ import { GridLayoutOptions, GridAttribute, ArkGridPeer } from './component/grid'
 import { GridItemOptions, GridItemAttribute, ArkGridItemPeer } from './component/gridItem'
 import { WaterFlowOptions, WaterFlowAttribute, ArkWaterFlowPeer } from './component/waterFlow'
 import { FlowItemAttribute, ArkFlowItemPeer } from './component/flowItem'
-import { ColumnOptions, ColumnAttribute, ArkColumnPeer } from './component/column'
-import { RowOptions, RowAttribute, ArkRowPeer } from './component/row'
+import { ColumnOptions, ColumnOptionsV2, ColumnAttribute, ArkColumnPeer } from './component/column'
+import { RowOptions, RowOptionsV2, RowAttribute, ArkRowPeer } from './component/row'
 import { StackOptions, StackAttribute, ArkStackPeer } from './component/stack'
 import { FlexOptions, FlexAttribute, ArkFlexPeer } from './component/flex'
 import { RelativeContainerAttribute, ArkRelativeContainerPeer } from './component/relativeContainer'
@@ -120,9 +117,11 @@ import { BusinessError } from '#external';
 import { Resource } from 'global.resource';
 import { ElementIdToCustomProperties } from "#handwritten"
 import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
-import { FrameNodeExtender } from './framework';
+import { FrameNodeExtender, SizeTLengthMetrics, NodeEdgesLengthMetrics } from './framework';
 import { extractors } from "#handwritten";
+import { PeerNode } from './PeerNode';
 import hilog from '@ohos.hilog';
+import { Vector2 } from "./Graphics.ets"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -159,18 +158,18 @@ export class FrameNodeInternal {
     }
 }
 
-// @ts-ignore
-function GetExactRetValue(data: KSerializerBuffer | KUint8ArrayPtr): Array<byte> {
-    // @ts-ignore
-    const retval = data as FixedArray<byte>;
-    // @ts-ignore
-    let exactRetValue: byte[] = new Array<byte>();
-    for (let i = 0; i < retval.length; i++) {
-        // @ts-ignore
-        exactRetValue.push(new Byte(retval[i]));
-    }
-    return exactRetValue;
-}
+const ERROR_CODE_NODE_IS_ADOPTED = 106206;
+const ERROR_CODE_NODE_HAS_PARENT = 106207;
+const ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208;
+const ERROR_CODE_NODE_CAN_NOT_ADOPT_TO = 106209;
+const ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN = 106210;
+
+const errorMap_: Map<number, string> = new Map<number, string>();
+errorMap_.set(ERROR_CODE_NODE_IS_ADOPTED, "The parameter 'child' is invalid: the node has already been adopted.");
+errorMap_.set(ERROR_CODE_NODE_HAS_PARENT, "The parameter 'child' is invalid: the child already has a parent node.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED, "The parameter 'child' is invalid: the node cannot be adopted.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the node cannot adopt children.');
+errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
 
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
@@ -205,9 +204,7 @@ export class FrameNode implements MaterializedBase {
     get gestureEvent(): UIGestureEvent {
         if (this._gestureEvent === undefined) {
             this._gestureEvent = new UIGestureEvent();
-            const retval = FrameNodeExtender.getFrameNodePtr(this)
-            let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
-            // this._gestureEvent!.setPeer(peer);
+            this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this.peer!.ptr as KPointer));
         }
         return this._gestureEvent as UIGestureEvent;
     }
@@ -224,14 +221,14 @@ export class FrameNode implements MaterializedBase {
                 return;
             }
             if (this.getType() === 'BuilderRootFrameNode') {
-                // this.renderNode_ = new RenderNode(this.getType());
-                // this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
+                this.renderNode_ = new RenderNode(this.getType());
+                this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
                 return;
             }
             const instanceId = this.instanceId_!.toInt();
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             if (this.getType() === undefined || this.getType() === "CustomFrameNode") {
-                // this.renderNode_ = new RenderNode('CustomFrameNode')
+                this.renderNode_ = new RenderNode('CustomFrameNode')
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
@@ -240,15 +237,15 @@ export class FrameNode implements MaterializedBase {
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
                 this.nodePtr_ = this.peer?.ptr
             }
-            // this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
+            this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
             if (this.renderNode_ && this.getType() === "CustomFrameNode") {
-                // this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
+                this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
             }
             this._nodeId = FrameNodeExtender.getIdByFrameNode(this.peer!.ptr);
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
             ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
-            // ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
+            ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
         }
     }
     static getFinalizer(): KPointer {
@@ -262,8 +259,12 @@ export class FrameNode implements MaterializedBase {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
-        const node_casted = node as (FrameNode)
-        FrameNodeExtender.appendChild(this, node_casted)
+        const node_casted = node as (FrameNode);
+        let flag = FrameNodeExtender.appendChild(this, node_casted);
+        if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error("The parameter 'node' is invalid: the node has already been adopted.");
+            throw new BusinessError(100025, error);
+        }
         return
     }
     public addComponentContent<T = undefined>(content: ComponentContent<T>) {
@@ -306,10 +307,15 @@ export class FrameNode implements MaterializedBase {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
+        let flag: number = 0;
         if (sibling === null || sibling === undefined) {
-            FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), nullptr);
+            flag = FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), nullptr);
         } else {
-            FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), toPeerPtr(sibling!));
+            flag = FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), toPeerPtr(sibling!));
+        }
+        if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error("The parameter 'child' is invalid: the node has already been adopted.");
+            throw new BusinessError(100025, error);
         }
         return
     }
@@ -430,7 +436,7 @@ export class FrameNode implements MaterializedBase {
             this.peer?.close();
         }
         this.nodePtr_ = undefined;
-        // this.renderNode_?.resetNodePtr();
+        this.renderNode_?.resetNodePtr();
     }
     public resetNodePtr(): void {
         if (this.peer?.ptr) {
@@ -441,58 +447,54 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getOpacity(this);
     }
     public getPositionToWindowWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToWindowWithTransform(this);
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToWindowWithTransform(this);
     }
     public getPositionToParent(): NodePosition {
-        // return FrameNodeExtender.getPositionToParent(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToParent(this);
     }
     public getPositionToScreen(): NodePosition {
-        // return FrameNodeExtender.getPositionToScreen(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToScreen(this);
     }
     public getPositionToWindow(): NodePosition {
-        // return FrameNodeExtender.getPositionToWindow(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToWindow(this);
     }
     public getPositionToParentWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToParentWithTransform(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToParentWithTransform(this);
     }
     public getPositionToScreenWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToScreenWithTransform(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToScreenWithTransform(this);
     }
     public getMeasuredSize(): Size {
         return FrameNodeExtender.getMeasuredSize(this)
     }
     public getLayoutPosition(): NodePosition {
-        // return FrameNodeExtender.getLayoutPosition(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getLayoutPosition(this);
     }
    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigBorderWidth()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics };
+        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigBorderWidth(this);
+        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
+          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
+        return result;
     }
     public getUserConfigPadding(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigPadding()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics }
+        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigPadding(this);
+        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
+          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
+        return result;
     }
     public getUserConfigMargin(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigMargin()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics }
+        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigMargin(this);
+        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
+          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
+        return result;
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigSize()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { width: lengthMetrics, height: lengthMetrics }
+        let sizeTLengthMetrics: SizeTLengthMetrics = FrameNodeExtender.getUserConfigSize(this);
+        let result: SizeT<LengthMetrics> = {
+            width: sizeTLengthMetrics.width,
+            height: sizeTLengthMetrics.height
+        };
+        return result;
     }
     public getId(): string {
         return FrameNodeExtender.getId(this);
@@ -540,8 +542,7 @@ export class FrameNode implements MaterializedBase {
         return;
     }
     public setLayoutPosition(position: NodePosition): void {
-        // const position_casted = position as (NodePosition);
-        // FrameNodeExtender.setLayoutPosition_serialize(this, position_casted);
+        FrameNodeExtender.setLayoutPosition(this, position);
         return;
     }
     public measure(constraint: LayoutConstraint): void {
@@ -553,10 +554,9 @@ export class FrameNode implements MaterializedBase {
         return;
     }
     public layout(position: NodePosition): void {
-        const position_casted = position as (NodePosition);
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-        // FrameNodeExtender.layout_serialize(this, position_casted);
+        FrameNodeExtender.layout(this, position);
         ArkUIAniModule._Common_Restore_InstanceId();
         return;
     }
@@ -592,6 +592,46 @@ export class FrameNode implements MaterializedBase {
     public isTransferred(): boolean {
         return false;
     }
+    adoptChild(child: FrameNode): void{
+    if (child === undefined || child === null) {
+        return;
+    }
+    if (!this.checkValid(this) || !this.isModifiable()) {
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    if (!child.checkValid(this) || !child.isModifiable()) {
+        const error = Error('The child node is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    const child_casted = child as (FrameNode);
+    let result = FrameNodeExtender.adoptChild(this, child_casted);
+    let errorInfo = errorMap_.get(result);
+    if (errorInfo !== undefined) {
+        const error = Error(errorInfo);
+        throw new BusinessError(100025, error);
+    }
+  }
+    removeAdoptedChild(child: FrameNode): void {
+    if (child === undefined || child === null) {
+      return;
+    }
+    if (!this.checkValid(this) || !this.isModifiable()) {
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    if (!child.checkValid(this) || !child.isModifiable()) {
+        const error = Error('The child node is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    const child_casted = child as (FrameNode);
+    let result = FrameNodeExtender.removeAdoptedChild(this, child_casted);
+    let errorInfo = errorMap_.get(result);
+    if (errorInfo !== undefined) {
+        const error = Error(errorInfo);
+        throw new BusinessError(100025, error);
+    }
+  }
     private getCommonEvent(): UICommonEvent {
         return FrameNodeExtender.getCommonEvent(this);
     }
@@ -613,7 +653,11 @@ export class FrameNode implements MaterializedBase {
             throw new BusinessError(100021, error);
         }
         const targetParent_casted = targetParent as (FrameNode);
-        FrameNodeExtender.moveTo(this, targetParent_casted, index_casted);
+        let result = FrameNodeExtender.moveTo(this, targetParent_casted, index_casted);
+        if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error('The current node has already been adopted.');
+            throw new BusinessError(100027, error);
+        }
         return;
     }
 
@@ -677,7 +721,7 @@ export class FrameNode implements MaterializedBase {
         }
         return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
     }
-    public convertPoint(position: NodePosition, targetNode: FrameNode): NodePosition {
+    public convertPosition(position: NodePosition, targetNode: FrameNode): NodePosition {
         if (targetNode === null) {
             const error = Error("The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.");
             throw new BusinessError(100025, error);
@@ -706,6 +750,9 @@ export class FrameNode implements MaterializedBase {
         const x = chanels[1];
         const y = chanels[2];
         return { x: x, y: y } as NodePosition;
+    }
+    public isInRenderState(): boolean {
+        return FrameNodeExtender.isOnRenderTree(this);
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -761,7 +808,7 @@ export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
         this.peer = new Finalizable(ptr!, FrameNode.getFinalizer());
         this.nodePtr_ = this.peer?.ptr;
         if (this.renderNode_) {
-            // this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(ptr), RenderNode.getFinalizer());
+            this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(ptr), RenderNode.getFinalizer());
         }
     }
     getType(): string {
@@ -887,7 +934,7 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkColumnNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: ColumnOptions): ColumnAttribute {
+        initialize(options: ColumnOptions | ColumnOptionsV2): ColumnAttribute {
             let arkColumnNode = this.attribute as ArkColumnNode;
             return arkColumnNode!.initialize(options);
         }
@@ -897,7 +944,7 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRowNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: RowOptions): RowAttribute {
+        initialize(options: RowOptions | RowOptionsV2): RowAttribute {
             let arkRowNode = this.attribute as ArkRowNode;
             return arkRowNode!.initialize(options);
         }
@@ -957,9 +1004,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkBlankNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(): BlankAttribute {
+        initialize(min: double | string): BlankAttribute {
             let arkBlankNode = this.attribute as ArkBlankNode;
-            return arkBlankNode!.initialize();
+            return arkBlankNode!.initialize(min);
         }
     }
 
@@ -1521,7 +1568,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createSwiperNode(context: UIContext, type: string): SwiperFrameNode {
+    function createSwiperNode(context: UIContext): SwiperFrameNode {
         return new SwiperFrameNode(context, 'Swiper', (node: FrameNode, type: ModifierType): ArkSwiperNode => {
             let arknode = new ArkSwiperNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1713,7 +1760,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createButtonNode(context: UIContext, type: 'Button'): ButtonFrameNode {
+    export function createButtonNode(context: UIContext): ButtonFrameNode {
         return new ButtonFrameNode(context, 'Button', (node: FrameNode, type: ModifierType): ArkButtonNode => {
             let arknode = new ArkButtonNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1724,7 +1771,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createCheckboxNode(context: UIContext, type: string): CheckboxFrameNode {
+    export function createCheckboxNode(context: UIContext): CheckboxFrameNode {
         return new CheckboxFrameNode(context, 'Checkbox', (node: FrameNode, type: ModifierType): ArkCheckboxNode => {
             let arknode = new ArkCheckboxNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1735,7 +1782,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createCheckboxGroupNode(context: UIContext, type: string): CheckboxGroupFrameNode {
+    export function createCheckboxGroupNode(context: UIContext): CheckboxGroupFrameNode {
         return new CheckboxGroupFrameNode(context, 'CheckboxGroup', (node: FrameNode, type: ModifierType): ArkCheckboxGroupNode => {
             let arknode = new ArkCheckboxGroupNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1746,7 +1793,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRadioNode(context: UIContext, type: string): RadioFrameNode {
+    export function createRadioNode(context: UIContext): RadioFrameNode {
         return new RadioFrameNode(context, 'Radio', (node: FrameNode, type: ModifierType): ArkRadioNode => {
             let arknode = new ArkRadioNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1757,7 +1804,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRatingNode(context: UIContext, type: string): RatingFrameNode {
+    export function createRatingNode(context: UIContext): RatingFrameNode {
         return new RatingFrameNode(context, 'Rating', (node: FrameNode, type: ModifierType): ArkRatingNode => {
             let arknode = new ArkRatingNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1768,7 +1815,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createSelectNode(context: UIContext, type: string): SelectFrameNode {
+    export function createSelectNode(context: UIContext): SelectFrameNode {
         return new SelectFrameNode(context, 'Select', (node: FrameNode, type: ModifierType): ArkSelectNode => {
             let arknode = new ArkSelectNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1779,7 +1826,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createSliderNode(context: UIContext, type: string): SliderFrameNode {
+    export function createSliderNode(context: UIContext): SliderFrameNode {
         return new SliderFrameNode(context, 'Slider', (node: FrameNode, type: ModifierType): ArkSliderNode => {
             let arknode = new ArkSliderNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1790,7 +1837,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createToggleNode(context: UIContext, type: string, options?: ToggleOptions): ToggleFrameNode {
+    export function createToggleNode(context: UIContext, options?: ToggleOptions): ToggleFrameNode {
         let toggleNode = new ToggleFrameNode(context, 'Toggle', (node: FrameNode, type: ModifierType): ArkToggleNode => {
             let arknode = new ArkToggleNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

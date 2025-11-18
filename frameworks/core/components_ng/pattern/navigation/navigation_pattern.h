@@ -80,6 +80,7 @@ public:
     void UpdateColorModeForNodes(const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
 
     void OnLanguageConfigurationUpdate() override;
+    void OnDpiConfigurationUpdate() override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -281,6 +282,11 @@ public:
     void SetIfNeedInit(bool ifNeedInit)
     {
         ifNeedInit_ = ifNeedInit;
+    }
+
+    void SetStartTime(int64_t startTime)
+    {
+        startTime_ = startTime;
     }
 
     void UpdateContextRect(
@@ -606,6 +612,11 @@ public:
     {
         return isTopFullScreenPage_;
     }
+    
+    bool CheckNeedInitRangeCalculation(SizeF& newSize)
+    {
+        return newSize != navigationSize_;
+    }
 private:
     void UpdateCanForceSplitLayout(const SizeF& frameSize);
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
@@ -736,12 +747,13 @@ private:
         std::vector<WeakPtr<NavDestinationNodeBase>>& invisibleNodes,
         std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void OnAllTransitionAnimationFinish();
+    void SetRequestedOrientationIfNeeded();
     void UpdatePageLevelConfigForSizeChanged();
     void UpdatePageLevelConfigForSizeChangedWhenNoAnimation();
     RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
     void HideSystemBarIfNeeded();
     void ShowOrRestoreSystemBarIfNeeded();
-    bool IsEquivalentToStackMode();
+    bool IsRealStackDisplay();
     void ClearPageAndNavigationConfig();
     bool CustomizeExpandSafeArea() override;
 
@@ -788,6 +800,7 @@ private:
     void FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle);
     RefPtr<NavDestinationContext> GetHomeDestinationContext();
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
+    void TriggerPerformanceCheck(const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath);
 
     //-------for force split------- begin------
     bool IsNavBarValid();
@@ -799,6 +812,8 @@ private:
     void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
         const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
     void NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames);
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -817,6 +832,7 @@ private:
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;
     bool ifNeedInit_ = true;
+    int64_t startTime_ = 0;
     float preNavBarWidth_ = 0.0f;
     float realNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
     float initNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
@@ -862,8 +878,9 @@ private:
 
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
-    bool isTransitionAnimationAborted_ = false;
+    bool windowSizeChangedDuringTransition_ = false;
     bool enableVisibilityLifecycleWithContentCover_ = true;
+    bool enableLockOrientation_ = false;
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;

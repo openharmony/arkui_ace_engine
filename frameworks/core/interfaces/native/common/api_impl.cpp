@@ -94,6 +94,7 @@ void SetCustomNodeDestroyCallback(void (*destroy)(Ark_NodeHandle nodeId))
 Ark_NodeHandle GetNodeByViewStack()
 {
     auto node = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_RETURN(node, nullptr);
     node->IncRefCount();
     return reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(node));
 }
@@ -237,7 +238,14 @@ void ApplyModifierFinish(Ark_NodeHandle nodePtr)
     auto* frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     if (frameNode) {
         frameNode->MarkModifyDone();
-        frameNode->MarkDirtyNode();
+        /*
+         * Two conditions for MarkDirtyNode:
+         * 1. if node is not TabContent
+         * 2. if node is TabContent and it should be on the main tree.
+         */
+        if (frameNode->IsOnMainTree() || frameNode->GetTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {
+            frameNode->MarkDirtyNode();
+        }
     }
 }
 

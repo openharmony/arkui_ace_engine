@@ -39,6 +39,7 @@ struct Parent {
       PageController.registerPages([
         'pages/v1_tests',
         'pages/v2_tests',
+        'pages/repeat_tests',
         // Add more pages if needed
       ])
       PageController.start(this.reportFinal)

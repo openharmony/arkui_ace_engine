@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ressched_report.h"
 #include "ressched_touch_optimizer.h"
 
 #include "base/log/ace_trace.h"
@@ -37,6 +38,10 @@ namespace {
     constexpr double THRESHOLD_OFFSET_VALUE = 2.0;
     // Coefficient for TP use end calculation
     constexpr double TP_USE_END_COEFFICIENT = 0.6;
+    // Vsync frequencies above 90Hz are disabled, which is 11.1ms
+    constexpr int64_t THRESHOLD_FOR_TPFLUSH_VSYNC_PERIOD = 12 * 1000 * 1000;
+    // 1ms
+    constexpr int64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
     // Direction enum for RVS detection
     enum RVS_DIRECTION : int32_t {
         RVS_NOT_APPLY = 0,      // No reverse signal
@@ -75,16 +80,12 @@ namespace {
 
 namespace OHOS::Ace {
 
-/*
- * Get the singleton instance of ResSchedTouchOptimizer.
- *
- * Returns:
- *     Reference to the ResSchedTouchOptimizer instance for the current thread.
- */
-ResSchedTouchOptimizer& ResSchedTouchOptimizer::GetInstance()
+ResSchedTouchOptimizer::ResSchedTouchOptimizer()
 {
-    thread_local ResSchedTouchOptimizer instance;
-    return instance;
+}
+
+ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
+{
 }
 
 /*
@@ -99,27 +100,19 @@ void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
 }
 
 /*
- * Set whether the last frame was triggered by TP flush.
+ * Set the timestamp of the last Vsync signal.
  *
  * Parameters:
- *     lastTpFlush [in] Whether the last frame was triggered by TP flush.
+ *     lastVsyncTimeStamp [in] Timestamp of the last Vsync signal.
  */
-void ResSchedTouchOptimizer::SetLastTpFlush(bool lastTpFlush)
+void ResSchedTouchOptimizer::SetLastVsyncTimeStamp(uint64_t lastVsyncTimeStamp)
 {
-    lastTpFlush_ = lastTpFlush;
+    if (!vsyncTimeReportExemption_) {
+        vsyncFlushed_ = true;
+        lastVsyncTimeStamp_ = lastVsyncTimeStamp;
+    }
+    vsyncTimeReportExemption_ = false;
 }
-
-/*
- * Set the VSync count of the last TP flush.
- *
- * Parameters:
- *     lastVsyncCount [in] The VSync count when the last TP flush occurred.
- */
-void ResSchedTouchOptimizer::SetLastTpFlushCount(uint32_t lastVsyncCount)
-{
-    lastTpFlushCount_ = lastVsyncCount;
-}
-
 
 /*
  * Set slide direction from pan gesture
@@ -132,46 +125,54 @@ void ResSchedTouchOptimizer::SetSlideDirection(int32_t slideDirection)
     slideDirection_ = slideDirection;
 }
 
-/*
- * Check if TP flush is needed for the current VSync.
- *
- * Parameters:
- *     touchEvent [in] The current touch event.
- *     currentVsyncCount [in] The current VSync count.
- *
- * Returns:
- *     true if TP flush is needed, false otherwise.
- */
-bool ResSchedTouchOptimizer::NeedTpFlushVsync(TouchEvent touchEvent, uint32_t currentVsyncCount)
+bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
+{
+    isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    bool result = NeedTpFlushVsyncInner(touchEvent);
+    if (isTpFlushFrameDisplayPeriod_ && !result) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end");
+        ACE_SCOPED_TRACE("TpFlush end");
+        isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    }
+    isTpFlushFrameDisplayPeriod_ = result;
+    vsyncFlushed_ = false;
+    return result;
+}
+
+bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
 {
     // RVS is disabled
     if (!RVSEnableCheck()) {
         return false;
     }
+    
+    // if hisAvgPointTimeStamp_ is zero, will case resample fail.
+    if (hisAvgPointTimeStamp_ == 0) {
+        return false;
+    }
+
     // Non-touch events are not processed
     if (touchEvent.sourceTool != SourceTool::FINGER) {
         return false;
     }
     // If slide is not accepted, trigger TP flush for the first frame
     if (!slideAccepted_) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "slide first frame scene");
-        ACE_SCOPED_TRACE("slide first frame scene");
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
+        ACE_SCOPED_TRACE("TpFlush first frame");
         return true;
     }
-    // If last frame was TP triggered and current VSync count differs,
+    // If last frame was TP triggered and current Vsync count differs,
     // trigger TP flush to avoid frame drop
-    if (lastTpFlushCount_ != 0 && lastTpFlushCount_ != currentVsyncCount) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "reversed and need tp flush");
-        ACE_SCOPED_TRACE("reversed and need tp flush");
+    if (lastTpFlush_ && vsyncFlushed_) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush continue");
+        ACE_SCOPED_TRACE("TpFlush continue");
         return true;
-    } else {
-        lastTpFlushCount_ = 0;
     }
     // If current direction is reversed and last frame wasn't TP triggered,
     // trigger TP flush to avoid frame drop
     if (!lastTpFlush_ && (RVSDirectionStateCheck(touchEvent.xReverse) || RVSDirectionStateCheck(touchEvent.yReverse))) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "slide reversed");
-        ACE_SCOPED_TRACE("slide reversed");
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush reversed");
+        ACE_SCOPED_TRACE("TpFlush reversed");
         return true;
     }
     return false;
@@ -217,7 +218,7 @@ void ResSchedTouchOptimizer::RVSQueueUpdate(std::list<TouchEvent>& touchEvents)
             if (rvsDequeX_[iter.id].size() >= RVS_QUEUE_SIZE) {
                 rvsDequeX_[iter.id].pop_front();
                 const int32_t axis = RVS_AXIS::RVS_AXIS_X;
-                RVSPointCheckWithSignal(iter, axis) || RVSPointCheckWithoutSignal(iter, axis);
+                RVSPointCheckWithoutSignal(iter, axis);
             }
         }
 
@@ -228,7 +229,7 @@ void ResSchedTouchOptimizer::RVSQueueUpdate(std::list<TouchEvent>& touchEvents)
             if (rvsDequeY_[iter.id].size() >= RVS_QUEUE_SIZE) {
                 rvsDequeY_[iter.id].pop_front();
                 const int32_t axis = RVS_AXIS::RVS_AXIS_Y;
-                RVSPointCheckWithSignal(iter, axis) || RVSPointCheckWithoutSignal(iter, axis);
+                RVSPointCheckWithoutSignal(iter, axis);
             }
         }
     }
@@ -420,7 +421,7 @@ void ResSchedTouchOptimizer::DispatchPointSelect(bool resampleEnable, TouchEvent
         resultPoint.y = resultValue;
     }
     UpdateDptHistory(resultPoint);
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck finally touchEvents.x = %{public}s touchEvents.y = %{public}s",
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck finally touchEvents.x = %s touchEvents.y = %s",
         std::to_string(resultPoint.x).c_str(), std::to_string(resultPoint.y).c_str());
 }
 
@@ -442,57 +443,7 @@ bool ResSchedTouchOptimizer::RVSEnableCheck()
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
-    return rvsEnable_;
-}
-
-/*
- * Select single point with direction reversal from touch events list.
- *
- * Parameters:
- *     touchEvents [in/out] List of touch events to process.
- */
-void ResSchedTouchOptimizer::SelectSinglePoint(std::list<TouchEvent>& touchEvents)
-{
-    if (!RVSEnableCheck()) {
-        return;
-    }
-
-    // Group points by ID
-    std::map<int, std::list<TouchEvent>> groupedPoints;
-    for (const auto& point : touchEvents) {
-        if (point.sourceTool != SourceTool::FINGER) {
-            return;
-        }
-        groupedPoints[point.id].push_back(point);
-    }
-    
-    std::list<TouchEvent> selectedPoints;
-    // Process each group
-    for (auto& pointGroup : groupedPoints) {
-        auto& points = pointGroup.second;
-        TouchEvent selectedPoint;
-        bool foundReverse = false;
-
-        // Find point with direction reversal
-        for (auto& point : points) {
-            if (point.xReverse != 0 || point.yReverse != 0) {
-                selectedPoint = point;
-                foundReverse = true;
-                break;
-            }
-        }
-
-        // If no reversal found, use the last point
-        if (!foundReverse && !points.empty()) {
-            selectedPoint = points.back();
-        }
-        // Add selected point to result if reversal was found
-        if (foundReverse && !points.empty()) {
-            selectedPoints.push_back(selectedPoint);
-        }
-    }
-    touchEvents.clear();
-    touchEvents = std::move(selectedPoints);
+    return rvsEnable_ && vsyncPeriod_  <= THRESHOLD_FOR_TPFLUSH_VSYNC_PERIOD;
 }
 
 /*
@@ -736,5 +687,95 @@ bool ResSchedTouchOptimizer::RVSDirectionStateCheck(uint32_t rvsDirection)
 {
     return static_cast<int32_t>(rvsDirection) == RVS_DIRECTION::RVS_DOWN_LEFT ||
         static_cast<int32_t>(rvsDirection) == RVS_DIRECTION::RVS_UP_RIGHT;
+}
+
+void ResSchedTouchOptimizer::SetVsyncPeriod(uint64_t vsyncPeriod)
+{
+    vsyncPeriod_ = vsyncPeriod;
+}
+
+bool ResSchedTouchOptimizer::GetIsTpFlushFrameDisplayPeriod() const
+{
+    return isTpFlushFrameDisplayPeriod_;
+}
+
+bool ResSchedTouchOptimizer::GetIsFirstFrameAfterTpFlushFrameDisplayPeriod() const
+{
+    return isFristFrameAfterTpFlushFrameDisplayPeriod_;
+}
+
+void ResSchedTouchOptimizer::SetHisAvgPointTimeStamp(const int32_t pointId,
+    const std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById)
+{
+    uint64_t avgTime = 0;
+    int32_t i = 0;
+    uint64_t lastTime = 0;
+    
+    if (historyPointsById.find(pointId) == historyPointsById.end()) {
+        hisAvgPointTimeStamp_ = 0;
+        return;
+    }
+
+    for (auto iter = historyPointsById.at(pointId).begin(); iter != historyPointsById.at(pointId).end(); iter++) {
+        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
+            avgTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
+            i++;
+            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        }
+    }
+    if (i > 0) {
+        avgTime /= static_cast<uint64_t>(i);
+    }
+    hisAvgPointTimeStamp_ = avgTime;
+}
+
+uint64_t ResSchedTouchOptimizer::FineTuneTimeStampDuringTpFlushPeriod(uint64_t timeStamp)
+{
+    uint64_t fictionalVsyncTime = timeStamp;
+    if (hisAvgPointTimeStamp_ != 0) {
+        fictionalVsyncTime = fictionalVsyncTime - vsyncPeriod_ + ONE_MS_IN_NS > hisAvgPointTimeStamp_
+            ? fictionalVsyncTime : hisAvgPointTimeStamp_ + vsyncPeriod_;
+    }
+    lastTpFlush_ = true;
+    vsyncTimeReportExemption_ = true;
+    return fictionalVsyncTime;
+}
+
+void ResSchedTouchOptimizer::FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(const int32_t pointId,
+    std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById)
+{
+    if (isFristFrameAfterTpFlushFrameDisplayPeriod_ && hisAvgPointTimeStamp_ !=  0 && lastVsyncTimeStamp_ != 0 &&
+        lastVsyncTimeStamp_ + ONE_MS_IN_NS <= hisAvgPointTimeStamp_ &&
+        historyPointsById.find(pointId) != historyPointsById.end()) {
+            std::chrono::nanoseconds newTimeStamp(lastVsyncTimeStamp_);
+            historyPointsById.at(pointId).back().time = std::chrono::high_resolution_clock::time_point(newTimeStamp);
+    }
+    lastTpFlush_ = false;
+    vsyncTimeReportExemption_ = false;
+}
+
+TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point)
+{
+    if (RVSEnableCheck()) {
+        std::list<TouchEvent> touchEvents;
+        touchEvents.push_back(point);
+        RVSQueueUpdate(touchEvents);
+        return std::move(touchEvents.back());
+    }
+    return point;
+}
+
+void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+{
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
+    ACE_SCOPED_TRACE("TpFlush end by up event");
+    lastTpFlush_ = false;
+    vsyncPeriod_ = 0;
+    lastVsyncTimeStamp_ = 0;
+    hisAvgPointTimeStamp_ = 0;
+    vsyncTimeReportExemption_ = false;
+    vsyncFlushed_ = false;
+    isTpFlushFrameDisplayPeriod_ = false;
+    isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
 }
 }

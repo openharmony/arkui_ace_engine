@@ -5435,4 +5435,37 @@ HWTEST_F(ListCommonTestNg, JudgeFocusDependence001, TestSize.Level1)
     pattern_->OnModifyDone();
     ASSERT_EQ(focusHub->GetFocusDependence(), FocusDependence::CHILD);
 }
+
+/**
+ * @tc.name: CAPIListChildrenMainSizeTest001
+ * @tc.desc: Test CAPI ListChildrenMainSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CAPIListChildrenMainSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with ListChildrenMainSize
+     */
+    ListModelNG model = CreateList();
+    // Set children main size: 100.0f, 200.0f, 150.0f, 250.0f, 300.0f
+    std::vector<float> sizeArr = { 100.0f, 200.0f, 150.0f, 250.0f, 300.0f };
+    size_t tmpSize = sizeArr.size();
+    const float* srcData = sizeArr.data();
+    float defaultSize = 100.0f;
+    auto childrenSize = AceType::MakeRefPtr<ListChildrenMainSize>(std::move(sizeArr), defaultSize);
+    model.SetListChildrenMainSize(AceType::RawPtr(frameNode_), childrenSize);
+    CreateListItems(5);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Check children main size
+     * @tc.expected: sizeArr is empty, childrenSize_ in pattern is set correctly.
+     */
+    EXPECT_TRUE(sizeArr.empty());
+    EXPECT_EQ(pattern_->childrenSize_, childrenSize);
+    EXPECT_EQ(pattern_->childrenSize_->childrenSize_.size(), tmpSize);
+    EXPECT_EQ(pattern_->childrenSize_->defaultSize_, defaultSize);
+    const float* destData = pattern_->childrenSize_->childrenSize_.data();
+    EXPECT_EQ(destData, srcData);
+}
 } // namespace OHOS::Ace::NG

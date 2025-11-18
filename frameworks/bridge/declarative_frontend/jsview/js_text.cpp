@@ -496,10 +496,10 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     JSRef<JSVal> args = info[0];
 
+    UnRegisterResource("TextIndent");
     if (!ParseJsDimensionFpNG(args, value, resObj)) {
         value.Reset();
         TextModel::GetInstance()->SetTextIndent(value);
-        UnRegisterResource("TextIndent");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -562,10 +562,10 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
 
+    UnRegisterResource("LineHeight");
     if (!ParseJsDimensionFpNG(args, value, resObj)) {
         value.Reset();
         TextModel::GetInstance()->SetLineHeight(value);
-        UnRegisterResource("LineHeight");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -691,10 +691,10 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
     CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("AdaptMinFontSize");
     if (!ParseJsDimensionFpNG(args, minFontSize, resObj, false)) {
         minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
         TextModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
-        UnRegisterResource("AdaptMinFontSize");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -718,10 +718,10 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
     CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("AdaptMaxFontSize");
     if (!ParseJsDimensionFpNG(args, maxFontSize, resObj, false)) {
         maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
         TextModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
-        UnRegisterResource("AdaptMaxFontSize");
         return;
     }
     if (maxFontSize.IsNegative()) {
@@ -766,10 +766,10 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("BaselineOffset");
     if (!ParseJsDimensionFpNG(args, value, resObj, false)) {
         value.Reset();
         TextModel::GetInstance()->SetBaselineOffset(value);
-        UnRegisterResource("BaselineOffset");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -1296,6 +1296,7 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
         return;
     }
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
+    UnRegisterResource("ColorShaderStyle");
     if (shaderStyleObj->HasProperty("options")) {
         auto optionsValue = shaderStyleObj->GetProperty("options");
         if (optionsValue->IsObject()) {
@@ -1310,8 +1311,15 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
     } else if (shaderStyleObj->HasProperty("color")) {
         Color textColor;
+        RefPtr<ResourceObject> resObj;
         auto infoColor = shaderStyleObj->GetProperty("color");
-        ParseJsColor(infoColor, textColor);
+        if (!ParseJsColor(infoColor, textColor, resObj)) {
+            TextModel::GetInstance()->ResetGradientShaderStyle();
+            return;
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<Color>("ColorShaderStyle", resObj, textColor);
+        }
         TextModel::GetInstance()->SetColorShaderStyle(textColor);
     } else {
         TextModel::GetInstance()->ResetGradientShaderStyle();
@@ -1400,7 +1408,6 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("enableSelectedDataDetector", &JSText::SetSelectDetectEnable);
-    JSClass<JSText>::StaticMethod("selectedDataDetectorConfig", &JSText::SetSelectDetectConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);

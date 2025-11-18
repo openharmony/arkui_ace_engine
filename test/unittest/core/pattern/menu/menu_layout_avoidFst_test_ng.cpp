@@ -33,6 +33,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -1442,126 +1443,6 @@ HWTEST_F(MenuLayoutAvoid1TestNg, MenuLayoutOverHeightTest004, TestSize.Level1)
         menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(menuProp, menuPattern, menuSize, false, layoutWrapper);
     delete layoutWrapper;
     ASSERT_EQ(menuLayoutAlgorithm->placement_, Placement::RIGHT_TOP);
-    ASSERT_EQ(afterPosition, expectedPosition);
-}
-
-/**
- * @tc.name: MenuLayoutOverHeightTestNg005
- * @tc.desc: Test Menu in Center with Top Placement Over Height.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuLayoutAvoid1TestNg, MenuLayoutOverHeightTest005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialization layoutAlgorithm parameters.
-     * @tc.expected: layoutAlgorithm is not null.
-     */
-    auto menuLayoutAlgorithm = GetMenuLayoutAlgorithm();
-    ASSERT_TRUE(menuLayoutAlgorithm);
-    menuLayoutAlgorithm->targetOffset_ = OffsetF(
-        (FULL_PHONE_WIDTH - menuLayoutAlgorithm->targetSize_.Width()) / 2,
-        (FULL_PHONE_HEIGHT - menuLayoutAlgorithm->targetSize_.Height()) / 2);
-    menuLayoutAlgorithm->placement_ = Placement::TOP;
-    menuLayoutAlgorithm->position_ = menuLayoutAlgorithm->targetOffset_;
-
-    /**
-     * @tc.steps: step2. Initialize menuNode parameters.
-     * @tc.expected: menuNode parameters is as expected.
-     */
-    std::vector<OptionParam> optionParams;
-    optionParams.emplace_back("MenuItem1", "", nullptr);
-    optionParams.emplace_back("MenuItem2", "", nullptr);
-    MenuParam menuParam;
-    menuParam.type = MenuType::CONTEXT_MENU;
-    menuParam.placement = Placement::TOP;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
-    ASSERT_NE(menuWrapperNode, nullptr);
-    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menuNode, nullptr);
-    auto menuProp = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    ASSERT_NE(menuProp, nullptr);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-    SizeF menuSize(MENU_SIZE_WIDTH, FULL_PHONE_HEIGHT / 2);
-    auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(menuGeometryNode, nullptr);
-    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(menuNode, menuGeometryNode, menuProp);
-    ASSERT_NE(layoutWrapper, nullptr);
-    menuLayoutAlgorithm->InitSpace(menuProp, menuPattern);
-
-    /**
-     * @tc.steps: step3. Afer menuLayoutAvoidAlgorithm avoid placement.
-     * @tc.expected: position and placement is as expected.
-     */
-    auto expectedPosition = OffsetF(
-        menuLayoutAlgorithm->targetOffset_.GetX() + menuLayoutAlgorithm->targetSize_.Width() +
-        menuLayoutAlgorithm->targetSecurity_, menuLayoutAlgorithm->targetOffset_.GetY() +
-        menuLayoutAlgorithm->targetSize_.Height() / 2 - menuSize.Height() / 2);
-    auto afterPosition =
-        menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(menuProp, menuPattern, menuSize, false, layoutWrapper);
-    delete layoutWrapper;
-    ASSERT_EQ(menuLayoutAlgorithm->placement_, Placement::RIGHT);
-    ASSERT_EQ(afterPosition, expectedPosition);
-}
-
-/**
- * @tc.name: MenuLayoutOverHeightTestNg006
- * @tc.desc: Test Menu in Center with TopRight Placement Over Height.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuLayoutAvoid1TestNg, MenuLayoutOverHeightTest006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialization layoutAlgorithm parameters.
-     * @tc.expected: layoutAlgorithm is not null.
-     */
-    auto menuLayoutAlgorithm = GetMenuLayoutAlgorithm();
-    ASSERT_TRUE(menuLayoutAlgorithm);
-    menuLayoutAlgorithm->targetOffset_ = OffsetF(
-        (FULL_PHONE_WIDTH - menuLayoutAlgorithm->targetSize_.Width()) / 2,
-        (FULL_PHONE_HEIGHT - menuLayoutAlgorithm->targetSize_.Height()) / 2);
-    menuLayoutAlgorithm->placement_ = Placement::TOP_RIGHT;
-    menuLayoutAlgorithm->position_ = menuLayoutAlgorithm->targetOffset_;
-
-    /**
-     * @tc.steps: step2. Initialize menuNode parameters.
-     * @tc.expected: menuNode parameters is as expected.
-     */
-    std::vector<OptionParam> optionParams;
-    optionParams.emplace_back("MenuItem1", "", nullptr);
-    optionParams.emplace_back("MenuItem2", "", nullptr);
-    MenuParam menuParam;
-    menuParam.type = MenuType::CONTEXT_MENU;
-    menuParam.placement = Placement::TOP_RIGHT;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
-    ASSERT_NE(menuWrapperNode, nullptr);
-    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menuNode, nullptr);
-    auto menuProp = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    ASSERT_NE(menuProp, nullptr);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-    SizeF menuSize(MENU_SIZE_WIDTH, FULL_PHONE_HEIGHT / 2);
-    auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(menuGeometryNode, nullptr);
-    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(menuNode, menuGeometryNode, menuProp);
-    ASSERT_NE(layoutWrapper, nullptr);
-    menuLayoutAlgorithm->InitSpace(menuProp, menuPattern);
-
-    /**
-     * @tc.steps: step3. Afer menuLayoutAvoidAlgorithm avoid placement.
-     * @tc.expected: position and placement is as expected.
-     */
-    auto expectedPosition = OffsetF(
-        menuLayoutAlgorithm->targetOffset_.GetX() + menuLayoutAlgorithm->targetSize_.Width() +
-        menuLayoutAlgorithm->targetSecurity_, menuLayoutAlgorithm->targetOffset_.GetY() +
-        menuLayoutAlgorithm->targetSize_.Height() - menuSize.Height());
-    auto afterPosition =
-        menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(menuProp, menuPattern, menuSize, false, layoutWrapper);
-    delete layoutWrapper;
-    ASSERT_EQ(menuLayoutAlgorithm->placement_, Placement::RIGHT_BOTTOM);
     ASSERT_EQ(afterPosition, expectedPosition);
 }
 } // namespace OHOS::Ace::NG

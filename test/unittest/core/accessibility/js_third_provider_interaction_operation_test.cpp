@@ -109,13 +109,6 @@ public:
         mockRequestId = requestId;
     }
 
-    void SetDetectElementInfoFocusableThroughAncestorResult(bool isFocusable, const int32_t requestId,
-        const Accessibility::AccessibilityElementInfo& info) override
-    {
-        mockFocusable_ = isFocusable;
-        mockRequestId = requestId;
-    }
-
     std::list<Accessibility::AccessibilityElementInfo> mockInfos_;
     Accessibility::AccessibilityElementInfo mockInfo_;
     Accessibility::FocusMoveResult mockResult_;

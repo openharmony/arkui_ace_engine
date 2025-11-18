@@ -1232,6 +1232,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetResponseRegionListImpl(Ark_NativePointer node,
+                                   const Opt_Array_ResponseRegion* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setResponseRegionList(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetItemSizeImpl(Ark_NativePointer node,
                          const Opt_Union_String_Number* value)
     {
@@ -1293,7 +1305,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSelectedImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Bindable* value)
+                         const Opt_Union_I32_Bindable* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1341,7 +1353,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetItemBorderRadiusImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1745,17 +1757,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ButtonModifier
     namespace ButtonInterfaceModifier {
-    void SetButtonOptionsImpl(Ark_NativePointer node,
-                              const Ark_Union_ButtonOptions_ResourceStr* label,
-                              const Opt_ButtonOptions* options)
+    void SetButtonOptions0Impl(Ark_NativePointer node,
+                               const Ark_ResourceStr* label,
+                               const Opt_ButtonOptions* options)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setButtonOptions(");
+        string out("setButtonOptions0(");
         WriteToString(&out, label);
         out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetButtonOptions1Impl(Ark_NativePointer node,
+                               const Opt_ButtonOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setButtonOptions1(");
         WriteToString(&out, options);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -1847,7 +1871,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1895,7 +1919,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1907,7 +1931,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -2476,18 +2500,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetDrawModifierImpl(Ark_NativePointer node,
-                             const Opt_DrawModifier* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDrawModifier(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetResponseRegionImpl(Ark_NativePointer node,
                                const Opt_Union_Array_Rectangle_Rectangle* value)
     {
@@ -2753,7 +2765,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOpacityImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_Resource* value)
+                        const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -2956,6 +2968,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                                const Opt_AccessibilityTransparentCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnAccessibilityHoverTransparent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetHoverEffectImpl(Ark_NativePointer node,
                             const Opt_HoverEffect* value)
     {
@@ -2993,7 +3017,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnKeyEventImpl(Ark_NativePointer node,
-                           const Opt_Callback_KeyEvent_Void* value)
+                           const Opt_Callback_KeyEvent_Boolean* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3125,7 +3149,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTabIndexImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3221,7 +3245,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBrightnessImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3233,7 +3257,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetContrastImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3245,7 +3269,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetGrayscaleImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3269,7 +3293,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSaturateImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3281,7 +3305,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSepiaImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3293,7 +3317,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetInvertImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_InvertOptions* value)
+                       const Opt_Union_F64_InvertOptions* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3305,7 +3329,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetHueRotateImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
+                          const Opt_Union_F64_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3557,7 +3581,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetZIndexImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3640,26 +3664,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                        const Opt_AlignRuleOption* value)
+    void SetAlignRulesImpl(Ark_NativePointer node,
+                           const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setAlignRulesWithAlignRuleOptionTypedValue(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                                  const Opt_LocalizedAlignRuleOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(");
+        string out("setAlignRules(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -3941,7 +3953,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetRestoreIdImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3953,7 +3965,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSphericalEffectImpl(Ark_NativePointer node,
-                                const Opt_Number* value)
+                                const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3965,7 +3977,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLightUpEffectImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -4092,6 +4104,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnAccessibilityFocus(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnAccessibilityActionInterceptImpl(Ark_NativePointer node,
+                                               const Opt_AccessibilityActionInterceptCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnAccessibilityActionIntercept(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -4449,7 +4473,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnClick1Impl(Ark_NativePointer node,
                          const Opt_Callback_ClickEvent_Void* event,
-                         const Opt_Number* distanceThreshold)
+                         const Opt_Float64* distanceThreshold)
     {
         if (!needGroupedLog(1))
         {
@@ -4556,7 +4580,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBlurImpl(Ark_NativePointer node,
-                     const Opt_Number* blurRadius,
+                     const Opt_Float64* blurRadius,
                      const Opt_BlurOptions* options,
                      const Opt_SystemAdaptiveOptions* sysOptions)
     {
@@ -4574,7 +4598,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLinearGradientBlurImpl(Ark_NativePointer node,
-                                   const Opt_Number* value,
+                                   const Opt_Float64* value,
                                    const Opt_LinearGradientBlurOptions* options)
     {
         if (!needGroupedLog(1))
@@ -4614,7 +4638,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBackdropBlurImpl(Ark_NativePointer node,
-                             const Opt_Number* radius,
+                             const Opt_Float64* radius,
                              const Opt_BlurOptions* options,
                              const Opt_SystemAdaptiveOptions* sysOptions)
     {
@@ -4905,7 +4929,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                    const Opt_Array_Number* ratios,
+                                    const Opt_Array_Float64* ratios,
                                     const Opt_VisibleAreaChangeCallback* event)
     {
         if (!needGroupedLog(1))
@@ -6145,7 +6169,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnRouterImpl(Ark_NativePointer node,
-                         const Opt_Callback_Object_Void* value)
+                         const Opt_Callback_RouterCallbackInfo_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6452,7 +6476,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetScrollBarWidthImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_String* value)
+                               const Opt_Union_F64_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6464,7 +6488,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_Number_String* value)
+                               const Opt_Union_Color_I32_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6488,7 +6512,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
-                                  const Opt_Callback_Number_Number_ComputedBarAttribute* value)
+                                  const Opt_Callback_I32_F64_ComputedBarAttribute* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6500,7 +6524,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Number_Void* value)
+                              const Opt_Callback_I32_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6512,7 +6536,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedCount0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6548,7 +6572,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxCountImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6560,7 +6584,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinCountImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6572,7 +6596,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCellLengthImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6632,7 +6656,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnItemDragMoveImpl(Ark_NativePointer node,
-                               const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
+                               const Opt_Callback_ItemDragInfo_I32_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6644,7 +6668,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnItemDragLeaveImpl(Ark_NativePointer node,
-                                const Opt_Callback_ItemDragInfo_Number_Void* value)
+                                const Opt_Callback_ItemDragInfo_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6656,7 +6680,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnItemDropImpl(Ark_NativePointer node,
-                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+                           const Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6692,7 +6716,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFrictionImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6752,7 +6776,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Number* count,
+                             const Opt_Int32* count,
                              const Opt_Boolean* show)
     {
         if (!needGroupedLog(1))
@@ -6886,7 +6910,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // GridItemInterfaceModifier
     namespace GridItemAttributeModifier {
     void SetRowStartImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6898,7 +6922,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetRowEndImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6910,7 +6934,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetColumnStartImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6922,7 +6946,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetColumnEndImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -7048,7 +7072,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // HyperlinkModifier
     namespace HyperlinkInterfaceModifier {
     void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                                 const Ark_Union_String_Resource* address,
+                                 const Opt_Union_String_Resource* address,
                                  const Opt_Union_String_Resource* content)
     {
         if (!needGroupedLog(1))
@@ -7838,6 +7862,92 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // IndicatorComponentAttributeModifier
+    namespace LazyGridLayoutAttributeModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return new TreeNode("LazyGridLayoutAttribute", id, flags);;
+        }
+        string out("construct(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return new TreeNode("LazyGridLayoutAttribute", id, flags);;
+    }
+    void SetRowsGapImpl(Ark_NativePointer node,
+                        const Opt_LengthMetrics* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setRowsGap(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetColumnsGapImpl(Ark_NativePointer node,
+                           const Opt_LengthMetrics* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setColumnsGap(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // LazyGridLayoutAttributeModifier
+    namespace LazyVGridLayoutModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return new TreeNode("LazyVGridLayout", id, flags);;
+        }
+        string out("construct(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return new TreeNode("LazyVGridLayout", id, flags);;
+    }
+    } // LazyVGridLayoutModifier
+    namespace LazyVGridLayoutInterfaceModifier {
+    void SetLazyVGridLayoutOptionsImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setLazyVGridLayoutOptions(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // LazyVGridLayoutInterfaceModifier
+    namespace LazyVGridLayoutAttributeModifier {
+    void SetColumnsTemplateImpl(Ark_NativePointer node,
+                                const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setColumnsTemplate(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // LazyVGridLayoutAttributeModifier
     namespace LineModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -8027,7 +8137,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetContentStartOffsetImpl(Ark_NativePointer node,
-                                   const Opt_Number* value)
+                                   const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8039,7 +8149,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetContentEndOffsetImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8075,7 +8185,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedCount0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8171,7 +8281,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Number_Number_Void* value)
+                              const Opt_Callback_I32_I32_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8195,7 +8305,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnItemMoveImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Number_Boolean* value)
+                           const Opt_Callback_I32_I32_Boolean* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8231,7 +8341,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnItemDragMoveImpl(Ark_NativePointer node,
-                               const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
+                               const Opt_Callback_ItemDragInfo_I32_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8243,7 +8353,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnItemDragLeaveImpl(Ark_NativePointer node,
-                                const Opt_Callback_ItemDragInfo_Number_Void* value)
+                                const Opt_Callback_ItemDragInfo_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8255,7 +8365,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnItemDropImpl(Ark_NativePointer node,
-                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+                           const Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8303,7 +8413,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLanesImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_LengthConstrain* value,
+                      const Opt_Union_I32_LengthConstrain* value,
                       const Opt_Dimension* gutter)
     {
         if (!needGroupedLog(1))
@@ -8318,7 +8428,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Number* count,
+                             const Opt_Int32* count,
                              const Opt_Boolean* show)
     {
         if (!needGroupedLog(1))
@@ -10525,7 +10635,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // RatingInterfaceModifier
     namespace RatingAttributeModifier {
     void SetStarsImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -10537,7 +10647,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetStepSizeImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -10701,7 +10811,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetRefreshOffsetImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -10725,7 +10835,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnOffsetChangeImpl(Ark_NativePointer node,
-                               const Opt_Callback_Number_Void* value)
+                               const Opt_Callback_F64_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -10737,7 +10847,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetPullDownRatioImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -10793,7 +10903,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBarrierImpl(Ark_NativePointer node,
-                        const Opt_Array_BarrierStyle* value)
+                        const Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle* value)
     {
         if (!needGroupedLog(1))
         {
@@ -11609,6 +11719,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetUserCancelEventImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setUserCancelEvent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // SaveButtonAttributeModifier
     namespace ScreenModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -11760,7 +11882,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_Number_String* value)
+                               const Opt_Union_Color_I32_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -11772,7 +11894,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetScrollBarWidthImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_String* value)
+                               const Opt_Union_F64_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -11820,7 +11942,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFrictionImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13180,6 +13302,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetFocusBoxImpl(Ark_NativePointer node,
+                         const Opt_FocusBoxStyle* style)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setFocusBox(");
+        WriteToString(&out, style);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // SecurityComponentMethodModifier
     namespace SelectModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -13215,7 +13349,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SelectInterfaceModifier
     namespace SelectAttributeModifier {
     void SetSelectedImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource_Bindable_Bindable* value)
+                         const Opt_Union_I32_Resource_Bindable_Bindable* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13426,18 +13560,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setControlSize(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetDividerImpl(Ark_NativePointer node,
-                        const Opt_DividerOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDivider(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -14034,7 +14156,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_SliderChangeMode_Void* value)
+                         const Opt_Callback_F64_SliderChangeMode_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14154,7 +14276,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinResponsiveDistanceImpl(Ark_NativePointer node,
-                                      const Opt_Number* value)
+                                      const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14379,6 +14501,93 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setTextShadow(");
         WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                    const Opt_TextBackgroundStyle* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTextBackgroundStyle(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBaselineOffsetImpl(Ark_NativePointer node,
+                               const Opt_LengthMetrics* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBaselineOffset(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setKey(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setId(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnClick0Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnClick0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnHoverImpl(Ark_NativePointer node,
+                        const Opt_HoverCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnHover(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnClick1Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* event,
+                         const Opt_Float64* distanceThreshold)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnClick1(");
+        WriteToString(&out, event);
+        out.append(", ");
+        WriteToString(&out, distanceThreshold);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -15268,6 +15477,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setKey(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setId(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // SymbolSpanAttributeModifier
     namespace TabContentModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -15431,7 +15664,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetAnimationDurationImpl(Ark_NativePointer node,
-                                  const Opt_Number* value)
+                                  const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15467,7 +15700,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_Void* value)
+                         const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15479,7 +15712,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnSelectedImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Void* value)
+                           const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15491,7 +15724,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnTabBarClickImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Void* value)
+                              const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15503,7 +15736,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnUnselectedImpl(Ark_NativePointer node,
-                             const Opt_Callback_Number_Void* value)
+                             const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15670,6 +15903,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnContentDidScrollImpl(Ark_NativePointer node,
+                                   const Opt_OnTabsContentDidScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnContentDidScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetBarModeImpl(Ark_NativePointer node,
                         const Opt_BarMode* value,
                         const Opt_ScrollableBarModeOptions* options)
@@ -15716,7 +15961,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedMaxCountImpl(Ark_NativePointer node,
-                               const Opt_Number* count,
+                               const Opt_Int32* count,
                                const Opt_TabsCacheMode* mode)
     {
         if (!needGroupedLog(1))
@@ -19203,7 +19448,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedCount0Impl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -19227,7 +19472,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Number_Void* value)
+                              const Opt_Callback_I32_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -19263,7 +19508,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Number* count,
+                             const Opt_Int32* count,
                              const Opt_Boolean* show)
     {
         if (!needGroupedLog(1))
@@ -19876,7 +20121,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                                   const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
+                                   const Opt_Type_WebAttribute_onInterceptRequest* value)
     {
         if (!needGroupedLog(1))
         {
@@ -21246,7 +21491,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl {
             ButtonModifier::ConstructImpl,
-            ButtonInterfaceModifier::SetButtonOptionsImpl,
+            ButtonInterfaceModifier::SetButtonOptions0Impl,
+            ButtonInterfaceModifier::SetButtonOptions1Impl,
             ButtonAttributeModifier::SetTypeImpl,
             ButtonAttributeModifier::SetStateEffectImpl,
             ButtonAttributeModifier::SetButtonStyleImpl,
@@ -21356,9 +21602,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::ConstructImpl,
             CommonMethodModifier::SetWidthImpl,
             CommonMethodModifier::SetHeightImpl,
-            CommonMethodModifier::SetDrawModifierImpl,
             CommonMethodModifier::SetResponseRegionImpl,
             CommonMethodModifier::SetMouseResponseRegionImpl,
+            CommonMethodModifier::SetResponseRegionListImpl,
             CommonMethodModifier::SetSizeImpl,
             CommonMethodModifier::SetConstraintSizeImpl,
             CommonMethodModifier::SetHitTestBehaviorImpl,
@@ -21396,6 +21642,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnHoverImpl,
             CommonMethodModifier::SetOnHoverMoveImpl,
             CommonMethodModifier::SetOnAccessibilityHoverImpl,
+            CommonMethodModifier::SetOnAccessibilityHoverTransparentImpl,
             CommonMethodModifier::SetHoverEffectImpl,
             CommonMethodModifier::SetOnMouseImpl,
             CommonMethodModifier::SetOnTouchImpl,
@@ -21453,8 +21700,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetMarkAnchorImpl,
             CommonMethodModifier::SetOffsetImpl,
             CommonMethodModifier::SetEnabledImpl,
-            CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-            CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+            CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,
@@ -21491,6 +21737,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
             CommonMethodModifier::SetAccessibilityRoleImpl,
             CommonMethodModifier::SetOnAccessibilityFocusImpl,
+            CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
             CommonMethodModifier::SetAccessibilityTextHintImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,
@@ -21966,6 +22213,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IndicatorComponentAttributeModifier::SetOnChangeImpl,
         };
         return &ArkUIIndicatorComponentModifierImpl;
+    }
+
+    const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttributeModifier()
+    {
+        static const GENERATED_ArkUILazyGridLayoutAttributeModifier ArkUILazyGridLayoutAttributeModifierImpl {
+            LazyGridLayoutAttributeModifier::ConstructImpl,
+            LazyGridLayoutAttributeModifier::SetRowsGapImpl,
+            LazyGridLayoutAttributeModifier::SetColumnsGapImpl,
+        };
+        return &ArkUILazyGridLayoutAttributeModifierImpl;
+    }
+
+    const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutModifier()
+    {
+        static const GENERATED_ArkUILazyVGridLayoutModifier ArkUILazyVGridLayoutModifierImpl {
+            LazyVGridLayoutModifier::ConstructImpl,
+            LazyVGridLayoutInterfaceModifier::SetLazyVGridLayoutOptionsImpl,
+            LazyVGridLayoutAttributeModifier::SetColumnsTemplateImpl,
+        };
+        return &ArkUILazyVGridLayoutModifierImpl;
     }
 
     const GENERATED_ArkUILineModifier* GetLineModifier()
@@ -22490,6 +22757,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SaveButtonAttributeModifier::SetIconSizeImpl,
             SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
             SaveButtonAttributeModifier::SetStateEffectImpl,
+            SaveButtonAttributeModifier::SetUserCancelEventImpl,
         };
         return &ArkUISaveButtonModifierImpl;
     }
@@ -22657,6 +22925,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SecurityComponentMethodModifier::SetMaxFontSizeImpl,
             SecurityComponentMethodModifier::SetHeightAdaptivePolicyImpl,
             SecurityComponentMethodModifier::SetEnabledImpl,
+            SecurityComponentMethodModifier::SetFocusBoxImpl,
         };
         return &ArkUISecurityComponentMethodModifierImpl;
     }
@@ -22684,7 +22953,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetMenuBackgroundColorImpl,
             SelectAttributeModifier::SetMenuBackgroundBlurStyleImpl,
             SelectAttributeModifier::SetControlSizeImpl,
-            SelectAttributeModifier::SetDividerImpl,
             SelectAttributeModifier::SetTextModifierImpl,
             SelectAttributeModifier::SetArrowModifierImpl,
             SelectAttributeModifier::SetOptionTextModifierImpl,
@@ -22787,6 +23055,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SpanAttributeModifier::SetTextCaseImpl,
             SpanAttributeModifier::SetLineHeightImpl,
             SpanAttributeModifier::SetTextShadowImpl,
+            SpanAttributeModifier::SetTextBackgroundStyleImpl,
+            SpanAttributeModifier::SetBaselineOffsetImpl,
+            SpanAttributeModifier::SetKeyImpl,
+            SpanAttributeModifier::SetIdImpl,
+            SpanAttributeModifier::SetOnClick0Impl,
+            SpanAttributeModifier::SetOnHoverImpl,
+            SpanAttributeModifier::SetOnClick1Impl,
         };
         return &ArkUISpanModifierImpl;
     }
@@ -22896,6 +23171,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolSpanAttributeModifier::SetFontWeightImpl,
             SymbolSpanAttributeModifier::SetEffectStrategyImpl,
             SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
+            SymbolSpanAttributeModifier::SetKeyImpl,
+            SymbolSpanAttributeModifier::SetIdImpl,
         };
         return &ArkUISymbolSpanModifierImpl;
     }
@@ -22942,6 +23219,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetPageFlipModeImpl,
             TabsAttributeModifier::SetBarBackgroundEffectImpl,
             TabsAttributeModifier::SetOnContentWillChangeImpl,
+            TabsAttributeModifier::SetOnContentDidScrollImpl,
             TabsAttributeModifier::SetBarModeImpl,
             TabsAttributeModifier::SetBarHeightImpl,
             TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,
@@ -23541,6 +23819,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetImageAnimatorModifier,
             GetImageSpanModifier,
             GetIndicatorComponentModifier,
+            GetLazyGridLayoutAttributeModifier,
+            GetLazyVGridLayoutModifier,
             GetLineModifier,
             GetLinearIndicatorModifier,
             GetListModifier,
@@ -23673,20 +23953,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetXImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_AccessibilityHoverEvent peer,
-                  const Ark_Number* x)
+                  const Ark_Float64* x)
     {
         if (!needGroupedLog(1))
         {
@@ -23697,20 +23977,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetYImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetYImpl(Ark_AccessibilityHoverEvent peer,
-                  const Ark_Number* y)
+                  const Ark_Float64* y)
     {
         if (!needGroupedLog(1))
         {
@@ -23721,20 +24001,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -23745,20 +24025,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -23769,20 +24049,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -23793,20 +24073,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -23918,7 +24198,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param,
-                                      const Callback_Void* event)
+                                      const Callback_Void* event,
+                                      Ark_Boolean immediately)
     {
         if (!needGroupedLog(1))
         {
@@ -23928,6 +24209,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, param);
         out.append(", ");
         WriteToString(&out, event);
+        out.append(", ");
+        WriteToString(&out, immediately);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -24406,29 +24689,43 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetHorizontalAxisValueImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetHorizontalAxisValueImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getHorizontalAxisValue(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVerticalAxisValue(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
+    }
+    Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
+                            Ark_AxisType axisType)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("hasAxis(");
+        WriteToString(&out, axisType);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
     }
     Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
     {
@@ -24454,20 +24751,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_AxisEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -24478,20 +24775,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_AxisEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -24502,20 +24799,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_AxisEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -24526,20 +24823,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_AxisEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -24550,20 +24847,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetXImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_AxisEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -24574,20 +24871,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_AxisEvent peer)
+    Ark_Float64 GetYImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetYImpl(Ark_AxisEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
         if (!needGroupedLog(1))
         {
@@ -24598,7 +24895,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetScrollStepImpl(Ark_AxisEvent peer)
+    Opt_Int32 GetScrollStepImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24611,7 +24908,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetScrollStepImpl(Ark_AxisEvent peer,
-                           const Opt_Number* scrollStep)
+                           const Opt_Int32* scrollStep)
     {
         if (!needGroupedLog(1))
         {
@@ -24741,20 +25038,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
+    Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTimestamp(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTimestampImpl(Ark_BaseEvent peer,
-                          const Ark_Number* timestamp)
+                          Ark_Int64 timestamp)
     {
         if (!needGroupedLog(1))
         {
@@ -24789,7 +25086,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetAxisHorizontalImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24802,7 +25099,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetAxisHorizontalImpl(Ark_BaseEvent peer,
-                               const Opt_Number* axisHorizontal)
+                               const Opt_Float64* axisHorizontal)
     {
         if (!needGroupedLog(1))
         {
@@ -24813,7 +25110,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetAxisVerticalImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24826,7 +25123,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetAxisVerticalImpl(Ark_BaseEvent peer,
-                             const Opt_Number* axisVertical)
+                             const Opt_Float64* axisVertical)
     {
         if (!needGroupedLog(1))
         {
@@ -24837,20 +25134,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPressureImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPressure(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPressureImpl(Ark_BaseEvent peer,
-                         const Ark_Number* pressure)
+                         Ark_Float64 pressure)
     {
         if (!needGroupedLog(1))
         {
@@ -24861,20 +25158,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTiltXImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTiltX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTiltXImpl(Ark_BaseEvent peer,
-                      const Ark_Number* tiltX)
+                      Ark_Float64 tiltX)
     {
         if (!needGroupedLog(1))
         {
@@ -24885,20 +25182,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTiltYImpl(Ark_BaseEvent peer)
+    Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTiltY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTiltYImpl(Ark_BaseEvent peer,
-                      const Ark_Number* tiltY)
+                      Ark_Float64 tiltY)
     {
         if (!needGroupedLog(1))
         {
@@ -24909,7 +25206,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
+    Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24922,7 +25219,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetRollAngleImpl(Ark_BaseEvent peer,
-                          const Opt_Number* rollAngle)
+                          const Opt_Float64* rollAngle)
     {
         if (!needGroupedLog(1))
         {
@@ -24981,7 +25278,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
+    Opt_Int32 GetDeviceIdImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -24994,7 +25291,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetDeviceIdImpl(Ark_BaseEvent peer,
-                         const Opt_Number* deviceId)
+                         const Opt_Int32* deviceId)
     {
         if (!needGroupedLog(1))
         {
@@ -25005,7 +25302,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+    Opt_Int32 GetTargetDisplayIdImpl(Ark_BaseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -25018,7 +25315,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
-                                const Opt_Number* targetDisplayId)
+                                const Opt_Int32* targetDisplayId)
     {
         if (!needGroupedLog(1))
         {
@@ -25101,7 +25398,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_BaselineOffsetStyle ConstructImpl(Ark_LengthMetrics value)
+    Ark_BaselineOffsetStyle ConstructImpl(const Ark_LengthMetrics* value)
     {
         if (!needGroupedLog(1))
         {
@@ -25498,8 +25795,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void AddColorStopImpl(Ark_CanvasGradient peer,
-                          const Ark_Number* offset,
-                          const Ark_String* color)
+                          Ark_Float64 offset,
+                          const Ark_Union_String_ColorMetrics* color)
     {
         if (!needGroupedLog(1))
         {
@@ -26612,7 +26909,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Union_String_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+    Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
     {
         if (!needGroupedLog(1))
         {
@@ -26625,7 +26922,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetFillStyleImpl(Ark_CanvasRenderer peer,
-                          const Ark_Union_String_I32_CanvasGradient_CanvasPattern* fillStyle)
+                          const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* fillStyle)
     {
         if (!needGroupedLog(1))
         {
@@ -26636,7 +26933,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Union_String_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+    Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
     {
         if (!needGroupedLog(1))
         {
@@ -26649,7 +26946,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
-                            const Ark_Union_String_I32_CanvasGradient_CanvasPattern* strokeStyle)
+                            const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* strokeStyle)
     {
         if (!needGroupedLog(1))
         {
@@ -27262,7 +27559,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ChildrenMainSize ConstructImpl(const Ark_Number* childDefaultSize)
+    Ark_ChildrenMainSize ConstructImpl(Ark_Float64 childDefaultSize)
     {
         if (!needGroupedLog(1))
         {
@@ -27288,9 +27585,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void SpliceImpl(Ark_ChildrenMainSize peer,
-                    const Ark_Number* start,
-                    const Opt_Number* deleteCount,
-                    const Opt_Array_Number* childrenSize)
+                    Ark_Int32 start,
+                    const Opt_Int32* deleteCount,
+                    const Opt_Array_Float64* childrenSize)
     {
         if (!needGroupedLog(1))
         {
@@ -27306,8 +27603,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void UpdateImpl(Ark_ChildrenMainSize peer,
-                    const Ark_Number* index,
-                    const Ark_Number* childSize)
+                    Ark_Int32 index,
+                    Ark_Float64 childSize)
     {
         if (!needGroupedLog(1))
         {
@@ -27320,20 +27617,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
+    Ark_Float64 GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getChildDefaultSize(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetChildDefaultSizeImpl(Ark_ChildrenMainSize peer,
-                                 const Ark_Number* childDefaultSize)
+                                 Ark_Float64 childDefaultSize)
     {
         if (!needGroupedLog(1))
         {
@@ -27380,20 +27677,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_ClickEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -27404,20 +27701,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_ClickEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -27428,20 +27725,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_ClickEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -27452,20 +27749,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_ClickEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -27476,20 +27773,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetXImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_ClickEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -27500,20 +27797,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_ClickEvent peer)
+    Ark_Float64 GetYImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetYImpl(Ark_ClickEvent peer,
-                  const Ark_Number* y)
+                  Ark_Float64 y)
     {
         if (!needGroupedLog(1))
         {
@@ -28303,6 +28600,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // ControllerHandlerAccessor
+    namespace CopyEventAccessor {
+    void DestroyPeerImpl(Ark_CopyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_CopyEvent ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_CopyEvent>(100);
+        }
+        string out("new CopyEvent(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_CopyEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_CopyEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void PreventDefaultImpl(Ark_CopyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("preventDefault(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // CopyEventAccessor
     namespace CustomDialogControllerAccessor {
     void DestroyPeerImpl(Ark_CustomDialogController peer)
     {
@@ -28547,6 +28890,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // CustomSpanAccessor
+    namespace CutEventAccessor {
+    void DestroyPeerImpl(Ark_CutEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_CutEvent ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_CutEvent>(100);
+        }
+        string out("new CutEvent(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_CutEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_CutEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void PreventDefaultImpl(Ark_CutEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("preventDefault(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // CutEventAccessor
     namespace DataResubmissionHandlerAccessor {
     void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
     {
@@ -28712,6 +29101,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // DecorationStyleAccessor
+    namespace DialogExtenderAccessor {
+    void ShowTimePickerDialogImpl(const Ark_TimePickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showTimePickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowTextPickerDialogImpl(const Ark_TextPickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showTextPickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showDatePickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DialogExtenderAccessor
     namespace DisappearSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
     {
@@ -28948,53 +29372,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetWindowXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetWindowYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDataImpl(Ark_DragEvent peer,
                      Ark_unifiedDataChannel_UnifiedData unifiedData)
@@ -29068,41 +29492,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetVelocityImpl(Ark_DragEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocity(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                                   const Callback_Void* customDropAnimation)
@@ -29272,66 +29696,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DrawingRenderingContextAccessor
-    namespace DrawModifierAccessor {
-    void DestroyPeerImpl(Ark_DrawModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_DrawModifier ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_DrawModifier>(100);
-        }
-        string out("new DrawModifier(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_DrawModifier>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_DrawModifier>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    Callback_DrawContext_Void GetDrawBehind_callbackImpl(Ark_DrawModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getDrawBehind_callback(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getDrawContent_callback(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    } // DrawModifierAccessor
     namespace EnvironmentBackendAccessor {
     } // EnvironmentBackendAccessor
     namespace EventEmulatorAccessor {
@@ -29765,7 +30129,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Map_AxisModel_Number GetAxisMapImpl(Ark_FocusAxisEvent peer)
+    Map_AxisModel_Float64 GetAxisMapImpl(Ark_FocusAxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -29778,7 +30142,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetAxisMapImpl(Ark_FocusAxisEvent peer,
-                        const Map_AxisModel_Number* axisMap)
+                        const Map_AxisModel_Float64* axisMap)
     {
         if (!needGroupedLog(1))
         {
@@ -29813,6 +30177,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // FocusControllerAccessor
+    namespace ForEachOpsAccessor {
+    void SyncOnMoveOpsImpl(Ark_NativePointer node,
+                           const Array_NativePointer* additionalChild,
+                           const Opt_OnMoveHandler* onMoveOps,
+                           const Opt_ItemDragEventHandler* onMoveDragEventOps)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("SyncOnMoveOps(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, additionalChild);
+        out.append(", ");
+        WriteToString(&out, onMoveOps);
+        out.append(", ");
+        WriteToString(&out, onMoveDragEventOps);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ForEachOpsAccessor
     namespace FrameNodeExtenderAccessor {
     Ark_NativePointer ConstructorFrameNodeImpl()
     {
@@ -29862,27 +30248,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    void AppendChildImpl(Ark_FrameNode peer,
-                         Ark_FrameNode child)
+    Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
+                              Ark_FrameNode child)
     {
         if (!needGroupedLog(1))
         {
-            return;
+            return 0;
         }
         string out("appendChild(");
         WriteToString(&out, peer);
         out.append(", ");
         WriteToString(&out, child);
         out.append(") \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
+        return 0;
     }
-    void InsertChildAfterImpl(Ark_NativePointer peer,
-                              Ark_NativePointer child,
-                              Ark_NativePointer sibling)
+    Ark_Int32 InsertChildAfterImpl(Ark_NativePointer peer,
+                                   Ark_NativePointer child,
+                                   Ark_NativePointer sibling)
     {
         if (!needGroupedLog(1))
         {
-            return;
+            return 0;
         }
         string out("insertChildAfter(");
         WriteToString(&out, peer);
@@ -29891,7 +30279,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, sibling);
         out.append(") \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
+        return 0;
     }
     void RemoveChildImpl(Ark_FrameNode peer,
                          Ark_FrameNode child)
@@ -30013,7 +30403,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30026,7 +30416,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30052,7 +30442,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetLayoutPositionImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30235,7 +30625,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLayoutPositionImpl(Ark_FrameNode peer,
-                               const Ark_Position* position)
+                               const Ark_Vector2* position)
     {
         if (!needGroupedLog(1))
         {
@@ -30263,7 +30653,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void LayoutImpl(Ark_FrameNode peer,
-                    const Ark_Position* position)
+                    const Ark_Vector2* position)
     {
         if (!needGroupedLog(1))
         {
@@ -30287,7 +30677,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToScreenImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30300,7 +30690,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30313,7 +30703,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30326,13 +30716,65 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToScreenWithTransform(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigBorderWidth(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigPadding(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigMargin(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigSize(");
         WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
@@ -30365,13 +30807,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    void MoveToImpl(Ark_FrameNode peer,
-                    Ark_FrameNode targetParent,
-                    const Ark_Number* index)
+    Ark_Float64 MoveToImpl(Ark_FrameNode peer,
+                           Ark_FrameNode targetParent,
+                           const Ark_Number* index)
     {
         if (!needGroupedLog(1))
         {
-            return;
+            return {42};
         }
         string out("moveTo(");
         WriteToString(&out, peer);
@@ -30380,7 +30822,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, index);
         out.append(") \n");
+        out.append("[return {42}] \n");
         appendGroupedLog(1, out);
+        return {42};
     }
     Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     {
@@ -30552,37 +30996,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
-                                         Ark_FrameNode pointer)
+    Ark_NativePointer CreateByRawPtrImpl(Ark_NativePointer ptr)
     {
-        if (!needGroupedLog(1))
-        {
+        if (!needGroupedLog(1)) {
             return nullptr;
         }
         string out("createByRawPtr(");
-        WriteToString(&out, peer);
-        out.append(", ");
-        WriteToString(&out, pointer);
+        WriteToString(&out, ptr);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
-                                   Ark_NativePointer pointer)
+    Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer ptr)
     {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_FrameNode>(300);
+        if (!needGroupedLog(1)) {
+            return nullptr;
         }
         string out("unWrapRawPtr(");
-        WriteToString(&out, peer);
-        out.append(", ");
-        WriteToString(&out, pointer);
+        WriteToString(&out, ptr);
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
+        out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_FrameNode>(300);
+        return nullptr;
     }
     Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     {
@@ -30596,6 +31032,51 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return reinterpret_cast<Ark_UICommonEvent>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_UICommonEvent>(300);
+    }
+    Ark_Int32 AdoptChildImpl(Ark_FrameNode peer,
+                             Ark_FrameNode child)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("adoptChild(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, child);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer,
+                                     Ark_FrameNode child)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("removeAdoptedChild(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, child);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("isOnRenderTree(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
     }
     } // FrameNodeExtenderAccessor
     namespace FrictionMotionAccessor {
@@ -30830,20 +31311,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetOffsetXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetOffsetXImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetXImpl(Ark_GestureEvent peer,
-                        const Ark_Number* offsetX)
+                        Ark_Float64 offsetX)
     {
         if (!needGroupedLog(1))
         {
@@ -30854,20 +31335,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetOffsetYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetOffsetYImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetYImpl(Ark_GestureEvent peer,
-                        const Ark_Number* offsetY)
+                        Ark_Float64 offsetY)
     {
         if (!needGroupedLog(1))
         {
@@ -30878,20 +31359,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetAngleImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetAngleImpl(Ark_GestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
         if (!needGroupedLog(1))
         {
@@ -30902,20 +31383,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetSpeedImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetSpeedImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getSpeed(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetSpeedImpl(Ark_GestureEvent peer,
-                      const Ark_Number* speed)
+                      Ark_Float64 speed)
     {
         if (!needGroupedLog(1))
         {
@@ -30926,20 +31407,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetScaleImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetScaleImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getScale(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetScaleImpl(Ark_GestureEvent peer,
-                      const Ark_Number* scale)
+                      Ark_Float64 scale)
     {
         if (!needGroupedLog(1))
         {
@@ -30950,20 +31431,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetPinchCenterXImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterXImpl(Ark_GestureEvent peer,
-                             const Ark_Number* pinchCenterX)
+                             Ark_Float64 pinchCenterX)
     {
         if (!needGroupedLog(1))
         {
@@ -30974,20 +31455,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetPinchCenterYImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterYImpl(Ark_GestureEvent peer,
-                             const Ark_Number* pinchCenterY)
+                             Ark_Float64 pinchCenterY)
     {
         if (!needGroupedLog(1))
         {
@@ -30998,20 +31479,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityXImpl(Ark_GestureEvent peer,
-                          const Ark_Number* velocityX)
+                          Ark_Float64 velocityX)
     {
         if (!needGroupedLog(1))
         {
@@ -31022,20 +31503,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityYImpl(Ark_GestureEvent peer,
-                          const Ark_Number* velocityY)
+                          Ark_Float64 velocityY)
     {
         if (!needGroupedLog(1))
         {
@@ -31046,20 +31527,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocity(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityImpl(Ark_GestureEvent peer,
-                         const Ark_Number* velocity)
+                         Ark_Float64 velocity)
     {
         if (!needGroupedLog(1))
         {
@@ -31271,17 +31752,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Number GetFingerCountImpl(Ark_GestureRecognizer peer)
+    Ark_Int32 GetFingerCountImpl(Ark_GestureRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getFingerCount(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
     {
@@ -31612,7 +32093,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Opt_Number GetXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetXImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31625,7 +32106,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetXImpl(Ark_HoverEvent peer,
-                  const Opt_Number* x)
+                  const Opt_Float64* x)
     {
         if (!needGroupedLog(1))
         {
@@ -31636,7 +32117,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetYImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31649,7 +32130,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetYImpl(Ark_HoverEvent peer,
-                  const Opt_Number* y)
+                  const Opt_Float64* y)
     {
         if (!needGroupedLog(1))
         {
@@ -31660,7 +32141,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetWindowXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetWindowXImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31673,7 +32154,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetWindowXImpl(Ark_HoverEvent peer,
-                        const Opt_Number* windowX)
+                        const Opt_Float64* windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -31684,7 +32165,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetWindowYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetWindowYImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31697,7 +32178,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetWindowYImpl(Ark_HoverEvent peer,
-                        const Opt_Number* windowY)
+                        const Opt_Float64* windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -31708,7 +32189,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetDisplayXImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetDisplayXImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31721,7 +32202,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetDisplayXImpl(Ark_HoverEvent peer,
-                         const Opt_Number* displayX)
+                         const Opt_Float64* displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -31732,7 +32213,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetDisplayYImpl(Ark_HoverEvent peer)
+    Opt_Float64 GetDisplayYImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -31745,7 +32226,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetDisplayYImpl(Ark_HoverEvent peer,
-                         const Opt_Number* displayY)
+                         const Opt_Float64* displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -32315,6 +32796,82 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+                                     Ark_KeyEvent event)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("dispatchKeyEvent(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    void OpenBindSheetImpl(Ark_VMContext vmContext,
+                           Ark_AsyncWorkerPtr asyncWorker,
+                           Ark_NativePointer bindSheetContent,
+                           const Opt_SheetOptions* sheetOptions,
+                           const Opt_Int32* targetId,
+                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("openBindSheet(");
+        WriteToString(&out, bindSheetContent);
+        out.append(", ");
+        WriteToString(&out, sheetOptions);
+        out.append(", ");
+        WriteToString(&out, targetId);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UpdateBindSheetImpl(Ark_VMContext vmContext,
+                             Ark_AsyncWorkerPtr asyncWorker,
+                             Ark_NativePointer bindSheetContent,
+                             const Ark_SheetOptions* sheetOptions,
+                             const Opt_Boolean* partialUpdate,
+                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("updateBindSheet(");
+        WriteToString(&out, bindSheetContent);
+        out.append(", ");
+        WriteToString(&out, sheetOptions);
+        out.append(", ");
+        WriteToString(&out, partialUpdate);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CloseBindSheetImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_NativePointer bindSheetContent,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("closeBindSheet(");
+        WriteToString(&out, bindSheetContent);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -32497,20 +33054,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetKeyCodeImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getKeyCode(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetKeyCodeImpl(Ark_KeyEvent peer,
-                        const Ark_Number* keyCode)
+                        Ark_Int32 keyCode)
     {
         if (!needGroupedLog(1))
         {
@@ -32569,20 +33126,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetDeviceIdImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDeviceId(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDeviceIdImpl(Ark_KeyEvent peer,
-                         const Ark_Number* deviceId)
+                         Ark_Int32 deviceId)
     {
         if (!needGroupedLog(1))
         {
@@ -32593,20 +33150,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetMetaKeyImpl(Ark_KeyEvent peer)
+    Ark_Int32 GetMetaKeyImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getMetaKey(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetMetaKeyImpl(Ark_KeyEvent peer,
-                        const Ark_Number* metaKey)
+                        Ark_Int32 metaKey)
     {
         if (!needGroupedLog(1))
         {
@@ -32617,20 +33174,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
+    Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTimestamp(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetTimestampImpl(Ark_KeyEvent peer,
-                          const Ark_Number* timestamp)
+                          Ark_Int64 timestamp)
     {
         if (!needGroupedLog(1))
         {
@@ -32713,7 +33270,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
+    Opt_Int64 GetUnicodeImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -32726,7 +33283,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetUnicodeImpl(Ark_KeyEvent peer,
-                        const Opt_Number* unicode)
+                        const Opt_Int64* unicode)
     {
         if (!needGroupedLog(1))
         {
@@ -33096,7 +33653,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_LetterSpacingStyle ConstructImpl(Ark_LengthMetrics value)
+    Ark_LetterSpacingStyle ConstructImpl(const Ark_LengthMetrics* value)
     {
         if (!needGroupedLog(1))
         {
@@ -33134,6 +33691,67 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // LetterSpacingStyleAccessor
+    namespace LevelOrderExtenderAccessor {
+    void DestroyPeerImpl(Ark_LevelOrderExtender peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_LevelOrderExtender ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_LevelOrderExtender>(100);
+        }
+        string out("new LevelOrderExtender(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_LevelOrderExtender>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_LevelOrderExtender>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_LevelOrderExtender ClampImpl(const Ark_Number* order)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_LevelOrderExtender>(300);
+        }
+        string out("clamp(");
+        WriteToString(&out, order);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_LevelOrderExtender>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_LevelOrderExtender>(300);
+    }
+    Ark_Number GetOrderImpl(Ark_LevelOrderExtender peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {42};
+        }
+        string out("getOrder(");
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    } // LevelOrderExtenderAccessor
     namespace LifeCycleAccessor {
     void DestroyPeerImpl(Ark_LifeCycle peer)
     {
@@ -33341,7 +33959,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_LineHeightStyle ConstructImpl(Ark_LengthMetrics lineHeight)
+    Ark_LineHeightStyle ConstructImpl(const Ark_LengthMetrics* lineHeight)
     {
         if (!needGroupedLog(1))
         {
@@ -33414,9 +34032,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
-                                          const Ark_Number* index,
-                                          const Ark_Number* indexInGroup)
+    Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
+                                          Ark_ListScroller peer,
+                                          Ark_Int32 index,
+                                          Ark_Int32 indexInGroup)
     {
         if (!needGroupedLog(1))
         {
@@ -33431,9 +34050,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    void ScrollToItemInGroupImpl(Ark_ListScroller peer,
-                                 const Ark_Number* index,
-                                 const Ark_Number* indexInGroup,
+    void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
+                                 Ark_ListScroller peer,
+                                 Ark_Int32 index,
+                                 Ark_Int32 indexInGroup,
                                  const Opt_Boolean* smooth,
                                  const Opt_ScrollAlign* align)
     {
@@ -33452,7 +34072,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
+    void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
+                                  Ark_ListScroller peer,
                                   const Opt_CloseSwipeActionOptions* options)
     {
         if (!needGroupedLog(1))
@@ -33464,9 +34085,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
-                                                             const Ark_Number* x,
-                                                             const Ark_Number* y)
+    Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,
+                                                             Ark_ListScroller peer,
+                                                             Ark_Float64 x,
+                                                             Ark_Float64 y)
     {
         if (!needGroupedLog(1))
         {
@@ -33589,17 +34211,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
+    Ark_Int32 GetDurationImpl(Ark_LongPressRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDuration(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // LongPressRecognizerAccessor
     namespace Matrix2DAccessor {
@@ -34066,20 +34688,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetDisplayXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayXImpl(Ark_MouseEvent peer,
-                         const Ark_Number* displayX)
+                         Ark_Float64 displayX)
     {
         if (!needGroupedLog(1))
         {
@@ -34090,20 +34712,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetDisplayYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetDisplayYImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDisplayY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetDisplayYImpl(Ark_MouseEvent peer,
-                         const Ark_Number* displayY)
+                         Ark_Float64 displayY)
     {
         if (!needGroupedLog(1))
         {
@@ -34114,20 +34736,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetWindowXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowXImpl(Ark_MouseEvent peer,
-                        const Ark_Number* windowX)
+                        Ark_Float64 windowX)
     {
         if (!needGroupedLog(1))
         {
@@ -34138,20 +34760,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetWindowYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetWindowYImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getWindowY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetWindowYImpl(Ark_MouseEvent peer,
-                        const Ark_Number* windowY)
+                        Ark_Float64 windowY)
     {
         if (!needGroupedLog(1))
         {
@@ -34162,20 +34784,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetXImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetXImpl(Ark_MouseEvent peer,
-                  const Ark_Number* x)
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -34186,20 +34808,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetYImpl(Ark_MouseEvent peer)
+    Ark_Float64 GetXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
-        string out("getY(");
+        string out("getX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    void SetYImpl(Ark_MouseEvent peer,
-                  const Ark_Number* y)
+    void SetXImpl(Ark_MouseEvent peer,
+                  Ark_Float64 x)
     {
         if (!needGroupedLog(1))
         {
@@ -34234,7 +34856,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
+    Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -34247,7 +34869,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetRawDeltaXImpl(Ark_MouseEvent peer,
-                          const Opt_Number* rawDeltaX)
+                          const Opt_Float64* rawDeltaX)
     {
         if (!needGroupedLog(1))
         {
@@ -34258,7 +34880,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
+    Opt_Float64 GetRawDeltaYImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
         {
@@ -34271,7 +34893,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void SetRawDeltaYImpl(Ark_MouseEvent peer,
-                          const Opt_Number* rawDeltaY)
+                          const Opt_Float64* rawDeltaY)
     {
         if (!needGroupedLog(1))
         {
@@ -34845,6 +35467,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, callback);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Array_String GetRouteMapInConfigImpl(Ark_NativePointer context)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("setCreateNavDestinationCallback(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     } // NavExtenderAccessor
     namespace NavigationTransitionProxyAccessor {
@@ -35901,6 +36537,64 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // NodeContainerOpsAccessor
+    namespace NodeContentExtenderAccessor {
+    Ark_NativePointer ConstructorNodeContentImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructorNodeContent(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer GetDestroyImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("getDestroy(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_Int32 AddFrameNodeImpl(Ark_NativePointer content,
+                               Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("addFrameNode(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer content,
+                                    Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("removeFrameNode(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // NodeContentExtenderAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -36128,20 +36822,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetOffsetXImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetOffsetXImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetXImpl(Ark_PanGestureEvent peer,
-                        const Ark_Number* offsetX)
+                        Ark_Float64 offsetX)
     {
         if (!needGroupedLog(1))
         {
@@ -36152,20 +36846,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetOffsetYImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetOffsetYImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetYImpl(Ark_PanGestureEvent peer,
-                        const Ark_Number* offsetY)
+                        Ark_Float64 offsetY)
     {
         if (!needGroupedLog(1))
         {
@@ -36176,20 +36870,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityXImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityXImpl(Ark_PanGestureEvent peer,
-                          const Ark_Number* velocityX)
+                          Ark_Float64 velocityX)
     {
         if (!needGroupedLog(1))
         {
@@ -36200,20 +36894,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityYImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityYImpl(Ark_PanGestureEvent peer,
-                          const Ark_Number* velocityY)
+                          Ark_Float64 velocityY)
     {
         if (!needGroupedLog(1))
         {
@@ -36224,20 +36918,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocity(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityImpl(Ark_PanGestureEvent peer,
-                         const Ark_Number* velocity)
+                         Ark_Float64 velocity)
     {
         if (!needGroupedLog(1))
         {
@@ -36298,7 +36992,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetDistanceImpl(Ark_PanGestureOptions peer,
-                         const Ark_Number* value)
+                         Ark_Float64 value)
     {
         if (!needGroupedLog(1))
         {
@@ -36310,7 +37004,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFingersImpl(Ark_PanGestureOptions peer,
-                        const Ark_Number* value)
+                        Ark_Int32 value)
     {
         if (!needGroupedLog(1))
         {
@@ -36333,17 +37027,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
+    Ark_Float64 GetDistanceImpl(Ark_PanGestureOptions peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDistance(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // PanGestureOptionsAccessor
     namespace PanRecognizerAccessor {
@@ -36515,6 +37209,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // ParagraphStyleAccessor
+    namespace PasteEventAccessor {
+    void DestroyPeerImpl(Ark_PasteEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_PasteEvent ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_PasteEvent>(100);
+        }
+        string out("new PasteEvent(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_PasteEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_PasteEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void PreventDefaultImpl(Ark_PasteEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("preventDefault(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // PasteEventAccessor
     namespace Path2DAccessor {
     void DestroyPeerImpl(Ark_Path2D peer)
     {
@@ -36875,20 +37615,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetScaleImpl(Ark_PinchGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getScale(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetScaleImpl(Ark_PinchGestureEvent peer,
-                      const Ark_Number* scale)
+                      Ark_Float64 scale)
     {
         if (!needGroupedLog(1))
         {
@@ -36899,20 +37639,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterXImpl(Ark_PinchGestureEvent peer,
-                             const Ark_Number* pinchCenterX)
+                             Ark_Float64 pinchCenterX)
     {
         if (!needGroupedLog(1))
         {
@@ -36923,20 +37663,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterYImpl(Ark_PinchGestureEvent peer,
-                             const Ark_Number* pinchCenterY)
+                             Ark_Float64 pinchCenterY)
     {
         if (!needGroupedLog(1))
         {
@@ -36983,17 +37723,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetDistanceImpl(Ark_PinchRecognizer peer)
+    Ark_Float64 GetDistanceImpl(Ark_PinchRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDistance(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // PinchRecognizerAccessor
     namespace PixelMapMockAccessor {
@@ -37053,8 +37793,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ProgressMask ConstructImpl(const Ark_Number* value,
-                                   const Ark_Number* total,
+    Ark_ProgressMask ConstructImpl(Ark_Float64 value,
+                                   Ark_Float64 total,
                                    const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
@@ -37085,7 +37825,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void UpdateProgressImpl(Ark_ProgressMask peer,
-                            const Ark_Number* value)
+                            Ark_Float64 value)
     {
         if (!needGroupedLog(1))
         {
@@ -38332,20 +39072,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_RotationGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetAngleImpl(Ark_RotationGestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
         if (!needGroupedLog(1))
         {
@@ -38392,17 +39132,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetAngleImpl(Ark_RotationRecognizer peer)
+    Ark_Float64 GetAngleImpl(Ark_RotationRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // RotationRecognizerAccessor
     namespace RouterExtenderAccessor {
@@ -38941,7 +39681,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    void ScrollToImpl(Ark_Scroller peer,
+    void ScrollToImpl(Ark_VMContext vmContext,
+                      Ark_Scroller peer,
                       const Ark_ScrollOptions* options)
     {
         if (!needGroupedLog(1))
@@ -38953,7 +39694,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ScrollEdgeImpl(Ark_Scroller peer,
+    void ScrollEdgeImpl(Ark_VMContext vmContext,
+                        Ark_Scroller peer,
                         Ark_Edge value,
                         const Opt_ScrollEdgeOptions* options)
     {
@@ -38968,8 +39710,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void FlingImpl(Ark_Scroller peer,
-                   const Ark_Number* velocity)
+    void FlingImpl(Ark_VMContext vmContext,
+                   Ark_Scroller peer,
+                   Ark_Float64 velocity)
     {
         if (!needGroupedLog(1))
         {
@@ -38980,7 +39723,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ScrollPageImpl(Ark_Scroller peer,
+    void ScrollPageImpl(Ark_VMContext vmContext,
+                        Ark_Scroller peer,
                         const Ark_ScrollPageOptions* value)
     {
         if (!needGroupedLog(1))
@@ -38992,7 +39736,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
+    Ark_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+                                       Ark_Scroller peer)
     {
         if (!needGroupedLog(1))
         {
@@ -39004,8 +39749,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    void ScrollToIndexImpl(Ark_Scroller peer,
-                           const Ark_Number* value,
+    void ScrollToIndexImpl(Ark_VMContext vmContext,
+                           Ark_Scroller peer,
+                           Ark_Int32 value,
                            const Opt_Boolean* smooth,
                            const Opt_ScrollAlign* align,
                            const Opt_ScrollToIndexOptions* options)
@@ -39025,7 +39771,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ScrollByImpl(Ark_Scroller peer,
+    void ScrollByImpl(Ark_VMContext vmContext,
+                      Ark_Scroller peer,
                       const Ark_Length* dx,
                       const Ark_Length* dy)
     {
@@ -39040,7 +39787,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
+    Ark_Boolean IsAtEndImpl(Ark_VMContext vmContext,
+                            Ark_Scroller peer)
     {
         if (!needGroupedLog(1))
         {
@@ -39052,8 +39800,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_RectResult GetItemRectImpl(Ark_Scroller peer,
-                                   const Ark_Number* index)
+    Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
+                                   Ark_Scroller peer,
+                                   Ark_Int32 index)
     {
         if (!needGroupedLog(1))
         {
@@ -39066,22 +39815,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetItemIndexImpl(Ark_Scroller peer,
-                                const Ark_Number* x,
-                                const Ark_Number* y)
+    Ark_Int32 GetItemIndexImpl(Ark_VMContext vmContext,
+                               Ark_Scroller peer,
+                               Ark_Float64 x,
+                               Ark_Float64 y)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getItemIndex(");
         WriteToString(&out, x);
         out.append(", ");
         WriteToString(&out, y);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // ScrollerAccessor
     namespace ScrollMotionAccessor {
@@ -39168,20 +39918,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetOffsetRemainImpl(Ark_ScrollResult peer)
+    Ark_Float64 GetOffsetRemainImpl(Ark_ScrollResult peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetRemain(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetRemainImpl(Ark_ScrollResult peer,
-                             const Ark_Number* offsetRemain)
+                             Ark_Float64 offsetRemain)
     {
         if (!needGroupedLog(1))
         {
@@ -39290,6 +40040,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // SearchOpsAccessor
+
+    namespace SelectExtenderAccessor {
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setDivider(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // SelectExtenderAccessor
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -39449,7 +40216,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SslErrorHandlerAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,
-                                const Callback_StateStylesChange* stateStyleChange)
+                                const Callback_StateStylesChange* stateStyleChange,
+                                Ark_Int32 allState)
     {
         if (!needGroupedLog(1))
         {
@@ -39459,6 +40227,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, node);
         out.append(", ");
         WriteToString(&out, stateStyleChange);
+        out.append(", ");
+        WriteToString(&out, allState);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -39669,6 +40439,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
+    }
+    void SetLengthImpl(Ark_StyledString peer,
+                       Ark_Int32 length)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setLength(");
+        WriteToString(&out, length);
+        out.append(") \n");
+        appendGroupedLog(1, out);
     }
     } // StyledStringAccessor
     namespace StyledStringControllerAccessor {
@@ -39900,20 +40682,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_SwipeGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetAngleImpl(Ark_SwipeGestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
         if (!needGroupedLog(1))
         {
@@ -39924,20 +40706,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
+    Ark_Float64 GetSpeedImpl(Ark_SwipeGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getSpeed(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetSpeedImpl(Ark_SwipeGestureEvent peer,
-                      const Ark_Number* speed)
+                      Ark_Float64 speed)
     {
         if (!needGroupedLog(1))
         {
@@ -39994,20 +40776,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getSelectedIndex(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                              const Ark_Number* selectedIndex)
+                              Ark_Int32 selectedIndex)
     {
         if (!needGroupedLog(1))
         {
@@ -40018,20 +40800,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getIndex(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                      const Ark_Number* index)
+                      Ark_Int32 index)
     {
         if (!needGroupedLog(1))
         {
@@ -40042,20 +40824,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPosition(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPositionImpl(Ark_SwiperContentTransitionProxy peer,
-                         const Ark_Number* position)
+                         Ark_Float64 position)
     {
         if (!needGroupedLog(1))
         {
@@ -40066,20 +40848,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getMainAxisLength(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer,
-                               const Ark_Number* mainAxisLength)
+                               Ark_Float64 mainAxisLength)
     {
         if (!needGroupedLog(1))
         {
@@ -40226,17 +41008,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
+    Ark_Float64 GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityThreshold(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_SwipeDirection GetDirectionImpl(Ark_SwipeRecognizer peer)
     {
@@ -40534,20 +41316,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetFromImpl(Ark_TabContentTransitionProxy peer)
+    Ark_Int32 GetFromImpl(Ark_TabContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getFrom(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetFromImpl(Ark_TabContentTransitionProxy peer,
-                     const Ark_Number* from)
+                     const Ark_Int32 from)
     {
         if (!needGroupedLog(1))
         {
@@ -40558,20 +41340,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetToImpl(Ark_TabContentTransitionProxy peer)
+    Ark_Int32 GetToImpl(Ark_TabContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTo(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetToImpl(Ark_TabContentTransitionProxy peer,
-                   const Ark_Number* to)
+                   const Ark_Int32 to)
     {
         if (!needGroupedLog(1))
         {
@@ -40619,7 +41401,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void ChangeIndexImpl(Ark_TabsController peer,
-                         const Ark_Number* value)
+                         const Ark_Int32 value)
     {
         if (!needGroupedLog(1))
         {
@@ -40633,7 +41415,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PreloadItemsImpl(Ark_VMContext vmContext,
                           Ark_AsyncWorkerPtr asyncWorker,
                           Ark_TabsController peer,
-                          const Opt_Array_Number* indices,
+                          const Opt_Array_Int32* indices,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
         if (!needGroupedLog(1))
@@ -40660,7 +41442,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTabBarOpacityImpl(Ark_TabsController peer,
-                              const Ark_Number* opacity)
+                              const Ark_Float64 opacity)
     {
         if (!needGroupedLog(1))
         {
@@ -40672,6 +41454,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // TabsControllerAccessor
+    namespace TabsExtenderAccessor {
+    void ApplyAttributesFinishImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("ApplyAttributesFinish(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // TabsExtenderAccessor
     namespace TapGestureEventAccessor {
     void DestroyPeerImpl(Ark_TapGestureEvent peer)
     {
@@ -40743,17 +41538,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
+    Ark_Int32 GetTapCountImpl(Ark_TapRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTapCount(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // TapRecognizerAccessor
     namespace TextAreaControllerAccessor {
@@ -42222,7 +43017,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    Ark_TransitionEffect Construct1Impl(const Ark_Number* effect)
+    Ark_TransitionEffect Construct1Impl(Ark_Float64 effect)
     {
         if (!needGroupedLog(1))
         {
@@ -42351,7 +43146,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
+    Ark_TransitionEffect OpacityImpl(Ark_Float64 alpha)
     {
         if (!needGroupedLog(1))
         {
@@ -43055,8 +43850,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
-                           const Ark_Number* start,
-                           const Opt_Number* deleteCount,
+                           Ark_Int32 start,
+                           const Opt_Int32* deleteCount,
                            const Opt_Array_SectionOptions* sections)
     {
         if (!needGroupedLog(1))
@@ -43089,7 +43884,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
-                           const Ark_Number* sectionIndex,
+                           Ark_Int32 sectionIndex,
                            const Ark_SectionOptions* section)
     {
         if (!needGroupedLog(1))
@@ -43117,17 +43912,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number LengthImpl(Ark_WaterFlowSections peer)
+    Ark_Int32 LengthImpl(Ark_WaterFlowSections peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("length(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // WaterFlowSectionsAccessor
     namespace WebContextMenuParamAccessor {
@@ -44403,6 +45198,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::GetFinalizerImpl,
             AxisEventAccessor::GetHorizontalAxisValueImpl,
             AxisEventAccessor::GetVerticalAxisValueImpl,
+            AxisEventAccessor::HasAxisImpl,
             AxisEventAccessor::GetActionImpl,
             AxisEventAccessor::SetActionImpl,
             AxisEventAccessor::GetDisplayXImpl,
@@ -44917,6 +45713,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ControllerHandlerPeer {
         virtual ~ControllerHandlerPeer() = default;
     };
+    const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor()
+    {
+        static const GENERATED_ArkUICopyEventAccessor CopyEventAccessorImpl {
+            CopyEventAccessor::DestroyPeerImpl,
+            CopyEventAccessor::ConstructImpl,
+            CopyEventAccessor::GetFinalizerImpl,
+            CopyEventAccessor::PreventDefaultImpl,
+        };
+        return &CopyEventAccessorImpl;
+    }
+
+    struct CopyEventPeer {
+        virtual ~CopyEventPeer() = default;
+    };
     const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
     {
         static const GENERATED_ArkUICustomDialogControllerAccessor CustomDialogControllerAccessorImpl {
@@ -44968,6 +45778,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct CustomSpanPeer {
         virtual ~CustomSpanPeer() = default;
     };
+    const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor()
+    {
+        static const GENERATED_ArkUICutEventAccessor CutEventAccessorImpl {
+            CutEventAccessor::DestroyPeerImpl,
+            CutEventAccessor::ConstructImpl,
+            CutEventAccessor::GetFinalizerImpl,
+            CutEventAccessor::PreventDefaultImpl,
+        };
+        return &CutEventAccessorImpl;
+    }
+
+    struct CutEventPeer {
+        virtual ~CutEventPeer() = default;
+    };
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
     {
         static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
@@ -45012,6 +45836,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DecorationStylePeer {
         virtual ~DecorationStylePeer() = default;
     };
+    const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor()
+    {
+        static const GENERATED_ArkUIDialogExtenderAccessor DialogExtenderAccessorImpl {
+            DialogExtenderAccessor::ShowTimePickerDialogImpl,
+            DialogExtenderAccessor::ShowTextPickerDialogImpl,
+            DialogExtenderAccessor::ShowDatePickerDialogImpl,
+        };
+        return &DialogExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIDisappearSymbolEffectAccessor DisappearSymbolEffectAccessorImpl {
@@ -45149,30 +45983,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DrawingRenderingContextAccessor::InvalidateImpl,
             DrawingRenderingContextAccessor::GetSizeImpl,
             DrawingRenderingContextAccessor::SetSizeImpl,
+            DrawingRenderingContextAccessor::GetCanvasImpl,
+            DrawingRenderingContextAccessor::SetCanvasImpl,
         };
         return &DrawingRenderingContextAccessorImpl;
     }
 
     struct DrawingRenderingContextPeer {
         virtual ~DrawingRenderingContextPeer() = default;
-    };
-    const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
-    {
-        static const GENERATED_ArkUIDrawModifierAccessor DrawModifierAccessorImpl {
-            DrawModifierAccessor::DestroyPeerImpl,
-            DrawModifierAccessor::ConstructImpl,
-            DrawModifierAccessor::GetFinalizerImpl,
-            DrawModifierAccessor::InvalidateImpl,
-            DrawModifierAccessor::GetDrawBehind_callbackImpl,
-            DrawModifierAccessor::SetDrawBehind_callbackImpl,
-            DrawModifierAccessor::GetDrawContent_callbackImpl,
-            DrawModifierAccessor::SetDrawContent_callbackImpl,
-        };
-        return &DrawModifierAccessorImpl;
-    }
-
-    struct DrawModifierPeer {
-        virtual ~DrawModifierPeer() = default;
     };
     const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor()
     {
@@ -45301,6 +46119,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &FocusControllerAccessorImpl;
     }
 
+    const GENERATED_ArkUIForEachOpsAccessor* GetForEachOpsAccessor()
+    {
+        static const GENERATED_ArkUIForEachOpsAccessor ForEachOpsAccessorImpl {
+            ForEachOpsAccessor::SyncOnMoveOpsImpl,
+        };
+        return &ForEachOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
     {
         static const GENERATED_ArkUIFrameNodeExtenderAccessor FrameNodeExtenderAccessorImpl {
@@ -45344,6 +46170,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetPositionToWindowWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToParentWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToScreenWithTransformImpl,
+            FrameNodeExtenderAccessor::GetUserConfigBorderWidthImpl,
+            FrameNodeExtenderAccessor::GetUserConfigPaddingImpl,
+            FrameNodeExtenderAccessor::GetUserConfigMarginImpl,
+            FrameNodeExtenderAccessor::GetUserConfigSizeImpl,
             FrameNodeExtenderAccessor::GetFrameNodeByKeyImpl,
             FrameNodeExtenderAccessor::GetIdByFrameNodeImpl,
             FrameNodeExtenderAccessor::MoveToImpl,
@@ -45362,6 +46192,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,
             FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
             FrameNodeExtenderAccessor::GetCommonEventImpl,
+            FrameNodeExtenderAccessor::AdoptChildImpl,
+            FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
+            FrameNodeExtenderAccessor::IsOnRendertreeImpl,
         };
         return &FrameNodeExtenderAccessorImpl;
     }
@@ -45520,7 +46353,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
-            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -45532,23 +46364,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
-    }
-
-    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
-            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
-            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
-        };
-        return &GlobalScopeUicontextFontScaleAccessorImpl;
-    }
-
-    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
-            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
-        };
-        return &GlobalScopeUicontextTextMenuAccessorImpl;
     }
 
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
@@ -45699,6 +46514,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
+            IUIContextAccessor::DispatchKeyEventImpl,
         };
         return &IUIContextAccessorImpl;
     }
@@ -45851,6 +46667,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct LetterSpacingStylePeer {
         virtual ~LetterSpacingStylePeer() = default;
+    };
+
+    const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor()
+    {
+        static const GENERATED_ArkUILevelOrderExtenderAccessor LevelOrderExtenderAccessorImpl {
+            LevelOrderExtenderAccessor::DestroyPeerImpl,
+            LevelOrderExtenderAccessor::ConstructImpl,
+            LevelOrderExtenderAccessor::GetFinalizerImpl,
+            LevelOrderExtenderAccessor::ClampImpl,
+            LevelOrderExtenderAccessor::GetOrderImpl,
+        };
+        return &LevelOrderExtenderAccessorImpl;
+    }
+
+    struct LevelOrderExtenderPeer {
+        virtual ~LevelOrderExtenderPeer() = default;
     };
     const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor()
     {
@@ -46108,6 +46940,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::PopToIndexImpl,
             NavExtenderAccessor::PopToNameImpl,
             NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
+            NavExtenderAccessor::GetRouteMapInConfigImpl,
         };
         return &NavExtenderAccessorImpl;
     }
@@ -46223,6 +47056,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &NodeContainerOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUINodeContentExtenderAccessor* GetNodeContentExtenderAccessor()
+    {
+        static const GENERATED_ArkUINodeContentExtenderAccessor NodeContentExtenderAccessorImpl {
+            NodeContentExtenderAccessor::ConstructorNodeContentImpl,
+            NodeContentExtenderAccessor::GetDestroyImpl,
+            NodeContentExtenderAccessor::AddFrameNodeImpl,
+            NodeContentExtenderAccessor::RemoveFrameNodeImpl,
+        };
+        return &NodeContentExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
     {
         static const GENERATED_ArkUIOffscreenCanvasAccessor OffscreenCanvasAccessorImpl {
@@ -46331,6 +47175,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct ParagraphStylePeer {
         virtual ~ParagraphStylePeer() = default;
+    };
+    const GENERATED_ArkUIPasteEventAccessor* GetPasteEventAccessor()
+    {
+        static const GENERATED_ArkUIPasteEventAccessor PasteEventAccessorImpl {
+            PasteEventAccessor::DestroyPeerImpl,
+            PasteEventAccessor::ConstructImpl,
+            PasteEventAccessor::GetFinalizerImpl,
+            PasteEventAccessor::PreventDefaultImpl,
+        };
+        return &PasteEventAccessorImpl;
+    }
+
+    struct PasteEventPeer {
+        virtual ~PasteEventPeer() = default;
     };
     const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
     {
@@ -46823,6 +47681,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &SearchOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor()
+    {
+        static const GENERATED_ArkUISelectExtenderAccessor SelectExtenderAccessorImpl {
+            SelectExtenderAccessor::SetDividerImpl,
+        };
+        return &SelectExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     {
         static const GENERATED_ArkUISpringMotionAccessor SpringMotionAccessorImpl {
@@ -46890,6 +47756,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StyledStringAccessor::Marshalling1Impl,
             StyledStringAccessor::Unmarshalling1Impl,
             StyledStringAccessor::GetLengthImpl,
+            StyledStringAccessor::SetLengthImpl,
         };
         return &StyledStringAccessorImpl;
     }
@@ -47096,6 +47963,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TabsControllerPeer {
         virtual ~TabsControllerPeer() = default;
     };
+    const GENERATED_ArkUITabsExtenderAccessor* GetTabsExtenderAccessor()
+    {
+        static const GENERATED_ArkUITabsExtenderAccessor TabsExtenderAccessorImpl {
+            TabsExtenderAccessor::ApplyAttributesFinishImpl,
+        };
+        return &TabsExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
     {
         static const GENERATED_ArkUITapGestureEventAccessor TapGestureEventAccessorImpl {
@@ -47755,18 +48630,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetConsoleMessageAccessor,
             GetContentModifierHelperAccessor,
             GetControllerHandlerAccessor,
+            GetCopyEventAccessor,
             GetCustomDialogControllerAccessor,
             GetCustomDialogControllerExtenderAccessor,
             GetCustomSpanAccessor,
+            GetCutEventAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
+            GetDialogExtenderAccessor,
             GetDisappearSymbolEffectAccessor,
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,
             GetDragEventAccessor,
             GetDrawingRenderingContextAccessor,
-            GetDrawModifierAccessor,
             GetEnvironmentBackendAccessor,
             GetEventEmulatorAccessor,
             GetEventResultAccessor,
@@ -47776,6 +48653,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFileSelectorResultAccessor,
             GetFocusAxisEventAccessor,
             GetFocusControllerAccessor,
+            GetForEachOpsAccessor,
             GetFrameNodeExtenderAccessor,
             GetFrictionMotionAccessor,
             GetFullScreenExitHandlerAccessor,
@@ -47788,8 +48666,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
             GetGlobalScope_ohos_fontAccessor,
             GetGlobalScope_ohos_measure_utilsAccessor,
-            GetGlobalScopeUicontextFontScaleAccessor,
-            GetGlobalScopeUicontextTextMenuAccessor,
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,
@@ -47808,6 +48684,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLazyBuildAccessor,
             GetLazyForEachOpsAccessor,
             GetLetterSpacingStyleAccessor,
+            GetLevelOrderExtenderAccessor,
             GetLifeCycleAccessor,
             GetLinearGradientAccessor,
             GetLinearIndicatorControllerAccessor,
@@ -47825,12 +48702,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNavPathInfoAccessor,
             GetNavPathStackAccessor,
             GetNodeContainerOpsAccessor,
+            GetNodeContentExtenderAccessor,
             GetOffscreenCanvasAccessor,
             GetOffscreenCanvasRenderingContext2DAccessor,
             GetPanGestureEventAccessor,
             GetPanGestureOptionsAccessor,
             GetPanRecognizerAccessor,
             GetParagraphStyleAccessor,
+            GetPasteEventAccessor,
             GetPath2DAccessor,
             GetPatternLockControllerAccessor,
             GetPermissionRequestAccessor,
@@ -47861,6 +48740,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetScrollResultAccessor,
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
+            GetSelectExtenderAccessor,
             GetSpringMotionAccessor,
             GetSpringPropAccessor,
             GetSslErrorHandlerAccessor,
@@ -47878,6 +48758,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTabBarSymbolAccessor,
             GetTabContentTransitionProxyAccessor,
             GetTabsControllerAccessor,
+            GetTabsExtenderAccessor,
             GetTapGestureEventAccessor,
             GetTapRecognizerAccessor,
             GetTextAreaControllerAccessor,

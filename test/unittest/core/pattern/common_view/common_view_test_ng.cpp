@@ -17,6 +17,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;

@@ -80,6 +80,13 @@ void ApplyAttributesFinish(ArkUINodeHandle node)
     frameNode->MarkModifyDone();
 }
 
+ArkUI_Bool IsOnRenderTree(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto renderContext = frameNode->GetRenderContext();
+    return renderContext->IsOnRenderTree();
+}
+
 RefPtr<FrameNode> GetParentNode(UINode* node)
 {
     auto uiNode = AceType::Claim<UINode>(node);
@@ -97,6 +104,9 @@ void AddBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     CHECK_NULL_VOID(currentNode);
     auto* childNode = reinterpret_cast<UINode*>(child);
     CHECK_NULL_VOID(childNode);
+    if (childNode->IsAdopted()) {
+        return;
+    }
     auto childRef = Referenced::Claim<UINode>(childNode);
     CHECK_NULL_VOID(childRef);
     auto parentNode = childRef->GetParent();
@@ -196,10 +206,11 @@ ArkUI_Bool ConvertPoint(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkU
     if (!sameParentNode) {
         return false;
     }
-    auto offset =
-        currentNode->ConvertPoint({ (*position)[0], (*position)[1] }, Referenced::Claim<FrameNode>(targetNode));
-    (*targetNodePositionOffset)[0] = offset.GetX();
-    (*targetNodePositionOffset)[1] = offset.GetY();
+    auto offset = currentNode->ConvertPoint({ PipelineBase::Vp2PxWithCurrentDensity((*position)[0]),
+                                                PipelineBase::Vp2PxWithCurrentDensity((*position)[1]) },
+        Referenced::Claim<FrameNode>(targetNode));
+    (*targetNodePositionOffset)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    (*targetNodePositionOffset)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return true;
 }
 
@@ -992,6 +1003,9 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto* toNode = reinterpret_cast<UINode*>(target_parent);
     CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    if (moveNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
+    }
     static const std::vector<const char*> nodeTypeArray = {
         OHOS::Ace::V2::STACK_ETS_TAG,
         OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
@@ -1054,7 +1068,9 @@ void AddSupportedUIStates(
     std::function<void(uint64_t)> onStatesChange = [userData, statesChangeHandler](uint64_t currentState) {
         using FuncType = float (*)(int32_t, void*);
         FuncType func = reinterpret_cast<FuncType>(statesChangeHandler);
-        func(static_cast<int32_t >(currentState), userData);
+        if (func != nullptr) {
+            func(static_cast<int32_t >(currentState), userData);
+        }
     };
     eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), onStatesChange, false, isExcludeInner);
 }
@@ -1198,6 +1214,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setFocusDependence = SetFocusDependence,
         .resetFocusDependence = ResetFocusDependence,
         .applyAttributesFinish = ApplyAttributesFinish,
+        .isOnRenderTree = IsOnRenderTree,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

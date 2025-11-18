@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-inline std::optional<float> ConvertProgressMaskValue(const Ark_Number* value)
+inline std::optional<float> ConvertProgressMaskValue(const Ark_Float64* value)
 {
     CHECK_NULL_RETURN(value, std::nullopt);
     auto convValue = Converter::OptConvert<float>(*value);
@@ -29,14 +29,14 @@ inline std::optional<float> ConvertProgressMaskValue(const Ark_Number* value)
     return convValue;
 }
 
-void SetProgressMaskValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Number* value)
+void SetProgressMaskValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Float64* value)
 {
     auto convValue = ConvertProgressMaskValue(value);
     CHECK_NULL_VOID(convValue);
     property->SetValue(*convValue);
 }
 
-void SetProgressMaskMaxValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Number* value)
+void SetProgressMaskMaxValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Float64* value)
 {
     auto convValue = ConvertProgressMaskValue(value);
     CHECK_NULL_VOID(convValue);
@@ -56,14 +56,14 @@ void DestroyPeerImpl(Ark_ProgressMask peer)
 {
     delete peer;
 }
-Ark_ProgressMask ConstructImpl(const Ark_Number* value,
-                               const Ark_Number* total,
+Ark_ProgressMask ConstructImpl(Ark_Float64 value,
+                               Ark_Float64 total,
                                const Ark_ResourceColor* color)
 {
     auto peer = new ProgressMaskPeer();
     const auto& property = peer->GetProperty();
-    SetProgressMaskValue(property, value);
-    SetProgressMaskMaxValue(property, total);
+    SetProgressMaskValue(property, &value);
+    SetProgressMaskMaxValue(property, &total);
     SetProgressMaskColor(property, color);
     return peer;
 }
@@ -72,10 +72,10 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void UpdateProgressImpl(Ark_ProgressMask peer,
-                        const Ark_Number* value)
+                        Ark_Float64 value)
 {
     CHECK_NULL_VOID(peer);
-    SetProgressMaskValue(peer->GetProperty(), value);
+    SetProgressMaskValue(peer->GetProperty(), &value);
 }
 void UpdateColorImpl(Ark_ProgressMask peer,
                      const Ark_ResourceColor* value)

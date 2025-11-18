@@ -18,6 +18,7 @@
 
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {

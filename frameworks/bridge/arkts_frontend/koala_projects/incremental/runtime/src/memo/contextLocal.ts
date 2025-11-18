@@ -14,7 +14,7 @@
  */
 
 import { __context, __id } from "../internals"
-import { State } from 'arkui.incremental.runtime.state';
+import { ReadableState as State } from 'arkui.incremental.runtime.state';
 import { StateContext, InternalScope } from '../states/State';
 
 /**

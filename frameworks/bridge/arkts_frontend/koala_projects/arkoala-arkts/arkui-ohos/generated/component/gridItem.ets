@@ -53,48 +53,48 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridItemInterface_setGridItemOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setRowStartAttribute(value: number | undefined): void {
+    setRowStartAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridItemAttribute_setRowStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setRowEndAttribute(value: number | undefined): void {
+    setRowEndAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridItemAttribute_setRowEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColumnStartAttribute(value: number | undefined): void {
+    setColumnStartAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridItemAttribute_setColumnStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColumnEndAttribute(value: number | undefined): void {
+    setColumnEndAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -119,11 +119,11 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof boolean) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable<boolean>) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -157,16 +157,16 @@ export interface GridItemAttribute extends CommonMethod {
     setGridItemOptions(value?: GridItemOptions): this {
         throw new Error("Unimplemented method setGridItemOptions")
     }
-    rowStart(value: number | undefined): this {
+    rowStart(value: int32 | undefined): this {
         throw new Error("Unimplemented method rowStart")
     }
-    rowEnd(value: number | undefined): this {
+    rowEnd(value: int32 | undefined): this {
         throw new Error("Unimplemented method rowEnd")
     }
-    columnStart(value: number | undefined): this {
+    columnStart(value: int32 | undefined): this {
         throw new Error("Unimplemented method columnStart")
     }
-    columnEnd(value: number | undefined): this {
+    columnEnd(value: int32 | undefined): this {
         throw new Error("Unimplemented method columnEnd")
     }
     selectable(value: boolean | undefined): this {
@@ -183,10 +183,10 @@ export interface GridItemAttribute extends CommonMethod {
     }
 }
 export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAttribute {
-    rowStart_value?: number | undefined
-    rowEnd_value?: number | undefined
-    columnStart_value?: number | undefined
-    columnEnd_value?: number | undefined
+    rowStart_value?: int32 | undefined
+    rowEnd_value?: int32 | undefined
+    columnStart_value?: int32 | undefined
+    columnEnd_value?: int32 | undefined
     selectable_value?: boolean | undefined
     selected_value?: boolean | Bindable<boolean> | undefined
     onSelect_value?: ((isSelected: boolean) => void) | undefined
@@ -194,16 +194,16 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     setGridItemOptions(value?: GridItemOptions): this {
         return this
     }
-    rowStart(value: number | undefined): this {
+    rowStart(value: int32 | undefined): this {
         return this
     }
-    rowEnd(value: number | undefined): this {
+    rowEnd(value: int32 | undefined): this {
         return this
     }
-    columnStart(value: number | undefined): this {
+    columnStart(value: int32 | undefined): this {
         return this
     }
-    columnEnd(value: number | undefined): this {
+    columnEnd(value: int32 | undefined): this {
         return this
     }
     selectable(value: boolean | undefined): this {
@@ -231,37 +231,38 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         if (this.checkPriority("setGridItemOptions")) {
             const value_casted = value as (GridItemOptions | undefined)
             this.getPeer()?.setGridItemOptionsAttribute(value_casted)
+            this.applyOptionsFinish('GridItemAttribute');
             return this
         }
         return this
     }
-    public rowStart(value: number | undefined): this {
+    public rowStart(value: int32 | undefined): this {
         if (this.checkPriority("rowStart")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setRowStartAttribute(value_casted)
             return this
         }
         return this
     }
-    public rowEnd(value: number | undefined): this {
+    public rowEnd(value: int32 | undefined): this {
         if (this.checkPriority("rowEnd")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setRowEndAttribute(value_casted)
             return this
         }
         return this
     }
-    public columnStart(value: number | undefined): this {
+    public columnStart(value: int32 | undefined): this {
         if (this.checkPriority("columnStart")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setColumnStartAttribute(value_casted)
             return this
         }
         return this
     }
-    public columnEnd(value: number | undefined): this {
+    public columnEnd(value: int32 | undefined): this {
         if (this.checkPriority("columnEnd")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setColumnEndAttribute(value_casted)
             return this
         }
@@ -298,6 +299,9 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -42,6 +42,7 @@ export class ObserveSingleton implements IObserve {
     public static readonly RenderingMonitor: int = 3;
     public static readonly RenderingComputed: int = 4;
     public static readonly RenderingPersistentStorage: int = 5;
+    // if add new to ths RenderingXXX, remember to change judgement when addRef
 
     public _renderingComponent: int = ObserveSingleton.RenderingComponent;
     private mutateMutableStateMode_: NotifyMutableStateMode = NotifyMutableStateMode.normal;
@@ -122,9 +123,11 @@ export class ObserveSingleton implements IObserve {
     public addDirtyRef(trackedRef: ITrackedDecoratorRef): void {
         if (trackedRef.id >= PersistenceV2Impl.MIN_PERSISTENCE_ID) {
             this.persistencePropRefsChanged_.add(trackedRef.weakThis);
-            return;
-        }
-        if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
+        } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_SYNC_MONITOR_ID) {
+            const currentMonitor = (trackedRef as MonitorValueInternal).monitor;
+            currentMonitor.notifyChangesForPath(trackedRef);
+            currentMonitor.runMonitorFunction();
+        } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
             this.monitorPathRefsChanged_.add(trackedRef.weakThis);
         } else if (trackedRef.id >= ComputedDecoratedVariable.MIN_COMPUTED_ID) {
             this.computedPropRefsChanged_.add(trackedRef.weakThis);
@@ -265,6 +268,9 @@ export class ObserveSingleton implements IObserve {
      * @returns
      */
     public applyTaskDelayMutableStateChange<T>(task: TaskType<T>): T {
+        if (ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComponent) {
+            return task();
+        }
         const temp = this.mutateMutableStateMode_;
         this.mutateMutableStateMode_ = NotifyMutableStateMode.delayMutation;
         const result: T = task();

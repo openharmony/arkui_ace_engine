@@ -31,18 +31,18 @@ export default namespace curves {
         Friction = 12,
     };
 
-    export native function cubicBezierCurve(x1: number, y1: number, x2: number, y2: number):ICurve;
-    export native function springMotion(response?: number, dampingFraction?: number, overlapDuration?: number): ICurve;
+    export native function cubicBezierCurve(x1: double, y1: double, x2: double, y2: double):ICurve;
+    export native function springMotion(response?: double, dampingFraction?: double, overlapDuration?: double): ICurve;
     export native function initCurve(curve?: Curve):ICurve;
-    export native function interpolatingSpring(velocity: number, mass: number, stiffness: number, damping: number):ICurve;
-    export native function springCurve(velocity: number, mass: number, stiffness: number, damping: number):ICurve;
-    export native function responsiveSpringMotion(response?: number, dampingFraction?: number, overlapDuration?: number): ICurve;
-    export native function customCurve(interpolate: (fraction: number) => number): ICurve;
+    export native function interpolatingSpring(velocity: double, mass: double, stiffness: double, damping: double):ICurve;
+    export native function springCurve(velocity: double, mass: double, stiffness: double, damping: double):ICurve;
+    export native function responsiveSpringMotion(response?: double, dampingFraction?: double, overlapDuration?: double): ICurve;
+    export native function customCurve(interpolate: (fraction: double) => double): ICurve;
     export native function stepsCurve(count: number, end: boolean): ICurve;
 
     export interface ICurve
     {
-        interpolate(fraction: number): number;
+        interpolate(fraction: double): double;
     }
     class ICurveImpl implements ICurve
     {
@@ -51,6 +51,6 @@ export default namespace curves {
         constructor(context:long) {
             this.nativeContext = context;
         }
-        public native interpolate(fraction: number): number;
+        public native interpolate(fraction: double): double;
     }
 }

@@ -68,15 +68,15 @@ public:
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-    OnPreDragFunc onPreDragFunc_;
-    OnDragStartFunc defaultOnDragStart_;
-    OnDragStartFunc onDragStart_;
-    OnDragFunc onDragEnter_;
-    OnDragFunc onDragLeave_;
-    OnDragFunc onDragMove_;
-    OnDragFunc onDrop_;
-    OnNewDragFunc onDragEnd_;
-    OnDragDropSpringLoadingFunc onDragSpringLoading_;
+    OnPreDragFunc onPreDragFunc;
+    OnDragStartFunc defaultOnDragStart;
+    OnDragStartFunc onDragStart;
+    OnDragFunc onDragEnter;
+    OnDragFunc onDragLeave;
+    OnDragFunc onDragMove;
+    OnDragFunc onDrop;
+    OnNewDragFunc onDragEnd;
+    OnDragDropSpringLoadingFunc onDragSpringLoading;
 };
 
 struct DragDropCallbackSet : public AceType {
@@ -87,8 +87,8 @@ public:
     ~DragDropCallbackSet() override = default;
     RefPtr<DragDropCallbackInfo> GetOrCreateInnerDragDropCallback();
     RefPtr<DragDropCallbackInfo> GetOrCreateCustomerDragDropCallback();
-    RefPtr<DragDropCallbackInfo> innerDragDropCallback_;
-    RefPtr<DragDropCallbackInfo> customerDragDropCallback_;
+    RefPtr<DragDropCallbackInfo> innerDragDropCallback;
+    RefPtr<DragDropCallbackInfo> customerDragDropCallback;
 };
 
 struct VisibleAreaChangeConfig : public AceType {
@@ -97,8 +97,8 @@ struct VisibleAreaChangeConfig : public AceType {
 public:
     VisibleAreaChangeConfig() = default;
     ~VisibleAreaChangeConfig() override = default;
-    std::vector<double> ratios_;
-    VisibleCallbackInfo callbackInfo_;
+    std::vector<double> ratios;
+    VisibleCallbackInfo callbackInfo;
 };
 
 struct VisibleAreaChangeCallbackSet : public AceType {
@@ -110,9 +110,9 @@ public:
     RefPtr<VisibleAreaChangeConfig> GetOrCreateUserVisibleAreaChange();
     RefPtr<VisibleAreaChangeConfig> GetOrCreateInnerVisibleAreaChange();
     RefPtr<VisibleAreaChangeConfig> GetOrCreateThrottledVisibleAreaChange();
-    RefPtr<VisibleAreaChangeConfig> userVisibleAreaChange_;
-    RefPtr<VisibleAreaChangeConfig> innerVisibleAreaChange_;
-    RefPtr<VisibleAreaChangeConfig> throttledVisibleAreaChange_;
+    RefPtr<VisibleAreaChangeConfig> userVisibleAreaChange;
+    RefPtr<VisibleAreaChangeConfig> innerVisibleAreaChange;
+    RefPtr<VisibleAreaChangeConfig> throttledVisibleAreaChange;
 };
 
 
@@ -248,9 +248,9 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
-    void AddSupportedUIStateWithCallback(
+    bool AddSupportedUIStateWithCallback(
         UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
-    void RemoveSupportedUIState(UIState state, bool isInner);
+    bool RemoveSupportedUIState(UIState state, bool isInner);
     bool GetUserSetStateStyle();
     void SetScrollingFeatureForbidden(bool isSetStateStyle);
     bool IsCurrentStateOn(UIState state);
@@ -285,7 +285,7 @@ public:
     std::vector<double>& GetVisibleAreaRatios(bool isUser);
     VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser);
     void SetVisibleAreaRatiosAndCallback(
-        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser);
+        const VisibleCallbackInfo& callback, const std::vector<double>& ratios, bool isUser);
     void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false);
     RefPtr<VisibleAreaChangeCallbackSet> GetOrCreateVisibleAreaChangeCallbackSet();
     bool HasVisibleAreaCallback(bool isUser);

@@ -206,7 +206,8 @@ int32_t FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formI
 
     sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
     if (proxy != nullptr) {
-        formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+        sptr<IFormRendererDispatcher> rendererDispatcher = iface_cast<IFormRendererDispatcher>(proxy);
+        SetFormRendererDispatcher(rendererDispatcher);
         CheckWhetherSurfaceChangeFailed();
     } else {
         TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
@@ -219,8 +220,9 @@ int32_t FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formI
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
-    if (formRendererDispatcher_) {
-        formRendererDispatcher_->SetMultiInstanceEnabled(SystemProperties::GetMultiInstanceEnabled());
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    if (formRendererDispatcher) {
+        formRendererDispatcher->SetMultiInstanceEnabled(SystemProperties::GetMultiInstanceEnabled());
     }
     return ERR_OK;
 }
@@ -243,13 +245,19 @@ void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
     }
     if (needRedispatch) {
         uint32_t reason = static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED);
-        formRendererDispatcher_->DispatchSurfaceChangeEvent(formSurfaceInfo, reason, nullptr);
+        auto formRendererDispatcher = GetFormRendererDispatcher();
+        if (formRendererDispatcher == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "dispatcher is null");
+            return;
+        }
+        formRendererDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo, reason, nullptr);
     }
 }
 
 void FormManagerDelegate::HandleCachedClickEvents()
 {
-    if (formRendererDispatcher_ == nullptr) {
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    if (formRendererDispatcher == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "dispatcher is null, formId:%{public}" PRId64, runningCardId_);
         return;
     }
@@ -263,7 +271,7 @@ void FormManagerDelegate::HandleCachedClickEvents()
             std::to_string(pointerEventCache_.size()).c_str());
         for (const auto& pointerEvent : pointerEventCache_) {
             SerializedGesture serializedGesture;
-            formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
+            formRendererDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
         }
         pointerEventCache_.clear();
     }
@@ -502,6 +510,15 @@ void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback)
     snapshotCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddFormRenderDiedCallback(FormRenderDiedCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+
+    onFormRenderDiedCallback_ = std::move(callback);
+}
+
 bool FormManagerDelegate::ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -650,7 +667,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     if (!eventAction->IsValid()) {
         return;
     }
-    
+
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
         return;
@@ -704,7 +721,8 @@ void FormManagerDelegate::DispatchPointerEvent(const
     }
 
     // if formRendererDispatcher_ is null, check if form is recycled.
-    if (formRendererDispatcher_ == nullptr) {
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    if (formRendererDispatcher == nullptr) {
         std::lock_guard<std::mutex> lock(recycleMutex_);
         if (recycleStatus_ == RecycleStatus::RECYCLED) {
             SetGestureInnerFlag();
@@ -731,14 +749,14 @@ void FormManagerDelegate::DispatchPointerEvent(const
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
-    
+
     bool disablePanGesture;
     {
         std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
         disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
     }
     if (!disablePanGesture) {
-        formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
+        formRendererDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
         return;
     }
 
@@ -751,7 +769,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
         pointerEvent->GetPointerAction());
     SerializedGesture ignoredGesture;
-    formRendererDispatcher_->DispatchPointerEvent(pointerEvent, ignoredGesture);
+    formRendererDispatcher->DispatchPointerEvent(pointerEvent, ignoredGesture);
     SetGestureInnerFlag();
 }
 
@@ -767,23 +785,25 @@ void FormManagerDelegate::SetGestureInnerFlag()
 
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 {
-    if (formRendererDispatcher_ == nullptr) {
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    if (formRendererDispatcher == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is null");
         return;
     }
 
-    formRendererDispatcher_->SetAllowUpdate(allowUpdate);
+    formRendererDispatcher->SetAllowUpdate(allowUpdate);
 }
 
 void FormManagerDelegate::NotifySurfaceChange(const OHOS::AppExecFwk::FormSurfaceInfo &formSurfaceInfo)
 {
     OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, formSurfaceInfo.width,
-        formSurfaceInfo.height, formSurfaceInfo.borderWidth);
+        formSurfaceInfo.height, formSurfaceInfo.borderWidth, formSurfaceInfo.formViewScale);
     UpdateFormSizeWantCache(formSurfaceInfo.width, formSurfaceInfo.height, formSurfaceInfo.formViewScale,
         formSurfaceInfo.borderWidth);
+    auto formRendererDispatcher = GetFormRendererDispatcher();
     {
         std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
-        if (formRendererDispatcher_ == nullptr) {
+        if (formRendererDispatcher == nullptr) {
             TAG_LOGW(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
             notifySurfaceChangeFailedRecord_.isfailed = true;
             notifySurfaceChangeFailedRecord_.expectedWidth = formSurfaceInfo.width;
@@ -818,7 +838,7 @@ void FormManagerDelegate::NotifySurfaceChange(const OHOS::AppExecFwk::FormSurfac
     } else if (transactionControllerHandler != nullptr) {
         transaction = transactionControllerHandler->GetRSTransaction();
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(formSurfaceInfo, static_cast<uint32_t>(sizeChangeReason),
+    formRendererDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo, static_cast<uint32_t>(sizeChangeReason),
         transaction);
 }
 
@@ -897,6 +917,9 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
+            if (onFormRenderDiedCallback_) {
+                onFormRenderDiedCallback_();
+            }
             ReAddForm();
             break;
         case FORM_STATUS_TIME_OUT:
@@ -957,7 +980,7 @@ void FormManagerDelegate::HandleLockFormCallback(bool lock)
 void FormManagerDelegate::ReAddForm()
 {
     std::lock_guard<std::mutex> lock(wantCacheMutex_);
-    formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
+    ClearFormRendererDispatcher(); // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     if (wantCache_.HasParameter(PARAM_FORM_MIGRATE_FORM_KEY)) {
         TAG_LOGW(AceLogTag::ACE_FORM, "Remove migrate form key.");
         wantCache_.RemoveParam(PARAM_FORM_MIGRATE_FORM_KEY);
@@ -976,35 +999,40 @@ void FormManagerDelegate::ReAddForm()
 
 void FormManagerDelegate::SetObscured(bool isObscured)
 {
-    CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->SetObscured(isObscured);
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->SetObscured(isObscured);
 }
 
 void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
     std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
-    CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
 void FormManagerDelegate::OnAccessibilityChildTreeDeregister()
 {
-    CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->OnAccessibilityChildTreeDeregister();
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->OnAccessibilityChildTreeDeregister();
 }
 
 void FormManagerDelegate::OnAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->OnAccessibilityDumpChildInfo(params, info);
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->OnAccessibilityDumpChildInfo(params, info);
 }
 
 void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
-    CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
 bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
@@ -1030,8 +1058,9 @@ bool FormManagerDelegate::IsFormBundleDebugSignature(const std::string& bundleNa
 void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
     std::vector<std::string>& info)
 {
-    CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->OnNotifyDumpInfo(params, info);
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->OnNotifyDumpInfo(params, info);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1040,7 +1069,7 @@ void FormManagerDelegate::ResetForm()
     TAG_LOGI(AceLogTag::ACE_FORM, "Reset form id is %{public}" PRId64 "", runningCardId_);
     runningCardId_ = -1;
     runningCompId_.clear();
-    formRendererDispatcher_ = nullptr;
+    ClearFormRendererDispatcher();
 }
 
 void FormManagerDelegate::ReleaseForm()
@@ -1104,7 +1133,7 @@ void FormManagerDelegate::ReleaseRenderer()
     }
 
     OHOS::AppExecFwk::FormMgr::GetInstance().ReleaseRenderer(runningCardId_, runningCompId_);
-    formRendererDispatcher_ = nullptr;
+    ClearFormRendererDispatcher();
 }
 
 void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)

@@ -1586,6 +1586,11 @@ public:
         JSClass<JSFileSelectorParam>::CustomMethod("getAcceptType", &JSFileSelectorParam::GetAcceptType);
         JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
         JSClass<JSFileSelectorParam>::CustomMethod("getMimeTypes", &JSFileSelectorParam::GetMimeType);
+        JSClass<JSFileSelectorParam>::CustomMethod("getSuggestedName", &JSFileSelectorParam::GetSuggestedName);
+        JSClass<JSFileSelectorParam>::CustomMethod("getDefaultPath", &JSFileSelectorParam::GetDefaultPath);
+        JSClass<JSFileSelectorParam>::CustomMethod("getDescriptions", &JSFileSelectorParam::GetDescriptions);
+        JSClass<JSFileSelectorParam>::CustomMethod(
+            "isAcceptAllOptionExcluded", &JSFileSelectorParam::IsAcceptAllOptionExcluded);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
     }
@@ -1643,6 +1648,41 @@ public:
             result->SetValueAt(index++, value);
         }
         args.SetReturnValue(result);
+    }
+
+    void GetSuggestedName(const JSCallbackInfo& args)
+    {
+        auto suggestedName = JSVal(ToJSValue(param_->GetDefaultFileName()));
+        auto descriptionRef = JSRef<JSVal>::Make(suggestedName);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetDefaultPath(const JSCallbackInfo& args)
+    {
+        auto defaultPath = JSVal(ToJSValue(param_->GetDefaultPath()));
+        auto descriptionRef = JSRef<JSVal>::Make(defaultPath);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetDescriptions(const JSCallbackInfo& args)
+    {
+        auto descriptions = param_->GetDescriptions();
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        std::vector<std::string>::iterator iterator;
+        uint32_t index = 0;
+        for (iterator = descriptions.begin(); iterator != descriptions.end(); ++iterator) {
+            auto valueStr = JSVal(ToJSValue(*iterator));
+            auto value = JSRef<JSVal>::Make(valueStr);
+            result->SetValueAt(index++, value);
+        }
+        args.SetReturnValue(result);
+    }
+
+    void IsAcceptAllOptionExcluded(const JSCallbackInfo& args)
+    {
+        auto isAcceptAllOptionExcluded = JSVal(ToJSValue(param_->IsAcceptAllOptionExcluded()));
+        auto descriptionRef = JSRef<JSVal>::Make(isAcceptAllOptionExcluded);
+        args.SetReturnValue(descriptionRef);
     }
 
 private:
@@ -2339,7 +2379,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("enableSelectedDataDetector", &JSWeb::EnableSelectedDataDetector);
-    JSClass<JSWeb>::StaticMethod("selectedDataDetectorConfig", &JSWeb::SelectedDataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::StaticMethod("onLoadStarted", &JSWeb::OnLoadStarted);
@@ -6781,18 +6820,6 @@ void JSWeb::EnableSelectedDataDetector(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableSelectedDataDetector(isEnabled);
-}
-
-void JSWeb::SelectedDataDetectorConfig(const JSCallbackInfo& args)
-{
-    RETURN_IF_CALLING_FROM_M114();
-    TextDetectConfig textDetectConfig;
-    if (args.Length() < 1 || !JSViewAbstract::ParseDataDetectorConfig(args, textDetectConfig)) {
-        TextDetectConfig defaultTextDetectConfig;
-        WebModel::GetInstance()->SetSelectedDataDetectorConfig(defaultTextDetectConfig);
-        return;
-    }
-    WebModel::GetInstance()->SetSelectedDataDetectorConfig(textDetectConfig);
 }
 
 void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)

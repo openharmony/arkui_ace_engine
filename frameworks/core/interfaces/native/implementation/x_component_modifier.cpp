@@ -71,13 +71,11 @@ void SetXComponentOptionsImpl(Ark_NativePointer node,
                 CHECK_NULL_VOID(peerImpl);
                 XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
             }
+            XComponentModelStatic::InitParams(frameNode);
         },
         [frameNode](const Ark_XComponentOptions& src) {
             XComponentType type = ConvertXComponentType(src.type);
             XComponentModelStatic::SetXComponentType(frameNode, type);
-            if (src.screenId.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-                XComponentModelStatic::SetScreenId(frameNode, static_cast<uint64_t>(src.screenId.value));
-            }
             auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(src.controller);
             CHECK_NULL_VOID(peerImpl);
             bool isUpdated = XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
@@ -85,14 +83,17 @@ void SetXComponentOptionsImpl(Ark_NativePointer node,
             XComponentModelNG::SetControllerOnCreated(frameNode, std::move(peerImpl->onSurfaceCreatedEvent));
             XComponentModelNG::SetControllerOnChanged(frameNode, std::move(peerImpl->onSurfaceChangedEvent));
             XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(peerImpl->onSurfaceDestroyedEvent));
+            XComponentModelStatic::InitParams(frameNode);
+            CHECK_EQUAL_VOID(src.screenId.tag, InteropTag::INTEROP_TAG_UNDEFINED);
+            XComponentModelStatic::SetScreenId(frameNode, static_cast<uint64_t>(src.screenId.value));
         },
         [frameNode](const Ark_NativeXComponentParameters& src) {
             XComponentType type = ConvertXComponentType(src.type);
             XComponentModelStatic::SetXComponentType(frameNode, type);
             XComponentModelStatic::MarkBindNative(frameNode);
+            XComponentModelStatic::InitParams(frameNode);
         },
         []() {});
-    XComponentModelStatic::InitParams(frameNode);
 #endif
 }
 } // XComponentInterfaceModifier
@@ -110,6 +111,7 @@ void SetOnLoadImpl(Ark_NativePointer node,
     }
     auto onLoad =
         [arkCallback = CallbackHelper(*optValue)](const std::string& xcomponentId) {
+            CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
             arkCallback.InvokeSync();
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
     };
@@ -129,6 +131,7 @@ void SetOnDestroyImpl(Ark_NativePointer node,
     }
     auto onDestroy =
         [arkCallback = CallbackHelper(*optValue)](const std::string&) {
+            CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
             arkCallback.InvokeSync();
     };
     XComponentModelNG::SetOnDestroy(frameNode, std::move(onDestroy));
@@ -179,10 +182,7 @@ void SetEnableTransparentLayerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     #ifdef XCOMPONENT_SUPPORTED
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        return;
-    }
-    XComponentModelNG::EnableTransparentLayer(frameNode, *convValue);
+    XComponentModelNG::EnableTransparentLayer(frameNode, convValue.value_or(false));
     #endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentAttributeModifier
@@ -195,6 +195,7 @@ const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
         XComponentAttributeModifier::SetOnDestroyImpl,
         XComponentAttributeModifier::SetEnableAnalyzerImpl,
         XComponentAttributeModifier::SetEnableSecureImpl,
+        XComponentAttributeModifier::SetEnableTransparentLayerImpl,
         XComponentAttributeModifier::SetHdrBrightnessImpl,
     };
     return &ArkUIXComponentModifierImpl;

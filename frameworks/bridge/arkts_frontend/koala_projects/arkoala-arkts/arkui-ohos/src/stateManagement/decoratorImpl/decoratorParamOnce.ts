@@ -12,31 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
-import { IParamOnceDecoratedVariable } from '../decorator';
+import { IParamOnceDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase implements IParamOnceDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
-    constructor(owningView: ExtendableComponent | null, varName: string, initValue: T) {
+    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Param @Once', owningView, varName);
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ParamOnce ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
+        uiUtils.builtinContainersAddRefLength(value);
         return value;
     }
 
     set(newValue: T): void {
         const value = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ParamOnce ${value === newValue} ${this.setTraceInfo()}`);
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(uiUtils.makeObserved(newValue, true) as T)) {
-        }
+        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
     }
 }

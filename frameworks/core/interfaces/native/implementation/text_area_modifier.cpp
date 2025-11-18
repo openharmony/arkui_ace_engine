@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -352,12 +353,10 @@ void SetOnPasteImpl(Ark_NativePointer node,
         NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
-        auto keeper = CallbackKeeper::Claim([&event]() {
-            event.SetPreventDefault(true);
-        });
-        Ark_PasteEvent arkEvent = {
-            .preventDefault = Converter::ArkValue<Opt_VoidCallback>(keeper.ArkValue())
-        };
+        Ark_PasteEvent arkEvent = PasteEventPeer::Create();
+        CHECK_NULL_VOID(arkEvent);
+        auto preventDefault = [&event]() { event.SetPreventDefault(true); };
+        arkEvent->SetPreventDefault(preventDefault);
         arkCallback.InvokeSync(arkContent, arkEvent);
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
@@ -562,12 +561,7 @@ void SetFontFeatureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        FONT_FEATURES_LIST fontFeatures;
-        TextFieldModelNG::SetFontFeature(frameNode, fontFeatures);
-        return;
-    }
-    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
+    TextFieldModelStatic::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
 }
 void SetOnWillInsertImpl(Ark_NativePointer node,
                          const Opt_Callback_InsertValue_Boolean* value)
@@ -780,13 +774,10 @@ void SetShowCounterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto showCounter = Converter::OptConvertPtr<bool>(value);
-    const bool defaultShowCounter = false;
-    const int32_t defaultCounterType = -1;
-    const bool defaultCounterBorder = true;
     if (!showCounter) {
-        TextFieldModelNG::SetShowCounter(frameNode, defaultShowCounter);
-        TextFieldModelStatic::SetCounterType(frameNode, defaultCounterType);
-        TextFieldModelStatic::SetShowCounterBorder(frameNode, defaultCounterBorder);
+        TextFieldModelStatic::SetShowCounter(frameNode, std::nullopt);
+        TextFieldModelStatic::SetCounterType(frameNode, std::nullopt);
+        TextFieldModelStatic::SetShowCounterBorder(frameNode, std::nullopt);
         return;
     }
     auto optionsOpt = Converter::OptConvertPtr<Ark_InputCounterOptions>(options);
@@ -805,7 +796,7 @@ void SetShowCounterImpl(Ark_NativePointer node,
     }
     TextFieldModelStatic::SetShowCounterBorder(frameNode, highlightBorderOpt);
     TextFieldModelStatic::SetCounterType(frameNode, thresholdPercentageOpt);
-    TextFieldModelNG::SetShowCounter(frameNode, *showCounter);
+    TextFieldModelStatic::SetShowCounter(frameNode, showCounter);
 }
 void SetCustomKeyboardImpl(Ark_NativePointer node,
                            const Opt_CustomNodeBuilder* value,
@@ -822,9 +813,10 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
-        // auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
-        // TextFieldModelNG::SetCustomKeyboard(
-        //     frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
+        auto customNodeBuilder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        TextFieldModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
         }, node);
 }
 } // TextAreaAttributeModifier

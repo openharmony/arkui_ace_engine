@@ -57,7 +57,7 @@ export interface WithThemeOptions {
     colorMode?: ThemeColorMode;
 }
 export interface WithThemeAttribute {
-    setWithThemeOptions(options: WithThemeOptions): this {
+    setWithThemeOptions(options: WithThemeOptions | undefined): this {
         throw new Error("Unimplemented method setWithThemeOptions")
     }
     attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
@@ -65,7 +65,7 @@ export interface WithThemeAttribute {
     }
 }
 export class ArkWithThemeStyle implements WithThemeAttribute {
-    setWithThemeOptions(options: WithThemeOptions): this {
+    setWithThemeOptions(options: WithThemeOptions | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
@@ -80,9 +80,10 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
         }
         return (this.peer as ArkWithThemePeer)
     }
-    public setWithThemeOptions(options: WithThemeOptions): this {
+    public setWithThemeOptions(options: WithThemeOptions | undefined): this {
         if (this.checkPriority("setWithThemeOptions")) {
             hookWithThemeOptions(this, options);
+            this.applyOptionsFinish('WithThemeAttribute');
             return this
         }
         return this
@@ -94,6 +95,10 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+        ArkThemeScopeManager.getInstance().themeOptionsStack.pop();
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -30,6 +30,7 @@
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -1195,23 +1196,15 @@ void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
     }
 }
 
-WidthBreakpoint PipelineBase::GetCalcWidthBreakpoint(double width)
+void PipelineBase::SetFrameMetricsCallBack(std::function<void(OHOS::Ace::FrameMetrics info)>&& callback)
 {
-    WidthLayoutBreakPoint finalBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
-    WidthBreakpoint breakpoint;
-    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density_, width)) {
-        breakpoint = WidthBreakpoint::WIDTH_XS;
-    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density_, width)) {
-        breakpoint = WidthBreakpoint::WIDTH_SM;
-    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density_, width)) {
-        breakpoint = WidthBreakpoint::WIDTH_MD;
-    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density_, width)) {
-        breakpoint = WidthBreakpoint::WIDTH_LG;
-    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density_, width)) {
-        breakpoint = WidthBreakpoint::WIDTH_XL;
-    } else {
-        breakpoint = WidthBreakpoint::WIDTH_XXL;
+    frameMetricsCallBack_ = std::move(callback);
+}
+
+void PipelineBase::FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info)
+{
+    if (frameMetricsCallBack_) {
+        frameMetricsCallBack_(info);
     }
-    return breakpoint;
 }
 } // namespace OHOS::Ace

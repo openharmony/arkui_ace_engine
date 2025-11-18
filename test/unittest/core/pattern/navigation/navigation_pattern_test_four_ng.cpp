@@ -988,14 +988,34 @@ HWTEST_F(NavigationPatternTestFourNg, CalcRotateAngleWithDisplayOrientation002, 
 }
 
 /**
- * @tc.name: IsEquivalentToStackMode001
- * @tc.desc: Branch: if (userNavMode == NavigationMode::STACK || hideNavBar) = true
- *           Condition: userNavMode == NavigationMode::STACK = true
- *           Condition: userNavMode == NavigationMode::STACK = false, hideNavBar = true
- *           Branch: if (userNavMode == NavigationMode::STACK || hideNavBar) = false
+ * @tc.name: IsRealStackDisplay001
+ * @tc.desc: Branch: if (userNavMode == NavigationMode::SPLIT) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestFourNg, IsEquivalentToStackMode001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestFourNg, IsRealStackDisplay001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::SPLIT;
+    bool isRealStackDisplay = navigationPattern->IsRealStackDisplay();
+    EXPECT_FALSE(isRealStackDisplay);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: IsRealStackDisplay002
+ * @tc.desc: Branch: if (userNavMode == NavigationMode::SPLIT) { => false
+ *                   if (userNavMode == NavigationMode::STACK || hideNavBar ||
+ *                       navigationMode_ == NavigationMode::STACK) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, IsRealStackDisplay002, TestSize.Level1)
 {
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1006,19 +1026,46 @@ HWTEST_F(NavigationPatternTestFourNg, IsEquivalentToStackMode001, TestSize.Level
     navigationPattern->SetNavigationStack(navigationStack);
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
-    bool isEquivalentToStackMode = navigationPattern->IsEquivalentToStackMode();
-    EXPECT_TRUE(isEquivalentToStackMode);
+    bool isRealStackDisplay = navigationPattern->IsRealStackDisplay();
+    EXPECT_TRUE(isRealStackDisplay);
 
-    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::SPLIT;
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::AUTO;
     navigationLayoutProperty->propHideNavBar_ = true;
-    isEquivalentToStackMode = navigationPattern->IsEquivalentToStackMode();
-    EXPECT_TRUE(isEquivalentToStackMode);
+    isRealStackDisplay = navigationPattern->IsRealStackDisplay();
+    EXPECT_TRUE(isRealStackDisplay);
 
-    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::SPLIT;
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::AUTO;
     navigationLayoutProperty->propHideNavBar_ = false;
-    navigationNode->navBarNode_ = nullptr;
-    isEquivalentToStackMode = navigationPattern->IsEquivalentToStackMode();
-    EXPECT_FALSE(isEquivalentToStackMode);
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    isRealStackDisplay = navigationPattern->IsRealStackDisplay();
+    EXPECT_TRUE(isRealStackDisplay);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: IsRealStackDisplay003
+ * @tc.desc: Branch: if (userNavMode == NavigationMode::SPLIT) { => false
+ *                   if (userNavMode == NavigationMode::STACK || hideNavBar ||
+ *                       navigationMode_ == NavigationMode::STACK) { => false
+ *                   if (navigationMode_ == NavigationMode::AUTO) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, IsRealStackDisplay003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::AUTO;
+    navigationLayoutProperty->propHideNavBar_ = false;
+    navigationPattern->navigationMode_ = NavigationMode::AUTO;
+    bool isRealStackDisplay = navigationPattern->IsRealStackDisplay();
+    EXPECT_TRUE(isRealStackDisplay);
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
 
@@ -1048,7 +1095,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled001, TestSize.Leve
 /**
  * @tc.name: IsPageLevelConfigEnabled002
  * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
- *           Branch: if (!IsEquivalentToStackMode()) = true
+ *           Branch: if (!IsRealStackDisplay()) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled002, TestSize.Level1)
@@ -1076,7 +1123,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled002, TestSize.Leve
 /**
  * @tc.name: IsPageLevelConfigEnabled003
  * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
- *           Branch: if (!IsEquivalentToStackMode()) = false
+ *           Branch: if (!IsRealStackDisplay()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = false
  *           Branch: if (pageNode_.Upgrade() == nullptr) = false
@@ -1111,7 +1158,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled003, TestSize.Leve
 /**
  * @tc.name: IsPageLevelConfigEnabled004
  * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
- *           Branch: if (!IsEquivalentToStackMode()) = false
+ *           Branch: if (!IsRealStackDisplay()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = true, !isFullPageNavigation_ = false
  *           Branch: if (pageNode_.Upgrade() == nullptr) = true
@@ -1142,7 +1189,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled004, TestSize.Leve
 /**
  * @tc.name: IsPageLevelConfigEnabled005
  * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
- *           Branch: if (!IsEquivalentToStackMode()) = false
+ *           Branch: if (!IsRealStackDisplay()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = true
  * @tc.type: FUNC
  */
@@ -1170,7 +1217,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled005, TestSize.Leve
 /**
  * @tc.name: IsPageLevelConfigEnabled006
  * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
- *           Branch: if (!IsEquivalentToStackMode()) = false
+ *           Branch: if (!IsRealStackDisplay()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = false
  *           Branch: if (pageNode_.Upgrade() == nullptr) = false
@@ -1208,7 +1255,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled006, TestSize.Leve
 /**
  * @tc.name: IsPageLevelConfigEnabled007
  * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
- *           Branch: if (!IsEquivalentToStackMode()) = false
+ *           Branch: if (!IsRealStackDisplay()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = false
  *           Branch: if (pageNode_.Upgrade() == nullptr) = false
@@ -1416,7 +1463,7 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded005, TestS
  *               preFirstVisibleNode == curFirstVisibleNode) = false
  *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
  *               preFirstVisibleNode == curFirstVisibleNode = false
- *           Branch: if (curNodeOri == preNodeOri) = true
+ *           Branch: if (!preNodeOri.has_value() && !curNodeOri.has_value()) { => true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded006, TestSize.Level1)
@@ -1439,6 +1486,8 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded006, TestS
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
 
+    navDestination01Node->orientation_ = std::nullopt;
+    navDestination02Node->orientation_ = std::nullopt;
     RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
     RefPtr<NavDestinationGroupNode> topDestination = nullptr;
     navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
@@ -1456,7 +1505,7 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded006, TestS
  *               preFirstVisibleNode == curFirstVisibleNode) = false
  *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
  *               preFirstVisibleNode == curFirstVisibleNode = false
- *           Branch: if (curNodeOri == preNodeOri) = true
+ *           Branch: if (!preNodeOri.has_value() && !curNodeOri.has_value()) { => false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded007, TestSize.Level1)
@@ -1480,6 +1529,8 @@ HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded007, TestS
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
 
+    navDestination01Node->orientation_ = std::nullopt;
+    navDestination02Node->orientation_ = Orientation::HORIZONTAL;
     RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
     RefPtr<NavDestinationGroupNode> topDestination = nullptr;
     navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
@@ -1582,11 +1633,11 @@ HWTEST_F(NavigationPatternTestFourNg, GetAllNodes003, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAllTransitionAnimationFinish001
- * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = true
+ * @tc.name: SetRequestedOrientationIfNeeded001
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled() || !enableLockOrientation) = true
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestFourNg, SetRequestedOrientationIfNeeded001, TestSize.Level1)
 {
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1597,7 +1648,7 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish001, TestSiz
     navigationPattern->SetNavigationStack(navigationStack);
     SetIsPageLevelConfigEnabled(false, navigationPattern, navigationNode, nullptr);
 
-    navigationPattern->OnAllTransitionAnimationFinish();
+    navigationPattern->SetRequestedOrientationIfNeeded();
     auto pipelineContext = navigationNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto navigationManager = pipelineContext->GetNavigationManager();
@@ -1607,12 +1658,12 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish001, TestSiz
 }
 
 /**
- * @tc.name: OnAllTransitionAnimationFinish002
- * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ * @tc.name: SetRequestedOrientationIfNeeded002
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled() || !enableLockOrientation) = false
  *           Branch: if (visibleNodes.empty()) = true
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish002, TestSize.Level1)
+HWTEST_F(NavigationPatternTestFourNg, SetRequestedOrientationIfNeeded002, TestSize.Level1)
 {
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1625,8 +1676,8 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish002, TestSiz
         ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
-
-    navigationPattern->OnAllTransitionAnimationFinish();
+    navigationPattern->enableLockOrientation_ = true;
+    navigationPattern->SetRequestedOrientationIfNeeded();
     auto pipelineContext = navigationNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto navigationManager = pipelineContext->GetNavigationManager();
@@ -1636,12 +1687,12 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish002, TestSiz
 }
 
 /**
- * @tc.name: OnAllTransitionAnimationFinish003
- * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ * @tc.name: SetRequestedOrientationIfNeeded003
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled() || !enableLockOrientation) = false
  *           Branch: if (visibleNodes.empty()) = false
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish003, TestSize.Level1)
+HWTEST_F(NavigationPatternTestFourNg, SetRequestedOrientationIfNeeded003, TestSize.Level1)
 {
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1661,19 +1712,20 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish003, TestSiz
     navPathList.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(navPathList);
     auto refCount = tempNode->RefCount();
-    navigationPattern->OnAllTransitionAnimationFinish();
+    navigationPattern->enableLockOrientation_ = true;
+    navigationPattern->SetRequestedOrientationIfNeeded();
     EXPECT_EQ(refCount, tempNode->RefCount());
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
 
 /**
- * @tc.name: OnAllTransitionAnimationFinish004
- * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ * @tc.name: SetRequestedOrientationIfNeeded004
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled() || !enableLockOrientation) = false
  *           Branch: if (visibleNodes.empty()) = false
  *                   if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) { => true
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish004, TestSize.Level1)
+HWTEST_F(NavigationPatternTestFourNg, SetRequestedOrientationIfNeeded004, TestSize.Level1)
 {
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1708,7 +1760,8 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish004, TestSiz
     navigationPattern->navigationStack_->SetNavPathList(navPathList);
 
     navMgr->beforeOrientationChangeTasks_.clear();
-    navigationPattern->OnAllTransitionAnimationFinish();
+    navigationPattern->enableLockOrientation_ = true;
+    navigationPattern->SetRequestedOrientationIfNeeded();
     EXPECT_TRUE(callbackInvoked);
     EXPECT_TRUE(navMgr->beforeOrientationChangeTasks_.empty());
     windowMgr->isSetOrientationNeededCallback_ = std::move(backupCallback);

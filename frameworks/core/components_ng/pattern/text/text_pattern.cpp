@@ -45,6 +45,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/text/html_utils.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
@@ -965,7 +966,24 @@ void TextPattern::HandleOnAskCelia()
     };
     dataDetectorAdapter_->OnClickAIMenuOption(aiSpan, *menuOptionAndActions.begin(), nullptr);
 }
-    
+
+bool TextPattern::IsAskCeliaSupported()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto isAskCeliaSupported = textFieldManager->IsAskCeliaSupported();
+    if (!isAskCeliaSupported.has_value()) {
+        CHECK_NULL_RETURN(GetDataDetectorAdapter(), false);
+        textFieldManager->SetIsAskCeliaSupported(dataDetectorAdapter_->IsAskCeliaSupported());
+        isAskCeliaSupported = textFieldManager->IsAskCeliaSupported();
+    }
+    return isAskCeliaSupported.value_or(false);
+}
+
 void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
     NG::TextLineStyle& textLineStyle, const std::optional<TextStyle>& textStyle)
 {
@@ -1437,12 +1455,14 @@ void TextPattern::UpdateAIMenuOptions()
         isShowAIMenuOption_ = false;
     }
     if (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) {
+        SetIsShowAskCeliaInRightClick(true);
         if (MaybeNeedShowSelectAIDetect()) {
             SetIsAskCeliaEnabled(!isShowAIMenuOption_);
         } else {
             SetIsAskCeliaEnabled(true);
         }
     } else {
+        SetIsShowAskCeliaInRightClick(false);
         SetIsAskCeliaEnabled(false);
     }
     if (!IsSupportAskCelia()) {
@@ -2432,6 +2452,7 @@ void TextPattern::InitFocusEvent()
 {
     CHECK_NULL_VOID(!focusInitialized_);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
@@ -3286,11 +3307,11 @@ void TextPattern::CloseOperate()
 
 DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
-    auto weakPtr = WeakClaim(this);
     DragDropInfo itemInfo;
-    auto pattern = weakPtr.Upgrade();
-    auto host = pattern->GetHost();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, itemInfo);
     auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(hub, itemInfo);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, itemInfo);
     if (!gestureHub->GetIsTextDraggable()) {
@@ -3298,16 +3319,16 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
     }
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     dragBoxes_ = GetTextBoxes();
-    pattern->status_ = Status::DRAGGING;
-    pattern->contentMod_->ChangeDragStatus();
-    pattern->showSelect_ = false;
+    status_ = Status::DRAGGING;
+    contentMod_->ChangeDragStatus();
+    showSelect_ = false;
     auto [start, end] = GetSelectedStartAndEnd();
-    pattern->recoverStart_ = start;
-    pattern->recoverEnd_ = end;
+    recoverStart_ = start;
+    recoverEnd_ = end;
     auto beforeStr = GetSelectedText(0, start, false, true);
     auto selectedStr = GetSelectedText(start, end, false, true);
     auto afterStr = GetSelectedText(end, textForDisplay_.length(), false, true);
-    pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
+    dragContents_ = { beforeStr, selectedStr, afterStr };
     auto selectedUtf8Str = UtfUtils::Str16DebugToStr8(selectedStr);
     itemInfo.extraInfo = selectedUtf8Str;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
@@ -3429,11 +3450,9 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
 
 void TextPattern::OnDragMove(const RefPtr<Ace::DragEvent>& event)
 {
-    auto weakPtr = WeakClaim(this);
-    auto pattern = weakPtr.Upgrade();
-    if (pattern->status_ == Status::DRAGGING) {
+    if (status_ == Status::DRAGGING) {
         CloseSelectOverlay();
-        pattern->showSelect_ = false;
+        showSelect_ = false;
     }
 }
 
@@ -3827,10 +3846,21 @@ float TextPattern::GetLineHeight() const
 
 std::vector<RectF> TextPattern::GetTextBoxes()
 {
+    std::vector<RectF> selectedRects;
     if (IsAiSelected()) {
-        return pManager_->GetRects(textSelector_.aiStart.value(), textSelector_.aiEnd.value());
+        selectedRects = pManager_->GetRects(textSelector_.aiStart.value(), textSelector_.aiEnd.value());
+    } else {
+        selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     }
-    return pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+#ifndef ACE_UNITTEST
+    if (!selectedRects.empty() && pManager_->IsSelectLineHeadAndUseLeadingMargin(textSelector_.GetTextStart())) {
+        // To make drag screenshot include LeadingMarginPlaceholder when not single line
+        if (selectedRects.front().GetY() != selectedRects.back().GetY()) {
+            selectedRects.front().SetLeft(0.0f);
+        }
+    }
+#endif
+    return selectedRects;
 }
 
 OffsetF TextPattern::GetParentGlobalOffset() const
@@ -4509,7 +4539,8 @@ void TextPattern::ParseOriText(const std::u16string& currentText)
     CHECK_NULL_VOID(GetDataDetectorAdapter());
     auto entityJson = JsonUtil::ParseJsonString(UtfUtils::Str16DebugToStr8(currentText));
     bool entityIsJson = !entityJson->IsNull();
-    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityIsJson);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: text content is the json format: %{public}d, id: %{public}i",
+        entityIsJson, GetHost() ? GetHost()->GetId() : -1);
     if (entityIsJson && !entityJson->GetValue("bundleName")->IsNull() &&
         dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
         if (childNodes_.empty()) {
@@ -5078,7 +5109,11 @@ void TextPattern::DumpTextStyleInfo()
                 textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString() : "Na")
             .append(" ForegroundColor: ")
             .append(
-                renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na"));
+            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na")
+            .append(" TextColorFlagByUser: ")
+            .append(textLayoutProp->HasTextColorFlagByUser()
+                ? std::to_string(textLayoutProp->GetTextColorFlagByUserValue(false))
+                : "Na"));
     if (renderContext->HasForegroundColorStrategy()) {
         auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
         DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
@@ -5237,7 +5272,7 @@ void TextPattern::DumpTextStyleInfo4()
         dumpLog.AddDesc(
             std::string("SymbolColorList: ")
                 .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList()))
-                .append("prop: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasSymbolColorList()
                             ? StringUtils::SymbolColorListToString(textLayoutProp->GetSymbolColorList().value())
                             : "Na"));
@@ -5564,7 +5599,9 @@ void TextPattern::UpdateRectForSymbolShadow(RectF& rect, float offsetX, float of
 
 void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
 {
-    auto property = GetHost()->GetLayoutProperty<TextLayoutProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = host->GetLayoutProperty<TextLayoutProperty>();
     auto shadowOpt  = property->GetSymbolShadow();
     if (shadowOpt.has_value()) {
         const auto& symbolShadow = shadowOpt.value();
@@ -5655,10 +5692,25 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     ProcessBoundRectByTextMarquee(boundsRect);
     boundsRect.SetWidth(std::max(frameSize.Width(), boundsRect.Width()));
     boundsRect.SetHeight(std::max(frameSize.Height(), boundsRect.Height()));
+    auto boundsRectY = boundsRect.GetY() + TextContentAlignOffsetY();
+    boundsRect.SetTop(boundsRectY);
     auto baselineOffset = LessOrEqual(baselineOffset_, 0) ? std::fabs(baselineOffset_) : 0;
     pManager_->GetPaintRegion(boundsRect, contentRect_.GetX(), contentRect_.GetY() + baselineOffset);
     overlayMod_->SetBoundsRect(boundsRect);
     return paintMethod;
+}
+
+float TextPattern::TextContentAlignOffsetY()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
+    CHECK_NULL_RETURN(textLayoutProperty->HasTextContentAlign(), 0.0f);
+    auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
+    auto alignOffsetY = static_cast<int32_t>(textContentAlign) *
+        (contentRect_.Height() + std::fabs(baselineOffset_) - pManager_->GetHeight()) / 2.0;
+    return alignOffsetY;
 }
 
 void TextPattern::SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize)
@@ -5821,6 +5873,8 @@ void TextPattern::SetTextDetectEnable(bool enable)
         };
         pipeline->SetConfigChangedCallback(host->GetId(), callback);
     } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "TextAI: CancelAITask is called by SetTextDetectEnable, id: %{public}i", host->GetId());
         dataDetectorAdapter_->CancelAITask();
     }
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
@@ -6969,8 +7023,6 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(TextIndent, CalcDimension, UpdateTextIndent),
         DEFINE_PROP_HANDLER(MinFontScale, float, UpdateMinFontScale),
         DEFINE_PROP_HANDLER(MaxFontScale, float, UpdateMaxFontScale),
-        DEFINE_PROP_HANDLER(LineHeight, CalcDimension, UpdateLineHeight),
-        DEFINE_PROP_HANDLER(LineSpacing, CalcDimension, UpdateLineSpacing),
         DEFINE_PROP_HANDLER(LetterSpacing, CalcDimension, UpdateLetterSpacing),
         DEFINE_PROP_HANDLER(AdaptMaxFontSize, CalcDimension, UpdateAdaptMaxFontSize),
         DEFINE_PROP_HANDLER(AdaptMinFontSize, CalcDimension, UpdateAdaptMinFontSize),
@@ -6979,6 +7031,28 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
         DEFINE_PROP_HANDLER(Content, std::u16string, UpdateContent),
         DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
+
+        { "LineHeight", [](
+            TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        realValue->Reset();
+                    }
+                    prop->UpdateLineHeight(*realValue);
+                }
+            }
+        },
+        
+        { "LineSpacing", [](
+            TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        realValue->Reset();
+                    }
+                    prop->UpdateLineSpacing(*realValue);
+                }
+            }
+        },
 
         {"SelectedBackgroundColor", [wp = WeakClaim(RawPtr(frameNode))](
             TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
@@ -7011,6 +7085,13 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(LineHeightMultiply, double, UpdateLineHeightMultiply),
         DEFINE_PROP_HANDLER(MinimumLineHeight, CalcDimension, UpdateMinimumLineHeight),
         DEFINE_PROP_HANDLER(MaximumLineHeight, CalcDimension, UpdateMaximumLineHeight),
+        {"ColorShaderStyle", [](TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto shaderStyleColor = Color(*realValue);
+                    prop->UpdateColorShaderStyle(shaderStyleColor);
+                }
+            }
+        },
     };
     auto it = handlers.find(key);
     if (it != handlers.end()) {

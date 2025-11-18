@@ -15,8 +15,7 @@
 
 import { DecoratedV1VariableBase } from './decoratorBase';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-import { ExtendableComponent } from '../../component/extendableComponent';
-import { IObjectLinkDecoratedVariable } from '../decorator';
+import { IObjectLinkDecoratedVariable, IVariableOwner } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ObserveSingleton } from '../base/observeSingleton';
@@ -24,6 +23,7 @@ import { WatchFuncType } from '../decorator';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 /**
  * implementation of V1 @ObjectLink
  * @ObjectLink has no local inot
@@ -44,7 +44,7 @@ export class ObjectLinkDecoratedVariable<T>
     private readonly backing_: IBackingValue<T>;
     // parentInitValue is the init value of parent @Component
     // constructor takes a copy of it
-    constructor(owningView: ExtendableComponent, varName: string, parentInitValue: T, watchFunc?: WatchFuncType) {
+    constructor(owningView: IVariableOwner, varName: string, parentInitValue: T, watchFunc?: WatchFuncType) {
         super('@ObjectLink', owningView, varName, watchFunc);
         this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, parentInitValue);
         this.registerWatchForObservedObjectChanges(parentInitValue);
@@ -55,9 +55,11 @@ export class ObjectLinkDecoratedVariable<T>
     }
 
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ObjectLink ${this.getTraceInfo()}`);
         // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 
@@ -65,10 +67,11 @@ export class ObjectLinkDecoratedVariable<T>
     // @ObjectLink updates from parent
     public update(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ObjectLink ${oldValue === newValue} ${this.updateTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }
-        const value = uiUtils.makeObserved(newValue) as T;
+        const value = uiUtils.makeV1Observed(newValue) as T;
         StateUpdateLoop.add(() => {
             if (this.backing_.set(value)) {
                 this.unregisterWatchFromObservedObjectChanges(oldValue);

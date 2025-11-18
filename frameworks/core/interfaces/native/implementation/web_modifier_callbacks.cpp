@@ -82,6 +82,34 @@ void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallba
     arkCallback.InvokeSync(parameter);
 }
 
+void OnLoadStarted(const CallbackHelper<Callback_OnLoadStartedEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<LoadStartedEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_OnLoadStartedEvent parameter;
+    parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+    arkCallback.InvokeSync(parameter);
+}
+
+void OnLoadFinished(const CallbackHelper<Callback_OnLoadFinishedEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<LoadFinishedEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_OnLoadFinishedEvent parameter;
+    parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+    arkCallback.InvokeSync(parameter);
+}
+
 void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
@@ -415,8 +443,8 @@ void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallb
     auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_FullScreenEnterEvent parameter;
-    parameter.videoWidth = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalWidth());
-    parameter.videoHeight = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalHeight());
+    parameter.videoWidth = Converter::ArkValue<Opt_Int32>(eventInfo->GetVideoNaturalWidth());
+    parameter.videoHeight = Converter::ArkValue<Opt_Int32>(eventInfo->GetVideoNaturalHeight());
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();
     parameter.handler = peer;
@@ -460,7 +488,7 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
 }
 
 RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+    const CallbackHelper<Type_WebAttribute_onInterceptRequest>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -475,10 +503,35 @@ RefPtr<WebResponse> OnInterceptRequest(
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.request = peer;
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebResourceResponse,
-        Callback_WebResourceResponse_Void>(parameter);
-    CHECK_NULL_RETURN(arkResult, nullptr);
-    return arkResult->handler;
+    const auto arkResult = arkCallback.InvokeWithObtainResult<Opt_WebResourceResponse,
+        Callback_Opt_WebResourceResponse_Void>(parameter);
+    CHECK_NULL_RETURN(arkResult.value, nullptr);
+    Ark_WebResourceResponse value = arkResult.value;
+    return value->handler;
+}
+
+std::string OnOverrideErrorPage(
+    const CallbackHelper<OnOverrideErrorPageCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_RETURN(refNode, "");
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<OnOverrideErrorPageEvent>(info);
+    CHECK_NULL_RETURN(eventInfo, "");
+    Ark_OnErrorReceiveEvent parameter;
+    auto errorPeer = new WebResourceErrorPeer();
+    errorPeer->handler = eventInfo->GetError();
+    parameter.error = errorPeer;
+    auto requestPeer = new WebResourceRequestPeer();
+    requestPeer->webRequest = eventInfo->GetWebResourceRequest();
+    parameter.request = requestPeer;
+    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_String,
+        Callback_String_Void>(parameter);
+    return Converter::Convert<std::string>(arkResult);
 }
 
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
@@ -589,9 +642,15 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
     Converter::ArkArrayHolder<Array_Buffer> vecHolder(eventInfo->GetCertChainData());
     auto tempValue = vecHolder.ArkValue();
+    for (int i = 0; i < tempValue.length; ++i) {
+        tempValue.array[i].resource.resourceId = i;
+        tempValue.array[i].resource.hold = [](int id) { return; };
+        tempValue.array[i].resource.release = [](int id) { return; };
+    }
     parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(tempValue);
     auto peer = new SslErrorHandlerPeer();
-    peer->handler = eventInfo->GetResult();
+    peer->sslErrorHandler = eventInfo->GetResult();
+    peer->type = SSL_ERROR_HANDLER;
     parameter.handler = peer;
     arkCallback.InvokeSync(parameter);
     return true;
@@ -617,10 +676,8 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     auto url = eventInfo->GetUrl();
     parameter.url = Converter::ArkValue<Ark_String>(url);
     auto peer = new SslErrorHandlerPeer();
-    // need check
-#ifdef WRONG_NEW_ACE
-    peer->handler = eventInfo->GetResult();
-#endif
+    peer->allSslErrorHandler = eventInfo->GetResult();
+    peer->type = ALL_SSL_ERROR_HANDLER;
     parameter.handler = peer;
     arkCallback.InvokeSync(parameter);
     return true;
@@ -1149,6 +1206,21 @@ void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityC
     arkCallback.InvokeSync(parameter);
 }
 
+void OnNativeEmbedObjectParamChange(const CallbackHelper<OnNativeEmbedObjectParamChangeCallback>& arkCallback,
+    int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedParamDataInfo>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_NativeEmbedParamDataInfo parameter;
+    parameter.embedId = Converter::ArkValue<Ark_String>(eventInfo->GetEmbedId());
+    parameter.objectAttributeId = Converter::ArkValue<Opt_String>(eventInfo->GetObjectAttributeId());
+    Converter::ArkArrayHolder<Array_NativeEmbedParamItem> vecHolder(eventInfo->GetParamItems());
+    auto tempValue = vecHolder.ArkValue();
+    parameter.paramItems = Converter::ArkValue<Opt_Array_NativeEmbedParamItem>(tempValue);
+    arkCallback.InvokeSync(parameter);
+}
+
 void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
     int32_t instanceId, const BaseEventInfo* info)
 {
@@ -1325,6 +1397,27 @@ void OnActivateContent(const CallbackHelper<VoidCallback>& arkCallback,
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     arkCallback.InvokeSync();
+}
+
+void OnSafeBrowsingCheckFinish(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+        CHECK_NULL_VOID(eventInfo);
+        Ark_ThreatType parameter = Converter::ArkValue<Ark_ThreatType>(
+            static_cast<Converter::ThreatType>(eventInfo->GetThreatType()));
+        arkCallback.InvokeSync(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebSafeBrowsingCheckFinish");
+#endif // ARKUI_CAPI_UNITTEST
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED

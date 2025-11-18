@@ -17,7 +17,6 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import { common } from '@kit.AbilityKit';
 import resourceManager from '@ohos.resourceManager';
-import { Prompt } from '@kit.ArkUI';
 import { accessibility } from '@kit.AccessibilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 
@@ -31,7 +30,6 @@ const BORDER_WIDTH_NONE: number = 0;
 const NODE_HEIGHT: number = 48;
 const LIST_ITEM_HEIGHT_NONE: number = 0;
 const LIST_ITEM_HEIGHT: number = 48;
-const SHADOW_OFFSETY: number = 10;
 const FLAG_NUMBER: number = 2;
 const DRAG_OPACITY: number = 0.4;
 const DRAG_OPACITY_NONE: number = 1;
@@ -45,7 +43,6 @@ const Y_BASE_PLATE_OFF_SET: string = '1.5vp';
 const COLOR_IMAGE_EDIT: string = '#FFFFFF';
 const COLOR_IMAGE_ROW: string = '#00000000';
 const COLOR_SELECT: string = '#1A0A59F7';
-const SHADOW_COLOR: string = '#00001E';
 const GRAG_POP_UP_HEIGHT: string = '48';
 const FLOOR_MIN_WIDTH: string = '128vp';
 const FLOOR_MAX_WIDTH: string = '208vp';
@@ -211,7 +208,7 @@ interface ItemPadding {
 
 interface Shadow {
   radius: Resource;
-  color: string;
+  color: Resource;
   offsetX?: number;
   offsetY?: number;
 }
@@ -2313,9 +2310,9 @@ class ListNodeDataSource extends BasicDataSource {
     height: GRAG_POP_UP_HEIGHT,
     shadow: {
       radius: $r('sys.float.ohos_id_default_shadow_m'),
-      color: SHADOW_COLOR,
+      color: $r('sys.color.ohos_id_color_dialog_bg'),
       offsetX: 0,
-      offsetY: SHADOW_OFFSETY,
+      offsetY: 0,
     },
     borderRadius: $r('sys.float.ohos_id_corner_radius_default_s'),
     fontColor: this.treeViewTheme.primaryTitleFontColor,

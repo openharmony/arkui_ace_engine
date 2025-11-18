@@ -40,6 +40,7 @@ ohos_unittest("ace_native_gesture_test") {
     "native_rotation_gesture_test.cpp",
     "native_swiper_gesture_test.cpp",
     "native_tap_gesture_test.cpp",
+    "native_gesture_test_two.cpp",
   ]
 
   configs = [

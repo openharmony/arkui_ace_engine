@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/render_node/render_node_paint_property.h"
 #include "core/components_ng/pattern/render_node/render_node_paint_method.h"

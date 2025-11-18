@@ -54,9 +54,9 @@ void RefreshModelNG::Create()
             .backward = NestedScrollMode::SELF_FIRST,
         }));
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(
-        RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO, frameNode);
 }
 
 RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
@@ -329,11 +329,11 @@ void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& c
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
 
-void RefreshModelNG::SetStepOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
+void RefreshModelNG::SetStepOffsetChange(FrameNode* frameNode, OffsetStepChangeEvent&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnStepOffsetChange(std::move(dragOffset));
+    eventHub->SetOnStepOffsetChange(std::move(changeEvent));
 }
 } // namespace OHOS::Ace::NG

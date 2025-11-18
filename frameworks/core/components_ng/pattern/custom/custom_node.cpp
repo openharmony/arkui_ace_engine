@@ -19,6 +19,7 @@
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/dump_log.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -232,7 +233,7 @@ void CustomNode::DoSetActiveChildRange(
 std::unique_ptr<JsonValue> CustomNode::GetStateInspectorInfo()
 {
     std::string res = FireOnDumpInspectorFunc();
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI State Inspector dump info %{public}s", res.c_str());
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI State Inspector dump info %{private}s", res.c_str());
     auto json = JsonUtil::ParseJsonString(res);
     return json;
 }
@@ -271,7 +272,7 @@ void CustomNode::DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo)
 void CustomNode::DumpInfo()
 {
     std::string ret = FireOnDumpInspectorFunc();
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI DumpInfo %{public}s", ret.c_str());
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI DumpInfo %{private}s", ret.c_str());
     if (ret != "") {
         auto json = JsonUtil::ParseJsonString(ret);
         if (json == nullptr || !json->IsValid()) {

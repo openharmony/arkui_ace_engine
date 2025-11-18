@@ -25,6 +25,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -2036,5 +2037,24 @@ HWTEST_F(NavigationPatternTestTwoNg, TriggerCustomAnimation001, TestSize.Level1)
     navigationPattern->onTransition_ = CustomNavigationAnimation;
     navigationPattern->TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, true);
     EXPECT_FALSE(eventHub->IsEnabled());
+}
+
+/**
+ * @tc.name: OnDpiConfigurationUpdate001
+ * @tc.desc: Branch: no branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, OnDpiConfigurationUpdate001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    pattern->SetNavigationStack(navigationStack);
+    
+    pattern->ifNeedInit_ = false;
+    
+    pattern->OnDpiConfigurationUpdate();
+    EXPECT_TRUE(pattern->ifNeedInit_);
 }
 } // namespace OHOS::Ace::NG

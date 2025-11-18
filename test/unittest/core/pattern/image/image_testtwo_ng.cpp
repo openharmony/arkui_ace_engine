@@ -652,7 +652,7 @@ HWTEST_F(ImageTestTwoNg, ImagePatternMethods, TestSize.Level0)
     imagePattern->EnableDrag();
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     eventHub->GetOrCreateDragDropCallbackSet()->GetOrCreateInnerDragDropCallback()->
-        defaultOnDragStart_(dragEvent, string(""));
+        defaultOnDragStart(dragEvent, string(""));
     EXPECT_EQ(dragEvent->GetData(), nullptr);
     std::vector<float> matrix = { 1.1f };
     ImageModelNG::SetColorFilterMatrix(AceType::RawPtr(frameNode), matrix);
@@ -754,6 +754,43 @@ HWTEST_F(ImageTestTwoNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Leve
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+}
+
+/**
+ * @tc.name: ImagePatternOnDirtyLayoutWrapperSwap0052
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnDirtyLayoutWrapperSwap0052, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, imageLayoutProperty);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    ImageResizableSlice tmp;
+    tmp.bottom = Dimension(5);
+    tmp.top = Dimension(5);
+    tmp.left = Dimension(5);
+    tmp.right = Dimension(5);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateImageResizableSlice(tmp);
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+    auto res = imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(res);
+    EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+    res = imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(res);
 }
 
 /**
@@ -1872,6 +1909,45 @@ HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource001, TestSize.Level1)
     int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
     image.CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, resObj);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_TRUE(pattern->needBorderRadius_);
+}
+
+/**
+ * @tc.name: HandleBorderRadiusResource002
+ * @tc.desc: Test HandleBorderRadiusResource function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
+    imageInfoConfig.src = std::make_shared<std::string>(RESOURCE_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. create resobj.
+     */
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    image.CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, resObjWithDimensionId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
     EXPECT_TRUE(pattern->needBorderRadius_);
 }

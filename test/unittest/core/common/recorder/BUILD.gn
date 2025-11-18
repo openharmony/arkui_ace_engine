@@ -19,5 +19,7 @@ ace_unittest("event_recorder_test") {
   sources = [
     "event_config_test.cpp",
     "event_recorder_test.cpp",
+    "event_controller_test.cpp",
+    "event_recorder_test_two.cpp",
   ]
 }

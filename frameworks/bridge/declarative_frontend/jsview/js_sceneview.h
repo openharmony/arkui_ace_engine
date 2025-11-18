@@ -36,6 +36,7 @@ public:
     static void JsShaderImageTexture(const JSCallbackInfo& info);
     static void JsShaderInputBuffer(const JSCallbackInfo& info);
     static void JsOnError(const JSCallbackInfo& info);
+    static void JsBackgroundColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

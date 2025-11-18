@@ -196,4 +196,30 @@ HWTEST_F(TextFieldPatternTesteleven, GetCancelImageText001, TestSize.Level1)
     EXPECT_EQ(result, "");
 }
 
+/**
+ * @tc.name: ReprocessAllRelatedToLPX
+ * @tc.desc: Test reprocess all related to lpx
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, ReprocessAllRelatedToLPX, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldPattern->SetTextChangedAtCreation(true);
+    PaddingProperty paddings;
+    paddings.top = NG::CalcLength(10, DimensionUnit::LPX);
+    TextFieldModelNG::SetPadding(AceType::RawPtr(frameNode), paddings);
+    textFieldPattern->OnModifyDone();
+    EXPECT_TRUE(textFieldPattern->lpxInfo_.hasLPXPadding);
+    EXPECT_TRUE(textFieldPattern->lpxInfo_.initTextRectWithLPX);
+    textFieldPattern->lpxInfo_.lastLogicScale  = 1.5f;
+    textFieldPattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(textFieldPattern->lpxInfo_.initTextRectWithLPX);
+}
+
 } // namespace OHOS::Ace::NG

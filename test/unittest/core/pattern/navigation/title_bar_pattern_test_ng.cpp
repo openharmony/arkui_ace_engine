@@ -20,7 +20,9 @@
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -1620,6 +1622,130 @@ HWTEST_F(TitleBarPatternTestNg, onAttachFrameNode, TestSize.Level1)
     
     bool value = renderContext->GetClipEdgeValue(false);
     EXPECT_EQ(value, true);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiFrameNode
+ * @tc.desc: test OnAttachToFrameNodeMultiThread & OnAttachToMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestNg, OnAttachToMainTreeMultiFrameNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create titleBarNode.
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate MutltiThread Enviroment.
+     */
+    auto host = titleBarPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isThreadSafeNode_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto size = context->halfFoldHoverChangedCallbackMap_.size();
+
+    /**
+     * @tc.steps: step3. Call OnAttachToFrameNode.
+     * @tc.expected: OnAttachToFrameNodeMultiThread is called, nothing is done.
+     */
+    titleBarPattern->OnAttachToFrameNode(); // call OnAttachToFrameNodeMultiThread
+    EXPECT_EQ(size, context->halfFoldHoverChangedCallbackMap_.size());
+
+    /**
+     * @tc.steps: step4. Call OnAttachToMainTree.
+     * @tc.expected: OnAttachToMainTreeMultiThread is called.
+     */
+    titleBarPattern->OnAttachToMainTree(); // call OnAttachToMainTreeMultiThread
+    EXPECT_EQ(size + 1, context->halfFoldHoverChangedCallbackMap_.size());
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread
+ * @tc.desc: test OnDetachFromFrameNodeMultiThread & OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestNg, OnDetachFromMainTreeMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create titleBarNode.
+     */
+    auto titleBarNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(titleBarNode, nullptr);
+    titleBarNode->isThreadSafeNode_ = true;
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate MutltiThread Enviroment.
+     */
+    auto host = titleBarPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isThreadSafeNode_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    titleBarPattern->OnAttachToMainTree(); // call OnAttachToMainTreeMultiThread
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isThreadSafeNode_ = true;
+    auto size = context->halfFoldHoverChangedCallbackMap_.size();
+
+    /**
+     * @tc.steps: step3. Call OnDetachFromFrameNode.
+     * @tc.expected: OnDetachFromFrameNodeMultiThread is called, nothing is done.
+     */
+    titleBarPattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode)); // call OnDetachFromMainTreeMultiThread
+    EXPECT_EQ(size, context->halfFoldHoverChangedCallbackMap_.size());
+
+    /**
+     * @tc.steps: step4. Call OnDetachFromMainTree.
+     * @tc.expected: OnDetachFromMainTreeMultiThread is called.
+     */
+    titleBarPattern->OnDetachFromMainTree(); // call OnDetachFromMainTreeMultiThread
+    EXPECT_EQ(size - 1, context->halfFoldHoverChangedCallbackMap_.size());
+}
+
+/**
+ * @tc.name: UpdateBackgroundStyleMultiThread
+ * @tc.desc: test UpdateBackgroundStyleMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestNg, UpdateBackgroundStyleMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread environment and create a thread-safe select node.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+
+    /**
+     * @tc.steps: step2. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isThreadSafeNode_ = true;
+    auto size = frameNode->afterAttachMainTreeTasks_.size();
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Call UpdateBackgroundStyle.
+     * @tc.expected: afterAttachMainTreeTasks_.size()++.
+     */
+    titleBarPattern->UpdateBackgroundStyle(frameNode); // call UpdateBackgroundStyleMultiThread
+    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), size + 1);
+
+    /**
+     * @tc.steps: step4. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
 }
 
 /**

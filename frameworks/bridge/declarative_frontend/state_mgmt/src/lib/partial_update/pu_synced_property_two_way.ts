@@ -25,6 +25,8 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   private source_: ObservedPropertyObjectAbstract<C>;
   
+  private rootSource_?: ObservedPropertyObjectAbstract<C>;
+  
   private fakeSourceBackup_: ObservedPropertyObjectAbstract<C>;
 
   constructor(source: ObservedPropertyObjectAbstract<C>,
@@ -32,6 +34,13 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
     this.source_ = source;
+    if (InteropConfigureStateMgmt.needsInterop()) {
+      let rootSource: ObservedPropertyObjectAbstract<C> = source;
+      if (rootSource instanceof SynchedPropertyTwoWayPU<C>) {
+        rootSource = rootSource.getRootSource();
+      }
+      this.rootSource_ = rootSource;
+    }
     if (this.source_) {
       // register to the parent property
       this.source_.addSubscriber(this);
@@ -106,6 +115,10 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName, isSync);
     }
     stateMgmtProfiler.end();
+  }
+
+  public getRootSource(): ObservedPropertyObjectAbstract<C> | undefined {
+    return this.rootSource_;
   }
 
   public getUnmonitored(): C {

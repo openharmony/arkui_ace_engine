@@ -40,7 +40,8 @@
             "liukaii1",
             "npisanov",
             "skrobagleb",
-            "huaweimaxuchu"
+            "huaweimaxuchu",
+            "zenix_zxy"
         ],
         "arkui_architecture": [
             "sunfei2021",
@@ -138,7 +139,8 @@
             "bc_yx",
             "hjoksky",
             "zhang-yinglie",
-            "whuqincheng"
+            "whuqincheng",
+            "chenjiadong"
         ],
         "arkui_cj": [
             "persisting",
@@ -185,6 +187,8 @@
         ],
         "arkuicodepulse": [
             "xi-heqiong",
+            "CCFFWW",
+            "hehongyang3",
             "ilyaerokhin",
             "spirinandrey",
             "huaweimaxuchu"
@@ -278,8 +282,11 @@
         "Hu_ZeQi": {
             "info": "[swiper huzeqi]"
         },
-        "cheng-feiwang": {
-            "info": "[模态类组件 chenfeiwang]"
+        "CCFFWW": {
+            "info": "[模态类组件 chengfeiwang]"
+        },
+        "hehongyang3": {
+            "info": "[视效动效组件 hehongyang]"
         },
         "H-xinwei": {
             "info": "[模态类组件 huangxinwei]"
@@ -458,7 +465,7 @@
         "cr_wanghui": {
             "info": "[web-网络加载 wanghui]"
         },
-        "chenjiadong0322": {
+        "chenjiadong": {
             "info": "[web-网络加载 chenjiadong]"
         },
         "qianlf": {

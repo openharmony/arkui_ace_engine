@@ -20,6 +20,7 @@
 #define protected public
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "base/utils/system_properties.h"
 #include "frameworks/core/event/coasting_axis_event_generator.h"
@@ -682,5 +683,57 @@ HWTEST_F(CoastingAxisEventTestNg, CoastingAxisEventTestNg014, TestSize.Level1)
     handler.CalculateFinalPosition();
     EXPECT_EQ(handler.velocityRatioX_, 0.0);
     EXPECT_EQ(handler.velocityRatioY_, 0.0);
+}
+
+/**
+ * @tc.name: CoastingAxisEventTestNg015
+ * @tc.desc: test NotifyTouchTestResult for all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(CoastingAxisEventTestNg, CoastingAxisEventTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: init.
+     */
+    ASSERT_NE(generator_, nullptr);
+    ASSERT_NE(generator_->animationHandler_, nullptr);
+    ASSERT_NE(node_, nullptr);
+    OHOS::Ace::ElementRegister::GetInstance()->AddUINode(node_);
+    generator_->animationHandler_->phase_ = CoastingAxisPhase::BEGIN;
+    generator_->axisResult_.clear();
+    /**
+     * @tc.steps: id match.
+     */
+    auto axisTarget1 = AceType::MakeRefPtr<AxisEventTarget>(node_->GetTag(), node_->GetId());
+    generator_->axisResult_.push_back(axisTarget1);
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEventActuator->SetNodeId(node_->GetId());
+    TouchTestResult touchTestResult;
+    touchTestResult.emplace_back(touchEventActuator);
+    generator_->NotifyTouchTestResult(touchTestResult, PointF(0, 0));
+    EXPECT_EQ(generator_->touchId_, node_->GetId());
+    /**
+     * @tc.steps: id not match, region match.
+     */
+    generator_->touchId_ = -1;
+    touchEventActuator->nodeId_ = node_->GetId() + 1;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    node_->renderContext_ = mockRenderContext;
+    generator_->NotifyTouchTestResult(touchTestResult, PointF(10, 10));
+    EXPECT_EQ(generator_->touchId_, node_->GetId());
+    /**
+     * @tc.steps: id and region not match.
+     */
+    touchEventActuator->nodeId_ = node_->GetId() + 2;
+    generator_->NotifyTouchTestResult(touchTestResult, PointF(999, 999));
+    EXPECT_EQ(generator_->touchId_, -1);
+    /**
+     * @tc.steps: axisResult_ empty.
+     */
+    generator_->axisResult_.clear();
+    touchTestResult.emplace_back(touchEventActuator);
+    generator_->NotifyTouchTestResult(touchTestResult, PointF(0, 0));
+    EXPECT_EQ(generator_->touchId_, -1);
 }
 } // namespace OHOS::Ace::NG

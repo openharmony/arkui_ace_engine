@@ -48,6 +48,7 @@ const struct UpdateSpanStyle TEST_TYPING_STYLE = {
     .updateItalicFontStyle = OHOS::Ace::FontStyle::ITALIC,
     .updateFontWeight = FontWeight::BOLD,
     .updateTextShadows = SHADOWS,
+    .updateLineThicknessScale = TEXT_DECORATION_THICKNESS_SCALE,
 };
 }
 
@@ -92,7 +93,7 @@ void RichEditorTypingStyleTest::TearDownTestSuite()
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -120,7 +121,7 @@ HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle001, TestSize.Level1)
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle002, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -158,7 +159,7 @@ HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle002, TestSize.Level1)
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UseStyleByTypingParagraphStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseStyleByTypingParagraphStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -196,7 +197,7 @@ HWTEST_F(RichEditorTypingStyleTest, UseStyleByTypingParagraphStyle001, TestSize.
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -231,7 +232,7 @@ HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Le
  * @tc.desc: test GetTypingStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -240,7 +241,7 @@ HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level1)
     ASSERT_NE(richEditorController, nullptr);
 
     /**
-     * @tc.steps: step1. get typing style
+     * @tc.steps: step1. set typing style
      */
     richEditorPattern->SetTypingStyle(TEST_TYPING_STYLE, std::nullopt);
 
@@ -248,9 +249,14 @@ HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level1)
      * @tc.steps: step2. get typing style
      */
     auto typingStyleResult = richEditorController->GetTypingStyle();
+
+    /**
+     * @tc.steps: step3. check typing style result
+     */
     EXPECT_TRUE(typingStyleResult.has_value());
     auto textShadows = typingStyleResult->updateTextShadows;
     EXPECT_TRUE(textShadows.has_value());
+    EXPECT_TRUE(typingStyleResult->updateLineThicknessScale.has_value());
 
     richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
 }

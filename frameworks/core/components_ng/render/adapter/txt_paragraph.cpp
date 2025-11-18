@@ -839,6 +839,15 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHigh
         }
         result.offset.SetX(result.offset.GetX() + paraStyle_.indent.ConvertToPx());
     }
+
+    bool hasLeadingMargin = paraStyle_.drawableLeadingMargin || paraStyle_.leadingMargin;
+    bool needHandleRtlLeadingMargin = paraStyle_.direction == TextDirection::RTL
+        && paraStyle_.align == TextAlign::START && hasLeadingMargin;
+    CHECK_NULL_RETURN(needHandleRtlLeadingMargin, true);
+    auto leadingMarginWidth = paraStyle_.drawableLeadingMargin
+        ? paraStyle_.drawableLeadingMargin->size.Width().ConvertToPx()
+        : paraStyle_.leadingMargin->size.Width().ConvertToPx();
+    result.offset.SetX(GetMaxWidth() - leadingMarginWidth);
     return true;
 }
 
@@ -888,6 +897,8 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     lineMetrics.endIndex = resMetric.endIndex;
     lineMetrics.baseline = resMetric.baseline;
     lineMetrics.lineNumber = resMetric.lineNumber;
+
+    ConvertFontMetrics(lineMetrics.firstCharMetrics, resMetric.firstCharMetrics);
 
     if (resMetric.runMetrics.empty()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetLineMetrics runMetrics is empty.");
@@ -939,22 +950,27 @@ void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunM
     runMetrics.textStyle.SetLocale(textStyleRes->locale);
 
     auto fontMetricsRes = runMetricsRes.fontMetrics;
-    runMetrics.fontMetrics.fFlags = fontMetricsRes.fFlags;
-    runMetrics.fontMetrics.fTop = fontMetricsRes.fTop;
-    runMetrics.fontMetrics.fAscent = fontMetricsRes.fAscent;
-    runMetrics.fontMetrics.fDescent = fontMetricsRes.fDescent;
-    runMetrics.fontMetrics.fBottom = fontMetricsRes.fBottom;
-    runMetrics.fontMetrics.fLeading = fontMetricsRes.fLeading;
-    runMetrics.fontMetrics.fAvgCharWidth = fontMetricsRes.fAvgCharWidth;
-    runMetrics.fontMetrics.fMaxCharWidth = fontMetricsRes.fMaxCharWidth;
-    runMetrics.fontMetrics.fXMin = fontMetricsRes.fXMin;
-    runMetrics.fontMetrics.fXMax = fontMetricsRes.fXMax;
-    runMetrics.fontMetrics.fXHeight = fontMetricsRes.fXHeight;
-    runMetrics.fontMetrics.fCapHeight = fontMetricsRes.fCapHeight;
-    runMetrics.fontMetrics.fUnderlineThickness = fontMetricsRes.fUnderlineThickness;
-    runMetrics.fontMetrics.fUnderlinePosition = fontMetricsRes.fUnderlinePosition;
-    runMetrics.fontMetrics.fStrikeoutThickness = fontMetricsRes.fStrikeoutThickness;
-    runMetrics.fontMetrics.fStrikeoutPosition = fontMetricsRes.fStrikeoutPosition;
+    ConvertFontMetrics(runMetrics.fontMetrics, fontMetricsRes);
+}
+
+void TxtParagraph::ConvertFontMetrics(FontMetrics& fontMetrics, const Rosen::Drawing::FontMetrics& rsFontMetrics)
+{
+    fontMetrics.fFlags = rsFontMetrics.fFlags;
+    fontMetrics.fTop = rsFontMetrics.fTop;
+    fontMetrics.fAscent = rsFontMetrics.fAscent;
+    fontMetrics.fDescent = rsFontMetrics.fDescent;
+    fontMetrics.fBottom = rsFontMetrics.fBottom;
+    fontMetrics.fLeading = rsFontMetrics.fLeading;
+    fontMetrics.fAvgCharWidth = rsFontMetrics.fAvgCharWidth;
+    fontMetrics.fMaxCharWidth = rsFontMetrics.fMaxCharWidth;
+    fontMetrics.fXMin = rsFontMetrics.fXMin;
+    fontMetrics.fXMax = rsFontMetrics.fXMax;
+    fontMetrics.fXHeight = rsFontMetrics.fXHeight;
+    fontMetrics.fCapHeight = rsFontMetrics.fCapHeight;
+    fontMetrics.fUnderlineThickness = rsFontMetrics.fUnderlineThickness;
+    fontMetrics.fUnderlinePosition = rsFontMetrics.fUnderlinePosition;
+    fontMetrics.fStrikeoutThickness = rsFontMetrics.fStrikeoutThickness;
+    fontMetrics.fStrikeoutPosition = rsFontMetrics.fStrikeoutPosition;
 }
 
 bool TxtParagraph::GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics)

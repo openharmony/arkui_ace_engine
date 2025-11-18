@@ -78,7 +78,8 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
     auto geometryNode = stageNode->GetGeometryNode();
     EXPECT_NE(geometryNode, nullptr);
     EXPECT_FALSE(geometryNode->GetMarginFrameSize().IsPositive());
-    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNodeRef =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNodeRef, nullptr);
     FrameNode* frameNode = &(*frameNodeRef);
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
@@ -93,7 +94,8 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
     ASSERT_FALSE(eventHub->HasOnAreaChanged());
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 
-    auto func = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
+    auto func =
+        [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
     eventHub->SetOnAreaChanged(std::move(func));
     ASSERT_TRUE(eventHub->HasOnAreaChanged());
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
@@ -109,7 +111,8 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.L
     /**
      * @tc.steps: step1. test method TriggerOnAreaChangeCallback
      */
-    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNodeRef =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNodeRef, nullptr);
     FrameNode* frameNode = &(*frameNodeRef);
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);

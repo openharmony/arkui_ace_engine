@@ -15,6 +15,8 @@
 
 #include "core/components_ng/syntax/arkoala_condition_scope.h"
 
+#include "core/components_ng/layout/layout_property.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {

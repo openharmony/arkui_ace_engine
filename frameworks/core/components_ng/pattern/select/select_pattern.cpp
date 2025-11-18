@@ -942,6 +942,14 @@ void SelectPattern::BuildChild()
 
 void SelectPattern::SetValue(const std::string& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetValue, value);
+    SetValueImpl(value);
+}
+
+void SelectPattern::SetValueImpl(const std::string& value)
+{
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateContent(value);
@@ -958,12 +966,23 @@ void SelectPattern::SetFontSize(const Dimension& value)
     if (value.IsNegative()) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontSize, value);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontSize(value);
 }
 
 void SelectPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetItalicFontStyle, value);
+    SetItalicFontStyleImpl(value);
+}
+
+void SelectPattern::SetItalicFontStyleImpl(const Ace::FontStyle& value)
 {
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -972,6 +991,14 @@ void SelectPattern::SetItalicFontStyle(const Ace::FontStyle& value)
 
 void SelectPattern::SetFontWeight(const FontWeight& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontWeight, value);
+    SetFontWeightImpl(value);
+}
+
+void SelectPattern::SetFontWeightImpl(const FontWeight& value)
+{
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontWeight(value);
@@ -979,12 +1006,28 @@ void SelectPattern::SetFontWeight(const FontWeight& value)
 
 void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontFamily, value);
+    SetFontFamilyImpl(value);
+}
+
+void SelectPattern::SetFontFamilyImpl(const std::vector<std::string>& value)
+{
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontFamily(value);
 }
 
 void SelectPattern::SetFontColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontColor, color);
+    SetFontColorImpl(color);
+}
+
+void SelectPattern::SetFontColorImpl(const Color& color)
 {
     fontColor_ = color;
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
@@ -1010,6 +1053,14 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 }
 
 void SelectPattern::SetOptionFontSize(const Dimension& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetOptionFontSize, value);
+    SetOptionFontSizeImpl(value);
+}
+
+void SelectPattern::SetOptionFontSizeImpl(const Dimension& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -1949,8 +2000,7 @@ void SelectPattern::OnColorConfigurationUpdate()
     auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(selectTheme);
 
-    auto pattern = host->GetPattern<SelectPattern>();
-    auto menuNode = pattern->GetMenuNode();
+    auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -1965,6 +2015,7 @@ void SelectPattern::OnColorConfigurationUpdate()
         }
     }
 
+    UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
     auto optionNode = menuPattern->GetOptions();
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
@@ -1977,7 +2028,6 @@ void SelectPattern::OnColorConfigurationUpdate()
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    UpdateMenuScrollColorConfiguration(menuNode);
     host->SetNeedCallChildrenUpdate(false);
     SetColorByUser(host, selectTheme);
 }
@@ -2030,14 +2080,13 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<S
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SelectPattern::UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode)
+void SelectPattern::UpdateMenuChildColorConfiguration(
+    const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange)
 {
     CHECK_NULL_VOID(menuNode);
-    auto scrollNode = AceType::DynamicCast<NG::FrameNode>(menuNode->GetChildAtIndex(0));
+    auto scrollNode = menuNode->GetFirstChild();
     CHECK_NULL_VOID(scrollNode);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(scrollPattern);
-    scrollPattern->OnColorConfigurationUpdate();
+    scrollNode->UpdateConfigurationUpdate(configurationChange);
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -2355,11 +2404,12 @@ void SelectPattern::SetDivider(const SelectDivider& divider)
 
 void SelectPattern::ResetFontColor()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, ResetFontColor);
     if (fontColor_.has_value()) {
         fontColor_.reset();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());

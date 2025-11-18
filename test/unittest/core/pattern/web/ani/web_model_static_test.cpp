@@ -110,9 +110,11 @@ HWTEST_F(WebModelStaticTest, CreateFrameNode001, TestSize.Level1)
     WebModelStatic::NotifyPopupWindowResultStatic(-1, true);
     WebModelStatic::NotifyPopupWindowResultStatic(1, true);
     WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
+    WebModelStatic::SetJavaScriptProxy(AccessibilityManager::RawPtr(frameNode), nullptr);
     WebModelStatic::SetPopup(AccessibilityManager::RawPtr(frameNode), true, 0);
     keyBoardMode = BlurOnKeyboardHideMode::BLUR;
     WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
+
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
     auto webSrc = webPatternStatic->GetWebSrc();
@@ -1283,6 +1285,16 @@ HWTEST_F(WebModelStaticTest, SetOnPageStartedEvent001, TestSize.Level1)
         [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
     webEventHub->FireOnPageFinishedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+    callbackCalled = false;
+    WebModelStatic::SetOnLoadStarted(AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
+    webEventHub->FireOnLoadStartedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+    callbackCalled = false;
+    WebModelStatic::SetOnLoadFinished(AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
+    webEventHub->FireOnLoadFinishedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
     auto onProgressChangeImpl = [](const BaseEventInfo* info) {};
     WebModelStatic::SetOnProgressChange(nullptr, onProgressChangeImpl);
     WebModelStatic::SetOnProgressChange(AccessibilityManager::RawPtr(frameNode), onProgressChangeImpl);
@@ -1508,6 +1520,29 @@ HWTEST_F(WebModelStaticTest, JavaScriptOnDocumentEnd025, TestSize.Level1)
     stack->Push(frameNode);
     ScriptItems scriptItemsEnd;
     WebModelStatic::JavaScriptOnDocumentEnd(AccessibilityManager::RawPtr(frameNode), scriptItemsEnd);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_NE(webPatternStatic->onDocumentEndScriptItems_, std::nullopt);
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnHeadEnd001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, JavaScriptOnHeadEnd001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    ScriptItems scriptItemsEnd;
+    ScriptItemsByOrder scriptItemsByOrder;
+    WebModelStatic::JavaScriptOnHeadEnd(AccessibilityManager::RawPtr(frameNode), scriptItemsEnd, scriptItemsByOrder);
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
     EXPECT_NE(webPatternStatic->onDocumentEndScriptItems_, std::nullopt);
@@ -1752,6 +1787,28 @@ HWTEST_F(WebModelStaticTest, SetSharedRenderProcessToken001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
     EXPECT_EQ(webPatternStatic->GetSharedRenderProcessToken(), "token");
+#endif
+}
+
+/**
+ * @tc.name: SetEmulateTouchFromMouseEvent001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEmulateTouchFromMouseEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto emulateTouchFromMouseEvent = true;
+    WebModelStatic::SetEmulateTouchFromMouseEvent(AccessibilityManager::RawPtr(frameNode), emulateTouchFromMouseEvent);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetEmulateTouchFromMouseEvent(), true);
 #endif
 }
 
@@ -2181,6 +2238,35 @@ HWTEST_F(WebModelStaticTest, SetOnUrlLoadIntercept001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnOverrideErrorPage001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnOverrideErrorPage001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return "";
+    };
+    WebModelStatic::SetOnOverrideErrorPage(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnOverrideErrorPageEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetOnFileSelectorShow001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -2194,7 +2280,6 @@ HWTEST_F(WebModelStaticTest, SetOnFileSelectorShow001, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
-
     auto callback = [&callCount](const BaseEventInfo* info) {
         callCount++;
         return true;
@@ -2223,7 +2308,6 @@ HWTEST_F(WebModelStaticTest, SetOnDetectedBlankScreen, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
-
     auto callback = [&callCount](const BaseEventInfo* info) {
         callCount++;
         return true;
@@ -2756,6 +2840,27 @@ HWTEST_F(WebModelStaticTest, SetGestureFocusMode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableSelectedDataDetector001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEnableSelectedDataDetector001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetEnableSelectedDataDetector(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableSelectedDataDetector(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetForceEnableZoom001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -2795,6 +2900,84 @@ HWTEST_F(WebModelStaticTest, SetBackToTop001, TestSize.Level1)
 
     WebModelStatic::SetBackToTop(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckBackToTop(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetRotateRenderEffect001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetRotateRenderEffect001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    std::optional<WebRotateEffect> effect;
+    WebModelStatic::SetRotateRenderEffect(AccessibilityManager::RawPtr(frameNode), effect);
+
+    effect = WebRotateEffect::RESIZE_COVER_EFFECT;
+    WebModelStatic::SetRotateRenderEffect(AccessibilityManager::RawPtr(frameNode), effect);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetRotateRenderEffect(),
+        WebRotateEffect::RESIZE_COVER_EFFECT);
+#endif
+}
+
+/**
+ * @tc.name: SetNativeEmbedObjectParamChangeId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNativeEmbedObjectParamChangeId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) { callCount++; };
+    WebModelStatic::SetNativeEmbedObjectParamChangeId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnNativeEmbedObjectParamChangeEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetSafeBrowsingCheckFinishId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetSafeBrowsingCheckFinishId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto callback = [&callbackCalled](const std::shared_ptr<BaseEventInfo> info) {
+        callbackCalled = true;
+    };
+    WebModelStatic::SetSafeBrowsingCheckFinishId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnSafeBrowsingCheckFinishEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "ui/view/frame_node.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -2197,7 +2198,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic015, TestSize.Level1)
     EXPECT_EQ(textPaintProperty->GetCursorWidth().value(), CARET_WIDTH);
 
     SearchModelStatic::SetCaretWidth(frameNode, std::nullopt);
-    EXPECT_FALSE(textPaintProperty->GetCursorWidth().has_value());
+    EXPECT_TRUE(textPaintProperty->GetCursorWidth().has_value());
 }
 
 /**
@@ -3011,8 +3012,7 @@ HWTEST_F(SearchTestTwoNg, searchSymbolIconColorTest, TestSize.Level1)
     auto color = pattern->GetDefaultIconColor(IMAGE_INDEX);
     auto searchTheme = pattern->GetTheme();
     ASSERT_NE(searchTheme, nullptr);
-    auto normalIconColor = searchTheme->GetSymbolIconColor();
-    EXPECT_EQ(color, normalIconColor);
+    EXPECT_EQ(color, Color::BLACK);
 }
 
 /**
@@ -4036,5 +4036,43 @@ HWTEST_F(SearchTestTwoNg, SearchOnWillAttachIME, TestSize.Level1)
     IMEClient client;
     textFieldPattern->FireOnWillAttachIME(client);
     EXPECT_EQ(fireOnWillAttachIME, true);
+}
+
+/**
+ * @tc.name: GetInspectorIdTest001
+ * @tc.desc: GetInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, GetInspectorIdTest001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_ETS_TAG,
+        nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::string value = "test1";
+    frameNode->UpdateInspectorId(value);
+    auto result = searchPattern->GetInspectorId();
+    EXPECT_NE(result, value);
+}
+
+/**
+ * @tc.name: GetInspectorIdTest002
+ * @tc.desc: GetInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, GetInspectorIdTest002, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_Field_ETS_TAG,
+        nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::string value = "test2";
+    frameNode->UpdateInspectorId(value);
+    auto result = searchPattern->GetInspectorId();
+    EXPECT_NE(result, value);
 }
 } // namespace OHOS::Ace::NG

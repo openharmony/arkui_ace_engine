@@ -902,9 +902,11 @@ void ListModelNG::ResetItemFillPolicy(FrameNode* frameNode)
 
 int32_t ListModelNG::GetItemFillPolicy(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, 0);
-    if (frameNode->GetLayoutProperty<ListLayoutProperty>()->GetItemFillPolicy().has_value()) {
-        return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetItemFillPolicy().value());
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, -1);
+    if (layoutProperty->GetItemFillPolicy().has_value()) {
+        return static_cast<int32_t>(layoutProperty->GetItemFillPolicy().value());
     }
     return -1;
 }
@@ -1155,6 +1157,14 @@ RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetOrCreateListChildrenMainSize();
+}
+
+void ListModelNG::SetListChildrenMainSize(FrameNode* frameNode, RefPtr<ListChildrenMainSize>& childrenSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListChildrenMainSize(childrenSize);
 }
 
 void ListModelNG::SetListChildrenMainSize(

@@ -598,7 +598,7 @@ void MovingPhotoPattern::RegisterTransitionImageEvent(const RefPtr<FrameNode>& i
     auto imageErrorEventCallback = [weak = WeakClaim(this)](const LoadImageFailEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleTransitionImageErrorEvent(info);
+        pattern->HandleImageErrorEvent(info);
     };
     imageHub->SetOnError(imageErrorEventCallback);
 }
@@ -615,9 +615,10 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
 void MovingPhotoPattern::HandleImageErrorEvent(const LoadImageFailEvent& info)
 {
     auto errorStatus = info.GetErrorInfo();
-    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorCode:%{public}d.", errorStatus.errorCode);
-    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorMessage:%{public}s.",
-        errorStatus.errorMessage.c_str());
+    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "OnHandleImageErrorEventCallback Start.");
+    CHECK_NULL_VOID(errorStatus.errorMessage.c_str());
+    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorCode:%{public}d.  errorMessage:%{public}s.",
+        errorStatus.errorCode, errorStatus.errorMessage.c_str());
     FireMediaPlayerImageError();
 }
 
@@ -632,16 +633,6 @@ void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSucce
             EightyToHundredAnimation();
         }
     }
-}
-
-void MovingPhotoPattern::HandleTransitionImageErrorEvent(const LoadImageFailEvent& info)
-{
-    auto errorStatus = info.GetErrorInfo();
-    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageErrorEvent  errorCode:%{public}d.",
-        errorStatus.errorCode);
-    TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageErrorEvent  errorMessage:%{public}s.",
-        errorStatus.errorMessage.c_str());
-    FireMediaPlayerImageError();
 }
 
 void MovingPhotoPattern::UpdateVideoNode()
@@ -1977,6 +1968,7 @@ void MovingPhotoPattern::DetachFirstImageFromFrameNode()
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhoto);
+    CHECK_NULL_VOID(movingPhoto->GetTotalChildCount() > NODE_COUNT);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
     host->RemoveChild(image);

@@ -110,14 +110,14 @@ public:
         return false;
     }
 
-    static void SetIsReloading(bool isReloading)
+    static void SetNeedReload(bool needReload)
     {
-        isReloading_ = isReloading;
+        needReload_ = needReload;
     }
 
-    static bool IsReloading()
+    static bool NeedReload()
     {
-        return isReloading_;
+        return needReload_;
     }
 
 private:
@@ -127,7 +127,8 @@ private:
         RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode);
     static bool ParseResStringObj(const std::vector<ResourceObjectParams>& params,
         RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type);
-    static bool isReloading_;
+    // check whether color resource need execute invert color function
+    static bool needReload_;
 };
 }
 #endif

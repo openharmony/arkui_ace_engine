@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IObservedObject, WatchFuncType } from '../decorator';
+import { IObservedObject, IVariableOwner, WatchFuncType } from '../decorator';
 import { IProvideDecoratedVariable } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
@@ -26,13 +25,14 @@ import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } fro
 import { WatchFunc } from './decoratorWatch';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IProvideDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
     private readonly allowOverride_: boolean;
     constructor(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         provideAliasName: string,
         initValue: T,
@@ -49,24 +49,27 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.provideAlias_ = provideAliasName;
         this.allowOverride_ = allowOverride ? allowOverride : false;
         this.registerWatchForObservedObjectChanges(initValue);
-        owningView.addProvidedVar(provideAliasName, this, allowOverride);
+        owningView.__addProvide__Internal(provideAliasName, this, allowOverride);
         if (varName !== provideAliasName) {
-            owningView.addProvidedVar(varName, this, allowOverride);
+            owningView.__addProvide__Internal(varName, this, allowOverride);
         }
     }
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provide ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
     public set(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provide ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }
-        let value: T = uiUtils.makeObserved(newValue);
+        let value: T = uiUtils.makeV1Observed(newValue);
         if (isDynamicObject(newValue)) {
-            let value = getObservedObject(newValue);
+            const value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
             // for interop

@@ -88,7 +88,7 @@ bool WaterFlowPattern::IsAtTop() const
 {
     return layoutInfo_->itemStart_;
 };
-bool WaterFlowPattern::IsAtBottom(bool considerRepeat, bool fromController) const
+bool WaterFlowPattern::IsAtBottom(bool considerRepeat) const
 {
     return considerRepeat ? (layoutInfo_->offsetEnd_ && layoutInfo_->repeatDifference_ == 0) : layoutInfo_->offsetEnd_;
 };
@@ -139,7 +139,8 @@ void WaterFlowPattern::UpdateScrollBarOffset()
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(-layoutInfo_->Offset() + layoutInfo_->contentStartOffset_, layoutInfo_->EstimateTotalHeight(),
+    UpdateScrollBarRegion(-layoutInfo_->Offset() + layoutInfo_->contentStartOffset_,
+        layoutInfo_->EstimateTotalHeight() + layoutInfo_->contentStartOffset_ + layoutInfo_->contentEndOffset_,
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 

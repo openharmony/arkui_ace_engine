@@ -20,7 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle, RelativeContainerAttribute } from "./component/relativeContainer"
+import { ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle, LocalizedBarrierStyle, RelativeContainerAttribute } from "./component/relativeContainer"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RelativeContainerModifier extends CommonMethodModifier implements RelativeContainerAttribute,AttributeModifier<RelativeContainerAttribute> {
@@ -37,7 +37,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
     _guideLine_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _guideLine_0_0value?: Array<GuideLineStyle> | undefined
     _barrier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barrier_0_0value?: Array<BarrierStyle> | undefined
+    _barrier_0_0value?: Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkRelativeContainerPeer;
@@ -63,7 +63,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
         {
             switch (this._barrier_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarrierAttribute((this._barrier_0_0value as Array<BarrierStyle> | undefined));
+                    peer.setBarrierAttribute((this._barrier_0_0value as Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined));
                     this._barrier_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -73,7 +73,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
                 }
                 default: {
                     this._barrier_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarrierAttribute((undefined as Array<BarrierStyle> | undefined));
+                    peer.setBarrierAttribute((undefined as Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined));
                 }
             }
         }
@@ -102,7 +102,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
                     break;
                 }
                 default: {
-                    this.barrier((undefined as Array<BarrierStyle> | undefined));
+                    this.barrier((undefined as Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined));
                 }
             }
         }
@@ -118,7 +118,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
         }
         return this
     }
-    barrier(value: Array<BarrierStyle> | undefined): this {
+    barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined): this {
         if (((this._barrier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._barrier_0_flag = AttributeUpdaterFlag.UPDATE

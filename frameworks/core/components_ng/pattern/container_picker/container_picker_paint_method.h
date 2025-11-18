@@ -20,10 +20,14 @@
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
-#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
+struct PickerDividerPaintInfo {
+    float strokeWidth = 0.0f;
+    float dividerLength = 0.0f;
+    Color dividerColor = Color::TRANSPARENT;
+};
 
 class ContainerPickerPaintMethod : public ScrollablePaintMethod {
     DECLARE_ACE_TYPE(ContainerPickerPaintMethod, ScrollablePaintMethod);
@@ -46,6 +50,12 @@ private:
     void PaintSelectionIndicatorDivider(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
 
     void CheckMarginAndLength(float& length, double& startMargin, double& endMargin) const;
+    void SetDefaultIndicatorBackground(
+        RefPtr<FrameNode> pickerNode, Color& backgroundColor, BorderRadiusProperty& borderRadius) const;
+    void SetDefaultIndicatorDivider(RefPtr<FrameNode> pickerNode, double& strokeWidth, Color& dividerColor,
+        double& startMargin, double& endMargin) const;
+    void PaintLine(const OffsetF& offset, const PickerDividerPaintInfo &dividerInfo,
+        RSCanvas& canvas) const;
 
     PaddingPropertyF safeAreaPadding_;
 };

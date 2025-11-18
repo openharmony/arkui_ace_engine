@@ -16,9 +16,19 @@
 import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
-import { ExtendableComponent } from '../component/extendableComponent';
+import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
+
+export interface IVariableOwner {
+    getUniqueId(): int;
+    __isViewActive__Internal(): boolean;
+    __getLocalStorage__Internal(): LocalStorage;
+    __addProvide__Internal<T>(alias: string, v: IProvideDecoratedVariable<T>, allowOverride?: boolean): void;
+    __findProvide__Internal<T>(alias: string): IProvideDecoratedVariable<T> | undefined;
+    __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void;
+    __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
+}
 
 export interface IDecoratedVariable {
     readonly varName: string;
@@ -31,12 +41,14 @@ export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
 
 export interface IDecoratedV2Variable extends IDecoratedVariable {}
 
-export interface IDecoratedImmutableVariable<T> {
+export interface IDecoratedReadableVariable<T> {
     get(): T;
 }
 
-export interface IDecoratedMutableVariable<T> {
-    get(): T;
+export interface IDecoratedImmutableVariable<T> extends IDecoratedReadableVariable<T> {
+}
+
+export interface IDecoratedMutableVariable<T> extends IDecoratedReadableVariable<T> {
     set(newValue: T): void;
 }
 
@@ -123,48 +135,48 @@ export const STATE_MGMT_FACTORY: IStateMgmtFactory = new __StateMgmtFactoryImpl(
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
-    makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T>;
+    makeLocal<T>(owningView: IVariableOwner, varName: string, initValue: T): ILocalDecoratedVariable<T>;
     makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T>;
-    makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T>;
-    makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T>;
+    makeParam<T>(owningView: IVariableOwner, varName: string, initValue: T): IParamDecoratedVariable<T>;
+    makeParamOnce<T>(owningView: IVariableOwner, varName: string, initValue: T): IParamOnceDecoratedVariable<T>;
     makeProvider<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         provideAlias: string,
         initValue: T
     ): IProviderDecoratedVariable<T>;
     makeConsumer<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         provideAlias: string,
         initValue: T
     ): IConsumerDecoratedVariable<T>;
     makeState<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStateDecoratedVariable<T>;
     makeProp<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): IPropDecoratedVariable<T>;
     makePropRef<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): IPropRefDecoratedVariable<T>;
     makeLink<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         source: LinkSourceType<T>,
         watchFunc?: WatchFuncType
     ): ILinkDecoratedVariable<T>;
     makeProvide<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         provideAlias: string,
         initValue: T,
@@ -172,47 +184,47 @@ export interface IStateMgmtFactory {
         watchFunc?: WatchFuncType
     ): IProvideDecoratedVariable<T>;
     makeConsume<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         provideAlias: string,
         watchFunc?: WatchFuncType
     ): IConsumeDecoratedVariable<T>;
     makeObjectLink<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): IObjectLinkDecoratedVariable<T>;
     makeStorageLink<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         propName: string,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStorageLinkDecoratedVariable<T>;
     makeLocalStorageLink<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         propName: string,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): ILocalStorageLinkDecoratedVariable<T>;
     makeStoragePropRef<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         propName: string,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T>;
     makeLocalStoragePropRef<T>(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         propName: string,
         varName: string,
         initValue: T,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T>;
     makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
-    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback, owningView?: ExtendableComponent): IMonitorDecoratedVariable;
+    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback, owningView?: IVariableOwner): IMonitorDecoratedVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -229,7 +241,7 @@ export interface ISubscribedWatches extends IWatchSubscriberRegister {
 }
 
 export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {
-    setOwner(owningView: ExtendableComponent);
+    setOwner(owningView: IVariableOwner);
 }
 
 export interface IMonitor {
@@ -237,7 +249,9 @@ export interface IMonitor {
     value<T>(path?: string): IMonitorValue<T> | undefined;
 }
 
-export interface IMonitorDecoratedVariable {}
+export interface IMonitorDecoratedVariable {
+    get path(): string[];
+}
 
 export interface IMonitorPathInfo {
     path: string;

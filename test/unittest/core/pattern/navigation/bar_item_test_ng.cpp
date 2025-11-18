@@ -227,8 +227,8 @@ HWTEST_F(BarItemTestNg, SetIconNodeWhenHideTextValue001, TestSize.Level1)
         V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     int32_t iconNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     barItemNode->SetIsHideItemText(true);
-    auto barItemIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, iconNodeId,
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto barItemIcon = FrameNode::GetOrCreateFrameNode(
+        V2::SYMBOL_ETS_TAG, iconNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     barItemNode->SetIconNode(barItemIcon);
 
     EXPECT_EQ(barItemNode->isHideText_, true);

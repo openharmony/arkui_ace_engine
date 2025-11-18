@@ -17,7 +17,10 @@
 
 #include "gtest/gtest.h"
 #include "include/core/SkCanvas.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 
@@ -45,12 +48,23 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
 
+    static constexpr int32_t ID_COMMANDS = 1000;
+    static constexpr int32_t ID_RADIUS_WIDTH = 1001;
+    static constexpr int32_t ID_RADIUS_HEIGHT = 1002;
+    static constexpr int32_t ID_COLOR = 1003;
+    static constexpr int32_t ID_DASH_OFFSET = 1004;
+    static constexpr int32_t ID_STROKE_LIMIT = 1005;
+    static constexpr int32_t ID_OPACITY = 1006;
+    static constexpr int32_t ID_STROKE_WIDTH = 1007;
+    static constexpr int32_t ID_WIDTH = 1008;
+    static constexpr int32_t ID_HEIGHT = 1009;
     static constexpr float WIDTH = 200.0f;
     static constexpr float HEIGHT = 300.0f;
     static constexpr float OPACITY = 0.5f;
     static constexpr float STROKE_WIDTH = 3.0f;
     static constexpr bool ANTIALIAS = false;
     static constexpr float STROKE_LIMIT = 5.0f;
+    static constexpr float DEFAULT_STROKE_LIMIT = 4.0f;
     static constexpr float DASHOFFSET = 3;
     static constexpr int32_t LINE_JOIN = 1;
     static constexpr int32_t LINE_CAP = 1;

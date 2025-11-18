@@ -540,15 +540,12 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
-    void OnAttachToMainTree() override
-    {
-        TextPattern::OnAttachToMainTree();
-    }
-
-    void OnDetachFromMainTree() override
-    {
-        TextPattern::OnDetachFromMainTree();
-    }
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     
     void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
@@ -652,7 +649,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
         TextChangeReason reason = TextChangeReason::UNKNOWN);
 #endif
-    std::u16string DeleteBackwardOperation(int32_t length);
+    std::u16string DeleteBackwardOperation(int32_t length, bool isIME = true);
     void DeleteForward(int32_t length = 1) override;
     void DeleteForward(int32_t length, TextChangeReason reason, bool isByIME = false);
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
@@ -1009,7 +1006,7 @@ public:
 
     void OnDetachFromFrameNode(FrameNode* node) override;
 
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return true;
     }

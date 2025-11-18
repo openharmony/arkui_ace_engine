@@ -785,10 +785,11 @@ HWTEST_F(FormRenderTest, FormRenderTest025, TestSize.Level1)
     float borderWidth = 1.0f;
     float width = 1.0f;
     float height = 1.0f;
-    formRenderer->UpdateFormSize(width, height, borderWidth);
+    float formViewScale = 1.0f;
+    formRenderer->UpdateFormSize(width, height, borderWidth, formViewScale);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    formRenderer->UpdateFormSize(width, height, borderWidth);
+    formRenderer->UpdateFormSize(width, height, borderWidth, formViewScale);
 }
 
 /**

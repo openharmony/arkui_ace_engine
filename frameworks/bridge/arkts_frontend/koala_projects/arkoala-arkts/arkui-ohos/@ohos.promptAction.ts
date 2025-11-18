@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { ArkUIGeneratedNativeModule } from '#components'
 import { Finalizable, SerializerBase, toPeerPtr, KPointer, MaterializedBase, DeserializerBase } from "@koalaui/interop"
 import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
     BorderRadiuses } from 'arkui/framework'
@@ -21,11 +22,12 @@ import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, Tr
     DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/framework'
 import { CustomBuilder } from 'arkui/framework'
 import { DialogAlignment } from 'arkui/framework'
-import { DismissDialogAction } from 'arkui/framework'
+import { DismissDialogAction, LevelOrderExtender } from 'arkui/framework'
 import { BorderStyle, Alignment } from 'arkui/framework'
 import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
 import { AsyncCallback } from 'arkui/base';
+import { int32 } from "@koalaui/compat";
 
 export enum LevelMode {
     OVERLAY = 0,
@@ -37,23 +39,14 @@ export enum ImmersiveMode {
     EXTEND = 1,
 }
 
-export class LevelOrder {
-    private order_: number = 0.0;
-    private static ORDER_MIN: number = -100000.0;
-    private static ORDER_MAX: number = 100000.0;
-    constructor() {}
+export class LevelOrder extends LevelOrderExtender {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
     public static clamp(order: number): LevelOrder {
-        let levelOrderImpl = new LevelOrder();
-        levelOrderImpl.setOrder(order);
-        return levelOrderImpl;
-    }
-    public getOrder(): number {
-        return this.order_;
-    }
-
-    private setOrder(order: number): void {
-        this.order_ = order < LevelOrder.ORDER_MIN ?
-            LevelOrder.ORDER_MIN : (order > LevelOrder.ORDER_MAX ? LevelOrder.ORDER_MAX : order);
+        const order_casted = order as (number)
+        const retval = ArkUIGeneratedNativeModule._LevelOrderExtender_clamp(order_casted)
+        return new LevelOrder(retval)
     }
 }
 
@@ -75,8 +68,8 @@ declare namespace promptAction {
 
     export interface ShowToastOptions {
         message: string | Resource;
-        duration?: number;
-        bottom?: string | number;
+        duration?: int32;
+        bottom?: string | double;
         showMode?: ToastShowMode;
         alignment?: Alignment;
         offset?: Offset;
@@ -121,7 +114,7 @@ declare namespace promptAction {
         onWillAppear?: (() => void);
         onWillDisappear?: (() => void);
         levelMode?: LevelMode;
-        levelUniqueId?: number;
+        levelUniqueId?: int32;
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
     }
@@ -131,7 +124,7 @@ declare namespace promptAction {
     }
 
     export interface ShowDialogSuccessResponse {
-        index: number;
+        index: int32;
     }
 
     export type PromptActionSingleButton = [Button];
@@ -150,12 +143,12 @@ declare namespace promptAction {
         showInSubWindow?: boolean;
         isModal?: boolean;
         levelMode?: LevelMode;
-        levelUniqueId?: number;
+        levelUniqueId?: int32;
         immersiveMode?: ImmersiveMode;
     }
 
     export interface ActionMenuSuccessResponse {
-        index: number;
+        index: int32;
     }
 
     export interface BaseDialogOptions {
@@ -181,7 +174,7 @@ declare namespace promptAction {
         backgroundEffect?: BackgroundEffectOptions;
         keyboardAvoidDistance?: LengthMetrics;
         levelMode?: LevelMode;
-        levelUniqueId?: number;
+        levelUniqueId?: int32;
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
         focusable?: boolean;
@@ -210,7 +203,7 @@ declare namespace promptAction {
     export interface DialogBuilderOptions {
         builder?: KPointer;
         destroyFunc?: ((ptr: KPointer) => void);
-        builderWithId?: ((dialogId: number) => KPointer);
+        builderWithId?: ((dialogId: int32) => KPointer);
     }
 
     export class DialogController extends CommonController {}
@@ -235,9 +228,9 @@ declare namespace promptAction {
 
     export function showToast(options: ShowToastOptions): void;
 
-    export function openToast(options: ShowToastOptions): Promise<number>;
+    export function openToast(options: ShowToastOptions): Promise<int32>;
 
-    export function closeToast(toastId: number): void;
+    export function closeToast(toastId: int32): void;
 
     export function showDialog1(options: ShowDialogOptions, callback: AsyncCallback<ShowDialogSuccessResponse>,
         optionsInternal?: ShowDialogOptionsInternal): void;
@@ -254,19 +247,19 @@ declare namespace promptAction {
         optionsInternal?: DialogOptionsInternal): Promise<void>;
 
     export function openCustomDialog(builderOptions: DialogBuilderOptions, options: CustomDialogOptions,
-        optionsInternal?: DialogOptionsInternal): Promise<number>;
+        optionsInternal?: DialogOptionsInternal): Promise<int32>;
 
     export function updateCustomDialog(content: KPointer, options: BaseDialogOptions): Promise<void>;
 
     export function closeCustomDialog1(content: KPointer): Promise<void>;
 
-    export function closeCustomDialog(dialogId: number): void;
+    export function closeCustomDialog(dialogId: int32): void;
 
     export function openCustomDialogWithController(content: KPointer, controller: DialogController,
         options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
 
     export function presentCustomDialog(builderOptions: DialogBuilderOptions, controller?: DialogController,
-        options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
+        options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<int32>;
 
     export function getTopOrder(): number | undefined;
     export function getBottomOrder(): number | undefined;

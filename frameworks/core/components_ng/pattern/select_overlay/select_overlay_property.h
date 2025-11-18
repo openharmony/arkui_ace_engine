@@ -205,6 +205,24 @@ enum class CloseReason {
     CLOSE_REASON_WINDOW_SIZE_CHANGE,
     CLOSE_REASON_SELECT_ALL
 };
+enum class NativeMenuId : int32_t {
+    ID_CUT = 0,
+    ID_COPY = 1,
+    ID_PASTE = 2,
+    ID_SELECT_ALL = 3,
+    ID_COLLABORATION_SERVICE = 4,
+    ID_CAMERA_INPUT = 5,
+    ID_AI_WRITE = 6,
+    ID_TRANSLATE = 7,
+    ID_SEARCH = 8,
+    ID_SHARE = 9,
+    ID_AI_MENU_URL = 10,
+    ID_AI_MENU_EMAIL = 11,
+    ID_AI_MENU_PHONE = 12,
+    ID_AI_MENU_ADDRESS = 13,
+    ID_AI_MENU_DATETIME = 14,
+    ID_ASK_CELIA = 15
+};
 
 struct HoldSelectionInfo {
     std::function<bool(const PointF&, bool)> checkTouchInArea;
@@ -241,6 +259,7 @@ struct SelectMenuInfo {
     OptionMenuType menuType = OptionMenuType::TOUCH_MENU;
     bool isAskCeliaEnabled = false;
     bool isShowAIMenuOptionChanged = false;
+    bool isShowAskCeliaInRightClick = false;
 
     // Customize menu information.
     std::optional<int32_t> responseType;
@@ -257,7 +276,8 @@ struct SelectMenuInfo {
                  (showSearch == info.showSearch) && (showShare == info.showShare) &&
                  (showCameraInput == info.showCameraInput) && (showAIWrite == info.showAIWrite) &&
                  (aiMenuOptionType == info.aiMenuOptionType) && !info.hasOnPrepareMenuCallback &&
-                 (isAskCeliaEnabled == info.isAskCeliaEnabled));
+                 (isAskCeliaEnabled == info.isAskCeliaEnabled) &&
+                 (isShowAskCeliaInRightClick == info.isShowAskCeliaInRightClick));
     }
 
     std::string ToString() const

@@ -118,6 +118,11 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
 };
+class EventManagerTestThreeNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+};
 } // namespace OHOS::Ace::NG
 
 #endif //TEST_UNITTEST_CORE_EVENT_EVENT_MANAGER_TEST_NG_H

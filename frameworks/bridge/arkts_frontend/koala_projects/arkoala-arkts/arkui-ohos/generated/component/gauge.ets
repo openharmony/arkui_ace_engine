@@ -95,58 +95,58 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof LinearGradient) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LinearGradient
                 LinearGradient_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (TypeChecker.isArray_Tuple_Union_ResourceColor_LinearGradient_Number(valueTmpValue)) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Array<[ ResourceColor | LinearGradient, number ]>
                 thisSerializer.writeInt32((valueTmpValueForIdx2.length).toInt())
                 for (let valueTmpValueForIdx2CounterI = 0; valueTmpValueForIdx2CounterI < valueTmpValueForIdx2.length; valueTmpValueForIdx2CounterI++) {
                     const valueTmpValueForIdx2TmpElement : [ ResourceColor | LinearGradient, number ] = valueTmpValueForIdx2[valueTmpValueForIdx2CounterI]
                     const valueTmpValueForIdx2TmpElement_0  = valueTmpValueForIdx2TmpElement[0]
                     if (valueTmpValueForIdx2TmpElement_0 instanceof ResourceColor) {
-                        thisSerializer.writeInt8((0).toChar())
+                        thisSerializer.writeInt8((0).toByte())
                         const valueTmpValueForIdx2TmpElement_0ForIdx0  = valueTmpValueForIdx2TmpElement_0 as ResourceColor
                         if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof Color) {
-                            thisSerializer.writeInt8((0).toChar())
+                            thisSerializer.writeInt8((0).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0  = valueTmpValueForIdx2TmpElement_0ForIdx0 as Color
                             thisSerializer.writeInt32(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx0.getOrdinal())
                         } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof number) {
-                            thisSerializer.writeInt8((1).toChar())
+                            thisSerializer.writeInt8((1).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1  = valueTmpValueForIdx2TmpElement_0ForIdx0 as number
                             thisSerializer.writeNumber(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx1)
                         } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof string) {
-                            thisSerializer.writeInt8((2).toChar())
+                            thisSerializer.writeInt8((2).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx2  = valueTmpValueForIdx2TmpElement_0ForIdx0 as string
                             thisSerializer.writeString(valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx2)
                         } else if (valueTmpValueForIdx2TmpElement_0ForIdx0 instanceof Resource) {
-                            thisSerializer.writeInt8((3).toChar())
+                            thisSerializer.writeInt8((3).toByte())
                             const valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx3  = valueTmpValueForIdx2TmpElement_0ForIdx0 as Resource
                             Resource_serializer.write(thisSerializer, valueTmpValueForIdx2TmpElement_0ForIdx0ForIdx3)
                         }
                     } else if (valueTmpValueForIdx2TmpElement_0 instanceof LinearGradient) {
-                        thisSerializer.writeInt8((1).toChar())
+                        thisSerializer.writeInt8((1).toByte())
                         const valueTmpValueForIdx2TmpElement_0ForIdx1  = valueTmpValueForIdx2TmpElement_0 as LinearGradient
                         LinearGradient_serializer.write(thisSerializer, valueTmpValueForIdx2TmpElement_0ForIdx1)
                     }
@@ -166,15 +166,15 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -234,7 +234,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     }
 }
 export interface GaugeOptions {
-    value: number;
+    value: number | undefined;
     min?: number;
     max?: number;
 }
@@ -348,6 +348,7 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         if (this.checkPriority("setGaugeOptions")) {
             const options_casted = options as (GaugeOptions)
             this.getPeer()?.setGaugeOptionsAttribute(options_casted)
+            this.applyOptionsFinish('GaugeAttribute');
             return this
         }
         return this
@@ -438,6 +439,9 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -487,7 +491,13 @@ export class GaugeOptions_serializer {
     public static write(buffer: SerializerBase, value: GaugeOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
-        valueSerializer.writeNumber(valueHolderForValue)
+        if (valueHolderForValue !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForValueTmpValue  = valueHolderForValue!
+            valueSerializer.writeNumber(valueHolderForValueTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForMin  = value.min
         if (valueHolderForMin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -507,7 +517,12 @@ export class GaugeOptions_serializer {
     }
     public static read(buffer: DeserializerBase): GaugeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let valueTmpBuf : number | undefined = undefined
+        if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            valueTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const valueTmpResult : number | undefined = valueTmpBuf
         const minTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let minTmpBuf : number | undefined = undefined
         if ((minTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -532,11 +547,11 @@ export class GaugeShadowOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
             if (valueHolderForRadiusTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as number
                 valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx1)
             }
@@ -547,12 +562,12 @@ export class GaugeShadowOptions_serializer {
         if (valueHolderForOffsetX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
-            if (valueHolderForOffsetXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetXTmpValueForIdx0)
+            if (valueHolderForOffsetXTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetXTmpValueForIdx0)
             } else if (valueHolderForOffsetXTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetXTmpValueForIdx1  = valueHolderForOffsetXTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForOffsetXTmpValueForIdx1)
             }
@@ -563,12 +578,12 @@ export class GaugeShadowOptions_serializer {
         if (valueHolderForOffsetY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
-            if (valueHolderForOffsetYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetYTmpValueForIdx0)
+            if (valueHolderForOffsetYTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetYTmpValueForIdx0)
             } else if (valueHolderForOffsetYTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetYTmpValueForIdx1  = valueHolderForOffsetYTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForOffsetYTmpValueForIdx1)
             }
@@ -594,35 +609,35 @@ export class GaugeShadowOptions_serializer {
         }
         const radiusTmpResult : number | Resource | undefined = radiusTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetXTmpBuf : number | Resource | undefined = undefined
+        let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetXTmpBuf_ : number | Resource | undefined
+            let offsetXTmpBuf_ : double | Resource | undefined
             if (offsetXTmpBuf_UnionSelector == (0).toChar()) {
-                offsetXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetXTmpBuf_UnionSelector == (1).toChar()) {
                 offsetXTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetXTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetXTmpBuf = (offsetXTmpBuf_ as number | Resource)
+            offsetXTmpBuf = (offsetXTmpBuf_ as double | Resource)
         }
-        const offsetXTmpResult : number | Resource | undefined = offsetXTmpBuf
+        const offsetXTmpResult : double | Resource | undefined = offsetXTmpBuf
         const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetYTmpBuf : number | Resource | undefined = undefined
+        let offsetYTmpBuf : double | Resource | undefined = undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetYTmpBuf_ : number | Resource | undefined
+            let offsetYTmpBuf_ : double | Resource | undefined
             if (offsetYTmpBuf_UnionSelector == (0).toChar()) {
-                offsetYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetYTmpBuf_UnionSelector == (1).toChar()) {
                 offsetYTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetYTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetYTmpBuf = (offsetYTmpBuf_ as number | Resource)
+            offsetYTmpBuf = (offsetYTmpBuf_ as double | Resource)
         }
-        const offsetYTmpResult : number | Resource | undefined = offsetYTmpBuf
+        const offsetYTmpResult : double | Resource | undefined = offsetYTmpBuf
         let value : GaugeShadowOptions = ({radius: radiusTmpResult, offsetX: offsetXTmpResult, offsetY: offsetYTmpResult} as GaugeShadowOptions)
         return value
     }
@@ -635,11 +650,11 @@ export class GaugeIndicatorOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -651,15 +666,15 @@ export class GaugeIndicatorOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpaceTmpValue  = valueHolderForSpace!
             if (valueHolderForSpaceTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as string
                 valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx0)
             } else if (valueHolderForSpaceTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as number
                 valueSerializer.writeNumber(valueHolderForSpaceTmpValueForIdx1)
             } else if (valueHolderForSpaceTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSpaceTmpValueForIdx2  = valueHolderForSpaceTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSpaceTmpValueForIdx2)
             }

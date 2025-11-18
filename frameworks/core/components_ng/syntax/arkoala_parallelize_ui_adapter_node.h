@@ -66,13 +66,16 @@ public:
 
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
-
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 private:
     std::function<int32_t()> getCount_;
     std::function<ArkUINodeHandle(int32_t, int32_t, int32_t)> registerCallback_;
 
     mutable std::list<RefPtr<UINode>> children_;
     std::map<int32_t, RefPtr<UINode>> childMap_;
+    int32_t start_ = 0;
+    int32_t end_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelizeUIAdapterNode);
 };

@@ -241,7 +241,7 @@ public:
     std::string GetOptionValue(const RefPtr<FrameNode>& frmeNode, uint32_t index)
     {
         if (index >= GetOptionCount(frmeNode)) {
-            return nullptr;
+            return "";
         }
         return options_[frmeNode][index];
     }

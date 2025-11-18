@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
@@ -1157,11 +1158,16 @@ void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
     CHECK_NULL_VOID(stack);
     JSRef<JSObject> navPathStackObj;
     if (stack->IsStaticStack()) {
-        // ArkTS1.2
+        // ArkTS static
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get static navPathStack");
-        navPathStackObj = JSNavPathStack::CreateNavPathStackObjFromStatic(AceType::Claim(pipeline), stack);
+        auto navigationStackExtend = JSNavigationStackExtend::GetOrCreateNavigationStackExtend(stack);
+        if (navigationStackExtend) {
+            auto navPathStackVal =
+                JsConverter::ConvertNapiValueToJsVal(navigationStackExtend->GetNavPathStackExtendObj());
+            navPathStackObj = JSRef<JSObject>::Cast(navPathStackVal);
+        }
     } else {
-        // ArkTS1.1
+        // ArkTS dynamic
         auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
         CHECK_NULL_VOID(jsStack);
         navPathStackObj = jsStack->GetDataSourceObj();
@@ -1218,7 +1224,7 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     info->Put("vsyncID", (int32_t)pipeline->GetFrameCount());
     info->Put("processID", getpid());
     info->Put("windowID", (int32_t)pipeline->GetWindowId());
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", info->ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{private}s", info->ToString().c_str());
     LayoutInspector::SendMessage(info->ToString());
 #endif
 }

@@ -26,6 +26,10 @@
 #include "core/gestures/drag_event.h"
 #include "core/components/common/properties/decoration.h"
 
+namespace OHOS::Ace {
+class CalcDimensionRect;
+}
+
 namespace OHOS::Ace::NG {
 
 class GestureEventHub;
@@ -100,7 +104,7 @@ class ACE_EXPORT DragEventActuator : public GestureEventActuator {
 public:
     DragEventActuator(
         const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance);
-    ~DragEventActuator() override = default;
+    ~DragEventActuator() override;
 
     void ReplaceDragEvent(const RefPtr<DragEvent>& dragEvent)
     {
@@ -297,6 +301,8 @@ public:
 
     inline static void FlushSyncGeometryNodeTasks();
 
+    void SetResponseRegionMapFull();
+    void ResetResponseRegionMap();
     void SetResponseRegionFull();
     void ResetResponseRegion();
     static void ResetDragStatus();
@@ -372,6 +378,7 @@ private:
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     std::vector<DimensionRect> responseRegion_;
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap_;
     bool isSelectedItemNode_ = false;
     bool isOnBeforeLiftingAnimation_ = false;
     bool isDragPrepareFinish_ = false;

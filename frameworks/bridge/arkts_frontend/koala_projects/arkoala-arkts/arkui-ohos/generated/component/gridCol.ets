@@ -59,11 +59,11 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof GridColColumnOption) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as GridColColumnOption
                 GridColColumnOption_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -79,11 +79,11 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof GridColColumnOption) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as GridColColumnOption
                 GridColColumnOption_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -99,11 +99,11 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof GridColColumnOption) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as GridColColumnOption
                 GridColColumnOption_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -177,6 +177,7 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         if (this.checkPriority("setGridColOptions")) {
             const option_casted = option as (GridColOptions | undefined)
             this.getPeer()?.setGridColOptionsAttribute(option_casted)
+            this.applyOptionsFinish('GridColAttribute');
             return this
         }
         return this
@@ -212,6 +213,9 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -335,11 +339,11 @@ export class GridColOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpanTmpValue  = valueHolderForSpan!
             if (valueHolderForSpanTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSpanTmpValueForIdx0  = valueHolderForSpanTmpValue as number
                 valueSerializer.writeNumber(valueHolderForSpanTmpValueForIdx0)
             } else if (valueHolderForSpanTmpValue instanceof GridColColumnOption) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSpanTmpValueForIdx1  = valueHolderForSpanTmpValue as GridColColumnOption
                 GridColColumnOption_serializer.write(valueSerializer, valueHolderForSpanTmpValueForIdx1)
             }
@@ -351,11 +355,11 @@ export class GridColOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetTmpValue  = valueHolderForOffset!
             if (valueHolderForOffsetTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOffsetTmpValueForIdx0  = valueHolderForOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForOffsetTmpValueForIdx0)
             } else if (valueHolderForOffsetTmpValue instanceof GridColColumnOption) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetTmpValueForIdx1  = valueHolderForOffsetTmpValue as GridColColumnOption
                 GridColColumnOption_serializer.write(valueSerializer, valueHolderForOffsetTmpValueForIdx1)
             }
@@ -367,11 +371,11 @@ export class GridColOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOrderTmpValue  = valueHolderForOrder!
             if (valueHolderForOrderTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOrderTmpValueForIdx0  = valueHolderForOrderTmpValue as number
                 valueSerializer.writeNumber(valueHolderForOrderTmpValueForIdx0)
             } else if (valueHolderForOrderTmpValue instanceof GridColColumnOption) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOrderTmpValueForIdx1  = valueHolderForOrderTmpValue as GridColColumnOption
                 GridColColumnOption_serializer.write(valueSerializer, valueHolderForOrderTmpValueForIdx1)
             }

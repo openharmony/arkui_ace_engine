@@ -167,6 +167,7 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
         if (this.checkPriority("setGridRowOptions")) {
             const option_casted = option as (GridRowOptions | undefined)
             this.getPeer()?.setGridRowOptionsAttribute(option_casted)
+            this.applyOptionsFinish('GridRowAttribute');
             return this
         }
         return this
@@ -194,6 +195,9 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -364,15 +368,15 @@ export class GridRowSizeOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXsTmpValue  = valueHolderForXs!
             if (valueHolderForXsTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXsTmpValueForIdx0  = valueHolderForXsTmpValue as string
                 valueSerializer.writeString(valueHolderForXsTmpValueForIdx0)
             } else if (valueHolderForXsTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXsTmpValueForIdx1  = valueHolderForXsTmpValue as number
                 valueSerializer.writeNumber(valueHolderForXsTmpValueForIdx1)
             } else if (valueHolderForXsTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXsTmpValueForIdx2  = valueHolderForXsTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForXsTmpValueForIdx2)
             }
@@ -384,15 +388,15 @@ export class GridRowSizeOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSmTmpValue  = valueHolderForSm!
             if (valueHolderForSmTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSmTmpValueForIdx0  = valueHolderForSmTmpValue as string
                 valueSerializer.writeString(valueHolderForSmTmpValueForIdx0)
             } else if (valueHolderForSmTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSmTmpValueForIdx1  = valueHolderForSmTmpValue as number
                 valueSerializer.writeNumber(valueHolderForSmTmpValueForIdx1)
             } else if (valueHolderForSmTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSmTmpValueForIdx2  = valueHolderForSmTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSmTmpValueForIdx2)
             }
@@ -404,15 +408,15 @@ export class GridRowSizeOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMdTmpValue  = valueHolderForMd!
             if (valueHolderForMdTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMdTmpValueForIdx0  = valueHolderForMdTmpValue as string
                 valueSerializer.writeString(valueHolderForMdTmpValueForIdx0)
             } else if (valueHolderForMdTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMdTmpValueForIdx1  = valueHolderForMdTmpValue as number
                 valueSerializer.writeNumber(valueHolderForMdTmpValueForIdx1)
             } else if (valueHolderForMdTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMdTmpValueForIdx2  = valueHolderForMdTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMdTmpValueForIdx2)
             }
@@ -424,15 +428,15 @@ export class GridRowSizeOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLgTmpValue  = valueHolderForLg!
             if (valueHolderForLgTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLgTmpValueForIdx0  = valueHolderForLgTmpValue as string
                 valueSerializer.writeString(valueHolderForLgTmpValueForIdx0)
             } else if (valueHolderForLgTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLgTmpValueForIdx1  = valueHolderForLgTmpValue as number
                 valueSerializer.writeNumber(valueHolderForLgTmpValueForIdx1)
             } else if (valueHolderForLgTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForLgTmpValueForIdx2  = valueHolderForLgTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForLgTmpValueForIdx2)
             }
@@ -444,15 +448,15 @@ export class GridRowSizeOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXlTmpValue  = valueHolderForXl!
             if (valueHolderForXlTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXlTmpValueForIdx0  = valueHolderForXlTmpValue as string
                 valueSerializer.writeString(valueHolderForXlTmpValueForIdx0)
             } else if (valueHolderForXlTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXlTmpValueForIdx1  = valueHolderForXlTmpValue as number
                 valueSerializer.writeNumber(valueHolderForXlTmpValueForIdx1)
             } else if (valueHolderForXlTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXlTmpValueForIdx2  = valueHolderForXlTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForXlTmpValueForIdx2)
             }
@@ -464,15 +468,15 @@ export class GridRowSizeOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXxlTmpValue  = valueHolderForXxl!
             if (valueHolderForXxlTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXxlTmpValueForIdx0  = valueHolderForXxlTmpValue as string
                 valueSerializer.writeString(valueHolderForXxlTmpValueForIdx0)
             } else if (valueHolderForXxlTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXxlTmpValueForIdx1  = valueHolderForXxlTmpValue as number
                 valueSerializer.writeNumber(valueHolderForXxlTmpValueForIdx1)
             } else if (valueHolderForXxlTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForXxlTmpValueForIdx2  = valueHolderForXxlTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForXxlTmpValueForIdx2)
             }
@@ -596,23 +600,23 @@ export class GutterOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
             if (valueHolderForXTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as Length
                 if (valueHolderForXTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForXTmpValueForIdx0ForIdx0  = valueHolderForXTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForXTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForXTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForXTmpValueForIdx0ForIdx1  = valueHolderForXTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForXTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForXTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForXTmpValueForIdx0ForIdx2  = valueHolderForXTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForXTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForXTmpValue instanceof GridRowSizeOption) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as GridRowSizeOption
                 GridRowSizeOption_serializer.write(valueSerializer, valueHolderForXTmpValueForIdx1)
             }
@@ -624,23 +628,23 @@ export class GutterOption_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
             if (valueHolderForYTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as Length
                 if (valueHolderForYTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForYTmpValueForIdx0ForIdx0  = valueHolderForYTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForYTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForYTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForYTmpValueForIdx0ForIdx1  = valueHolderForYTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForYTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForYTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForYTmpValueForIdx0ForIdx2  = valueHolderForYTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForYTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForYTmpValue instanceof GridRowSizeOption) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as GridRowSizeOption
                 GridRowSizeOption_serializer.write(valueSerializer, valueHolderForYTmpValueForIdx1)
             }
@@ -714,23 +718,23 @@ export class GridRowOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGutterTmpValue  = valueHolderForGutter!
             if (valueHolderForGutterTmpValue instanceof Length) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForGutterTmpValueForIdx0  = valueHolderForGutterTmpValue as Length
                 if (valueHolderForGutterTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForGutterTmpValueForIdx0ForIdx0  = valueHolderForGutterTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForGutterTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForGutterTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForGutterTmpValueForIdx0ForIdx1  = valueHolderForGutterTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForGutterTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForGutterTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForGutterTmpValueForIdx0ForIdx2  = valueHolderForGutterTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForGutterTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForGutterTmpValue instanceof GutterOption) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForGutterTmpValueForIdx1  = valueHolderForGutterTmpValue as GutterOption
                 GutterOption_serializer.write(valueSerializer, valueHolderForGutterTmpValueForIdx1)
             }
@@ -742,11 +746,11 @@ export class GridRowOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColumnsTmpValue  = valueHolderForColumns!
             if (valueHolderForColumnsTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColumnsTmpValueForIdx0  = valueHolderForColumnsTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColumnsTmpValueForIdx0)
             } else if (valueHolderForColumnsTmpValue instanceof GridRowColumnOption) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColumnsTmpValueForIdx1  = valueHolderForColumnsTmpValue as GridRowColumnOption
                 GridRowColumnOption_serializer.write(valueSerializer, valueHolderForColumnsTmpValueForIdx1)
             }

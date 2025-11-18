@@ -103,7 +103,9 @@ void FolderStackPattern::DumpInfo()
 
 void FolderStackPattern::SetLayoutBeforeAnimation(const RefPtr<FolderStackGroupNode>& hostNode)
 {
+    CHECK_NULL_VOID(hostNode);
     auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
+    CHECK_NULL_VOID(controlPartsStackNode);
     auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());
     auto controlPartsStackWrapper = hostNode->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(controlPartsStackWrapper);
@@ -224,7 +226,10 @@ bool FolderStackPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 void FolderStackPattern::StartOffsetEnteringAnimation()
 {
     auto host = GetHost();
-    if (!host->GetLayoutProperty<FolderStackLayoutProperty>()->GetEnableAnimation().value_or(true)) {
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<FolderStackLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetEnableAnimation().value_or(true)) {
         return;
     }
     AnimationOption optionPosition;
@@ -258,6 +263,7 @@ void FolderStackPattern::BeforeCreateLayoutWrapper()
 void FolderStackPattern::SetAutoRotate()
 {
     auto layoutProperty = GetLayoutProperty<FolderStackLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto autoHalfFold = layoutProperty->GetAutoHalfFold().value_or(true);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);

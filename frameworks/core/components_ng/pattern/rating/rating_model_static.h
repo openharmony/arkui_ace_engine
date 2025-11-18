@@ -25,7 +25,7 @@ class ACE_EXPORT RatingModelStatic {
 public:
     static void SetStars(FrameNode* frameNode, const std::optional<int32_t>& value);
     static void SetStepSize(FrameNode* frameNode, const std::optional<double>& value);
-    static void SetRatingOptions(FrameNode* frameNode, const std::optional<double>& rating = 0.0,
+    static void SetRatingOptions(FrameNode* frameNode, const double& rating,
                                  const std::optional<bool>&  indicator = false);
     static void SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange);
     static void SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent&& onChange);

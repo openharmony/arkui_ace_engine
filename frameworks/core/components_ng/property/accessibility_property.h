@@ -20,12 +20,16 @@
 #include <string>
 #include <unordered_set>
 
+#include "ui/accessibility/accessibility_constants.h"
+#include "ui/focus/focus_constants.h"
+
 #include "accessibility_property_function.h"
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Accessibility {
 class ExtraElementInfo;
@@ -46,6 +50,10 @@ struct AccessibilityGroupOptions {
     std::string stateControllerByInspector;
     AccessibilityRoleType actionControllerByType = AccessibilityRoleType::ROLE_NONE;
     std::string actionControllerByInspector;
+};
+
+struct OverlayAccessibilityProperty {
+    bool isModal = true; // true means cannot focus lower component of dialog like components
 };
 
 using ActionNoParam = std::function<void()>;
@@ -74,6 +82,7 @@ using GetWindowScenePositionImpl = std::function<void((WindowSceneInfo& windowSc
 
 using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF& point)>;
 
+class UINode;
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
@@ -667,6 +676,10 @@ public:
     AccessibilityGroupOptions GetAccessibilityGroupOptions();
     void ResetAccessibilityGroupOptions();
 
+    // used to indicate whether a dialog like component is modal
+    void SetIsAccessibilityModal(bool isModal);
+    virtual bool IsAccessibilityModal() const;
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -790,8 +803,10 @@ protected:
     // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
     // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
     int32_t accessibilityZIndex_ = -1;
-    // used to maintain user accessibilityOptions
+    // used to maintain user accessibilityOptions, only for interface of accessibilityOptions
     std::optional<AccessibilityGroupOptions> accessibilityGroupOptions_;
+    // used to maintain overlay, dialog like components' options
+    std::optional<OverlayAccessibilityProperty> overlayProperty_;
 };
 } // namespace OHOS::Ace::NG
 

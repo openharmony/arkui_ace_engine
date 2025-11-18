@@ -470,7 +470,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level1)
     TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(0, 0, true);
     TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(1, 0, true);
     TokenThemeStorage::GetInstance()->defaultLightTheme_ = nullptr;
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     TokenThemeStorage::GetInstance()->CacheResetColor();
 
     /**
@@ -530,7 +530,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level1)
     TokenThemeStorage::GetInstance()->ResetThemeColor(1, theme, theme, colorMode);
     EXPECT_EQ(TokenThemeStorage::GetInstance()->CacheGet(1)->Colors()->Brand(), Color::BLACK);
 
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
 }
 
 /**
@@ -733,5 +733,25 @@ HWTEST_F(WithThemeTestNg, WithThemeTest017, TestSize.Level1)
     EXPECT_EQ(colors->InteractiveActive(), Color(gColors[TokenColors::INTERACTIVE_ACTIVE]));
     EXPECT_EQ(colors->InteractiveSelect(), Color(gColors[TokenColors::INTERACTIVE_SELECT]));
     EXPECT_EQ(colors->InteractiveClick(), Color(gColors[TokenColors::INTERACTIVE_CLICK]));
+}
+
+/**
+ * @tc.name: WithThemeNodeTest001
+ * @tc.desc: Test SetThemeScopeId basic functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeNodeTest001, TestSize.Level1)
+{
+    // Create WithThemeNode and reset themeScopeId_ to 0
+    auto withThemeNode = WithThemeNode::CreateWithThemeNode(60086);
+    withThemeNode->themeScopeId_ = 0;
+    
+    // Test SetThemeScopeId when themeScopeId_ is 0
+    withThemeNode->SetThemeScopeId(12345);
+    EXPECT_EQ(withThemeNode->GetThemeScopeId(), 12345);
+    
+    // Test SetThemeScopeId when themeScopeId_ is not 0 (should not change)
+    withThemeNode->SetThemeScopeId(67890);
+    EXPECT_EQ(withThemeNode->GetThemeScopeId(), 12345);
 }
 } //namespace OHOS::Ace::NG

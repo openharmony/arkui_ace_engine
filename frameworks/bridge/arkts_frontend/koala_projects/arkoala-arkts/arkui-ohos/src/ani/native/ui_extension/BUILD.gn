@@ -28,7 +28,10 @@ ohos_shared_library("arkuiuiextension_ani") {
   sources = [
     "../utils/ani_utils.cpp",
     "ani_callback_info.cpp",
+    "ani_uiextension_module.cpp",
     "native_dynamic_module.cpp",
+    "native_security_ui_extension.cpp",
+    "native_ui_extension_common.cpp",
     "native_ui_extension.cpp",
   ]
   external_deps = [

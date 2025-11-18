@@ -78,7 +78,7 @@ void RichEditorScrollTestOneNg::TearDownTestSuite()
  * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -119,7 +119,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback001, TestSize.Level1)
  * @tc.desc: test OnScrollCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -147,7 +147,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level1)
  * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -200,7 +200,7 @@ HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection001, TestSize.Level
  * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection002, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -246,7 +246,7 @@ HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection002, TestSize.Level
  * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection003, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -298,7 +298,7 @@ HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection003, TestSize.Level
  * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection004, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -332,7 +332,7 @@ HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection004, TestSize.Level
  * @tc.desc: test CheckScrollable.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, CheckScrollable, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, CheckScrollable, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -359,7 +359,7 @@ HWTEST_F(RichEditorScrollTestOneNg, CheckScrollable, TestSize.Level1)
  * @tc.desc: test InitScrollablePattern
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -393,7 +393,7 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern001, TestSize.Level1)
  * @tc.desc: test InitScrollablePattern and more.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern002, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -438,7 +438,7 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern002, TestSize.Level1)
  * @tc.desc: test InitScrollablePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern003, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -457,7 +457,7 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern003, TestSize.Level1)
  * @tc.desc: test InitScrollablePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -476,7 +476,7 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level1)
  * @tc.desc: test OnAutoScroll
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -519,7 +519,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level1)
  * @tc.desc: test ScheduleAutoScroll
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, ScheduleAutoScroll001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, ScheduleAutoScroll001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -548,7 +548,7 @@ HWTEST_F(RichEditorScrollTestOneNg, ScheduleAutoScroll001, TestSize.Level1)
  * @tc.desc: test OnScrollEndCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -578,7 +578,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback001, TestSize.Level1)
  * @tc.desc: test OnScrollEndCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback002, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -606,7 +606,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback002, TestSize.Level1)
  * @tc.desc: test OnScrollEndCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback003, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -632,7 +632,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollEndCallback003, TestSize.Level1)
  * @tc.desc: test UpdateScrollBarOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarOffset001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarOffset001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -660,7 +660,7 @@ HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarOffset001, TestSize.Level1)
  * @tc.desc: Test auto scroll when adding a span after the richEditor is ready.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -697,7 +697,7 @@ HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll001, TestSize.Lev
  * @tc.desc: Test no auto scroll when adding a span before the richEditor is ready.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll002, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll002, TestSize.Level0)
 {
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(richEditorNode, nullptr);
@@ -732,7 +732,7 @@ HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll002, TestSize.Lev
  * @tc.desc: test richEditor pageup and pagedown function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, PageScrollTest001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, PageScrollTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -756,7 +756,7 @@ HWTEST_F(RichEditorScrollTestOneNg, PageScrollTest001, TestSize.Level1)
  * @tc.desc: test richEditor UpdateScrollBarColor function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarColor001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarColor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -781,7 +781,7 @@ HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarColor001, TestSize.Level1)
  * @tc.desc: test richEditor GetScrollBarColor function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, GetScrollBarColor001, TestSize.Level1)
+HWTEST_F(RichEditorScrollTestOneNg, GetScrollBarColor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

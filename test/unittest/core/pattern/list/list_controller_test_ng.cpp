@@ -1228,6 +1228,71 @@ HWTEST_F(ListControllerTestNg, GetInfo003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusIfElseNodeHeaderFooterTest
+ * @tc.desc: Test whether algorithm of focus works normally when
+             the header or the footer of list group contains a if or else node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListControllerTestNg, FocusIfElseNodeHeaderFooterTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemGroup and get curPattern.
+     */
+    CreateList();
+    CreateListItemGroup();
+    auto listItemGroupFrameNode = AceType::DynamicCast<FrameNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto listItemGroupPattern = listItemGroupFrameNode->GetPattern<ListItemGroupPattern>();
+    auto curPattern = AceType::MakeRefPtr<ListPattern>();
+    CreateListItems(3);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Add header and get colomnNode.
+     */
+    IfElseModelNG headerIfElse;
+    headerIfElse.Create();
+    auto headerIfElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    ViewStackProcessor::GetInstance()->Pop();
+    ColumnModelNG colModel;
+    colModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(GROUP_HEADER_LEN));
+    ViewAbstract::SetHeight(CalcLength(GROUP_HEADER_LEN));
+    auto headerOfColumnNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    headerIfElseNode->AddChild(headerOfColumnNode);
+    itemGroupPatters_[0]->AddHeader(headerIfElseNode);
+
+    /**
+     * @tc.steps: step3. Add footer and get colomnNode.
+     */
+    IfElseModelNG footerIfElse;
+    footerIfElse.Create();
+    auto footerIfElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    ViewStackProcessor::GetInstance()->Pop();
+    colModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(GROUP_HEADER_LEN));
+    ViewAbstract::SetHeight(CalcLength(GROUP_HEADER_LEN));
+    auto footerOfColumnNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    footerIfElseNode->AddChild(footerOfColumnNode);
+    itemGroupPatters_[0]->AddFooter(footerIfElseNode);
+
+     /**
+     * @tc.steps: step4. FlushLayoutTasks.
+     * @tc.expected: GetCurrentFocusIndices can find colomn in header and footer.
+     */
+    FlushUITasks(frameNode_);
+    int32_t curIndexInGroup = 2;
+    listItemGroupPattern->
+        GetCurrentFocusIndices(headerOfColumnNode, curPattern, curIndexInGroup);
+    EXPECT_EQ(curIndexInGroup, -1);
+    listItemGroupPattern->
+        GetCurrentFocusIndices(footerOfColumnNode, curPattern, curIndexInGroup);
+    EXPECT_EQ(curIndexInGroup, 3);
+}
+
+/**
  * @tc.name: CustomNodeHeaderFooterTest
  * @tc.desc: Test IsHasHeader and IsHasFooter when header and footer is custom node.
  * @tc.type: FUNC
@@ -1336,11 +1401,22 @@ HWTEST_F(ListControllerTestNg, CheckIsAtEndWhenScrollToBottom, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Scroll to bottom, check IsAtEnd.
-     * @tc.expected: IsAtEnd is true.
+     * @tc.expected: IsAtEnd is true and endIndex_ is 10.
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.count(10), 1);
+    EXPECT_EQ(pattern_->endIndex_, 10);
+    EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
+
+    /**
+     * @tc.steps: step3. remeasure list.
+     * @tc.expected: IsAtEnd is true and endIndex_ is 10.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.count(10), 1);
+    EXPECT_EQ(pattern_->endIndex_, 10);
     EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
 }
 } // namespace OHOS::Ace::NG

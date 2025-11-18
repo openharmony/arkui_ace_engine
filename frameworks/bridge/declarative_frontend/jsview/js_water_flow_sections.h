@@ -27,7 +27,8 @@ class FrameNode;
 
 namespace OHOS::Ace::Framework {
 using OnSectionChangedCallback =
-    std::function<void(size_t start, size_t deleteCount, std::vector<NG::WaterFlowSections::Section>& newSections)>;
+    std::function<void(size_t start, size_t deleteCount, std::vector<NG::WaterFlowSections::Section>& newSections,
+        const std::vector<NG::WaterFlowSections::Section>& allSections)>;
 
 class JSWaterFlowSections : public Referenced {
 public:

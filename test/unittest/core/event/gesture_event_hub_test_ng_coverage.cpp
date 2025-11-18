@@ -831,4 +831,72 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubOnDragStartTestCoverage00
     gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, event);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragStartRequestStatus_, DragStartRequestStatus::READY);
 }
+
+/**
+ * @tc.name: GestureEventHubGetPixelMapOffset004
+ * @tc.desc: Test GetPixelMapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode);
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps2: Invoke GetPixelMapOffset
+     * @tc.expected: NearZero(gestureEventHub->frameNodeSize_.Width()) is false,
+     * NearZero(size.Width()) is false.
+     */
+    GestureEvent info = GestureEvent();
+    auto size = SizeF(500, 600);
+    PreparedInfoForDrag data;
+    gestureEventHub->frameNodeSize_ = SizeF(1, 1);
+    DragPreviewOption option;
+    option.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+    frameNode->SetDragPreviewOptions(option);
+    gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
+    EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
+    EXPECT_FALSE(NearZero(size.Width()));
+}
+
+/**
+ * @tc.name: GestureEventHubGetPixelMapOffset005
+ * @tc.desc: Test GetPixelMapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode);
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps2: Invoke GetPixelMapOffset
+     * @tc.expected: NearZero(gestureEventHub->frameNodeSize_.Width()) is false,
+     * NearZero(size.Width()) is false.
+     */
+    GestureEvent info = GestureEvent();
+    auto size = SizeF(500, 600);
+    PreparedInfoForDrag data;
+    data.isSceneBoardTouchDrag = true;
+    gestureEventHub->frameNodeSize_ = SizeF(1, 1);
+    gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
+    EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
+    EXPECT_FALSE(NearZero(size.Width()));
+}
 } // namespace OHOS::Ace::NG

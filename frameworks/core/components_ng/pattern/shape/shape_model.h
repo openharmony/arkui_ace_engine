@@ -54,6 +54,14 @@ public:
     virtual void SetAntiAlias(bool antiAlias);
     virtual void SetWidth();
     virtual void SetHeight();
+    virtual void SetStroke(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetFill(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetForegroundColor(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetStrokeDashOffset(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetStrokeMiterLimit(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetStrokeOpacity(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetFillOpacity(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetStrokeWidth(const RefPtr<ResourceObject>& resObj) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_SHAPE_MODEL_H

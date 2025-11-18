@@ -211,11 +211,11 @@ export class TextMenuItemId implements MaterializedBase {
     static of_serialize(id: ResourceStr): TextMenuItemId {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (id instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const idForIdx0  = id as string
             thisSerializer.writeString(idForIdx0)
         } else if (id instanceof Resource) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const idForIdx1  = id as Resource
             Resource_serializer.write(thisSerializer, idForIdx1)
         }
@@ -325,7 +325,7 @@ export enum TextDataDetectorType {
     DATE_TIME = 4
 }
 export interface TextDataDetectorConfig {
-    types: Array<TextDataDetectorType>;
+    types: Array<TextDataDetectorType> | null | undefined;
     onDetectResultUpdate?: ((value0: string) => void);
     color?: ResourceColor;
     decoration?: DecorationStyleInterface;
@@ -758,19 +758,19 @@ export class DecorationStyleResult_serializer {
         valueSerializer.writeInt32(valueHolderForType.valueOf())
         const valueHolderForColor  = value.color
         if (valueHolderForColor instanceof Color) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
             valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
         } else if (valueHolderForColor instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForColorForIdx1  = valueHolderForColor as number
             valueSerializer.writeNumber(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForColorForIdx2  = valueHolderForColor as string
             valueSerializer.writeString(valueHolderForColorForIdx2)
         } else if (valueHolderForColor instanceof Resource) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForColorForIdx3  = valueHolderForColor as Resource
             Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
@@ -867,11 +867,11 @@ export class TextMenuItem_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForContent  = value.content
         if (valueHolderForContent instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForContentForIdx0  = valueHolderForContent as string
             valueSerializer.writeString(valueHolderForContentForIdx0)
         } else if (valueHolderForContent instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForContentForIdx1  = valueHolderForContent as Resource
             Resource_serializer.write(valueSerializer, valueHolderForContentForIdx1)
         }
@@ -880,11 +880,11 @@ export class TextMenuItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -898,11 +898,11 @@ export class TextMenuItem_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLabelInfoTmpValue  = valueHolderForLabelInfo!
             if (valueHolderForLabelInfoTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLabelInfoTmpValueForIdx0  = valueHolderForLabelInfoTmpValue as string
                 valueSerializer.writeString(valueHolderForLabelInfoTmpValueForIdx0)
             } else if (valueHolderForLabelInfoTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLabelInfoTmpValueForIdx1  = valueHolderForLabelInfoTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForLabelInfoTmpValueForIdx1)
             }
@@ -965,15 +965,15 @@ export class CaretStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -985,19 +985,19 @@ export class CaretStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -1092,10 +1092,16 @@ export class TextDataDetectorConfig_serializer {
     public static write(buffer: SerializerBase, value: TextDataDetectorConfig): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTypes  = value.types
-        valueSerializer.writeInt32((valueHolderForTypes.length).toInt())
-        for (let valueHolderForTypesCounterI = 0; valueHolderForTypesCounterI < valueHolderForTypes.length; valueHolderForTypesCounterI++) {
-            const valueHolderForTypesTmpElement : TextDataDetectorType = valueHolderForTypes[valueHolderForTypesCounterI]
-            valueSerializer.writeInt32(valueHolderForTypesTmpElement.valueOf())
+        if (valueHolderForTypes !== undefined && valueHolderForTypes !== null) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypesTmpValue  = valueHolderForTypes!
+            valueSerializer.writeInt32((valueHolderForTypesTmpValue.length).toInt())
+            for (let valueHolderForTypesTmpValueCounterI = 0; valueHolderForTypesTmpValueCounterI < valueHolderForTypesTmpValue.length; valueHolderForTypesTmpValueCounterI++) {
+                const valueHolderForTypesTmpValueTmpElement : TextDataDetectorType = valueHolderForTypesTmpValue[valueHolderForTypesTmpValueCounterI]
+                valueSerializer.writeInt32(valueHolderForTypesTmpValueTmpElement.valueOf())
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForOnDetectResultUpdate  = value.onDetectResultUpdate
         if (valueHolderForOnDetectResultUpdate !== undefined) {
@@ -1110,19 +1116,19 @@ export class TextDataDetectorConfig_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -1140,12 +1146,17 @@ export class TextDataDetectorConfig_serializer {
     }
     public static read(buffer: DeserializerBase): TextDataDetectorConfig {
         let valueDeserializer : DeserializerBase = buffer
-        const typesTmpBufLength : int32 = valueDeserializer.readInt32()
-        let typesTmpBuf : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBufLength)
-        for (let typesTmpBufBufCounterI = 0; typesTmpBufBufCounterI < typesTmpBufLength; typesTmpBufBufCounterI++) {
-            typesTmpBuf[typesTmpBufBufCounterI] = TextDataDetectorType.fromValue(valueDeserializer.readInt32())
+        const typesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typesTmpBuf : Array<TextDataDetectorType> | null | undefined = undefined
+        if ((typesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const typesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let typesTmpBuf_ : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBuf_Length)
+            for (let typesTmpBuf_BufCounterI = 0; typesTmpBuf_BufCounterI < typesTmpBuf_Length; typesTmpBuf_BufCounterI++) {
+                typesTmpBuf_[typesTmpBuf_BufCounterI] = TextDataDetectorType.fromValue(valueDeserializer.readInt32())
+            }
+            typesTmpBuf = typesTmpBuf_
         }
-        const typesTmpResult : Array<TextDataDetectorType> = typesTmpBuf
+        const typesTmpResult : Array<TextDataDetectorType> | null | undefined = typesTmpBuf
         const onDetectResultUpdateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDetectResultUpdateTmpBuf : ((value0: string) => void) | undefined = undefined
         if ((onDetectResultUpdateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

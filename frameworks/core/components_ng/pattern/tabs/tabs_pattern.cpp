@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -122,6 +123,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         pattern->FireTabContentStateCallback(preIndex, currentIndex);
         /* TabChange callback */
         pattern->FireTabChangeCallback(preIndex, currentIndex);
+        /* TabChange performanceCheck */
+        pattern->PerformanceCheckTabChange(pattern, tabsNode, currentIndex);
 
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
@@ -135,8 +138,6 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
                     TabContentChangeEvent eventInfo(currentIndex);
                     jsEvent(&eventInfo);
                 }, true);
-            
-            pattern->PerformanceCheckTabChange(pattern, tabsNode, currentIndex);
         }
     });
 
@@ -840,6 +841,13 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
             }
         }
         AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
+        auto host = GetHost();
+        if (host) {
+            auto pipeline = host->GetContextWithCheck();
+            if (pipeline) {
+                pipeline->GetLoadCompleteManager()->StartCollect("");
+            }
+        }
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
     }
@@ -987,5 +995,37 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
         dividerRenderProperty->UpdateDividerColor(currentDivider.color);
     }
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TabsPattern::DumpInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
+    CHECK_NULL_VOID(callbackPtr);
+    DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ").append(
+        *callbackPtr ? "true" : "false"));
+}
+
+void TabsPattern::DumpAdvanceInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
+    CHECK_NULL_VOID(callbackPtr);
+    DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ").append(
+        *callbackPtr ? "true" : "false"));
 }
 } // namespace OHOS::Ace::NG

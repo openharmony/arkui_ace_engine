@@ -27,10 +27,10 @@ export interface IncrementalScope<T> {
     get unchanged(): boolean;
     get cached(): T;
     recache(value?: T): T;
-    param<V>(index: int, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>;
+    param<V>(index: int, value: V): ReadableState<V>;
 }
 
-export interface State<V> {
+export interface ReadableState<V> {
     readonly value: V;
     readonly modified: boolean;
 }

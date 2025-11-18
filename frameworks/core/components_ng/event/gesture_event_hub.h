@@ -44,6 +44,7 @@ struct DragNotifyMsg;
 struct KeyEvent;
 class UnifiedData;
 class Subwindow;
+class CalcDimensionRect;
 }
 
 namespace OHOS::Ace::NG {
@@ -169,7 +170,7 @@ class PipelineContext;
 class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
-    ~GestureEventHub() override = default;
+    ~GestureEventHub() override;
     void AddGesture(const RefPtr<NG::Gesture>& gesture);
     // call by CAPI do distinguish with AddGesture called by ARKUI;
     void ClearGesture();
@@ -234,6 +235,7 @@ public:
     GestureEventFunc GetClickEvent();
     void BindMenu(GestureEventFunc&& showMenu);
     void RegisterMenuOnTouch(TouchEventFunc&& callback);
+    void AddTouchEventForTips(TouchEventFunc&& tipsTouchEventFunc);
     bool IsLongClickable() const;
     void SetRedirectClick(bool redirectClick);
     bool ActLongClick();
@@ -278,6 +280,10 @@ public:
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
     const std::vector<DimensionRect>& GetResponseRegion() const;
     const std::vector<DimensionRect>& GetMouseResponseRegion() const;
+    std::vector<CalcDimensionRect> GetFingerResponseRegionFromMap();
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& GetResponseRegionMap();
+    void SetResponseRegionMap(
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap);
     void SetResponseRegionFunc(const OnReponseRegionFunc& func);
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     void SetOnTouchTestFunc(OnChildTouchTestFunc&& callback);
@@ -484,6 +490,7 @@ private:
     // used in bindMenu, need to delete the old callback when bindMenu runs again
     RefPtr<ClickEvent> showMenu_;
     RefPtr<TouchEventImpl> bindMenuTouch_;
+    RefPtr<TouchEventImpl> tipsTouchEvent_;
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
@@ -491,6 +498,7 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     std::vector<DimensionRect> mouseResponseRegion_;
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
 

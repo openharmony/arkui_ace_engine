@@ -32,6 +32,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
@@ -710,7 +711,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg006, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();
@@ -764,7 +765,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg007, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();
@@ -818,7 +819,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg008, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();
@@ -872,7 +873,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg009, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();

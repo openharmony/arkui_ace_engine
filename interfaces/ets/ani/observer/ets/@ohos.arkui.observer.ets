@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode } from "@ohos.arkui.component"
+import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
+HeightBreakpoint, WidthBreakpoint } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
@@ -22,18 +23,44 @@ import hilog from '@ohos.hilog'
  export default namespace uiObserver {
     loadLibrary("observer_ani");
     export native function createUIObserver(id: number): UIObserver;
+    export native function onRouterPageUpdate(
+        context: UIAbilityContext | UIContext,
+        callback: Callback<RouterPageInfo>
+    ): void;
+    export native function offRouterPageUpdate(
+        context: UIAbilityContext | UIContext,
+        callback?: Callback<RouterPageInfo>
+    ): void;
+    export native function onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+    export native function offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+    export native function onNavDestinationUpdate(
+        options: NavDestinationSwitchObserverOptions,
+        callback: Callback<NavDestinationInfo>
+    ): void;
+    export native function offNavDestinationUpdate(
+        options: NavDestinationSwitchObserverOptions,
+        callback?: Callback<NavDestinationInfo>
+    ): void;
+    export native function onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+    export native function offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+    export native function onNavDestinationSwitch(
+        observerOptions: NavDestinationSwitchObserverOptions,
+        callback: Callback<NavDestinationSwitchInfo>
+    ): void;
+    export native function offNavDestinationSwitch(
+        observerOptions: NavDestinationSwitchObserverOptions,
+        callback?: Callback<NavDestinationSwitchInfo>
+    ): void;
+
+    export native function onTabChange(callback: Callback<ObserverOptions>): void;
+    export native function offTabChange(callback?: Callback<ObserverOptions>): void;
+    export native function onTabChange(options: ObserverOptions, callback: Callback<ObserverOptions>): void;
+    export native function offTabChange(options: ObserverOptions, callback?: Callback<ObserverOptions>): void;
+
     export class DensityInfo {
         density: number;
     }
-    export default interface UIObserver
-    {
-        on(type: string, callback: object) : void;
-        off(type: string, callback?: object) : void;
-        on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
-        off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
-    }
-    
-    class UIObserverImpl implements UIObserver
+    export class UIObserver
     {
         private nativeObserverAddr:long = 0;
         
@@ -42,17 +69,64 @@ import hilog from '@ohos.hilog'
                 this.nativeObserverAddr = nativeAddr;
             }
         }
-        
+
         public native on(type: string, callback: object) : void;
         public native off(type: string, callback?: object) : void;
-        
+
         public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        public native onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+
+        public native offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        public native onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        public native offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+
+        public native onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        public native offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+
+        public native onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        public native offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        public native onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        public native offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
+
+        public native onTabChange(callback: Callback<TabContentInfo>): void;
+        public native offTabChange(callback?: Callback<TabContentInfo>): void;
+        public native onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        public native offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        public native onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        public native onDensityUpdate(callback: Callback<DensityInfo>): void;
+        public native offDensityUpdate(callback?: Callback<DensityInfo>): void;
+        public native onWillDraw(callback: Callback<void>): void;
+        public native offWillDraw(callback?: Callback<void>): void;
+        public native onDidLayout(callback: Callback<void>): void;
+        public native offDidLayout(callback?: Callback<void>): void;
     }
 
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+    }
+    export class WindowSizeLayoutBreakpointInfo {
+        widthBreakpoint: WidthBreakpoint;
+        heightBreakpoint: HeightBreakpoint;
     }
 
     export class NavigationInfoImpl implements NavigationInfo {
@@ -109,22 +183,22 @@ import hilog from '@ohos.hilog'
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: int;
+        mode?: NavDestinationMode;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: int;
+        mode?: NavDestinationMode;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;
@@ -150,6 +224,15 @@ import hilog from '@ohos.hilog'
                 return NavDestinationState.ON_BACKPRESS;
             } else {
                 throw Error("state in NavDestinationInfo type Error");
+            }
+        }
+        static castToNavDestinationMode(value: number): NavDestinationMode {
+            if (value === 0) {
+                return NavDestinationMode.STANDARD;
+            } else if (value === 1) {
+                return NavDestinationMode.DIALOG;
+            } else {
+                throw Error("mode in NavDestinationInfo type Error");
             }
         }
         static transferStatic(input: Any): Object {
@@ -186,7 +269,7 @@ import hilog from '@ohos.hilog'
             if (!index.isNumber()) {
                 throw Error("index in NavDestinationInfo type Error");
             }
-            staticValue.index = index.toNumber();
+            staticValue.index = index.toNumber() as int;
 
             let param = dynamicValue.getProperty("param");
             if (param.isString()) {
@@ -200,6 +283,22 @@ import hilog from '@ohos.hilog'
                 throw Error("navDestinationId in NavDestinationInfo type Error");
             }
             staticValue.navDestinationId = navDestinationId.toString();
+
+            let uniqueId = dynamicValue.getProperty("uniqueId");
+            if (!uniqueId.isNumber()) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            } else if (!(uniqueId.isUndefined() || uniqueId.isNull())) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            }
+            staticValue.uniqueId = uniqueId.toNumber() as int;
+
+            let mode = dynamicValue.getProperty("mode");
+            if (!mode.isNumber()) {
+                throw Error("mode in NavDestinationInfo type Error");
+            } else if (!(mode.isUndefined() || mode.isNull())) {
+                throw Error("mode in NavDestinationInfo type Error");
+            }
+            staticValue.mode = NavDestinationInfoImpl.castToNavDestinationMode(mode.toNumber());
 
             return staticValue;
         }
@@ -223,6 +322,16 @@ import hilog from '@ohos.hilog'
                 dynamicValue.setProperty('param', ESValue.wrap(staticValue.param));
             }
             dynamicValue.setProperty('navDestinationId', ESValue.wrap(staticValue.navDestinationId));
+            if (staticValue.uniqueId === null || staticValue.uniqueId === undefined) {
+                dynamicValue.setProperty('uniqueId', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
+            if (staticValue.mode === null || staticValue.mode === undefined) {
+                dynamicValue.setProperty('mode', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('mode', ESValue.wrapNumber(staticValue.mode!));
+            }
             return dynamicValue as Any;
         }
     }
@@ -237,7 +346,7 @@ import hilog from '@ohos.hilog'
 
     export class RouterPageInfo {
         context: UIAbilityContext | UIContext;
-        index: number;
+        index: int;
         name: string;
         path: string;
         state: RouterPageState;
@@ -273,7 +382,7 @@ import hilog from '@ohos.hilog'
             if (!index.isNumber()) {
                 throw Error("index in RouterPageInfo type Error");
             }
-            staticValue.index = index.toNumber();
+            staticValue.index = index.toNumber() as int;
 
             let name = dynamicValue.getProperty('name');
             if (!name.isString()) {
@@ -332,5 +441,40 @@ import hilog from '@ohos.hilog'
 
     export interface NavDestinationSwitchInfo {}
 
-    export interface TabContentInfo {}
+    export enum TabContentState {
+        ON_SHOW = 0,
+        ON_HIDE = 1
+    }
+
+    export interface TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: int;
+        state: TabContentState;
+        index: int;
+        id: string;
+        uniqueId: int;
+        lastIndex?: int;
+    }
+
+    export class TabContentInfoImpl implements TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: int;
+        state: TabContentState;
+        index: int;
+        id: string;
+        uniqueId: int;
+        lastIndex?: int;
+        static setTabContentInfoImplLastIndex(contentInfo: TabContentInfoImpl, value: int): void {
+            contentInfo.lastIndex = value;
+        }
+        static castToTabContentState(value: number): TabContentState {
+            if (value === 0) {
+                return TabContentState.ON_SHOW;
+            } else if (value === 1) {
+                return TabContentState.ON_HIDE;
+            } else {
+                throw Error("state in TabContentState type Error");
+            }
+        }
+    }
  }

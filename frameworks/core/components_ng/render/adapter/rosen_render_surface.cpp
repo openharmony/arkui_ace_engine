@@ -591,7 +591,7 @@ void RosenRenderSurface::DrawBufferForXComponent(
         : surfaceNode->buffer_->GetSurfaceBufferTransform();
     Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
         static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->acquireFence_, transform, {},
-        surfaceNode->isOpaque_ };
+        surfaceNode->sendTimes_ > 1 ? isOpaque_.load() : surfaceNode->isOpaque_ };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 }
@@ -742,6 +742,7 @@ void RosenRenderSurface::OnWindowStateChange(bool isShow)
 void RosenRenderSurface::SetSurfaceBufferOpaque(bool isOpaque)
 {
     isOpaque_ = isOpaque;
+    MarkDirtyIfNeeded();
 }
 
 void DrawBufferListener::OnBufferAvailable()

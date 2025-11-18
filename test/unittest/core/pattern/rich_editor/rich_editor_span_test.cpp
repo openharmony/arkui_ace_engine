@@ -121,7 +121,7 @@ void RichEditorSpanTest::ConstructSpans(RefPtr<RichEditorPattern> pattern, T val
  * @tc.desc: test span num [text-text]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextText001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -184,7 +184,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextText001, TestSize.Level1)
  * @tc.desc: test span num [text-image]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextImage001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextImage001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -247,7 +247,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextImage001, TestSize.Level1)
  * @tc.desc: test span num [text-builder]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextBuilder001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextBuilder001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -310,7 +310,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextBuilder001, TestSize.Level1)
  * @tc.desc: test span num [text-symbol]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextSymbol001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextSymbol001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -373,7 +373,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextSymbol001, TestSize.Level1)
  * @tc.desc: test span num [image-text]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageText001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -436,7 +436,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageText001, TestSize.Level1)
  * @tc.desc: test span num [image-image]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageImage001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageImage001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -499,7 +499,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageImage001, TestSize.Level1)
  * @tc.desc: test span num [image-builder]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageBuilder001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageBuilder001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -562,7 +562,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageBuilder001, TestSize.Level1)
  * @tc.desc: test span num [image-symbol]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageSymbol001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageSymbol001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -625,7 +625,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageSymbol001, TestSize.Level1)
  * @tc.desc: test span num [builder-text]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderText001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -688,7 +688,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderText001, TestSize.Level1)
  * @tc.desc: test span num [builder-image]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderImage001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderImage001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -751,7 +751,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderImage001, TestSize.Level1)
  * @tc.desc: test span num [builder-builder]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderBuilder001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderBuilder001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -814,7 +814,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderBuilder001, TestSize.Level
  * @tc.desc: test span num [builder-symbol]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderSymbol001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderSymbol001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -877,7 +877,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderSymbol001, TestSize.Level1
  * @tc.desc: test span num [symbol-text]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolText001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -940,7 +940,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolText001, TestSize.Level1)
  * @tc.desc: test span num [symbol-image]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolImage001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolImage001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1003,7 +1003,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolImage001, TestSize.Level1)
  * @tc.desc: test span num [symbol-builder]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolBuilder001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolBuilder001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1066,7 +1066,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolBuilder001, TestSize.Level1
  * @tc.desc: test span num [symbol-symbol]
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolSymbol001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolSymbol001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1129,7 +1129,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolSymbol001, TestSize.Level1)
  * @tc.desc: test IsSelectAll001
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, IsSelectAll001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, IsSelectAll001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1148,7 +1148,7 @@ HWTEST_F(RichEditorSpanTest, IsSelectAll001, TestSize.Level1)
  * @tc.desc: test GetDelPartiallySpanItem
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, GetDelPartiallySpanItem001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, GetDelPartiallySpanItem001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1195,7 +1195,7 @@ HWTEST_F(RichEditorSpanTest, GetDelPartiallySpanItem001, TestSize.Level1)
  * @tc.desc: test GetSameSpanItem
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, GetSameSpanItem001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, GetSameSpanItem001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1221,7 +1221,7 @@ HWTEST_F(RichEditorSpanTest, GetSameSpanItem001, TestSize.Level1)
  * @tc.desc: test GetSameSpanItem
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, GetSameSpanItem002, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, GetSameSpanItem002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1248,7 +1248,7 @@ HWTEST_F(RichEditorSpanTest, GetSameSpanItem002, TestSize.Level1)
  * @tc.desc: test InsertDiffStyleValueInSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, RichEditorPatternTestInsertDiffStyleValueInSpan001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, RichEditorPatternTestInsertDiffStyleValueInSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1271,7 +1271,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorPatternTestInsertDiffStyleValueInSpan001,
  * @tc.desc: test GetReplacedSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, GetReplacedSpan001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, GetReplacedSpan001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1318,7 +1318,7 @@ HWTEST_F(RichEditorSpanTest, GetReplacedSpan001, TestSize.Level1)
  * @tc.desc: test GetReplacedSpanFission
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, GetReplacedSpanFission001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, GetReplacedSpanFission001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -1349,7 +1349,7 @@ HWTEST_F(RichEditorSpanTest, GetReplacedSpanFission001, TestSize.Level1)
  * @tc.desc: test ToGestureSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, ToGestureSpan001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, ToGestureSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1372,7 +1372,7 @@ HWTEST_F(RichEditorSpanTest, ToGestureSpan001, TestSize.Level1)
  * @tc.desc: test ToBaselineOffsetSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, ToBaselineOffsetSpan001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, ToBaselineOffsetSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1393,7 +1393,7 @@ HWTEST_F(RichEditorSpanTest, ToBaselineOffsetSpan001, TestSize.Level1)
  * @tc.desc: test ToTextShadowSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, ToTextShadowSpan001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, ToTextShadowSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1420,7 +1420,7 @@ HWTEST_F(RichEditorSpanTest, ToTextShadowSpan001, TestSize.Level1)
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, CreateImageSourceInfo001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, CreateImageSourceInfo001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1440,7 +1440,7 @@ HWTEST_F(RichEditorSpanTest, CreateImageSourceInfo001, TestSize.Level1)
  * @tc.desc: test InsertSpanByBackData
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanTest, InsertSpanByBackData001, TestSize.Level1)
+HWTEST_F(RichEditorSpanTest, InsertSpanByBackData001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

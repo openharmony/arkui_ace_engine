@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,7 @@ void QRCodePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
 }
 
 bool QRCodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -71,7 +73,9 @@ void QRCodePattern::DumpInfo()
 
 FocusPattern QRCodePattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_RETURN(qrCodeTheme, FocusPattern());
@@ -91,7 +95,11 @@ void QRCodePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    json->Put("Color", paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString().c_str());
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    CHECK_NULL_VOID(qrCodeTheme);
+    json->Put("Color", paintProperty->GetColorValue(qrCodeTheme->GetQrcodeColor()).ColorToString().c_str());
     json->Put("ContentOpacity", std::to_string(paintProperty->GetOpacityValue(1.0f)).c_str());
     json->Put("ContentString", paintProperty->GetValueValue(" ").c_str());
 }

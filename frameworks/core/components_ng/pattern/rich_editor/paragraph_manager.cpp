@@ -77,6 +77,15 @@ std::string ParagraphManager::GetDumpInfo() const
     return dumpInfo;
 }
 
+int32_t ParagraphManager::GetParagraphLength() const
+{
+    int32_t totalLength = 0;
+    for (const auto& info : paragraphs_) {
+        totalLength += (info.end - info.start);
+    }
+    return totalLength;
+}
+
 float ParagraphManager::GetLongestLine() const
 {
     float res = 0.0f;
@@ -330,6 +339,50 @@ void ParagraphManager::GetPaintRegion(RectF& boundsRect, float x, float y) const
         auto rect = info.paragraph->GetPaintRegion(x, y);
         boundsRect = boundsRect.CombineRectT(rect);
         y += info.paragraph->GetHeight();
+    }
+}
+
+void ParagraphManager::PaintAllLeadingMarginSpan(DrawingContext& drawingContext,
+    const OffsetT<float>& offset)
+{
+    auto paragraphs = GetParagraphs();
+    size_t lineCount = 0;
+    for (auto&& paragraphInfo : paragraphs) {
+        const auto& drawableLeadingMargin = paragraphInfo.paragraphStyle.drawableLeadingMargin;
+        auto currentParagraphLineCount = paragraphInfo.paragraph->GetLineCount();
+        if (!drawableLeadingMargin.has_value() || currentParagraphLineCount <= 0) {
+            lineCount += currentParagraphLineCount;
+            continue;
+        }
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("ParagraghManager::PaintLeadingMarginSpan");
+        }
+        CHECK_NULL_VOID(paragraphInfo.paragraph);
+        const auto& leadingMarginOnDraw = drawableLeadingMargin.value().onDraw_;
+        CHECK_NULL_VOID(leadingMarginOnDraw);
+        for (size_t i = 0; i < currentParagraphLineCount; i++) {
+            auto lineMetrics = GetLineMetrics(lineCount + i);
+            if (paragraphInfo.paragraph->empty()) {
+                CaretMetricsF caretMetricsF;
+                paragraphInfo.paragraph->HandleCaretWhenEmpty(caretMetricsF, true);
+                lineMetrics.x = caretMetricsF.offset.GetX();
+                lineMetrics.height = caretMetricsF.height;
+            }
+            LeadingMarginSpanOptions options;
+            options.x = paragraphInfo.paragraphStyle.direction != TextDirection::RTL ?
+                lineMetrics.x + offset.GetX() : lineMetrics.x + offset.GetX() + lineMetrics.width;
+            options.direction = paragraphInfo.paragraphStyle.direction;
+            options.top = lineMetrics.y + offset.GetY();
+            options.baseline = lineMetrics.baseline + offset.GetY();
+            options.bottom = options.top + lineMetrics.height;
+            options.start = lineMetrics.startIndex;
+            options.end = lineMetrics.endIndex;
+            if (i == 0) {
+                options.first = true;
+            }
+            leadingMarginOnDraw(drawingContext, options);
+        }
+        lineCount += currentParagraphLineCount;
     }
 }
 

@@ -18,7 +18,7 @@ import {
   Length, FlexDirection, Resource, ResourceStr, ResourceColor, ShadowStyle, SymbolGlyphModifier, FlexAlign,
   HorizontalAlign, SizeOptions, FontWeight, SymbolEffect, ScaleOptions, BorderStyle, LocalizedPadding, Padding,
   FlexOptions, MarqueeStartPolicy, ButtonType, Color, HitTestMode, ItemAlign, ToggleType, HoverEffect, TextOverflow,
-  ImageFit, SymbolEffectStrategy, px2vp, $r, LocalizedMargin, Margin, ButtonStyleMode, ButtonRole, ButtonAttribute,
+  ImageFit, SymbolEffectStrategy, $r, LocalizedMargin, Margin, ButtonStyleMode, ButtonRole, ButtonAttribute,
   ColumnOptions, ButtonOptions, OnCheckboxChangeCallback, FlexSpaceOptions, RowOptions, ClickEvent, MeasureResult,
   HoverEvent, SizeChangeCallback, CommonMethod, ShadowOptions,
 } from '@ohos.arkui.component'
@@ -149,7 +149,7 @@ const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
 const ACCESSIBILITY_LEVEL_AUTO = 'auto';
 const ACCESSIBILITY_LEVEL_YES = 'yes';
 const ACCESSIBILITY_LEVEL_NO = 'no';
-const RESOURCE_TYPE_SYMBOL: number = 40000;
+const RESOURCE_TYPE_SYMBOL: int = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map<number, number>([
   [IconType.BADGE, BADGE_SIZE],
@@ -308,7 +308,7 @@ struct ContentItemStruct {
   getSingleRowTextHeight(text: ResourceStr | null, sizeResource: Length): number {
     if (text && sizeResource) {
       const measureUtils = new MeasureUtils()
-      let singleRowHeight: number = px2vp(measureUtils.measureTextSize({
+      let singleRowHeight: number = this.getUIContext().px2vp(measureUtils.measureTextSize({
         textContent: text,
         fontSize: sizeResource,
         maxLines: TEXT_MAX_LINE

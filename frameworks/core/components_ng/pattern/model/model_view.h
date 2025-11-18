@@ -64,6 +64,7 @@ public:
     virtual void AddShaderImageTexture(const std::string& path) = 0;
     virtual void AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer) = 0;
     virtual std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> GetShaderInputBuffer() = 0;
+    virtual void SetBackgroundColor(uint32_t argb) = 0;
 
 private:
     static std::unique_ptr<ModelView> instance_;

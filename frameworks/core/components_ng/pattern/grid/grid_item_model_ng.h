@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,9 @@ public:
     static RefPtr<FrameNode> CreateGridItem(int32_t nodeId);
     static void SetForceRebuild(FrameNode* frameNode, bool value);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
+    static bool GetSelectable(FrameNode* frameNode);
     static void SetSelected(FrameNode* frameNode, bool selected);
+    static bool GetSelected(FrameNode* frameNode);
     static void SetRowStart(FrameNode* frameNode, int32_t rowStart);
     static void SetRowEnd(FrameNode* frameNode, int32_t rowEnd);
     static void SetColumnStart(FrameNode* frameNode, int32_t columnStart);

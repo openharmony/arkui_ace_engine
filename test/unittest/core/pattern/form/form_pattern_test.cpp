@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -55,7 +56,9 @@ constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double TRANSPARENT_VAL = 0;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
+constexpr float LAYOUT_WIEDTH_FLOAT = 100.0f;
 } // namespace
+
 class FormPatternTest : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -337,6 +340,13 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level0)
     GetCurrentTimestamp();
     taskNum1 = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);
     EXPECT_EQ(taskNum, taskNum1);
+
+    pattern->isDynamic_ = false;
+    pattern->SetAccessibilityState(true);
+    pattern->isStaticFormSnaping_ = false;
+    pattern->HandleSnapshot(delayTime, "1");
+
+    EXPECT_EQ(pattern->isStaticFormSnaping_, false);
 }
 
 /**
@@ -2122,14 +2132,13 @@ HWTEST_F(FormPatternTest, FormPatternTest_060, TestSize.Level0)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-
     AAFwk::Want want;
     int layoutWidthInt = 100;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, layoutWidthInt);
     float result = DEFAULT_VIEW_SCALE;
     result = pattern->GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY,
         DEFAULT_VIEW_SCALE);
-    EXPECT_TRUE(NearEqual(result, 100));
+    EXPECT_TRUE(NearEqual(result, LAYOUT_WIEDTH_FLOAT));
     float layoutWidthFloat = MAX_FORM_VIEW_SCALE;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, static_cast<double>(layoutWidthFloat));
     result = pattern->GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY,
@@ -2151,18 +2160,58 @@ HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
     EXPECT_NE(pattern, nullptr);
 
-    // accessibilityState_ == state, return false
+    // accessibilityState_ == false, return false
     pattern->accessibilityState_ = false;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(false));
 
-    // isDynamic_ is true, return false
+    // isDynamic_ is true, should return false
     pattern->isDynamic_ = true;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(true));
     EXPECT_TRUE(pattern->IsAccessibilityState());
 
+    // AccessibilityState is false, return false
     pattern->SetAccessibilityState(false);
     EXPECT_FALSE(pattern->IsAccessibilityState());
+
+    // AccessibilityState is true, return true
+    pattern->SetAccessibilityState(true);
+    EXPECT_TRUE(pattern->IsAccessibilityState());
+}
+
+/**
+ * @tc.name: FormPatternTest_062
+ * @tc.desc: SetObscured
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_062, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->SetObscured(false);
+    EXPECT_FALSE(pattern->isFormObscured_);
+
+    pattern->SetObscured(true);
+    EXPECT_TRUE(pattern->isFormObscured_);
+}
+
+/**
+ * @tc.name: FormPatternTest_063
+ * @tc.desc: OnLanguageConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_063, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_FALSE(pattern->isTibetanLanguage_);
 }
 } // namespace OHOS::Ace::NG

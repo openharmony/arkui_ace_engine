@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 #include <type_traits>
+#include <unordered_set>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
@@ -77,6 +78,7 @@ public:
     void InitAllChildrenDragManager(bool init);
     void MappingChildWithId(std::unordered_set<std::string>& oldIdsSet, std::list<RefPtr<UINode>>& additionalChildComps,
         std::map<std::string, RefPtr<UINode>>& oldNodeByIdMap);
+    void DumpInfo() override;
 private:
     std::list<std::string> ids_;
 

@@ -257,7 +257,6 @@ HWTEST_F(AxisEventTestNg, AxisEventHasAxisTest001, TestSize.Level1)
     EXPECT_FALSE(axisInfo.HasAxis(AxisType::PINCH_AXIS));
     EXPECT_FALSE(axisInfo.HasAxis(static_cast<AxisType>(-1)));
     EXPECT_FALSE(axisInfo.HasAxis(static_cast<AxisType>(3)));
-
     axisInfo.axes_ = 7;
     EXPECT_EQ(axisInfo.GetAxes(), axisInfo.axes_);
     EXPECT_TRUE(axisInfo.HasAxis(AxisType::HORIZONTAL_AXIS));

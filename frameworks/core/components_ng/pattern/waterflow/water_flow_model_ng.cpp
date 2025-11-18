@@ -599,8 +599,8 @@ FlexDirection WaterFlowModelNG::GetLayoutDirection(FrameNode* frameNode)
 
 std::string WaterFlowModelNG::GetColumnsTemplate(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, nullptr);
     std::string value = "1fr";
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, ColumnsTemplate, value, frameNode, value);
     return value;
 }
@@ -608,7 +608,7 @@ std::string WaterFlowModelNG::GetColumnsTemplate(FrameNode* frameNode)
 std::string WaterFlowModelNG::GetRowsTemplate(FrameNode* frameNode)
 {
     std::string value = "1fr";
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, RowsTemplate, value, frameNode, value);
     return value;
 }
@@ -868,12 +868,167 @@ void WaterFlowModelNG::ResetItemFillPolicy(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, frameNode);
 }
 
-PresetFillType WaterFlowModelNG::GetItemFillPolicy(FrameNode* frameNode)
+int32_t WaterFlowModelNG::GetItemFillPolicy(FrameNode* frameNode)
 {
-    PresetFillType value = PresetFillType::BREAKPOINT_DEFAULT;
+    CHECK_NULL_RETURN(frameNode, -1);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, value);
-    auto itemFillPolicy = layoutProperty->GetItemFillPolicy();
-    return itemFillPolicy.value_or(value);
+    CHECK_NULL_RETURN(layoutProperty, -1);
+    if (layoutProperty->GetItemFillPolicy().has_value()) {
+        return static_cast<int32_t>(layoutProperty->GetItemFillPolicy().value());
+    }
+    return -1;
+}
+
+void WaterFlowModelNG::ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjRowsGap(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjRowsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("waterflow.rowsGap");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        if (!(parseOk && result > 0.0_vp)) {
+            result.SetValue(0.0);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, result, node);
+    };
+    pattern->AddResObj("waterflow.rowsGap", resObj, std::move(updateFunc));
+}
+
+void WaterFlowModelNG::ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjColumnsGap(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("waterflow.columnsGap");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        if (!(parseOk && result > 0.0_vp)) {
+            result.SetValue(0.0);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, result, node);
+    };
+    pattern->AddResObj("waterflow.columnsGap", resObj, std::move(updateFunc));
+}
+
+void WaterFlowModelNG::ParseResObjItemMinWidth(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjItemMinWidth(frameNode, resObj);
+}
+void WaterFlowModelNG::ParseResObjItemMinWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("waterflow.itemMinWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            WaterFlowModelNG::SetItemMinWidth(AceType::RawPtr(node), result);
+        }
+    };
+    pattern->AddResObj("waterflow.itemMinWidth", resObj, std::move(updateFunc));
+}
+
+void WaterFlowModelNG::ParseResObjItemMaxWidth(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjItemMaxWidth(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjItemMaxWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("waterflow.itemMaxWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            WaterFlowModelNG::SetItemMaxWidth(AceType::RawPtr(node), result);
+        }
+    };
+    pattern->AddResObj("waterflow.itemMaxWidth", resObj, std::move(updateFunc));
+}
+
+void WaterFlowModelNG::ParseResObjItemMinHeight(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjItemMinHeight(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjItemMinHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("waterflow.itemMinHeight");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            WaterFlowModelNG::SetItemMinHeight(AceType::RawPtr(node), result);
+        }
+    };
+    pattern->AddResObj("waterflow.itemMinHeight", resObj, std::move(updateFunc));
+}
+
+void WaterFlowModelNG::ParseResObjItemMaxHeight(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjItemMaxHeight(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjItemMaxHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("waterflow.itemMaxHeight");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            WaterFlowModelNG::SetItemMaxHeight(AceType::RawPtr(node), result);
+        }
+    };
+    pattern->AddResObj("waterflow.itemMaxHeight", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

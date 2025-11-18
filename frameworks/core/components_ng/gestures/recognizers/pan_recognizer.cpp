@@ -44,7 +44,10 @@ void PanRecognizer::ForceCleanRecognizer()
     touchPointsDistance_.clear();
     localMatrix_.clear();
     isStartTriggered_ = false;
-    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline && pipeline->GetTouchOptimizer()) {
+        pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
+    }
 }
 
 PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount)
@@ -148,8 +151,6 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
 void PanRecognizer::OnAccepted()
 {
-    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
-    ResSchedTouchOptimizer::GetInstance().SetSlideDirection(static_cast<int32_t>(panVelocity_.GetDirection()));
     int64_t acceptTime = GetSysTimestamp();
     int64_t inputTime = acceptTime;
     if (firstInputTime_.has_value()) {
@@ -186,7 +187,12 @@ void PanRecognizer::OnAccepted()
         isStartTriggered_ = false;
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
     }
-    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline && pipeline->GetTouchOptimizer()) {
+        pipeline->GetTouchOptimizer()->SetSlideAccepted(true);
+        pipeline->GetTouchOptimizer()->SetSlideDirection(static_cast<int32_t>(panVelocity_.GetDirection()));
+        pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
+    }
 }
 
 void PanRecognizer::OnRejected()
@@ -247,7 +253,10 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(false);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline && pipeline->GetTouchOptimizer()) {
+        pipeline->GetTouchOptimizer()->SetSlideAccepted(false);
+    }
     extraInfo_ = "";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
                                                                   : static_cast<int32_t>(MouseAction::PRESS);
@@ -260,6 +269,10 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     distance_ = newDistance_;
     direction_ = newDirection_;
     distanceMap_ = newDistanceMap_;
+
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
 
     if (direction_.type == PanDirection::NONE) {
         auto node = GetAttachedNode().Upgrade();
@@ -275,10 +288,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         extraInfo_ += "mouse event is not allowed.";
         return;
-    }
-
-    if (fingersId_.find(event.id) == fingersId_.end()) {
-        fingersId_.insert(event.id);
     }
 
     deviceId_ = event.deviceId;
@@ -351,7 +360,10 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline && pipeline->GetTouchOptimizer()) {
+        pipeline->GetTouchOptimizer()->SetSlideAccepted(true);
+    }
     extraInfo_ = "Fingers: " + std::to_string(currentFingers_) + "(cur) - " + std::to_string(fingers_);
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
                                                                   : static_cast<int32_t>(MouseAction::RELEASE);
@@ -389,7 +401,10 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
             averageDistance_.Reset();
-            ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            if (pipeline && pipeline->GetTouchOptimizer()) {
+                pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
+            }
             AddOverTimeTrace();
             lastRefereeState_ = RefereeState::READY;
             refereeState_ = RefereeState::READY;
@@ -614,7 +629,10 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline && pipeline->GetTouchOptimizer()) {
+        pipeline->GetTouchOptimizer()->SetSlideAccepted(true);
+    }
     extraInfo_ += "cancel received.";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
                                                                   : static_cast<int32_t>(MouseAction::CANCEL);
@@ -782,7 +800,10 @@ void PanRecognizer::OnResetStatus()
     isFlushTouchEventsEnd_ = false;
     isForDrag_ = false;
     isStartTriggered_ = false;
-    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline && pipeline->GetTouchOptimizer()) {
+        pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
+    }
 }
 
 void PanRecognizer::OnSucceedCancel()
@@ -822,8 +843,14 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetIsInterpolated(touchPoint.isInterpolated);
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
     info.SetInputYDeltaSlope(touchPoint.inputYDeltaSlope);
-    info.SetMainDelta((ResSchedTouchOptimizer::GetInstance().HandleMainDelta(mainDelta_,
-        static_cast<double>(touchPoints_.size()), touchPoints_)));
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline && pipeline->GetTouchOptimizer()) {
+        info.SetMainDelta((pipeline->GetTouchOptimizer()->HandleMainDelta(mainDelta_,
+            static_cast<double>(touchPoints_.size()), touchPoints_)));
+    } else {
+        info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
+    }
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
         info.SetGlobalDisplayLocation(lastAxisEvent_.GetGlobalDisplayOffset());

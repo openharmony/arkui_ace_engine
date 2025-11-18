@@ -258,16 +258,22 @@ void JSGrid::UseProxy(const JSCallbackInfo& args)
 
 void JSGrid::SetColumnsTemplate(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
-        GridModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         auto fillTypeParam = jsObj->GetProperty("fillType");
         if (!fillTypeParam->IsNull()) {
             auto type = JSScrollable::ParsePresetFillType(fillTypeParam);
             if (type.has_value()) {
                 GridModel::GetInstance()->SetItemFillPolicy(type.value());
+            } else {
+                GridModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
             }
+        } else {
+            GridModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
         }
     } else {
         GridModel::GetInstance()->SetColumnsTemplate(jsValue->ToString());
@@ -285,8 +291,13 @@ void JSGrid::SetColumnsGap(const JSCallbackInfo& info)
         return;
     }
     CalcDimension colGap;
-
-    if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(info[0], colGap, resObj) || colGap.Value() < 0) {
+            colGap.SetValue(0.0);
+        }
+        GridModel::GetInstance()->ParseResObjColumnsGap(resObj);
+    } else if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
         colGap.SetValue(0.0);
     }
 
@@ -299,8 +310,13 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
         return;
     }
     CalcDimension rowGap;
-
-    if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(info[0], rowGap, resObj) || rowGap.Value() < 0) {
+            rowGap.SetValue(0.0);
+        }
+        GridModel::GetInstance()->ParseResObjRowsGap(resObj);
+    } else if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
         rowGap.SetValue(0.0);
     }
 
@@ -310,6 +326,10 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
 void JSGrid::JsGridHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        // null/undefined keep last grid height
         return;
     }
     JSViewAbstract::JsHeight(info);

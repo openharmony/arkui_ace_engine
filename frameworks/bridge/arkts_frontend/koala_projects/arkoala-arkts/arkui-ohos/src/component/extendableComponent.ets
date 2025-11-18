@@ -20,7 +20,10 @@ import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from 
 import {
     IProvideDecoratedVariable,
     IProviderDecoratedVariable,
+    IVariableOwner,
     LocalStorage,
+    StateMgmtDFX,
+    DumpInfo
 } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
@@ -56,7 +59,7 @@ export interface IExtendableComponent {
     setActiveInternal(active: boolean, isReuse: boolean): void;
 }
 
-export abstract class ExtendableComponent implements LifeCycle {
+export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     static current: object | undefined = undefined;
     private isActive_: number = 1;
 
@@ -76,59 +79,59 @@ export abstract class ExtendableComponent implements LifeCycle {
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
     }
 
-    addMeToParent(): void {
-        this.parent_?.addChild(this);
+    __addMeToParent__Internal(): void {
+        this.parent_?.__addChild__Internal(this);
     }
 
-    addChild(child: ExtendableComponent): void {
+    __addChild__Internal(child: ExtendableComponent): void {
         this.childrenWeakRefMap_.set(child.getUniqueId(), new WeakRef<ExtendableComponent>(child));
     }
 
-    setParent(parent: ExtendableComponent | undefined): void {
+    __setParent__Internal(parent: ExtendableComponent | undefined): void {
         this.parent_ = parent;
     }
 
-    removeChildById(id: int32): void {
+    __removeChildById__Internal(id: int32): void {
         this.childrenWeakRefMap_.delete(id);
     }
 
-    removeMeFromParent(): void {
-        this.parent_?.removeChildById(this.getUniqueId());
+    __removeMeFromParent__Internal(): void {
+        this.parent_?.__removeChildById__Internal(this.getUniqueId());
     }
 
-    removeAllChild(): void {
+    __removeAllChild__Internal(): void {
         this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
             const child = weak.deref();
-            child?.setParent(undefined);
+            child?.__setParent__Internal(undefined);
         });
         this.childrenWeakRefMap_.clear();
     }
 
-    getActive(): number {
+    __getActive__Internal(): number {
         return this.isActive_;
     }
 
-    setActive(activeCount: number): void {
+    __setActive__Internal(activeCount: number): void {
         this.isActive_ = activeCount;
     }
 
-    isViewActive(): boolean {
+    __isViewActive__Internal(): boolean {
         return this.delegate_!.isViewActive();
     }
 
-    addActiveChangeListenerForInterop(listener: (active: boolean, isReuse: boolean) => void): void {
+    __addActiveChangeListenerForInterop__Internal(listener: (active: boolean, isReuse: boolean) => void): void {
         this.activeChangeListenerForInterop_.add(listener);
     }
 
-    removeActiveChangeListenerForInterop(listener: (active: boolean, isReuse: boolean) => void): void {
+    __removeActiveChangeListenerForInterop__Internal(listener: (active: boolean, isReuse: boolean) => void): void {
         this.activeChangeListenerForInterop_.delete(listener);
     }
 
-    propagateToChild(active: boolean, isReuse: boolean): void {
+    __propagateToChild__Internal(active: boolean, isReuse: boolean): void {
         if (this.childrenWeakRefMap_.size > 0) {
             this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
                 const child = weak.deref();
-                child?.setActiveInternal(active, isReuse);
+                child?.__setActiveInternal__Internal(active, isReuse);
             });
         }
         if (this.activeChangeListenerForInterop_.size > 0) {
@@ -138,26 +141,26 @@ export abstract class ExtendableComponent implements LifeCycle {
         }
     }
 
-    setActiveInternal(active: boolean, isReuse: boolean): void {
+    __setActiveInternal__Internal(active: boolean, isReuse: boolean): void {
         this.delegate_!.setActiveInternal(active, isReuse);
     }
 
-    setDelegate(delegate: IExtendableComponent): void {
+    __setDelegate__Internal(delegate: IExtendableComponent): void {
         this.delegate_ = delegate;
     }
 
-    addProvidedVarV2<T>(providedPropName: string, store: IProviderDecoratedVariable<T>): void {
+    __addProvider__Internal<T>(providedPropName: string, store: IProviderDecoratedVariable<T>): void {
         this.providedVarsV2_.set(providedPropName, store as object as IProviderDecoratedVariable<object>);
     }
 
-    addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {
-        if (!allowOverride && this.findProvide<T>(providedPropName)) {
+    __addProvide__Internal<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {
+        if (!allowOverride && this.__findProvide__Internal<T>(providedPropName)) {
             throw new ReferenceError(`Duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Component already.`);
         }
         this.providedVars_.set(providedPropName, store as object as IProvideDecoratedVariable<object>);
     }
 
-    findProvidedVarV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
+    __findProvidedVarV2__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
         const result = this.providedVarsV2_.get(providedPropName);
         if (result == undefined) {
             return undefined;
@@ -165,27 +168,24 @@ export abstract class ExtendableComponent implements LifeCycle {
         return result as IProviderDecoratedVariable<T>;
     }
 
-    findProvideV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | null {
+    __findProvider__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
         let parentCom = this.parent_;
         while (parentCom !== undefined) {
-            let provideVar = parentCom.findProvidedVarV2(providedPropName);
+            let provideVar = parentCom.__findProvidedVarV2__Internal(providedPropName);
             if (provideVar !== undefined) {
                 return provideVar as object as IProviderDecoratedVariable<T>;
             }
             parentCom = parentCom.parent_;
         }
-        return null;
+        return undefined;
     }
 
-    findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+    __findProvide__Internal<T>(providedPropName: string): IProvideDecoratedVariable<T> | undefined {
         const localVar = this.providedVars_.get(providedPropName);
         if (localVar !== undefined) {
             return localVar as object as IProvideDecoratedVariable<T>;
         }
-        if (this.parent_ !== undefined) {
-            return this.parent_!.findProvide<T>(providedPropName);
-        }
-        return null;
+        return this.parent_?.__findProvide__Internal<T>(providedPropName);
     }
 
     getUIContext(): UIContext {
@@ -213,15 +213,22 @@ export abstract class ExtendableComponent implements LifeCycle {
         return this.delegate_!.getDialogController();
     }
 
-    public get localStorage_(): LocalStorage {
-        if (!this.localStoragebackStore_ && this.parent_) {
-            this.localStoragebackStore_ = this.parent_!.localStorage_;
-        }
+    __getLocalStorage__Internal(): LocalStorage {
+        return this.__localStorage__Internal;
+    }
 
+    public get __localStorage__Internal(): LocalStorage {
+        // When the current component has no localStorage instance and has parent component.
+        if (!this.localStoragebackStore_ && this.parent_) {
+            this.localStoragebackStore_ = this.backLocalStorage_ ? this.backLocalStorage_ : this.parent_!.__localStorage__Internal;
+        }
+        // When the current component has no localStorage instance and no parent component.
         if (!this.localStoragebackStore_) {
+            // When the useSharedStorage parameter is set to true.
             if (this.useSharedStorage_) {
                 this.localStoragebackStore_ = this.getUIContext().getSharedLocalStorage();
             }
+            // When the useSharedStorage parameter is set to false, or when it is set to true but the localStorage instance obtained from UIContext is undefined.
             if (!this.localStoragebackStore_) {
                 this.localStoragebackStore_ = this.backLocalStorage_ ? this.backLocalStorage_ : new LocalStorage();
             }
@@ -230,16 +237,29 @@ export abstract class ExtendableComponent implements LifeCycle {
         return this.localStoragebackStore_!;
     }
 
-    public set localStorage_(instance: LocalStorage) {
+    public set __localStorage__Internal(instance: LocalStorage) {
         this.localStoragebackStore_ = instance;
     }
     
-    getPeerNode(): PeerNode | undefined {
+    __getPeerNode__Internal(): PeerNode | undefined {
         return this.delegate_!.getPeerNode();
     }
 
-    public onDumpInspector(): string {
-        return ""
+    public __onDumpInspector__Internal(): string {
+        const dumpInfo: DumpInfo = new DumpInfo();
+        const isV2 = this instanceof CustomComponentV2;
+        dumpInfo.viewinfo = {
+            componentName: Type.of(this).getName(),
+            isV2: isV2
+        };
+        let ret: string = '';
+        try {
+            StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo, isV2);
+            ret = JSON.stringify(dumpInfo);
+        } catch (error) {
+            InteropNativeModule._NativeLog(`dump component ${ dumpInfo.viewinfo.componentName} error: ${(error as Error).message}`);
+        }
+        return ret;
     }
 
     onWillApplyTheme(theme: Theme) {}

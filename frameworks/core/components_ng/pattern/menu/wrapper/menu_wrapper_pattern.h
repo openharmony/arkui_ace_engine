@@ -340,6 +340,7 @@ public:
         if (onAppearCallback_) {
             onAppearCallback_();
         }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_APPEAR);
     }
 
     void CallMenuDisappearCallback()
@@ -347,6 +348,7 @@ public:
         if (onDisappearCallback_) {
             onDisappearCallback_();
         }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DISAPPEAR);
     }
 
     void CallMenuAboutToAppearCallback()
@@ -354,6 +356,7 @@ public:
         if (aboutToAppearCallback_) {
             aboutToAppearCallback_();
         }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
     }
 
     void CallMenuAboutToDisappearCallback()
@@ -361,6 +364,7 @@ public:
         if (aboutToDisappearCallback_) {
             aboutToDisappearCallback_();
         }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
     }
 
    void CallMenuOnWillAppearCallback()
@@ -368,28 +372,32 @@ public:
        if (onWillAppearCallback_) {
            onWillAppearCallback_();
        }
-   }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_WILL_APPEAR);
+    }
 
    void CallMenuOnDidAppearCallback()
    {
        if (onDidAppearCallback_) {
            onDidAppearCallback_();
        }
-   }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DID_APPEAR);
+    }
 
    void CallMenuOnWillDisappearCallback()
    {
        if (onWillDisappearCallback_) {
            onWillDisappearCallback_();
        }
-   }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_WILL_DISAPPEAR);
+    }
 
    void CallMenuOnDidDisappearCallback()
    {
        if (onDidDisappearCallback_) {
            onDidDisappearCallback_();
        }
-   }
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+    }
 
     void CallMenuStateChangeCallback(const std::string& value)
     {
@@ -744,6 +752,18 @@ private:
     void AddTargetWindowHotArea(std::vector<Rect>& rects);
     void AddWrapperChildHotArea(std::vector<Rect>& rects, const RefPtr<LayoutWrapper>& layoutWrapper);
     void AddFilterHotArea(std::vector<Rect>& rects);
+    void NotifyMenuLifeCycleEventToTarget(const NG::MenuLifeCycleEvent& menuLifeCycleEvent)
+    {
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        auto pipeline = targetNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuLifeCycleCallback = overlayManager->GetMenuLifeCycleCallback(targetId_);
+        CHECK_NULL_VOID(menuLifeCycleCallback);
+        menuLifeCycleCallback(menuLifeCycleEvent);
+    }
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;

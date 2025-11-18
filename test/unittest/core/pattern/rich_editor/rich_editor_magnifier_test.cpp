@@ -19,6 +19,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components/text_field/textfield_theme.h"
@@ -102,7 +103,7 @@ void RichEditorMagnifierTest::InitMagnifierParams(const SizeF& frameSize)
  * @tc.desc: Test magnifier position.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto frameSize = SizeF(600.f, 400.f);
@@ -149,7 +150,7 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level1)
  * @tc.desc: Test magnifier position.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto frameSize = SizeF(600.f, 400.f);
@@ -195,6 +196,29 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level1)
     TestMagnifier(richEditorPattern, controller, localOffset);
 }
 
+/**
+ * @tc.name: MagnifierTest003
+ * @tc.desc: Test magnifier position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMagnifierTest, MagnifierTest003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto frameSize = SizeF(600.f, 400.f);
+    InitMagnifierParams(frameSize);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->OpenMagnifier();
+    auto magnifierNode = controller->magnifierFrameNode_;
+    controller->colorModeChange_ = true;
+    controller->OpenMagnifier();
+    EXPECT_EQ(controller->colorModeChange_, false);
+    EXPECT_NE(magnifierNode, controller->magnifierFrameNode_);
+}
+
 void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
     const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
 {
@@ -236,7 +260,7 @@ void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& ric
  * @tc.desc: test UpdateMagnifierStateAfterLayout
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout001, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -253,7 +277,7 @@ HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout001, TestSize.L
  * @tc.desc: test UpdateMagnifierStateAfterLayout
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout002, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -272,7 +296,7 @@ HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout002, TestSize.L
  * @tc.desc: test HandleSurfaceChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged001, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -287,7 +311,7 @@ HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged001, TestSize.Level1)
  * @tc.desc: test HandleSurfaceChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged002, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

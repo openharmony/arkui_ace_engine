@@ -16,39 +16,39 @@
 export default namespace matrix4 {
     loadLibrary("matrix4_ani");
     export interface TranslateOption {
-        x?: number;
-        y?: number;
-        z?: number;
+        x?: double;
+        y?: double;
+        z?: double;
     }
 
     export interface ScaleOption {
-        x?: number;
-        y?: number;
-        z?: number;
-        centerX?: number;
-        centerY?: number;
+        x?: double;
+        y?: double;
+        z?: double;
+        centerX?: double;
+        centerY?: double;
     }
 
     export interface RotateOption {
-        x?: number;
-        y?: number;
-        z?: number;
-        centerX?: number;
-        centerY?: number;
-        angle?: number;
+        x?: double;
+        y?: double;
+        z?: double;
+        centerX?: double;
+        centerY?: double;
+        angle?: double;
     }
 
     export interface Point {
-        x: number;
-        y: number;
+        x: double;
+        y: double;
     }
 
     export interface PolyToPolyOptions {
         src: Array<Point>;
-        srcIndex?: number;
+        srcIndex?: int;
         dst: Array<Point>;
-        dstIndex?: number;
-        pointCount?: number;
+        dstIndex?: int;
+        pointCount?: int;
     }
 
     export default interface Matrix4Transit {
@@ -58,14 +58,14 @@ export default namespace matrix4 {
         scale(options: ScaleOption): Matrix4Transit;
         rotate(options: RotateOption): Matrix4Transit;
         translate(options: TranslateOption): Matrix4Transit;
-        skew(x: number, y: number): Matrix4Transit;
+        skew(x: double, y: double): Matrix4Transit;
         setPolyToPoly(options: PolyToPolyOptions): Matrix4Transit;
         transformPoint(options: [
-            number,
-            number
+            double,
+            double
         ]): [
-            number,
-            number
+            double,
+            double
         ];
     }
 
@@ -115,20 +115,20 @@ export default namespace matrix4 {
         public native scale(options: ScaleOption): Matrix4Transit;
         public native rotate(options: RotateOption): Matrix4Transit;
         public native translate(options: TranslateOption): Matrix4Transit;
-        public native skew(x: number, y: number): Matrix4Transit;
+        public native skew(x: double, y: double): Matrix4Transit;
         public native setPolyToPoly(options: PolyToPolyOptions): Matrix4Transit;
         public native transformPoint(options: [
-                            number,
-                            number
+                            double,
+                            double
                         ]): [
-                            number,
-                            number
+                            double,
+                            double
                         ]; 
     }
     export native function identity():Matrix4Transit;
     export native function init(options: [
-        number, number, number, number, 
-        number, number, number, number,
-        number, number, number, number,
-        number, number, number, number]):Matrix4Transit;
+        double, double, double, double, 
+        double, double, double, double,
+        double, double, double, double,
+        double, double, double, double]):Matrix4Transit;
 }

@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IProvideDecoratedVariable } from '../decorator';
+import { IProvideDecoratedVariable, IVariableOwner } from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IConsumeDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
-    sourceProvide_: IProvideDecoratedVariable<T> | null;
-    constructor(owningView: ExtendableComponent, varName: string, provideAliasName: string, watchFunc?: WatchFuncType) {
+    sourceProvide_: IProvideDecoratedVariable<T> | undefined;
+    constructor(owningView: IVariableOwner, varName: string, provideAliasName: string, watchFunc?: WatchFuncType) {
         super('@Consume', owningView, varName, watchFunc);
         this.provideAliasName = provideAliasName;
-        this.sourceProvide_ = owningView.findProvide<T>(provideAliasName);
-        if (this.sourceProvide_ === null) {
+        this.sourceProvide_ = owningView.__findProvide__Internal<T>(provideAliasName);
+        if (this.sourceProvide_ === undefined) {
             throw new Error('no Provide found for Consume');
         }
         if (this.sourceProvide_) {
@@ -39,14 +39,19 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.registerWatchForObservedObjectChanges(initValue);
         this.sourceProvide_!.registerWatchToSource(this);
     }
+    
     public get(): T {
-        return this.sourceProvide_!.get();
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${this.getTraceInfo()}`);
+        const value = this.sourceProvide_!.get();
+        uiUtils.builtinContainersAddRefAnyKey(value);
+        return value;
     }
 
     public set(newValue: T): void {
         const oldValue = this.sourceProvide_!.get();
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue !== newValue) {
-            const value = uiUtils.makeObserved(newValue);
+            const value = uiUtils.makeV1Observed(newValue);
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(value);
             this.sourceProvide_!.set(value);

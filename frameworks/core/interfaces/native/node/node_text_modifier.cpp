@@ -24,6 +24,8 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
@@ -38,6 +40,7 @@ constexpr bool DEFAULT_TRIM_SPACE = false;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr uint32_t DEFAULT_MAX_LINE = Infinity<uint32_t>();
 constexpr uint32_t DEFAULT_MIN_LINE = 0;
@@ -278,7 +281,6 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextModelNG::SetTextColor(frameNode, Color(color));
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -292,6 +294,7 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
             pattern->RegisterResource<Color>("TextColor", resObj, result);
         }
     }
+    TextModelNG::SetTextColor(frameNode, result);
 }
 
 void ResetFontColor(ArkUINodeHandle node)
@@ -530,6 +533,7 @@ void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration
     decoration->decorationType = static_cast<int32_t>(TextModelNG::GetDecoration(frameNode));
     decoration->color = TextModelNG::GetTextDecorationColor(frameNode).GetValue();
     decoration->style = static_cast<int32_t>(TextModelNG::GetTextDecorationStyle(frameNode));
+    decoration->lineThicknessScale = TextModelNG::GetLineThicknessScale(frameNode);
 }
 
 void ResetTextDecoration(ArkUINodeHandle node)
@@ -539,6 +543,7 @@ void ResetTextDecoration(ArkUINodeHandle node)
     TextModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     TextModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     TextModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    TextModelNG::SetLineThicknessScale(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -1362,7 +1367,6 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -1376,6 +1380,7 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
             pattern->RegisterResource<Color>("SelectedBackgroundColor", resObj, result);
         }
     }
+    TextModelNG::SetSelectedBackgroundColor(frameNode, result);
 }
 
 ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
@@ -2145,6 +2150,11 @@ void ResetTextGradient(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "TextGradient.gradient");
     TextModelNG::ResetTextGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
 }
 
 ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Uint32 (*colors)[10],
@@ -2175,11 +2185,37 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     return index;
 }
 
-void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
     TextModelNG::SetColorShaderStyle(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!colorShaderColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorShaderColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("ColorShaderStyle", resObj, result);
+        }
+    }
+}
+
+void ResetColorShaderColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetTextGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
 }
 
 void SetTextVerticalAlign(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign)
@@ -2216,6 +2252,272 @@ void ResetTextContentTransition(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetContentTransition(frameNode);
+}
+
+void* GetRectsForRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 heightStyle, ArkUI_Int32 widthStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::vector<OHOS::Rosen::TextRect>* textRects = new std::vector<OHOS::Rosen::TextRect>;
+    std::vector<ParagraphManager::TextBox> textBoxes = TextModelNG::GetRectsForRange(
+        frameNode, start, end, static_cast<RectHeightStyle>(heightStyle), static_cast<RectWidthStyle>(widthStyle));
+    for (uint32_t i = 0; i < textBoxes.size(); i++) {
+        ParagraphManager::TextBox textBox = textBoxes[i];
+        OHOS::Rosen::Drawing::RectF rect(
+            textBox.rect_.Left(), textBox.rect_.Top(), textBox.rect_.Right(), textBox.rect_.Bottom());
+        OHOS::Rosen::TextRect textRect(rect, static_cast<OHOS::Rosen::TextDirection>(textBox.direction_));
+        (*textRects).push_back(textRect);
+    }
+    return textRects;
+}
+
+void* GetGlyphPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy)
+{
+#ifndef PREVIEW
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    PositionWithAffinity positionWithAffinity = TextModelNG::GetGlyphPositionAtCoordinate(frameNode, dx, dy);
+    OHOS::Rosen::IndexAndAffinity* indexAndAffinity =
+        new OHOS::Rosen::IndexAndAffinity(0, OHOS::Rosen::Affinity::PREV);
+    indexAndAffinity->index = positionWithAffinity.position_;
+    indexAndAffinity->affinity = static_cast<OHOS::Rosen::Affinity>(positionWithAffinity.affinity_);
+    return indexAndAffinity;
+#else
+    return nullptr;
+#endif
+}
+
+ArkUITextLineMetrics GetLineMetrics(ArkUINodeHandle node, ArkUI_Int32 lineNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, {});
+    TextLineMetrics textLineMetrics = TextModelNG::GetLineMetrics(frameNode, lineNumber);
+    ArkUITextLineMetrics lineMetrics;
+    lineMetrics.ascender = textLineMetrics.ascender;
+    lineMetrics.descender = textLineMetrics.descender;
+    lineMetrics.capHeight = textLineMetrics.capHeight;
+    lineMetrics.xHeight = textLineMetrics.xHeight;
+    lineMetrics.width = textLineMetrics.width;
+    lineMetrics.height = textLineMetrics.height;
+    lineMetrics.x = textLineMetrics.x;
+    lineMetrics.y = textLineMetrics.y;
+    lineMetrics.startIndex = textLineMetrics.startIndex;
+    lineMetrics.endIndex = textLineMetrics.endIndex;
+    FontMetrics firstCharMetrics = textLineMetrics.firstCharMetrics;
+    ArkUIFontMetrics fontMetrics;
+    fontMetrics.fFlags = firstCharMetrics.fFlags;
+    fontMetrics.fTop = firstCharMetrics.fTop;
+    fontMetrics.fAscent = firstCharMetrics.fAscent;
+    fontMetrics.fDescent = firstCharMetrics.fDescent;
+    fontMetrics.fBottom = firstCharMetrics.fBottom;
+    fontMetrics.fLeading = firstCharMetrics.fLeading;
+    fontMetrics.fAvgCharWidth = firstCharMetrics.fAvgCharWidth;
+    fontMetrics.fMaxCharWidth = firstCharMetrics.fMaxCharWidth;
+    fontMetrics.fXMin = firstCharMetrics.fXMin;
+    fontMetrics.fXMax = firstCharMetrics.fXMax;
+    fontMetrics.fXHeight = firstCharMetrics.fXHeight;
+    fontMetrics.fCapHeight = firstCharMetrics.fCapHeight;
+    fontMetrics.fUnderlineThickness = firstCharMetrics.fUnderlineThickness;
+    fontMetrics.fUnderlinePosition = firstCharMetrics.fUnderlinePosition;
+    fontMetrics.fStrikeoutThickness = firstCharMetrics.fStrikeoutThickness;
+    fontMetrics.fStrikeoutPosition = firstCharMetrics.fStrikeoutPosition;
+    lineMetrics.firstCharMetrics = fontMetrics;
+    return lineMetrics;
+}
+
+ArkUITextMenuItemArray ConvertToArkUITextMenuItemArray(
+    ArkUITextMenuItem* textMenuItems, const std::vector<NG::MenuItemParam>& itemPrams)
+{
+    ArkUITextMenuItemArray itemArray;
+    itemArray.items = nullptr;
+    itemArray.length = 0;
+    CHECK_NULL_RETURN(textMenuItems, itemArray);
+    for (size_t i = 0; i < itemPrams.size(); ++i) {
+        const auto& itemParam = itemPrams[i];
+        if (itemParam.menuOptionsParam.content.has_value()) {
+            textMenuItems[i].content = itemParam.menuOptionsParam.content.value().c_str();
+        }
+        if (itemParam.menuOptionsParam.icon.has_value()) {
+            textMenuItems[i].icon = itemParam.menuOptionsParam.icon.value().c_str();
+        }
+        if (itemParam.menuOptionsParam.labelInfo.has_value()) {
+            textMenuItems[i].labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
+        }
+        textMenuItems[i].id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
+    }
+    itemArray.items = textMenuItems;
+    itemArray.length = itemPrams.size();
+    return itemArray;
+}
+
+std::vector<NG::MenuOptionsParam> ConvertToMenuOptionsParams(const ArkUITextMenuItemArray& itemArray)
+{
+    std::vector<NG::MenuOptionsParam> outOptionVec;
+    CHECK_NULL_RETURN(itemArray.items, outOptionVec);
+    for (uint32_t i = 0; i < itemArray.length; ++i) {
+        NG::MenuOptionsParam menuOption;
+        auto& item = itemArray.items[i];
+        if (item.content) {
+            menuOption.content = std::string(item.content);
+        }
+        if (item.isDelContent) {
+            delete[] item.content;
+        }
+        if (item.icon) {
+            menuOption.icon = std::string(item.icon);
+        }
+        if (item.isDelIcon) {
+            delete[] item.icon;
+        }
+        if (item.labelInfo) {
+            menuOption.labelInfo = std::string(item.labelInfo);
+        }
+        if (item.isDelLabel) {
+            delete[] item.labelInfo;
+        }
+        menuOption.id = SelectOverlayNode::ConvertToStrMenuId(item.id);
+        outOptionVec.push_back(menuOption);
+    }
+    delete[] itemArray.items;
+    return outOptionVec;
+}
+
+NG::OnCreateMenuCallback WrapOnCreateMenuCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback =
+        [adapterCallback = optionsParam->createAdapterCallback, userCallback = optionsParam->onCreateMenu,
+            userData = optionsParam->createUserData](const std::vector<NG::MenuItemParam>& itemParams) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItems[itemParams.size()];
+                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
+                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
+                return ConvertToMenuOptionsParams(outItemArray);
+            }
+            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
+            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
+                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
+            return outOptionVec;
+        };
+    return onCreateMenuCallback;
+}
+
+NG::OnMenuItemClickCallback WrapOnMenuItemClickCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnMenuItemClickCallback onMenuItemClick =
+        [adapterCallback = optionsParam->itemClickAdapterCallback, userCallback = optionsParam->onMenuItemClick,
+            userData = optionsParam->clickUserData](const NG::MenuItemParam& itemParam) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItem;
+                if (itemParam.menuOptionsParam.content.has_value()) {
+                    menuItem.content = itemParam.menuOptionsParam.content.value().c_str();
+                }
+                if (itemParam.menuOptionsParam.icon.has_value()) {
+                    menuItem.icon = itemParam.menuOptionsParam.icon.value().c_str();
+                }
+                if (itemParam.menuOptionsParam.labelInfo.has_value()) {
+                    menuItem.labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
+                }
+                menuItem.id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
+                return adapterCallback(userCallback, userData, &menuItem, itemParam.start, itemParam.end);
+            }
+            return false;
+        };
+    return onMenuItemClick;
+}
+
+NG::OnPrepareMenuCallback WrapOnPrepareMenuCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnPrepareMenuCallback onPrepareMenuCallback =
+        [adapterCallback = optionsParam->prepareAdapterCallback, userCallback = optionsParam->onPrepareMenu,
+            userData = optionsParam->prepareUserData](const std::vector<NG::MenuItemParam>& itemParams) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItems[itemParams.size()];
+                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
+                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
+                return ConvertToMenuOptionsParams(outItemArray);
+            }
+            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
+            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
+                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
+            return outOptionVec;
+        };
+    return onPrepareMenuCallback;
+}
+
+void SetTextEditMenuOptions(ArkUINodeHandle node, ArkUIEditOptionsParam* optionsParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (optionsParam->onCreateMenu) {
+        NG::OnCreateMenuCallback createCallback = WrapOnCreateMenuCallback(optionsParam);
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(createCallback));
+    }
+    if (optionsParam->onMenuItemClick) {
+        NG::OnMenuItemClickCallback itemClickCallback = WrapOnMenuItemClickCallback(optionsParam);
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(itemClickCallback));
+    }
+    if (optionsParam->onPrepareMenu) {
+        NG::OnPrepareMenuCallback prepareCallback = WrapOnPrepareMenuCallback(optionsParam);
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(prepareCallback));
+    }
+}
+
+void ResetTextEditMenuOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
+}
+
+void SetTextBindSelectionMenu(ArkUINodeHandle node, ArkUITextBindMenuParam* menuParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* contentNode = reinterpret_cast<FrameNode*>(menuParam->contentNode);
+    CHECK_NULL_VOID(contentNode);
+    TextSpanType textSpanType = TextSpanType::TEXT;
+    if (!TextSpanTypeMapper::GetTextSpanTypeFromJsType(menuParam->textSpanType, textSpanType)) {
+        textSpanType = TextSpanType::TEXT;
+    }
+    auto textResponseType = static_cast<TextResponseType>(menuParam->textResponseType);
+    std::function<void()> builderFunc = [contentNode = AceType::Claim(contentNode)]() {
+        ViewStackProcessor::GetInstance()->Push(contentNode);
+    };
+    SelectMenuParam selectMenuParam;
+    selectMenuParam.previewMenuOptions.hapticFeedbackMode =
+        static_cast<HapticFeedbackMode>(menuParam->hapticFeedbackMode);
+    if (menuParam->onMenuShow) {
+        auto onMenuShow = reinterpret_cast<void (*)(int32_t, int32_t, void*)>(menuParam->onMenuShow);
+        selectMenuParam.onMenuShow = [onMenuShow, userData = menuParam->onMenuShowUserData](
+                                         int32_t start, int32_t end) {
+            if (onMenuShow) {
+                onMenuShow(start, end, userData);
+            }
+        };
+    }
+    if (menuParam->onMenuHide) {
+        auto onMenuHide = reinterpret_cast<void (*)(int32_t, int32_t, void*)>(menuParam->onMenuHide);
+        selectMenuParam.onMenuHide = [onMenuHide, userData = menuParam->onMenuHideUserData](
+                                         int32_t start, int32_t end) {
+            if (onMenuHide) {
+                onMenuHide(start, end, userData);
+            }
+        };
+    }
+    TextModelNG::BindSelectionMenu(frameNode, textSpanType, textResponseType, builderFunc, selectMenuParam);
+}
+
+void ResetTextBindSelectionMenu(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetBindSelectionMenu(frameNode);
 }
 } // namespace
 
@@ -2390,8 +2692,16 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextVerticalAlign = ResetTextVerticalAlign,
         .getTextVerticalAlign = GetTextVerticalAlign,
         .setColorShaderColor = SetColorShaderColor,
+        .resetColorShaderColor = ResetColorShaderColor,
         .setTextContentTransition = SetTextContentTransition,
         .resetTextContentTransition = ResetTextContentTransition,
+        .getRectsForRange = GetRectsForRange,
+        .getGlyphPositionAtCoordinate = GetGlyphPositionAtCoordinate,
+        .getLineMetrics = GetLineMetrics,
+        .setTextEditMenuOptions = SetTextEditMenuOptions,
+        .resetTextEditMenuOptions = ResetTextEditMenuOptions,
+        .setTextBindSelectionMenu = SetTextBindSelectionMenu,
+        .resetTextBindSelectionMenu = ResetTextBindSelectionMenu,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

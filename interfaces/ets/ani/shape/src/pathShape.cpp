@@ -23,15 +23,19 @@ const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.PathShape";
 void ANICreatePathShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
     ani_class cls;
-    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
+    ani_status status;
+    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
+        LOGE("Not find PathShape class, status:%{public}d", status);
         return;
     }
     PathPeer* shapePeer = new PathPeer();
     auto path = AceType::MakeRefPtr<Path>();
     shapePeer->pathShape = path;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "pathShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("PathShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -51,8 +55,11 @@ void ANICreatePathShapeWithParam(
     path->SetValue(commands);
     shapePeer->pathShape = path;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "pathShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    ani_status status;
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("PathShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -60,7 +67,7 @@ void ANICreatePathShapeWithParam(
 PathPeer* GetPathShape(ani_env* env, ani_object obj)
 {
     ani_long pathAni;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "pathShapeResult", &pathAni)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "basicShapeResult", &pathAni)) {
         return nullptr;
     }
 
@@ -153,7 +160,7 @@ ani_object ANIPathShapeCommands(ani_env* env, [[maybe_unused]] ani_object object
 
 ani_object PathShape::ANIPathShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return ANIShapeFromPtr<PathPeer>(env, ptr, ANI_SHAPE_NAME, "pathShapeResult");
+    return ANIShapeFromPtr<PathPeer>(env, ptr, ANI_SHAPE_NAME, "basicShapeResult");
 }
 
 ani_status PathShape::BindPathShape(ani_env* env)

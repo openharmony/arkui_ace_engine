@@ -88,7 +88,7 @@ public:
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static FlexDirection GetLayoutDirection(FrameNode* frameNode);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
-    static PresetFillType GetItemFillPolicy(FrameNode* frameNode);
+    static int32_t GetItemFillPolicy(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
@@ -136,9 +136,21 @@ public:
     static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
     static bool GetSyncLoad(FrameNode* frameNode);
     void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjItemMinWidth(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjItemMaxWidth(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjItemMinHeight(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjItemMaxHeight(const RefPtr<ResourceObject>& resObj) override;
     static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
+    static void ParseResObjRowsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjItemMinWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjItemMaxWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjItemMinHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjItemMaxHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

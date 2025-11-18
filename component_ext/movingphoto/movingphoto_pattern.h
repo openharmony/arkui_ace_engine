@@ -231,7 +231,6 @@ private:
     void HandleImageCompleteEvent(const LoadImageSuccessEvent& info);
     void HandleImageErrorEvent(const LoadImageFailEvent& info);
     void HandleTransitionImageCompleteEvent(const LoadImageSuccessEvent& info);
-    void HandleTransitionImageErrorEvent(const LoadImageFailEvent& info);
     void MediaResetToPlay();
 
     void FireMediaPlayerImageComplete();

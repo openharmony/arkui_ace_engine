@@ -358,6 +358,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest008, Test
     NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
         touchPoint, pixelMapList };
     RefPtr<FrameNode> imageNode = nullptr;
+
     NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
     ASSERT_NE(imageNode, nullptr);
     auto textNode = NG::DragAnimationHelper::CreateBadgeTextNode(data.badgeNumber);
@@ -435,33 +436,6 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest009, Test
 }
 
 /**
- * @tc.name: DragDropControllerFuncWrapperTest010
- * @tc.desc: Test TransDragWindowToDragFwk function. DragDropManager's isDragFwkShow_ will be true afther
- * TransDragWindowToDragFwk.
- * @tc.type: FUNC
- */
-HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create dragDropManager.
-     * @tc.expected: step1. dragDropManager is not null.
-     */
-    int32_t containerId = 100;
-    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
-    ASSERT_NE(pipelineContext, nullptr);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    ASSERT_NE(dragDropManager, nullptr);
-
-    /**
-     * @tc.steps: step2. Call TransDragWindowToDragFwk function.
-     * @tc.expected: step2. dragDropManager->isDragFwkShow_ is true
-     */
-    dragDropManager->SetDragFwkShow(false);
-    NG::DragControllerFuncWrapper::TransDragWindowToDragFwk(containerId);
-    EXPECT_TRUE(dragDropManager->IsDragFwkShow());
-}
-
-/**
  * @tc.name: DragDropControllerFuncWrapperTest011
  * @tc.desc: Test CalcDragMoveOffset function. DragMoveOffset can be calculated correctly.
  * @tc.type: FUNC
@@ -487,6 +461,33 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest011, Test
     dragDropManager->SetDragPreviewInfo(dragPreviewInfo);
     auto offset = NG::DragControllerFuncWrapper::CalcDragMoveOffset(30, 30);
     EXPECT_EQ(offset, Offset(10, 10));
+}
+
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest010
+ * @tc.desc: Test TransDragWindowToDragFwk function. DragDropManager's isDragFwkShow_ will be true afther
+ * TransDragWindowToDragFwk.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dragDropManager.
+     * @tc.expected: step1. dragDropManager is not null.
+     */
+    int32_t containerId = 100;
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call TransDragWindowToDragFwk function.
+     * @tc.expected: step2. dragDropManager->isDragFwkShow_ is true
+     */
+    dragDropManager->SetDragFwkShow(false);
+    NG::DragControllerFuncWrapper::TransDragWindowToDragFwk(containerId);
+    EXPECT_TRUE(dragDropManager->IsDragFwkShow());
 }
 
 /**

@@ -289,6 +289,13 @@ class WebController : public virtual AceType {
     DECLARE_ACE_TYPE(WebController, AceType);
 
 public:
+    ~WebController() override
+    {
+        if (cookieManager_ != nullptr) {
+            delete cookieManager_;
+            cookieManager_ = nullptr;
+        }
+    }
     using LoadUrlImpl = std::function<void(std::string, const std::map<std::string, std::string>&)>;
     using AccessBackwardImpl = std::function<bool()>;
     using AccessForwardImpl = std::function<bool()>;

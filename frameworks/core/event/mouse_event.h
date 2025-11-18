@@ -37,23 +37,6 @@ static const int32_t MOUSE_BASE_ID = 1000;
 
 using OnMouseEventFunc = std::function<void(MouseInfo& info)>;
 
-enum class MouseAction : int32_t {
-    NONE = 0,
-    PRESS = 1,
-    RELEASE = 2,
-    MOVE = 3,
-    WINDOW_ENTER = 4,
-    WINDOW_LEAVE = 5,
-    HOVER,
-    HOVER_ENTER,
-    HOVER_MOVE,
-    HOVER_EXIT,
-    PULL_DOWN,
-    PULL_MOVE,
-    PULL_UP,
-    CANCEL
-};
-
 enum class AccessibilityHoverAction : int32_t {
     UNKNOWN = -1,
     HOVER_ENTER,
@@ -372,7 +355,7 @@ public:
     {
         rawDeltaX_ = rawDeltaX;
     }
-    float GetRawDeltaX()
+    float GetRawDeltaX() const
     {
         return rawDeltaX_;
     }
@@ -381,7 +364,7 @@ public:
     {
         rawDeltaY_ = rawDeltaY;
     }
-    float GetRawDeltaY()
+    float GetRawDeltaY() const
     {
         return rawDeltaY_;
     }

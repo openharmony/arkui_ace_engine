@@ -28,6 +28,8 @@ void EventReport::SendPageRouterException(PageRouterExcepType type, const std::s
 
 void EventReport::SendComponentException(ComponentExcepType type) {}
 
+void EventReport::ReportComponentLoadTimeout(const EventInfo& eventInfo) {}
+
 void EventReport::SendAPIChannelException(APIChannelExcepType type) {}
 
 void EventReport::SendRenderException(RenderExcepType type) {}
@@ -117,4 +119,8 @@ void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::s
 {}
 
 void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInfo& generalEventErrorInfo) {}
+
+void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const std::string& touchInfo,
+    uint64_t endTime)
+{}
 } // namespace OHOS::Ace

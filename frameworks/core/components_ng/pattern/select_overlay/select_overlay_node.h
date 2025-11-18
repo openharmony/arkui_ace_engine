@@ -108,6 +108,8 @@ public:
     void FireCustomMenuChangeEvent(bool isMenuShow);
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void UpdateToolBarFromMainWindow(bool menuItemChanged, bool noAnimation = false);
+    static int32_t ConvertToIntMenuId(const std::string& menuId);
+    static std::string ConvertToStrMenuId(int32_t menuId);
 
 private:
     void CreateToolBar();

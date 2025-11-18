@@ -30,13 +30,13 @@ public:
 
 /**
  * @tc.name: TextPattern001
- * @tc.desc: Test TextPattern UpdateCaretRect
+ * @tc.desc: Test TextPattern UpdateCaretRect.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and test pattern UpdateCaretRect
+     * @tc.steps: step1. create frameNode and test pattern UpdateCaretRect.
      */
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
@@ -49,7 +49,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern002
- * @tc.desc: Test TextPattern CheckSelectAreaVisible
+ * @tc.desc: Test TextPattern CheckSelectAreaVisible.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
@@ -69,7 +69,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern003
- * @tc.desc: Test TextPattern OnIsFocusActiveUpdate
+ * @tc.desc: Test TextPattern OnIsFocusActiveUpdate.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
@@ -89,7 +89,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction
+ * @tc.desc: Test TextPattern HandleExtendAction.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
@@ -109,7 +109,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern005
- * @tc.desc: Test TextPattern HandleBlurEvent
+ * @tc.desc: Test TextPattern HandleBlurEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
@@ -2481,6 +2481,39 @@ HWTEST_F(TextFieldPatternTest, TextPattern108, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSelectDetectEnable001
+ * @tc.desc: Test SetSelectDetectEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, SetSelectDetectEnable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldNode.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    textFieldNode->SetParent(frameNode_);
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetSelectDetectEnable.
+     * @tc.expected: the default properties are default values(true).
+     */
+    ASSERT_EQ(pattern->GetSelectDetectEnable(), true);
+
+    /**
+     * @tc.steps: step3. create selectDetectEnable and call SetSelectDetectEnable.
+     * @tc.expected: the properties are successfully set to false values.
+     */
+    bool selectDetectEnable = false;
+    pattern->SetSelectDetectEnable(selectDetectEnable);
+    ASSERT_EQ(pattern->GetSelectDetectEnable(), false);
+}
+
+/**
  * @tc.name: OnDragNodeDetachFromMainTree001
  * @tc.desc: Test OnDragNodeDetachFromMainTree
  * @tc.type: FUNC
@@ -3082,5 +3115,48 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnAttachToMainTreeMultiThread();
+}
+
+/**
+ * @tc.name: TextFieldPatternTestMultiThread3
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ */
+HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1)
+{
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->StartTwinklingMultiThread();
+}
+
+/**
+ * @tc.name: TextInputResponseAreaGetChildOffset
+ * @tc.desc: test TextInputResponseArea GetChildOffset method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern);
+    SizeF parentSize = SizeF(100.0f, 100.0f);
+    RectF contentRect = RectF(20.0f, 20.0f, 60.0f, 60.0f);
+    SizeF childSize = SizeF(70.0f, 40.0f);
+    float nodeWidth = 10.0f;
+    auto offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
+    EXPECT_EQ(offset, OffsetF(75.0f, 20.0f));
+    responseArea->hostPattern_.Reset();
+    offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
+    EXPECT_EQ(offset, OffsetF(40.0f, 40.0f));
 }
 } // namespace OHOS::Ace::NG

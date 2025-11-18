@@ -141,6 +141,7 @@ void CounterDecorator::UpdateTextFieldMargin()
             textFieldLayoutProperty->UpdateMargin(margin);
         } else {
             auto currentBottomMargin = currentMargin->bottom->GetDimension();
+            UpdateBottomMargin(currentMargin, currentBottomMargin);
             if (LessNotEqual(currentBottomMargin.ConvertToPx(), newBottomMargin.ConvertToPx())) {
                 currentMargin->bottom = CalcLength(newBottomMargin);
             }
@@ -152,6 +153,24 @@ void CounterDecorator::UpdateTextFieldMargin()
     auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityLevel("yes");
+}
+
+void CounterDecorator::UpdateBottomMargin(const std::unique_ptr<MarginProperty>& marginProp, Dimension& bottom)
+{
+    auto decoratedNode = decoratedNode_.Upgrade();
+    CHECK_NULL_VOID(decoratedNode);
+    auto paintProperty = decoratedNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasMarginByUser()) {
+        return;
+    }
+    auto userMargin = paintProperty->GetMarginByUserValue();
+    if (!userMargin.bottom.has_value() || userMargin.bottom->GetDimension().Unit() != DimensionUnit::LPX ||
+        LessNotEqual(userMargin.bottom->GetDimension().ConvertToPx(), bottom.ConvertToPx())) {
+        return;
+    }
+    marginProp->bottom = userMargin.bottom;
+    bottom = userMargin.bottom->GetDimension();
 }
 
 float CounterDecorator::MeasureTextNodeHeight()

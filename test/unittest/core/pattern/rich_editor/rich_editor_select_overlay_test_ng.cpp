@@ -86,7 +86,7 @@ void RichEditorSelectOverlayTestNg::TearDownTestSuite()
  * @tc.desc: test GetSelectArea
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -105,7 +105,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level1)
  * @tc.desc: test OnHandleMoveStart
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -124,7 +124,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart001, TestSize.Level1)
  * @tc.desc: test OnHandleMoveStart
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -144,7 +144,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level1)
  * @tc.desc: test SwitchCaretState
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, SwitchCaretState001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, SwitchCaretState001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -162,7 +162,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SwitchCaretState001, TestSize.Level1)
  * @tc.desc: test SwitchCaretState
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, SwitchCaretState002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, SwitchCaretState002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -182,7 +182,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SwitchCaretState002, TestSize.Level1)
  * @tc.desc: test OnOverlayClick
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -198,7 +198,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick001, TestSize.Level1)
  * @tc.desc: test OnOverlayClick
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -213,7 +213,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick002, TestSize.Level1)
  * @tc.desc: test OnOverlayClick
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick003, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -230,7 +230,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick003, TestSize.Level1)
  * @tc.desc: test OnOverlayClick
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick004, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -246,7 +246,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick004, TestSize.Level1)
  * @tc.desc: test OnAncestorNodeChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -268,7 +268,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level1)
  * @tc.desc: test OnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -290,7 +290,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove001, TestSize.Level1)
  * @tc.desc: test OnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -313,7 +313,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove002, TestSize.Level1)
  * @tc.desc: test OnHandleMoveDone
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -332,7 +332,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone001, TestSize.Level1)
  * @tc.desc: test OnHandleMoveDone
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -351,7 +351,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone002, TestSize.Level1)
  * @tc.desc: test GetSelectOverlayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -405,7 +405,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level1)
  * @tc.desc: test RefreshSelectOverlay and more.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RefreshSelectOverlay001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RefreshSelectOverlay001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -453,7 +453,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RefreshSelectOverlay001, TestSize.Level1
  * @tc.desc: test OnHandleMoveDone
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDownTest001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDownTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -492,7 +492,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDownTest001, TestSize.Leve
  * @tc.desc: test OnHandleMoveDone
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, HandleOnAskCeliaTest001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, HandleOnAskCeliaTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -536,7 +536,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, HandleOnAskCeliaTest001, TestSize.Level1
  * @tc.desc: test DumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -565,7 +565,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo001, TestSize.Level1)
  * @tc.desc: test set and get selectedBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, SelectedBackgroundColorTest001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, SelectedBackgroundColorTest001, TestSize.Level0)
 {
     RichEditorModelNG model;
     model.Create();
@@ -586,7 +586,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SelectedBackgroundColorTest001, TestSize
  * @tc.desc: test whether the handle is moved when scrolling.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, MoveHandle, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, MoveHandle, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -620,7 +620,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, MoveHandle, TestSize.Level1)
  * @tc.desc: test show single handle with empty text
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -658,7 +658,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle001, TestSize.Level1)
  * @tc.desc: test show single handle with text
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -709,7 +709,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle002, TestSize.Level1)
  * @tc.desc: test move caret by touch event
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle003, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -757,7 +757,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SingleHandle003, TestSize.Level1)
  * @tc.desc: test UpdateSelectionType
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectionType001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectionType001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -787,7 +787,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectionType001, TestSize.Level1)
  * @tc.desc: test UpdateOverlayModifier
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, UpdateOverlayModifier001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, UpdateOverlayModifier001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richeditor controller
@@ -834,7 +834,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, UpdateOverlayModifier001, TestSize.Level
  * @tc.desc: test CalculateSelectedRect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, CalculateSelectedRect001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, CalculateSelectedRect001, TestSize.Level0)
 {
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
     auto result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
@@ -876,7 +876,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, CalculateSelectedRect001, TestSize.Level
  * @tc.desc: Test RichEditorPattern Handle Level OnFrameNodeChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, HandleLevel001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, HandleLevel001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get rich editor pattern instance, then add text span
@@ -918,7 +918,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, HandleLevel001, TestSize.Level1)
  * @tc.desc: Test RichEditorPattern Handle Level on FrameNode changed finish.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, HandleLevel002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, HandleLevel002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get rich editor pattern instance, then add text span
@@ -960,7 +960,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, HandleLevel002, TestSize.Level1)
  * @tc.desc: test OnCloseOverlay
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnCloseOverlay001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnCloseOverlay001, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     RefPtr<OverlayInfo> info = nullptr;
@@ -980,7 +980,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnCloseOverlay001, TestSize.Level1)
  * @tc.desc: Test GetGlyphPositionAtCoordinate.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level0)
 {
     auto offset = Offset(50.0, -80.0);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
@@ -997,7 +997,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetGlyphPositionAtCoordinate001, TestSiz
  * @tc.desc: Test IsSelectLineHeadAndUseLeadingMargin.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, IsSelectLineHeadAndUseLeadingMargin001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, IsSelectLineHeadAndUseLeadingMargin001, TestSize.Level0)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
@@ -1013,7 +1013,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, IsSelectLineHeadAndUseLeadingMargin001, 
  * @tc.desc: Test onDraw.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1060,7 +1060,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg001, TestSize.Lev
  * @tc.desc: Test UpdateScrollBar.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1099,7 +1099,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg002, TestSize.Lev
  * @tc.desc: test OnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg003, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1123,7 +1123,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg003, TestSize.Lev
  * @tc.desc: test CheckHandleVisible
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg004, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1148,7 +1148,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg004, TestSize.Lev
  * @tc.desc: test UpdateSelectorOnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg005, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1164,7 +1164,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg005, TestSize.Lev
  * @tc.desc: test OnMenuItemAction
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg007, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg007, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1185,7 +1185,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg007, TestSize.Lev
  * @tc.desc: test OnCloseOverlay
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg008, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg008, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1207,7 +1207,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg008, TestSize.Lev
  * @tc.desc: test OnHandleLevelModeChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg009, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg009, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1229,7 +1229,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg009, TestSize.Lev
  * @tc.desc: test OnAncestorNodeChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg010, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg010, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1245,7 +1245,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg010, TestSize.Lev
  * @tc.desc: test CreateHandles
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, CreateHandles001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, CreateHandles001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1277,7 +1277,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, CreateHandles001, TestSize.Level1)
  * @tc.desc: test ShowHandles
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1317,7 +1317,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles001, TestSize.Level1)
  * @tc.desc: test ShowHandles
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1335,7 +1335,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles002, TestSize.Level1)
  * @tc.desc: test RichEditorPattern ShowHandles
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles003, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1365,7 +1365,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles003, TestSize.Level1)
  * @tc.desc: test CreateAndShowSingleHandle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, CreateAndShowSingleHandle001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, CreateAndShowSingleHandle001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create richEditorPattern
@@ -1392,7 +1392,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, CreateAndShowSingleHandle001, TestSize.L
  * @tc.desc: test DumpInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo002, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1417,7 +1417,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo002, TestSize.Level1)
  * @tc.desc: test OnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1434,7 +1434,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level1)
  * @tc.desc: test UpdateSelectorOnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectorOnHandleMove001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectorOnHandleMove001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1452,7 +1452,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectorOnHandleMove001, TestSize.
  * @tc.desc: test ToggleMenu
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, ToggleMenu001, TestSize.Level1)
+HWTEST_F(RichEditorSelectOverlayTestNg, ToggleMenu001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

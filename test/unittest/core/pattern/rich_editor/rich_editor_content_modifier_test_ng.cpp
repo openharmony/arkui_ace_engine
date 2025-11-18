@@ -163,7 +163,7 @@ void RichEditorContentModifierTestNg::SetTypingStyle()
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, onDraw001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, onDraw001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -186,7 +186,7 @@ HWTEST_F(RichEditorContentModifierTestNg, onDraw001, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectX001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectX001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -205,7 +205,7 @@ HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectX001, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectY001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectY001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -224,7 +224,7 @@ HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectY001, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, SetClipOffset001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, SetClipOffset001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -243,7 +243,7 @@ HWTEST_F(RichEditorContentModifierTestNg, SetClipOffset001, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, SetClipSize001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, SetClipSize001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -262,7 +262,7 @@ HWTEST_F(RichEditorContentModifierTestNg, SetClipSize001, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -285,7 +285,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan001, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan002, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan002, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -305,7 +305,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan002, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan003, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan003, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -326,7 +326,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan003, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan004, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan004, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -355,7 +355,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan004, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan005, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan005, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -385,7 +385,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan005, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan006, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan006, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -415,7 +415,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan006, TestSize.Level1)
  * @tc.desc: Test PaintLeadingMarginSpan.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -478,7 +478,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan001, TestSize.Le
  * @tc.desc: Test PaintLeadingMarginSpan.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan002, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan002, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -511,7 +511,7 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintLeadingMarginSpan002, TestSize.Le
  * @tc.desc: Test AdjustParagraphX.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorContentModifierTestNg, AdjustParagraphX001, TestSize.Level1)
+HWTEST_F(RichEditorContentModifierTestNg, AdjustParagraphX001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);

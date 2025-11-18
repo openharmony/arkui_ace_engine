@@ -843,7 +843,7 @@ void ResetRegisterNativeEmbedRule(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::RegisterNativeEmbedRule(frameNode, nullptr, nullptr);
+    WebModelNG::RegisterNativeEmbedRule(frameNode, "", "");
 }
 
 void SetNativeEmbedOptions(ArkUINodeHandle node, ArkUI_Bool value)
@@ -2210,25 +2210,7 @@ void ResetEnableSelectedDataDetector(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetEnableSelectedDataDetector(frameNode, DEFAULT_ENABLE_DATA_DETECTOR);
-}
-
-void SetSelectedDataDetectorConfigWithEvent(
-    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextDetectConfig detectConfig;
-    detectConfig.types = arkUITextDetectConfig->types;
-    WebModelNG::SetSelectedDataDetectorConfig(frameNode, detectConfig);
-}
-
-void ResetSelectedDataDetectorConfigWithEvent(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextDetectConfig detectConfig;
-    WebModelNG::SetSelectedDataDetectorConfig(frameNode, detectConfig);
+    WebModelNG::SetEnableSelectedDataDetector(frameNode, DEFAULT_ENABLE_SELECTED_DATA_DETECTOR);
 }
 
 void SetOnSslErrorEventReceive(ArkUINodeHandle node, void* extraParam)
@@ -2634,8 +2616,6 @@ const ArkUIWebModifier* GetWebModifier()
         .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
         .setEnableSelectedDataDetector = SetEnableSelectedDataDetector,
         .resetEnableSelectedDataDetector = ResetEnableSelectedDataDetector,
-        .setSelectedDataDetectorConfigWithEvent = SetSelectedDataDetectorConfigWithEvent,
-        .resetSelectedDataDetectorConfigWithEvent = ResetSelectedDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
@@ -2867,8 +2847,6 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
         .setEnableSelectedDataDetector = SetEnableSelectedDataDetector,
         .resetEnableSelectedDataDetector = ResetEnableSelectedDataDetector,
-        .setSelectedDataDetectorConfigWithEvent = SetSelectedDataDetectorConfigWithEvent,
-        .resetSelectedDataDetectorConfigWithEvent = ResetSelectedDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,

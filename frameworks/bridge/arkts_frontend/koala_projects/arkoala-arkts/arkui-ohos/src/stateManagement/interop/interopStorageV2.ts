@@ -16,6 +16,7 @@
 import { StorageHelper, StorageDefaultCreator } from '../storage/persistenceV2'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { AppStorageV2Impl} from '../storage/appStorageV2';
+import { transferTypeName } from '../storage/persistenceV2';
 
 export class InteropAppStorageV2 {
     private static instance_: InteropAppStorageV2 | undefined = undefined;
@@ -108,7 +109,7 @@ export class InteropAppStorageV2 {
     }
 
     public connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-        return InteropAppStorageV2.instance().connect(ttype, ttype.getName(), defaultCreator);
+        return InteropAppStorageV2.instance().connect(ttype, transferTypeName(ttype.getName()), defaultCreator);
     }
 
     public remove(keyOrType: string | Type): void {

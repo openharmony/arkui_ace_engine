@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_page.h"
 #include "core/common/platform_window.h"
+#include "core/common/window_size_breakpoint.h"
 
 namespace OHOS::Rosen {
 class RSUIDirector;
@@ -35,9 +36,6 @@ namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 } // namespace NG
-
-enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL, WIDTH_XXL, UNDEFINED};
-enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
 
 class ACE_EXPORT Window : public std::enable_shared_from_this<Window> {
 public:
@@ -255,6 +253,14 @@ public:
 
     void SetForceVsyncRequests(bool forceVsyncRequests);
 
+    void NotifyBreakpointChangeIfNeeded(int32_t instanceId, const WidthLayoutBreakPoint& widthLayoutBreakpoints,
+        const HeightLayoutBreakPoint& heightLayoutBreakpoints);
+
+    WindowSizeBreakpoint GetCurrentBreakpoint() const
+    {
+        return currentBreakpoint_;
+    }
+
     WidthBreakpoint GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const;
     HeightBreakpoint GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const;
 
@@ -278,6 +284,7 @@ protected:
     bool dvsyncOn_ = false;
     int64_t lastDVsyncInbihitPredictTs_ = 0;
     bool forceVsync_ = false;
+    WindowSizeBreakpoint currentBreakpoint_;
 
 private:
     std::function<Rect()> windowRectImpl_;

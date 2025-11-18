@@ -27,20 +27,26 @@ final class CONSTANT {
 
 export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     public store_: Array<T>;
+    @JSONStringifyIgnore
     private meta_: IMutableKeyedStateMeta;
     // support for @Watch
     // each IObservedObject manages a set of @Wtch subscribers
     // when a object property changes need to call execureOnSubscribingWatches
     // compare interface
+    @JSONStringifyIgnore
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
+    @JSONStringifyIgnore
     private ____V1RenderId: RenderIdType = 0;
+    @JSONStringifyIgnore
     private allowDeep_: boolean;
+    private isAPI_: boolean;
 
-    constructor(src: Array<T>, allowDeep: boolean = false) {
+    constructor(src: Array<T>, allowDeep: boolean = false, isAPI: boolean = false) {
         super();
         this.store_ = src;
         this.allowDeep_ = allowDeep;
+        this.isAPI_ = isAPI;
         this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedArray');
     }
 
@@ -96,7 +102,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
         }
-        return uiUtils.makeObserved(this.store_[idx], this.allowDeep_);
+        const makeobserved = uiUtils.makeObservedEntrance(this.store_[idx], this.allowDeep_, this.isAPI_);
+        this.store_[idx] = makeobserved;
+        return this.store_[idx];
     }
 
     // [] operator
@@ -371,6 +379,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     public override $_iterator(): IterableIterator<T> {
         // NOTE! addRef for OB_LENGTH similarly to V2!
         this.meta_.addRef(CONSTANT.OB_LENGTH);
+        this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.values();
     }
 

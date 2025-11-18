@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_MIN_LINES = 0;
 constexpr int32_t DEFAULT_ALPHA = 255;
 constexpr float DEFAULT_OPACITY = 0.2;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 
 void TextModelNG::Create(const std::u16string& content)
 {
@@ -815,6 +816,23 @@ void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& re
     }
 }
 
+void TextModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam);
+}
+
+void TextModelNG::ResetBindSelectionMenu(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ClearSelectionMenu();
+}
+
 void TextModelNG::SetSelectDetectEnable(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1124,6 +1142,14 @@ TextDecorationStyle TextModelNG::GetTextDecorationStyle(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextDecorationStyle::SOLID);
     return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
+}
+
+float TextModelNG::GetLineThicknessScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_LINE_THICKNESS_SCALE);
+    return layoutProperty->GetLineThicknessScale().value_or(DEFAULT_LINE_THICKNESS_SCALE);
 }
 
 TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
@@ -1653,6 +1679,31 @@ size_t TextModelNG::GetLineCount(FrameNode* frameNode)
     return textPattern->GetLineCount();
 }
 
+std::vector<ParagraphManager::TextBox> TextModelNG::GetRectsForRange(
+    FrameNode* frameNode, int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, {});
+    return textPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+}
+
+PositionWithAffinity TextModelNG::GetGlyphPositionAtCoordinate(FrameNode* frameNode, double dx, double dy)
+{
+    CHECK_NULL_RETURN(frameNode, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    return textPattern->GetGlyphPositionAtCoordinate(dx, dy);
+}
+
+TextLineMetrics TextModelNG::GetLineMetrics(FrameNode* frameNode, int32_t lineNumber)
+{
+    CHECK_NULL_RETURN(frameNode, TextLineMetrics());
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, TextLineMetrics());
+    return textPattern->GetLineMetrics(lineNumber);
+}
+
 void TextModelNG::SetOptimizeTrailingSpace(bool trim)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, OptimizeTrailingSpace, trim);
@@ -1756,6 +1807,16 @@ void TextModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
     CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, value, frameNode);
+}
+
+Color TextModelNG::GetColorShaderStyle(FrameNode* frameNode)
+{
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto defaultColor = GetDefaultColor(themeScopeId);
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultColor);
+    return layoutProperty->GetColorShaderStyle().value_or(defaultColor);
 }
 
 NG::Gradient TextModelNG::GetGradientStyle(FrameNode* frameNode)

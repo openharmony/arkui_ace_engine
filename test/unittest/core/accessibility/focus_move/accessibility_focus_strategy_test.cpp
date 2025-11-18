@@ -597,45 +597,175 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindNextReadableNodeBySelfAndSameLevel0
 }
 
 /**
- * @tc.name: FindNextReadableNodeToCheckUserNext001
+ * @tc.name: FindNextReadableNodeBySelfAndSameLevel003
  * @tc.desc: UpdateAccessibilityElementInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityFocusStrategyTest, FindNextReadableNodeToCheckUserNext001, TestSize.Level1)
+HWTEST_F(AccessibilityFocusStrategyTest, FindNextReadableNodeBySelfAndSameLevel003, TestSize.Level1)
+{
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::vector<std::shared_ptr<FocusRulesCheckNode>> sameLevelNodes;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+
+    // not check current and current is not ChildTreeContainer
+    // children. empty,  bypass descendants， !NoNeedSearchild
+    condition.bypassDescendants = true;
+    focusStrategy.mockCanFocus_ = true;
+    auto result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    ASSERT_EQ(targetNode, nullptr);
+    // children. empty,  not bypass descendants， !NoNeedSearchild
+    condition.bypassDescendants = false;
+    result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    // children. empty,  bypass descendants， NoNeedSearchild
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityLevel(NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
+
+    condition.bypassDescendants = true;
+    focusStrategy.mockCanFocus_ = true;
+    result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    ASSERT_EQ(targetNode, nullptr);
+    // children. empty,  not bypass descendants， NoNeedSearchild
+    condition.bypassDescendants = false;
+    result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    ASSERT_EQ(targetNode, nullptr);
+}
+
+/**
+ * @tc.name: FindNextReadableNodeBySelfAndSameLevel004
+ * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, FindNextReadableNodeBySelfAndSameLevel004, TestSize.Level1)
+{
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = CreatFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    frameNode->AddChild(frameNode1);
+    frameNode1->MountToParent(frameNode);
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::vector<std::shared_ptr<FocusRulesCheckNode>> sameLevelNodes;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+
+    // not check current and current is not ChildTreeContainer
+    // children not empty,  bypass descendants， !NoNeedSearchild, expect not find node
+    condition.bypassDescendants = true;
+    focusStrategy.mockCanFocus_ = true;
+    auto result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    ASSERT_EQ(targetNode, nullptr);
+    // children not empty,  not bypass descendants， !NoNeedSearchild, expect not find node
+    condition.bypassDescendants = false;
+    result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(targetNode->GetAccessibilityId(), frameNode1->GetAccessibilityId());
+    targetNode.reset();
+    // children not empty,  bypass descendants， NoNeedSearchild, expect not find node
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityLevel(NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
+    condition.bypassDescendants = true;
+    focusStrategy.mockCanFocus_ = true;
+    result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    ASSERT_EQ(targetNode, nullptr);
+    // children not empty,  not bypass descendants， NoNeedSearchild, expect not find node
+    condition.bypassDescendants = false;
+    result =
+        focusStrategy.FindNextReadableNodeBySelfAndSameLevel(condition, checkNode, sameLevelNodes, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+    ASSERT_EQ(targetNode, nullptr);
+}
+
+/**
+ * @tc.name: FindPrevReadableNodeByChildAndSelf001
+ * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, FindPrevReadableNodeByChildAndSelf001, TestSize.Level1)
+{
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = CreatFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    frameNode->AddChild(frameNode1);
+    frameNode1->MountToParent(frameNode);
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::vector<std::shared_ptr<FocusRulesCheckNode>> sameLevelNodes;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    focusStrategy.mockCanFocus_ = true;
+    // NoNeedSearchChild, only search and get self
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityLevel(NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
+    auto result =
+        focusStrategy.FindPrevReadableNodeByChildAndSelf(checkNode, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(targetNode->GetAccessibilityId(), frameNode->GetAccessibilityId());
+
+    // need searchchild, can search child node
+    targetNode.reset();
+    accessibilityProperty->SetAccessibilityLevel(NG::AccessibilityProperty::Level::YES_STR);
+    result =
+        focusStrategy.FindPrevReadableNodeByChildAndSelf(checkNode, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(targetNode->GetAccessibilityId(), frameNode1->GetAccessibilityId());
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest020
+ * @tc.desc: Test the method SetIsAccessibilityModal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsAccessibilityModalTest001, TestSize.Level1)
+{
+    NG::AccessibilityProperty accessibilityProperty;
+    EXPECT_FALSE(accessibilityProperty.overlayProperty_.has_value());
+    // default value is true
+    EXPECT_TRUE(accessibilityProperty.IsAccessibilityModal());
+    accessibilityProperty.SetIsAccessibilityModal(false);
+    EXPECT_FALSE(accessibilityProperty.IsAccessibilityModal());
+    accessibilityProperty.SetIsAccessibilityModal(true);
+    EXPECT_TRUE(accessibilityProperty.IsAccessibilityModal());
+}
+
+/**
+ * @tc.name: FindPrevReadableNode001
+ * @tc.desc: Test the method FindPrevReadableNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, FindPrevReadableNode001, TestSize.Level1)
 {
     MockAccessibilityFocusStrategy focusStrategy;
-    int64_t accessibilityId1 = 1;
-    int64_t accessibilityId2 = 2;
-    auto checkNode1 = std::make_shared<MockFocusRulesCheckNode>(accessibilityId1);
-    auto checkNode2 = std::make_shared<MockFocusRulesCheckNode>(accessibilityId2);
+    std::shared_ptr<FocusRulesCheckNode> checkNode1;
     std::shared_ptr<FocusRulesCheckNode> targetNode;
-    // no nextNode
-    auto result = focusStrategy.FindNextReadableNodeToCheckUserNext(checkNode1, targetNode);
-    ASSERT_EQ(targetNode, nullptr);
+    AceFocusMoveDetailCondition condition;
+    auto result = focusStrategy.FindPrevReadableNode(condition, checkNode1, targetNode);
+    // checknode null，returns fail
     ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL);
-    // not focus able
-    focusStrategy.mockCanFocus_ = false;
-    result = focusStrategy.FindNextReadableNodeToCheckUserNext(checkNode1, targetNode);
-    ASSERT_EQ(targetNode, nullptr);
-    ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL);
-
-    // have nextNode and can focus
-    focusStrategy.mockCanFocus_ = true;
-    checkNode1->mockNextNode_ = std::move(checkNode2);
-    result = focusStrategy.FindNextReadableNodeToCheckUserNext(checkNode1, targetNode);
-    ASSERT_NE(targetNode, nullptr);
-    ASSERT_EQ(targetNode->GetAccessibilityId(), accessibilityId2);
-    ASSERT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
-    // have nextNode, not focus able but ChildTreeContainer
-    focusStrategy.mockCanFocus_ = false;
-    int64_t accessibilityId3 = 3;
-    auto checkNode3 = std::make_shared<MockFocusRulesCheckNode>(accessibilityId3);
-    checkNode3->mockChildTreeContainer = true;
-    checkNode1->mockNextNode_ = std::move(checkNode3);
-    result = focusStrategy.FindNextReadableNodeToCheckUserNext(checkNode1, targetNode);
-    ASSERT_NE(targetNode, nullptr);
-    ASSERT_EQ(targetNode->GetAccessibilityId(), accessibilityId3);
-    ASSERT_EQ(result, AceFocusMoveResult::FIND_CHILDTREE);
 }
 
 } // namespace OHOS::Ace::NG

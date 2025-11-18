@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/implementation/navigation_context.h"
 #include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
+
+namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
 
 namespace OHOS::Ace::NG::Converter {
 struct NavContentInfo {
@@ -69,25 +72,55 @@ void FinishTransitionImpl(Ark_NavigationTransitionProxy peer)
 }
 Ark_NavContentInfo GetFromImpl(Ark_NavigationTransitionProxy peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->handler, Ark_NavContentInfo());
+    auto navDestinationContext = peer->handler->GetPreDestinationContext();
+    CHECK_NULL_RETURN(navDestinationContext, Ark_NavContentInfo());
+    return Converter::ArkValue<Ark_NavContentInfo>(navDestinationContext);
 }
 void SetFromImpl(Ark_NavigationTransitionProxy peer,
                  const Ark_NavContentInfo* from)
 {
     CHECK_NULL_VOID(peer && from && peer->handler);
-    Converter::Convert<Converter::NavContentInfo>(*from);
-    LOGE("NavigationTransitionProxyAccessor::SetFromImpl, modifying from attribute isn't supported");
+    auto navDestinationContext = peer->handler->GetPreDestinationContext();
+    CHECK_NULL_VOID(navDestinationContext);
+    auto navPathInfo = AceType::DynamicCast<Nav::JSNavPathInfoStatic>(navDestinationContext->GetNavPathInfo());
+    CHECK_NULL_VOID(navPathInfo);
+    navPathInfo->SetName(Converter::OptConvert<std::string>(from->name).value_or(""));
+    navPathInfo->SetParam(Converter::OptConvert<Nav::ExternalData>(from->param).value_or(Nav::ExternalData{}));
+    navDestinationContext->SetIndex(Converter::Convert<int32_t>(from->index));
+    if (from->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        navDestinationContext->SetMode(static_cast<NavDestinationMode>(from->mode.value));
+    } else {
+        navDestinationContext->SetMode(NavDestinationMode::STANDARD);
+    }
+    auto idString = Converter::OptConvert<std::string>(from->navDestinationId).value_or("0");
+    navDestinationContext->SetNavDestinationId(std::atol(idString.c_str()));
 }
 Ark_NavContentInfo GetToImpl(Ark_NavigationTransitionProxy peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->handler, Ark_NavContentInfo());
+    auto navDestinationContext = peer->handler->GetTopDestinationContext();
+    CHECK_NULL_RETURN(navDestinationContext, Ark_NavContentInfo());
+    return Converter::ArkValue<Ark_NavContentInfo>(navDestinationContext);
 }
 void SetToImpl(Ark_NavigationTransitionProxy peer,
                const Ark_NavContentInfo* to)
 {
     CHECK_NULL_VOID(peer && to && peer->handler);
-    Converter::Convert<Converter::NavContentInfo>(*to);
-    LOGE("NavigationTransitionProxyAccessor::SetToImpl, modifying from attribute isn't supported");
+    auto navDestinationContext = peer->handler->GetTopDestinationContext();
+    CHECK_NULL_VOID(navDestinationContext);
+    auto navPathInfo = AceType::DynamicCast<Nav::JSNavPathInfoStatic>(navDestinationContext->GetNavPathInfo());
+    CHECK_NULL_VOID(navPathInfo);
+    navPathInfo->SetName(Converter::OptConvert<std::string>(to->name).value_or(""));
+    navPathInfo->SetParam(Converter::OptConvert<Nav::ExternalData>(to->param).value_or(Nav::ExternalData{}));
+    navDestinationContext->SetIndex(Converter::Convert<int32_t>(to->index));
+    if (to->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        navDestinationContext->SetMode(static_cast<NavDestinationMode>(to->mode.value));
+    } else {
+        navDestinationContext->SetMode(NavDestinationMode::STANDARD);
+    }
+    auto idString = Converter::OptConvert<std::string>(to->navDestinationId).value_or("0");
+    navDestinationContext->SetNavDestinationId(std::atol(idString.c_str()));
 }
 Opt_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
 {
@@ -128,7 +161,7 @@ void SetCancelTransitionImpl(Ark_NavigationTransitionProxy peer,
 Opt_UpdateTransitionCallback GetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     auto callback = CallbackKeeper::RegisterReverseCallback<UpdateTransitionCallback,
-        std::function<void(Ark_Number)>>([peer](Ark_Number progress) {
+        std::function<void(Ark_Float64)>>([peer](Ark_Float64 progress) {
         CHECK_NULL_VOID(peer && peer->handler);
         if (peer->handler->GetInteractive()) {
             peer->FireUpdateProgress(Converter::Convert<float>(progress));
@@ -147,7 +180,7 @@ void SetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
             CHECK_NULL_VOID(peer && peer->handler);
             if (peer->handler->GetInteractive()) {
                 peer->handler->UpdateTransition(progress);
-                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(progress));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Float64>(progress));
             }
         };
     }

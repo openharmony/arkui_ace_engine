@@ -23,6 +23,7 @@
 using SwiperContentTransitionProxyRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::SwiperContentTransitionProxy>;
 
 struct SwiperContentTransitionProxyPeer {
+    virtual ~SwiperContentTransitionProxyPeer() = default;
     SwiperContentTransitionProxyRefPtr handler;
     void SetHandler(const SwiperContentTransitionProxyRefPtr& handlerIn)
     {

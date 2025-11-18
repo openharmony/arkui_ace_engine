@@ -103,27 +103,27 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
             for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
                 const valueTmpValueTmpElement : ResourceColor | LinearGradient = valueTmpValue[valueTmpValueCounterI]
                 if (valueTmpValueTmpElement instanceof ResourceColor) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as ResourceColor
                     if (valueTmpValueTmpElementForIdx0 instanceof Color) {
-                        thisSerializer.writeInt8((0).toChar())
+                        thisSerializer.writeInt8((0).toByte())
                         const valueTmpValueTmpElementForIdx0ForIdx0  = valueTmpValueTmpElementForIdx0 as Color
                         thisSerializer.writeInt32(valueTmpValueTmpElementForIdx0ForIdx0.getOrdinal())
                     } else if (valueTmpValueTmpElementForIdx0 instanceof number) {
-                        thisSerializer.writeInt8((1).toChar())
+                        thisSerializer.writeInt8((1).toByte())
                         const valueTmpValueTmpElementForIdx0ForIdx1  = valueTmpValueTmpElementForIdx0 as number
                         thisSerializer.writeNumber(valueTmpValueTmpElementForIdx0ForIdx1)
                     } else if (valueTmpValueTmpElementForIdx0 instanceof string) {
-                        thisSerializer.writeInt8((2).toChar())
+                        thisSerializer.writeInt8((2).toByte())
                         const valueTmpValueTmpElementForIdx0ForIdx2  = valueTmpValueTmpElementForIdx0 as string
                         thisSerializer.writeString(valueTmpValueTmpElementForIdx0ForIdx2)
                     } else if (valueTmpValueTmpElementForIdx0 instanceof Resource) {
-                        thisSerializer.writeInt8((3).toChar())
+                        thisSerializer.writeInt8((3).toByte())
                         const valueTmpValueTmpElementForIdx0ForIdx3  = valueTmpValueTmpElementForIdx0 as Resource
                         Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx0ForIdx3)
                     }
                 } else if (valueTmpValueTmpElement instanceof LinearGradient) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as LinearGradient
                     LinearGradient_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx1)
                 }
@@ -140,19 +140,19 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -168,15 +168,15 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -292,6 +292,7 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
         if (this.checkPriority("setDataPanelOptions")) {
             const options_casted = options as (DataPanelOptions)
             this.getPeer()?.setDataPanelOptionsAttribute(options_casted)
+            this.applyOptionsFinish('DataPanelAttribute');
             return this
         }
         return this
@@ -349,6 +350,9 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -470,11 +474,11 @@ export class DataPanelShadowOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
             if (valueHolderForRadiusTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as number
                 valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx1)
             }
@@ -485,12 +489,12 @@ export class DataPanelShadowOptions_serializer {
         if (valueHolderForOffsetX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
-            if (valueHolderForOffsetXTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetXTmpValueForIdx0)
+            if (valueHolderForOffsetXTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetXTmpValueForIdx0)
             } else if (valueHolderForOffsetXTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetXTmpValueForIdx1  = valueHolderForOffsetXTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForOffsetXTmpValueForIdx1)
             }
@@ -501,12 +505,12 @@ export class DataPanelShadowOptions_serializer {
         if (valueHolderForOffsetY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
-            if (valueHolderForOffsetYTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetYTmpValueForIdx0)
+            if (valueHolderForOffsetYTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetYTmpValueForIdx0)
             } else if (valueHolderForOffsetYTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetYTmpValueForIdx1  = valueHolderForOffsetYTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForOffsetYTmpValueForIdx1)
             }
@@ -521,27 +525,27 @@ export class DataPanelShadowOptions_serializer {
             for (let valueHolderForColorsTmpValueCounterI = 0; valueHolderForColorsTmpValueCounterI < valueHolderForColorsTmpValue.length; valueHolderForColorsTmpValueCounterI++) {
                 const valueHolderForColorsTmpValueTmpElement : ResourceColor | LinearGradient = valueHolderForColorsTmpValue[valueHolderForColorsTmpValueCounterI]
                 if (valueHolderForColorsTmpValueTmpElement instanceof ResourceColor) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForColorsTmpValueTmpElementForIdx0  = valueHolderForColorsTmpValueTmpElement as ResourceColor
                     if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof Color) {
-                        valueSerializer.writeInt8((0).toChar())
+                        valueSerializer.writeInt8((0).toByte())
                         const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx0  = valueHolderForColorsTmpValueTmpElementForIdx0 as Color
                         valueSerializer.writeInt32(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx0.getOrdinal())
                     } else if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof number) {
-                        valueSerializer.writeInt8((1).toChar())
+                        valueSerializer.writeInt8((1).toByte())
                         const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx1  = valueHolderForColorsTmpValueTmpElementForIdx0 as number
                         valueSerializer.writeNumber(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx1)
                     } else if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof string) {
-                        valueSerializer.writeInt8((2).toChar())
+                        valueSerializer.writeInt8((2).toByte())
                         const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx2  = valueHolderForColorsTmpValueTmpElementForIdx0 as string
                         valueSerializer.writeString(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx2)
                     } else if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof Resource) {
-                        valueSerializer.writeInt8((3).toChar())
+                        valueSerializer.writeInt8((3).toByte())
                         const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx3  = valueHolderForColorsTmpValueTmpElementForIdx0 as Resource
                         Resource_serializer.write(valueSerializer, valueHolderForColorsTmpValueTmpElementForIdx0ForIdx3)
                     }
                 } else if (valueHolderForColorsTmpValueTmpElement instanceof LinearGradient) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForColorsTmpValueTmpElementForIdx1  = valueHolderForColorsTmpValueTmpElement as LinearGradient
                     LinearGradient_serializer.write(valueSerializer, valueHolderForColorsTmpValueTmpElementForIdx1)
                 }
@@ -568,35 +572,35 @@ export class DataPanelShadowOptions_serializer {
         }
         const radiusTmpResult : number | Resource | undefined = radiusTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetXTmpBuf : number | Resource | undefined = undefined
+        let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetXTmpBuf_ : number | Resource | undefined
+            let offsetXTmpBuf_ : double | Resource | undefined
             if (offsetXTmpBuf_UnionSelector == (0).toChar()) {
-                offsetXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetXTmpBuf_UnionSelector == (1).toChar()) {
                 offsetXTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetXTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetXTmpBuf = (offsetXTmpBuf_ as number | Resource)
+            offsetXTmpBuf = (offsetXTmpBuf_ as double | Resource)
         }
-        const offsetXTmpResult : number | Resource | undefined = offsetXTmpBuf
+        const offsetXTmpResult : double | Resource | undefined = offsetXTmpBuf
         const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetYTmpBuf : number | Resource | undefined = undefined
+        let offsetYTmpBuf : double | Resource | undefined = undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetYTmpBuf_ : number | Resource | undefined
+            let offsetYTmpBuf_ : double | Resource | undefined
             if (offsetYTmpBuf_UnionSelector == (0).toChar()) {
-                offsetYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetYTmpBuf_UnionSelector == (1).toChar()) {
                 offsetYTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetYTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetYTmpBuf = (offsetYTmpBuf_ as number | Resource)
+            offsetYTmpBuf = (offsetYTmpBuf_ as double | Resource)
         }
-        const offsetYTmpResult : number | Resource | undefined = offsetYTmpBuf
+        const offsetYTmpResult : double | Resource | undefined = offsetYTmpBuf
         const colorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorsTmpBuf : Array<ResourceColor | LinearGradient> | undefined = undefined
         if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -639,33 +643,33 @@ export class ColorStop_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForColor  = value.color
         if (valueHolderForColor instanceof Color) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
             valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
         } else if (valueHolderForColor instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForColorForIdx1  = valueHolderForColor as number
             valueSerializer.writeNumber(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForColorForIdx2  = valueHolderForColor as string
             valueSerializer.writeString(valueHolderForColorForIdx2)
         } else if (valueHolderForColor instanceof Resource) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForColorForIdx3  = valueHolderForColor as Resource
             Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
         const valueHolderForOffset  = value.offset
         if (valueHolderForOffset instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForOffsetForIdx0  = valueHolderForOffset as string
             valueSerializer.writeString(valueHolderForOffsetForIdx0)
         } else if (valueHolderForOffset instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForOffsetForIdx1  = valueHolderForOffset as number
             valueSerializer.writeNumber(valueHolderForOffsetForIdx1)
         } else if (valueHolderForOffset instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForOffsetForIdx2  = valueHolderForOffset as Resource
             Resource_serializer.write(valueSerializer, valueHolderForOffsetForIdx2)
         }

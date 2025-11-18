@@ -98,218 +98,223 @@ public:
 
     Color Brand() const
     {
-        return ConvertJsValueToColor(colors_[BRAND]);
+        return ConvertJsValueToColor(BRAND);
     }
     Color Warning() const
     {
-        return ConvertJsValueToColor(colors_[WARNING]);
+        return ConvertJsValueToColor(WARNING);
     }
     Color Alert() const
     {
-        return ConvertJsValueToColor(colors_[ALERT]);
+        return ConvertJsValueToColor(ALERT);
     }
     Color Confirm() const
     {
-        return ConvertJsValueToColor(colors_[CONFIRM]);
+        return ConvertJsValueToColor(CONFIRM);
     }
 
     Color FontPrimary() const
     {
-        return ConvertJsValueToColor(colors_[FONT_PRIMARY]);
+        return ConvertJsValueToColor(FONT_PRIMARY);
     }
     Color FontSecondary() const
     {
-        return ConvertJsValueToColor(colors_[FONT_SECONDARY]);
+        return ConvertJsValueToColor(FONT_SECONDARY);
     }
     Color FontTertiary() const
     {
-        return ConvertJsValueToColor(colors_[FONT_TERTIARY]);
+        return ConvertJsValueToColor(FONT_TERTIARY);
     }
     Color FontFourth() const
     {
-        return ConvertJsValueToColor(colors_[FONT_FOURTH]);
+        return ConvertJsValueToColor(FONT_FOURTH);
     }
     Color FontEmphasize() const
     {
-        return ConvertJsValueToColor(colors_[FONT_EMPHASIZE]);
+        return ConvertJsValueToColor(FONT_EMPHASIZE);
     }
 
     Color FontOnPrimary() const
     {
-        return ConvertJsValueToColor(colors_[FONT_ON_PRIMARY]);
+        return ConvertJsValueToColor(FONT_ON_PRIMARY);
     }
     Color FontOnSecondary() const
     {
-        return ConvertJsValueToColor(colors_[FONT_ON_SECONDARY]);
+        return ConvertJsValueToColor(FONT_ON_SECONDARY);
     }
     Color FontOnTertiary() const
     {
-        return ConvertJsValueToColor(colors_[FONT_ON_TERTIARY]);
+        return ConvertJsValueToColor(FONT_ON_TERTIARY);
     }
     Color FontOnFourth() const
     {
-        return ConvertJsValueToColor(colors_[FONT_ON_FOURTH]);
+        return ConvertJsValueToColor(FONT_ON_FOURTH);
     }
 
     Color IconPrimary() const
     {
-        return ConvertJsValueToColor(colors_[ICON_PRIMARY]);
+        return ConvertJsValueToColor(ICON_PRIMARY);
     }
     Color IconSecondary() const
     {
-        return ConvertJsValueToColor(colors_[ICON_SECONDARY]);
+        return ConvertJsValueToColor(ICON_SECONDARY);
     }
     Color IconTertiary() const
     {
-        return ConvertJsValueToColor(colors_[ICON_TERTIARY]);
+        return ConvertJsValueToColor(ICON_TERTIARY);
     }
     Color IconFourth() const
     {
-        return ConvertJsValueToColor(colors_[ICON_FOURTH]);
+        return ConvertJsValueToColor(ICON_FOURTH);
     }
     Color IconEmphasize() const
     {
-        return ConvertJsValueToColor(colors_[ICON_EMPHASIZE]);
+        return ConvertJsValueToColor(ICON_EMPHASIZE);
     }
     Color IconSubEmphasize() const
     {
-        return ConvertJsValueToColor(colors_[ICON_SUB_EMPHASIZE]);
+        return ConvertJsValueToColor(ICON_SUB_EMPHASIZE);
     }
 
     Color IconOnPrimary() const
     {
-        return ConvertJsValueToColor(colors_[ICON_ON_PRIMARY]);
+        return ConvertJsValueToColor(ICON_ON_PRIMARY);
     }
     Color IconOnSecondary() const
     {
-        return ConvertJsValueToColor(colors_[ICON_ON_SECONDARY]);
+        return ConvertJsValueToColor(ICON_ON_SECONDARY);
     }
     Color IconOnTertiary() const
     {
-        return ConvertJsValueToColor(colors_[ICON_ON_TERTIARY]);
+        return ConvertJsValueToColor(ICON_ON_TERTIARY);
     }
     Color IconOnFourth() const
     {
-        return ConvertJsValueToColor(colors_[ICON_ON_FOURTH]);
+        return ConvertJsValueToColor(ICON_ON_FOURTH);
     }
 
     Color BackgroundPrimary() const
     {
-        return ConvertJsValueToColor(colors_[BACKGROUND_PRIMARY]);
+        return ConvertJsValueToColor(BACKGROUND_PRIMARY);
     }
     Color BackgroundSecondary() const
     {
-        return ConvertJsValueToColor(colors_[BACKGROUND_SECONDARY]);
+        return ConvertJsValueToColor(BACKGROUND_SECONDARY);
     }
     Color BackgroundTertiary() const
     {
-        return ConvertJsValueToColor(colors_[BACKGROUND_TERTIARY]);
+        return ConvertJsValueToColor(BACKGROUND_TERTIARY);
     }
     Color BackgroundFourth() const
     {
-        return ConvertJsValueToColor(colors_[BACKGROUND_FOURTH]);
+        return ConvertJsValueToColor(BACKGROUND_FOURTH);
     }
     Color BackgroundEmphasize() const
     {
-        return ConvertJsValueToColor(colors_[BACKGROUND_EMPHASIZE]);
+        return ConvertJsValueToColor(BACKGROUND_EMPHASIZE);
     }
 
     Color CompForegroundPrimary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_FOREGROUND_PRIMARY]);
+        return ConvertJsValueToColor(COMP_FOREGROUND_PRIMARY);
     }
     Color CompBackgroundPrimary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_PRIMARY]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_PRIMARY);
     }
     Color CompBackgroundPrimaryTran() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_PRIMARY_TRAN]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_PRIMARY_TRAN);
     }
     Color CompBackgroundPrimaryContrary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_PRIMARY_CONTRARY]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_PRIMARY_CONTRARY);
     }
     Color CompBackgroundGray() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_GRAY]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_GRAY);
     }
     Color CompBackgroundSecondary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_SECONDARY]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_SECONDARY);
     }
     Color CompBackgroundTertiary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_TERTIARY]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_TERTIARY);
     }
     Color CompBackgroundEmphasize() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_EMPHASIZE]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_EMPHASIZE);
     }
     Color CompBackgroundNeutral() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_NEUTRAL]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_NEUTRAL);
     }
     Color CompEmphasizeSecondary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_EMPHASIZE_SECONDARY]);
+        return ConvertJsValueToColor(COMP_EMPHASIZE_SECONDARY);
     }
     Color CompEmphasizeTertiary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_EMPHASIZE_TERTIARY]);
+        return ConvertJsValueToColor(COMP_EMPHASIZE_TERTIARY);
     }
     Color CompDivider() const
     {
-        return ConvertJsValueToColor(colors_[COMP_DIVIDER]);
+        return ConvertJsValueToColor(COMP_DIVIDER);
     }
     Color CompCommonContrary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_COMMON_CONTRARY]);
+        return ConvertJsValueToColor(COMP_COMMON_CONTRARY);
     }
     Color CompBackgroundFocus() const
     {
-        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_FOCUS]);
+        return ConvertJsValueToColor(COMP_BACKGROUND_FOCUS);
     }
     Color CompFocusedPrimary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_FOCUSED_PRIMARY]);
+        return ConvertJsValueToColor(COMP_FOCUSED_PRIMARY);
     }
     Color CompFocusedSecondary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_FOCUSED_SECONDARY]);
+        return ConvertJsValueToColor(COMP_FOCUSED_SECONDARY);
     }
     Color CompFocusedTertiary() const
     {
-        return ConvertJsValueToColor(colors_[COMP_FOCUSED_TERTIARY]);
+        return ConvertJsValueToColor(COMP_FOCUSED_TERTIARY);
     }
 
     Color InteractiveHover() const
     {
-        return ConvertJsValueToColor(colors_[INTERACTIVE_HOVER]);
+        return ConvertJsValueToColor(INTERACTIVE_HOVER);
     }
     Color InteractivePressed() const
     {
-        return ConvertJsValueToColor(colors_[INTERACTIVE_PRESSED]);
+        return ConvertJsValueToColor(INTERACTIVE_PRESSED);
     }
     Color InteractiveFocus() const
     {
-        return ConvertJsValueToColor(colors_[INTERACTIVE_FOCUS]);
+        return ConvertJsValueToColor(INTERACTIVE_FOCUS);
     }
     Color InteractiveActive() const
     {
-        return ConvertJsValueToColor(colors_[INTERACTIVE_ACTIVE]);
+        return ConvertJsValueToColor(INTERACTIVE_ACTIVE);
     }
     Color InteractiveSelect() const
     {
-        return ConvertJsValueToColor(colors_[INTERACTIVE_SELECT]);
+        return ConvertJsValueToColor(INTERACTIVE_SELECT);
     }
     Color InteractiveClick() const
     {
-        return ConvertJsValueToColor(colors_[INTERACTIVE_CLICK]);
+        return ConvertJsValueToColor(INTERACTIVE_CLICK);
     }
 private:
-    Color ConvertJsValueToColor(const ResourceValue& resValue) const
+    Color ConvertJsValueToColor(const int32_t resNum) const
     {
+        if (colors_.size() != COLORS_NUMBER) {
+            LOGE("JSThemeColors not SetColors yet!");
+            return Color();
+        }
+        auto resValue = colors_[resNum];
         if (resValue.colorObj) {
             Color color;
             ResourceParseUtils::ParseResColor(resValue.colorObj, color);

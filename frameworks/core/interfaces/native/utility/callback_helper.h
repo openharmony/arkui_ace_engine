@@ -54,7 +54,7 @@ template<typename CallbackType,
     std::enable_if_t<std::is_same_v<decltype(CallbackType().resource), Ark_CallbackResource>, bool> = true,
     std::enable_if_t<std::is_function_v<std::remove_pointer_t<decltype(CallbackType().call)>>, bool> = true
 >
-class CallbackHelper {
+class CallbackHelper : public virtual Referenced {
 public:
     CallbackHelper() = default;
 
@@ -94,7 +94,7 @@ public:
         if (callback_.callSync) {
             Ark_VMContext vmContext = GetVMContext();
             if (vmContext == nullptr) {
-                LOGF_ABORT("InvokeSync %{public}p. VMContext is null.", callback_.callSync);
+                LOGF_ABORT("InvokeSync VMContext is null.");
             }
             (*callback_.callSync)(vmContext, callback_.resource.resourceId, std::forward<Params>(args)...);
         }
@@ -187,7 +187,7 @@ public:
 
     static Ark_VMContext GetVMContext()
     {
-        auto container = Container::Current();
+        auto container = Container::CurrentSafely();
         CHECK_NULL_RETURN(container, nullptr);
         auto frontEnd = container->GetFrontend();
         CHECK_NULL_RETURN(frontEnd, nullptr);

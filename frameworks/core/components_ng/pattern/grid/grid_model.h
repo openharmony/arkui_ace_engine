@@ -89,6 +89,8 @@ public:
     virtual void SetSyncLoad(bool syncLoad) {}
     virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
 

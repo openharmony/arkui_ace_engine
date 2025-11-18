@@ -58,7 +58,8 @@ enum class MenuItemType {
     TRANSLATE,
     SHARE,
     SEARCH,
-    ASK_CELIA
+    ASK_CELIA,
+    AI_MENU_OPTION
 };
 
 MenuItemType StringToMenuItemType(std::string_view id)
@@ -74,6 +75,11 @@ MenuItemType StringToMenuItemType(std::string_view id)
         { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
         { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
         { "OH_DEFAULT_ASK_CELIA", MenuItemType::ASK_CELIA },
+        { "OH_DEFAULT_AI_MENU_PHONE", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_URL", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_EMAIL", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_ADDRESS", MenuItemType::AI_MENU_OPTION },
+        { "OH_DEFAULT_AI_MENU_DATETIME", MenuItemType::AI_MENU_OPTION }
     };
 
     auto item = keyMenuItemMap.find(id);
@@ -121,6 +127,9 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
             break;
         case MenuItemType::ASK_CELIA:
             menuOptionsParam.symbolId = theme->GetAskCeliaSymbolId();
+            break;
+        case MenuItemType::AI_MENU_OPTION:
+            menuOptionsParam.symbolId = theme->GetAIMenuSymbolId();
             break;
         default:
             menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
@@ -1373,6 +1382,21 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(const EcmaVM *vm, const Local<J
         return true;
     }
     result.emplace_back(resourceWrapper->GetString(resId->Uint32Value(vm)));
+    return true;
+}
+
+bool ArkTSUtils::ParseResponseRegionTool(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, ResponseRegionSupportedTool& toolType)
+{
+    if (!jsValue->IsNumber()) {
+        return false;
+    }
+    auto typeNum = jsValue->ToNumber(vm)->Value();
+    if (0 <= typeNum && typeNum < static_cast<int32_t>(NG::ResponseRegionSupportedTool::TOOLCNT)) {
+        toolType = static_cast<NG::ResponseRegionSupportedTool>(typeNum);
+    } else {
+        toolType = NG::ResponseRegionSupportedTool::ALL;
+    }
     return true;
 }
 

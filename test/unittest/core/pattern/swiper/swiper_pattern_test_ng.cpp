@@ -2170,6 +2170,24 @@ HWTEST_F(SwiperPatternTestNg, PropertyPrefMonitor002, TestSize.Level1)
     pattern_->PropertyPrefMonitor(false);
     EXPECT_FALSE(pattern_->isInAutoPlay_);
     EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
+
+    pattern_->isInAutoPlay_ = false;
+    pattern_->isAutoPlayAnimationRunning_ =true;
+    pattern_->PropertyPrefMonitor(false);
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
+    EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
+ 
+    pattern_->isInAutoPlay_ = true;
+    pattern_->hasTabsAncestor_ = false;
+    pattern_->isAutoPlayAnimationRunning_ =false;
+    pattern_->PropertyPrefMonitor(true);
+    EXPECT_TRUE(pattern_->isInAutoPlay_);
+    EXPECT_TRUE(pattern_->isAutoPlayAnimationRunning_);
+
+    pattern_->isInAutoPlay_ = false;
+    pattern_->PropertyPrefMonitor(false);
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
+    EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
 }
 
 /**
@@ -2180,16 +2198,19 @@ HWTEST_F(SwiperPatternTestNg, PropertyPrefMonitor002, TestSize.Level1)
 HWTEST_F(SwiperPatternTestNg, FillType001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create swiper, isAutoPlayAnimationRunning_ is false.
-     * @tc.expected: isAutoPlayAnimationRunning_ is false.
+     * @tc.steps: step1. Create swiper.
+     * @tc.expected: set fillType is 0.
      */
     SwiperModelNG model = CreateSwiper();
     model.SetFillType(0);
     CreateSwiperItems();
     CreateSwiperDone();
     auto layoutProperty = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
-
     EXPECT_EQ(SwiperModelNG::GetFillType(AceType::RawPtr(frameNode_)), 0);
+    /**
+     * @tc.steps: step2. Create swiper.
+     * @tc.expected: check all contentWidth with fillType is 0.
+     */
     pattern_->CalculateDisplayCount();
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 1);
     SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 100);
@@ -2198,7 +2219,10 @@ HWTEST_F(SwiperPatternTestNg, FillType001, TestSize.Level1)
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 2);
     SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 900);
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 3);
-
+    /**
+     * @tc.steps: step3. Create swiper.
+     * @tc.expected: check all contentWidth with fillType is 2.
+     */
     SwiperModelNG::SetFillType(AceType::RawPtr(frameNode_), 2);
     EXPECT_EQ(SwiperModelNG::GetFillType(AceType::RawPtr(frameNode_)), 2);
     pattern_->CalculateDisplayCount();
@@ -2209,5 +2233,67 @@ HWTEST_F(SwiperPatternTestNg, FillType001, TestSize.Level1)
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 3);
     SwiperUtils::CheckBreakPointDisplayCount(layoutProperty, 900);
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 5);
+}
+
+/**
+ * @tc.name: FillType002
+ * @tc.desc: Test FillType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FillType002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     * @tc.expected: check the effect of padding.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto layoutProperty = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    PaddingProperty padding { CalcLength(10, DimensionUnit::VP), CalcLength(10, DimensionUnit::VP),
+        CalcLength(0, DimensionUnit::VP), CalcLength(0, DimensionUnit::VP) };
+    layoutProperty->padding_ = std::make_unique<PaddingProperty>(padding);
+    // 840 is LG, contenWidth + padding = 820 + 10 + 10.
+    EXPECT_EQ(SwiperUtils::GetWidthBreakpoint(layoutProperty, 820), WidthBreakpoint::WIDTH_LG);
+}
+
+/**
+ * @tc.name: FillType003
+ * @tc.desc: Test FillType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FillType003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     * @tc.expected: check the effect of padding.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto layoutProperty = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    PaddingProperty padding { CalcLength(0, DimensionUnit::VP), CalcLength(0, DimensionUnit::VP),
+        CalcLength(10, DimensionUnit::VP), CalcLength(10, DimensionUnit::VP) };
+    layoutProperty->padding_ = std::make_unique<PaddingProperty>(padding);
+    // 840 is LG, contenWidth + padding = 820 + 10 + 10.
+    EXPECT_EQ(SwiperUtils::GetWidthBreakpoint(layoutProperty, 820), WidthBreakpoint::WIDTH_LG);
+}
+
+/**
+ * @tc.name: JSIndicatorControllerBase001
+ * @tc.desc: Test FillType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, JSIndicatorControllerBase001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     * @tc.expected: check the indicatorController type.
+     */
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto controller = AceType::MakeRefPtr<JSIndicatorControllerBase>();
+    swiperPattern->SetIndicatorController(controller);
+    EXPECT_EQ(AceType::TypeName(swiperPattern->indicatorController_.Upgrade()), "JSIndicatorControllerBase");
 }
 } // namespace OHOS::Ace::NG

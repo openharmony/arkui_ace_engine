@@ -202,7 +202,7 @@ bool ScrollableController::IsAtEnd() const
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
-    return pattern->IsAtBottom(true, true);
+    return pattern->IsAtBottom(true);
 }
 
 Rect ScrollableController::GetItemRect(int32_t index) const

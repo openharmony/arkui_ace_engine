@@ -56,7 +56,7 @@ const SINGLE_ICON_ZONE_SIZE = lazyInit(() => {
     return getResourceValue('sys.float.subheader_right_icon_zone_size');
 });
 const RIGHT_SINGLE_ICON_SIZE = lazyInit(() => {
-    return getResourceValue('sys.float.subheader_right_icon_size');
+    return getResourceValue('sys.float.subheader_right_icon_size') + 'vp';
 });
 const DEFAULT_FOCUS_STYLE = lazyInit(() => {
     return getResourceValue('sys.float.subheader_right_button_default_focus_style');
@@ -1340,7 +1340,7 @@ export class SubHeader extends ViewPU {
                         SymbolGlyph.create(s9.iconOptions?.icon);
                         SymbolGlyph.fontSize(s9.iconOptions?.symbolicIconOption?.fontSize ?
                         Util.symbolFontSize(s9.iconOptions?.symbolicIconOption?.fontSize) :
-                            getResourceValue('sys.float.subheader_left_icon_size'));
+                            getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
                         SymbolGlyph.fontColor(s9.iconOptions?.symbolicIconOption?.fontColor ??
                             [this.subHeaderTheme.leftIconColor]);
                         SymbolGlyph.fontWeight(s9.iconOptions?.symbolicIconOption?.fontWeight);
@@ -1355,8 +1355,8 @@ export class SubHeader extends ViewPU {
                     this.observeComponentCreation2((d10, e10) => {
                         Image.create(s9.iconOptions?.icon);
                         Image.fillColor(this.subHeaderTheme.leftIconColor);
-                        Image.width(getResourceValue('sys.float.subheader_left_icon_size'));
-                        Image.height(getResourceValue('sys.float.subheader_left_icon_size'));
+                        Image.width(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                        Image.height(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
                         Image.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) });
                         Image.draggable(false);
                         Image.flexShrink(0);
@@ -1660,7 +1660,7 @@ export class SubHeader extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             });
-            SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH());
+            SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH() + 'vp');
             SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
             SymbolGlyph.draggable(false);
             SymbolGlyph.width(ARROW_ICON_WIDTH());
@@ -1901,7 +1901,7 @@ export class SubHeader extends ViewPU {
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__',
                         });
-                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH());
+                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH() + 'vp');
                         SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.focusable(true);
@@ -2308,6 +2308,7 @@ class SingleIconStyle extends ViewPU {
                                     Image.draggable(false);
                                     Image.borderRadius(getResourceValue('sys.float.subheader_right_image_radius'));
                                     Image.padding(getResourceValue('sys.float.subheader_right_image_padding'));
+                                    Image.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined : new DefaultImageButtonFocusStyle());
                                 }, Image);
                             });
                         }
@@ -2514,6 +2515,17 @@ class DefaultFocusStyleModifier {
         instance.onBlur(() => {
             this.stateStyleAction && this.stateStyleAction(false);
         });
+    }
+}
+
+class DefaultImageButtonFocusStyle {
+    applyNormalAttribute(instance) {
+        if (!instance) {
+            return;
+        }
+        instance
+            .borderRadius(getResourceValue('sys.float.padding_level2'))
+            .focusBox({ margin: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
     }
 }
 

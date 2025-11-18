@@ -993,6 +993,7 @@ void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefP
     option.SetDuration(animateDuration);
     option.SetOnFinishEvent([weakManager = AceType::WeakClaim(AceType::RawPtr(dragDropManager)), containerId]() {
        auto dragDropManager = weakManager.Upgrade();
+       CHECK_NULL_VOID(dragDropManager);
        dragDropManager->SetStartAnimation(true);
        if (dragDropManager && !dragDropManager->IsPullMoveReceivedForCurrentDrag()) {
            DragControllerFuncWrapper::TransDragWindowToDragFwk(containerId);
@@ -1004,6 +1005,7 @@ void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefP
     CHECK_NULL_VOID(renderContext);
     auto context = imageNode->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    context->OnShow();
     AnimationUtils::Animate(
         option,
         [renderContext, info = dragDropManager->GetDragPreviewInfo(), newOffset, overlayManager,

@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
+#include "base/image/image_color_filter.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -1150,6 +1151,8 @@ panda::Local<panda::JSValueRef> WrapAxisEventPointer(panda::JsiRuntimeCallInfo* 
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetPinchAxisScaleValue));
     dynamicEvent->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState));
+    dynamicEvent->Set(vm, panda::StringRef::NewFromUtf8(vm, "hasAxis"),
+        panda::FunctionRef::New(vm, NG::ArkTSUtils::JsHasAxis));
     panda::Local<panda::JSValueRef> pointerObj = runtimeCallInfo->GetCallArgRef(1);
     if (!pointerObj.IsNull() && !pointerObj->IsUndefined()) {
         auto nativePointer = static_cast<int64_t>(pointerObj->ToNumber(vm)->Value());
@@ -1258,6 +1261,49 @@ panda::Local<panda::JSValueRef> WrapEventTargetInfoPointer(panda::JsiRuntimeCall
         eventTarget->SetInspectorId(nativeId);
     }
     return eventTargetObj.Get().GetLocalHandle();
+}
+
+panda::Local<panda::JSValueRef> GetColorFilterPointer(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> colorFilter = runtimeCallInfo->GetCallArgRef(0);
+    if (!colorFilter->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> colorFilterObj = panda::Local<panda::ObjectRef>(colorFilter);
+    if (colorFilterObj->GetNativePointerFieldCount(vm) < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto ptrValue = reinterpret_cast<int64_t>(colorFilterObj->GetNativePointerField(vm, 0));
+    return panda::NumberRef::New(vm, ptrValue);
+}
+
+panda::Local<panda::JSValueRef> WrapColorFilterPointer(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::JSValueRef> colorFilterValueRef = runtimeCallInfo->GetCallArgRef(0);
+    if (colorFilterValueRef.IsNull() || colorFilterValueRef->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> dynamicColorFilter = panda::Local<panda::ObjectRef>(colorFilterValueRef);
+    panda::Local<panda::JSValueRef> pointerObj = runtimeCallInfo->GetCallArgRef(1);
+    if (pointerObj->IsNumber()) {
+        auto nativePointer = static_cast<int64_t>(pointerObj->ToNumber(vm)->Value());
+        ImageColorFilter* rawPtr = reinterpret_cast<ImageColorFilter*>(nativePointer);
+        auto colorFilter = Referenced::Claim<ImageColorFilter>(rawPtr);
+        colorFilter->IncRefCount();
+        dynamicColorFilter->SetNativePointerFieldCount(vm, 1);
+        dynamicColorFilter->SetNativePointerField(vm, 0, reinterpret_cast<void*>(nativePointer));
+    }
+    return panda::JSValueRef::Undefined(vm);
 }
 
 template<typename T>
@@ -2043,6 +2089,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapKeyEventPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapEventTargetInfoPointer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapEventTargetInfoPointer));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "WrapColorFilterPointer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapColorFilterPointer));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetColorFilterPointer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetColorFilterPointer));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapImageAIOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions<NG::ImagePattern>));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapCanvasImageAIOptions"),

@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,7 +50,14 @@ void ContainerPickerModel::SetSelectedIndex(int32_t index)
     CHECK_NULL_VOID(frameNode);
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    pickerPattern->SetSelectedIndex(index);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasSelectedIndex()) {
+        pickerPattern->SetTargetIndex(index);
+    } else {
+        pickerPattern->SetSelectedIndex(index);
+    }
+    
     ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, SelectedIndex, index);
 }
 
@@ -74,10 +82,10 @@ void ContainerPickerModel::SetOnScrollStop(ContainerPickerChangeEvent&& onScroll
 void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type);
-    if (style.type == static_cast<int32_t>(IndicatorType::DIVIDER)) {
-        if (style.dividerWidth.has_value()) {
+    if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.strokeWidth.has_value()) {
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerWidth,
-                style.dividerWidth.value());
+                style.strokeWidth.value());
         }
         if (style.dividerColor.has_value()) {
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerColor,
@@ -91,7 +99,7 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorEndMargin,
                 style.endMargin.value());
         }
-    } else if (style.type == static_cast<int32_t>(IndicatorType::BACKGROUND)) {
+    } else if (style.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
         if (style.backgroundColor.has_value()) {
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBackgroundColor,
                 style.backgroundColor.value());
@@ -102,7 +110,14 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
         }
     } else {
         TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
+        return;
     }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetIndicatorStyleVal(style);
 }
 
 void ContainerPickerModel::SetCanLoop(FrameNode* frameNode, bool isLoop)
@@ -138,10 +153,10 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type, frameNode);
-    if (style.type == static_cast<int32_t>(IndicatorType::DIVIDER)) {
-        if (style.dividerWidth.has_value()) {
+    if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.strokeWidth.has_value()) {
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorDividerWidth, style.dividerWidth.value(), frameNode);
+                ContainerPickerLayoutProperty, IndicatorDividerWidth, style.strokeWidth.value(), frameNode);
         }
         if (style.dividerColor.has_value()) {
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -155,7 +170,7 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorEndMargin, style.endMargin.value(), frameNode);
         }
-    } else if (style.type == static_cast<int32_t>(IndicatorType::BACKGROUND)) {
+    } else if (style.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
         if (style.backgroundColor.has_value()) {
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorBackgroundColor, style.backgroundColor.value(), frameNode);
@@ -166,6 +181,88 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
         }
     } else {
         TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
+        return;
+    }
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetIndicatorStyleVal(style);
+}
+
+void ContainerPickerModel::ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ProcessResourceObj(frameNode, key, resObj);
+}
+
+void ContainerPickerModel::ProcessResourceObj(FrameNode* frameNode, const std::string& key,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+
+    using Handler = std::function<void(const RefPtr<ResourceObject>&)>;
+    const std::unordered_map<std::string, Handler> handlers = {
+        {"containerPicker.strokeWidth", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateDividerWidthWithResObj(resObj);
+            }
+        },
+        {"containerPicker.dividerColor", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateDividerColorWithResObj(resObj);
+            }
+        },
+        {"containerPicker.startMargin", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateStartMarginWithResObj(resObj);
+            }
+        },
+        {"containerPicker.endMargin", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateEndMarginWithResObj(resObj);
+            }
+        },
+        {"containerPicker.backgroundColor",
+            [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateBackgroundColorWithResObj(resObj);
+            }
+        },
+        {"containerPicker.borderRadius",
+            [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateBorderRadiusWithResObj(resObj);
+            }
+        }
+    };
+
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        auto updateFunc = handlers.at(key);
+        pickerPattern->AddResObj(key, resObj, std::move(updateFunc));
     }
 }
+
 } // namespace OHOS::Ace::NG

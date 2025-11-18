@@ -847,25 +847,12 @@ bool ListPattern::IsAtTop() const
            NonNegative(startMainPos - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
-bool ListPattern::IsAtBottom(bool considerRepeat, bool fromController) const
+bool ListPattern::IsAtBottom(bool considerRepeat) const
 {
     bool groupAtStart = true;
     bool groupAtEnd = true;
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t endIndex = endIndex_;
-    while (fromController && endIndex < maxListItemIndex_) {
-        if (!posMap_) {
-            break;
-        }
-        auto info = posMap_->GetPositionInfo(endIndex + 1);
-        if (!NearZero(info.mainSize)) {
-            break;
-        }
-        endIndex++;
-        if (!NearZero(spaceWidth_)) {
-            break;
-        }
-    }
     float endMainPos = endMainPos_;
     float startMainPos = startMainPos_;
     auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
@@ -1320,10 +1307,10 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         CHECK_NULL_RETURN(parentNode, nullptr);
         auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
         CHECK_NULL_RETURN(parentPattern, nullptr);
-        if (parentPattern->GetHeader() == curFrame) {
+        if (parentPattern->GetHeaderNode() == curFrame) {
             curIndex = parentPattern->GetIndexInList();
             curIndexInGroup = -1;
-        } else if (parentPattern->GetFooter() == curFrame) {
+        } else if (parentPattern->GetFooterNode() == curFrame) {
             curIndex = parentPattern->GetIndexInList();
             curIndexInGroup = parentPattern->GetTotalItemCount();
         } else {
@@ -1524,8 +1511,9 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
             CHECK_NULL_RETURN(parentPattern, false);
             if (parentPattern->GetIndexInList() == tarMainIndex) {
-                if ((parentPattern->GetHeader() == childFrame && tarGroupIndex == -1) ||
-                    (parentPattern->GetFooter() == childFrame && tarGroupIndex == parentPattern->GetTotalItemCount())) {
+                if ((parentPattern->GetHeaderNode() == childFrame && tarGroupIndex == -1) ||
+                    (parentPattern->GetFooterNode() == childFrame &&
+                     tarGroupIndex == parentPattern->GetTotalItemCount())) {
                     target = childFocus;
                     return true;
                 }
@@ -1797,6 +1785,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
 bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto totalItemCount = host->GetTotalChildCount();
     if ((index < 0) || (index >= totalItemCount)) {
         return false;
@@ -3229,6 +3218,16 @@ void ListPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> ch
     MarkDirtyNodeSelf();
 }
 
+void ListPattern::SetListChildrenMainSize(RefPtr<ListChildrenMainSize>& childrenSize)
+{
+    childrenSize_ = childrenSize;
+    OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
+}
+
 void ListPattern::SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize)
 {
     childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
@@ -4195,7 +4194,7 @@ bool ListPattern::CheckFocusOnHeaderOrFooter(const RefPtr<FocusHub>& childFocusH
     auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
     CHECK_NULL_RETURN(curFrame, false);
 
-    if (groupPattern->GetHeader() == curFrame || groupPattern->GetFooter() == curFrame) {
+    if (groupPattern->GetHeaderNode() == curFrame || groupPattern->GetFooterNode() == curFrame) {
         return true;
     }
     return false;

@@ -14,7 +14,7 @@
  */
 
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
-import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState } from "@koalaui/runtime"
+import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState, mutableState } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer, StateStylesOps } from "#generated"
@@ -39,12 +39,16 @@ export class PeerNode extends IncrementalNode {
     peer: NativePeerNode
     protected static currentId: int32 = INITIAL_ID
     protected static cursor: int32 = UNINITIALIZE_CURSOR
+    private static staticLock = new Mutex()
     static nextId(): int32 {
+        PeerNode.staticLock.lock();
         if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
             PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
             PeerNode.currentId = PeerNode.cursor
         }
-        return PeerNode.currentId++;
+        let resId = PeerNode.currentId++;
+        PeerNode.staticLock.unlock();
+        return resId;
     }
     private id: int32
     private _onReuse?: (param?: RecordData) => void
@@ -53,12 +57,19 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
+    private _disabledStateUpdates: MutableState<boolean> = GlobalStateManager.instance.mutableState<boolean>(false, true);
 
     getPeerPtr(): pointer {
         return this.peer.ptr
     }
     public getStateStyleMutable(): MutableState<int32> | undefined {
         return this._uiStateStyle;
+    }
+    override get disabledStateUpdates(): boolean {
+        return this._disabledStateUpdates.value
+    }
+    set disabledStateUpdates(disabled: boolean) {
+        this._disabledStateUpdates.value = disabled
     }
     setId(id: int32) {
         PeerNode.updatePeerNodeMap()
@@ -103,11 +114,7 @@ export class PeerNode extends IncrementalNode {
     }
 
     /* reuse and recycle object on RootPeers */
-    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
-        if (reuseKey === undefined) {
-            return undefined;
-        }
-
+    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         if (!this.isKind(RootPeerType))
             return this.parent?.reuse(reuseKey, id)
 
@@ -120,11 +127,7 @@ export class PeerNode extends IncrementalNode {
         return undefined;
     }
 
-    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
-        if (reuseKey === undefined) {
-            return false;
-        }
-
+    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         if (!this.isKind(RootPeerType)) {
             return this.parent?.recycle(reuseKey, child, id) ?? false
         }
@@ -142,7 +145,7 @@ export class PeerNode extends IncrementalNode {
         ArkUIAniModule._UINode_OnUpdateDone(this.peer.ptr)
     }
 
-    setReusePoolSize(size: number, reuseKey: string): void {
+    setReusePoolSize(size: int32, reuseKey: string): void {
         if (size < 0) {
             return
         }
@@ -168,7 +171,7 @@ export class PeerNode extends IncrementalNode {
         this._onReuse = cb
     }
 
-    private static peerNodeMap = new Map<number, PeerNode>()
+    private static peerNodeMap = new containers.ConcurrentHashMap<number, PeerNode>()
 
     // peerNodeRawTail needs for perf optimizations. Insert into array much faster
     private static peerNodeRawTail = new Array<PeerNode>()
@@ -201,7 +204,9 @@ export class PeerNode extends IncrementalNode {
         super(derivedNodeType ?? PeerNodeType)
         this.id = id
         this.peer = NativePeerNode.create(this, peerPtr, flags)
+        PeerNode.staticLock.lock()
         PeerNode.peerNodeRawTail.push(this)
+        PeerNode.staticLock.unlock()
         this.onChildInserted = (child: IncrementalNode) => {
             // Improve: rework to avoid search
             let peer = findPeerNode(child)
@@ -263,7 +268,7 @@ export class PeerNode extends IncrementalNode {
         super.dispose()
     }
 
-    public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
+    public getOrCreateStateStyleMutable(curState: int32 = 15): MutableState<int32> | undefined {
         if (this._uiStateStyle !== undefined) {
             return this._uiStateStyle!;
         }
@@ -272,7 +277,7 @@ export class PeerNode extends IncrementalNode {
             this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
                 this._uiStateStyle!.value = state
-            })
+            }, curState)
             return this._uiStateStyle!;
         }
     }

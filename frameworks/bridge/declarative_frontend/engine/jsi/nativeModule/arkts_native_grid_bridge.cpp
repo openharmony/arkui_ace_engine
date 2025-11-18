@@ -198,21 +198,22 @@ ArkUINativeModuleValue GridBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runtimeCa
 
     CalcDimension size;
     std::string calcStr;
+    RefPtr<ResourceObject> columnGapResObj;
     struct ArkUIResourceLength columnGap = { 0.0, 0, nullptr };
-    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, true)) {
+    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, columnGapResObj, true)) {
         GetArkUINodeModifiers()->getGridModifier()->resetGridColumnsGap(nativeNode);
     } else {
+        auto columnGapRawPtr = AceType::RawPtr(columnGapResObj);
         if (size.Unit() == DimensionUnit::CALC) {
             columnGap.unit = static_cast<int32_t>(DimensionUnit::CALC);
             calcStr = size.CalcValue();
             columnGap.string = calcStr.c_str();
-            GetArkUINodeModifiers()->getGridModifier()->setGridColumnsGap(nativeNode, &columnGap);
         } else {
             columnGap.value = size.Value();
             columnGap.unit = static_cast<int32_t>(size.Unit());
             columnGap.string = calcStr.c_str();
-            GetArkUINodeModifiers()->getGridModifier()->setGridColumnsGap(nativeNode, &columnGap);
         }
+        GetArkUINodeModifiers()->getGridModifier()->setGridColumnsGap(nativeNode, &columnGap, columnGapRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -239,21 +240,22 @@ ArkUINativeModuleValue GridBridge::SetRowsGap(ArkUIRuntimeCallInfo* runtimeCallI
 
     CalcDimension size;
     std::string calcStr;
+    RefPtr<ResourceObject> rowGapResObj;
     struct ArkUIResourceLength rowsGap = { 0.0, 0, nullptr };
-    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, true)) {
+    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, rowGapResObj, true)) {
         GetArkUINodeModifiers()->getGridModifier()->resetGridRowsGap(nativeNode);
     } else {
+        auto rowGapRawPtr = AceType::RawPtr(rowGapResObj);
         if (size.Unit() == DimensionUnit::CALC) {
             rowsGap.unit = static_cast<int32_t>(DimensionUnit::CALC);
             calcStr = size.CalcValue();
             rowsGap.string = calcStr.c_str();
-            GetArkUINodeModifiers()->getGridModifier()->setGridRowsGap(nativeNode, &rowsGap);
         } else {
             rowsGap.value = size.Value();
             rowsGap.unit = static_cast<int32_t>(size.Unit());
             rowsGap.string = calcStr.c_str();
-            GetArkUINodeModifiers()->getGridModifier()->setGridRowsGap(nativeNode, &rowsGap);
         }
+        GetArkUINodeModifiers()->getGridModifier()->setGridRowsGap(nativeNode, &rowsGap, rowGapRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

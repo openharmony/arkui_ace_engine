@@ -13,9 +13,17 @@
  * limitations under the License.
  */
 
-import { RuntimeType, runtimeType } from "@koalaui/interop";
-import { ArkBaseNode } from "./ArkBaseNode";
-import { GridItemAttribute, ArkGridItemPeer, GridItemOptions, Bindable } from "../component/gridItem";
+import { RuntimeType, runtimeType } from '@koalaui/interop';
+import { ArkBaseNode } from './ArkBaseNode';
+import { int32 } from '@koalaui/common';
+import {
+  GridItemAttribute,
+  ArkGridItemPeer,
+  GridItemOptions,
+  Bindable,
+  AttributeModifier,
+  CommonMethod
+} from '../component/gridItem';
 export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -41,26 +49,26 @@ export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
     allowChildCount(): number {
         return 1;
     }
-    rowStart(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    rowStart(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setRowStartAttribute(value_casted)
         this.markDirty()
         return this
     }
-    rowEnd(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    rowEnd(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setRowEndAttribute(value_casted)
         this.markDirty()
         return this
     }
-    columnStart(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    columnStart(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setColumnStartAttribute(value_casted)
         this.markDirty()
         return this
     }
-    columnEnd(value: number | undefined): this {
-        const value_casted = value as (number | undefined)
+    columnEnd(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
         this.getPeer()?.setColumnEndAttribute(value_casted)
         this.markDirty()
         return this
@@ -80,5 +88,9 @@ export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
         this.getPeer()?.setOnSelectAttribute(value_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<GridItemAttribute> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }

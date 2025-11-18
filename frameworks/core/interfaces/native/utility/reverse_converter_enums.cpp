@@ -24,6 +24,31 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_AccessibilityAction& dst, const AccessibilityInterfaceAction& src)
+{
+    switch (src) {
+        case AccessibilityInterfaceAction::UNDEFINED_ACTION: dst = ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION; break;
+        case AccessibilityInterfaceAction::ACCESSIBILITY_CLICK: dst = ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK; break;
+        default:
+            dst = static_cast<Ark_AccessibilityAction>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityAction: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_AccessibilityActionInterceptResult& dst, const AccessibilityActionInterceptResult& src)
+{
+    switch (src) {
+        case AccessibilityActionInterceptResult::ACTION_INTERCEPT: dst =  ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_INTERCEPT; break;
+        case AccessibilityActionInterceptResult::ACTION_CONTINUE: dst = ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_CONTINUE; break;
+        case AccessibilityActionInterceptResult::ACTION_RISE: dst = ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_RISE; break;
+        default:
+            dst = static_cast<Ark_AccessibilityActionInterceptResult>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityActionInterceptResult: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src)
 {
     switch (src) {
@@ -404,8 +429,8 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
-        case MouseAction::WINDOW_ENTER: dst = ARK_MOUSE_ACTION_WINDOW_ENTER; break;
-        case MouseAction::WINDOW_LEAVE: dst = ARK_MOUSE_ACTION_WINDOW_LEAVE; break;
+        case MouseAction::WINDOW_ENTER: dst = ARK_MOUSE_ACTION_ENTER_WINDOW; break;
+        case MouseAction::WINDOW_LEAVE: dst = ARK_MOUSE_ACTION_LEAVE_WINDOW; break;
         case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
@@ -525,6 +550,9 @@ void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHan
         case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
             dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
             break;
+        case SecurityComponentHandleResult::CLICK_GRANT_CANCELED:
+            dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_CANCELED_BY_USER;
+            break;
         default:
             dst = static_cast<Ark_SaveButtonOnClickResult>(-1);
             LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
@@ -612,6 +640,7 @@ void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
         case V2::StickyStyle::NONE: dst = ARK_STICKY_STYLE_NONE; break;
         case V2::StickyStyle::HEADER: dst = ARK_STICKY_STYLE_HEADER; break;
         case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
+        case V2::StickyStyle::BOTH: dst = ARK_STICKY_STYLE_BOTH; break;
         default: dst = static_cast<Ark_StickyStyle>(-1);
             LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
     }
@@ -806,6 +835,8 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
         case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
+        case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEY; break;
+        case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
         default: dst = static_cast<Ark_SourceType>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }
@@ -1005,6 +1036,18 @@ void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src
         case OHOS::Ace::CanvasUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
         case OHOS::Ace::CanvasUnit::PX: dst = ARK_LENGTH_METRICS_UNIT_PX; break;
         default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
+    }
+}
+
+void AssignArkValue(Ark_NativeEmbedParamStatus& dst, const NativeEmbedParamStatus& src)
+{
+    switch (src) {
+        case NativeEmbedParamStatus::ADD: dst = ARK_NATIVE_EMBED_PARAM_STATUS_ADD; break;
+        case NativeEmbedParamStatus::UPDATE: dst = ARK_NATIVE_EMBED_PARAM_STATUS_UPDATE; break;
+        case NativeEmbedParamStatus::DELETE: dst = ARK_NATIVE_EMBED_PARAM_STATUS_DELETE; break;
+        default:
+            dst = static_cast<Ark_NativeEmbedParamStatus>(-1);
+            LOGE("Unexpected enum value in NativeEmbedParamStatus: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

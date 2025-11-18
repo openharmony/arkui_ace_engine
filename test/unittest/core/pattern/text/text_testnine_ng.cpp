@@ -19,6 +19,7 @@
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -993,6 +994,66 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle008, TestSize.Level1)
     layoutProperty->ResetGradientShaderStyle();
     auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
     EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
+}
+
+/**
+ * @tc.name: TextColorShaderStyleTest001
+ * @tc.desc: Test SetColorShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, TextColorShaderStyleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set TextColorShaderStyle Value
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test1", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+
+    TextModelNG model;
+    Color colorValue = Color(0xffc0c0c0);
+    model.SetColorShaderStyle(colorValue);
+    model.SetColorShaderStyle(AceType::RawPtr(frameNode), colorValue);
+
+    /**
+     * @tc.expected: step2. Get And Check TextColorShaderStyle Value
+     */
+    Color defaultColor = Color::BLACK;
+    auto result = layoutProperty->GetColorShaderStyleValue(defaultColor);
+    EXPECT_EQ(TextModelNG::GetColorShaderStyle(AceType::RawPtr(frameNode)), colorValue);
+    EXPECT_EQ(result, colorValue);
+}
+
+/**
+ * @tc.name: TextColorShaderStyleTest002
+ * @tc.desc: Test UpdatePropertyImpl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, TextColorShaderStyleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.  UpdatePropertyImpl ColorShaderStyle
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+    ASSERT_NE(valueBase, nullptr);
+    Color colorValue = Color(0xffc0c0c0);
+    valueBase->SetValue(colorValue);
+    pattern->UpdatePropertyImpl("ColorShaderStyle", valueBase);
+
+    /**
+     * @tc.expected: Get And Check TextColorShaderStyle Value
+     */
+    Color defaultColor = Color::BLACK;
+    auto result = layoutProperty->GetColorShaderStyleValue(defaultColor);
+    EXPECT_EQ(result, colorValue);
 }
 
 /**

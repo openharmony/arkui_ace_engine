@@ -1303,4 +1303,21 @@ HWTEST_F(AppBarTestNg, SetCustomAppBarNode001, TestSize.Level1)
     auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
     EXPECT_NE(customAppBar, nullptr);
 }
+
+/**
+ * @tc.name: SetCustomAppBarNode002
+ * @tc.desc: Test GetJSAppBarContainer
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, SetCustomAppBarNode002, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    RefPtr<AtomicServicePattern> atomicServicePattern = AceType::MakeRefPtr<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    atomicServicePattern->customAppBarNodeNode_ = custom;
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    EXPECT_NE(customAppBar, nullptr);
+}
 } // namespace OHOS::Ace::NG

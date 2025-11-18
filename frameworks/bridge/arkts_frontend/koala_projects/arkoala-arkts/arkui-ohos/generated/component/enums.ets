@@ -126,8 +126,8 @@ export enum MouseAction {
     Move = 3,
     HOVER = 4,
     Hover = 4,
-    WINDOW_ENTER = 5,
-    WINDOW_LEAVE = 6,
+    ENTER_WINDOW = 4,
+    LEAVE_WINDOW = 5,
     CANCEL = 13
 }
 export enum AnimationStatus {
@@ -412,10 +412,10 @@ export enum FontWeight {
     Bolder = 5
 }
 export enum TextAlign {
-    CENTER = 0,
-    Center = 0,
-    START = 1,
-    Start = 1,
+    CENTER = 1,
+    Center = 1,
+    START = 0,
+    Start = 0,
     END = 2,
     End = 2,
     JUSTIFY = 3
@@ -506,6 +506,12 @@ export enum CopyOptions {
     InApp = 1,
     LOCAL_DEVICE = 2,
     LocalDevice = 2
+}
+export enum ResponseRegionSupportedTool {
+    ALL = 0,
+    FINGER = 1,
+    PEN = 2,
+    MOUSE = 3
 }
 export enum HitTestMode {
     DEFAULT = 0,
@@ -732,4 +738,9 @@ export enum AnimationPropertyType {
     TRANSLATION = 1,
     SCALE = 2,
     OPACITY = 3
+}
+export enum AxisType {
+    VERTICAL_AXIS = 0,
+    HORIZONTAL_AXIS = 1,
+    PINCH_AXIS = 2
 }

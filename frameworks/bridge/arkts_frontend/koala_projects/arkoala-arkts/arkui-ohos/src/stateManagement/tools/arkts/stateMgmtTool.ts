@@ -23,6 +23,7 @@ import {
     IStorageLinkDecoratedVariable,
     ILocalStorageLinkDecoratedVariable,
     IStoragePropRefDecoratedVariable,
+    IPropRefDecoratedVariable
 } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { InterfaceProxyHandler } from './observeInterfaceProxy';
@@ -42,6 +43,9 @@ export class StateMgmtTool {
     }
     static isIPropDecoratedVariable(value: NullableObject): boolean {
         return value instanceof IPropDecoratedVariable;
+    }
+    static isPropRefDecoratedVariable(value: NullableObject): boolean {
+        return value instanceof IPropRefDecoratedVariable;
     }
     static isILinkDecoratedVariable(value: NullableObject): boolean {
         return value instanceof ILinkDecoratedVariable;
@@ -89,10 +93,10 @@ export class StateMgmtTool {
         }
         return undefined;
     }
-    static createProxy<T extends Object>(value: T, allowDeep: boolean = false): T {
+    static createProxy<T extends Object>(value: T, allowDeep: boolean = false, isAPI: boolean = false): T {
         const ifaces: FixedArray<Class> = Class.of(value).getInterfaces();
         const linker = Class.current().getLinker();
-        return reflect.Proxy.create(linker, ifaces, new InterfaceProxyHandler(value, allowDeep)) as T;
+        return reflect.Proxy.create(linker, ifaces, new InterfaceProxyHandler(value, allowDeep, isAPI)) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);

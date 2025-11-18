@@ -1289,6 +1289,44 @@ HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg030, TestSize.Lev
 }
 
 /**
+ * @tc.name: MenuItemPatternBasicTestNg031
+ * @tc.desc: Get theme value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu node
+     * @tc.expected: itemPattern is not null
+     */
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        return selectTheme;
+    });
+    selectTheme->menuFontColor_ = Color::RED;
+    itemPattern->OnModifyDone();
+    EXPECT_EQ(itemPattern->GetCurrentSelectTheme()->GetMenuFontColor(), Color::RED);
+
+    /**
+     * @tc.steps: step2. execute theme change.
+     * @tc.expected: result as expected
+     */
+    selectTheme->menuFontColor_ = Color::BLACK;
+    EXPECT_EQ(itemPattern->GetCurrentSelectTheme()->GetMenuFontColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: RegisterAccessibilityChildActionNotify001
  * @tc.desc: Test callback function.
  * @tc.type: FUNC

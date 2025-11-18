@@ -23,7 +23,8 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StateStylesOpsAccessor {
 void OnStateStyleChangeImpl(Ark_NativePointer node,
-                            const Callback_StateStylesChange* stateStyleChange)
+                            const Callback_StateStylesChange* stateStyleChange,
+                            Ark_Int32 allState)
 {
     auto frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -37,9 +38,9 @@ void OnStateStyleChangeImpl(Ark_NativePointer node,
     };
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
-    uint64_t allState = UI_STATE_NORMAL | UI_STATE_PRESSED | UI_STATE_FOCUSED | UI_STATE_DISABLED | UI_STATE_SELECTED;
+    uint64_t currentState = static_cast<uint64_t>(static_cast<uint32_t>(allState));
     std::function<void(uint64_t)> onStateStyleChange = onStateStyleChangeLambda;
-    eventHub->AddSupportedUIStateWithCallback(allState, onStateStyleChange, false);
+    eventHub->AddSupportedUIStateWithCallback(currentState, onStateStyleChange, false);
 }
 } // StateStylesOpsAccessor
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor()

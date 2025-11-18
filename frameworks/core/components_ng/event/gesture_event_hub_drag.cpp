@@ -278,9 +278,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
     }
 
     // use menuPreview's size and offset for drag framework.
-    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f) &&
-        (DragAnimationHelper::ShouldSetOffsetForMenuDrag() ||
-            frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT)) {
+    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
@@ -369,8 +367,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         if (dragInfoData.isNeedCreateTiled) {
             result.SetX(-size.Width() / HALF_PIXELMAP);
             result.SetY(-size.Height() / HALF_PIXELMAP);
-        } else if (frameNode->GetDragPreviewOption().isTouchPointCalculationBasedOnFinalPreviewEnable ||
-            dragInfoData.isSceneBoardTouchDrag) {
+        } else if (frameNode->GetDragPreviewOption().isTouchPointCalculationBasedOnFinalPreviewEnable) {
             auto centerX = coordinateX + frameNodeSize_.Width() / HALF_PIXELMAP;
             auto centerY = coordinateY + frameNodeSize_.Height() / HALF_PIXELMAP;
             coordinateX = centerX - dragInfoData.dragPreviewRect.Width() / HALF_PIXELMAP;
@@ -379,6 +376,13 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
             auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / dragInfoData.dragPreviewRect.Height();
             result.SetX(-rateX * size.Width());
             result.SetY(-rateY * size.Height());
+        } else if (dragInfoData.isSceneBoardTouchDrag) {
+            auto centerX = coordinateX + frameNodeSize_.Width() / HALF_PIXELMAP;
+            auto centerY = coordinateY + frameNodeSize_.Height() / HALF_PIXELMAP;
+            coordinateX = centerX - size.Width() / HALF_PIXELMAP;
+            coordinateY = centerY - size.Height() / HALF_PIXELMAP;
+            result.SetX(coordinateX - info.GetGlobalLocation().GetX());
+            result.SetY(coordinateY - info.GetGlobalLocation().GetY());
         } else {
             auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
             auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
@@ -990,7 +994,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     const int32_t pointerId = info.GetPassThrough() ? info.GetPointerId() % PASS_THROUGH_EVENT_ID : info.GetPointerId();
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, pointerId, screenX, screenY,
-        info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, false,
+        info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, dragEvent->IsUseDataLoadParams(),
         dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
         dragSummaryInfo.totalSize, dragSummaryInfo.tag };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
@@ -1004,10 +1008,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
         "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s, "
-        "eventId %{public}d, detailedSummary %{public}s, summaryTag %{public}s",
+        "eventId %{public}d, detailedSummary %{public}s, summaryTag %{public}s, isDragDelay %{public}d",
         frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
-        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), pointerId, info.GetTargetDisplayId(),
-        windowId, summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str(), dragSummaryInfo.tag.c_str());
+        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), pointerId, info.GetTargetDisplayId(), windowId,
+        summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str(), dragSummaryInfo.tag.c_str(),
+        dragData.isDragDelay);
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");
@@ -1642,8 +1647,7 @@ OffsetF GestureEventHub::GetDragPreviewInitPositionToScreen(
         } else if ((data.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_TRANSITION ||
                        data.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) ||
                    data.badgeNumber > 1) {
-            previewOffset = menuPreviewCenter - OffsetF(frameNodeSize_.Width(), frameNodeSize_.Height()) / 2.0f +
-                            data.dragMovePosition;
+            previewOffset = data.originPreviewRect.GetOffset();
         }
     }
     return previewOffset;

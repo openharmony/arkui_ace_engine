@@ -18,7 +18,8 @@ export {
   ContentModifier,
   CustomStyles,
   GestureModifier,
-  UIGestureEvent
+  UIGestureEvent,
+  DrawModifier
 } from "./component/common";
 export {
   LifeCycle,

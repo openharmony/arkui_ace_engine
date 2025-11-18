@@ -131,6 +131,7 @@ constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_F
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 const int FACTOR_TWO = 2;
+constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
 
 static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
 {
@@ -278,6 +279,7 @@ void CancelModifierAnimation(std::shared_ptr<ModifierName>& modifier, Rosen::Mod
 }
 } // namespace
 
+std::timed_mutex RosenRenderContext::taskMtx_;
 bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
 bool RosenRenderContext::initPropertyNodeChangeCallback_ = SetPropertyNodeChangeCallback();
 
@@ -586,6 +588,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(const s
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode, .isSync = true };
+    surfaceNodeConfig.isSkipCheckInMultiInstance = param->isSkipCheckInMultiInstance;
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode;
     if (rsUIContext) {
         surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsUIContext);
@@ -709,8 +712,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
     if (SystemProperties::GetSyncDebugTraceEnabled()) {
         auto host = GetHost();
-        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(),
-            host->GetId(), paintRect.ToString().c_str());
+        if (host != nullptr) {
+            ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(),
+                host->GetId(), paintRect.ToString().c_str());
+        }
     }
     if (extraOffset_.has_value()) {
         SyncGeometryFrame(paintRect + extraOffset_.value());
@@ -744,7 +749,7 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
     }
 
     if (bgLoadingCtx_ && bgImage_) {
-        PaintBackground();
+        ScheduleBackgroundPaint(false);
     }
 
     auto sourceFromImage = GetBorderSourceFromImage().value_or(false);
@@ -920,6 +925,46 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
     return task;
 }
 
+bool CheckFirstPixelMap(RefPtr<CanvasImage>& bgImage)
+{
+    auto decodeImage = bgImage->GetFirstPixelMap();
+    if (!decodeImage) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Image decoding failed.");
+        return false;
+    }
+    return true;
+}
+
+void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
+{
+    if (bgImage_->IsStatic()) {
+        PaintBackground();
+        CHECK_EQUAL_VOID(requestNextFrame, false);
+        RequestNextFrame();
+    } else {
+        auto syncMode = GetBackgroundImageSyncMode().value_or(false);
+        if (syncMode) {
+            CHECK_EQUAL_VOID(CheckFirstPixelMap(bgImage_), false);
+            PaintBackground();
+            CHECK_EQUAL_VOID(requestNextFrame, false);
+            RequestNextFrame();
+        } else {
+            auto image = bgImage_;
+            pendingDecodeTask_.Reset([weakCtx = WeakClaim(this), image, requestNextFrame]() {
+                auto ctx = weakCtx.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                auto host = ctx->GetHost();
+                CHECK_NULL_VOID(host);
+                CHECK_EQUAL_VOID(CheckFirstPixelMap(ctx->bgImage_), false);
+                ctx->OnPaintBackgroundDynamic(requestNextFrame);
+            });
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(pendingDecodeTask_, TaskExecutor::TaskType::BACKGROUND, "ArkUIDecodeImplPixelMap");
+        }
+    }
+}
+
 LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
@@ -933,17 +978,56 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        CHECK_EQUAL_VOID(ctx->CancelDynamicImageLoadingTasks(), false);
         CHECK_NULL_VOID(ctx->bgLoadingCtx_);
         ctx->bgImage_ = ctx->bgLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bgImage_);
         CHECK_NULL_VOID(ctx->GetHost());
         CHECK_NULL_VOID(ctx->GetHost()->GetGeometryNode());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
-            ctx->PaintBackground();
-            ctx->RequestNextFrame();
+            ctx->ScheduleBackgroundPaint();
         }
     };
     return task;
+}
+
+void RosenRenderContext::OnPaintBackgroundDynamic(bool requestNextFrame)
+{
+    if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in setTask.");
+        return;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, taskMtx_);
+    pendingUITask_.Reset([weakCtx = WeakClaim(this), requestNextFrame]() {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        auto host = ctx->GetHost();
+        CHECK_NULL_VOID(host);
+        ctx->PaintBackground();
+        CHECK_EQUAL_VOID(requestNextFrame, false);
+        ctx->RequestNextFrame();
+    });
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(pendingUITask_, TaskExecutor::TaskType::UI, "ArkUIPaintImplPixelMap");
+}
+
+bool RosenRenderContext::CancelDynamicImageLoadingTasks()
+{
+    if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in cancelTask.");
+        return false;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, taskMtx_);
+    if (pendingDecodeTask_) {
+        pendingDecodeTask_.Cancel();
+    }
+    if (pendingUITask_) {
+        pendingUITask_.Cancel();
+    }
+    return true;
 }
 
 void RosenRenderContext::PaintBackground()
@@ -1320,6 +1404,8 @@ void RosenRenderContext::OnLightUpEffectUpdate(double radio)
 void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList)
 {
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     RectF rect = GetPaintRectWithoutTransform();
     if (rect.IsEmpty()) {
         return;
@@ -1327,7 +1413,7 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     if (NeedPreloadImage(optionList, rect)) {
         return;
     }
-    auto pattern = GetHost()->GetPattern();
+    auto pattern = host->GetPattern();
     auto particlePattern = AceType::DynamicCast<ParticlePattern>(pattern);
     if (particlePattern->HaveUnVisibleParent()) {
         return;
@@ -1418,7 +1504,7 @@ bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optio
             auto imageHeight = Dimension(ConvertDimensionToPx(imageSize.second, rect.Height()), DimensionUnit::PX);
             auto canvasImageIter = particleImageMap_.find(imageParameter.GetImageSource());
             bool imageHasData = true;
-            if (canvasImageIter->second) {
+            if (canvasImageIter != particleImageMap_.end() && canvasImageIter->second) {
                 imageHasData = canvasImageIter->second->HasData();
             }
             if (canvasImageIter == particleImageMap_.end() || !imageHasData) {
@@ -1847,7 +1933,7 @@ void RosenRenderContext::OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeM
         TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent True.");
         isHdr_ = true;
         rsCanvasNode->SetHDRPresent(true);
-    } else if (isHdr_) {
+    } else if (dynamicRangeMode == DynamicRangeMode::STANDARD && isHdr_) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent False.");
         isHdr_ = false;
         rsCanvasNode->SetHDRPresent(false);
@@ -1988,6 +2074,11 @@ void RosenRenderContext::AddOrUpdateModifier(std::shared_ptr<ModifierName>& modi
 {
     if (modifier != nullptr) {
         (*modifier.*Setter)(value);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetNeedCallbackAreaChange(true);
     } else {
         modifier = std::make_shared<ModifierName>();
         (*modifier.*Setter)(value);
@@ -3352,7 +3443,7 @@ void RosenRenderContext::OnBorderImageGradientUpdate(const Gradient& gradient)
     if (!gradient.IsValid()) {
         return;
     }
-    if (GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
+    if (GetHost() && GetHost()->GetGeometryNode() && GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
         PaintBorderImageGradient();
     }
     RequestNextFrame();
@@ -3371,7 +3462,9 @@ void RosenRenderContext::PaintBorderImageGradient()
     if (NearZero(paintSize.Width()) || NearZero(paintSize.Height())) {
         return;
     }
-    auto layoutProperty = GetHost()->GetLayoutProperty();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
 
     auto borderImageProperty = *GetBdImage();
@@ -3927,6 +4020,7 @@ void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension&
 
 bool RosenRenderContext::IsUsingPosition(const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, true);
     auto layoutProperty = frameNode->GetLayoutProperty();
     bool isUsingPosition = true;
     if (layoutProperty) {
@@ -4142,7 +4236,7 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         }
         rsNode_->AddModifier(accessibilityFocusStateModifier_);
         accessibilityFocusStateModifier_->AttachAnimationRectProperty();
-        RequestNextFrame();
+        RequestNextFrame(true);
         return;
     }
     if (!isFocusBoxGlow_) {
@@ -4542,7 +4636,7 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     auto childNodesNew = children;
     if (SystemProperties::GetContainerDeleteFlag()) {
         auto frameNode = GetHost();
-        if (frameNode->GetIsDelete()) {
+        if (!frameNode || frameNode->GetIsDelete()) {
             return;
         }
         childNodesNew.clear();

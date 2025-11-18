@@ -27,7 +27,7 @@
 #define GENERATE_CASES(num, OP) EXPAND_##num(OP, num)
 
 #define CREATE_INSERT_CASE(testSuite, cases, number)                                                         \
-HWTEST_F(testSuite, testSuite##number, TestSize.Level1)                                                      \
+HWTEST_F(testSuite, testSuite##number, TestSize.Level0)                                                      \
 {                                                                                                            \
     ASSERT_NE(richEditorNode_, nullptr);                                                                     \
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();                                         \

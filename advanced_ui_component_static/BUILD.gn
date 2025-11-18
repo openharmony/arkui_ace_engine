@@ -15,15 +15,26 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("advanced_ui_component_static") {
-  deps = []
+  deps = [
+    "dialog:dialog",
+    "dialogv2:dialogV2",
+  ]
   if (!ace_engine_feature_wearable) {
     deps += [
+      "counter:counter",
       "composeListItem:composeListItem",
+      "foldsplitcontainer:foldSplitContainer",
       "fullscreenlaunchcomponent:fullScreenLaunch",
+      "segmentbutton:segmentButton",
+      "segmentbuttonv2:SegmentButtonV2",
+      "selectionmenu:selectionMenu",
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
-      "segmentbutton:segmentButton",
-      "foldsplitcontainer:foldSplitContainer"
+      "subheaderv2:subHeaderV2",
+      "composetitlebar:composeTitleBar",
+      "editabletitlebar:editableTitleBar",
+      "subheader:subHeader",
+      "toolbarv2:toolBarV2",
     ]
   }
 }

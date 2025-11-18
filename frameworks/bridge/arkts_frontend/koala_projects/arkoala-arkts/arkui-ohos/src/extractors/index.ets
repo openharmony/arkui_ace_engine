@@ -43,10 +43,12 @@ import {
   PathShape,
 } from "@ohos.arkui.shape";
 import { FrameNode } from "arkui.FrameNode";
+import { RenderNode } from "arkui.RenderNode";
 import { default as resourceManager } from "@ohos.resourceManager";
 import { LevelOrder } from "@ohos.promptAction";
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
+import { ImageModifier } from "../ImageModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles } from "#generated";
@@ -126,6 +128,14 @@ export namespace extractors {
     return x as NodeController;
   }
 
+  export function toRenderNodePtr(value: RenderNode): KPointer {
+    return value.getPeer()!.ptr;
+  }
+  export function fromRenderNodePtr(ptr: KPointer): RenderNode {
+    const x: Object = {};
+    return x as RenderNode;
+  }
+
   export function toFrameNodePtr(value: FrameNode): KPointer {
     return toPeerPtr(value);
   }
@@ -161,6 +171,13 @@ export namespace extractors {
   }
   export function fromTextModifierPtr(ptr: KPointer): TextModifier {
     return ArkUIAniModule._Extractors_FromTextModifierPtr(ptr);
+  }
+
+  export function toImageModifierPtr(value: ImageModifier): KPointer {
+    throw new Error("toImageModifierPtr is not implemented.")
+  }
+  export function fromImageModifierPtr(ptr: KPointer): ImageModifier {
+    throw new Error("fromImageModifierPtr is not implemented.")
   }
   // end
 
@@ -364,11 +381,10 @@ export namespace extractors {
   }
 
   export function toLevelOrderPtr(value: LevelOrder): KPointer {
-    return 123;
+    return toPeerPtr(value);
   }
   export function fromLevelOrderPtr(ptr: KPointer): LevelOrder {
-    const x: Object = {};
-    return x as LevelOrder;
+    return new LevelOrder(ptr);
   }
 
   export function toWindowWindowStagePtr(value: window.WindowStage): KPointer {

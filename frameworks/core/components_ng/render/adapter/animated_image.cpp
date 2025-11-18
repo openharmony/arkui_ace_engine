@@ -29,6 +29,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+// Minimum allowed frame duration to avoid flickering (in milliseconds).
+constexpr int32_t MIN_FRAME_DURATION = 20;
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
 constexpr float RESIZE_THRESHOLD = 0.7f;
@@ -96,7 +98,7 @@ std::vector<int> AnimatedImage::GenerateDuration(const std::unique_ptr<SkCodec>&
     std::vector<int> duration;
     auto info = codec->getFrameInfo();
     for (int32_t i = 0; i < codec->getFrameCount(); ++i) {
-        if (info[i].fDuration <= 0) {
+        if (info[i].fDuration < MIN_FRAME_DURATION) {
             duration.push_back(STANDARD_FRAME_DURATION);
         } else {
             duration.push_back(info[i].fDuration);
@@ -329,5 +331,12 @@ void AnimatedPixmap::UseCachedFrame(RefPtr<CanvasImage>&& image)
 {
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = DynamicCast<PixelMapImage>(image)->GetPixelMap();
+}
+
+RefPtr<PixelMap> AnimatedPixmap::GetFirstPixelMap()
+{
+    std::scoped_lock<std::mutex> lock(decodeMtx_);
+    DecodeImpl(0);
+    return currentFrame_;
 }
 } // namespace OHOS::Ace::NG

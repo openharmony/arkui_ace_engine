@@ -196,6 +196,7 @@ HWTEST_F(WebDataDetectorAdapterTest, GetSelectDataDetectorTypes_002, TestSize.Le
     adapter->selectConfig_.enable = true;
     adapter->selectConfig_.useDDtypes = true;
     adapter->config_.types = "email,location";
+
     EXPECT_EQ(adapter->GetSelectDataDetectorTypes(), "email,location");
     adapter->config_.types = "";
     EXPECT_EQ(adapter->GetSelectDataDetectorTypes(), ALL_TEXT_DETECT_TYPES);
@@ -233,6 +234,11 @@ HWTEST_F(WebDataDetectorAdapterTest, FilterAndMapTypes_001, TestSize.Level0)
     std::string expected5 = "phoneNum,url,email";
     std::string result5 = WebDataDetectorAdapter::FilterAndMapTypes(input5);
     EXPECT_EQ(result5, expected5);
+
+    std::string input6 = "phoneNum,url,email,location,datetime";
+    std::string expected6 = "phoneNum,url,email,location,datetime";
+    std::string result6 = WebDataDetectorAdapter::FilterAndMapTypes(input6);
+    EXPECT_EQ(result6, expected6);
 }
 
 /**

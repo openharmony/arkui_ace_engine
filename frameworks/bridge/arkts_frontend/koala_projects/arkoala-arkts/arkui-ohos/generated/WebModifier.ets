@@ -133,7 +133,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _onHttpAuthRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onHttpAuthRequest_0_0value?: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined
     _onInterceptRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onInterceptRequest_0_0value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined
+    _onInterceptRequest_0_0value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined
     _onPermissionRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onPermissionRequest_0_0value?: ((value0: OnPermissionRequestEvent) => void) | undefined
     _onScreenCaptureRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1171,7 +1171,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             switch (this._onInterceptRequest_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnInterceptRequestAttribute((this._onInterceptRequest_0_0value as ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined));
+                    peer.setOnInterceptRequestAttribute((this._onInterceptRequest_0_0value as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined));
                     this._onInterceptRequest_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1181,7 +1181,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
                 default: {
                     this._onInterceptRequest_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnInterceptRequestAttribute((undefined as ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined));
+                    peer.setOnInterceptRequestAttribute((undefined as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined));
                 }
             }
         }
@@ -3428,7 +3428,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                     break;
                 }
                 default: {
-                    this.onInterceptRequest((undefined as ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined));
+                    this.onInterceptRequest((undefined as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined));
                 }
             }
         }
@@ -5120,7 +5120,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
         return this
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         if (((this._onInterceptRequest_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onInterceptRequest_0_flag = AttributeUpdaterFlag.UPDATE

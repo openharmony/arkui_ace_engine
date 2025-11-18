@@ -16,16 +16,62 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import {CommonAttribute, AttributeModifier } from  "./component/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { MutableState, GlobalStateManager } from '@koalaui/runtime'
+import { CommonAttribute, AttributeModifier } from  './component/common'
 import { CommonMethodModifier } from './CommonMethodModifier'
+
 export class CommonModifier extends CommonMethodModifier implements CommonAttribute,AttributeModifier<CommonAttribute> {
     applyNormalAttribute(instance: CommonAttribute): void {}
     applyPressedAttribute(instance: CommonAttribute): void {}
     applyFocusedAttribute(instance: CommonAttribute): void {}
     applyDisabledAttribute(instance: CommonAttribute): void {}
     applySelectedAttribute(instance: CommonAttribute): void {}
+}
+
+export class ModifierStateManager {
+    static INSTANCE: ModifierStateManager = new ModifierStateManager();
+    private constructor() { }
+    private _flag: boolean = false;
+    get isEnable(): boolean {
+        return this._flag;
+    }
+    scope(f: () => void): void {
+        this.disable();
+        try {
+            f();
+        } finally {
+            this.enable();
+        }
+    }
+    private enable(): void {
+        this._flag = true;
+    }
+    private disable(): void {
+        this._flag = false;
+    }
+}
+
+export interface IModifierState {
+    addRef(): void;
+    fireChange(): void;
+}
+
+export class ModifierState implements IModifierState {
+    public _state: MutableState<int> | undefined = undefined;
+    constructor() {
+        this._state = GlobalStateManager.instance.mutableState<int>(0, true);
+    }
+    get state(): MutableState<int> {
+        return this._state!;
+    }
+    addRef(): void {
+        this._state!.value;
+    }
+    fireChange(): void {
+        if (!ModifierStateManager.INSTANCE.isEnable) {
+            this._state!.value;
+            return;
+        }
+        this._state!.value = this._state!.value % 100 + 1;
+    }
 }

@@ -361,4 +361,10 @@ void ForEachNode::InitAllChildrenDragManager(bool init)
         }
     }
 }
+
+void ForEachNode::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("length of source data:")
+                                        .append(std::to_string(ids_.size()).c_str()));
+}
 } // namespace OHOS::Ace::NG

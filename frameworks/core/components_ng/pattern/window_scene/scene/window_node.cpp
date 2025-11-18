@@ -124,7 +124,7 @@ bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const To
     return false;
 }
 
-std::vector<RectF> WindowNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
+std::vector<RectF> WindowNode::GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool)
 {
     auto pattern = GetPattern<WindowPattern>();
     if (pattern != nullptr) {

@@ -296,6 +296,18 @@ bool FileSelectorParamOhos::IsCapture()
 {
     return false;
 }
+std::string FileSelectorParamOhos::GetDefaultPath()
+{
+    return "";
+}
+std::vector<std::string> FileSelectorParamOhos::GetDescriptions()
+{
+    return {};
+}
+bool FileSelectorParamOhos::IsAcceptAllOptionExcluded()
+{
+    return false;
+}
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result) {}
 void WebPermissionRequestOhos::Deny() const {}
 std::string WebPermissionRequestOhos::GetOrigin() const

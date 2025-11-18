@@ -17,12 +17,12 @@ class ArkContainerPickerComponent extends ArkComponent implements PickerAttribut
     constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onChange(callback: Optional<OnPickerChangeCallback>): this {
+  onChange(callback: Optional<OnPickerCallback>): this {
     modifierWithKey(
       this._modifiersWithKeys, ContainerPickerOnChangeModifier.identity, ContainerPickerOnChangeModifier, callback);
     return this;
   }
-  onScrollStop(callback: Optional<OnPickerChangeCallback>) : this {
+  onScrollStop(callback: Optional<OnPickerCallback>) : this {
     modifierWithKey(
       this._modifiersWithKeys, ContainerPickerOnScrollStopModifier.identity, ContainerPickerOnScrollStopModifier, callback);
     return this;
@@ -42,8 +42,8 @@ class ArkContainerPickerComponent extends ArkComponent implements PickerAttribut
   }
 
 }
-class ContainerPickerOnChangeModifier extends ModifierWithKey<Optional<OnPickerChangeCallback>> {
-  constructor(value: Optional<OnPickerChangeCallback>) {
+class ContainerPickerOnChangeModifier extends ModifierWithKey<Optional<OnPickerCallback>> {
+  constructor(value: Optional<OnPickerCallback>) {
     super(value);
   }
   static identity: Symbol = Symbol('containerPickerOnChange');
@@ -57,8 +57,8 @@ class ContainerPickerOnChangeModifier extends ModifierWithKey<Optional<OnPickerC
 }
 
 
-class ContainerPickerOnScrollStopModifier extends ModifierWithKey<Optional<OnPickerChangeCallback>> {
-  constructor(value: Optional<OnPickerChangeCallback>) {
+class ContainerPickerOnScrollStopModifier extends ModifierWithKey<Optional<OnPickerCallback>> {
+  constructor(value: Optional<OnPickerCallback>) {
      super(value);
   }
   static identity: Symbol = Symbol('containerPickerOnScrollStop');
@@ -109,10 +109,9 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey<Optional
       getUINativeModule().containerPicker.resetContainerPickerSelectionIndicator(node);
     } else if (this.value == null) {
       getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined,
-        undefined, undefined);
+        undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     } else {
-      const { type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, borderRadius } = this.value;
+      const { type, strokeWidth, dividerColor, startMargin, endMargin, backgroundColor, borderRadius } = this.value;
       if (borderRadius != null) {
         const borderRadiusKeys = Object.keys(borderRadius);
         let topLeft;
@@ -132,10 +131,10 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey<Optional
           bottomLeft = borderRadius.bottomStart;
           bottomRight = borderRadius.bottomEnd;
         }
-        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, topLeft, topRight, bottomLeft,
+        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, strokeWidth, dividerColor, startMargin, endMargin, backgroundColor, topLeft, topRight, bottomLeft,
           bottomRight);
       } else {
-        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, undefined, undefined,
+        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, strokeWidth, dividerColor, startMargin, endMargin, backgroundColor, undefined, undefined,
           undefined, undefined);
       }
     }

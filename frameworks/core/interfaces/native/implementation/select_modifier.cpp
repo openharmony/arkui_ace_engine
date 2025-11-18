@@ -203,22 +203,22 @@ std::optional<std::string> ProcessBindableValue(FrameNode* frameNode,
     return result;
 }
 std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
-    const Opt_Union_Number_Resource_Bindable_Bindable* value)
+    const Opt_Union_I32_Resource_Bindable_Bindable* value)
 {
     std::optional<int32_t> result;
     Converter::VisitUnionPtr(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Int32& src) {
             result = Converter::OptConvert<int32_t>(src);
         },
         [&result](const Ark_Resource& src) {
             result = Converter::OptConvert<int32_t>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_I32& src) {
             result = Converter::Convert<int32_t>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](int32_t index) {
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index));
+                arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(index));
             };
             SelectModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
         },
@@ -233,7 +233,7 @@ std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectAttributeModifier {
-    void Selected1Impl(Ark_NativePointer node, const Opt_Union_Number_Resource* value);
+    void Selected1Impl(Ark_NativePointer node, const Opt_Union_I32_Resource* value);
     void Font1Impl(Ark_NativePointer node, const Opt_Font* value);
     void SelectedOptionFont1Impl(Ark_NativePointer node, const Opt_Font* value);
     void OptionFont1Impl(Ark_NativePointer node, const Opt_Font* value);
@@ -266,7 +266,7 @@ void SetSelectOptionsImpl(Ark_NativePointer node,
 } // SelectInterfaceModifier
 namespace SelectAttributeModifier {
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_Resource_Bindable_Bindable* value)
+                     const Opt_Union_I32_Resource_Bindable_Bindable* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -383,7 +383,7 @@ void SetOnSelectImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (optValue) {
         onSelect = [arkCallback = CallbackHelper(*optValue)](int32_t index, const std::string& value) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+            auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
             auto arkValue = Converter::ArkValue<Ark_String>(value);
             arkCallback.Invoke(arkIndex, arkValue);
         };
@@ -471,43 +471,6 @@ void SetControlSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetControlSize(frameNode, Converter::OptConvertPtr<ControlSize>(value));
-}
-void SetDividerImpl(Ark_NativePointer node,
-                    const Opt_DividerOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = SelectModelStatic::GetDefaultDivider(frameNode);
-    if (value->tag == INTEROP_TAG_UNDEFINED) {
-        SelectModelStatic::SetDivider(frameNode, divider);
-        return;
-    }
-    auto dividerOptions = value->value;
-    auto strokeWidthOpt = Converter::OptConvert<Dimension>(dividerOptions.strokeWidth);
-    Validator::ValidateNonNegative(strokeWidthOpt);
-    Validator::ValidateNonPercent(strokeWidthOpt);
-    if (strokeWidthOpt.has_value()) {
-        divider.strokeWidth = strokeWidthOpt.value();
-    }
-    auto colorOpt = Converter::OptConvert<Color>(dividerOptions.color);
-    if (colorOpt.has_value()) {
-        divider.color = colorOpt.value();
-    }
-    auto startMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.startMargin);
-    Validator::ValidateNonNegative(startMarginOpt);
-    Validator::ValidateNonPercent(startMarginOpt);
-    if (startMarginOpt.has_value()) {
-        divider.startMargin = startMarginOpt.value();
-    }
-    auto endMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.endMargin);
-    Validator::ValidateNonNegative(endMarginOpt);
-    Validator::ValidateNonPercent(endMarginOpt);
-    if (endMarginOpt.has_value()) {
-        divider.endMargin = endMarginOpt.value();
-    }
-    std::optional<SelectDivider> dividerOpt = divider;
-    SelectModelStatic::SetDivider(frameNode, dividerOpt);
 }
 void SetTextModifierImpl(Ark_NativePointer node,
                          const Opt_TextModifier* value)
@@ -631,7 +594,6 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetMenuBackgroundColorImpl,
         SelectAttributeModifier::SetMenuBackgroundBlurStyleImpl,
         SelectAttributeModifier::SetControlSizeImpl,
-        SelectAttributeModifier::SetDividerImpl,
         SelectAttributeModifier::SetTextModifierImpl,
         SelectAttributeModifier::SetArrowModifierImpl,
         SelectAttributeModifier::SetOptionTextModifierImpl,

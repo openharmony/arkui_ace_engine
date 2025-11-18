@@ -146,7 +146,7 @@ public:
         return info_.reachStart_;
     }
 
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return considerRepeat ? (info_.offsetEnd_ && info_.repeatDifference_ == 0) : info_.offsetEnd_;
     }
@@ -294,6 +294,8 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleBlurEvent();
 
     void ClearMultiSelect() override;
     bool IsItemSelected(float offsetX, float offsetY) override;
@@ -332,7 +334,6 @@ private:
     RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
-    float mainSizeChanged_ = 0.0f;
     KeyEvent keyEvent_;
     GridFocus focusHandler_ { *this, info_ };
 

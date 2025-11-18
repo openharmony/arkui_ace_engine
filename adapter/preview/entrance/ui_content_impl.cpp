@@ -604,7 +604,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     viewPtr->NotifyDensityChanged(config.Density());
     viewPtr->NotifySurfaceChanged(config.Width(), config.Height());
     if (deviceConfig_.orientation != runArgs_.deviceConfig.orientation ||
-        deviceConfig_.density != runArgs_.deviceConfig.density) {
+        !NearEqual(deviceConfig_.density, runArgs_.deviceConfig.density)) {
         container->NotifyConfigurationChange(false, ConfigurationChange({ false, false, true }));
         runArgs_.deviceConfig.orientation = deviceConfig_.orientation;
         runArgs_.deviceConfig.density = deviceConfig_.density;
@@ -646,7 +646,7 @@ int32_t UIContentImpl::CreateModalUIExtension(
 }
 
 void UIContentImpl::CloseModalUIExtension(int32_t sessionId) {}
-
+void UIContentImpl::SetFrameMetricsCallBack(std::function<void(FrameMetrics info)>&& callback) {}
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)
 {
     ContainerScope scope(instanceId_);

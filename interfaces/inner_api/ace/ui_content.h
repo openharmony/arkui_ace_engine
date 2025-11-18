@@ -332,6 +332,14 @@ public:
     virtual void SetParentToken(sptr<IRemoteObject> token);
 
     /**
+     * @description: Must be called by the main thread, otherwise there may be multi-threaded issues and undefined
+     * behavior.
+     * @return Return key information for each frame.
+     */
+    virtual void SetFrameMetricsCallBack(
+        std::function<void(FrameMetrics info)>&& callback) {}
+
+    /**
      * @description: Get parent ability token.
      * @return return parent ability token.
      */
@@ -618,6 +626,12 @@ public:
 
     virtual UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
+
+    virtual UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId)
     {
         return UIContentErrorCode::NO_ERRORS;
     }

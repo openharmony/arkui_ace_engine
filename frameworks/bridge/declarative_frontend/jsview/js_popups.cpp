@@ -418,12 +418,11 @@ void ParseRadius(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& radiusVal)
 void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
     const RefPtr<PopupParam>& popupParam, const RefPtr<NG::FrameNode> popupTargetNode = nullptr)
 {
+    CHECK_NULL_VOID(popupParam);
     auto arrowOffset = popupObj->GetProperty("arrowOffset");
     CalcDimension offset;
     if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
-        if (popupParam) {
-            popupParam->SetArrowOffset(offset);
-        }
+        popupParam->SetArrowOffset(offset);
     }
 
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -447,9 +446,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             if (std::strcmp(pEnd, "End") == 0) {
                 offset = ARROW_ONE_HUNDRED_PERCENT_VALUE;
             }
-            if (popupParam) {
-                popupParam->SetArrowOffset(offset);
-            }
+            popupParam->SetArrowOffset(offset);
         }
     }
 
@@ -457,9 +454,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     if (!targetSpace->IsNull()) {
         CalcDimension space;
         if (JSViewAbstract::ParseJsDimensionVp(targetSpace, space)) {
-            if (popupParam) {
-                popupParam->SetTargetSpace(space);
-            }
+            popupParam->SetTargetSpace(space);
         }
     }
 
@@ -472,9 +467,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             showInSubBoolean = false;
         }
 #endif
-        if (popupParam) {
-            popupParam->SetShowInSubWindow(showInSubBoolean);
-        }
+        popupParam->SetShowInSubWindow(showInSubBoolean);
     }
 
     auto placementValue = popupObj->GetProperty("placement");
@@ -535,16 +528,14 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         } else {
             targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         }
-        if (popupParam) {
-            auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
-                                             node = targetNode](const std::string& param) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("Popup.onStateChange");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute(keys, param);
-            };
-            popupParam->SetOnStateChange(onStateChangeCallback);
-        }
+        auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
+                                            node = targetNode](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup.onStateChange");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, param);
+        };
+        popupParam->SetOnStateChange(onStateChangeCallback);
     }
 
     auto offsetVal = popupObj->GetProperty("offset");
@@ -561,9 +552,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
             popupOffset.SetY(dy.ConvertToPx());
         }
-        if (popupParam) {
-            popupParam->SetTargetOffset(popupOffset);
-        }
+        popupParam->SetTargetOffset(popupOffset);
     }
 
     Color backgroundColor;
@@ -773,9 +762,8 @@ void ParseCustomPopupParam(
             return;
         }
     }
-    if (popupParam) {
-        popupParam->SetUseCustomComponent(true);
-    }
+    CHECK_NULL_VOID(popupParam);
+    popupParam->SetUseCustomComponent(true);
 
     auto focusableValue = popupObj->GetProperty("focusable");
     if (focusableValue->IsBoolean()) {

@@ -35,6 +35,7 @@ public:
     NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
 
     bool AddUINode(const RefPtr<NG::UINode>& node);
+    std::vector<RefPtr<NG::UINode>> GetUINodesFromItemMap(const std::vector<std::int32_t>& keys);
     bool Exists(ElementIdType elementId);
 
     /**
@@ -259,6 +260,23 @@ bool ElementRegisterImpl::AddUINode(const RefPtr<NG::UINode>& node)
     return AddReferenced(node->GetId(), node);
 }
 
+std::vector<RefPtr<NG::UINode>> ElementRegisterImpl::GetUINodesFromItemMap(const std::vector<std::int32_t>& keys)
+{
+    std::vector<RefPtr<NG::UINode>> children;
+    for (auto& iter : itemMap_) {
+        if (std::find(keys.begin(), keys.end(), iter.first) == keys.end()) {
+            auto uiNode = GetUINodeById(iter.first);
+            CHECK_NULL_CONTINUE(uiNode);
+            int32_t parentId = -1;
+            if (uiNode->GetParent()) {
+                parentId = uiNode->GetParent()->GetId();
+            }
+            children.emplace_back(uiNode);
+        }
+    }
+    return children;
+}
+
 bool ElementRegisterImpl::RemoveItem(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
@@ -461,6 +479,12 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
     DELEGATE(AddUINode(node), false);
+}
+
+std::vector<RefPtr<NG::UINode>> ElementRegister::GetUINodesFromItemMap(const std::vector<std::int32_t>& keys)
+{
+    std::vector<RefPtr<NG::UINode>> children;
+    DELEGATE(GetUINodesFromItemMap(keys), children);
 }
 
 bool ElementRegister::Exists(ElementIdType elementId)

@@ -492,7 +492,7 @@ ani_object GenMeasurable(ani_env* env,  NG::MeasureLayoutChild* child)
 {
         ani_class cls ;
         static const char *className =
-            "arkui.ani.arkts.ArkUIAniCustomNodeModule/MeasurableLayoutableInner";
+            "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasurableLayoutableInner";
         if (ANI_OK != env->FindClass(className, &cls)) {
             return nullptr;
         }

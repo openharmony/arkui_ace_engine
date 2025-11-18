@@ -64,6 +64,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
         return false;
     }
     value = static_cast<double>(aniValue);
+    value = (value <= 0) ? DEFAULT_SNAPSHOT_SCALE : value;
     return true;
 }
 
@@ -230,6 +231,7 @@ static bool GetAniIntValue(ani_env* env, ani_object object, int32_t& value)
         return false;
     }
     value = static_cast<int32_t>(aniValue);
+    value = (value < 0) ? DEFAULT_DELAY_TIME : value;
     return true;
 }
 

@@ -86,6 +86,9 @@ int32_t GestureGroup::Deserialize(const char* buff)
     buff += sizeof(GestureMode);
     while (total != 0) {
         auto gesture = MakeGesture(*(GestureType*)buff);
+        if (gesture == nullptr) {
+            return -1;
+        }
         auto len = gesture->Deserialize(buff);
         buff += len;
         total -= len;

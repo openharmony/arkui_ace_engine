@@ -29,10 +29,12 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
@@ -791,5 +793,66 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupContentModifierTest015, TestSi
     pattern->UpdateUIStatus(true);
     EXPECT_EQ(pattern->uiStatus_, UIStatus::OFF_TO_ON);
     EXPECT_TRUE(pattern->UseContentModifier());
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThreadTest001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, OnAttachToMainTreeMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a checkboxgroup node and get its pattern and event hub.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 2, AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call OnAttachToMainTreeMultiThread.
+     * @tc.expected: The result is expected.
+     */
+    pattern->OnAttachToMainTreeMultiThread();
+    EXPECT_FALSE(pattern->updateFlag_);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThreadTest001
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, OnDetachFromMainTreeMultiThreadTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1 Create frameNode and pattern
+     * @tc.expected: Create successfully.
+     */
+    CheckBoxGroupModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(CHECKBOXGROUP_NAME);
+    auto stageNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto child = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 2, AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(child, nullptr);
+    auto pattern = child->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(stageManager->stageNode_, nullptr);
+    stageManager->stageNode_->children_.push_back(child);
+    stageNode->AddChild(child);
+    pattern->currentNavId_ = "test";
+    /**
+     * @tc.steps: step2 Call OnAttachToMainTreeMultiThread
+     * @tc.expected: currentNavId_ is "".
+     */
+    pattern->OnAttachToMainTreeMultiThread();
+    EXPECT_EQ(pattern->currentNavId_, "");
+    /**
+     * @tc.steps: step3 Call OnDetachFromMainTreeMultiThread
+     * @tc.expected: stageNode_ isn't null.
+     */
+    pattern->OnDetachFromMainTreeMultiThread();
+    EXPECT_NE(stageManager->stageNode_, nullptr);
 }
 } // namespace OHOS::Ace::NG

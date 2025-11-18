@@ -79,7 +79,7 @@ public:
     static Dimension GetRefreshOffset(FrameNode* frameNode);
     static bool GetPullToRefresh(FrameNode* frameNode);
     static void SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent);
-    static void SetStepOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset);
+    static void SetStepOffsetChange(FrameNode* frameNode, OffsetStepChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 

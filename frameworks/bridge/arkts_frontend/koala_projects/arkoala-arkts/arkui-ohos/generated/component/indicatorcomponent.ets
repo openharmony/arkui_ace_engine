@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -61,8 +61,8 @@ export class IndicatorComponentController implements MaterializedBase {
         this.showPrevious_serialize()
         return
     }
-    public changeIndex(index: number, useAnimation?: boolean): void {
-        const index_casted = index as (number)
+    public changeIndex(index: int32 | undefined, useAnimation?: boolean): void {
+        const index_casted = index as (int32 | undefined)
         const useAnimation_casted = useAnimation as (boolean | undefined)
         this.changeIndex_serialize(index_casted, useAnimation_casted)
         return
@@ -73,8 +73,15 @@ export class IndicatorComponentController implements MaterializedBase {
     showPrevious_serialize(): void {
         ArkUIGeneratedNativeModule._IndicatorComponentController_showPrevious(this.peer!.ptr)
     }
-    changeIndex_serialize(index: number, useAnimation?: boolean): void {
+    changeIndex_serialize(index: int32 | undefined, useAnimation?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (index !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const indexTmpValue  = index!
+            thisSerializer.writeInt32(indexTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         if (useAnimation !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const useAnimationTmpValue  = useAnimation!
@@ -82,7 +89,7 @@ export class IndicatorComponentController implements MaterializedBase {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._IndicatorComponentController_changeIndex(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._IndicatorComponentController_changeIndex(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -110,24 +117,24 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._IndicatorComponentInterface_setIndicatorComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setInitialIndexAttribute(value: number | undefined): void {
+    setInitialIndexAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setInitialIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCountAttribute(value: number | undefined): void {
+    setCountAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -140,11 +147,11 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof DotIndicator) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as DotIndicator
                 DotIndicator_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof DigitIndicator) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as DigitIndicator
                 DigitIndicator_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -178,7 +185,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setVertical(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnChangeAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnChangeAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -195,10 +202,10 @@ export interface IndicatorComponentAttribute extends CommonMethod {
     setIndicatorComponentOptions(controller?: IndicatorComponentController): this {
         throw new Error("Unimplemented method setIndicatorComponentOptions")
     }
-    initialIndex(value: number | undefined): this {
+    initialIndex(value: int32 | undefined): this {
         throw new Error("Unimplemented method initialIndex")
     }
-    count(value: number | undefined): this {
+    count(value: int32 | undefined): this {
         throw new Error("Unimplemented method count")
     }
     style(value: DotIndicator | DigitIndicator | undefined): this {
@@ -210,7 +217,7 @@ export interface IndicatorComponentAttribute extends CommonMethod {
     vertical(value: boolean | undefined): this {
         throw new Error("Unimplemented method vertical")
     }
-    onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onChange")
     }
     attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -218,19 +225,19 @@ export interface IndicatorComponentAttribute extends CommonMethod {
     }
 }
 export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements IndicatorComponentAttribute {
-    initialIndex_value?: number | undefined
-    count_value?: number | undefined
+    initialIndex_value?: int32 | undefined
+    count_value?: int32 | undefined
     style_value?: DotIndicator | DigitIndicator | undefined
     loop_value?: boolean | undefined
     vertical_value?: boolean | undefined
-    onChange_value?: ((value0: number) => void) | undefined
+    onChange_value?: ((value0: int32) => void) | undefined
     setIndicatorComponentOptions(controller?: IndicatorComponentController): this {
         return this
     }
-    initialIndex(value: number | undefined): this {
+    initialIndex(value: int32 | undefined): this {
         return this
     }
-    count(value: number | undefined): this {
+    count(value: int32 | undefined): this {
         return this
     }
     style(value: DotIndicator | DigitIndicator | undefined): this {
@@ -242,7 +249,7 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
     vertical(value: boolean | undefined): this {
         return this
     }
-    onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: int32) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -261,21 +268,22 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         if (this.checkPriority("setIndicatorComponentOptions")) {
             const controller_casted = controller as (IndicatorComponentController | undefined)
             this.getPeer()?.setIndicatorComponentOptionsAttribute(controller_casted)
+            this.applyOptionsFinish('IndicatorComponentAttribute');
             return this
         }
         return this
     }
-    public initialIndex(value: number | undefined): this {
+    public initialIndex(value: int32 | undefined): this {
         if (this.checkPriority("initialIndex")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setInitialIndexAttribute(value_casted)
             return this
         }
         return this
     }
-    public count(value: number | undefined): this {
+    public count(value: int32 | undefined): this {
         if (this.checkPriority("count")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCountAttribute(value_casted)
             return this
         }
@@ -305,9 +313,9 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
+    public onChange(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
         }
@@ -320,6 +328,9 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

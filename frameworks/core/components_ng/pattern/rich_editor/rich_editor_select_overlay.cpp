@@ -315,8 +315,9 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
-    menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
+    menuInfo.showAIWrite = pattern->IsShowAIWrite();
     menuInfo.isAskCeliaEnabled = pattern->IsAskCeliaEnabled();
+    menuInfo.isShowAskCeliaInRightClick = pattern->IsShowAskCeliaInRightClick();
     pattern->UpdateSelectMenuInfo(menuInfo);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "OnUpdateMenuInfo, IsShowAIMenuOption=%{public}d, AIItemOptionEmpty=%{public}d",
         pattern->IsShowAIMenuOption(), pattern->GetAIItemOption().empty());

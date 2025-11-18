@@ -76,6 +76,7 @@ ace_unittest("ui_extension_accessibility_child_tree_callback_test") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
@@ -153,6 +154,7 @@ ace_unittest("ui_extension_pattern_test_ng") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
@@ -226,6 +228,7 @@ ace_unittest("ui_extension_component_testtwo_ng") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",

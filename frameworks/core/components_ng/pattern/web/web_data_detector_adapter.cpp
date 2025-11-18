@@ -89,7 +89,13 @@ WebDataDetectorAdapter::WebDataDetectorAdapter(const WeakPtr<Pattern>& pattern, 
     TextDetectConfig defaultConfig;
     defaultConfig.types = ALL_TEXT_DETECT_TYPES;
     SetDataDetectorConfig(defaultConfig);
-    SetSelectedDataDetectorConfig(defaultConfig, true);
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Using API Version less than 22");
+        SetSelectDataDetectorEnable(false);
+        SetSelectedDataDetectorConfig(defaultConfig, true);
+    } else {
+        SetSelectedDataDetectorConfig(defaultConfig, false);
+    }
 }
 
 void WebDataDetectorAdapter::SetDataDetectorEnable(bool enable)
@@ -172,6 +178,11 @@ void WebDataDetectorAdapter::Init()
     ResetContextMap();
     if (!flag) {
         return;
+    }
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::Init SetSelectDataDetectorEnable = %{public}d",
+            config_.enable);
+        SetSelectDataDetectorEnable(config_.enable);
     }
     if (config_.enable) {
         InitJSProxy();

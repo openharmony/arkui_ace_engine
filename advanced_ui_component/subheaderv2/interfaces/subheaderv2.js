@@ -68,7 +68,7 @@ const SINGLE_ICON_ZONE_SIZE = lazyInit(() => {
     return getResourceValue('sys.float.subheader_right_icon_zone_size');
 });
 const RIGHT_SINGLE_ICON_SIZE = lazyInit(() => {
-    return getResourceValue('sys.float.subheader_right_icon_size');
+    return getResourceValue('sys.float.subheader_right_icon_size') + 'vp';
 });
 const DEFAULT_FOCUS_STYLE = lazyInit(() => {
     return getResourceValue('sys.float.subheader_right_button_default_focus_style');
@@ -495,8 +495,8 @@ export class SubHeaderV2 extends ViewV2 {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create($$.iconOptions);
                         Image.fillColor(this.subHeaderV2Theme.leftIconColor);
-                        Image.width(getResourceValue('sys.float.subheader_left_icon_size'));
-                        Image.height(getResourceValue('sys.float.subheader_left_icon_size'));
+                        Image.width(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                        Image.height(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
                         Image.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) });
                         Image.draggable(false);
                         Image.flexShrink(0);
@@ -938,7 +938,7 @@ export class SubHeaderV2 extends ViewV2 {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             });
-            SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH());
+            SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH() + 'vp');
             SymbolGlyph.fontColor([this.subHeaderV2Theme.iconArrowColor]);
             SymbolGlyph.draggable(false);
             SymbolGlyph.width(ARROW_ICON_WIDTH());
@@ -1178,7 +1178,7 @@ export class SubHeaderV2 extends ViewV2 {
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__',
                         });
-                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH());
+                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH() + 'vp');
                         SymbolGlyph.fontColor([this.subHeaderV2Theme.iconArrowColor]);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.focusable(true);
@@ -2000,7 +2000,7 @@ class SymbolGlyphChild extends ViewV2 {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create(this.icon);
-            SymbolGlyph.fontSize(getResourceValue('sys.float.subheader_left_icon_size'));
+            SymbolGlyph.fontSize(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
             SymbolGlyph.fontColor(this.fontColor);
             SymbolGlyph.attributeModifier.bind(this)(this.icon);
             SymbolGlyph.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) });
@@ -2231,6 +2231,7 @@ class SingleIconStyle extends ViewV2 {
                                     Image.draggable(false);
                                     Image.borderRadius(getResourceValue('sys.float.subheader_right_image_radius'));
                                     Image.padding(getResourceValue('sys.float.subheader_right_image_padding'));
+                                    Image.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined : new DefaultImageButtonFocusStyle());
                                 }, Image);
                             });
                         }
@@ -2582,6 +2583,17 @@ class DefaultFocusStyleModifier {
         instance.onBlur(() => {
             this.stateStyleAction && this.stateStyleAction(false);
         });
+    }
+}
+
+class DefaultImageButtonFocusStyle {
+    applyNormalAttribute(instance) {
+        if (!instance) {
+            return;
+        }
+        instance
+            .borderRadius(getResourceValue('sys.float.padding_level2'))
+            .focusBox({ margin: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
     }
 }
 

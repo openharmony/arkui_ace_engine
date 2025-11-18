@@ -388,6 +388,16 @@ public:
         mouseOffset_ = offset;
     }
 
+    void SetIsTipsAppearing(bool isTipsAppearing)
+    {
+        IsTipsAppearing_ = isTipsAppearing;
+    }
+
+    bool IsTipsAppearing() const
+    {
+        return IsTipsAppearing_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -404,8 +414,6 @@ protected:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    void OnAttachToFrameNodeMultiThread();
-    void OnAttachToFrameNodeImpl();
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
     void OnAttachToMainTree() override;
@@ -482,6 +490,7 @@ private:
     bool isCustomPopup_ = false;
     bool isTips_ = false;
     RefPtr<FrameNode> messageNode_;
+    bool IsTipsAppearing_ = false;
 
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;

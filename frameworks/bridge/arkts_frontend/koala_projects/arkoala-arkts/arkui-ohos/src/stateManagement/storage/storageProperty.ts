@@ -27,7 +27,7 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements I
     private readonly set_: SetType<T>;
 
     constructor(key: string, get: GetType<T>, set: SetType<T>) {
-        super('AbstractProperty', null, key);
+        super('AbstractProperty', undefined, key);
 
         this.key_ = key;
         this.get_ = get;

@@ -35,7 +35,7 @@ class RichEditorStyledStringTestNg : public RichEditorStyledStringCommonTestNg {
  * @tc.desc: Test events not supported in styledString mode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create richEditorModel in styledString mode
@@ -85,7 +85,7 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
  * @tc.desc: Test SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with text
@@ -138,7 +138,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level
  * @tc.desc: Test SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with image
@@ -184,7 +184,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController002, TestSize.Level
  * @tc.desc: Test SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController003, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan
@@ -214,7 +214,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController003, TestSize.Level
  * @tc.desc: Test SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController004, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -251,7 +251,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController004, TestSize.Level
  * @tc.desc: Test GetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController005, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -305,7 +305,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController005, TestSize.Level
  * @tc.desc: Test OnWillChange.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController006, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with text
@@ -370,7 +370,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController006, TestSize.Level
  * @tc.desc: Test OnDidChange.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController007, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with text
@@ -426,7 +426,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController007, TestSize.Level
  * @tc.desc: Test SetTypingStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with text
@@ -471,7 +471,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
  * @tc.desc: Test SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController009, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with text
@@ -518,7 +518,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController009, TestSize.Level
  * @tc.desc: Test textVerticalAlign.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController010, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController010, TestSize.Level0)
 {
     /*
      *@tc.steps: step1. create styledString with text
@@ -545,7 +545,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController010, TestSize.Level
  * @tc.desc: Test SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringController011, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController011, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -562,7 +562,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController011, TestSize.Level
  * @tc.desc: Test insert value in styledString mode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -602,7 +602,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue001, TestSize.Leve
  * @tc.desc: Test insert value in styledString mode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -642,7 +642,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue002, TestSize.Leve
  * @tc.desc: Test caret and handles with customSpan.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan and text
@@ -693,7 +693,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
  * @tc.desc: Test FromStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, FromStyledString001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, FromStyledString001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with text
@@ -722,7 +722,7 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString001, TestSize.Level1)
  * @tc.desc: test CopySpanStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle001, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
@@ -739,7 +739,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle001, TestSize.Level1)
  * @tc.desc: test CopySpanStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle002, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
@@ -754,7 +754,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle002, TestSize.Level1)
  * @tc.desc: test CopySpanStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -784,7 +784,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
  * @tc.desc: test CopySpanStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle004, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -814,7 +814,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle004, TestSize.Level1)
  * @tc.desc: test GetSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with text
@@ -838,7 +838,7 @@ HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
  * @tc.desc: test RichEditorPattern InsertValueInStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -879,7 +879,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Le
  * @tc.desc: test RichEditorPattern DeleteValueInStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -902,7 +902,7 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Le
  * @tc.desc: test RichEditorPattern InsertStyledStringByPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, InsertStyledStringByPaste001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, InsertStyledStringByPaste001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern and controller
@@ -933,7 +933,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertStyledStringByPaste001, TestSize.Le
  * @tc.desc: test UpdateSpanStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, UpdateSpanStyle001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, UpdateSpanStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -954,7 +954,7 @@ HWTEST_F(RichEditorStyledStringTestNg, UpdateSpanStyle001, TestSize.Level1)
  * @tc.desc: test FromStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -985,7 +985,7 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level1)
  * @tc.desc: test FromStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, FromStyledString003, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, FromStyledString003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1008,7 +1008,7 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString003, TestSize.Level1)
  * @tc.desc: Test spans to styledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, ToStyledString001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, ToStyledString001, TestSize.Level0)
 {
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(richEditorNode, nullptr);
@@ -1039,7 +1039,7 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString001, TestSize.Level1)
  * @tc.desc: test ToStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, ToStyledString002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, ToStyledString002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1057,7 +1057,7 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString002, TestSize.Level1)
  * @tc.desc: Test spans to styledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, ToStyledString003, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, ToStyledString003, TestSize.Level0)
 {
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(richEditorNode, nullptr);
@@ -1107,7 +1107,7 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString003, TestSize.Level1)
  * @tc.desc: Test spans to styledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, ToStyledString004, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, ToStyledString004, TestSize.Level0)
 {
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(richEditorNode, nullptr);
@@ -1149,7 +1149,7 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString004, TestSize.Level1)
  * @tc.desc: test CreateStyledStringByTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -1198,7 +1198,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle, TestSize.L
  * @tc.desc: test CreateStyledStringByTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -1252,7 +1252,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle002, TestSiz
  * @tc.desc: Test delete backward in styledString mode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -1293,7 +1293,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward001, TestSize.L
  * @tc.desc: Test delete backward in styledString mode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -1336,7 +1336,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward002, TestSize.L
  * @tc.desc: Test delete forward in styledString mode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -1376,7 +1376,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward001, TestSize.Le
  * @tc.desc: Test delete backward in styledString mode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create styledString with customSpan、image and text
@@ -1416,7 +1416,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Le
  * @tc.desc: test DeleteValueInStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1434,7 +1434,7 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
  * @tc.desc: Test deleteDecorationType of DecorationSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level0)
 {
     /**
      * @tc.steps1: Initialize a spanString and AddSpan

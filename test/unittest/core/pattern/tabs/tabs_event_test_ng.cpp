@@ -1368,7 +1368,13 @@ HWTEST_F(TabsEventTestNg, ObserverTestNg003, TestSize.Level1)
         EXPECT_EQ(info.index, 1);
         EXPECT_EQ(info.state, TabContentState::ON_SHOW);
     };
+    auto funcForAni = [](const TabContentInfo& info) {
+        EXPECT_EQ(info.index, 1);
+        EXPECT_EQ(info.state, TabContentState::ON_SHOW);
+    };
+
     UIObserverHandler::GetInstance().SetHandleTabChangeFunc(func);
+    UIObserverHandler::GetInstance().SetHandleTabChangeFuncForAni(funcForAni);
 
     TabsModelNG model = CreateTabs(BarPosition::START, 1);
 
@@ -1376,6 +1382,7 @@ HWTEST_F(TabsEventTestNg, ObserverTestNg003, TestSize.Level1)
     CreateTabsDone(model);
 
     UIObserverHandler::GetInstance().SetHandleTabChangeFunc(nullptr);
+    UIObserverHandler::GetInstance().SetHandleTabChangeFuncForAni(nullptr);
 }
 
 /**

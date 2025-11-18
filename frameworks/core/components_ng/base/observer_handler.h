@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/common/container.h"
+#include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -50,6 +51,7 @@ struct NavDestinationInfo {
     NavDestinationState state;
     int32_t index;
     napi_value param;
+    std::string interopParam;
     std::string navDestinationId;
     NavDestinationMode mode;
     int32_t uniqueId;
@@ -178,9 +180,19 @@ struct TextChangeEventInfo {
     {}
 };
 
-struct WindowSizeBreakpoint {
-    WidthBreakpoint widthBreakpoint;
-    HeightBreakpoint heightBreakpoint;
+struct SwiperItemInfoNG {
+    int32_t uniqueId = -1;
+    int32_t index = -1;
+
+    SwiperItemInfoNG(int32_t uniqueId, int32_t index)
+        : uniqueId(uniqueId), index(index)
+    {}
+};
+
+struct SwiperContentInfo {
+    std::string id = "";
+    int32_t uniqueId = -1;
+    std::vector<SwiperItemInfoNG> swiperItemInfos = {};
 };
 
 enum class GestureListenerType { TAP = 0, LONG_PRESS, PAN, PINCH, SWIPE, ROTATION, UNKNOWN };
@@ -206,6 +218,7 @@ public:
         const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
         const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
+    void NotifyTabContentStateUpdateForAni(const TabContentInfo& info);
     void NotifyTabChange(const TabContentInfo& info);
     void NotifyGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
         const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase);
@@ -218,6 +231,8 @@ public:
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
+    void NotifySwiperContentUpdate(const SwiperContentInfo& info);
+    bool IsSwiperContentObserverEmpty();
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
@@ -237,8 +252,12 @@ public:
         const RefPtr<NG::FrameNode>& frameNode, NG::GestureActionPhase phase);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
     using TabChangeHandleFunc = void (*)(const TabContentInfo&);
+    using TabChangeHandleFuncForAni = std::function<void(const TabContentInfo& info)>;
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
+    using TabContentHandleFuncForAni = std::function<void(const NG::TabContentInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
+    using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
+    using SwiperContentObservrEmptyFunc = bool (*)();
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
@@ -250,6 +269,7 @@ public:
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
+    void SetHandleTabContentUpdateFuncForAni(TabContentHandleFuncForAni func);
     void SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
@@ -261,6 +281,7 @@ public:
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
     void SetHandleTabChangeFunc(TabChangeHandleFunc func);
+    void SetHandleTabChangeFuncForAni(TabChangeHandleFuncForAni func);
     void SetHandleGestureHandleFunc(GestureHandleFunc func);
 
     using BeforePanStartHandleFuncForAni = std::function<void()>;
@@ -277,6 +298,8 @@ public:
     using DidClickHandleFuncForAni = std::function<void()>;
     void SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func);
     void SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func);
+    void SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func);
+    void SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
@@ -293,9 +316,13 @@ private:
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
+    TabContentHandleFuncForAni tabContentHandleFuncForAni_ = nullptr;
     TabChangeHandleFunc tabChangeHandleFunc_ = nullptr;
+    TabChangeHandleFuncForAni tabChangeHandleFuncForAni_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
+    SwiperContentUpdateHandleFunc swiperContentUpdateHandleFunc_ = nullptr;
+    SwiperContentObservrEmptyFunc swiperContentObservrEmptyFunc_ = nullptr;
 
     BeforePanStartHandleFuncForAni beforePanStartHandleFuncForAni_ = nullptr;
     AfterPanStartHandleFuncForAni afterPanStartHandleFuncForAni_ = nullptr;

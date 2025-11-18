@@ -18,10 +18,17 @@
 #include "ui/base/utils/utils.h"
 #include "ui/view/draw/node_paint_method.h"
 
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
+
+PaintWrapper::PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,
+    RefPtr<PaintProperty> paintProperty)
+    : renderContext_(std::move(renderContext)), geometryNode_(std::move(geometryNode)),
+      paintProperty_(std::move(paintProperty)), extensionHandler_(nullptr)
+{}
 
 PaintWrapper::PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,
     RefPtr<PaintProperty> paintProperty, RefPtr<ExtensionHandler> handler)

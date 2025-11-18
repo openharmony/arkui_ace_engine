@@ -1,3 +1,4 @@
+// test/mock/base/mock_ressched_touch_optimizer.cpp
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +17,14 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 
 namespace OHOS::Ace {
-ResSchedTouchOptimizer& ResSchedTouchOptimizer::GetInstance()
+ResSchedTouchOptimizer::ResSchedTouchOptimizer()
 {
-    thread_local ResSchedTouchOptimizer instance;
-    return instance;
 }
+
+ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
+{
+}
+
 
 void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
 {
@@ -41,5 +45,75 @@ void ResSchedTouchOptimizer::SetSlideAcceptOffset(Offset offset)
 
 void ResSchedTouchOptimizer::SetSlideDirection(int32_t slideDirection)
 {
+}
+
+void ResSchedTouchOptimizer::SetVsyncPeriod(uint64_t vsyncPeriod)
+{
+}
+
+bool ResSchedTouchOptimizer::GetIsTpFlushFrameDisplayPeriod() const
+{
+    return isTpFlushFrameDisplayPeriod_;
+}
+
+bool ResSchedTouchOptimizer::GetIsFirstFrameAfterTpFlushFrameDisplayPeriod() const
+{
+    return isFristFrameAfterTpFlushFrameDisplayPeriod_;
+}
+
+bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
+{
+    return isTpFlushFrameDisplayPeriod_;
+}
+
+TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& inputEvent)
+{
+    return inputEvent;
+}
+
+void ResSchedTouchOptimizer::SetHisAvgPointTimeStamp(int32_t pointId,
+    const std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById)
+{
+}
+
+uint64_t ResSchedTouchOptimizer::FineTuneTimeStampDuringTpFlushPeriod(uint64_t timeStamp)
+{
+    // only Mock Behavior
+    isTpFlushFrameDisplayPeriod_ = false;
+    return timeStamp;
+}
+
+void ResSchedTouchOptimizer::FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(const int32_t pointId,
+    std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById)
+{
+    // only Mock Behavior
+    historyPointsById.clear();
+}
+
+void ResSchedTouchOptimizer::SetLastVsyncTimeStamp(uint64_t timeStamp)
+{
+}
+
+bool ResSchedTouchOptimizer::RVSEnableCheck()
+{
+    return rvsEnable_;
+}
+
+void ResSchedTouchOptimizer::DispatchPointSelect(bool hasResamplePoint, TouchEvent& tpPoint,
+    TouchEvent& resamplePoint, TouchEvent& resultPoint)
+{
+    resultPoint = hasResamplePoint ? resamplePoint : tpPoint;
+}
+
+void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+{
+    lastTpFlush_ = false;
+    vsyncPeriod_ = 0;
+    lastVsyncTimeStamp_ = 0;
+    hisAvgPointTimeStamp_ = 0;
+    vsyncTimeReportExemption_ = false;
+    vsyncFlushed_ = false;
+    isTpFlushFrameDisplayPeriod_ = false;
+    isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
 }
 } // namespace OHOS::Ace

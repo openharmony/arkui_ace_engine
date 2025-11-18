@@ -495,25 +495,25 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     actionEndTask(info);
     info.SetOffsetX(1.0f);
-    
-    Point globalPoint1 = Point(1.0f, 1.0f);
-    info.SetGlobalPoint(globalPoint1);
+
+    Offset point(1.0f, 1.0f);
+    info.SetLocalLocation(point);
     info.SetOffsetY(200.0f);
     columnPattern_->yLast_ = 0.0f;
     columnPattern_->pressed_ = true;
     columnPattern_->HandleDragMove(info);
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 201.0f);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 1);
-    
-    Point globalPoint2 = Point(1.0f, 201.0f);
-    info.SetGlobalPoint(globalPoint2);
+
+    Offset point2 = Offset(1.0f, 201.0f);
+    info.SetLocalLocation(point2);
     columnPattern_->pressed_ = true;
     columnPattern_->HandleDragMove(info);
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 401.0f);
     EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
 
-    Point globalPoint3 = Point(1.0f, 401.0f);
-    info.SetGlobalPoint(globalPoint3);
+    Offset point3 = Offset(1.0f, 401.0f);
+    info.SetLocalLocation(point3);
     columnPattern_->pressed_ = true;
     columnPattern_->HandleDragMove(info);
     EXPECT_FLOAT_EQ(columnPattern_->yLast_, 601.0f);

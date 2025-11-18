@@ -24,7 +24,7 @@ import {
     Bindable
 } from "../framework";
 import { Resource } from "global.resource";
-import { ContentModifier } from "#handwritten";
+import { ContentModifier, hookSelectSetDividerMethod } from "#handwritten";
 
 export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     constructParam(...param: Object[]): this {
@@ -51,10 +51,10 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         this.markDirty();
         return this;
     }
-    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+    selected(value: int | Resource | Bindable<int> | Bindable<Resource> | undefined): this {
         const value_type = runtimeType(value);
         if ((RuntimeType.BOOLEAN === value_type) || (RuntimeType.UNDEFINED === value_type)) {
-            const value_casted = value as (number | Resource | undefined);
+            const value_casted = value as (int | Resource | undefined);
             this.getPeer()?.setSelectedAttribute(value_casted);
             this.markDirty();
             return this;
@@ -63,13 +63,8 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         return this;
     }
     value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
-        const value_type = runtimeType(value);
-        if ((RuntimeType.BOOLEAN === value_type) || (RuntimeType.UNDEFINED === value_type)) {
-            const value_casted = value as (ResourceStr | undefined);
-            this.getPeer()?.setValueAttribute(value_casted);
-            this.markDirty();
-            return this;
-        }
+        const value_casted = value as (ResourceStr | Bindable<string> | Bindable<Resource> | undefined);
+        this.getPeer()?.setValueAttribute(value_casted);
         this.markDirty();
         return this;
     }
@@ -121,8 +116,8 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         this.markDirty();
         return this;
     }
-    onSelect(value: ((index: number, value: string) => void) | OnSelectCallback | undefined): this {
-        const value_casted = value as (((index: number, value: string) => void) | OnSelectCallback | undefined);
+    onSelect(value: ((index: int, value: string) => void) | OnSelectCallback | undefined): this {
+        const value_casted = value as (((index: int, value: string) => void) | OnSelectCallback | undefined);
         this.getPeer()?.setOnSelectAttribute(value_casted);
         this.markDirty();
         return this;
@@ -174,8 +169,7 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         return this;
     }
     divider(value: DividerOptions | null | undefined): this {
-        const value_casted = value as ( DividerOptions | null | undefined);
-        this.getPeer()?.setDividerAttribute(value_casted);  
+        hookSelectSetDividerMethod(this.getPeer(), value);
         this.markDirty();
         return this;
     }

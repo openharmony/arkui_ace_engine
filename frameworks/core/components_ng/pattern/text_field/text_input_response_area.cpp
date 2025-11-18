@@ -72,6 +72,7 @@ OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRec
 {
     auto offset = Alignment::GetAlignPosition(parentSize, childSize, Alignment::CENTER);
     auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(textFieldPattern, offset);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
@@ -547,10 +548,8 @@ void PasswordResponseArea::LoadImageSourceInfo()
         auto iconTheme = pipeline->GetTheme<IconTheme>();
         CHECK_NULL_VOID(iconTheme);
         auto textDisableColor = textFieldTheme->GetTextColorDisable();
-        auto hideIconPath = iconTheme->GetIconPath(hideIcon_->GetResourceId());
-        hideIcon_->SetSrc(hideIconPath, textDisableColor);
-        auto showIconPath = iconTheme->GetIconPath(showIcon_->GetResourceId());
-        showIcon_->SetSrc(showIconPath, textDisableColor);
+        hideIcon_->SetFillColor(textDisableColor);
+        showIcon_->SetFillColor(textDisableColor);
         UpdateImageSource();
     }
 }
@@ -558,6 +557,7 @@ void PasswordResponseArea::LoadImageSourceInfo()
 void PasswordResponseArea::AddImageEventOnError()
 {
     auto imageNode = passwordNode_.Upgrade();
+    CHECK_NULL_VOID(imageNode);
     auto eventHub = imageNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError([ weakNode = WeakClaim(AceType::RawPtr(imageNode)), weakArea = WeakClaim(this) ]

@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, extractors, hookFlexAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookFlexAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -98,6 +98,7 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
         if (this.checkPriority("setFlexOptions")) {
             const value_casted = value as (FlexOptions | undefined)
             this.getPeer()?.setFlexOptionsAttribute(value_casted)
+            this.applyOptionsFinish('FlexAttribute');
             return this
         }
         return this
@@ -109,6 +110,9 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
@@ -155,13 +159,13 @@ export class FlexSpaceOptions_serializer {
         const mainTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let mainTmpBuf : LengthMetrics | undefined = undefined
         if ((mainTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            mainTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            mainTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const mainTmpResult : LengthMetrics | undefined = mainTmpBuf
         const crossTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let crossTmpBuf : LengthMetrics | undefined = undefined
         if ((crossTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            crossTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            crossTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const crossTmpResult : LengthMetrics | undefined = crossTmpBuf
         let value : FlexSpaceOptions = ({main: mainTmpResult, cross: crossTmpResult} as FlexSpaceOptions)

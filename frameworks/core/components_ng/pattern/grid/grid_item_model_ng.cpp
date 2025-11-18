@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,14 @@ void GridItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
     pattern->SetSelectable(selectable);
 }
 
+bool GridItemModelNG::GetSelectable(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->Selectable();
+}
+
 void GridItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
 {
     CHECK_NULL_VOID(frameNode);
@@ -163,6 +171,14 @@ void GridItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
+}
+
+bool GridItemModelNG::GetSelected(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsSelected();
 }
 
 void GridItemModelNG::SetRowStart(FrameNode* frameNode, int32_t rowStart)

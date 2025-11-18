@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -509,7 +510,10 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
         if (textLayoutProperty) {
             if (textLayoutProperty->HasTextContentAlign()) {
                 auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
-                alignPosition = GetAlignPosition(size, content->GetRect().GetSize(), textContentAlign, align);
+                auto contentSize = content->GetRect().GetSize();
+                alignPosition = GreatOrEqual(contentSize.Height(), contentHeight_) ?
+                    GetAlignPosition(size, content->GetRect().GetSize(), textContentAlign, align) :
+                    Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align);
             } else {
                 alignPosition = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align);
             }
@@ -1006,7 +1010,8 @@ void MultipleParagraphLayoutAlgorithm::CalcHeightWithMinLines(TextStyle& textSty
             minLines = std::min(minLines, textLayoutProperty->GetMaxLines().value());
         }
         auto lineCount = static_cast<uint32_t>(paragraphManager_->GetLineCount());
-        if (lineCount >= minLines) {
+        auto paragraphLength = paragraphManager_->GetParagraphLength();
+        if (lineCount >= minLines && paragraphLength != 0) {
             return;
         }
         auto paragraphHeight = paragraphManager_->GetHeight();

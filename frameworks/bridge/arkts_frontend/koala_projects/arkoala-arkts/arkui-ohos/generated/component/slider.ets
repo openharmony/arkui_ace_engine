@@ -24,16 +24,18 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_F64_serializer } from "./common"
 import { Color, CrownSensitivity, Axis } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookSliderContentModifier, hookSliderAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookSliderContentModifier, extractors, hookSliderAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { SliderModifier } from "./../SliderModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     attributeSet?: SliderModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -64,19 +66,19 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -92,27 +94,27 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof LinearGradient) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LinearGradient
                 LinearGradient_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -128,27 +130,27 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ResourceColor) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
                 if (valueTmpValueForIdx0 instanceof Color) {
-                    thisSerializer.writeInt8((0).toChar())
+                    thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
                 } else if (valueTmpValueForIdx0 instanceof number) {
-                    thisSerializer.writeInt8((1).toChar())
+                    thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
-                    thisSerializer.writeInt8((2).toChar())
+                    thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
-                    thisSerializer.writeInt8((3).toChar())
+                    thisSerializer.writeInt8((3).toByte())
                     const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof LinearGradient) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LinearGradient
                 LinearGradient_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -176,15 +178,15 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -194,7 +196,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_setTrackThickness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnChangeAttribute(value: ((value: number,mode: SliderChangeMode) => void) | undefined): void {
+    setOnChangeAttribute(value: ((value: double,mode: SliderChangeMode) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -212,19 +214,19 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -240,15 +242,15 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -264,19 +266,19 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -292,15 +294,15 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -316,15 +318,15 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -364,15 +366,15 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -394,12 +396,12 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_setSliderInteractionMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinResponsiveDistanceAttribute(value: number | undefined): void {
+    setMinResponsiveDistanceAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -455,11 +457,11 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue  = content!
             if (contentTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0  = contentTmpValue as string
                 thisSerializer.writeString(contentTmpValueForIdx0)
             } else if (contentTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const contentTmpValueForIdx1  = contentTmpValue as Resource
                 Resource_serializer.write(thisSerializer, contentTmpValueForIdx1)
             }
@@ -493,14 +495,14 @@ export enum SliderInteraction {
     SLIDE_AND_CLICK_UP = 2
 }
 export interface SlideRange {
-    from?: number;
-    to?: number;
+    from?: double;
+    to?: double;
 }
 export interface SliderOptions {
-    value?: number | Bindable<number> | undefined;
-    min?: number;
-    max?: number;
-    step?: number;
+    value?: double | Bindable<double> | undefined;
+    min?: double;
+    max?: double;
+    step?: double;
     style?: SliderStyle;
     direction?: Axis;
     reverse?: boolean;
@@ -513,13 +515,14 @@ export enum SliderBlockType {
 export interface SliderBlockStyle {
     type: SliderBlockType;
     image?: ResourceStr;
+    shape?: CircleShape | EllipseShape | PathShape | RectShape;
 }
-export type SliderTriggerChangeCallback = (value: number, mode: SliderChangeMode) => void;
+export type SliderTriggerChangeCallback = (value: double, mode: SliderChangeMode) => void;
 export interface SliderConfiguration extends CommonConfiguration<SliderConfiguration> {
-    value: number;
-    min: number;
-    max: number;
-    step: number;
+    value: double;
+    min: double;
+    max: double;
+    step: double;
     triggerChange: SliderTriggerChangeCallback;
 }
 export interface SliderAttribute extends CommonMethod {
@@ -541,7 +544,7 @@ export interface SliderAttribute extends CommonMethod {
     trackThickness(value: Length | undefined): this {
         throw new Error("Unimplemented method trackThickness")
     }
-    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
+    onChange(value: ((value: double,mode: SliderChangeMode) => void) | undefined): this {
         throw new Error("Unimplemented method onChange")
     }
     blockBorderColor(value: ResourceColor | undefined): this {
@@ -571,7 +574,7 @@ export interface SliderAttribute extends CommonMethod {
     sliderInteractionMode(value: SliderInteraction | undefined): this {
         throw new Error("Unimplemented method sliderInteractionMode")
     }
-    minResponsiveDistance(value: number | undefined): this {
+    minResponsiveDistance(value: double | undefined): this {
         throw new Error("Unimplemented method minResponsiveDistance")
     }
     contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
@@ -599,7 +602,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     selectedColor_value?: ResourceColor | LinearGradient | undefined
     showSteps_value?: boolean | undefined
     trackThickness_value?: Length | undefined
-    onChange_value?: ((value: number,mode: SliderChangeMode) => void) | undefined
+    onChange_value?: ((value: double,mode: SliderChangeMode) => void) | undefined
     blockBorderColor_value?: ResourceColor | undefined
     blockBorderWidth_value?: Length | undefined
     stepColor_value?: ResourceColor | undefined
@@ -609,7 +612,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     blockStyle_value?: SliderBlockStyle | undefined
     stepSize_value?: Length | undefined
     sliderInteractionMode_value?: SliderInteraction | undefined
-    minResponsiveDistance_value?: number | undefined
+    minResponsiveDistance_value?: double | undefined
     contentModifier_value?: ContentModifier<SliderConfiguration> | undefined
     slideRange_value?: SlideRange | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
@@ -633,7 +636,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     trackThickness(value: Length | undefined): this {
         return this
     }
-    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
+    onChange(value: ((value: double,mode: SliderChangeMode) => void) | undefined): this {
         return this
     }
     blockBorderColor(value: ResourceColor | undefined): this {
@@ -663,7 +666,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     sliderInteractionMode(value: SliderInteraction | undefined): this {
         return this
     }
-    minResponsiveDistance(value: number | undefined): this {
+    minResponsiveDistance(value: double | undefined): this {
         return this
     }
     contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
@@ -697,6 +700,7 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         if (this.checkPriority("setSliderOptions")) {
             const options_casted = options as (SliderOptions | undefined)
             this.getPeer()?.setSliderOptionsAttribute(options_casted)
+            this.applyOptionsFinish('SliderAttribute');
             return this
         }
         return this
@@ -741,9 +745,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
-    public onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
+    public onChange(value: ((value: double,mode: SliderChangeMode) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
-            const value_casted = value as (((value: number,mode: SliderChangeMode) => void) | undefined)
+            const value_casted = value as (((value: double,mode: SliderChangeMode) => void) | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
         }
@@ -821,9 +825,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
-    public minResponsiveDistance(value: number | undefined): this {
+    public minResponsiveDistance(value: double | undefined): this {
         if (this.checkPriority("minResponsiveDistance")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setMinResponsiveDistanceAttribute(value_casted)
             return this
         }
@@ -876,6 +880,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 
 @memo
@@ -903,7 +910,7 @@ export class SlideRange_serializer {
         if (valueHolderForFrom !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFromTmpValue  = valueHolderForFrom!
-            valueSerializer.writeNumber(valueHolderForFromTmpValue)
+            valueSerializer.writeFloat64(valueHolderForFromTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -911,7 +918,7 @@ export class SlideRange_serializer {
         if (valueHolderForTo !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForToTmpValue  = valueHolderForTo!
-            valueSerializer.writeNumber(valueHolderForToTmpValue)
+            valueSerializer.writeFloat64(valueHolderForToTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -919,17 +926,17 @@ export class SlideRange_serializer {
     public static read(buffer: DeserializerBase): SlideRange {
         let valueDeserializer : DeserializerBase = buffer
         const fromTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fromTmpBuf : number | undefined = undefined
+        let fromTmpBuf : double | undefined = undefined
         if ((fromTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fromTmpBuf = (valueDeserializer.readNumber() as number)
+            fromTmpBuf = valueDeserializer.readFloat64()
         }
-        const fromTmpResult : number | undefined = fromTmpBuf
+        const fromTmpResult : double | undefined = fromTmpBuf
         const toTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let toTmpBuf : number | undefined = undefined
+        let toTmpBuf : double | undefined = undefined
         if ((toTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            toTmpBuf = (valueDeserializer.readNumber() as number)
+            toTmpBuf = valueDeserializer.readFloat64()
         }
-        const toTmpResult : number | undefined = toTmpBuf
+        const toTmpResult : double | undefined = toTmpBuf
         let value : SlideRange = ({from: fromTmpResult, to: toTmpResult} as SlideRange)
         return value
     }
@@ -942,13 +949,13 @@ export class SliderConfiguration_serializer {
         const valueHolderForContentModifier  = value.contentModifier
         valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
         const valueHolderForValue  = value.value
-        valueSerializer.writeNumber(valueHolderForValue)
+        valueSerializer.writeFloat64(valueHolderForValue)
         const valueHolderForMin  = value.min
-        valueSerializer.writeNumber(valueHolderForMin)
+        valueSerializer.writeFloat64(valueHolderForMin)
         const valueHolderForMax  = value.max
-        valueSerializer.writeNumber(valueHolderForMax)
+        valueSerializer.writeFloat64(valueHolderForMax)
         const valueHolderForStep  = value.step
-        valueSerializer.writeNumber(valueHolderForStep)
+        valueSerializer.writeFloat64(valueHolderForStep)
         const valueHolderForTriggerChange  = value.triggerChange
         valueSerializer.holdAndWriteCallback(valueHolderForTriggerChange)
     }
@@ -956,19 +963,19 @@ export class SliderConfiguration_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const enabledTmpResult : boolean = valueDeserializer.readBoolean()
         const contentModifierTmpResult : ContentModifier<SliderConfiguration> = (valueDeserializer.readObject() as ContentModifier<SliderConfiguration>)
-        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
-        const minTmpResult : number = (valueDeserializer.readNumber() as number)
-        const maxTmpResult : number = (valueDeserializer.readNumber() as number)
-        const stepTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpResult : double = valueDeserializer.readFloat64()
+        const minTmpResult : double = valueDeserializer.readFloat64()
+        const maxTmpResult : double = valueDeserializer.readFloat64()
+        const stepTmpResult : double = valueDeserializer.readFloat64()
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : SliderTriggerChangeCallback = (value: number, mode: SliderChangeMode):void => {
+        const triggerChangeTmpResult : SliderTriggerChangeCallback = (value: double, mode: SliderChangeMode):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
-            triggerChangeTmpBufBufArgsSerializer.writeNumber(value);
+            triggerChangeTmpBufBufArgsSerializer.writeFloat64(value);
             triggerChangeTmpBufBufArgsSerializer.writeInt32(mode.valueOf());
             InteropNativeModule._CallCallbackSync(10, 711649376, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
@@ -988,13 +995,37 @@ export class SliderBlockStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForImageTmpValue  = valueHolderForImage!
             if (valueHolderForImageTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForImageTmpValueForIdx0  = valueHolderForImageTmpValue as string
                 valueSerializer.writeString(valueHolderForImageTmpValueForIdx0)
             } else if (valueHolderForImageTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForImageTmpValueForIdx1  = valueHolderForImageTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForImageTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForShape  = value.shape
+        if (valueHolderForShape !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShapeTmpValue  = valueHolderForShape!
+            if (valueHolderForShapeTmpValue instanceof CircleShape) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForShapeTmpValueForIdx0  = valueHolderForShapeTmpValue as CircleShape
+                CircleShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx0)
+            } else if (valueHolderForShapeTmpValue instanceof EllipseShape) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForShapeTmpValueForIdx1  = valueHolderForShapeTmpValue as EllipseShape
+                EllipseShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx1)
+            } else if (valueHolderForShapeTmpValue instanceof PathShape) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForShapeTmpValueForIdx2  = valueHolderForShapeTmpValue as PathShape
+                PathShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx2)
+            } else if (valueHolderForShapeTmpValue instanceof RectShape) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForShapeTmpValueForIdx3  = valueHolderForShapeTmpValue as RectShape
+                RectShape_serializer.write(valueSerializer, valueHolderForShapeTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1018,7 +1049,26 @@ export class SliderBlockStyle_serializer {
             imageTmpBuf = (imageTmpBuf_ as string | Resource)
         }
         const imageTmpResult : ResourceStr | undefined = imageTmpBuf
-        let value : SliderBlockStyle = ({type: typeTmpResult, image: imageTmpResult} as SliderBlockStyle)
+        const shapeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shapeTmpBuf : CircleShape | EllipseShape | PathShape | RectShape | undefined = undefined
+        if ((shapeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const shapeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let shapeTmpBuf_ : CircleShape | EllipseShape | PathShape | RectShape | undefined
+            if (shapeTmpBuf_UnionSelector == (0).toChar()) {
+                shapeTmpBuf_ = (CircleShape_serializer.read(valueDeserializer) as CircleShape)
+            } else if (shapeTmpBuf_UnionSelector == (1).toChar()) {
+                shapeTmpBuf_ = (EllipseShape_serializer.read(valueDeserializer) as EllipseShape)
+            } else if (shapeTmpBuf_UnionSelector == (2).toChar()) {
+                shapeTmpBuf_ = (PathShape_serializer.read(valueDeserializer) as PathShape)
+            } else if (shapeTmpBuf_UnionSelector == (3).toChar()) {
+                shapeTmpBuf_ = (RectShape_serializer.read(valueDeserializer) as RectShape)
+            } else {
+                throw new Error("One of the branches for shapeTmpBuf_ has to be chosen through deserialisation.")
+            }
+            shapeTmpBuf = (shapeTmpBuf_ as CircleShape | EllipseShape | PathShape | RectShape)
+        }
+        const shapeTmpResult : CircleShape | EllipseShape | PathShape | RectShape | undefined = shapeTmpBuf
+        let value : SliderBlockStyle = ({type: typeTmpResult, image: imageTmpResult, shape: shapeTmpResult} as SliderBlockStyle)
         return value
     }
 }
@@ -1029,14 +1079,14 @@ export class SliderOptions_serializer {
         if (valueHolderForValue !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForValueTmpValue  = valueHolderForValue!
-            if (valueHolderForValueTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
-                const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as number
-                valueSerializer.writeNumber(valueHolderForValueTmpValueForIdx0)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<number>) {
-                valueSerializer.writeInt8((1).toChar())
-                const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)
+            if (valueHolderForValueTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForValueTmpValueForIdx0)
+            } else if (valueHolderForValueTmpValue instanceof Bindable<double>) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Bindable<double>
+                Bindable_F64_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1045,7 +1095,7 @@ export class SliderOptions_serializer {
         if (valueHolderForMin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinTmpValue  = valueHolderForMin!
-            valueSerializer.writeNumber(valueHolderForMinTmpValue)
+            valueSerializer.writeFloat64(valueHolderForMinTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1053,7 +1103,7 @@ export class SliderOptions_serializer {
         if (valueHolderForMax !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxTmpValue  = valueHolderForMax!
-            valueSerializer.writeNumber(valueHolderForMaxTmpValue)
+            valueSerializer.writeFloat64(valueHolderForMaxTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1061,7 +1111,7 @@ export class SliderOptions_serializer {
         if (valueHolderForStep !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStepTmpValue  = valueHolderForStep!
-            valueSerializer.writeNumber(valueHolderForStepTmpValue)
+            valueSerializer.writeFloat64(valueHolderForStepTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1093,38 +1143,38 @@ export class SliderOptions_serializer {
     public static read(buffer: DeserializerBase): SliderOptions {
         let valueDeserializer : DeserializerBase = buffer
         const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let valueTmpBuf : number | Bindable<number> | undefined = undefined
+        let valueTmpBuf : double | Bindable<double> | undefined = undefined
         if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const valueTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let valueTmpBuf_ : number | Bindable<number> | undefined
+            let valueTmpBuf_ : double | Bindable<double> | undefined
             if (valueTmpBuf_UnionSelector == (0).toChar()) {
-                valueTmpBuf_ = (valueDeserializer.readNumber() as number)
+                valueTmpBuf_ = valueDeserializer.readFloat64()
             } else if (valueTmpBuf_UnionSelector == (1).toChar()) {
-                valueTmpBuf_ = Bindable_Number_serializer.read(valueDeserializer)
+                valueTmpBuf_ = Bindable_F64_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for valueTmpBuf_ has to be chosen through deserialisation.")
             }
-            valueTmpBuf = (valueTmpBuf_ as number | Bindable<number>)
+            valueTmpBuf = (valueTmpBuf_ as double | Bindable<double>)
         }
-        const valueTmpResult : number | Bindable<number> | undefined = valueTmpBuf
+        const valueTmpResult : double | Bindable<double> | undefined = valueTmpBuf
         const minTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let minTmpBuf : number | undefined = undefined
+        let minTmpBuf : double | undefined = undefined
         if ((minTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            minTmpBuf = (valueDeserializer.readNumber() as number)
+            minTmpBuf = valueDeserializer.readFloat64()
         }
-        const minTmpResult : number | undefined = minTmpBuf
+        const minTmpResult : double | undefined = minTmpBuf
         const maxTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxTmpBuf : number | undefined = undefined
+        let maxTmpBuf : double | undefined = undefined
         if ((maxTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxTmpBuf = (valueDeserializer.readNumber() as number)
+            maxTmpBuf = valueDeserializer.readFloat64()
         }
-        const maxTmpResult : number | undefined = maxTmpBuf
+        const maxTmpResult : double | undefined = maxTmpBuf
         const stepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let stepTmpBuf : number | undefined = undefined
+        let stepTmpBuf : double | undefined = undefined
         if ((stepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            stepTmpBuf = (valueDeserializer.readNumber() as number)
+            stepTmpBuf = valueDeserializer.readFloat64()
         }
-        const stepTmpResult : number | undefined = stepTmpBuf
+        const stepTmpResult : double | undefined = stepTmpBuf
         const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let styleTmpBuf : SliderStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

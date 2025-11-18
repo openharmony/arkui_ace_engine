@@ -1,0 +1,504 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@Entry
+@Component
+struct TextExample32dev {
+  controller: TextController = new TextController();
+  options: TextOptions = { controller: this.controller };
+  @State text: string = 'Text editMenuOptions'
+  @State phoneNumber: string = '13912345678';
+  @State url: string = 'www.baidu.com';
+  @State email: string = 'wangyi@example.com';
+  @State address: string = '河北省保定市';
+  @State datetime: string = '2024年7月19日';
+  @State tag: boolean = true;
+
+  onCreateMenu(menuItems: Array<TextMenuItem>) {
+    menuItems.forEach((value, index) => {
+      value.icon = $r('app.media.startIcon')
+      if (value.id.equals(TextMenuItemId.COPY)) {
+        value.content = $r('app.string.copy')
+      }
+      if (value.id.equals(TextMenuItemId.SELECT_ALL)) {
+        value.content = '全选change'
+      }
+    })
+    let item1: TextMenuItem = {
+      content: 'custom1',
+      icon: $r('app.media.22'),
+      id: TextMenuItemId.of('custom1'),
+    }
+    let item2: TextMenuItem = {
+      content: 'custom2\ncustom2',
+      id: TextMenuItemId.of('custom2'),
+      icon: $r('app.media.81'),
+    }
+
+    let item3: TextMenuItem = {
+      content: 'custom3',
+      id: TextMenuItemId.of('custom3'),
+      icon: $r('app.media.bmp'),
+    }
+    let item4: TextMenuItem = {
+      content: 'custom4',
+      id: TextMenuItemId.of('custom4'),
+      icon: $r('app.media.svg'),
+    }
+    let item5: TextMenuItem = {
+      content: 'custom5',
+      id: TextMenuItemId.of('custom5'),
+      icon: $r('app.media.webp'),
+    }
+    let item6: TextMenuItem = {
+      content: 'custom6',
+      id: TextMenuItemId.of('custom6'),
+      icon: $r('app.media.gif'),
+    }
+    let item7: TextMenuItem = {
+      content: $r('app.string.longText'),
+      id: TextMenuItemId.of('custom7'),
+      icon: $r('app.media.jpeg'),
+    }
+    let item11: TextMenuItem = {
+      content: 'AB,C123JJKHJKN,MNMN',
+      id: TextMenuItemId.of('custom11'),
+      icon: $r('app.media.icon'),
+    }
+    menuItems.unshift(item1)
+    menuItems.unshift(item2)
+    menuItems.unshift(item3)
+    menuItems.unshift(item4)
+    menuItems.unshift(item5)
+    menuItems.unshift(item6)
+    menuItems.unshift(item7)
+    return menuItems
+  }
+
+  onCreateMenu2(menuItems: Array<TextMenuItem>) {
+    menuItems.forEach((value, index) => {
+      value.icon = $r('app.media.startIcon')
+      if (value.id.equals(TextMenuItemId.COPY)) {
+        value.content = $r('app.string.copy')
+      }
+      if (value.id.equals(TextMenuItemId.SELECT_ALL)) {
+        value.content = '全选change'
+      }
+    })
+    let item1: TextMenuItem = {
+      content: 'custom1',
+      icon: $r('app.media.22'),
+      id: TextMenuItemId.of('custom1'),
+    }
+    let item2: TextMenuItem = {
+      content: 'custom2\ncustom2',
+      id: TextMenuItemId.of('custom2'),
+      icon: $r('app.media.81'),
+    }
+
+    let item3: TextMenuItem = {
+      content: 'custom3',
+      id: TextMenuItemId.of('custom3'),
+      icon: $r('app.media.bmp'),
+    }
+    let item4: TextMenuItem = {
+      content: 'custom4',
+      id: TextMenuItemId.of('custom4'),
+      icon: $r('app.media.svg'),
+    }
+    let item5: TextMenuItem = {
+      content: 'custom5',
+      id: TextMenuItemId.of('custom5'),
+      icon: $r('app.media.webp'),
+    }
+    let item6: TextMenuItem = {
+      content: 'custom6',
+      id: TextMenuItemId.of('custom6'),
+      icon: $r('app.media.gif'),
+    }
+    let item7: TextMenuItem = {
+      content: $r('app.string.longText'),
+      id: TextMenuItemId.of('custom7'),
+      icon: $r('app.media.jpeg'),
+    }
+    let item11: TextMenuItem = {
+      content: 'AB,C123JJKHJKN,MNMN',
+      id: TextMenuItemId.of('custom11'),
+      icon: $r('app.media.icon'),
+    }
+    menuItems.push(item1)
+    menuItems.push(item2)
+    menuItems.push(item3)
+    menuItems.push(item4)
+    menuItems.push(item5)
+    menuItems.push(item6)
+    menuItems.push(item7)
+    return menuItems
+  }
+
+  onCreateMenu3(menuItems: Array<TextMenuItem>) {
+    menuItems.forEach((value, index) => {
+      value.icon = $r('app.media.startIcon')
+      if (value.id.equals(TextMenuItemId.COPY)) {
+        value.content = $r('app.string.copy')
+      }
+      if (value.id.equals(TextMenuItemId.SELECT_ALL)) {
+        value.content = '全选change'
+      }
+    })
+    let item1: TextMenuItem = {
+      content: 'custom1',
+      icon: $r('app.media.22'),
+      id: TextMenuItemId.of('custom1'),
+    }
+    let item2: TextMenuItem = {
+      content: 'custom2\ncustom2',
+      id: TextMenuItemId.of('custom2'),
+      icon: $r('app.media.81'),
+    }
+
+    let item3: TextMenuItem = {
+      content: 'custom3',
+      id: TextMenuItemId.of('custom3'),
+      icon: $r('app.media.bmp'),
+    }
+    let item4: TextMenuItem = {
+      content: 'custom4',
+      id: TextMenuItemId.of('custom4'),
+      icon: $r('app.media.svg'),
+    }
+    let item5: TextMenuItem = {
+      content: 'custom5',
+      id: TextMenuItemId.of('custom5'),
+      icon: $r('app.media.webp'),
+    }
+    let item6: TextMenuItem = {
+      content: 'custom6',
+      id: TextMenuItemId.of('custom6'),
+      icon: $r('app.media.gif'),
+    }
+    let item7: TextMenuItem = {
+      content: $r('app.string.longText'),
+      id: TextMenuItemId.of('custom7'),
+      icon: $r('app.media.jpeg'),
+    }
+    let item11: TextMenuItem = {
+      content: 'AB,C123JJKHJKN,MNMN',
+      id: TextMenuItemId.of('custom11'),
+      icon: $r('app.media.icon'),
+    }
+    menuItems.unshift(item1)
+    menuItems.unshift(item2)
+    menuItems.unshift(item3)
+    menuItems.unshift(item4)
+    menuItems.unshift(item5)
+    menuItems.unshift(item6)
+    menuItems.unshift(item7)
+    menuItems.shift()
+    return menuItems
+  }
+
+  onCreateMenu4(menuItems: Array<TextMenuItem>) {
+    menuItems.forEach((value, index) => {
+      value.icon = $r('app.media.startIcon')
+      if (value.id.equals(TextMenuItemId.COPY)) {
+        value.content = $r('app.string.copy')
+      }
+      if (value.id.equals(TextMenuItemId.SELECT_ALL)) {
+        value.content = '全选change'
+      }
+    })
+    let item1: TextMenuItem = {
+      content: 'custom1',
+      icon: $r('app.media.22'),
+      id: TextMenuItemId.of('custom1'),
+    }
+    let item2: TextMenuItem = {
+      content: 'custom2\ncustom2',
+      id: TextMenuItemId.of('custom2'),
+      icon: $r('app.media.81'),
+    }
+
+    let item3: TextMenuItem = {
+      content: 'custom3',
+      id: TextMenuItemId.of('custom3'),
+      icon: $r('app.media.bmp'),
+    }
+    let item4: TextMenuItem = {
+      content: 'custom4',
+      id: TextMenuItemId.of('custom4'),
+      icon: $r('app.media.svg'),
+    }
+    let item5: TextMenuItem = {
+      content: 'custom5',
+      id: TextMenuItemId.of('custom5'),
+      icon: $r('app.media.webp'),
+    }
+    let item6: TextMenuItem = {
+      content: 'custom6',
+      id: TextMenuItemId.of('custom6'),
+      icon: $r('app.media.gif'),
+    }
+    let item7: TextMenuItem = {
+      content: $r('app.string.longText'),
+      id: TextMenuItemId.of('custom7'),
+      icon: $r('app.media.jpeg'),
+    }
+    let item11: TextMenuItem = {
+      content: 'AB,C123JJKHJKN,MNMN',
+      id: TextMenuItemId.of('custom11'),
+      icon: $r('app.media.icon'),
+    }
+    menuItems.push(item1)
+    menuItems.push(item2)
+    menuItems.push(item3)
+    menuItems.push(item4)
+    menuItems.push(item5)
+    menuItems.push(item6)
+    menuItems.push(item7)
+    menuItems.pop()
+    return menuItems
+  }
+
+  build() {
+    Column() {
+      Button('onMenuItemClick' + this.tag).onClick(() => {
+        this.tag = !this.tag
+      })
+      Text('Text editMenuOptions unshift')
+        .fontSize(20)
+        .copyOption(CopyOptions.LocalDevice)
+        .bindSelectionMenu(TextSpanType.IMAGE, this.LongPressImageCustomMenu, TextResponseType.LONG_PRESS, {
+          onDisappear: () => {
+            console.info(`自定义选择菜单关闭时回调`);
+          },
+          onAppear: () => {
+            console.info(`自定义选择菜单弹出时回调`);
+          }
+        })
+        .bindSelectionMenu(TextSpanType.TEXT, this.RightClickTextCustomMenu, TextResponseType.RIGHT_CLICK)
+        .bindSelectionMenu(TextSpanType.MIXED, this.SelectMixCustomMenu, TextResponseType.SELECT)
+        .onTextSelectionChange((selectionStart: number, selectionEnd: number) => {
+          console.info(`文本选中区域变化回调, selectionStart: ${selectionStart}, selectionEnd: ${selectionEnd}`);
+        })
+        .borderWidth(1)
+        .borderColor(Color.Red)
+        .width(280)
+        .height(50)
+        .enableDataDetector(true)
+        .editMenuOptions({
+          onCreateMenu: this.onCreateMenu, onMenuItemClick: (menuItem: TextMenuItem, textRange: TextRange) => {
+            if (menuItem.id.equals(TextMenuItemId.of('custom2'))) {
+              console.log('拦截 id: custom2 start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.COPY)) {
+              console.log('拦截 COPY start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.SELECT_ALL)) {
+              console.log('拦截 SELECT_ALL start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            return false;
+          }
+        })
+        .margin({ top: 20 })
+
+      Text('Text editMenuOptions push')
+        .fontSize(20)
+        .copyOption(CopyOptions.LocalDevice)
+        .bindSelectionMenu(TextSpanType.IMAGE, this.LongPressImageCustomMenu, TextResponseType.LONG_PRESS, {
+          onDisappear: () => {
+            console.info(`自定义选择菜单关闭时回调`);
+          },
+          onAppear: () => {
+            console.info(`自定义选择菜单弹出时回调`);
+          }
+        })
+        .bindSelectionMenu(TextSpanType.TEXT, this.RightClickTextCustomMenu, TextResponseType.RIGHT_CLICK)
+        .bindSelectionMenu(TextSpanType.MIXED, this.SelectMixCustomMenu, TextResponseType.SELECT)
+        .onTextSelectionChange((selectionStart: number, selectionEnd: number) => {
+          console.info(`文本选中区域变化回调, selectionStart: ${selectionStart}, selectionEnd: ${selectionEnd}`);
+        })
+        .borderWidth(1)
+        .borderColor(Color.Red)
+        .width(280)
+        .height(50)
+        .enableDataDetector(true)
+        .editMenuOptions({
+          onCreateMenu: this.onCreateMenu2, onMenuItemClick: (menuItem: TextMenuItem, textRange: TextRange) => {
+            if (menuItem.id.equals(TextMenuItemId.of('custom2'))) {
+              console.log('拦截 id: custom2 start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.COPY)) {
+              console.log('拦截 COPY start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.SELECT_ALL)) {
+              console.log('拦截 SELECT_ALL start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            return false;
+          }
+        })
+        .margin({ top: 20 })
+
+      Text('Text editMenuOptions shift')
+        .fontSize(20)
+        .copyOption(CopyOptions.LocalDevice)
+        .bindSelectionMenu(TextSpanType.IMAGE, this.LongPressImageCustomMenu, TextResponseType.LONG_PRESS, {
+          onDisappear: () => {
+            console.info(`自定义选择菜单关闭时回调`);
+          },
+          onAppear: () => {
+            console.info(`自定义选择菜单弹出时回调`);
+          }
+        })
+        .bindSelectionMenu(TextSpanType.TEXT, this.RightClickTextCustomMenu, TextResponseType.RIGHT_CLICK)
+        .bindSelectionMenu(TextSpanType.MIXED, this.SelectMixCustomMenu, TextResponseType.SELECT)
+        .onTextSelectionChange((selectionStart: number, selectionEnd: number) => {
+          console.info(`文本选中区域变化回调, selectionStart: ${selectionStart}, selectionEnd: ${selectionEnd}`);
+        })
+        .borderWidth(1)
+        .borderColor(Color.Red)
+        .width(280)
+        .height(50)
+        .enableDataDetector(true)
+        .editMenuOptions({
+          onCreateMenu: this.onCreateMenu3, onMenuItemClick: (menuItem: TextMenuItem, textRange: TextRange) => {
+            if (menuItem.id.equals(TextMenuItemId.of('custom2'))) {
+              console.log('拦截 id: custom2 start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.COPY)) {
+              console.log('拦截 COPY start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.SELECT_ALL)) {
+              console.log('拦截 SELECT_ALL start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            return false;
+          }
+        })
+        .margin({ top: 20 })
+
+      Text('Text editMenuOptions pop')
+        .fontSize(20)
+        .copyOption(CopyOptions.LocalDevice)
+        .bindSelectionMenu(TextSpanType.IMAGE, this.LongPressImageCustomMenu, TextResponseType.LONG_PRESS, {
+          onDisappear: () => {
+            console.info(`自定义选择菜单关闭时回调`);
+          },
+          onAppear: () => {
+            console.info(`自定义选择菜单弹出时回调`);
+          }
+        })
+        .bindSelectionMenu(TextSpanType.TEXT, this.RightClickTextCustomMenu, TextResponseType.RIGHT_CLICK)
+        .bindSelectionMenu(TextSpanType.MIXED, this.SelectMixCustomMenu, TextResponseType.SELECT)
+        .onTextSelectionChange((selectionStart: number, selectionEnd: number) => {
+          console.info(`文本选中区域变化回调, selectionStart: ${selectionStart}, selectionEnd: ${selectionEnd}`);
+        })
+        .borderWidth(1)
+        .borderColor(Color.Red)
+        .width(280)
+        .height(50)
+        .enableDataDetector(true)
+        .editMenuOptions({
+          onCreateMenu: this.onCreateMenu4, onMenuItemClick: (menuItem: TextMenuItem, textRange: TextRange) => {
+            if (menuItem.id.equals(TextMenuItemId.of('custom2'))) {
+              console.log('拦截 id: custom2 start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.COPY)) {
+              console.log('拦截 COPY start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            if (menuItem.id.equals(TextMenuItemId.SELECT_ALL)) {
+              console.log('拦截 SELECT_ALL start:' + textRange.start + '; end:' + textRange.end)
+              return this.tag;
+            }
+            return false;
+          }
+        })
+        .margin({ top: 20 })
+
+
+    }
+    .width('90%')
+    .margin('5%')
+
+  }
+
+  @Builder
+  RightClickTextCustomMenu() {
+    Column() {
+      Menu() {
+        MenuItemGroup() {
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Right Click Menu 1', labelInfo: '' })
+            .onClick((event) => {
+              this.controller.closeSelectionMenu();
+            })
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Right Click Menu 2', labelInfo: '' })
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Right Click Menu 3', labelInfo: '' })
+        }
+      }
+      .menuStyles()
+    }
+  }
+
+  @Builder
+  LongPressImageCustomMenu() {
+    Column() {
+      Menu() {
+        MenuItemGroup() {
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Long Press Image Menu 1', labelInfo: '' })
+            .onClick((event) => {
+              this.controller.closeSelectionMenu();
+            })
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Long Press Image Menu 2', labelInfo: '' })
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Long Press Image Menu 3', labelInfo: '' })
+        }
+      }
+      .menuStyles()
+    }
+  }
+
+  @Builder
+  SelectMixCustomMenu() {
+    Column() {
+      Menu() {
+        MenuItemGroup() {
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Select Mixed Menu 1', labelInfo: '' })
+            .onClick((event) => {
+              this.controller.closeSelectionMenu();
+            })
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Select Mixed Menu 2', labelInfo: '' })
+          MenuItem({ startIcon: $r('app.media.app_icon'), content: 'Select Mixed Menu 3', labelInfo: '' })
+        }
+      }
+      .menuStyles()
+    }
+  }
+}
+
+@Extend(Menu)
+function menuStyles() {
+  .radius($r('sys.float.ohos_id_corner_radius_card'))
+  .clip(true)
+  .backgroundColor('#F0F0F0')
+}

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SCROLLABLE_COMPONENT_COMPONENTS_LIST_ITEM_SWIPE_H
-#define SCROLLABLE_COMPONENT_COMPONENTS_LIST_ITEM_SWIPE_H
+#ifndef SCROLLABLE_COMPONENTS_LIST_ITEM_SWIPE_H
+#define SCROLLABLE_COMPONENTS_LIST_ITEM_SWIPE_H
 
 #include <functional>
 
@@ -356,4 +356,4 @@ private:
     std::function<void(float, void *)> offsetUD_;
 };
 
-#endif // SCROLLABLE_COMPONENT_COMPONENTS_LIST_ITEM_SWIPE_H
+#endif // SCROLLABLE_COMPONENTS_LIST_ITEM_SWIPE_H

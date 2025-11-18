@@ -118,6 +118,26 @@ HWTEST_F(SvgManagerTestNg, CalcDstRect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SvgImageTest001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgManagerTestNg, SvgImageTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(IMAGE_LABEL.c_str(), IMAGE_LABEL.length());
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+    auto svgImage = AceType::DynamicCast<SvgImage>(svg->children_.at(0));
+    std::string test = "test.svg";
+    EXPECT_EQ(svgImage->LoadLocalImage(test), nullptr);
+    test = "testgif";
+    EXPECT_EQ(svgImage->LoadLocalImage(test), nullptr);
+}
+
+/**
  * @tc.name: ParseHrefAttr001
  * @tc.desc: test function of SvgImage.
  * @tc.type: FUNC

@@ -14,8 +14,7 @@
  */
 
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable, IObservedObject } from '../decorator';
-import { ExtendableComponent } from '../../component/extendableComponent';
+import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable, IObservedObject, IVariableOwner } from '../decorator';
 import { WatchFuncType, WatchIdType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
@@ -29,6 +28,7 @@ import { UIUtils } from '../utils';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
     watchId: WatchIdType;
@@ -43,7 +43,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     public readonly backing_: IBackingValue<T>;
     // @state can init from parent @Component
     // initValue is either value provided by parent or localInit value
-    constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
+    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@State', owningView, varName, watchFunc);
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);
@@ -62,20 +62,23 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     }
 
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`State ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 
     public set(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`State ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }
-        let value: T = uiUtils.makeObserved(newValue);
+        let value: T = uiUtils.makeV1Observed(newValue);
         // for interop
         if (isDynamicObject(newValue)) {
-            let value = getObservedObject(newValue);
+            const value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
             this.backing_.setNoCheck(value);
@@ -98,7 +101,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
      */
     public mkLink(varName: string): LinkDecoratedVariable<T> {
         const link = new LinkDecoratedVariable<T>(
-            null,
+            undefined,
             varName,
             this,
             () => this.get(),
@@ -113,7 +116,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
      * used by LocalStorage
      */
     public mkProp(varName: string): __MkPropReturnType<T> {
-        const prop = new PropDecoratedVariable<T>(null, varName, this.get());
+        const prop = new PropDecoratedVariable<T>(undefined, varName, this.get());
         // the WatchFunc must not hold a strong reference on prop
         const weakProp = new WeakRef<PropDecoratedVariable<T>>(prop);
         // when this StateDecoratedVariable changes, the watchFunc is called,

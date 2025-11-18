@@ -1046,8 +1046,8 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
 
 declare class ArkContainerPicker extends ArkComponent implements PickerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    onChange(callback: Optional<OnPickerChangeCallback>): this;
-    onScrollStop(callback: Optional<OnPickerChangeCallback>): this;
+    onChange(callback: Optional<OnPickerCallback>): this;
+    onScrollStop(callback: Optional<OnPickerCallback>): this;
     canLoop(isLoop: Optional<boolean>): this;
     enableHapticFeedback(enable: Optional<boolean>): this;
     selectionIndicator(style: Optional<PickerIndicatorStyle>): this;
@@ -1971,6 +1971,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
     onUnselected(event: (index: number) => void): TabsAttribute;
+    onContentDidScroll(handler: OnTabsContentDidScrollCallback | undefined): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;

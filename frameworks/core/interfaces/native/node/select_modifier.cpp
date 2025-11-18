@@ -640,8 +640,6 @@ void SetSelectValue(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(values);
-    CHECK_NULL_VOID(icons);
     std::vector<SelectParam> params;
     for (uint32_t i = 0; i < length; i++) {
         if (!values[i]) {
@@ -937,7 +935,6 @@ void SetSelectSymbolValue(ArkUINodeHandle node, ArkUI_CharPtr* values,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(values);
 
     std::vector<SelectParam> params(length);
     for (uint32_t i = 0; i < length; i++) {

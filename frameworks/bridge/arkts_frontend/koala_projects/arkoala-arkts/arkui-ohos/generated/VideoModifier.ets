@@ -26,6 +26,7 @@ import { CommonMethod } from "./component/common"
 import { ImageFit } from "./component/enums"
 import { VoidCallback } from "./component/units"
 import { ImageAnalyzerConfig } from "./component/imageCommon"
+import { ColorMetrics } from "arkui.Graphics"
 export class VideoModifier extends CommonMethodModifier implements VideoAttribute,AttributeModifier<VideoAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
@@ -73,6 +74,8 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _analyzerConfig_0_0value?: ImageAnalyzerConfig | undefined
     _enableShortcutKey_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableShortcutKey_0_0value?: boolean | undefined
+    _surfaceBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _surfaceBackgroundColor_0_0value?: ColorMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkVideoPeer;
@@ -400,6 +403,24 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 }
             }
         }
+        if (this._surfaceBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._surfaceBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSurfaceBackgroundColorAttribute((this._surfaceBackgroundColor_0_0value as ColorMetrics | undefined));
+                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSurfaceBackgroundColorAttribute((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: VideoModifier): void {
         super.mergeModifier(modifier)
@@ -637,6 +658,19 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 }
             }
         }
+        if (modifier._surfaceBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._surfaceBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.surfaceBackgroundColor(modifier._surfaceBackgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.surfaceBackgroundColor((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
     }
     muted(value: boolean | undefined): this {
         if (((this._muted_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._muted_0_0value) !== (value)))
@@ -833,6 +867,17 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         } else
         {
             this._enableShortcutKey_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
+        if (((this._surfaceBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._surfaceBackgroundColor_0_0value = value
+        } else
+        {
+            this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

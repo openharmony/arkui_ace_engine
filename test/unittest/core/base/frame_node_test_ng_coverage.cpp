@@ -15,11 +15,13 @@
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "core/common/recorder/event_definition.h"
-#include "core/components_ng/property/grid_property.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/extension_handler.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/property/grid_property.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/render/mock_canvas_image.h"
 

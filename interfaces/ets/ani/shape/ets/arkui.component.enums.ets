@@ -14,28 +14,28 @@
  */
 
 export enum Color {
-    
-    White,
-   
-    Black,
-  
-    Blue,
 
-    Brown,
-  
-    Gray,
+  White = '#FFFFFFFF',
 
-    Green,
+  Black = '#FF000000',
 
-    Grey,
+  Blue = '#FF0000FF',
 
-    Orange,
+  Brown = '#FFA52A2A',
 
-    Pink,
+  Gray = '#FF808080',
 
-    Red,
+  Green = '#FF008000',
 
-    Yellow,
+  Grey = '#FF808080',
 
-    Transparent
+  Orange = '#FFFFA500',
+
+  Pink = '#FFFFC0CB',
+
+  Red = '#FFFF0000',
+
+  Yellow = '#FFFFFF00',
+
+  Transparent = '#00000000',
 }

@@ -17,55 +17,55 @@ export default namespace componentUtils {
     loadLibrary("componentUtils_ani");
 
     export interface Size {
-        width: number
-        height: number
+        width: double
+        height: double
     }
 
     export interface Offset {
-        x: number
-        y: number
+        x: double
+        y: double
     }
 
     export interface TranslateResult {
-        x: number
-        y: number
-        z: number
+        x: double
+        y: double
+        z: double
     }
 
     export interface ScaleResult {
-        x: number
-        y: number
-        z: number
-        centerX: number
-        centerY: number
+        x: double
+        y: double
+        z: double
+        centerX: double
+        centerY: double
     }
 
     export interface RotateResult {
-        x: number
-        y: number
-        z: number
-        centerX: number
-        centerY: number
-        angle: number
+        x: double
+        y: double
+        z: double
+        centerX: double
+        centerY: double
+        angle: double
     }
 
     type Matrix4Result = [
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
-        number,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
     ];
 
     export interface ComponentInfo {

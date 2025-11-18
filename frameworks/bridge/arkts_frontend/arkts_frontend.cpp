@@ -17,7 +17,7 @@
 #include <ani.h>
 #include "interfaces/inner_api/ace/constants.h"
 #include "ui/base/utils/utils.h"
-
+#include "base/utils/system_properties.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -50,13 +50,15 @@ struct AppInfo {
     const char* handleMessageMethodSig;
     const char* registerNativeModule;
     const char* registerNativeModuleSig;
+    const char* constructorParamClassName;
+    const char* constructorParamCtorMethod;
+    const char* constructorParamSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
     "arkui.ArkUIEntry.Application",
     "createApplication",
-    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
-    "C{arkui.component.customComponent.EntryPoint}:C{arkui.ArkUIEntry.Application}",
+    "C{arkui.ArkUIEntry.ApplicationConstructorParam}:C{arkui.ArkUIEntry.Application}",
     "start",
     "z:l",
     "enter",
@@ -69,6 +71,10 @@ const AppInfo KOALA_APP_INFO = {
     "liC{std.core.String}:z",
     "registerNativeModulePreloader",
     ":",
+    "arkui.ArkUIEntry.ApplicationConstructorParam",
+    "<ctor>",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
+    "C{arkui.component.customComponent.EntryPoint}z:",
 };
 
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
@@ -441,9 +447,26 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     std::string moduleName = currentContainer->GetModuleName();
     ani_string module;
     env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
-    if (env->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
-            legacyEntryPointObj ? legacyEntryPointObj : optionalEntry,
-            entryPointObj ? entryPointObj : optionalEntry) != ANI_OK) {
+    ani_boolean enableDebug = ani_boolean(SystemProperties::GetDebugEnabled());
+    ani_class appConstructorParamClass;
+    if (env->FindClass(KOALA_APP_INFO.constructorParamClassName, &appConstructorParamClass) != ANI_OK) {
+        LOGE("Cannot load class %{public}s", KOALA_APP_INFO.constructorParamClassName);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_method paramConstructor;
+    if (env->Class_FindMethod(appConstructorParamClass, KOALA_APP_INFO.constructorParamCtorMethod,
+        KOALA_APP_INFO.constructorParamSig, &paramConstructor) != ANI_OK) {
+        LOGE("Cannot find create method %{public}s", KOALA_APP_INFO.constructorParamCtorMethod);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_object param;
+    if (env->Object_New(appConstructorParamClass, paramConstructor, &param, aniUrl, aniParams, false, module,
+        legacyEntryPointObj ? legacyEntryPointObj : optionalEntry, entryPointObj ? entryPointObj : optionalEntry,
+        enableDebug) != ANI_OK) {
+        LOGE("Fail to create ApplicationConstructorParam");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    if (env->Class_CallStaticMethod_Ref(appClass, create, &appLocal, param) != ANI_OK) {
         LOGE("createApplication returned null");
         return UIContentErrorCode::INVALID_URL;
     }
@@ -505,6 +528,15 @@ void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
     }
 }
 
+void ArktsFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    if (!context) {
+        return;
+    }
+    accessibilityManager_->AddSubPipelineContext(context);
+    accessibilityManager_->RegisterSubWindowInteractionOperation(context->GetWindowId());
+}
+
 ani_ref ArktsFrontend::GetSharedStorage(int32_t id)
 {
     int32_t currentInstance = id;
@@ -538,13 +570,13 @@ ani_object ArktsFrontend::GetUIContext(int32_t instanceId)
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.base.UIContextUtil.UIContextUtil", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
     ani_ref aniRef = nullptr;
     if ((status = env->Class_CallStaticMethodByName_Ref(uiContextClass, "getOrCreateUIContextById",
-        "I:L@ohos/arkui/UIContext/UIContext;", &aniRef, instanceId)) != ANI_OK) {
+        "i:C{@ohos.arkui.UIContext.UIContext}", &aniRef, instanceId)) != ANI_OK) {
         LOGE("Class_CallStaticMethodByName_Ref failed, %{public}d", status);
         return result;
     }
@@ -613,6 +645,12 @@ void* ArktsFrontend::PushDynamicExtender(const std::string& url, const std::stri
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     auto pageNode = AceType::WeakClaim(static_cast<NG::FrameNode*>(pageNodeRawPtr)).Upgrade();
     CHECK_NULL_RETURN(pageNode, nullptr);
+    if (pageNode->RefCount() != 2) {
+        LOGE("AceRouter pageNode for PushDynamicExtender has wrong RefCount: %{public}d", pageNode->RefCount());
+    }
+    if (pageNode->RefCount() > 1) {
+        pageNode->DecRefCount();
+    }
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
@@ -629,6 +667,12 @@ void* ArktsFrontend::ReplaceDynamicExtender(const std::string& url, const std::s
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     auto pageNode = AceType::WeakClaim(static_cast<NG::FrameNode*>(pageNodeRawPtr)).Upgrade();
     CHECK_NULL_RETURN(pageNode, nullptr);
+    if (pageNode->RefCount() != 2) {
+        LOGE("AceRouter pageNode for ReplaceDynamicExtender has wrong RefCount: %{public}d", pageNode->RefCount());
+    }
+    if (pageNode->RefCount() > 1) {
+        pageNode->DecRefCount();
+    }
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;

@@ -69,6 +69,7 @@
 #include "core/components/video/video_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
@@ -179,6 +180,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::SwiperTheme::TypeId(), &ThemeBuildFunc<NG::SwiperTheme::Builder> },
     { NG::LinearIndicatorTheme::TypeId(), &ThemeBuildFunc<NG::LinearIndicatorTheme::Builder> },
     { NG::RefreshThemeNG::TypeId(), &ThemeBuildFunc<NG::RefreshThemeNG::Builder> },
+    { NG::ContainerPickerTheme::TypeId(), &ThemeBuildFunc<NG::ContainerPickerTheme::Builder> },
 };
 
 template<class T>
@@ -227,27 +229,16 @@ ThemeManagerImpl::ThemeManagerImpl(RefPtr<ResourceAdapter>& resourceAdapter)
 
 void ThemeManagerImpl::RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func)
 {
-    auto key = GetThemesMapKey(type);
-    auto findIter = themes_.find(key);
+    auto findIter = themes_.find(type);
     if (findIter != themes_.end()) {
         return;
     }
     THEME_BUILDERS_KIT.insert({ type, func });
 }
 
-std::string ThemeManagerImpl::GetThemesMapKey(ThemeType type) const
-{
-    auto colorMode = GetCurrentColorMode();
-    auto colorModeString = std::to_string(static_cast<int32_t>(colorMode));
-    auto typeString = std::to_string(type);
-    auto key = colorModeString + typeString;
-    return key;
-}
-
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
 {
-    auto key = GetThemesMapKey(type);
-    auto findIter = themes_.find(key);
+    auto findIter = themes_.find(type);
     if (findIter != themes_.end()) {
         return findIter->second;
     }
@@ -265,8 +256,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
     }
   
     auto theme = builderIter->second(themeConstants_);
-    auto key = GetThemesMapKey(type);
-    themes_.emplace(key, theme);
+    themes_.emplace(type, theme);
     return theme;
 }
 
@@ -276,7 +266,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
     if (builderIterKit == THEME_BUILDERS_KIT.end()) {
         return nullptr;
     }
-    auto key = GetThemesMapKey(type);
+
     if (auto pipeline = NG::PipelineContext::GetCurrentContext(); pipeline) {
         ColorMode localMode = pipeline->GetLocalColorMode();
         ColorMode systemMode = pipeline->GetColorMode();
@@ -294,12 +284,12 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
             ResourceManager::GetInstance().UpdateColorMode(
                 pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), localMode);
         }
-        themes_.emplace(key, theme);
+        themes_.emplace(type, theme);
         return theme;
     }
     
     auto theme = builderIterKit->second();
-    themes_.emplace(key, theme);
+    themes_.emplace(type, theme);
     return theme;
 }
 
@@ -412,8 +402,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId
 
 Color ThemeManagerImpl::GetBackgroundColor() const
 {
-    auto key = GetThemesMapKey(AppTheme::TypeId());
-    auto findIter = themes_.find(key);
+    auto findIter = themes_.find(AppTheme::TypeId());
     if (findIter != themes_.end()) {
         auto appTheme = AceType::DynamicCast<AppTheme>(findIter->second);
         if (appTheme) {
@@ -436,6 +425,15 @@ Color ThemeManagerImpl::GetBackgroundColor() const
 }
 
 void ThemeManagerImpl::LoadResourceThemes()
+{
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        LoadResourceThemesMultiThread();
+        return;
+    }
+    LoadResourceThemesInner();
+}
+
+void ThemeManagerImpl::LoadResourceThemesInner()
 {
     themes_.clear();
     themeWrappersLight_.clear();

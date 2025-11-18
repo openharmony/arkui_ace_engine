@@ -1768,6 +1768,31 @@ class ArkDragPreview {
   }
 }
 
+class ArkResponseRegionList {
+  tool: number;
+  x: LengthMetrics;
+  y: LengthMetrics;
+  width: LengthMetrics | string;
+  height LengthMetrics | string;
+  constructor() {
+    this.tool = undefined;
+    this.x = undefined;
+    this.y = undefined;
+    this.width = undefined;
+    this.height = undefined;
+  }
+
+  isEqual(another: ArkResponseRegionList): boolean {
+    return (
+      this.tool === another.tool &&
+      this.x === another.x &&
+      this.y === another.y &&
+      this.width === another.width &&
+      this.height === another.height
+    );
+  }
+}
+
 class ArkShadowStyle {
   shadowStyle: number;
   constructor() {

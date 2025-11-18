@@ -135,6 +135,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, event);
     return this;
   }
+  onContentDidScroll(handler: OnTabsContentDidScrollCallback | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, TabsOnContentDidScrollModifier.identity, TabsOnContentDidScrollModifier, handler);
+    return this;
+  }
   fadingEdge(value: boolean): TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
     return this;
@@ -635,6 +639,21 @@ class TabsOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
       getUINativeModule().tabs.resetTabOnUnselected(node);
     } else {
       getUINativeModule().tabs.setTabOnUnselected(node, this.value);
+    }
+  }
+}
+
+class TabsOnContentDidScrollModifier extends ModifierWithKey<(selectedIndex: number, index: number,
+  position: number, mainAxisLength: number) => void> {
+  constructor(value: (selectedIndex: number, index: number, position: number, mainAxisLength: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOnContentDidScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnContentDidScroll(node);
+    } else {
+      getUINativeModule().tabs.setTabsOnContentDidScroll(node, this.value);
     }
   }
 }

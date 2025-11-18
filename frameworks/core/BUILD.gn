@@ -929,6 +929,7 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_attributes.cpp",
       "components/theme/theme_constants.cpp",
       "components/theme/theme_manager_impl.cpp",
+      "components/theme/theme_manager_multi_thread.cpp",
       "components/theme/theme_utils.cpp",
       "components/video/resource/player.cpp",
 

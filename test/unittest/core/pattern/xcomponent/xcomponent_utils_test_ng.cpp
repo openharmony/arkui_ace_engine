@@ -649,4 +649,77 @@ HWTEST_F(XComponentUtilsTestNg, ConvertNativeXComponentAnalyzerStatusTest, TestS
     result = XComponentUtils::ConvertNativeXComponentAnalyzerStatus(static_cast<ImageAnalyzerState>(4));
     EXPECT_EQ(result, ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED);
 }
+
+/**
+ * @tc.name: XComponentNodeTypeToStringTest
+ * @tc.desc: Test XComponentNodeTypeToString Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentUtilsTestNg, XComponentNodeTypeToStringTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Test XComponentNodeTypeToString when type is XComponentNodeType::TYPE_NODE
+     * @tc.expected: result = "type_node"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentNodeTypeToString(XComponentNodeType::TYPE_NODE), "type_node");
+    /**
+     * @tc.step2: Test XComponentNodeTypeToString when type is XComponentNodeType::UNKNOWN
+     * @tc.expected: result = "unknown"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentNodeTypeToString(XComponentNodeType::UNKNOWN), "unknown");
+    /**
+     * @tc.step3: Test XComponentNodeTypeToString when type is XComponentNodeType::CNODE
+     * @tc.expected: result = "cnode"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentNodeTypeToString(XComponentNodeType::CNODE), "cnode");
+    /**
+     * @tc.step4: Test XComponentNodeTypeToString when type is XComponentNodeType::DECLARATIVE_NODE
+     * @tc.expected: result = "declarative_node"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentNodeTypeToString(XComponentNodeType::DECLARATIVE_NODE), "declarative_node");
+    /**
+     * @tc.step5: Test XComponentNodeTypeToString when type is unknown XComponentNodeType enum value
+     * @tc.expected: result = "unknown"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentNodeTypeToString(static_cast<XComponentNodeType>(5)), "unknown");
+}
+
+/**
+ * @tc.name: XComponentTypeToStringTest
+ * @tc.desc: Test XComponentTypeToStringTest Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentUtilsTestNg, XComponentTypeToStringTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Test XComponentTypeToString when type is XComponentType::UNKNOWN
+     * @tc.expected: result = "unknown"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentTypeToString(XComponentType::UNKNOWN), "unknown");
+    /**
+     * @tc.step2: Test XComponentTypeToString when type is XComponentType::SURFACE
+     * @tc.expected: result = "surface"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentTypeToString(XComponentType::SURFACE), "surface");
+    /**
+     * @tc.step3: Test XComponentTypeToString when type is XComponentType::COMPONENT
+     * @tc.expected: result = "component"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentTypeToString(XComponentType::COMPONENT), "component");
+    /**
+     * @tc.step4: Test XComponentTypeToString when type is XComponentType::TEXTURE
+     * @tc.expected: result = "texture"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentTypeToString(XComponentType::TEXTURE), "texture");
+    /**
+     * @tc.step5: Test XComponentTypeToString when type is XComponentType::NODE
+     * @tc.expected: result = "node"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentTypeToString(XComponentType::NODE), "node");
+    /**
+     * @tc.step6: Test XComponentTypeToString when type is XComponentType::UNKNOWN
+     * @tc.expected: result = "unknown"
+     */
+    EXPECT_EQ(XComponentUtils::XComponentTypeToString(static_cast<XComponentType>(5)), "unknown");
+}
 } // namespace OHOS::Ace::NG

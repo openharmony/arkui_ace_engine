@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -46,9 +47,6 @@ using namespace testing::ext;
 using namespace OHOS::Ace::Testing;
 
 namespace OHOS::Ace::NG {
-namespace {
-const Dimension DEFAULT_MARGIN = 2.0_vp;
-}
 
 class ContainerPickerPaintMethodTest : public TestNG {
 public:
@@ -68,13 +66,16 @@ public:
 void ContainerPickerPaintMethodTest::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
+    auto theme = AceType::MakeRefPtr<ContainerPickerTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
 }
 
 void ContainerPickerPaintMethodTest::TearDownTestSuite()
 {
+    MockPipelineContext::TearDown();
     TestNG::TearDownTestSuite();
 }
 
@@ -118,26 +119,6 @@ RefPtr<PaintWrapper> ContainerPickerPaintMethodTest::CreateMockPaintWrapper(cons
 }
 
 /**
- * @tc.name: GetContentDrawFunctionTest001
- * @tc.desc: Test ContainerPickerPaintMethod GetContentDrawFunction
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPaintMethodTest, GetContentDrawFunctionTest001, TestSize.Level1)
-{
-    auto node = CreateContainerPickerNode();
-    auto paintWrapper = CreateMockPaintWrapper(node);
-    Testing::MockCanvas rsCanvas;
-    
-    EXPECT_CALL(rsCanvas, ClipRect(_, _, _)).Times(1);
-    
-    auto drawFunction = paintMethod_->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
-    ASSERT_NE(drawFunction, nullptr);
-    
-    // Test with valid canvas
-    drawFunction(rsCanvas);
-}
-
-/**
  * @tc.name: GetForegroundDrawFunctionTest001
  * @tc.desc: Test ContainerPickerPaintMethod GetForegroundDrawFunction
  * @tc.type: FUNC
@@ -150,7 +131,7 @@ HWTEST_F(ContainerPickerPaintMethodTest, GetForegroundDrawFunctionTest001, TestS
     
     // Set indicator type to divider
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
-    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(IndicatorType::DIVIDER));
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
     
     auto drawFunction = paintMethod_->GetForegroundDrawFunction(AceType::RawPtr(paintWrapper));
     ASSERT_NE(drawFunction, nullptr);
@@ -210,7 +191,7 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorBackgroundTest00
     
     // Set indicator type to divider
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
-    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(IndicatorType::DIVIDER));
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
     
     // Should not call any canvas methods
     EXPECT_CALL(rsCanvas, Save()).Times(0);
@@ -232,7 +213,7 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest001, 
     
     // Set indicator type to background
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
-    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(IndicatorType::BACKGROUND));
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
     
     // Should not call DrawLine
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(0);
@@ -272,10 +253,9 @@ HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest002, TestSize.L
     paintMethod_->CheckMarginAndLength(length, startMargin, endMargin);
     
     // Margins should be reset to default
-    float defaultMarginPx = DEFAULT_MARGIN.ConvertToPx();
-    EXPECT_FLOAT_EQ(startMargin, defaultMarginPx);
-    EXPECT_FLOAT_EQ(endMargin, defaultMarginPx);
-    EXPECT_FLOAT_EQ(length, 100.0f - 2 * defaultMarginPx);
+    EXPECT_FLOAT_EQ(startMargin, 0.0);
+    EXPECT_FLOAT_EQ(endMargin, 0.0);
+    EXPECT_FLOAT_EQ(length, 100.0f);
 }
 
 /**
@@ -304,6 +284,127 @@ HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest003, TestSize.L
     
     // Restore original RTL setting
     AceApplicationInfo::GetInstance().isRightToLeft_ = originalRtl;
+}
+
+/**
+ * @tc.name: PaintSelectionIndicatorDividerTest002
+ * @tc.desc: Test ContainerPickerPaintMethod PaintSelectionIndicatorDivider with stroke width limitation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker
+     */
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    Testing::MockCanvas rsCanvas;
+
+    // Set indicator type to divider
+    auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
+
+    // Mock pipeline context and theme
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    float defaultThickness = 2.0f;
+    mockTheme_->dividerThickness_ = Dimension(defaultThickness);
+
+    /**
+     * @tc.steps: step2. Test with stroke width equal to half of item height
+     * @tc.expected: step2. Stroke width should remain as set, not be reset to default
+     */
+    float itemHeightHalf = PICKER_ITEM_HEIGHT.ConvertToPx() / HALF;
+    layoutProperty->UpdateIndicatorDividerWidth(Dimension(itemHeightHalf));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, DetachBrush()).Times(AnyNumber());
+    paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
+
+    /**
+     * @tc.steps: step3. Test with stroke width greater than half of item height
+     * @tc.expected: step3. Stroke width should be reset to default
+     */
+    float excessiveWidth = itemHeightHalf + 1.0f;
+    layoutProperty->UpdateIndicatorDividerWidth(Dimension(excessiveWidth));
+    paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
+}
+
+/**
+ * @tc.name: PaintLineWithNormalParametersTest
+ * @tc.desc: Test ContainerPickerPaintMethod PaintLine with normal parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintLineWithNormalParametersTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create mock canvas and set up PaintLine parameters
+     */
+    Testing::MockCanvas rsCanvas;
+    OffsetF offset(10.0f, 20.0f);
+    PickerDividerPaintInfo dividerInfo;
+    dividerInfo.dividerLength = 100.0f;
+    dividerInfo.strokeWidth = 2.0f;
+    dividerInfo.dividerColor = Color::RED;
+
+    /**
+     * @tc.steps: step2. Mock canvas operations
+     */
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call PaintLine method
+     * @tc.expected: step3. Canvas methods should be called with correct parameters
+     */
+    paintMethod_->PaintLine(offset, dividerInfo, rsCanvas);
+}
+
+/**
+ * @tc.name: PaintSelectionIndicatorBackgroundWithPaddingTest
+ * @tc.desc: Test ContainerPickerPaintMethod PaintSelectionIndicatorBackground with padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorBackgroundWithPaddingTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker with background indicator type and padding
+     */
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    Testing::MockCanvas rsCanvas;
+
+    auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+
+    PaddingProperty padding;
+    padding.left = CalcLength(20.0f);
+    padding.right = CalcLength(20.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty->UpdatePadding(padding);
+
+    auto geometryNode = node->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(300.0f, 500.0f));
+
+    /**
+     * @tc.steps: step2. Mock canvas operations
+     */
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+
+    /**
+     * @tc.steps: step3. Call PaintSelectionIndicatorBackground method
+     * @tc.expected: step3. Should use contentRect with padding applied
+     */
+    paintMethod_->PaintSelectionIndicatorBackground(AceType::RawPtr(paintWrapper), rsCanvas);
 }
 
 } // namespace OHOS::Ace::NG

@@ -643,7 +643,9 @@ void FfiOHOSAceFrameworkRichEditorOnCopy(void(*callback)(int64_t))
 
 void FfiOHOSAceFrameworkRichEditorOnWillChange(bool(*callback)(NativeRichEditorChangeValue))
 {
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(frameNode);
     auto onWillChange = [cjCallback = CJLambda::Create(callback)](
                             const NG::RichEditorChangeValue& changeValue) {
         NativeRichEditorChangeValue nativeParams;

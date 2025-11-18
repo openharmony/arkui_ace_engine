@@ -14,12 +14,11 @@
  */
 
 import { SubscribedAbstractProperty } from './storageProperty';
-import { WatchFuncType, WatchIdType, IDecoratedV1Variable } from '../decorator';
+import { WatchFuncType, WatchIdType, IDecoratedV1Variable, IVariableOwner } from '../decorator';
 import { DecoratedV1VariableBase, DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { StateDecoratedVariable } from '../decoratorImpl/decoratorState';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { uiUtils } from '../base/uiUtilsImpl';
 
 export interface IStorageProperty {
@@ -35,7 +34,7 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
     );
 
     constructor(propName: string, initValue: T) {
-        super(null, propName, initValue);
+        super(undefined, propName, initValue);
     }
 
     public mkRef(propertyNameInAppStorage: string): SubscribedAbstractProperty<T> {
@@ -49,7 +48,7 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
     }
 
     public makeStorageLink(
-        owner: ExtendableComponent,
+        owner: IVariableOwner,
         propertyNameInAppStorage: string,
         varName: string,
         decoratorName: string,
@@ -108,7 +107,7 @@ export class StorageBase {
     }
 
     public createAndSet<T>(key: string, value: T): boolean {
-        const sp = new StorageProperty<T>(key, uiUtils.makeObserved(value));
+        const sp = new StorageProperty<T>(key, uiUtils.makeV1Observed(value));
         this.repoAllTypes.set(key, sp);
         return true;
     }
@@ -146,7 +145,7 @@ export class StorageBase {
     }
 
     public makeStorageLink<T>(
-        owner: ExtendableComponent,
+        owner: IVariableOwner,
         key: string,
         varName: string,
         decoratorName: string,

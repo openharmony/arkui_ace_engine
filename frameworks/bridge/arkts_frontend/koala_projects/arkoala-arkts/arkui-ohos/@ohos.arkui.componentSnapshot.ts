@@ -18,20 +18,20 @@ import { PixelMap } from "#external";
 
 export declare namespace componentSnapshot {
     export interface SnapshotRegion {
-        left: number;
-        right: number;
-        top: number;
-        bottom: number;
+        left: double;
+        right: double;
+        top: double;
+        bottom: double;
     }
     export interface LocalizedSnapshotRegion {
-        start: number;
-        end: number;
-        top: number;
-        bottom: number;
+        start: double;
+        end: double;
+        top: double;
+        bottom: double;
     }
     export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
     export interface SnapshotOptions {
-        scale?: number;
+        scale?: double;
         waitUntilRenderFinished?: boolean;
         region?: SnapshotRegionType;
     }

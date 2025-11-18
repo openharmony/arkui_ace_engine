@@ -44,15 +44,19 @@ void ParseWidthAndHeight(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS
 void ANICreateRectShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
     ani_class cls;
-    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
+    ani_status status;
+    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
+        LOGE("Not find RectShape class, status:%{public}d", status);
         return;
     }
     RectPeer* shapePeer = new RectPeer();
     auto rect = AceType::MakeRefPtr<ShapeRect>();
     shapePeer->rectShape = rect;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "rectShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("RectShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -66,10 +70,13 @@ void ANICreateRectShapeWithParam(
 
     RectPeer* shapePeer = new RectPeer();
     auto rect = AceType::MakeRefPtr<ShapeRect>();
+    ani_status status;
 
     if (IsInstanceOfCls(env, aniOption, "@ohos.arkui.shape.RectShapeOptions")) {
         ani_ref params_ref;
-        if (ANI_OK != env->Object_GetPropertyByName_Ref(aniOption, "radius", &params_ref)) {
+        if ((status = env->Object_GetPropertyByName_Ref(aniOption, "radius", &params_ref)) != ANI_OK) {
+            LOGE("Get radius failed, status:%{public}d", status);
+            delete shapePeer;
             return;
         }
         if (!GetIsUndefinedObject(env, params_ref) && GetIsArrayObject(env, params_ref)) {
@@ -99,8 +106,10 @@ void ANICreateRectShapeWithParam(
     }
     ParseWidthAndHeight(env, aniOption, rect);
     shapePeer->rectShape = rect;
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "rectShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("RectShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -108,7 +117,7 @@ void ANICreateRectShapeWithParam(
 RectPeer* GetRectShape(ani_env* env, ani_object obj)
 {
     ani_long rectAni;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "rectShapeResult", &rectAni)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "basicShapeResult", &rectAni)) {
         return nullptr;
     }
 
@@ -123,9 +132,10 @@ ani_object ANIRectShapeWidth(ani_env* env, [[maybe_unused]] ani_object object, [
     }
     ani_class cls;
     if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
-        return nullptr;
+        return object;
     }
     RectPeer* rectObj = GetRectShape(env, object);
+    CHECK_NULL_RETURN(rectObj, object);
     CalcDimension width;
     if (!ParseLength(env, object, aniOption, width)) {
         return object;
@@ -143,9 +153,10 @@ ani_object ANIRectShapeHeight(ani_env* env, [[maybe_unused]] ani_object object, 
     }
     ani_class cls;
     if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
-        return nullptr;
+        return object;
     }
     RectPeer* rectObj = GetRectShape(env, object);
+    CHECK_NULL_RETURN(rectObj, object);
     CalcDimension height;
     if (!ParseLength(env, object, aniOption, height)) {
         return object;
@@ -304,7 +315,7 @@ ani_object ANIRectShapeRadius(ani_env* env, ani_object object, [[maybe_unused]] 
 
 ani_object RectShape::ANIRectShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return ANIShapeFromPtr<RectPeer>(env, ptr, ANI_SHAPE_NAME, "rectShapeResult");
+    return ANIShapeFromPtr<RectPeer>(env, ptr, ANI_SHAPE_NAME, "basicShapeResult");
 }
 
 ani_status RectShape::BindRectShape(ani_env* env)

@@ -30,6 +30,7 @@ public:
     bool IsDataDetectorSupported() override;
     void GetAIEntityMenu(TextDataDetectResult& textDataDetectResult) override;
     void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) override;
+    bool IsAskCeliaSupported() override;
 
     void AdjustCursorPosition(int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp,
         const TimeStamp& lastClickTimeStamp);

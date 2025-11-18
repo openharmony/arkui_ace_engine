@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { IBackingValue } from '../base/iBackingValue';
 import {
     ILocalStoragePropRefDecoratedVariable,
     IStoragePropRefDecoratedVariable,
+    IVariableOwner,
     IWatchSubscriberRegister,
     WatchFuncType,
 } from '../decorator';
@@ -32,6 +32,7 @@ import { UIUtils } from '../utils';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { getObservedObject, isDynamicObject } from '../../component/interop';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class StoragePropRefDecoratedVariable<T>
     extends DecoratedV1VariableBase<T>
@@ -42,7 +43,7 @@ export class StoragePropRefDecoratedVariable<T>
     storageWatchFunc_: WatchFunc;
     propName: string;
     constructor(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         storagePropRef: AbstractProperty<T>,
         propName: string,
         varName: string,
@@ -78,13 +79,16 @@ export class StoragePropRefDecoratedVariable<T>
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 
     set(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }
@@ -92,7 +96,7 @@ export class StoragePropRefDecoratedVariable<T>
             const value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
-            const value = uiUtils.makeObserved(newValue);
+            const value = uiUtils.makeV1Observed(newValue);
             this.backing_.setNoCheck(value);
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);

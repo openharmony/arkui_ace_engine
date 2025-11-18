@@ -34,6 +34,7 @@ import { RecordData } from "@ohos.base"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
+import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { AccessibilityCallback, AccessibilityFocusCallback, TransitionFinishCallback, TipsMessageType, ShouldBuiltInRecognizerParallelWithCallback, OnDragEventCallback, GestureRecognizerJudgeBeginCallback, CustomProperty, MouseEvent, TouchEvent, DragEvent, ResponseType, AttributeModifier, LayoutPolicy, Length, ResourceColor, AccessibilityFocusCallback, AccessibilityOptions, AccessibilityRoleType, AccessibilitySamePageMode, Alignment, AlignRuleOption, AnimateParam, Area, AttributeModifier, Axis, AxisEvent, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BackgroundImageOptions, BackgroundOptions, BaseGestureEvent, Bindable, BlendApplyType, BlendMode, BlurOptions, BlurStyle, BorderImageOption, BorderOptions, BorderRadiuses, BorderStyle, ChainStyle, ChainWeightOptions, ClickEffect, ClickEvent, Color, ColoringStrategy, ComponentContent, ContentCoverOptions, ContextMenuOptions, CrownEvent, CustomBuilder, CustomPopupOptions, CustomProperty, Dimension, Direction, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, DropOptions, EdgeColors, EdgeOutlineStyles, EdgeOutlineWidths, Edges, EdgeStyles, EdgeWidths, EffectType, FocusAxisEvent, FocusBoxStyle, FocusDrawLevel, FocusMovement, FocusPriority, ForegroundBlurStyleOptions, ForegroundEffectOptions, FunctionKey, GeometryTransitionOptions, GestureInfo, GestureJudgeResult, GestureMask, GestureModifier, GestureRecognizerJudgeBeginCallback, GestureType, HitTestMode, HoverEffect, HoverEvent, ImageRepeat, ImageSize, InvertOptions, ItemAlign, KeyEvent, LinearGradientBlurOptions, LinearGradientOptions, LocalizedAlignRuleOptions, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MenuElement, MenuOptions, ModalTransition, ModifierKey, MotionBlurOptions, MotionPathOptions, ObscuredReasons, OnDragEventCallback, OutlineOptions, OutlineRadiuses, OutlineStyle, OverlayOptions, Padding, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, Position, PreDragStatus, PreviewConfiguration, ProgressMask, RadialGradientOptions, Rectangle, RenderFit, ResizableOptions, ResourceColor, ResourceStr, ReuseOptions, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, sharedTransitionOptions, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SizeOptions, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsMessageType, TipsOptions, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TranslateOptions, Visibility, VisibleAreaChangeCallback, VisibleAreaEventOptions, VoidCallback } from '#generated';
 import { LengthMetrics } from 'arkui/Graphics';
 import { default as uiEffect } from '@ohos.graphics.uiEffect';
@@ -129,8 +130,9 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         super();
         this.uiContext = uiContext;
         this.instance = instance;
-        this.instance.setDelegate(this);
+        this.instance.__setDelegate__Internal(this);
         this.styles = styles;
+        ArkThemeScopeManager.getInstance().registerThemeScopeComponent(this);
     }
  
     /** @memo:intrinsic */
@@ -159,12 +161,12 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     __removeChildWhenDispose__IExtendableComponent_Internal(): void {
-        this.instance.removeMeFromParent();
-        this.instance.removeAllChild();
+        this.instance.__removeMeFromParent__Internal();
+        this.instance.__removeAllChild__Internal();
     }
 
     __addMeToParent__IExtendableComponent_Internal(): void {
-        this.instance.addMeToParent();
+        this.instance.__addMeToParent__Internal();
     }
 
     queryNavigationInfo(): uiObserver.NavigationInfo {
@@ -202,6 +204,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     build(): void {
         const current = ExtendableComponent.current;
         ExtendableComponent.current = this.instance as object;
+        this.onWillApplyTheme(ArkThemeScopeManager.getInstance().getFinalTheme(this));
         this.instance.build();
         ExtendableComponent.current = current;
     }
@@ -231,18 +234,18 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
     isValidActiveCount(): boolean {
-        return this.instance.getActive() < 2;
+        return this.instance.__getActive__Internal() < 2;
     }
     setActiveCount(active: boolean): void {
-        let activeCount: number = this.instance.getActive();
+        let activeCount: number = this.instance.__getActive__Internal();
         activeCount += active ? 1 : -1;
-        this.instance.setActive(activeCount);
+        this.instance.__setActive__Internal(activeCount);
         if (!this.isValidActiveCount()) {
-            console.log(`activeCount_error: ${this.instance.getActive()}`);
+            console.log(`activeCount_error: ${this.instance.__getActive__Internal()}`);
         }
     }
     isViewActive(): boolean {
-        return this.instance.getActive() > 0;
+        return this.instance.__getActive__Internal() > 0;
     }
     setActiveInternal(active: boolean, isReuse: boolean): void {
         this.setActiveCount(active);
@@ -255,7 +258,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         if (peer) {
             peer.disabledStateUpdates = !this.isViewActive();
         }
-        this.instance.propagateToChild(active, isReuse);
+        this.instance.__propagateToChild__Internal(active, isReuse);
     }
     pageTransition(): void {
         if (this.instance instanceof PageLifeCycle) {
@@ -277,6 +280,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
         if (this.instance instanceof ReusableLifeCycle) {
+            ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
             const reusable = this.instance as ReusableLifeCycle;
             if (param) {
                 reusable.aboutToReuse(new ReuseObject(param))
@@ -291,6 +295,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                 reusable.aboutToReuse(new ReuseObject(params));
             }
         } else if (this.instance instanceof ReusableV2LifeCycle) {
+            ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
             const reusable = this.instance as ReusableV2LifeCycle;
             reusable.aboutToReuse();
         } else {
@@ -299,6 +304,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
     aboutToRecycle(): void {
         if (this.instance instanceof BaseCustomComponent<T_Options>) {
+            ArkUIAniModule._CustomNode_OnRecycle(this.getPeer()!.peer.ptr);
             const component = this.instance as BaseCustomComponent<T_Options>;
             component.aboutToRecycle()
         } else {
@@ -325,7 +331,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     onDumpInspector(): string {
-        return this.instance.onDumpInspector();
+        return this.instance.__onDumpInspector__Internal();
     }
 
     onWillApplyTheme(theme: Theme): void {
@@ -423,9 +429,8 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        const init: S_Options | undefined = (initializers == null) ? undefined : (initializers() as S_Options);
         CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers), content, init);
+            () => createInstance(uiContext, factory, initializers), content, initializers);
     }
 }
 
@@ -434,6 +439,24 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         super(useSharedStorage, storage);
     }
+
+    /** @memo */
+    static _invokeImpl<S extends BaseCustomComponent<S_Options>, S_Options>(
+        /** @memo */
+        style: ((instance: S) => void) | undefined,
+        factory: () => S,
+        initializers?: () => S_Options,
+        reuseKey?: string,
+        /** @memo */
+        content?: () => void
+    ): void {
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        const uiContext = data?.uiContext;
+        CustomDelegate._instantiate(
+            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
+    }
+
     aboutToRecycle(): void {}
 
     __toRecord(param: object): Record<string, object> { return {} }
@@ -631,7 +654,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.onTouch(value));
         return this
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.onKeyEvent(value));
         return this
     }
@@ -675,7 +698,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.onBlur(value));
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.tabIndex(value));
         return this
     }
@@ -823,7 +846,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.displayPriority(value));
         return this
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.zIndex(value));
         return this
     }
@@ -959,7 +982,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.stateStyles(value));
         return this
     }
-    restoreId(value: number | undefined): this {
+    restoreId(value: int32 | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.restoreId(value));
         return this
     }
@@ -1124,7 +1147,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.foregroundBlurStyle(style, options, sysOptions));
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.onClick(event, distanceThreshold));
         return this
     }
@@ -1244,7 +1267,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.bindSheet(isShow, builder, options));
         return this
     }
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.onVisibleAreaChange(ratios, event));
         return this
     }
@@ -1287,9 +1310,8 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        const init: S_Options | undefined = (initializers == null) ? undefined : (initializers() as S_Options);
         CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers, style), content, init, reuseKey);
+            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
      aboutToReuse(params: ReuseObject): void {}
@@ -1313,9 +1335,8 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        const init: S_Options | undefined = (initializers == null) ? undefined : (initializers() as S_Options);
         CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers, style), content, init, reuseKey);
+            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
     aboutToReuse(): void {}

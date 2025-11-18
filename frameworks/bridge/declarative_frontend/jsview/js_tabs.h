@@ -42,6 +42,7 @@ protected:
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTabBarClick(const JSCallbackInfo& info);
     static void SetOnUnselected(const JSCallbackInfo& info);
+    static void SetOnContentDidScroll(const JSCallbackInfo& info);
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnGestureSwipe(const JSCallbackInfo& info);

@@ -124,6 +124,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsAttributeSetTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.attribute_set.enabled", "false") == "true");
+}
+
 bool IsTextTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
@@ -268,7 +273,7 @@ bool IsMouseTransformEnable()
 
 bool IsCompatibleInputTransEnabled()
 {
-    return (system::GetParameter("persist.ace.event.compatible.enable", "0") == "1");
+    return (system::GetParameter("const.arkui.mouseCompatibleConverting", "false") == "true");
 }
 
 float ReadScrollCoefficients()
@@ -527,6 +532,12 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
+int32_t ReadPageLoadTimeThreshold()
+{
+    return system::GetIntParameter(
+        "const.arkui.pageload.timethreshold", 1000); // page load max timethreshold is 1000ms.
+}
+
 bool IsAscending(const std::vector<double>& nums)
 {
     for (size_t i = 1; i < nums.size(); ++i) {
@@ -664,6 +675,7 @@ std::string InitSysDeviceType()
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
+std::atomic<bool> SystemProperties::attributeSetTraceEnable_(IsAttributeSetTraceEnabled() && developerModeOn_);
 bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
@@ -754,6 +766,7 @@ double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
+int32_t SystemProperties::pageLoadTimethreshold_ = ReadPageLoadTimeThreshold();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -902,6 +915,7 @@ void SystemProperties::InitDeviceInfo(
     multiInstanceEnabled_ = IsMultiInstanceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
+    attributeSetTraceEnable_.store(IsAttributeSetTraceEnabled() && developerModeOn_);
     traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
@@ -1413,6 +1427,11 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 int32_t SystemProperties::GetTouchAccelarate()
 {
     return touchAccelarate_;
+}
+
+int32_t SystemProperties::GetPageLoadTimethreshold()
+{
+    return pageLoadTimethreshold_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

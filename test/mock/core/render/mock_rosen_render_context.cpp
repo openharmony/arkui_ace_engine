@@ -17,15 +17,15 @@
 #include "test/mock/core/render/mock_rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
+void RenderContext::SetRequestFrame(const std::function<void(bool)>& requestFrame)
 {
     requestFrame_ = requestFrame;
 }
 
-void RenderContext::RequestNextFrame() const
+void RenderContext::RequestNextFrame(bool isOffScreenNode) const
 {
     if (requestFrame_) {
-        requestFrame_();
+        requestFrame_(isOffScreenNode);
     }
 }
 

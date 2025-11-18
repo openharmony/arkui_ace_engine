@@ -380,8 +380,6 @@ protected:
     void AddAfterLayoutTaskForExportTexture();
     void UpdateTransformHint();
     void DumpInfo() override;
-    static std::string XComponentTypeToString(XComponentType type);
-    static std::string XComponentNodeTypeToString(XComponentNodeType type);
     void AdjustNativeWindowSize(float width, float height);
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
@@ -404,6 +402,7 @@ protected:
     void* nativeWindow_ = nullptr;
     bool hasReleasedSurface_ = false;
     RefPtr<RenderContext> renderContextForSurface_;
+    RefPtr<RenderContext> handlingSurfaceRenderContext_;
     std::optional<int32_t> transformHintChangedCallbackId_;
     std::string surfaceId_;
     bool isOnTree_ = false;
@@ -469,7 +468,7 @@ private:
     bool ExportTextureAvailable();
     bool DoTextureExport();
     bool StopTextureExport();
-    void InitializeRenderContext();
+    void InitializeRenderContext(bool isThreadSafeNode = false);
     void SetSurfaceNodeToGraphic();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
@@ -502,7 +501,6 @@ private:
     std::optional<std::string> soPath_;
     std::optional<uint64_t> screenId_;
 
-    RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;

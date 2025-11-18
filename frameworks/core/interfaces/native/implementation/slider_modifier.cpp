@@ -24,19 +24,19 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_Number_Bindable& value)
+std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable& value)
 {
     std::optional<float> result;
     Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Float64& src) {
             result = Converter::OptConvert<float>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_F64& src) {
             result = Converter::OptConvert<float>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](float value) {
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+                arkCallback.Invoke(Converter::ArkValue<Ark_Float64>(value));
             };
             SliderModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
@@ -68,8 +68,8 @@ template<>
 SliderBlockSizeOptions Convert(const Ark_SizeOptions& src)
 {
     return {
-        .width = Converter::OptConvert<Dimension>(src.width),
-        .height = Converter::OptConvert<Dimension>(src.height)
+        .width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.width, DimensionUnit::VP),
+        .height = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.height, DimensionUnit::VP)
     };
 }
 
@@ -82,18 +82,17 @@ struct SliderBlockImageInfo {
 struct SliderBlockStyle {
     std::optional<SliderModel::BlockStyleType> type;
     std::optional<ImageSourceInfo> image;
-    std::optional<std::string> shape;
+    std::optional<RefPtr<BasicShape>> shape;
 };
 
 template<>
 SliderBlockStyle Convert(const Ark_SliderBlockStyle& src)
 {
+    const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* shape = &(src.shape);
     return {
         .type = Converter::OptConvert<SliderModel::BlockStyleType>(src.type),
         .image = Converter::OptConvert<ImageSourceInfo>(src.image),
-#ifdef WRONG_GEN
-        .shape = Converter::OptConvert<std::string>(src.shape)
-#endif
+        .shape = Converter::OptConvertPtr<RefPtr<BasicShape>>(shape)
     };
 }
 } // namespace Converter
@@ -203,12 +202,12 @@ void SetTrackThicknessImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
     Validator::ValidatePositive(convValue);
     SliderModelStatic::SetThickness(frameNode, convValue);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_SliderChangeMode_Void* value)
+                     const Opt_Callback_F64_SliderChangeMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -218,7 +217,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](float newValue, int32_t mode) {
-        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(newValue);
+        Ark_Float64 arkValue = Converter::ArkValue<Ark_Float64>(newValue);
         Ark_SliderChangeMode arkMode = Converter::ArkValue<Ark_SliderChangeMode>(
             static_cast<SliderModel::SliderChangeMode>(mode));
         arkCallback.Invoke(arkValue, arkMode);
@@ -238,7 +237,7 @@ void SetBlockBorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetBlockBorderWidth(frameNode, convValue);
 }
@@ -255,7 +254,7 @@ void SetTrackBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
 }
@@ -278,10 +277,9 @@ void SetBlockSizeImpl(Ark_NativePointer node,
         .value_or(Converter::SliderBlockSizeOptions{});
     SliderModelStatic::SetBlockSize(frameNode, convValue.width, convValue.height);
 }
-void SetBlockStyleImpl(Ark_NativePointer node,
-                       const Opt_SliderBlockStyle* value)
+void SetBlockStyleImpl(Ark_NativePointer node, const Opt_SliderBlockStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Converter::SliderBlockStyle>(value);
     if (convValue.has_value()) {
@@ -289,10 +287,12 @@ void SetBlockStyleImpl(Ark_NativePointer node,
         if (convValue.value().image.has_value()) {
             SliderModelNG::SetBlockImage(frameNode, convValue.value().image->GetSrc(),
                 convValue.value().image->GetBundleName(), convValue.value().image->GetModuleName());
+        } else if (convValue.value().shape.has_value()) {
+            SliderModelNG::SetBlockShape(frameNode, convValue.value().shape.value());
         } else {
             SliderModelNG::ResetBlockImage(frameNode);
+            SliderModelNG::ResetBlockShape(frameNode);
         }
-        LOGE("SliderModifier::BlockStyleImpl is not implemented, raw pointer is not supported!");
     } else {
         SliderModelStatic::SetBlockType(frameNode, std::nullopt);
         SliderModelNG::ResetBlockImage(frameNode);
@@ -303,7 +303,7 @@ void SetStepSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(*value, DimensionUnit::VP);
     Validator::ValidateNonNegative(convValue);
     SliderModelStatic::SetStepSize(frameNode, convValue);
 }
@@ -316,7 +316,7 @@ void SetSliderInteractionModeImpl(Ark_NativePointer node,
     SliderModelStatic::SetSliderInteractionMode(frameNode, convValue);
 }
 void SetMinResponsiveDistanceImpl(Ark_NativePointer node,
-                                  const Opt_Number* value)
+                                  const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

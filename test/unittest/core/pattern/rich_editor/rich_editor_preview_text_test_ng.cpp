@@ -85,7 +85,7 @@ void RichEditorPreviewTextTestNg::TearDownTestSuite()
  * @tc.desc: test setPreviewText and decoration available
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -144,7 +144,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText001, TestSize.Level1)
  * @tc.desc: test setPreviewText init, update, and delete available
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText002, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -185,7 +185,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText002, TestSize.Level1)
  * @tc.desc: test SetPreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText003, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -213,7 +213,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText003, TestSize.Level1)
  * @tc.desc: test RichEditorPattern SetPreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText004, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -246,7 +246,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText004, TestSize.Level1)
  * @tc.desc: test FinishTextPreview available
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -277,7 +277,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview001, TestSize.Level1)
  * @tc.desc: test FinishTextPreview by insertValue available
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -307,7 +307,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level1)
  * @tc.desc: test FinishTextPreview
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview003, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -347,7 +347,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview003, TestSize.Level1)
  * @tc.desc: test FinishTextPreview
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview004, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -367,7 +367,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview004, TestSize.Level1)
  * @tc.desc: test RichEditorPattern GetPreviewTextInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextInfo001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextInfo001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -385,7 +385,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextInfo001, TestSize.Level1)
  * @tc.desc: test UpdatePreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -426,7 +426,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText001, TestSize.Level1)
  * @tc.desc: test UpdatePreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText002, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -483,7 +483,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText002, TestSize.Level1)
  * @tc.desc: test UpdatePreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText003, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -524,7 +524,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText003, TestSize.Level1)
  * @tc.desc: test UpdatePreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestUpdatePreviewText001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestUpdatePreviewText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -543,7 +543,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestUpdatePreviewText001,
  * @tc.desc: test PaintPreviewTextDecoration
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, PaintPreviewTextDecoration001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, PaintPreviewTextDecoration001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -561,7 +561,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, PaintPreviewTextDecoration001, TestSize.Le
  * @tc.desc: test InitPreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestInitPreviewText001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestInitPreviewText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -592,7 +592,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestInitPreviewText001, T
  * @tc.desc: test GetPreviewTextDecorationColor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextDecorationColor001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextDecorationColor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -625,7 +625,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextDecorationColor001, TestSize
  * @tc.desc: test GetPreviewTextUnderlineWidth
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextUnderlineWidth001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextUnderlineWidth001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -650,7 +650,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextUnderlineWidth001, TestSize.
  * @tc.desc: test GetPreviewTextRects
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextRects001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextRects001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -677,7 +677,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextRects001, TestSize.Level1)
  * @tc.desc: test ReplaceText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, ReplacePreviewText001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, ReplacePreviewText001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -717,7 +717,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, ReplacePreviewText001, TestSize.Level1)
  * @tc.desc: test GetPreviewTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestGetPreviewTextStyle001, TestSize.Level1)
+HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestGetPreviewTextStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

@@ -522,6 +522,7 @@ void JSToggle::JsRadius(const JSCallbackInfo& info)
     CalcDimension radius;
     // when toggle equels button should follow button model.
     if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        SetCornerApplyType(info);
         JSButton::JsRadius(info);
     } else {
         JSViewAbstract::JsBorderRadius(info);

@@ -1,0 +1,147 @@
+{
+  "integer": [
+    {
+      "name": "menuValInteger",
+      "value": 100
+    },
+    {
+      "name": "fillOpacity_10",
+      "value": 10
+    },
+    {
+      "name": "fillOpacity_50",
+      "value": 50
+    },
+    {
+      "name": "select_select20",
+      "value": 20
+    },
+    {
+      "name": "select_select5",
+      "value": 5
+    },
+    {
+      "name": "waterFlow_itemConstraintSize10",
+      "value": 10
+    },
+    {
+      "name": "waterFlow_itemConstraintSize20",
+      "value": 20
+    },
+    {
+      "name": "waterFlow_itemConstraintSize80",
+      "value": 80
+    },
+    {
+      "name": "waterFlow_itemConstraintSize100",
+      "value": 100
+    },
+    {
+      "name": "font_size_text",
+      "value": 16
+    },
+    {
+      "name": "font_size_number",
+      "value": 20
+    },
+  {
+      "name": "commonStrokeOpacity",
+      "value": 5
+    },
+    {
+      "name": "strokeOpacity",
+      "value": 5
+    },
+    {
+      "name": "fontSize",
+      "value": 5
+    },
+    {
+      "name": "trackBackgroundColor",
+      "value": 123
+    },
+    {
+      "name": "dataPanelStrokeWidth",
+      "value": 30
+    },
+    {
+      "name": "gaugeStrokeWidth",
+      "value": 20
+    },
+ {
+      "name": "QRCode_contentOpacity",
+      "value": 1
+    },
+   {
+      "name": "textTimer_fontSize",
+      "value": 10
+    },
+    {
+      "name": "scroll_friction",
+      "value": 0
+    },
+    {
+      "name": "list_lanes",
+      "value": 10
+    },
+    {
+      "name": "tabs_barGridAlign",
+      "value": 10
+    },
+    {
+      "name": "DataPanel_strokeWidth",
+      "value": 30
+    },
+    {
+      "name": "length100",
+      "value": 100
+    },
+    {
+      "name": "sideBarWidth",
+      "value": 150
+    },
+    {
+      "name": "minSideBarWidth",
+      "value": 50
+    },
+    {
+      "name": "maxSideBarWidth",
+      "value": 300
+    },
+    {
+      "name": "minContentWidth",
+      "value": 300
+    },
+    {
+      "name": "dividerWidth",
+      "value": 2
+    },
+    {
+      "name": "startMargin",
+      "value": 10
+    },
+    {
+      "name": "endMargin",
+      "value": 10
+    },
+    {
+      "name": "navBarWidth",
+      "value": 100
+    },
+    {
+      "name": "minContentWidthRange",
+      "value": 50
+    },
+    {
+      "name": "maxContentWidthRange",
+      "value": 200
+    },
+    {
+      "name": "minContentWidth1",
+      "value": 300
+    }, {
+      "name": "integer_30",
+      "value": 30
+    }
+  ]
+}

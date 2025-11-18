@@ -38,6 +38,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
@@ -56,6 +57,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -430,12 +432,12 @@ void SwiperPattern::MarkDirtyBindIndicatorNode() const
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-Framework::JSIndicatorController* SwiperPattern::GetIndicatorController()
+RefPtr<JSIndicatorControllerBase> SwiperPattern::GetIndicatorController()
 {
-    return indicatorController_;
+    return indicatorController_.Upgrade();
 }
 
-void SwiperPattern::SetIndicatorController(Framework::JSIndicatorController* controller)
+void SwiperPattern::SetIndicatorController(RefPtr<JSIndicatorControllerBase> controller)
 {
     indicatorController_ = controller;
 }
@@ -456,6 +458,7 @@ void SwiperPattern::OnModifyDone()
     if (currentIndex_ != index && index >= 0) {
         AceAsyncTraceBeginCommercial(
             0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
+        LoadCompleteManagerStartCollect();
     }
 
     if (!isBindIndicator_) {
@@ -1266,6 +1269,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
+                swiper->LoadCompleteManagerStopCollect();
             });
         }
         UpdateCurrentIndex(algo->GetCurrentIndex());
@@ -1940,6 +1944,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index, std::optional<int32_t
         jumpIndexByUser_ = CheckTargetIndex(tempIndex);
     }
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
+    LoadCompleteManagerStartCollect();
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
     FireAndCleanScrollingListener();
@@ -3329,6 +3334,9 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown id: %{public}d", swiperId_);
+    if (isArrowTouched_) {
+        return;
+    }
     isTouchDown_ = true;
     isTouchDownOnOverlong_ = true;
     if (InsideIndicatorRegion(locationInfo)) {
@@ -3857,30 +3865,36 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
 #endif
         if (hasTabsAncestor_) {
             AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
+            LoadCompleteManagerStartCollect();
         } else if (isInAutoPlay_) {
             isAutoPlayAnimationRunning_ = true;
             PerfMonitor::GetPerfMonitor()->StartCommercial(
                 PerfConstants::AUTO_APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+            LoadCompleteManagerStartCollect();
         } else {
             PerfMonitor::GetPerfMonitor()->StartCommercial(
                 PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+            LoadCompleteManagerStartCollect();
         }
     } else {
 #ifdef OHOS_PLATFORM
         if (isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         } else {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+            ResSchedReport::GetInstance().ResSchedDataReport("swiper_slide_off");
         }
 #endif
         isInAutoPlay_ = false;
         if (hasTabsAncestor_) {
             AceAsyncTraceEndCommercial(0, APP_TABS_FLING);
+            LoadCompleteManagerStopCollect();
         } else if (isAutoPlayAnimationRunning_) {
             isAutoPlayAnimationRunning_ = false;
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::AUTO_APP_SWIPER_FLING, true);
-        } else {
+            LoadCompleteManagerStopCollect();
+    } else {
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_FLING, true);
+            LoadCompleteManagerStopCollect();
         }
     }
 }
@@ -4352,6 +4366,7 @@ void SwiperPattern::PlayTranslateAnimation(
             host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);
             AceAsyncTraceBeginCommercial(
                 0, swiper->hasTabsAncestor_ ? APP_TABS_FRAME_ANIMATION : APP_SWIPER_FRAME_ANIMATION);
+            swiper->LoadCompleteManagerStartCollect();
             AnimationCallbackInfo info;
             info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
             info.currentOffset = swiper->GetCustomPropertyOffset() +
@@ -4376,6 +4391,7 @@ void SwiperPattern::PlayTranslateAnimation(
             CHECK_NULL_VOID(swiper);
             AceAsyncTraceEndCommercial(
                 0, swiper->hasTabsAncestor_ ? APP_TABS_FRAME_ANIMATION : APP_SWIPER_FRAME_ANIMATION);
+            swiper->LoadCompleteManagerStopCollect();
             if (finishAnimation && swiper->translateAnimationIsRunning_) {
                 swiper->isFinishAnimation_ = true;
             }
@@ -5285,8 +5301,9 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             }
             auto stepItems = swiper->IsSwipeByGroup() ? displayCount : 1;
             swiper->targetIndex_ = swiper->CheckTargetIndex(swiper->currentIndex_ + stepItems);
-            ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d",
-                delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_);
+            ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d id %d",
+                delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_,
+                swiper->swiperId_);
             swiper->MarkDirtyNodeSelf();
         }
     });
@@ -5556,10 +5573,13 @@ void SwiperPattern::SetLazyLoadIsLoop() const
         if (repeatVirtualNode) {
             repeatVirtualNode->SetIsLoop(isLoop);
         }
-
         auto repeatVirtualNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(targetNode.value());
         if (repeatVirtualNode2) {
             repeatVirtualNode2->SetIsLoop(isLoop);
+        }
+        auto arkoalaLazyNode = AceType::DynamicCast<ArkoalaLazyNode>(targetNode.value());
+        if (arkoalaLazyNode) {
+            arkoalaLazyNode->SetIsLoop(isLoop);
         }
     }
 }
@@ -6808,7 +6828,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     auto currentIndex = GetLoopIndex(currentIndex_);
     auto totalCount = TotalCount();
     auto displayCount = GetDisplayCount();
-    bool commTouchBottom = (currentFirstIndex == 0);
+    bool commTouchBottom = (currentFirstIndex == totalCount - 1);
     bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
     bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
     bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
@@ -7787,5 +7807,46 @@ void SwiperPattern::OnFontScaleConfigurationUpdate()
         pattern->SetMainSizeIsMeasured(false);
         pattern->MarkDirtyNodeSelf();
     });
+}
+
+std::vector<SwiperItemInfoNG> SwiperPattern::GetShownItemInfoFromIndex(int32_t index)
+{
+    std::vector<SwiperItemInfoNG> infos = {};
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, infos);
+    auto displayCount = GetDisplayCount();
+    auto totalCount = TotalCount();
+    for (int32_t count = 0; (count < displayCount) && (count + index < totalCount); count++) {
+        auto swiperItemNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index + count, false));
+        if (!swiperItemNode) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "empty swiper item [index: %{public}d] while collecting shownInfos",
+                index + count);
+            continue;
+        }
+        auto tag = swiperItemNode->GetTag();
+        if (tag == V2::SWIPER_INDICATOR_ETS_TAG ||
+            tag == V2::SWIPER_LEFT_ARROW_ETS_TAG ||
+            tag == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+            break;
+        }
+        infos.push_back(SwiperItemInfoNG(swiperItemNode->GetId(), index + count));
+    }
+    return infos;
+}
+
+void SwiperPattern::LoadCompleteManagerStartCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StartCollect("");
+    }
+}
+
+void SwiperPattern::LoadCompleteManagerStopCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StopCollect();
+    }
 }
 } // namespace OHOS::Ace::NG

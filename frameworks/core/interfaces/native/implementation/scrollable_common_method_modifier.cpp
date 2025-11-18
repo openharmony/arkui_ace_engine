@@ -78,7 +78,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_Number_String* value)
+                           const Opt_Union_Color_I32_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -86,7 +86,7 @@ void SetScrollBarColorImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarColor(frameNode, convValue);
 }
 void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String* value)
+                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -102,7 +102,7 @@ void SetNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::GetOptPtr(value);
     if (!convValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetNestedScroll(frameNode, std::nullopt, std::nullopt);
         return;
     }
     auto forward = Converter::OptConvert<NestedScrollMode>(convValue->scrollForward);
@@ -115,26 +115,21 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
-    auto scrollEnabled = *convValue;
     auto layoutProp = frameNode->GetLayoutPropertyPtr<LayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     const auto id = AceType::TypeId(layoutProp);
     if (GridLayoutProperty::TypeId() == id) {
-        GridModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+        GridModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (ListLayoutProperty::TypeId() == id) {
-        ListModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+        ListModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (ScrollLayoutProperty::TypeId() == id) {
-        ScrollModelStatic::SetScrollEnabled(frameNode, scrollEnabled);
+        ScrollModelStatic::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (WaterFlowLayoutProperty::TypeId() == id) {
-        WaterFlowModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+        WaterFlowModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     }
 }
 void SetFrictionImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_Resource* value)
+                     const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -202,7 +197,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnScrollStop(frameNode, std::move(modelCallback));
 }
 void SetFlingSpeedLimitImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -214,6 +209,7 @@ void SetClipContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     Converter::VisitUnion(*value,
         [frameNode](const Ark_ContentClipMode& arkMode) {
             auto mode = Converter::OptConvert<ContentClipMode>(arkMode);

@@ -147,7 +147,7 @@ public:
         return false;
     }
     virtual bool IsAtTop() const = 0;
-    virtual bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const = 0;
+    virtual bool IsAtBottom(bool considerRepeat = false) const = 0;
     virtual bool IsAtTopWithDelta() const
     {
         return IsAtTop();
@@ -160,9 +160,9 @@ public:
     {
         return !IsAtBottom();
     }
-    virtual bool OutBoundaryCallback()
+    virtual bool OutBoundaryCallback(bool useCurrentDelta = true)
     {
-        return IsOutOfBoundary();
+        return IsOutOfBoundary(useCurrentDelta);
     }
 
     virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
@@ -934,6 +934,8 @@ public:
         return isInitialized_;
     }
 
+    void SetCanOverScroll(bool val);
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
@@ -1030,7 +1032,6 @@ protected:
         return scrollOriginChild_.Upgrade();
     }
 
-    void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
     bool lastCanOverScroll_ = false;
 

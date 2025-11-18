@@ -99,6 +99,8 @@ public:
     size_t GetLineCount() const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
     void GetPaintRegion(RectF& boundsRect, float x, float y) const;
+    void PaintAllLeadingMarginSpan(DrawingContext& drawingContext,
+        const OffsetT<float>& offset);
     void PaintLeadingMarginSpan(const ParagraphManager::ParagraphInfo& paragraphInfo, const OffsetT<float>& offset,
         DrawingContext& drawingContext);
     std::vector<TextBox> GetRectsForRange(int32_t start, int32_t end,
@@ -108,6 +110,7 @@ public:
     bool IsIndexAtParagraphEnd(int32_t index);
     bool DidExceedMaxLinesInner() const;
     std::string GetDumpInfo() const;
+    int32_t GetParagraphLength() const;
 
 protected:
     std::vector<ParagraphInfo> paragraphs_;

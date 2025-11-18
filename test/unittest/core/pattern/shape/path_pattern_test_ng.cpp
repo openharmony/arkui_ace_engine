@@ -20,9 +20,13 @@
 #define protected public
 #define private public
 #include "base_shape_pattern_test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/path_pattern.h"
@@ -169,5 +173,44 @@ HWTEST_F(PathPatternTestNg, MeasureContent001, TestSize.Level1)
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_TRUE(size.has_value());
     EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: SetCommands001
+ * @tc.desc: PathModelNG::SetCommands
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(PathPatternTestNg, SetCommands001, TestSize.Level1)
+{
+    auto pathModelNG = PathModelNG();
+    pathModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pathPaintProperty = frameNode->GetPaintProperty<PathPaintProperty>();
+    ASSERT_NE(pathPaintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<PathPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    pathModelNG.SetCommands(invalidResObj);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pathPaintProperty->HasCommands(), false);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(ID_COMMANDS, PATH_CMD);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        ID_COMMANDS, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    pathModelNG.SetCommands(resObjWithString);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pathPaintProperty->HasCommands(), true);
+    EXPECT_STREQ(pathPaintProperty->GetCommandsValue().c_str(), PATH_CMD.c_str());
+
+    pathModelNG.SetCommands(resObjWithString);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

@@ -88,7 +88,7 @@ constexpr int32_t DEFAULT_TAP_COUNT = 1;
 constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
-constexpr int32_t DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15;
+constexpr double DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15.0;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
@@ -1538,6 +1538,70 @@ bool ParseJsAlignRule(const EcmaVM* vm, const Local<JSValueRef> &arg, std::strin
         return true;
     }
     return false;
+}
+
+bool ParseResponseRegionList(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t toolTypes[], ArkUI_Float32 regionValues[],
+    ArkUI_CharPtr regionCalcValues[], int32_t regionUnits[], int32_t length)
+{
+    if (jsValue->IsUndefined() || !jsValue->IsArray(vm)) {
+        return false;
+    }
+    int32_t cnt = 0;
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+    for (int32_t i = 0; i < length; i = i + NUM_5, ++cnt) {
+        Local<JSValueRef> tool = transArray->GetValueAt(vm, jsValue, i + NUM_0);
+        Local<JSValueRef> x = transArray->GetValueAt(vm, jsValue, i + NUM_1);
+        Local<JSValueRef> y = transArray->GetValueAt(vm, jsValue, i + NUM_2);
+        Local<JSValueRef> width = transArray->GetValueAt(vm, jsValue, i + NUM_3);
+        Local<JSValueRef> height = transArray->GetValueAt(vm, jsValue, i + NUM_4);
+
+        auto toolType = NG::ResponseRegionSupportedTool::ALL;
+        CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+
+        if (!ArkTSUtils::ParseResponseRegionTool(vm, tool, toolType)) {
+            toolType = NG::ResponseRegionSupportedTool::ALL;
+        }
+        if (!ArkTSUtils::ParseJsLengthMetrics(vm, x, xDimen)) {
+            xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        }
+        if (!ArkTSUtils::ParseJsLengthMetrics(vm, y, yDimen)) {
+            yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        }
+        bool parseSuccess = width->IsString(vm) 
+            ? ArkTSUtils::ParseJsDimensionNG(vm, width, widthDimen, DimensionUnit::VP) 
+            : ArkTSUtils::ParseJsLengthMetrics(vm, width, widthDimen);
+        if (!parseSuccess) {
+            widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        }
+        parseSuccess = height->IsString(vm) 
+            ? ArkTSUtils::ParseJsDimensionNG(vm, height, heightDimen, DimensionUnit::VP) 
+            : ArkTSUtils::ParseJsLengthMetrics(vm, height, heightDimen);
+        if (!parseSuccess) {
+            heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        }
+        int32_t iFix = i - cnt;
+        toolTypes[i + NUM_0] = static_cast<int32_t>(toolType);
+        regionUnits[iFix + NUM_0] = static_cast<int32_t>(xDimen.Unit());
+        regionValues[iFix + NUM_0] = static_cast<ArkUI_Float32>(xDimen.Value());
+        regionUnits[iFix + NUM_1] = static_cast<int32_t>(yDimen.Unit());
+        regionValues[iFix + NUM_1] = static_cast<ArkUI_Float32>(yDimen.Value());
+        regionUnits[iFix + NUM_2] = static_cast<int32_t>(widthDimen.Unit());
+        if (widthDimen.Unit() == DimensionUnit::CALC) {
+            regionCalcValues[iFix + NUM_2] = strdup(static_cast<ArkUI_CharPtr>(widthDimen.CalcValue().c_str()));
+        } else {
+            regionValues[iFix + NUM_2] = static_cast<ArkUI_Float32>(widthDimen.Value());
+        }
+        regionUnits[iFix + NUM_3] = static_cast<int32_t>(heightDimen.Unit());
+        if (heightDimen.Unit() == DimensionUnit::CALC) {
+            regionCalcValues[iFix + NUM_3] = strdup(static_cast<ArkUI_CharPtr>(heightDimen.CalcValue().c_str()));
+        } else {
+            regionValues[iFix + NUM_3] = static_cast<ArkUI_Float32>(heightDimen.Value());
+        }
+    }
+    return true;
 }
 
 bool ParseResponseRegion(const EcmaVM* vm, const Local<JSValueRef>& jsValue, ArkUI_Float32 regionValues[],
@@ -6576,6 +6640,37 @@ ArkUINativeModuleValue CommonBridge::ResetDragPreview(ArkUIRuntimeCallInfo* runt
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetResponseRegionList(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    int32_t length = thirdArg->Int32Value(vm);
+    int32_t toolTypes[length];
+    ArkUI_Float32 regionArray[length];
+    ArkUI_CharPtr regionCalcArray[length];
+    int32_t regionUnits[length];
+    if (!ParseResponseRegionList(vm, secondArg, toolTypes, regionArray, regionCalcArray, regionUnits, length)) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetResponseRegionList(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setResponseRegionList(nativeNode, toolTypes, regionArray, regionCalcArray, regionUnits, length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetResponseRegionList(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetResponseRegionList(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -8139,7 +8234,7 @@ void CommonBridge::GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int
 
 void CommonBridge::GetLongPressGestureValue(
     ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
-    bool& limitFingerCount, int32_t& allowableMovement, uint32_t argNumber)
+    bool& limitFingerCount, double& allowableMovement, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -8165,8 +8260,9 @@ void CommonBridge::GetLongPressGestureValue(
     }
     Local<JSValueRef> allowableMovementArg = runtimeCallInfo->GetCallArgRef(argNumber + NUM_4);
     if (!allowableMovementArg.IsNull() && !allowableMovementArg->IsUndefined()) {
-        auto allowableMovementValue = static_cast<int32_t>(allowableMovementArg->ToNumber(vm)->Value());
-        allowableMovement = allowableMovementValue <= 0 ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMovementValue;
+        auto allowableMovementValue = static_cast<double>(allowableMovementArg->ToNumber(vm)->Value());
+        allowableMovement =
+            LessOrEqual(allowableMovementValue, 0.0) ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMovementValue;
     }
 }
 
@@ -9795,7 +9891,7 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGesture(ArkUIRuntimeCallInfo* r
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     bool limitFingerCount = false;
-    int32_t allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
+    double allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
     GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, allowableMovement, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
         fingers, repeat, duration, limitFingerCount, nullptr);
@@ -9962,7 +10058,7 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGestureToGroup(ArkUIRuntimeCall
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     bool limitFingerCount = false;
-    int32_t allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
+    double allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
     GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, allowableMovement, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
         fingers, repeat, duration, limitFingerCount, nullptr);

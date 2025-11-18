@@ -780,11 +780,13 @@ double CanvasPattern::GetHeight()
 
 void CanvasPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
 {
+    CHECK_NULL_VOID(paintMethod_);
     paintMethod_->SetRSCanvasCallback(callback);
 }
 
 void CanvasPattern::SetInvalidate()
 {
+    CHECK_NULL_VOID(paintMethod_);
     auto task = [](CanvasPaintMethod& paintMethod) {};
     paintMethod_->PushTask(task);
 }

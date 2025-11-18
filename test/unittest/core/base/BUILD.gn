@@ -73,7 +73,10 @@ ace_unittest("ui_node_gc_test_ng") {
 ace_unittest("ui_node_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "ui_node_test_ng.cpp" ]
+  sources = [
+    "ui_node_test_ng.cpp",
+    "ui_node_test_ng_two.cpp",
+  ]
 }
 
 ace_unittest("view_abstract_test_ng") {
@@ -85,6 +88,11 @@ ace_unittest("view_abstract_test_ng") {
     "view_abstract_test_ng_for_visual_effect.cpp",
     "view_abstract_test_ng_new.cpp",
     "view_abstract_test_ng_two.cpp",
+    "view_abstract_test_three_ng.cpp",
+    "view_abstract_test_four_ng.cpp",
+    "view_abstract_test_five_ng.cpp",
+    "view_abstract_test_six_ng.cpp",
+    "view_abstract_test_two_ng_for_property_config.cpp",
   ]
 }
 
@@ -115,7 +123,10 @@ ace_unittest("observer_test_ng") {
 ace_unittest("view_abstract_model_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "view_abstract_model_test_ng.cpp" ]
+  sources = [
+    "view_abstract_model_test_ng.cpp",
+    "view_abstract_model_test_two_ng.cpp",
+  ]
 }
 
 ace_unittest("short_cuts_little_test_ng") {

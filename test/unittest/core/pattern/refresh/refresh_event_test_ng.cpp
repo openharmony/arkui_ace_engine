@@ -904,6 +904,84 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VersionTwelveHandleDrag006
+ * @tc.desc: Test whole refresh action with PullDownRatio in VERSION_TWELVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag006, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTriggered = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    float offset = 0.f;
+    auto onRefreshingEvent = [&isRefreshTriggered]() { isRefreshTriggered = true; };
+    auto onStateChangeEvent = [&refreshStatus](
+                                  const int32_t value) { refreshStatus = static_cast<RefreshStatus>(value); };
+    auto onOffsetChangeEvent = [&offset](const float value) { offset = value; };
+    bool isDrag = false;
+    float stepOffset = 0.0f;
+    auto onStepOffsetChangeEvent = [&stepOffset, &isDrag](const float value, const bool isDragValue) {
+                                        stepOffset = value;
+                                        isDrag = isDragValue;
+                                    };
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnRefreshing(std::move(onRefreshingEvent));
+    model.SetOnStateChange(std::move(onStateChangeEvent));
+    model.SetOnOffsetChange(std::move(onOffsetChangeEvent));
+    model.SetStepOffsetChange(AceType::RawPtr(frameNode_), std::move(onStepOffsetChangeEvent));
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step1. HandleDragStart
+     * @tc.expected: Nothing changed
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate, the delta less than or equal TRIGGER_LOADING_DISTANCE
+     * @tc.expected: Trigger onStateChangeEvent/onOffsetChangeEvent/onStepOffsetChange
+     */
+    pattern_->HandleDragUpdate(TRIGGER_LOADING_DISTANCE / pattern_->CalculatePullDownRatio());
+    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
+    EXPECT_EQ(offset, TRIGGER_LOADING_DISTANCE);
+    EXPECT_EQ(stepOffset, TRIGGER_LOADING_DISTANCE);
+    EXPECT_TRUE(isDrag);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate, the delta(Plus previous delta) greater than or equal TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: Trigger onStateChangeEvent/onOffsetChangeEvent/onStepOffsetChange
+     */
+    pattern_->HandleDragUpdate(
+        (TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE) / pattern_->CalculatePullDownRatio());
+    EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
+    EXPECT_EQ(offset, TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(stepOffset, pattern_->scrollOffset_ - TRIGGER_LOADING_DISTANCE);
+    EXPECT_TRUE(isDrag);
+
+    /**
+     * @tc.steps: step4. HandleDragEnd
+     * @tc.expected: Trigger onRefreshingEvent/onStateChangeEvent/onOffsetChangeEvent
+     */
+    EXPECT_FALSE(isRefreshTriggered); // no trigger refresh before
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_TRUE(isRefreshTriggered);
+    EXPECT_EQ(refreshStatus, RefreshStatus::REFRESH);
+    EXPECT_EQ(offset, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step5. The frontEnd set isRefreshing to false
+     * @tc.expected: Trigger onStateChangeEvent/onOffsetChangeEvent
+     */
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(refreshStatus, RefreshStatus::DONE);
+    EXPECT_EQ(offset, TRIGGER_REFRESH_DISTANCE);
+}
+
+/**
  * @tc.name: VersionTwelveHandleDragUpdate001
  * @tc.desc: Refresh should processing all delta each slip before reaching the original position
  * @tc.type: FUNC

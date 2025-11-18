@@ -123,6 +123,7 @@ public:
   
 private:
     void OnAttachToFrameNode() override;
+    void OnHostChildUpdateDone() override;
     int32_t TotalCount() const;
 
     void InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub);

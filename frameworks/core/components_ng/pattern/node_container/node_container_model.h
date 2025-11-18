@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NODE_CONTAINER_NODE_CONTAINER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NODE_CONTAINER_NODE_CONTAINER_MODEL_H
 
+#include <mutex>
+
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT NodeContainerModel {

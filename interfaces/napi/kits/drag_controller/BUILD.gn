@@ -96,7 +96,7 @@ template("napi_dragcontroller_static") {
     }
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
-      if (defined(global_parts_info.distributeddatamgr_udmf)) {
+      if (defined(global_parts_info.distributeddatamgr_udmf) && !is_arkui_x) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:udmf_data_napi" ]
         deps += [ "$ace_root/frameworks/core:ace_container_scope" ]

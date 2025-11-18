@@ -76,6 +76,8 @@ public:
     void SetSyncLoad(bool syncLoad) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
+    void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
 
@@ -102,8 +104,11 @@ public:
     static void SetMinCount(FrameNode* frameNode, int32_t minCount);
     static void SetCellLength(FrameNode* frameNode, int32_t cellLength);
     static void SetEditable(FrameNode* frameNode, bool editMode);
+    static bool GetEditable(FrameNode* frameNode);
     static void SetMultiSelectable(FrameNode* frameNode, bool multiSelectable);
+    static bool GetMultiSelectable(FrameNode* frameNode);
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
+    static bool GetSupportAnimation(FrameNode* frameNode);
     static EdgeEffect GetEdgeEffect(FrameNode* frameNode);
     static bool GetAlwaysEnabled(FrameNode* frameNode);
     static EffectEdge GetEffectEdge(FrameNode* frameNode);
@@ -138,6 +143,8 @@ public:
     static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
     static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
     static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjRowsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
     static bool GetSyncLoad(FrameNode* frameNode);
@@ -157,7 +164,9 @@ public:
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy);
-    static PresetFillType GetItemFillPolicy(FrameNode* frameNode);
+    static void ResetItemFillPolicy(FrameNode* frameNode);
+    static int32_t GetItemFillPolicy(FrameNode* frameNode);
+    static void SetOnGridItemDragStart(FrameNode* frameNode, ItemDragStartFunc&& value);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

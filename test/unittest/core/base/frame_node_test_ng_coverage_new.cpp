@@ -15,8 +15,9 @@
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "core/event/touch_event.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "frameworks/core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1104,7 +1105,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeNotifyColorModeChange02, TestSize.Level1)
      */
     auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
     auto childNode = FrameNode::CreateFrameNode("child", 2, AceType::MakeRefPtr<PagePattern>(nullptr), true);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     frameNode->AddChild(childNode);
     frameNode->AllowForceDark(true);
     childNode->AllowForceDark(false);
@@ -1113,7 +1114,31 @@ HWTEST_F(FrameNodeTestNg, FrameNodeNotifyColorModeChange02, TestSize.Level1)
      * @tc.expected: expect ResourceParseUtils  isReloading_ is true.
      */
     childNode->NotifyColorModeChange(1);
-    EXPECT_TRUE(ResourceParseUtils::IsReloading());
+    EXPECT_TRUE(ResourceParseUtils::NeedReload());
+}
+
+/**
+ * @tc.name: FrameNodeNotifyColorModeChange03
+ * @tc.desc: Test the function NotifyColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeNotifyColorModeChange03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto childNode = FrameNode::CreateFrameNode("child", 2, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    ResourceParseUtils::SetNeedReload(false);
+    frameNode->AddChild(childNode);
+    frameNode->AllowForceDark(true);
+    childNode->AllowForceDark(false);
+    /**
+     * @tc.steps: step2. call the function NotifyColorModeChange.
+     * @tc.expected: expect ResourceParseUtils  isReloading_ is false.
+     */
+    childNode->NotifyColorModeChange(1);
+    EXPECT_FALSE(ResourceParseUtils::NeedReload());
 }
 
 /**

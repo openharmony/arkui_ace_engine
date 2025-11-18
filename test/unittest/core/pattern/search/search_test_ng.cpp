@@ -18,6 +18,8 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/color.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_node.h"
@@ -1363,7 +1365,9 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     auto pattern = searchNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(searchNode, nullptr);
+
     searchModelInstance.CreateTextField(searchNode, PLACEHOLDER_U16, EMPTY_VALUE_U16, true);
+
     std::function<void(bool)> onEditChangefunc;
     std::function<void(const ChangeValueInfo&)> onChange;
     std::function<void(const std::u16string&)> onCut;
@@ -1376,6 +1380,7 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     std::function<void(const std::u16string&)> onChangeEvent;
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClickCallback;
+
     OHOS::Ace::NG::SearchModelNG::SetOnEditChange(frameNode, std::move(onEditChangefunc));
     std::function<void(float, float)> onContentScroll;
     OHOS::Ace::NG::SearchModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
@@ -1389,12 +1394,15 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     OHOS::Ace::NG::SearchModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
     OHOS::Ace::NG::SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     OHOS::Ace::NG::SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClickCallback));
+
     std::function<void(const std::u16string&, NG::TextCommonEvent&)> onPasteEvent;
+
     searchModelInstance.SetOnPasteWithEvent(std::move(onPasteEvent));
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextCommonEvent event;
+
     eventHub->FireOnPasteWithEvent(u"", event);
 }
 
@@ -1585,6 +1593,34 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: SetDividerColor001
+ * @tc.desc: Set Separator Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetDividerColor001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    searchModelInstance.SetDividerColor(Color::BLUE);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerColorSetByUser = layoutProperty->GetDividerColorSetByUser().value_or(false);
+    EXPECT_EQ(dividerColorSetByUser, true);
+
+    /*
+     * Get dividerNode. DIVIDER_INDEX is 5.
+     * Set DividerColor and DividerColorByUser, get two value and check.
+     */
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(5));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    EXPECT_EQ(dividerRenderProperty->GetDividerColor(), Color::BLUE);
 }
 
 /**
@@ -2567,6 +2603,7 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
      * @tc.steps: Create Text filed node with default text and placeholder
      */
     SearchModelNG searchModelInstance;
+
     searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2576,6 +2613,7 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
     auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     ASSERT_NE(searchLayoutProperty, nullptr);
     searchPattern->InitMargin(searchLayoutProperty);
+
     const auto& marginProperty = searchLayoutProperty->GetMarginProperty();
     ASSERT_NE(marginProperty, nullptr);
     EXPECT_TRUE(marginProperty->top);
@@ -2587,6 +2625,7 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
     EXPECT_FALSE(marginProperty->bottom);
 
     MarginProperty margin;
+
     margin.top = CalcLength(10.0f);
     margin.bottom = CalcLength(10.0f);
     searchLayoutProperty->UpdateUserMargin(margin);
@@ -2595,6 +2634,9 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
 
     EXPECT_TRUE(marginProperty->top);
     EXPECT_TRUE(marginProperty->bottom);
+
+    searchPattern->UpdateSearchSymbol();
+    searchPattern->UpdateSearchSymbol();
 }
 
 /**
@@ -2688,5 +2730,37 @@ HWTEST_F(SearchTestNg, HandleNotifyChildAction, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     notifyFunc(textFieldFrameNode, NotifyChildActionType::ACTION_CLICK);
     EXPECT_TRUE(userClicked);
+}
+
+/**
+* @tc.name: UpdateSearchSymbol001
+* @tc.desc: check onColorconfig
+* @tc.type: FUNC
+*/
+HWTEST_F(SearchTestNg, UpdateSearchSymbol001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    searchModelInstance.Create(u"", u"", "");
+    auto searchNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(searchNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(iconFrameNode, nullptr);
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(searchNode->GetPattern());
+
+    symbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    searchPattern->UpdateSearchSymbol();
+    std::vector<Color> colors = { Color::RED };
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorListValue({}), colors);
+
+    symbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    symbolLayoutProperty->UpdateTextColorFlagByUser(true);
+    searchPattern->UpdateSearchSymbol();
+    colors = { Color::BLUE };
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList().value(), colors);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

@@ -118,6 +118,7 @@ enum class WebInfoType : int32_t {
 };
 
 struct PipInfo {
+    int32_t nodeId;
     uint32_t mainWindowId;
     int delegateId;
     int childId;
@@ -126,9 +127,35 @@ struct PipInfo {
     int height;
 };
 
+class SnapshotTouchReporter {
+public:
+    void OnAppear();
+    void OnDisappear();
+    void OnClick();
+    void OnPan();
+private:
+    std::optional<uint64_t> appearTime_;
+    std::unique_ptr<JsonValue> infos_;
+};
+
 enum class WebWindowMaximizeReason : uint32_t {
     MAXIMIZE = 0,
     EXIT_FREE_MULTI_MODE,
+};
+
+// Event for touch trigger image analyzer
+enum class ImageOverlayEvent {
+    TOUCH_PRESS,
+    TOUCH_RELEASE,
+    CREATE_OVERLAY,
+    CREATE_OVERLAY_RELEASE
+};
+
+// only for touch, if mouse trigger image analyzer, always NONE
+enum class ImageOverlayStatus {
+    NONE,
+    TOUCH_HOLD,  // touch hold
+    HOLD_CREATE  // touch hold and create overlay
 };
 
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
@@ -583,6 +610,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableSelectedDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlankScreenDetectionConfig, BlankScreenDetectionConfig);
@@ -668,7 +696,7 @@ public:
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     void UpdateOnFocusTextField(bool isFocus);
-    void UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME);
+    void UpdateTextFieldStatus(bool isImeShowKeyboard, bool isTextInputfocus);
     bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
@@ -727,6 +755,10 @@ public:
     {
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
     }
+    bool IsImeStatusShow() const
+    {
+        return isImeStatus_ == VkState::VK_SHOW;
+    }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     bool IsRtl();
@@ -756,7 +788,6 @@ public:
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     void UpdateDataDetectorConfig(const TextDetectConfig& config);
-    void UpdateEnableSelectDataDetector(bool isEnabled);
     void UpdateSelectedDataDetectorConfig(const TextDetectConfig& config);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
@@ -764,6 +795,8 @@ public:
         int rectHeight, int pointX, int pointY);
     void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
     void OnTextSelected();
+    void UpdateImageOverlayStatus(ImageOverlayEvent event);
+    void DestroyOverlayOnNoResponse();
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
@@ -936,6 +969,7 @@ public:
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
+    void InitSnapshotGesture(const RefPtr<GestureEventHub>& gestureHub);
 
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
@@ -1087,6 +1121,7 @@ private:
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
+    void OnEnableSelectedDataDetectorUpdate(bool enable);
     void OnGestureFocusModeUpdate(GestureFocusMode mode);
     void OnRotateRenderEffectUpdate(WebRotateEffect effect);
     void WebRotateRenderEffect(WindowSizeChangeReason type);
@@ -1345,6 +1380,7 @@ private:
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
+    VkState isImeStatus_ { VkState::VK_NONE };
     bool isDragging_ = false;
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
@@ -1361,6 +1397,7 @@ private:
     ResponseType curResponseType_ = ResponseType::LONG_PRESS;
     bool curContextMenuResult_ = false;
     bool isSnapshotImageAnimating_ = false;
+    std::shared_ptr<SnapshotTouchReporter> snapshotReporter_ = nullptr;
 
     bool isWindowShow_ = true;
     bool isActive_ = true;
@@ -1444,6 +1481,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
     bool overlayCreating_ = false;
     bool awaitingOnTextSelected_ = false;
+    ImageOverlayStatus imageOverlayStatus_ = ImageOverlayStatus::NONE;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;

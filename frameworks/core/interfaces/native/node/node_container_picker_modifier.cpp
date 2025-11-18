@@ -17,12 +17,13 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/native/node/node_container_picker_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
 enum GetValueArrayIndex {
     GETTOPLEFT,
     GETTOPRIGHT,
@@ -49,7 +50,8 @@ void ResetContainerPickerCanLoop(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ContainerPickerModel::SetCanLoop(frameNode, true);
 }
-void SetContainerPickerOnChangeExt(ArkUINodeHandle node, void* callback)
+
+void SetContainerPickerOnChangeEvt(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -63,13 +65,15 @@ void ResetContainerPickerOnChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ContainerPickerModel::SetOnChange(frameNode, nullptr);
 }
-void SetContainerPickerOnScrollStopExt(ArkUINodeHandle node, void* callback)
+
+void SetContainerPickerOnScrollStopEvt(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScrollStop = reinterpret_cast<std::function<void(const double)>*>(callback);
     ContainerPickerModel::SetOnScrollStop(frameNode, std::move(*onScrollStop));
 }
+
 void ResetContainerPickerOnScrollStop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -124,18 +128,75 @@ void AddRadiusResource(const struct ArkUIPickerIndicatorStyle* pickerIndicatorSt
         CONTAINER_PICKER_ADD_RADIUS_RESOURCE(indicatorStyle.borderRadius, bottomRight, radiusBottomRight);
     }
 }
+void PickerRegisterResourceObj(FrameNode* frameNode, const struct ArkUIPickerIndicatorStyle* pickerIndicatorStyle,
+    PickerIndicatorStyle& indicatorStyle)
+{
+    if (!SystemProperties::ConfigChangePerform() || !pickerIndicatorStyle) {
+        return;
+    }
+
+    if (!pickerIndicatorStyle->isDefaultDividerWidth) {
+        auto* strokeWidthPtr = reinterpret_cast<ResourceObject*>(pickerIndicatorStyle->strokeWidthRawPtr);
+        auto strokeWidthResObj = AceType::Claim(strokeWidthPtr);
+        ContainerPickerModel::ProcessResourceObj(frameNode, "containerPicker.strokeWidth", strokeWidthResObj);
+    }
+
+    if (!pickerIndicatorStyle->isDefaultDividerColor) {
+        auto* dividerColorPtr = reinterpret_cast<ResourceObject*>(pickerIndicatorStyle->dividerColorRawPtr);
+        auto dividerColorResObj = AceType::Claim(dividerColorPtr);
+        ContainerPickerModel::ProcessResourceObj(frameNode, "containerPicker.dividerColor", dividerColorResObj);
+    }
+
+    if (!pickerIndicatorStyle->isDefaultStartMargin) {
+        auto* startMarginPtr = reinterpret_cast<ResourceObject*>(pickerIndicatorStyle->startMarginRawPtr);
+        auto startMarginResObj = AceType::Claim(startMarginPtr);
+        ContainerPickerModel::ProcessResourceObj(frameNode, "containerPicker.startMargin", startMarginResObj);
+    }
+
+    if (!pickerIndicatorStyle->isDefaultEndMargin) {
+        auto* endMarginPtr = reinterpret_cast<ResourceObject*>(pickerIndicatorStyle->endMarginRawPtr);
+        auto endMarginResObj = AceType::Claim(endMarginPtr);
+        ContainerPickerModel::ProcessResourceObj(frameNode, "containerPicker.endMargin", endMarginResObj);
+    }
+
+    if (!pickerIndicatorStyle->isDefaultBackgroundColor) {
+        auto* bgColorPtr = reinterpret_cast<ResourceObject*>(pickerIndicatorStyle->backgroundColorRawPtr);
+        auto bgColorResObj = AceType::Claim(bgColorPtr);
+        ContainerPickerModel::ProcessResourceObj(frameNode, "containerPicker.backgroundColor", bgColorResObj);
+    }
+
+    if (!pickerIndicatorStyle->isDefaultBorderRadius) {
+        AddRadiusResource(pickerIndicatorStyle, indicatorStyle);
+        RefPtr<ResourceObject> radiusResObj = AceType::MakeRefPtr<ResourceObject>();
+        ContainerPickerModel::ProcessResourceObj(frameNode, "containerPicker.borderRadius", radiusResObj);
+    }
+}
 
 void SetContainerPickerSelectionIndicator(ArkUINodeHandle node, ArkUI_Bool* isHasValue,
     const struct ArkUIPickerIndicatorStyle* pickerIndicatorStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(pickerIndicatorStyle);
     PickerIndicatorStyle indicatorStyle;
-    indicatorStyle.borderRadius = theme->GetSelectedBorderRadius();
+    indicatorStyle.isDefaultDividerWidth = pickerIndicatorStyle->isDefaultDividerWidth;
+    indicatorStyle.isDefaultDividerColor = pickerIndicatorStyle->isDefaultDividerColor;
+    indicatorStyle.isDefaultStartMargin = pickerIndicatorStyle->isDefaultStartMargin;
+    indicatorStyle.isDefaultEndMargin = pickerIndicatorStyle->isDefaultEndMargin;
+    indicatorStyle.isDefaultBackgroundColor = pickerIndicatorStyle->isDefaultBackgroundColor;
+    indicatorStyle.isDefaultBorderRadius = pickerIndicatorStyle->isDefaultBorderRadius;
+
+    indicatorStyle.type = pickerIndicatorStyle->type;
+    indicatorStyle.strokeWidth = Dimension(pickerIndicatorStyle->strokeWidthValue,
+        static_cast<DimensionUnit>(pickerIndicatorStyle->strokeWidthUnit));
+    indicatorStyle.startMargin = Dimension(pickerIndicatorStyle->startMarginValue,
+        static_cast<DimensionUnit>(pickerIndicatorStyle->startMarginUnit));
+    indicatorStyle.endMargin = Dimension(pickerIndicatorStyle->endMarginValue,
+        static_cast<DimensionUnit>(pickerIndicatorStyle->endMarginUnit));
+    indicatorStyle.dividerColor = Color(pickerIndicatorStyle->dividerColor);
+
+    indicatorStyle.backgroundColor = Color(pickerIndicatorStyle->backgroundColor);
+    indicatorStyle.borderRadius = BorderRadiusProperty(DEFAULT_RADIUS);
     if (isHasValue[GETTOPLEFT]) {
         indicatorStyle.borderRadius->radiusTopLeft = Dimension(pickerIndicatorStyle->values[TOPLEFT],
             static_cast<DimensionUnit>(pickerIndicatorStyle->units[TOPLEFT]));
@@ -152,8 +213,7 @@ void SetContainerPickerSelectionIndicator(ArkUINodeHandle node, ArkUI_Bool* isHa
         indicatorStyle.borderRadius->radiusBottomRight = Dimension(pickerIndicatorStyle->values[BOTTOMRIGHT],
             static_cast<DimensionUnit>(pickerIndicatorStyle->units[BOTTOMRIGHT]));
     }
-
-    AddRadiusResource(pickerIndicatorStyle, indicatorStyle);
+    PickerRegisterResourceObj(frameNode, pickerIndicatorStyle, indicatorStyle);
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
 }
 
@@ -161,13 +221,28 @@ void ResetContainerPickerSelectionIndicator(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<ContainerPickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     PickerIndicatorStyle indicatorStyle;
-    indicatorStyle.borderRadius = theme->GetSelectedBorderRadius();
+    indicatorStyle.strokeWidth = pickerTheme->GetStrokeWidth();
+    indicatorStyle.dividerColor = pickerTheme->GetIndicatorDividerColor();
+    indicatorStyle.startMargin = Dimension();
+    indicatorStyle.endMargin = Dimension();
+    indicatorStyle.backgroundColor = pickerTheme->GetIndicatorBackgroundColor();
+    indicatorStyle.borderRadius = NG::BorderRadiusProperty(pickerTheme->GetIndicatorBackgroundRadius());
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("containerPicker.strokeWidth");
+        pattern->UnRegisterResource("containerPicker.dividerColor");
+        pattern->UnRegisterResource("containerPicker.startMargin");
+        pattern->UnRegisterResource("containerPicker.endMargin");
+        pattern->UnRegisterResource("containerPicker.backgroundColor");
+        pattern->UnRegisterResource("containerPicker.borderRadius");
+    }
 }
 }  // namespace
 
@@ -176,9 +251,9 @@ const ArkUIContainerPickerModifier* GetContainerPickerModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN();  // don't move this line
     static const ArkUIContainerPickerModifier modifier = {
-        .setContainerPickerOnChange = SetContainerPickerOnChangeExt,
+        .setContainerPickerOnChange = SetContainerPickerOnChangeEvt,
         .resetContainerPickerOnChange = ResetContainerPickerOnChange,
-        .setContainerPickerOnScrollStop = SetContainerPickerOnScrollStopExt,
+        .setContainerPickerOnScrollStop = SetContainerPickerOnScrollStopEvt,
         .resetContainerPickerOnScrollStop = ResetContainerPickerOnScrollStop,
         .setContainerPickerEnableHapticFeedback = SetContainerPickerEnableHapticFeedback,
         .resetContainerPickerEnableHapticFeedback = ResetContainerPickerEnableHapticFeedback,

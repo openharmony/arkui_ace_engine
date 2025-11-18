@@ -140,7 +140,7 @@ void RichEditorDragTestNG::ClearSpan()
  * @tc.desc: Test FolderStackTestNG properties & ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, RichEditorDragTestNG001, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, RichEditorDragTestNG001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init FolderStack node with Aniamtion/AutoHalfFold props false, itemId not null.
@@ -154,7 +154,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragTestNG001, TestSize.Level1)
  * @tc.desc: Test onDraw.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG001, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG001, TestSize.Level0)
 {
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -214,7 +214,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG001, TestSize.
  * @tc.desc: Test onDraw.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG002, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG002, TestSize.Level0)
 {
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -249,7 +249,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG002, TestSize.
  * @tc.desc: Test PaintFrameNode.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG003, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG003, TestSize.Level0)
 {
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -310,7 +310,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG003, TestSize.
  * @tc.desc: Test StartFloatingAnimate.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG004, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG004, TestSize.Level0)
 {
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -343,7 +343,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG004, TestSize.
  * @tc.desc: test CreateDragNode
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, CreateDragNode001, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, CreateDragNode001, TestSize.Level0)
 {
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -376,7 +376,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode001, TestSize.Level1)
  * @tc.desc: test CreateDragNode
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, CreateDragNode002, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, CreateDragNode002, TestSize.Level0)
 {
     auto hostNode =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -422,7 +422,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode002, TestSize.Level1)
  * @tc.desc: test CreateDragNode
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, CreateDragNode003, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, CreateDragNode003, TestSize.Level0)
 {
     auto hostNode =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -468,7 +468,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode003, TestSize.Level1)
  * @tc.desc: test CreateDragNode
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, CreateDragNode004, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, CreateDragNode004, TestSize.Level0)
 {
     auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
         []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -519,7 +519,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode004, TestSize.Level1)
  * @tc.desc: test InitDragShadow
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, InitDragShadow001, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, InitDragShadow001, TestSize.Level0)
 {
     auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
         []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -537,7 +537,7 @@ HWTEST_F(RichEditorDragTestNG, InitDragShadow001, TestSize.Level1)
  * @tc.desc: test GetMaxSelectedWidth
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, GetMaxSelectedWidth001, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, GetMaxSelectedWidth001, TestSize.Level0)
 {
     auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
         []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
@@ -553,7 +553,7 @@ HWTEST_F(RichEditorDragTestNG, GetMaxSelectedWidth001, TestSize.Level1)
  * @tc.desc: test dragstart
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDragTestNG, RichEditorDragStart001, TestSize.Level1)
+HWTEST_F(RichEditorDragTestNG, RichEditorDragStart001, TestSize.Level0)
 {
     auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
         []() { return AceType::MakeRefPtr<RichEditorPattern>(); });

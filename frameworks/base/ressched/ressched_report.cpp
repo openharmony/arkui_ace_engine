@@ -34,6 +34,7 @@ constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
 constexpr uint32_t RES_TYPE_OVERLAY        = 151;
+constexpr uint32_t RES_TYPE_BACKPRESSED_EVENT = 184;
 constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
@@ -45,6 +46,7 @@ constexpr int32_t SLIDE_DETECTING = 2;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
 constexpr int32_t MOVE_DETECTING = 7;
+constexpr int32_t SWIPER_SLIDE_OFF_EVENT = 8;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
@@ -68,13 +70,14 @@ constexpr char SCRTID[] = "scrTid";
 constexpr char BUNDLE_NAME[] = "bundleName";
 constexpr char ABILITY_NAME[] = "abilityName";
 constexpr char CLICK[] = "click";
-constexpr char KEY_EVENT[] = "key_event";
+constexpr char RSS_KEY_EVENT[] = "key_event";
 constexpr char PUSH_PAGE[] = "push_page";
 constexpr char POP_PAGE[] = "pop_page";
 constexpr char PAGE_END_FLUSH[] = "page_end_flush";
 constexpr char AUTO_PLAY_ON[] = "auto_play_on";
 constexpr char AUTO_PLAY_OFF[] = "auto_play_off";
 constexpr char SLIDE_OFF[] = "slide_off";
+constexpr char SWIPER_SLIDE_OFF[] = "swiper_slide_off";
 constexpr char OVERLAY_ADD[] = "overlay_add";
 constexpr char OVERLAY_REMOVE[] = "overlay_remove";
 constexpr char TOUCH[] = "touch";
@@ -94,6 +97,7 @@ constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
 #endif
+constexpr char BACKPRESSED[] = "backpressed";
 
 void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload)
 {
@@ -129,6 +133,19 @@ ResSchedReport::ResSchedReport()
 {
     reportDataFunc_ = LoadReportDataFunc();
     reportSyncEventFunc_ = LoadReportSyncEventFunc();
+    setNotifyForceExpandStateFunc_ = LoadSetNotifyForceExpandStateFunc();
+    notifyAppSceneFunc_ = LoadNotifyAppSceneFunc();
+    if (setNotifyForceExpandStateFunc_) {
+        setNotifyForceExpandStateFunc_(NotifyForceExpandStateFunc);
+    }
+}
+
+void ResSchedReport::NotifyAppScene(uint32_t resType, int64_t value,
+    const std::unordered_map<std::string, std::string>& payload)
+{
+    if (notifyAppSceneFunc_) {
+        notifyAppSceneFunc_(resType, value, payload);
+    }
 }
 
 void ResSchedReport::TriggerModuleSerializer()
@@ -189,6 +206,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
             { CLICK,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
+                    NotifyAppScene(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
                 }
             },
             { AUTO_PLAY_ON,
@@ -204,6 +222,11 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
             { SLIDE_OFF,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     reportDataFunc_(RES_TYPE_SLIDE, SLIDE_OFF_EVENT, payload);
+                }
+            },
+            { SWIPER_SLIDE_OFF,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, SWIPER_SLIDE_OFF_EVENT, payload);
                 }
             },
             { POP_PAGE,
@@ -232,12 +255,14 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
                     reportDataFunc_(RES_TYPE_LONG_FRAME, LONG_FRAME_START_EVENT, payload);
+                    NotifyAppScene(RES_TYPE_LONG_FRAME, LONG_FRAME_START_EVENT, payload);
                 }
             },
             { LONG_FRAME_END,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
                     reportDataFunc_(RES_TYPE_LONG_FRAME, LONG_FRAME_END_EVENT, payload);
+                    NotifyAppScene(RES_TYPE_LONG_FRAME, LONG_FRAME_END_EVENT, payload);
                 }
             },
 #endif
@@ -257,12 +282,21 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
                     reportDataFunc_(RES_TYPE_ABILITY_OR_PAGE_SWITCH, ABILITY_OR_PAGE_SWITCH_START_EVENT, payload);
+                    NotifyAppScene(RES_TYPE_ABILITY_OR_PAGE_SWITCH, ABILITY_OR_PAGE_SWITCH_START_EVENT, payload);
                 }
             },
             { ABILITY_OR_PAGE_SWITCH_END,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
                     reportDataFunc_(RES_TYPE_ABILITY_OR_PAGE_SWITCH, ABILITY_OR_PAGE_SWITCH_END_EVENT, payload);
+                    NotifyAppScene(RES_TYPE_ABILITY_OR_PAGE_SWITCH, ABILITY_OR_PAGE_SWITCH_END_EVENT, payload);
+                }
+            },
+            { BACKPRESSED,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_BACKPRESSED_EVENT, 0, payload);
+                    NotifyAppScene(RES_TYPE_BACKPRESSED_EVENT, 0, payload);
                 }
             },
         };
@@ -431,7 +465,7 @@ void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportC
 void ResSchedReport::HandleKeyDown(const KeyEvent& event)
 {
     std::unordered_map<std::string, std::string> payload;
-    payload[Ressched::NAME] = KEY_EVENT;
+    payload[Ressched::NAME] = RSS_KEY_EVENT;
     payload[KEY_CODE] = std::to_string(static_cast<int>(event.code));
     ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_DOWN_EVENT, payload);
 }
@@ -453,7 +487,7 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent, const ReportCon
 void ResSchedReport::HandleKeyUp(const KeyEvent& event)
 {
     std::unordered_map<std::string, std::string> payload;
-    payload[Ressched::NAME] = KEY_EVENT;
+    payload[Ressched::NAME] = RSS_KEY_EVENT;
     payload[KEY_CODE] = std::to_string(static_cast<int>(event.code));
     ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_UP_EVENT, payload);
 }
@@ -480,6 +514,7 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent, const ReportC
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, MOVE_DETECTING, payload);
+        NotifyAppScene(RES_TYPE_SLIDE, MOVE_DETECTING, payload);
     }
 }
 
@@ -548,6 +583,7 @@ void ResSchedReport::LoadPageEvent(int32_t value)
     payload[Ressched::NAME] = LOAD_PAGE;
     LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_LOAD_PAGE, value, payload);
+    NotifyAppScene(RES_TYPE_LOAD_PAGE, value, payload);
 }
 
 void ResSchedReport::HandleAxisBegin(const AxisEvent& axisEvent)

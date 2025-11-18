@@ -132,7 +132,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
 
     if (AceType::InstanceOf<AnimatableArithmeticProperty>(property)) {
         auto castProp = AceType::DynamicCast<AnimatableArithmeticProperty>(property);
-        if (!castProp && !castProp->Get()) {
+        if (!castProp || !castProp->Get()) {
             LOGE("ConvertToRSProperty: Failed converting to RSProperty - AnimatableArithmeticProperty is null");
             return nullptr;
         }

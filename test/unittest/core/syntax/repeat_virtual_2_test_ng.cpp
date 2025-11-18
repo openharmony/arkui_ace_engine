@@ -94,6 +94,25 @@ RefPtr<FrameNode> RepeatVirtual2TestNg::CreateListItemNode()
     return listItemFrameNode;
 }
 
+class MockFrameNode : public FrameNode {
+    DECLARE_ACE_TYPE(MockFrameNode, FrameNode);
+
+public:
+    MockFrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern)
+    {}
+
+    ~MockFrameNode() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    MOCK_METHOD(void, OnRecycle, (), (override));
+    MOCK_METHOD(void, OnReuse, (), (override));
+};
+
 /**
  * @tc.name: CreateRepeat001
  * @tc.desc: Test creation of GetOrCreateRepeatNode
@@ -733,6 +752,22 @@ HWTEST_F(RepeatVirtual2TestNg, ConvertFromToIndex002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RecycleItems001
+ * @tc.desc: Test node.RecycleItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RecycleItems001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    repeatNode->RecycleItems(0, 5);
+    EXPECT_EQ(repeatNode->prevRecycleFrom_, 0);
+    EXPECT_EQ(repeatNode->prevRecycleTo_, 5);
+    repeatNode->RecycleItems(5, 0);
+    EXPECT_EQ(repeatNode->prevRecycleFrom_, 0);
+    EXPECT_EQ(repeatNode->prevRecycleTo_, 5);
+}
+
+/**
  * @tc.name: UpdateFrameChildIndexRecord001
  * @tc.desc: Test node.updateFrameChildIndexRecord
  * @tc.type: FUNC
@@ -815,22 +850,46 @@ HWTEST_F(RepeatVirtual2TestNg, NotifyColorModeChange002, TestSize.Level1)
 HWTEST_F(RepeatVirtual2TestNg, UpdateIsL1001, TestSize.Level1)
 {
     auto repeatNode = CreateRepeatVirtualNode(10);
-    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2017, AceType::MakeRefPtr<Pattern>());
-    CacheItem cacheItem0 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
-    CacheItem cacheItem1 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    RefPtr<UINode> mockNode = AceType::MakeRefPtr<MockFrameNode>("node", 2017, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem0 = RepeatVirtualScroll2CacheItem::MakeCacheItem(mockNode, true);
+    CacheItem cacheItem1 = RepeatVirtualScroll2CacheItem::MakeCacheItem(mockNode, true);
+    /**
+     * @tc.steps: step1. update cacheItem0 to non-L1 when node_ is nullptr
+     * @tc.expected: isL1_ is false, recycledNodeIds_ size is 0
+     */
     cacheItem0->node_ = nullptr;
     repeatNode->caches_.UpdateIsL1(cacheItem0, false);
     EXPECT_EQ(cacheItem0->isL1_, false);
     EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 0);
+    /**
+     * @tc.steps: step2. update cacheItem1 to non-L1 when node_ is valid
+     * @tc.expected: isL1_ is false, recycledNodeIds_ size is 1
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockFrameNode>(cacheItem1->node_)), OnRecycle())
+        .Times(1); // expect OnRecycle called once
     repeatNode->caches_.UpdateIsL1(cacheItem1, false);
     EXPECT_EQ(cacheItem1->isL1_, false);
     EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 1);
+    /**
+     * @tc.steps: step3. update cacheItem0 to L1
+     * @tc.expected: isL1_ is true, recycledNodeIds_ size is 1
+     */
     repeatNode->caches_.UpdateIsL1(cacheItem0, true);
     EXPECT_EQ(cacheItem0->isL1_, true);
     EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 1);
+    /**
+     * @tc.steps: step4. update cacheItem1 to L1
+     * @tc.expected: isL1_ is true, recycledNodeIds_ size is 0
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockFrameNode>(cacheItem1->node_)), OnReuse())
+        .Times(1); // expect OnReuse called once
     repeatNode->caches_.UpdateIsL1(cacheItem1, true);
     EXPECT_EQ(cacheItem1->isL1_, true);
     EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 0);
+    /**
+     * @tc.steps: step5. update cacheItem1 to non-L1 again
+     * @tc.expected: isL1_ is false, recycledNodeIds_ size is 1
+     */
     repeatNode->caches_.UpdateIsL1(cacheItem1, false, false);
     EXPECT_EQ(cacheItem1->isL1_, false);
     EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 0);

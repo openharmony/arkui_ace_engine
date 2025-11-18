@@ -82,6 +82,7 @@
 
 namespace OHOS::Ace {
 struct TextDetectConfig;
+class ResponseRegion;
 }
 
 namespace OHOS::Ace::NG {
@@ -191,6 +192,7 @@ namespace Converter {
             std::optional<StringArray> ToFontFamilies();
             std::optional<Dimension> ToDimension();
             std::optional<CalcLength> ToCalcLength();
+            std::optional<CalcDimension> ToCalcDimension();
             std::optional<float> ToFloat();
             std::optional<int32_t> ToInt();
             std::optional<uint32_t> ToSymbol();
@@ -206,6 +208,7 @@ namespace Converter {
             std::optional<std::string> GetRawfilePath();
             std::optional<std::string> GetMediaPath();
             std::optional<std::string> GetPluralResource();
+            std::optional<CalcDimension> GetDimensionInner();
             std::optional<int32_t> GetIntegerResource();
             std::optional<double> GetFloatResource();
 
@@ -356,8 +359,14 @@ namespace Converter {
 
     // Implementation is in cpp
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
-    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+    void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
+    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
         const GradientDirection &direction);
+    // if src is not string or number, return directly. If src is invalid string, use defaultValue.
+    void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Opt_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
+    void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
 
     template<>
     inline uint32_t Convert(const Ark_Number& src)
@@ -512,6 +521,7 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
     template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
+    template<> BorderStyleProperty Convert(const Ark_NodeEdgeStyles& src);
     template<> BorderRadiusProperty Convert(const Ark_Number& src);
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
@@ -529,6 +539,7 @@ namespace Converter {
     template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
+    template<> CalcDimension Convert(const Ark_Float64& src);
     template<> CalcDimension Convert(const Ark_String& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Number& src);
@@ -536,15 +547,19 @@ namespace Converter {
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_Int32& src);
+    template<> Color Convert(const Ark_Int64& src);
+    template<> Color Convert(const Ark_Float64& src);
     template<> Color Convert(const Ark_String& src);
     template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> Dimension Convert(const Ark_Number& src);
     template<> Dimension Convert(const Ark_Int32& src);
+    template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_String& src);
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
+    template<> ResponseRegion Convert(const Ark_ResponseRegion &src);
     template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EdgesParam Convert(const Ark_Edges& src);
     template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
@@ -561,6 +576,7 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
+    template<> GradientColor Convert(const Ark_Tuple_ResourceColor_F64& value);
     template<> Header Convert(const Ark_Header& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
@@ -626,10 +642,14 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShapePoint Convert(const Ark_ShapePoint& src);
+    template<> SheetHeight Convert(const Ark_DoubleLengthDetents& src);
     template<> SheetHeight Convert(const Ark_Number& src);
     template<> SheetHeight Convert(const Ark_Resource& src);
     template<> SheetHeight Convert(const Ark_SheetSize& src);
+    template<> SheetHeight Convert(const Ark_SingleLengthDetent& src);
     template<> SheetHeight Convert(const Ark_String& src);
+    template<> SheetHeight Convert(const Ark_TripleLengthDetents& src);
+    template<> SheetHeight Convert(const Ark_Union_SheetSize_Length& src);
     template<> StringArray Convert(const Ark_CustomObject& src);
     template<> SysOptions Convert(const Ark_SystemAdaptiveOptions& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
@@ -652,6 +672,7 @@ namespace Converter {
     template<> std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src);
     template<> std::set<SourceTool> Convert(const Array_SourceTool& src);
     template<> std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src);
+    template<> std::string Convert(const Ark_CommandPath& src);
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<Dimension> Convert(const Array_Length& src);
@@ -668,6 +689,9 @@ namespace Converter {
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQuality& src);
+    template<> void AssignCast(std::optional<AccessibilityInterfaceAction>& dst, const Ark_AccessibilityAction& src);
+    template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst,
+        const Ark_AccessibilityActionInterceptResult& src);
     template<> void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src);
     template<> void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src);
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
@@ -745,6 +769,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
+    template<> void AssignCast(std::optional<ResponseRegionSupportedTool>& dst,
+        const Ark_ResponseRegionSupportedTool& src);
     template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);
     template<> void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src);
     template<> void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src);
@@ -861,9 +887,11 @@ namespace Converter {
     template<> void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src);
     template<> void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src);
     template<> void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src);
+    template<> void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src);
+    template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src);

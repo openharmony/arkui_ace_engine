@@ -239,6 +239,7 @@ void SelectContentOverlayManager::UpdateStatusInfos(SelectOverlayInfo& overlayIn
         overlayInfo.secondHandle.isShow = false;
     }
     SelectMenuInfo menuInfo;
+    // for menuInfo update, some AI update logic in BaseTextSelectOverlay::OnUpdateSelectOverlayInfo
     selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     overlayInfo.menuInfo = menuInfo;
     overlayInfo.callerFrameNode = selectOverlayHolder_->GetOwner();
@@ -534,8 +535,6 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
         firstHandleInfo = selectOverlayHolder_->GetFirstHandleInfo();
         if (firstHandleInfo) {
             ConvertHandleRelativeToParent(*firstHandleInfo);
-            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update first handle info %{public}s - %{public}s",
-                firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
         }
     }
     std::optional<SelectHandleInfo> secondHandleInfo;
@@ -543,8 +542,6 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
         secondHandleInfo = selectOverlayHolder_->GetSecondHandleInfo();
         if (secondHandleInfo) {
             ConvertHandleRelativeToParent(*secondHandleInfo);
-            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update second handle info %{public}s - %{public}s",
-                secondHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
         }
     }
     if (!firstHandleInfo && !secondHandleInfo) {

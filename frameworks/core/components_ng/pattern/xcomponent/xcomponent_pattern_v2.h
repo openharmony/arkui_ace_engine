@@ -91,7 +91,7 @@ private:
     void DisposeSurface();
     int32_t HandleSurfaceCreated();
     int32_t HandleSurfaceDestroyed();
-    void InitializeRenderContext();
+    void InitializeRenderContext(bool isThreadSafeNode = false);
     std::pair<bool, bool> UpdateSurfaceRect();
     void HandleSurfaceChangeEvent(bool offsetChanged, bool sizeChanged, bool frameOffsetChange);
     void XComponentSizeChange(const RectF& surfaceRect);

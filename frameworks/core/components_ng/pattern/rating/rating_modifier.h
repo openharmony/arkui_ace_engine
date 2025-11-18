@@ -174,7 +174,7 @@ public:
 
     void SetTouchStar(int32_t touchStar, const RefPtr<FrameNode>& host)
     {
-        if (touchStar < 0 || touchStar >= starNum_->Get() || touchStar_->Get() != touchStar) {
+        if (touchStar < 0 || touchStar >= starNum_->Get() || (touchStar_ && (touchStar_->Get() != touchStar))) {
             SetHoverState(RatingAnimationType::NONE, host);
         }
         if (touchStar_) {
@@ -200,6 +200,11 @@ public:
     {
         isFocus_ = isFocus;
         SetHoverState(state_, host);
+    }
+
+    void SetIsNeedFocusStyle(bool isNeedFocusStyle)
+    {
+        isNeedFocusStyle_ = isNeedFocusStyle;
     }
 
     void SetHoverState(const RatingAnimationType& state, const RefPtr<FrameNode>& host)
@@ -249,6 +254,7 @@ private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
     bool isFocus_ = false;
+    bool isNeedFocusStyle_ = false;
     bool indicator_ = false;
     bool isImageInfoFromTheme_ = false;
     Dimension distance_ = 4.0_vp;

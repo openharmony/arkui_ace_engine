@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
@@ -127,40 +128,82 @@ void SetSetIconImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetSetIcon(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
+    SecurityComponentModelNG::SetIcon(frameNode, info);
 }
 void SetSetTextImpl(Ark_NativePointer node,
                     const Opt_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetSetText(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto convContent = Converter::OptConvertPtr<std::string>(value);
+    SecurityComponentModelNG::SetText(frameNode, convContent);
 }
 void SetIconSizeImpl(Ark_NativePointer node,
                      const Opt_Union_Dimension_SizeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetIconSize(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto valueSelector = value->value.selector;
+    if (valueSelector == 0) {
+        Opt_Dimension dimensionTmp = {};
+        dimensionTmp.tag = INTEROP_TAG_OBJECT;
+        dimensionTmp.value = value->value.value0;
+        auto valueOpt = Converter::OptConvert<Dimension>(dimensionTmp);
+        Validator::ValidateNonNegative(valueOpt);
+        Validator::ValidateNonPercent(valueOpt);
+        SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
+    } else if (valueSelector == 1) {
+        auto sizeOptionsTmp = value->value.value1;
+        auto widthDimension = Converter::OptConvert<Dimension>(sizeOptionsTmp.width);
+        auto heightDimension = Converter::OptConvert<Dimension>(sizeOptionsTmp.height);
+        std::optional<CalcLength> width;
+        std::optional<CalcLength> height;
+        if (widthDimension.has_value()) {
+            width.emplace(CalcLength(widthDimension.value()));
+        }
+        if (heightDimension.has_value()) {
+            height.emplace(CalcLength(heightDimension.value()));
+        }
+        SecurityComponentModelNG::SetIconSize(frameNode, CalcSize(width, height));
+    } else {
+        return;
+    }
 }
 void SetIconBorderRadiusImpl(Ark_NativePointer node,
                              const Opt_Union_Dimension_BorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetIconBorderRadius(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<BorderRadiusProperty>(*value);
+    SecurityComponentModelNG::SetIconBorderRadius(frameNode, convValue);
 }
 void SetStateEffectImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetStateEffect(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    SecurityComponentModelNG::SetStateEffect(frameNode, value->value);
+}
+void SetUserCancelEventImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SecurityComponentModelNG::SetUserCancelEvent(frameNode, convValue);
 }
 } // SaveButtonAttributeModifier
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
@@ -174,6 +217,7 @@ const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
         SaveButtonAttributeModifier::SetIconSizeImpl,
         SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
         SaveButtonAttributeModifier::SetStateEffectImpl,
+        SaveButtonAttributeModifier::SetUserCancelEventImpl,
     };
     return &ArkUISaveButtonModifierImpl;
 }

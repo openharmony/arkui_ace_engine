@@ -438,6 +438,8 @@ private:
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void UpdateTitleAndContentColor();
+    void UpdateMaskColor();
+    RefPtr<FrameNode> GetMaskNode();
     void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
@@ -463,6 +465,7 @@ private:
     void OnDetachFromMainTreeImpl();
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
+    void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
     bool InvertShadowColor();
     void OnWindowShow() override;
     RefPtr<DialogTheme> dialogTheme_;

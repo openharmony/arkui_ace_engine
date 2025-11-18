@@ -59,7 +59,7 @@ using GetControllerFunc = void* (*)(void* object, const char*);
 using ParseObjectFunc = void* (*)(void* object);
 using GetStatusFunc = int32_t (*)(void* object);
 using GetPixelMapFunc = void (*)(void* object, std::shared_ptr<Media::PixelMap>& pixelmap);
-using SetPixelMapListFunc = void (*)(void* object, std::vector<void*> pixelMaps);
+using SetPixelMapListFunc = void (*)(void* object, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps);
 using SetPathFunc = void (*)(void* object, const char* path);
 using SetResourceFunc = void (*)(void* object, void* resource);
 using SetTotalDurationFunc = void (*)(void* object, int32_t duration);
@@ -181,7 +181,7 @@ void AnimatedLoadSync(void* object, int32_t& width, int32_t& height, int32_t& er
     }
 }
 
-void AnimatedSetPixelMapListC(void* object, std::vector<void*> pixelMaps)
+void AnimatedSetPixelMapListC(void* object, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps)
 {
     if (auto entry = GetAceFunction<SetPixelMapListFunc>(ANIMATED_SET_PIXELMAP_LIST)) {
         entry(object, pixelMaps);

@@ -46,11 +46,11 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
     setRichTextOptionsAttribute(content: string | Resource): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const contentForIdx0  = content as string
             thisSerializer.writeString(contentForIdx0)
         } else if (content instanceof Resource) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const contentForIdx1  = content as Resource
             Resource_serializer.write(thisSerializer, contentForIdx1)
         }
@@ -125,6 +125,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         if (this.checkPriority("setRichTextOptions")) {
             const content_casted = content as (string | Resource)
             this.getPeer()?.setRichTextOptionsAttribute(content_casted)
+            this.applyOptionsFinish('RichTextAttribute');
             return this
         }
         return this
@@ -152,6 +153,9 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

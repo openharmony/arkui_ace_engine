@@ -304,7 +304,7 @@ bool ScrollPattern::IsAtTop() const
     return NonNegative(currentOffset_);
 }
 
-bool ScrollPattern::IsAtBottom(bool considerRepeat, bool fromController) const
+bool ScrollPattern::IsAtBottom(bool considerRepeat) const
 {
     if (LessNotEqual(scrollableDistance_, 0.0)) {
         return LessOrEqual(currentOffset_, 0.0);
@@ -725,8 +725,9 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     if (LessOrEqual(scrollableDistance_, 0.0)) {
         return;
     }
-    float distance =
-        scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ : (-scrollableDistance_ - currentOffset_);
+    float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP
+                         ? -currentOffset_ + contentStartOffset_
+                         : (-scrollableDistance_ - currentOffset_ - contentEndOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
@@ -1257,6 +1258,7 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
 float ScrollPattern::GetSelectScrollWidth()
 {
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, 0.0f);
     auto parent = columnInfo->GetParent();
     CHECK_NULL_RETURN(parent, SELECT_SCROLL_MIN_WIDTH.ConvertToPx());
     parent->BuildColumnWidth();

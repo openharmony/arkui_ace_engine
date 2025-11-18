@@ -149,18 +149,18 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
         ComputeInnerLayoutParam(childLayoutConstraint, dialogProp);
         UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
+        // remove the height of the floating button
+        auto childMaxSize = childLayoutConstraint.maxSize;
+        auto maxHeightWithoutFloatButton = layoutConstraint->maxSize.Height() - floatButtonsHeight_;
+        childMaxSize.SetHeight(std::min(childMaxSize.Height(), maxHeightWithoutFloatButton));
+        childLayoutConstraint.UpdateMaxSizeWithCheck(childMaxSize);
+        childLayoutConstraint.percentReference.SetHeight(
+            std::min(childLayoutConstraint.percentReference.Height(), maxHeightWithoutFloatButton));
     }
 
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         childLayoutConstraint.maxSize.SetWidth(LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
     }
-    // remove the height of the floating button
-    auto childMaxSize = childLayoutConstraint.maxSize;
-    auto maxHeightWithoutFloatButton = layoutConstraint->maxSize.Height() - floatButtonsHeight_;
-    childMaxSize.SetHeight(std::min(childMaxSize.Height(), maxHeightWithoutFloatButton));
-    childLayoutConstraint.UpdateMaxSizeWithCheck(childMaxSize);
-    childLayoutConstraint.percentReference.SetHeight(
-        std::min(childLayoutConstraint.percentReference.Height(), maxHeightWithoutFloatButton));
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
     if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
@@ -766,7 +766,13 @@ void DialogLayoutAlgorithm::AvoidScreen(
     }
     auto overScreen = LessNotEqual(availableRect.Width(), childSize.Width()) ||
                       LessNotEqual(availableRect.Height(), childSize.Height());
-    auto needAvoidScreen = DialogManager::GetInstance().IsPcOrFreeMultiWindow(dialogNode) && !overScreen;
+    // The following situations trigger avoidance:
+    // 1.PC or freemultiwindowMode, customstyle is false.
+    // 2.hopper UEC subwindow non-modal dialog.
+    auto needAvoidScreen =
+        ((DialogManager::GetInstance().IsPcOrFreeMultiWindow(dialogNode) && !customSize_) ||
+            (SystemProperties::IsSuperFoldDisplayDevice() && !isModal_ && isUIExtensionSubWindow_)) &&
+        !overScreen;
     if (!needAvoidScreen) {
         return;
     }
@@ -1127,8 +1133,12 @@ void DialogLayoutAlgorithm::DialogOverflowAdjust(
     auto limitTop = availableTop + limitAreaPadding;
     auto limitBottom = availableBottom  - limitAreaPadding;
     // Adjust allowed area for foldable devices
-    if (alignBottomScreen_) {
-        limitTop = foldCreaseRect.Bottom();
+    if (isHoverMode_) {
+        if (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN) {
+            limitBottom = foldCreaseRect.Top();
+        } else {
+            limitTop = foldCreaseRect.Bottom();
+        }
     }
     if (GreatNotEqual(limitTop, limitBottom)) {
         return;
