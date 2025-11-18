@@ -3662,22 +3662,27 @@ class ClickEffectModifier extends ModifierWithKey<ClickEffect | null> {
   }
 }
 
-class KeyBoardShortCutModifier extends ModifierWithKey<ArkKeyBoardShortCut> {
-  constructor(value: ArkKeyBoardShortCut) {
+class KeyBoardShortCutModifier extends ModifierWithKey<Array<ArkKeyBoardShortCut>> {
+  constructor(value: Array<ArkKeyBoardShortCut>) {
     super(value);
   }
   static identity: Symbol = Symbol('keyboardShortcut');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().common.resetKeyBoardShortCut(node);
-    } else if (this.value.action === undefined) {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+      getUINativeModule().common.resetKeyBoardShortCutAll(node);
     } else {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
+      while (this.value.length !== 0) {
+        let item = this.value.shift();
+        if (item === undefined) {
+          continue;
+        }
+        if (item.action === undefined) {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys);
+        } else {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys, item.action);
+        }
+      }
     }
-  }
-  checkObjectDiff(): boolean {
-    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -4107,6 +4112,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _gestureEvent: UIGestureEvent;
   _instanceId: number;
   _needDiff: boolean;
+  _keyboardShortcutList: Array<ArkKeyBoardShortCut>;
   private _onVisibleAreaChange: ArkOnVisibleAreaChange = null;
   private _onPreDragEvent: PreDragCallback = null;
   private _onTouchInterceptEvent: TouchInterceptCallback = null;
@@ -4139,6 +4145,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this._changed = false;
     this._classType = classType;
     this._needDiff = true;
+    this._keyboardShortcutList = new Array();
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -5678,7 +5685,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
     keyboardShortCut.action = action;
-    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
+    this._keyboardShortcutList.push(keyboardShortCut);
+    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier,
+      this._keyboardShortcutList);
     return this;
   }
 

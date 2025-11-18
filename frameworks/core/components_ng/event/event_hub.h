@@ -257,6 +257,7 @@ public:
     void SetKeyboardShortcut(
         const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction);
     void ClearSingleKeyboardShortcut();
+    void ClearSingleKeyboardShortcutAll();
     std::vector<KeyboardShortcut>& GetKeyboardShortcut();
     void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onDragFunc);
     void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& onDragEnd);
