@@ -7519,7 +7519,7 @@ export interface CommonMethod {
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         throw new Error("Unimplemented method onDragEnd")
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         throw new Error("Unimplemented method allowDrop")
     }
     draggable(value: boolean | undefined): this {
@@ -7928,7 +7928,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDragLeave_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDrop_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragEnd_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    allowDrop_value?: Array<uniformTypeDescriptor.UniformDataType> | null | undefined
+    allowDrop_value?: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined
     draggable_value?: boolean | undefined
     dragPreview_value?: CustomBuilder | DragItemInfo | string | undefined
     onPreDrag_value?: ((value0: PreDragStatus) => void) | undefined
@@ -8313,7 +8313,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         return this
     }
     draggable(value: boolean | undefined): this {
@@ -9866,7 +9866,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         if (this.checkPriority("allowDrop")) {
             hookAllowDrop(this, value)
             return this

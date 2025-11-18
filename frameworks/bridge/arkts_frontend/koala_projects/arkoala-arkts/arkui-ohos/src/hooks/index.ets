@@ -125,7 +125,7 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
 }
 
-export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | undefined) : void {
+export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | Array<string> | undefined) : void {
   if (!node) {
       return
   }
@@ -139,7 +139,7 @@ export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPe
     }
     return
   }
-  let array = value as (Array<UniformDataType> | undefined)
+  let array = value as (Array<UniformDataType> | Array<string> | undefined)
   if (node instanceof ArkCommonMethodComponent) {
     let nodeComponent = node as ArkCommonMethodComponent
     ArkUIAniModule._Drag_Set_AllowDrop(nodeComponent.getPeer().getPeerPtr(), array)
