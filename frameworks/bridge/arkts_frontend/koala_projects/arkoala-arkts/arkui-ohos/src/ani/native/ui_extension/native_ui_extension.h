@@ -29,6 +29,10 @@ public:
 
 private:
     // UiExtensionModal
+    static ani_long UiextensionConstruct(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_int id, [[maybe_unused]] ani_int flag,
+        [[maybe_unused]] ani_object typeObj);
     static ani_status SetUiextensionOption(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj);
@@ -53,6 +57,8 @@ private:
     static ani_status SetOnDrawReady(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
+    static bool ParseUiextensionType(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object typeObj, int32_t& result);
     // UiExtensionProxy
     static ani_status SendData(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

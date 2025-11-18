@@ -184,7 +184,8 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
      */
     int64_t extensionOffset = 0;
     elementId = 1;
-    auto pair = uiExtensionManager->UnWrapExtensionAbilityId(extensionOffset, elementId);
+    auto pair =
+        uiExtensionManager->UnWrapExtensionAbilityId(extensionOffset, elementId);
     ASSERT_EQ(pair.first, 0);
     ASSERT_EQ(pair.second, 0);
     extensionOffset = 1;
@@ -534,7 +535,8 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager008, TestSize.Level1)
     /**
      * @tc.steps: step5. test NotifyOccupiedAreaChangeInfo.
      */
-    auto info = sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
+    auto info =
+        sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
     info->rect_.height_ = 100;
     auto sessionWrapper = WeakPtr<SessionWrapper>();
     uiExtensionManager->sessionWrapper_ = sessionWrapper;

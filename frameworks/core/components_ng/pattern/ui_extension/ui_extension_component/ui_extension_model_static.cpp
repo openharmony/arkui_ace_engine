@@ -16,20 +16,61 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.h"
 
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> UIExtensionStatic::CreateFrameNode(
-    int32_t nodeId, NG::SessionType sessionType)
+const CalcDimension EMBEDDED_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
+const CalcDimension EMBEDDED_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
+
+static RefPtr<FrameNode> CreateEmbeddedComponent(int32_t nodeId, NG::SessionType sessionType)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, [sessionType] () {
             return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType);
         });
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    ViewAbstract::SetWidth(static_cast<FrameNode*>(
+        Referenced::RawPtr(frameNode)), CalcLength(EMBEDDED_COMPONENT_MIN_WIDTH));
+    ViewAbstract::SetHeight(static_cast<FrameNode*>(
+        Referenced::RawPtr(frameNode)), CalcLength(EMBEDDED_COMPONENT_MIN_HEIGHT));
+    ViewAbstract::SetMinWidth(static_cast<FrameNode*>(
+        Referenced::RawPtr(frameNode)), CalcLength(EMBEDDED_COMPONENT_MIN_WIDTH));
+    ViewAbstract::SetMinHeight(static_cast<FrameNode*>(
+        Referenced::RawPtr(frameNode)), CalcLength(EMBEDDED_COMPONENT_MIN_HEIGHT));
+    return frameNode;
+}
+
+static RefPtr<FrameNode> CreateUIExtensionComponent(int32_t nodeId, NG::SessionType sessionType)
+{
+    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, [sessionType] () {
+            return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType);
+        });
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     return frameNode;
+}
+
+RefPtr<FrameNode> UIExtensionStatic::CreateFrameNode(
+    int32_t nodeId, NG::SessionType sessionType)
+{
+    switch (sessionType) {
+        case NG::SessionType::UI_EXTENSION_ABILITY:
+            return CreateUIExtensionComponent(nodeId, sessionType);
+        case NG::SessionType::EMBEDDED_UI_EXTENSION:
+            return CreateEmbeddedComponent(nodeId, sessionType);
+        default:
+            break;
+    }
+
+    LOGW("No sessionType support, sessionType is %{public}d", static_cast<int32_t>(sessionType));
+    return nullptr;
 }
 
 void UIExtensionStatic::UpdateUecConfig(FrameNode* frameNode, bool isTransferringCaller, bool densityDpi,

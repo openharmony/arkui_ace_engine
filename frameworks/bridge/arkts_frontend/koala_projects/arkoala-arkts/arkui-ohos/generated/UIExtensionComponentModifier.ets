@@ -75,7 +75,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         {
             switch (this._onReceive_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnReceiveAttribute((this._onReceive_0_0value as ((value0: Map<string, RecordData>) => void) | undefined));
+                    peer.setOnReceiveAttribute((this._onReceive_0_0value as ((value0: Record<string, RecordData>) => void) | undefined));
                     this._onReceive_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -85,7 +85,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
                 }
                 default: {
                     this._onReceive_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnReceiveAttribute((undefined as ((value0: Map<string, RecordData>) => void) | undefined));
+                    peer.setOnReceiveAttribute((undefined as ((value0: Record<string, RecordData>) => void) | undefined));
                 }
             }
         }

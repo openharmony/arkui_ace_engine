@@ -17,14 +17,13 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { RecordData } from "./pluginComponent"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ErrorCallback, BusinessError } from "@ohos.base"
+import { ErrorCallback, BusinessError, RecordData } from "@ohos.base"
 import { extractors, AttributeModifier, hookUIExtensionComponentAttributeModifier, AttributeUpdater } from "#handwritten"
 import { default as Want } from "@ohos.app.ability.Want"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -36,8 +35,8 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { ModifierStateManager } from '../CommonModifier';
 export interface UIExtensionProxy {
-    send(data: Map<string, RecordData>): void
-    sendSync(data: Map<string, RecordData>): Map<string, RecordData>
+    send(data: Record<string, RecordData>): void
+    sendSync(data: Record<string, RecordData>): Record<string, RecordData>
     onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
     onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
     offAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
@@ -68,14 +67,14 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     public static fromPtr(ptr: KPointer): UIExtensionProxyInternal {
         return new UIExtensionProxyInternal(ptr)
     }
-    public send(data: Map<string, RecordData>): void {
-        const data_casted = data as (Map<string, RecordData>)
-        this.send_serialize(data_casted)
+    public send(data: Record<string, RecordData>): void {
+        const data_casted = data as (Record<string, RecordData>)
+        ArkUIAniUiextensionProxyModal._Send_Data(this.peer!.ptr, data_casted)
         return
     }
-    public sendSync(data: Map<string, RecordData>): Map<string, RecordData> {
-        const data_casted = data as (Map<string, RecordData>)
-        return this.sendSync_serialize(data_casted)
+    public sendSync(data: Record<string, RecordData>): Record<string, RecordData> {
+        const data_casted = data as (Record<string, RecordData>)
+        return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data_casted)
     }
     public onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
@@ -198,7 +197,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         thisSerializer.release()
     }
 }
-export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
+export class ArkUIExtensionComponentPeer extends ArkUIExtensionComponentPeerBase {
     attributeSet?: UIExtensionComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -210,18 +209,6 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setUIExtensionComponentOptionsAttribute(want: Want, options?: UIExtensionOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
-            UIExtensionOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentInterface_setUIExtensionComponentOptions(this.peer.ptr, extractors.toWantPtr(want), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setOnRemoteReadyAttribute(value: ((value0: UIExtensionProxy) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -232,54 +219,6 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnRemoteReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnReceiveAttribute(value: ((value0: Map<string, RecordData>) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnErrorAttribute(value: ErrorCallback<BusinessError> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnTerminatedAttribute(value: ((value0: TerminationInfo) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnDrawReadyAttribute(value: (() => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnDrawReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -294,11 +233,11 @@ export enum WindowModeFollowStrategy {
 export interface UIExtensionOptions {
     isTransferringCaller?: boolean;
     placeholder?: ComponentContent;
-    areaChangePlaceholder?: Map<string, ComponentContent>;
+    areaChangePlaceholder?: Record<string, ComponentContent>;
     dpiFollowStrategy?: DpiFollowStrategy;
     windowModeFollowStrategy?: WindowModeFollowStrategy;
 }
-export type ReceiveCallback = ((value0: Map<string, RecordData>) => void);
+export type ReceiveCallback = ((value0: Record<string, RecordData>) => void);
 export interface UIExtensionComponentAttribute extends CommonMethod {
     setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
         throw new Error("Unimplemented method setUIExtensionComponentOptions")
@@ -306,7 +245,7 @@ export interface UIExtensionComponentAttribute extends CommonMethod {
     onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
         throw new Error("Unimplemented method onRemoteReady")
     }
-    onReceive(value: ((value0: Map<string, RecordData>) => void) | undefined): this {
+    onReceive(value: ((value0: Record<string, RecordData>) => void) | undefined): this {
         throw new Error("Unimplemented method onReceive")
     }
     onError(value: ErrorCallback<BusinessError> | undefined): this {
@@ -324,7 +263,7 @@ export interface UIExtensionComponentAttribute extends CommonMethod {
 }
 export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implements UIExtensionComponentAttribute {
     onRemoteReady_value?: ((value0: UIExtensionProxy) => void) | undefined
-    onReceive_value?: ((value0: Map<string, RecordData>) => void) | undefined
+    onReceive_value?: ((value0: Record<string, RecordData>) => void) | undefined
     onError_value?: ErrorCallback<BusinessError> | undefined
     onTerminated_value?: ((value0: TerminationInfo) => void) | undefined
     onDrawReady_value?: (() => void) | undefined
@@ -335,7 +274,7 @@ export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implement
     onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
         return this
     }
-    onReceive(value: ((value0: Map<string, RecordData>) => void) | undefined): this {
+    onReceive(value: ((value0: Record<string, RecordData>) => void) | undefined): this {
         return this
     }
     onError(value: ErrorCallback<BusinessError> | undefined): this {
@@ -377,9 +316,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    public onReceive(value: ((value0: Map<string, RecordData>) => void) | undefined): this {
+    public onReceive(value: ((value0: Record<string, RecordData>) => void) | undefined): this {
         if (this.checkPriority("onReceive")) {
-            const value_casted = value as (((value0: Map<string, RecordData>) => void) | undefined)
+            const value_casted = value as (((value0: Record<string, RecordData>) => void) | undefined)
             this.getPeer()?.setOnReceiveAttribute(value_casted)
             return this
         }
@@ -511,26 +450,11 @@ export class UIExtensionOptions_serializer {
             isTransferringCallerTmpBuf = valueDeserializer.readBoolean()
         }
         const isTransferringCallerTmpResult : boolean | undefined = isTransferringCallerTmpBuf
-        const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let placeholderTmpBuf : ComponentContent | undefined = undefined
-        if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            placeholderTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
-        }
-        const placeholderTmpResult : ComponentContent | undefined = placeholderTmpBuf
+        const placeholderTmpResult : ComponentContent | undefined = undefined
         const areaChangePlaceholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let areaChangePlaceholderTmpBuf : Map<string, ComponentContent> | undefined = undefined
-        if ((areaChangePlaceholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const areaChangePlaceholderTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
-            let areaChangePlaceholderTmpBuf_ : Map<string, ComponentContent> = new Map<string, ComponentContent>()
-            // TODO: TS map resize
-            for (let areaChangePlaceholderTmpBuf_IVar = 0; areaChangePlaceholderTmpBuf_IVar < areaChangePlaceholderTmpBuf_SizeVar; areaChangePlaceholderTmpBuf_IVar++) {
-                const areaChangePlaceholderTmpBuf_KeyVar : string = (valueDeserializer.readString() as string)
-                const areaChangePlaceholderTmpBuf_ValueVar : ComponentContent = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
-                areaChangePlaceholderTmpBuf_.set(areaChangePlaceholderTmpBuf_KeyVar, areaChangePlaceholderTmpBuf_ValueVar)
-            }
-            areaChangePlaceholderTmpBuf = areaChangePlaceholderTmpBuf_
-        }
-        const areaChangePlaceholderTmpResult : Map<string, ComponentContent> | undefined = areaChangePlaceholderTmpBuf
+        const areaChangePlaceholderTmpResult : Map<string, ComponentContent> | undefined = undefined
         const dpiFollowStrategyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dpiFollowStrategyTmpBuf : DpiFollowStrategy | undefined = undefined
         if ((dpiFollowStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

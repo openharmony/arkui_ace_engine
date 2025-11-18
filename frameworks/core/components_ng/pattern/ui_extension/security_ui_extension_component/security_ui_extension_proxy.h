@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class SecurityUIExtensionPattern;
-class SecurityUIExtensionProxy : public AceType {
+class ACE_FORCE_EXPORT SecurityUIExtensionProxy : public AceType {
     DECLARE_ACE_TYPE(SecurityUIExtensionProxy, AceType);
 
 public:
@@ -33,6 +33,11 @@ public:
     int32_t SendDataSync(
         const RefPtr<WantParamsWrap>& wantParams, AAFwk::WantParams& reWantParams);
     RefPtr<SecurityUIExtensionPattern> GetPattern() const;
+    /* only for ArkTS static begin*/
+    void SendData(const AAFwk::WantParams& wantParams);
+    int32_t SendDataSync(
+        const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams);
+    /* only for ArkTS static end*/
 
 private:
     RefPtr<SessionWrapper> sessionWrapper_;
