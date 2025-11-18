@@ -164,7 +164,16 @@ static CurvesObj* unwrapp(ani_env *env, ani_object object)
 static ani_double Interpolate(ani_env* env, ani_object object, ani_double fraction)
 {
     auto curveObject = unwrapp(env, object);
+    ani_double errorValue = 0.0;
+    if (curveObject == nullptr) {
+        LOGE("curveObject is nullptr");
+        return errorValue;
+    }
     auto curveInterpolate = curveObject->curve;
+    if (curveInterpolate == nullptr) {
+        LOGE("curveInterpolate is nullptr");
+        return errorValue;
+    }
     float time = std::clamp(static_cast<float>(fraction), 0.0f, 1.0f);
     ani_double curveValue = static_cast<ani_double>(curveInterpolate->Move(time));
     return curveValue;
@@ -489,6 +498,7 @@ static ani_object CustomCurve(ani_env* env, ani_object callbackObj)
 
     ani_object curve_object;
     if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(interpolatingCurve))) {
+        delete interpolatingCurve;
         return nullptr;
     }
     return curve_object;
