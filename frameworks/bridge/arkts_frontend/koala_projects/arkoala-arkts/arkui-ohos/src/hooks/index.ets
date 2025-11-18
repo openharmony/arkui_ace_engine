@@ -567,7 +567,10 @@ export function unregisterDetach(peerPtr: CanvasRenderingContext2D, callback?: V
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
     WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }
-export function hookListItemGroupOptionsImpl(node: ArkListItemGroupComponent, options: ListItemGroupOptions | undefined): void {
+export function hookListItemGroupOptionsImpl(
+    node: ArkListItemGroupComponent,
+    options: ListItemGroupOptions | undefined
+): void {
     ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
 }
 export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,

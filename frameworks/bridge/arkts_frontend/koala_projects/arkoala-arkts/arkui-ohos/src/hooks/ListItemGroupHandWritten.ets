@@ -22,7 +22,10 @@ import { CustomBuilder, ArkComponentRootPeer } from 'arkui/framework'
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { GlobalStateManager, IncrementalNode, memoEntry, StateManager, createStateManager } from '@koalaui/runtime'
 export class ListItemGroupHandWritten {
-    static hookListItemGroupOptionsImpl(node: ArkListItemGroupComponent, options: ListItemGroupOptions | undefined): void {
+    static hookListItemGroupOptionsImpl(
+        node: ArkListItemGroupComponent,
+        options: ListItemGroupOptions | undefined
+    ): void {
         if (options === undefined) {
             ArkUIAniModule._SetListItemGroupSpace(node.getPeer().peer.ptr, 0)
             ArkUIAniModule._SetListItemGroupStyle(node.getPeer().peer.ptr, ListItemGroupStyle.NONE)
@@ -37,7 +40,7 @@ export class ListItemGroupHandWritten {
         } else if (options.header !== undefined) {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             if (options.header instanceof CustomBuilder) {
-                const value_builder = options.header as CustomBuilder
+                const valueBuilder = options.header as CustomBuilder
                 const old = GlobalStateManager.instance;
                 let manager: StateManager = createStateManager()!;
                 GlobalStateManager.SetLocalManager(manager);
@@ -45,7 +48,7 @@ export class ListItemGroupHandWritten {
                     ArkComponentRootPeer.create(undefined), (context: StateContext) => {
                     const frozen = manager.frozen
                     manager.frozen = true
-                    memoEntry<void>(context, 0, value_builder)
+                    memoEntry<void>(context, 0, valueBuilder)
                     manager.frozen = frozen
                 })
                 GlobalStateManager.SetLocalManager(old);
@@ -62,7 +65,7 @@ export class ListItemGroupHandWritten {
         } else if (options.footer !== undefined) {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             if (options.footer instanceof CustomBuilder) {
-                const value_builder = options.footer as CustomBuilder
+                const valueBuilder = options.footer as CustomBuilder
                 const old = GlobalStateManager.instance;
                 let manager: StateManager = createStateManager()!;
                 GlobalStateManager.SetLocalManager(manager);
@@ -70,7 +73,7 @@ export class ListItemGroupHandWritten {
                     ArkComponentRootPeer.create(undefined), (context: StateContext) => {
                     const frozen = manager.frozen
                     manager.frozen = true
-                    memoEntry<void>(context, 0, value_builder)
+                    memoEntry<void>(context, 0, valueBuilder)
                     manager.frozen = frozen
                 })
                 GlobalStateManager.SetLocalManager(old);
