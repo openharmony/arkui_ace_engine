@@ -77,4 +77,5 @@ HWTEST_F(SizeTTest, SizeT_ToString_Boundary_Case_With_Nan_And_Inf, TestSize.Leve
     expected = "[nan x -nan]";
     EXPECT_EQ(sizeD.ToString(), expected);
 }
+
 } // namespace OHOS::Ace
