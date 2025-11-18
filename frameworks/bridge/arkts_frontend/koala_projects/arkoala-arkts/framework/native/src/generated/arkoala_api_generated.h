@@ -348,6 +348,12 @@ typedef struct Opt_Date Opt_Date;
 typedef struct DatePickerDialogPeer DatePickerDialogPeer;
 typedef struct DatePickerDialogPeer* Ark_DatePickerDialog;
 typedef struct Opt_DatePickerDialog Opt_DatePickerDialog;
+typedef struct DigitIndicatorPeer DigitIndicatorPeer;
+typedef struct DigitIndicatorPeer* Ark_DigitIndicator;
+typedef struct Opt_DigitIndicator Opt_DigitIndicator;
+typedef struct DotIndicatorPeer DotIndicatorPeer;
+typedef struct DotIndicatorPeer* Ark_DotIndicator;
+typedef struct Opt_DotIndicator Opt_DotIndicator;
 typedef struct DrawableDescriptorPeer DrawableDescriptorPeer;
 typedef struct DrawableDescriptorPeer* Ark_DrawableDescriptor;
 typedef struct Opt_DrawableDescriptor Opt_DrawableDescriptor;
@@ -425,6 +431,9 @@ typedef struct Opt_ImageSourceSize Opt_ImageSourceSize;
 typedef struct ImageModifierPeer ImageModifierPeer;
 typedef struct ImageModifierPeer* Ark_ImageModifier;
 typedef struct Opt_ImageModifier Opt_ImageModifier;
+typedef struct IndicatorPeer IndicatorPeer;
+typedef struct IndicatorPeer* Ark_Indicator;
+typedef struct Opt_Indicator Opt_Indicator;
 typedef struct IndicatorComponentControllerPeer IndicatorComponentControllerPeer;
 typedef struct IndicatorComponentControllerPeer* Ark_IndicatorComponentController;
 typedef struct Opt_IndicatorComponentController Opt_IndicatorComponentController;
@@ -2814,6 +2823,8 @@ typedef struct Ark_Union_Length_F64 Ark_Union_Length_F64;
 typedef struct Opt_Union_Length_F64 Opt_Union_Length_F64;
 typedef struct Ark_Union_Length_LayoutPolicy Ark_Union_Length_LayoutPolicy;
 typedef struct Opt_Union_Length_LayoutPolicy Opt_Union_Length_LayoutPolicy;
+typedef struct Ark_Union_LengthMetrics_Length Ark_Union_LengthMetrics_Length;
+typedef struct Opt_Union_LengthMetrics_Length Opt_Union_LengthMetrics_Length;
 typedef struct Ark_Union_MenuItemOptions_CustomBuilder Ark_Union_MenuItemOptions_CustomBuilder;
 typedef struct Opt_Union_MenuItemOptions_CustomBuilder Opt_Union_MenuItemOptions_CustomBuilder;
 typedef struct Ark_Union_NavDestinationContext_NavBar Ark_Union_NavDestinationContext_NavBar;
@@ -2881,8 +2892,6 @@ typedef struct Ark_DividerOptions Ark_DividerOptions;
 typedef struct Opt_DividerOptions Opt_DividerOptions;
 typedef struct Ark_DividerStyle Ark_DividerStyle;
 typedef struct Opt_DividerStyle Opt_DividerStyle;
-typedef struct Ark_DotIndicator Ark_DotIndicator;
-typedef struct Opt_DotIndicator Opt_DotIndicator;
 typedef struct Ark_EdgeOutlineWidths Ark_EdgeOutlineWidths;
 typedef struct Opt_EdgeOutlineWidths Opt_EdgeOutlineWidths;
 typedef struct Ark_Edges Ark_Edges;
@@ -3106,8 +3115,6 @@ typedef struct Ark_CustomDialogControllerOptionsExtender Ark_CustomDialogControl
 typedef struct Opt_CustomDialogControllerOptionsExtender Opt_CustomDialogControllerOptionsExtender;
 typedef struct Ark_CustomPopupOptions Ark_CustomPopupOptions;
 typedef struct Opt_CustomPopupOptions Opt_CustomPopupOptions;
-typedef struct Ark_DigitIndicator Ark_DigitIndicator;
-typedef struct Opt_DigitIndicator Opt_DigitIndicator;
 typedef struct Ark_EventTarget Ark_EventTarget;
 typedef struct Opt_EventTarget Opt_EventTarget;
 typedef struct FocusAxisEventPeer FocusAxisEventPeer;
@@ -7144,6 +7151,14 @@ typedef struct Opt_DatePickerDialog {
     Ark_Tag tag;
     Ark_DatePickerDialog value;
 } Opt_DatePickerDialog;
+typedef struct Opt_DigitIndicator {
+    Ark_Tag tag;
+    Ark_DigitIndicator value;
+} Opt_DigitIndicator;
+typedef struct Opt_DotIndicator {
+    Ark_Tag tag;
+    Ark_DotIndicator value;
+} Opt_DotIndicator;
 typedef struct Opt_DrawableDescriptor {
     Ark_Tag tag;
     Ark_DrawableDescriptor value;
@@ -7314,6 +7329,10 @@ typedef struct Opt_ImageModifier {
     Ark_Tag tag;
     Ark_ImageModifier value;
 } Opt_ImageModifier;
+typedef struct Opt_Indicator {
+    Ark_Tag tag;
+    Ark_Indicator value;
+} Opt_Indicator;
 typedef struct Opt_IndicatorComponentController {
     Ark_Tag tag;
     Ark_IndicatorComponentController value;
@@ -18005,6 +18024,18 @@ typedef struct Opt_Union_Length_Number {
     Ark_Tag tag;
     Ark_Union_Length_Number value;
 } Opt_Union_Length_Number;
+typedef struct Ark_Union_LengthMetrics_Length {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_LengthMetrics value0;
+        Ark_Length value1;
+    };
+} Ark_Union_LengthMetrics_Length;
+typedef struct Opt_Union_LengthMetrics_Length {
+    Ark_Tag tag;
+    Ark_Union_LengthMetrics_Length value;
+} Opt_Union_LengthMetrics_Length;
 typedef struct Ark_Union_MenuItemOptions_CustomBuilder {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18381,28 +18412,6 @@ typedef struct Opt_DividerStyle {
     Ark_Tag tag;
     Ark_DividerStyle value;
 } Opt_DividerStyle;
-typedef struct Ark_DotIndicator {
-    /* kind: Interface */
-    Opt_Length _left;
-    Opt_Length _top;
-    Opt_Length _right;
-    Opt_Length _bottom;
-    Opt_LengthMetrics _start;
-    Opt_LengthMetrics _end;
-    Opt_Length _itemWidth;
-    Opt_Length _itemHeight;
-    Opt_Length _selectedItemWidth;
-    Opt_Length _selectedItemHeight;
-    Opt_Boolean _mask;
-    Opt_ResourceColor _color;
-    Opt_ResourceColor _selectedColor;
-    Opt_Int32 _maxDisplayCount;
-    Opt_LengthMetrics _space;
-} Ark_DotIndicator;
-typedef struct Opt_DotIndicator {
-    Ark_Tag tag;
-    Ark_DotIndicator value;
-} Opt_DotIndicator;
 typedef struct Ark_EdgeOutlineWidths {
     /* kind: Interface */
     Opt_Dimension top;
@@ -19900,23 +19909,6 @@ typedef struct Opt_CustomPopupOptions {
     Ark_Tag tag;
     Ark_CustomPopupOptions value;
 } Opt_CustomPopupOptions;
-typedef struct Ark_DigitIndicator {
-    /* kind: Interface */
-    Opt_Length _left;
-    Opt_Length _top;
-    Opt_Length _right;
-    Opt_Length _bottom;
-    Opt_LengthMetrics _start;
-    Opt_LengthMetrics _end;
-    Opt_ResourceColor _fontColor;
-    Opt_ResourceColor _selectedFontColor;
-    Opt_Font _digitFont;
-    Opt_Font _selectedDigitFont;
-} Ark_DigitIndicator;
-typedef struct Opt_DigitIndicator {
-    Ark_Tag tag;
-    Ark_DigitIndicator value;
-} Opt_DigitIndicator;
 typedef struct Ark_EventTarget {
     /* kind: Interface */
     Ark_Area area;
@@ -25324,6 +25316,20 @@ typedef struct GENERATED_ArkUIDialogExtenderAccessor {
     void (*showDatePickerDialog)(const Ark_DatePickerDialogOptions* options);
 } GENERATED_ArkUIDialogExtenderAccessor;
 
+typedef struct GENERATED_ArkUIDigitIndicatorAccessor {
+    void (*destroyPeer)(Ark_DigitIndicator peer);
+    Ark_DigitIndicator (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*fontColor)(Ark_DigitIndicator peer,
+                      const Opt_ResourceColor* value);
+    void (*selectedFontColor)(Ark_DigitIndicator peer,
+                              const Opt_ResourceColor* value);
+    void (*digitFont)(Ark_DigitIndicator peer,
+                      const Opt_Font* value);
+    void (*selectedDigitFont)(Ark_DigitIndicator peer,
+                              const Opt_Font* value);
+} GENERATED_ArkUIDigitIndicatorAccessor;
+
 typedef struct GENERATED_ArkUIDisappearSymbolEffectAccessor {
     void (*destroyPeer)(Ark_DisappearSymbolEffect peer);
     Ark_DisappearSymbolEffect (*construct)(const Opt_EffectScope* scope);
@@ -25352,6 +25358,30 @@ typedef struct GENERATED_ArkUIDismissPopupActionAccessor {
     void (*setReason)(Ark_DismissPopupAction peer,
                       Ark_DismissReason reason);
 } GENERATED_ArkUIDismissPopupActionAccessor;
+
+typedef struct GENERATED_ArkUIDotIndicatorAccessor {
+    void (*destroyPeer)(Ark_DotIndicator peer);
+    Ark_DotIndicator (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*itemWidth)(Ark_DotIndicator peer,
+                      const Opt_Length* value);
+    void (*itemHeight)(Ark_DotIndicator peer,
+                       const Opt_Length* value);
+    void (*selectedItemWidth)(Ark_DotIndicator peer,
+                              const Opt_Length* value);
+    void (*selectedItemHeight)(Ark_DotIndicator peer,
+                               const Opt_Length* value);
+    void (*mask)(Ark_DotIndicator peer,
+                 const Opt_Boolean* value);
+    void (*color)(Ark_DotIndicator peer,
+                  const Opt_ResourceColor* value);
+    void (*selectedColor)(Ark_DotIndicator peer,
+                          const Opt_ResourceColor* value);
+    void (*maxDisplayCount)(Ark_DotIndicator peer,
+                            const Opt_Int32* maxDisplayCount);
+    void (*space)(Ark_DotIndicator peer,
+                  const Opt_LengthMetrics* space);
+} GENERATED_ArkUIDotIndicatorAccessor;
 
 typedef struct GENERATED_ArkUIDragEventAccessor {
     void (*destroyPeer)(Ark_DragEvent peer);
@@ -25826,6 +25856,29 @@ typedef struct GENERATED_ArkUIImageDataAccessor {
     void (*setWidth)(Ark_ImageData peer,
                      Ark_Int32 width);
 } GENERATED_ArkUIImageDataAccessor;
+
+typedef struct GENERATED_ArkUIIndicatorAccessor {
+    void (*destroyPeer)(Ark_Indicator peer);
+    Ark_Indicator (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*left)(Ark_Indicator peer,
+                 const Opt_Length* value);
+    void (*top)(Ark_Indicator peer,
+                const Opt_Length* value);
+    void (*right)(Ark_Indicator peer,
+                  const Opt_Length* value);
+    void (*bottom0)(Ark_Indicator peer,
+                    const Opt_Length* value);
+    void (*bottom1)(Ark_Indicator peer,
+                    const Opt_Union_LengthMetrics_Length* bottom,
+                    Ark_Boolean ignoreSize);
+    void (*start)(Ark_Indicator peer,
+                  const Opt_LengthMetrics* value);
+    void (*end)(Ark_Indicator peer,
+                const Opt_LengthMetrics* value);
+    Ark_DotIndicator (*dot)();
+    Ark_DigitIndicator (*digit)();
+} GENERATED_ArkUIIndicatorAccessor;
 
 typedef struct GENERATED_ArkUIIndicatorComponentControllerAccessor {
     void (*destroyPeer)(Ark_IndicatorComponentController peer);
@@ -27986,9 +28039,11 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDatePickerDialogAccessor* (*getDatePickerDialogAccessor)();
     const GENERATED_ArkUIDecorationStyleAccessor* (*getDecorationStyleAccessor)();
     const GENERATED_ArkUIDialogExtenderAccessor* (*getDialogExtenderAccessor)();
+    const GENERATED_ArkUIDigitIndicatorAccessor* (*getDigitIndicatorAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
     const GENERATED_ArkUIDismissDialogActionAccessor* (*getDismissDialogActionAccessor)();
     const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();
+    const GENERATED_ArkUIDotIndicatorAccessor* (*getDotIndicatorAccessor)();
     const GENERATED_ArkUIDragEventAccessor* (*getDragEventAccessor)();
     const GENERATED_ArkUIDrawingRenderingContextAccessor* (*getDrawingRenderingContextAccessor)();
     const GENERATED_ArkUIEnvironmentBackendAccessor* (*getEnvironmentBackendAccessor)();
@@ -28021,6 +28076,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIImageAttachmentAccessor* (*getImageAttachmentAccessor)();
     const GENERATED_ArkUIImageBitmapAccessor* (*getImageBitmapAccessor)();
     const GENERATED_ArkUIImageDataAccessor* (*getImageDataAccessor)();
+    const GENERATED_ArkUIIndicatorAccessor* (*getIndicatorAccessor)();
     const GENERATED_ArkUIIndicatorComponentControllerAccessor* (*getIndicatorComponentControllerAccessor)();
     const GENERATED_ArkUIIUIContextAccessor* (*getIUIContextAccessor)();
     const GENERATED_ArkUIJsGeolocationAccessor* (*getJsGeolocationAccessor)();

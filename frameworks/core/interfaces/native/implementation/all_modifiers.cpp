@@ -231,9 +231,11 @@ const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandler
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor();
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
 const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor();
+const GENERATED_ArkUIDigitIndicatorAccessor* GetDigitIndicatorAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
 const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
+const GENERATED_ArkUIDotIndicatorAccessor* GetDotIndicatorAccessor();
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
 const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor();
@@ -266,6 +268,7 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
 const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
 const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor();
+const GENERATED_ArkUIIndicatorAccessor* GetIndicatorAccessor();
 const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor();
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor();
 const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor();
@@ -545,9 +548,11 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDatePickerDialogAccessor,
         GetDecorationStyleAccessor,
         GetDialogExtenderAccessor,
+        GetDigitIndicatorAccessor,
         GetDisappearSymbolEffectAccessor,
         GetDismissDialogActionAccessor,
         GetDismissPopupActionAccessor,
+        GetDotIndicatorAccessor,
         GetDragEventAccessor,
         GetDrawingRenderingContextAccessor,
         GetEnvironmentBackendAccessor,
@@ -580,6 +585,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetImageAttachmentAccessor,
         GetImageBitmapAccessor,
         GetImageDataAccessor,
+        GetIndicatorAccessor,
         GetIndicatorComponentControllerAccessor,
         GetIUIContextAccessor,
         GetJsGeolocationAccessor,

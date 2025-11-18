@@ -25,6 +25,8 @@
 #include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
+#include "core/interfaces/native/implementation/dot_indicator_peer_impl.h"
+#include "core/interfaces/native/implementation/digit_indicator_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
@@ -60,53 +62,6 @@ std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Unio
 }
 
 namespace OHOS::Ace::NG::Converter {
-template<>
-SwiperParameters Convert(const Ark_DotIndicator& src)
-{
-    SwiperParameters p;
-    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
-    p.dimTop = Converter::OptConvert<Dimension>(src._top);
-    p.dimRight = Converter::OptConvert<Dimension>(src._right);
-    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
-
-    p.dimStart = Converter::OptConvert<Dimension>(src._start);
-    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
-
-    p.itemWidth = Converter::OptConvert<Dimension>(src._itemWidth);
-    p.itemHeight = Converter::OptConvert<Dimension>(src._itemHeight);
-    p.selectedItemWidth = Converter::OptConvert<Dimension>(src._selectedItemWidth);
-    p.selectedItemHeight = Converter::OptConvert<Dimension>(src._selectedItemHeight);
-
-    p.maskValue = Converter::OptConvert<bool>(src._mask);
-    p.colorVal = Converter::OptConvert<Color>(src._color);
-    p.selectedColorVal = Converter::OptConvert<Color>(src._selectedColor);
-    p.maxDisplayCountVal = Converter::OptConvert<int32_t>(src._maxDisplayCount);
-    return p;
-}
-
-template<>
-SwiperDigitalParameters Convert(const Ark_DigitIndicator& src)
-{
-    SwiperDigitalParameters p;
-    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
-    p.dimTop = Converter::OptConvert<Dimension>(src._top);
-    p.dimRight = Converter::OptConvert<Dimension>(src._right);
-    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
-
-    p.dimStart = Converter::OptConvert<Dimension>(src._start);
-    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
-
-    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._digitFont); font) {
-        std::tie(p.fontSize, p.fontWeight) = *font;
-    }
-    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._selectedDigitFont); font) {
-        std::tie(p.selectedFontSize, p.selectedFontWeight) = *font;
-    }
-
-    p.fontColor = Converter::OptConvert<Color>(src._fontColor);
-    p.selectedFontColor = Converter::OptConvert<Color>(src._selectedFontColor);
-    return p;
-}
 
 template<>
 ArrowStyleVariantType Convert(const Ark_ArrowStyle& src)
@@ -326,7 +281,10 @@ void SetIntervalImpl(Ark_NativePointer node,
 namespace {
 void SetIndicator(FrameNode* frameNode, const Ark_DigitIndicator& src)
 {
-    auto digitParam = Converter::Convert<SwiperDigitalParameters>(src);
+    CHECK_NULL_VOID(frameNode);
+    auto peerDigitIndicator = src;
+    CHECK_NULL_VOID(peerDigitIndicator);
+    auto digitParam = peerDigitIndicator->GetDigitParameters();
     CheckSwiperDigitalParameters(digitParam);
     SwiperModelStatic::SetIndicatorIsBoolean(frameNode, false);
     SwiperModelStatic::SetDigitIndicatorStyle(frameNode, digitParam);
@@ -335,7 +293,10 @@ void SetIndicator(FrameNode* frameNode, const Ark_DigitIndicator& src)
 }
 void SetIndicator(FrameNode* frameNode, const Ark_DotIndicator& src)
 {
-    auto dotParam = Converter::Convert<SwiperParameters>(src);
+    CHECK_NULL_VOID(frameNode);
+    auto peerDotIndicator = src;
+    CHECK_NULL_VOID(peerDotIndicator);
+    auto dotParam = peerDotIndicator->GetDotParameters();
     auto isCustomSize = CheckSwiperParameters(dotParam);
     SwiperModelStatic::SetIndicatorIsBoolean(frameNode, false);
     SwiperModelStatic::SetDotIndicatorStyle(frameNode, dotParam);
