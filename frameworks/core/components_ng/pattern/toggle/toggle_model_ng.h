@@ -84,6 +84,7 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetToggleState(FrameNode* frameNode, bool isOn = false);
+    static bool GetToggleState(FrameNode* frameNode);
 
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);
@@ -115,6 +116,8 @@ private:
     static void UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
     static void UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
     static void UpdateToggleButtonIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static bool GetCheckboxIsOn(FrameNode* frameNode);
+    static bool GetToggleButtonIsOn(FrameNode* frameNode);
     static void ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode);
     static std::string ColorTypeToString(const ToggleColorType toggleColorType);
     static std::string DimensionTypeToString(const ToggleDimensionType toggleDimensionType);
