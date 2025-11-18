@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
-export { observableProxy, ObservableClass, TrackableProps } from '@koalaui/compat'
+export {
+    observableProxy,
+    ObservableClass,
+    TrackableProps,
+} from '@koalaui/compat'
 
 export {
     AnimatedState,
@@ -67,7 +71,9 @@ export {
     transition,
 } from './animation/TimeAnimation'
 
-export { RuntimeProfiler } from './common/RuntimeProfiler'
+export {
+    RuntimeProfiler,
+} from './common/RuntimeProfiler'
 
 export {
     memoBind,
@@ -123,6 +129,9 @@ export {
 } from './memo/testing'
 
 export {
+    Dependent,
+} from './states/Dependency'
+export {
     Disposable,
     disposeContent,
     disposeContentBackward,
@@ -148,7 +157,6 @@ export {
     MutableState,
     StateManager,
     StateManagerImpl,
-    StateImpl,
     ValueTracker,
 } from './states/State'
 

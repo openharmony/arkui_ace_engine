@@ -17,6 +17,14 @@ import { UID, Unique, UniqueMap, UniqueSet } from '../common/Unique'
 
 let uidCounter: UID = 0
 
+/** This interface represents an object that may depend on some other dependencies. */
+export interface Dependent {
+    /** @return `true` if this object has at least one dependency */
+    hasDependencies(): boolean
+    /** @return a string representation of this object, useful for debugging */
+    toString(): string
+}
+
 /** This interface represents an unique observer that can be notified that some changes. */
 export interface Dependency {
     /** Returns dependencies to all used states. */
@@ -60,7 +68,7 @@ export class StateToScopes implements Unique {
 
     invalidateIf(predicate: (element: ScopeToStates) => boolean): void {
         this.dependencies.forEach((dependency: ScopeToStates) => {
-            if (predicate(dependency)) dependency.invalidate()
+            if (predicate(dependency)) { dependency.invalidate() }
         })
     }
 
@@ -112,7 +120,7 @@ export class ScopeToStates implements Unique {
         const current = this.marker
         this.marker = !current
         this.dependencies.deleteIf((dependency: StateToScopes, marker: Boolean) => {
-            if (current === marker) return false
+            if (current === marker) { return false }
             dependency.remove(this)
             return true
         })
