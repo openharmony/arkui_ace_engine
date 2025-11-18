@@ -669,8 +669,8 @@ HWTEST_F(WebModelStaticTest, SetEnableFollowSystemFontWeight002, TestSize.Level1
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetEnableFollowSystemFontWeight(AccessibilityManager::RawPtr(frameNode), false);
-    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(false), false);
+    WebModelStatic::SetEnableFollowSystemFontWeight(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(true), true);
 #endif
 }
 
@@ -1217,7 +1217,7 @@ HWTEST_F(WebModelStaticTest, SetMediaOptions001, TestSize.Level1)
     WebModelStatic::SetAudioSessionType(AccessibilityManager::RawPtr(frameNode), audioSessionType);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioResumeInterval(0), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioExclusive(true), true);
-    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioSessionType(3), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioSessionType(WebAudioSessionType::AMBIENT), true);
 #endif
 }
 
