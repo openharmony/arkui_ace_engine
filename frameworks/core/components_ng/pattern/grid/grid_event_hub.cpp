@@ -211,6 +211,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     SnapshotParam param;
     if (auto pixmap = ComponentSnapshot::CreateSync(customNode, param); pixmap) {
         callback(pixmap, 0, nullptr);
+        gridItem->SetActive(true);
         return;
     }
     param.delay = CREATE_PIXELMAP_TIME;
