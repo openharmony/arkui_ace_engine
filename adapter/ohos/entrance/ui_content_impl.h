@@ -571,7 +571,7 @@ protected:
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
-    std::function<void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
+    std::function<void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)> addNodeCallback_ = nullptr;
     std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode> keyFrameNode_ = nullptr;
     std::atomic<bool> cachedAnimateFlag_ = false;
