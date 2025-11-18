@@ -193,7 +193,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
 {
     static const int expectedResId = 123;
-    static constexpr auto TEST_VALUE(u"string text");
+    static constexpr auto testValue(u"string text");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -205,7 +205,7 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
         ASSERT_NE(submitEventInfo, nullptr);
-        EXPECT_EQ(submitEventInfo->GetText(), TEST_VALUE);
+        EXPECT_EQ(submitEventInfo->GetText(), testValue);
         GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
         EXPECT_EQ(resourceId, expectedResId);
         g_EventTestKey = enterKeyType;
@@ -214,7 +214,7 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
     auto func = Converter::ArkValue<OnSubmitCallback>(onSubmitFunc, expectedResId);
     modifier_->setOnSubmit(node_, &func);
     TextFieldCommonEvent event;
-    event.SetText(TEST_VALUE);
+    event.SetText(testValue);
     eventHub->FireOnSubmit(111, event);
     EXPECT_EQ(g_EventTestKey, -1);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);

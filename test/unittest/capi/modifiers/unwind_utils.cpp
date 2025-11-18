@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 
 static std::set<std::string> reportedThemes;
 
-static const std::string getThemePrefix("_ZN4OHOS3Ace12ThemeManager8GetThemeINS0_");
+static const std::string GET_THEME_PREFIX("_ZN4OHOS3Ace12ThemeManager8GetThemeINS0_");
 
 std::string ProcessBacktrace(void)
 {
@@ -55,10 +55,10 @@ std::string ProcessBacktrace(void)
         if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
             //std::cout << sym << std::endl;
             auto str = std::string(sym);
-            if (str.substr(0, getThemePrefix.size()) == getThemePrefix) {
+            if (str.substr(0, GET_THEME_PREFIX.size()) == GET_THEME_PREFIX) {
                 std::size_t pos;
-                auto len = std::stoi(str.substr(getThemePrefix.size()), &pos);
-                auto themeName = str.substr(getThemePrefix.size() + pos, len);
+                auto len = std::stoi(str.substr(GET_THEME_PREFIX.size()), &pos);
+                auto themeName = str.substr(GET_THEME_PREFIX.size() + pos, len);
                 return themeName;
             }
         }

@@ -264,10 +264,9 @@ PreviewText PREVIEW_TEXT = { .offset = 1234, .value = u"test_offset" };
 const auto EMPTY_TEXT(u"");
 
 bool g_isEditChangeTest(true);
-std::u16string g_EventTestString(u"");
-std::u16string g_EventErrorTestString(u"");
+std::u16string g_eventTestString(u"");
 Ark_EnterKeyType g_EventTestKey{};
-int32_t g_EventTestOffset(0);
+int32_t g_eventTestOffset(0);
 int32_t g_startValue(0);
 int32_t g_endValue(0);
 float g_scrollX(0);
@@ -479,12 +478,12 @@ HWTEST_F(TextAreaModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
 {
-    constexpr auto DEFAULT_TEXT_INDENT = "0.00vp";
+    constexpr auto defaultTextIndent = "0.00vp";
     const std::string propName("textIndent");
     ASSERT_NE(modifier_->setTextIndent, nullptr);
 
     auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, DEFAULT_TEXT_INDENT);
+    EXPECT_EQ(checkVal, defaultTextIndent);
 
     for (const auto& [value, expectVal] : ARK_LENGTH_TEST_PLAN) {
         modifier_->setTextIndent(node_, &value);
@@ -500,19 +499,19 @@ HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
 {
-    constexpr auto DEFAULT_CARET_COLOR = "#FF000000";
-    constexpr auto DEFAULT_CARET_WIDTH = "0.00px";
+    constexpr auto defaultCaretColor = "#FF000000";
+    constexpr auto defaultCaretWidth = "0.00px";
     const std::string propName("caretStyle");
-    constexpr auto PROP_COLOR = "color";
-    constexpr auto PROP_WIDTH = "width";
+    constexpr auto propColor = "color";
+    constexpr auto propWidth = "width";
     ASSERT_NE(modifier_->setCaretStyle, nullptr);
 
     auto value = GetStringAttribute(node_, propName);
     auto caretStyleObj = JsonUtil::ParseJsonString(value);
-    auto defaultCaretColor = caretStyleObj->GetString(PROP_COLOR);
-    auto defaultCaretWidth = caretStyleObj->GetString(PROP_WIDTH);
-    EXPECT_EQ(defaultCaretColor, DEFAULT_CARET_COLOR);
-    EXPECT_EQ(defaultCaretWidth, DEFAULT_CARET_WIDTH);
+    auto defaultCaretColor = caretStyleObj->GetString(propColor);
+    auto defaultCaretWidth = caretStyleObj->GetString(propWidth);
+    EXPECT_EQ(defaultCaretColor, defaultCaretColor);
+    EXPECT_EQ(defaultCaretWidth, defaultCaretWidth);
 
     typedef std::pair<std::string, std::string> CheckCaretValue;
     typedef std::pair<Ark_CaretStyle, CheckCaretValue> TestCaretStyle;
@@ -528,7 +527,7 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
             auto length = std::get<0>(testLength).value;
             auto unit = std::get<0>(testLength).unit;
             if ((LessNotEqual(length, 0.0f) || (unit == static_cast<int32_t>(DimensionUnit::PERCENT)))) {
-                caretValue = { std::get<1>(testColor), DEFAULT_CARET_WIDTH };
+                caretValue = { std::get<1>(testColor), defaultCaretWidth };
             }
             TestCaretStyle testCaretStyle = { arkCaretStyle, caretValue };
             testPlanCaretStyle.push_back(testCaretStyle);
@@ -539,8 +538,8 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
         modifier_->setCaretStyle(node_, &caretStyle.first);
         value = GetStringAttribute(node_, propName);
         caretStyleObj = JsonUtil::ParseJsonString(value);
-        auto caretColor = caretStyleObj->GetString(PROP_COLOR);
-        auto caretWidth = caretStyleObj->GetString(PROP_WIDTH);
+        auto caretColor = caretStyleObj->GetString(propColor);
+        auto caretWidth = caretStyleObj->GetString(propWidth);
         EXPECT_EQ(caretColor, caretStyle.second.first);
         EXPECT_EQ(caretWidth, caretStyle.second.second);
     }
@@ -584,7 +583,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit0Test, TestSize.Level1)
     auto func = Converter::ArkValue<Callback_EnterKeyType_Void>(onSubmit0, CONTEXT_ID);
     modifier_->setOnSubmit0(node_, &func);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
     ASSERT_NE(eventHub, nullptr);
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(111, event);
@@ -666,25 +665,25 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    g_EventTestString = u"";
-    g_EventTestOffset = 0;
+    g_eventTestString = u"";
+    g_eventTestOffset = 0;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestOffset, 0);
     auto onChange =
         [](Ark_Int32 nodeId, Ark_String value, Opt_PreviewText previewText, Opt_TextChangeOptions options) {
-            g_EventTestOffset = PREVIEW_TEXT.offset;
-            g_EventTestString.append(CHECK_TEXT).append(PREVIEW_TEXT.value);
+            g_eventTestOffset = PREVIEW_TEXT.offset;
+            g_eventTestString.append(CHECK_TEXT).append(PREVIEW_TEXT.value);
         };
     auto func = Converter::ArkValue<EditableTextOnChangeCallback>(onChange, CONTEXT_ID);
     modifier_->setOnChange(node_, &func);
     textFieldEventHub->FireOnChange({CHECK_TEXT, PREVIEW_TEXT});
     std::u16string checkString = CHECK_TEXT;
     checkString.append(PREVIEW_TEXT.value);
-    EXPECT_EQ(g_EventTestString, checkString);
-    EXPECT_EQ(g_EventTestOffset, PREVIEW_TEXT.offset);
+    EXPECT_EQ(g_eventTestString, checkString);
+    EXPECT_EQ(g_eventTestOffset, PREVIEW_TEXT.offset);
 }
 
 /**
@@ -913,7 +912,7 @@ HWTEST_F(TextAreaModifierTest, setEnterKeyTypeTest2, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setMaxLinesTest, TestSize.Level1)
 {
     const std::string propName("maxLines");
-    constexpr auto DEFAULT_MAX_VIEW_LINES = "3";
+    constexpr auto defaultMaxViewLines = "3";
     ASSERT_NE(modifier_->setMaxLines, nullptr);
 
     auto checkVal = GetStringAttribute(node_, propName);
@@ -921,16 +920,16 @@ HWTEST_F(TextAreaModifierTest, setMaxLinesTest, TestSize.Level1)
 
     TextFieldModelNG::SetInputStyle(reinterpret_cast<FrameNode*>(node_), InputStyle::INLINE);
     checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, DEFAULT_MAX_VIEW_LINES);
+    EXPECT_EQ(checkVal, defaultMaxViewLines);
 
     typedef std::pair<Ark_Number, std::string> ArkNumberTestStep;
     const std::vector<ArkNumberTestStep> testPlan = {
         { Converter::ArkValue<Ark_Number>(20), "20" },
         { Converter::ArkValue<Ark_Number>(0), "0" },
         { Converter::ArkValue<Ark_Number>(22.5f), "22" },
-        { Converter::ArkValue<Ark_Number>(-20), DEFAULT_MAX_VIEW_LINES },
+        { Converter::ArkValue<Ark_Number>(-20), defaultMaxViewLines },
         { Converter::ArkValue<Ark_Number>(0.0f), "0" },
-        { Converter::ArkValue<Ark_Number>(-22.5f), DEFAULT_MAX_VIEW_LINES } };
+        { Converter::ArkValue<Ark_Number>(-22.5f), defaultMaxViewLines } };
 
     for (const auto& [value, expectVal] : testPlan) {
         modifier_->setMaxLines(node_, const_cast<Ark_Number*>(&value));
@@ -1071,27 +1070,27 @@ HWTEST_F(TextAreaModifierTest, setOnWillInsertTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setOnDidInsertTest, TestSize.Level1)
 {
-    g_EventTestString = u"";
-    g_EventTestOffset = 0;
+    g_eventTestString = u"";
+    g_eventTestOffset = 0;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     InsertValueInfo checkValueDefault;
     textFieldEventHub->FireOnDidInsertValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestOffset, 0);
     auto onDidInsert =
         [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-            g_EventTestString = Converter::Convert<std::u16string>(data.insertValue);
-            g_EventTestOffset = Converter::Convert<int32_t>(data.insertOffset);
+            g_eventTestString = Converter::Convert<std::u16string>(data.insertValue);
+            g_eventTestOffset = Converter::Convert<int32_t>(data.insertOffset);
         };
     auto func = Converter::ArkValue<Callback_InsertValue_Void>(onDidInsert, CONTEXT_ID);
     modifier_->setOnDidInsert(node_, &func);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
         textFieldEventHub->FireOnDidInsertValueEvent(checkValue);
-        EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-        EXPECT_EQ(g_EventTestOffset, expectVal);
+        EXPECT_EQ(g_eventTestString, CHECK_TEXT);
+        EXPECT_EQ(g_eventTestOffset, expectVal);
     }
 }
 
@@ -1146,21 +1145,21 @@ HWTEST_F(TextAreaModifierTest, setOnWillDeleteTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setOnDidDeleteTest, TestSize.Level1)
 {
-    g_EventTestString = u"";
-    g_EventTestOffset = 0;
+    g_eventTestString = u"";
+    g_eventTestOffset = 0;
     g_deleteDirection = TextDeleteDirection::FORWARD;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     DeleteValueInfo checkValueDefault;
     textFieldEventHub->FireOnDidDeleteValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestOffset, 0);
     EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
     auto onDidDelete =
         [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-            g_EventTestString = Converter::Convert<std::u16string>(data.deleteValue);
-            g_EventTestOffset = Converter::Convert<int32_t>(data.deleteOffset);
+            g_eventTestString = Converter::Convert<std::u16string>(data.deleteValue);
+            g_eventTestOffset = Converter::Convert<int32_t>(data.deleteOffset);
             auto didDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
             if (didDeleteDirection) {
                 g_deleteDirection = didDeleteDirection.value();
@@ -1174,8 +1173,8 @@ HWTEST_F(TextAreaModifierTest, setOnDidDeleteTest, TestSize.Level1)
                 .deleteOffset = value, .deleteValue = CHECK_TEXT, .direction = deleteDirection
             };
             textFieldEventHub->FireOnDidDeleteValueEvent(checkValue);
-            EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-            EXPECT_EQ(g_EventTestOffset, expectVal);
+            EXPECT_EQ(g_eventTestString, CHECK_TEXT);
+            EXPECT_EQ(g_eventTestOffset, expectVal);
             EXPECT_EQ(g_deleteDirection, deleteDirection);
         }
     }
@@ -1215,21 +1214,21 @@ HWTEST_F(TextAreaModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setOnCopyTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnCopy, nullptr);
-    g_EventTestString = EMPTY_TEXT;
+    g_eventTestString = EMPTY_TEXT;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
     auto onCopy =
         [](Ark_Int32 nodeId, Ark_String value) {
             auto textString = Converter::Convert<std::u16string>(value);
-            g_EventTestString = textString;
+            g_eventTestString = textString;
         };
     auto func = Converter::ArkValue<Callback_String_Void>(onCopy, CONTEXT_ID);
     modifier_->setOnCopy(node_, &func);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
+    EXPECT_EQ(g_eventTestString, CHECK_TEXT);
 }
 
 /**
@@ -1240,20 +1239,20 @@ HWTEST_F(TextAreaModifierTest, setOnCopyTest, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setOnCutTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnCut, nullptr);
-    g_EventTestString = EMPTY_TEXT;
+    g_eventTestString = EMPTY_TEXT;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
     auto onCut =
         [](Ark_Int32 nodeId, Ark_String value) {
-            g_EventTestString = Converter::Convert<std::u16string>(value);
+            g_eventTestString = Converter::Convert<std::u16string>(value);
         };
     auto func = Converter::ArkValue<Callback_String_Void>(onCut, CONTEXT_ID);
     modifier_->setOnCut(node_, &func);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
+    EXPECT_EQ(g_eventTestString, CHECK_TEXT);
 }
 
 /**
@@ -1741,11 +1740,13 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
         auto jsonValue = GetJsonValue(node_);
         ASSERT_NE(jsonValue, nullptr);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        EXPECT_EQ(checkVal, expectedStr) <<
+        EXPECT_EQ(checkVal, expectedStr)
+ <<
             "Input value is: " << input << ", method: setTextAreaOptions, attribute: "
             << ATTRIBUTE_PLACEHOLDER_NAME;
         checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_NAME);
-        EXPECT_EQ(checkVal, expectedStr) <<
+        EXPECT_EQ(checkVal, expectedStr)
+ <<
             "Input value is: " << input << ", method: setTextAreaOptions, attribute: "
             << ATTRIBUTE_TEXT_NAME;
     };

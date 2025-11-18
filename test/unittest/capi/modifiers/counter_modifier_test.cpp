@@ -204,11 +204,10 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
 HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
-    constexpr auto PROP_NAME = "backgroundColor";
+    constexpr auto propName = "backgroundColor";
     auto resName = NamedResourceId("aa.bb.cc", ResourceType::COLOR);
     auto resId = IntResourceId(1234, ResourceType::COLOR);
-    const std::string EXPECTED_RESOURCE_COLOR =
-        Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
+    const std::string expectedResourceColor = Color::RED.ToString();
     const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)),
              "#FFFFFFFF" },
@@ -224,12 +223,12 @@ HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
 
     ASSERT_NE(commonModifier_->setBackgroundColor, nullptr);
 
-    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    auto checkInitial = GetAttrValue<std::string>(node_, propName);
     EXPECT_EQ(checkInitial, Color::TRANSPARENT.ToString());
 
     for (const auto &[arkResColor, expected]: testPlan) {
         commonModifier_->setBackgroundColor(node_, &arkResColor);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        auto checkColor = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkColor, expected);
     }
 }

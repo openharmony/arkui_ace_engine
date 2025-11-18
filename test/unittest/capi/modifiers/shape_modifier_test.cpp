@@ -142,15 +142,15 @@ HWTEST_F(ShapeModifierTest, setViewPortTest, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, setStrokeTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "stroke";
+    constexpr auto propName = "stroke";
     ASSERT_NE(modifier_->setStroke, nullptr);
 
-    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    auto checkInitial = GetAttrValue<std::string>(node_, propName);
     EXPECT_EQ(checkInitial, Color::BLACK.ToString());
 
     for (const auto& [arkResColor, expected] : TEST_COLOR_PLAN) {
         modifier_->setStroke(node_, &arkResColor);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        auto checkColor = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkColor, expected);
     }
 }
@@ -162,15 +162,15 @@ HWTEST_F(ShapeModifierTest, setStrokeTest, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, setFillTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "fill";
+    constexpr auto propName = "fill";
     ASSERT_NE(modifier_->setFill, nullptr);
 
-    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    auto checkInitial = GetAttrValue<std::string>(node_, propName);
     EXPECT_EQ(checkInitial, Color::BLACK.ToString());
 
     for (const auto& [arkResColor, expected] : TEST_COLOR_PLAN) {
         modifier_->setFill(node_, &arkResColor);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        auto checkColor = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkColor, expected);
     }
 }
@@ -467,7 +467,7 @@ HWTEST_F(ShapeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, setAntiAliasTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "antiAlias";
+    constexpr auto propName = "antiAlias";
     ASSERT_NE(modifier_->setAntiAlias, nullptr);
     using OneBoolStep = std::tuple<Ark_Boolean, std::string>;
     const std::vector<OneBoolStep> BOOL_TEST_PLAN = {
@@ -480,14 +480,14 @@ HWTEST_F(ShapeModifierTest, setAntiAliasTest, TestSize.Level1)
         { false, "false" }
     };
     auto fullJson = GetJsonValue(node_);
-    auto checkVal = GetAttrValue<std::string>(fullJson, PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(fullJson, propName);
     EXPECT_EQ(checkVal, "true");
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto valueOpt = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setAntiAlias(node_, &valueOpt);
         auto fullJson = GetJsonValue(node_);
-        checkVal = GetAttrValue<std::string>(fullJson, PROP_NAME);
+        checkVal = GetAttrValue<std::string>(fullJson, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }

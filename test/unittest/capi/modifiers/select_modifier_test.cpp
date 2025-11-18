@@ -115,7 +115,7 @@ struct TestFont {
     }
 };
 
-float strToFloat(const std::string& str)
+float StrToFloat(const std::string& str)
 {
     char* ptr = nullptr;
     float result = strtof(str.c_str(), &ptr);
@@ -606,7 +606,7 @@ HWTEST_F(SelectModifierTest, setOptionHeightTest, TestSize.Level1)
     for (const auto &[value, expectVal]: OPTION_HEIGHT_TEST_PLAN) {
         modifier_->setOptionHeight(node_, &value);
         auto checkVal = GetStringAttribute(node_, propName);
-        EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
+        EXPECT_FLOAT_EQ(StrToFloat(checkVal), expectVal);
     }
 }
 
@@ -1073,7 +1073,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionWidthTest, TestSize.Level1)
         auto value = ArkUnion<Opt_Union_Dimension_OptionWidthMode, Ark_Dimension>(lengthValue);
         modifier_->setOptionWidth(node_, &value);
         auto checkVal = GetStringAttribute(node_, optionWidthPropName);
-        EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
+        EXPECT_FLOAT_EQ(StrToFloat(checkVal), expectVal);
     }
 
     auto value1 = ArkUnion<Opt_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_TRIGGER);
@@ -1084,7 +1084,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionWidthTest, TestSize.Level1)
     auto value2 = ArkUnion<Opt_Union_Dimension_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_CONTENT);
     modifier_->setOptionWidth(node_, &value2);
     auto checkVal2 = GetStringAttribute(node_, optionWidthPropName);
-    EXPECT_EQ(strToFloat(checkVal2), 250.5f); // old width value is used
+    EXPECT_EQ(StrToFloat(checkVal2), 250.5f); // old width value is used
 }
 
 /**

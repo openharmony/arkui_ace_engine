@@ -193,14 +193,14 @@ public:
  */
 HWTEST_F(TabsModifierTest, setVerticalTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "vertical";
+    constexpr auto propName = "vertical";
     ASSERT_NE(modifier_->setVertical, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "false");
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
         modifier_->setVertical(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -212,14 +212,14 @@ HWTEST_F(TabsModifierTest, setVerticalTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setFadingEdgeTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "fadingEdge";
+    constexpr auto propName = "fadingEdge";
     ASSERT_NE(modifier_->setFadingEdge, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "true");
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
         modifier_->setFadingEdge(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -231,9 +231,9 @@ HWTEST_F(TabsModifierTest, setFadingEdgeTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setScrollableTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "scrollable";
+    constexpr auto propName = "scrollable";
     ASSERT_NE(modifier_->setScrollable, nullptr);
-    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, true);
 
     typedef std::pair<Ark_Boolean, bool> BoolTestStep;
@@ -250,7 +250,7 @@ HWTEST_F(TabsModifierTest, setScrollableTest, TestSize.Level1)
     for (const auto& [value, expectVal] : boolTestPlan) {
         modifier_->setScrollable(node_, value);
         auto json = GetJsonValue(node_);
-        checkVal = GetAttrValue<bool>(json, PROP_NAME);
+        checkVal = GetAttrValue<bool>(json, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -262,14 +262,14 @@ HWTEST_F(TabsModifierTest, setScrollableTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarOverlapTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "barOverlap";
+    constexpr auto propName = "barOverlap";
     ASSERT_NE(modifier_->setBarOverlap, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "false");
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
         modifier_->setBarOverlap(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -281,9 +281,9 @@ HWTEST_F(TabsModifierTest, setBarOverlapTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "animationDuration";
+    constexpr auto propName = "animationDuration";
     ASSERT_NE(modifier_->setAnimationDuration, nullptr);
-    auto checkVal = GetAttrValue<int>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, static_cast<int>(ANIMATION_DURATION_DEFAULT));
 
     typedef std::pair<Ark_Number, int> ArkNumberTestStep;
@@ -300,13 +300,13 @@ HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : arkNumberTestPlan) {
         modifier_->setAnimationDuration(node_, &value);
-        checkVal = GetAttrValue<int>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 
     //value should not be changed
     modifier_->setAnimationDuration(node_, nullptr);
-    checkVal = GetAttrValue<int>(GetJsonValue(node_), PROP_NAME);
+    checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, arkNumberTestPlan[arkNumberTestPlan.size()-1].second);
 }
 
@@ -317,9 +317,9 @@ HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "animationMode";
+    constexpr auto propName = "animationMode";
     ASSERT_NE(modifier_->setAnimationMode, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "AnimationMode.CONTENT_FIRST");
 
     typedef std::pair<Opt_AnimationMode, std::string> AnimationModeTestStep;
@@ -333,13 +333,13 @@ HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : animationModeTestPlan) {
         modifier_->setAnimationMode(node_, &value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 
     //value should not be changed
     modifier_->setAnimationMode(node_, nullptr);
-    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, animationModeTestPlan[animationModeTestPlan.size()-1].second);
 }
 
@@ -350,9 +350,9 @@ HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setEdgeEffectTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "edgeEffect";
+    constexpr auto propName = "edgeEffect";
     ASSERT_NE(modifier_->setEdgeEffect, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "EdgeEffect::SPRING");
     typedef std::pair<Opt_EdgeEffect, std::string> EdgeEffectTestStep;
     const std::vector<EdgeEffectTestStep> edgeEffectTestPlan = {
@@ -365,13 +365,13 @@ HWTEST_F(TabsModifierTest, setEdgeEffectTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : edgeEffectTestPlan) {
         modifier_->setEdgeEffect(node_, &value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 
     //value should not be changed
     modifier_->setEdgeEffect(node_, nullptr);
-    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, edgeEffectTestPlan[edgeEffectTestPlan.size()-1].second);
 }
 
@@ -382,9 +382,9 @@ HWTEST_F(TabsModifierTest, setEdgeEffectTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarPositionTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "barPosition";
+    constexpr auto propName = "barPosition";
     ASSERT_NE(modifier_->setBarPosition, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "BarPosition.Start");
 
     typedef std::pair<Ark_BarPosition, std::string> BarPositionTestStep;
@@ -397,7 +397,7 @@ HWTEST_F(TabsModifierTest, setBarPositionTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : BarPositionTestPlan) {
         modifier_->setBarPosition(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -409,10 +409,10 @@ HWTEST_F(TabsModifierTest, setBarPositionTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarMode0Test, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "barMode";
+    constexpr auto propName = "barMode";
     ASSERT_NE(modifier_->setBarMode0, nullptr);
     ASSERT_NE(modifier_->setBarMode1, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "BarMode.Fixed");
 
     typedef std::pair<Ark_BarMode, std::string> BarMode0TestStep;
@@ -426,11 +426,11 @@ HWTEST_F(TabsModifierTest, setBarMode0Test, TestSize.Level1)
 
     for (const auto& [value, expectVal] : BarMode0TestPlan) {
         modifier_->setBarMode1(node_, ARK_BAR_MODE_SCROLLABLE, nullptr);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, scrollableMode);
 
         modifier_->setBarMode0(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -442,10 +442,10 @@ HWTEST_F(TabsModifierTest, setBarMode0Test, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "barMode";
+    constexpr auto propName = "barMode";
     ASSERT_NE(modifier_->setBarMode0, nullptr);
     ASSERT_NE(modifier_->setBarMode1, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "BarMode.Fixed");
 
     std::string scrollableMode =
@@ -459,11 +459,11 @@ HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
 
     for (const auto& [value, expectVal] : BarMode1TestPlan) {
         modifier_->setBarMode1(node_, value, nullptr);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
 
         modifier_->setBarMode0(node_, ARK_BAR_MODE_FIXED);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, "BarMode.Fixed");
     }
 
@@ -476,7 +476,7 @@ HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_AVERAGE_SPLIT\"}";
     auto optOptions = Converter::ArkValue<Opt_ScrollableBarModeOptions>(options);
     modifier_->setBarMode1(node_, ARK_BAR_MODE_SCROLLABLE, &optOptions);
-    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, scrollableMode2);
 }
 
@@ -487,14 +487,14 @@ HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarMode2Test, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "barMode";
+    constexpr auto propName = "barMode";
     ASSERT_NE(modifier_->setBarModeScrollable, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "BarMode.Fixed");
 
     for (const auto& [value, expectVal] : SCROLLABLE_BAR_MODE_TEST_PLAN) {
         modifier_->setBarModeScrollable(node_, &value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -506,9 +506,9 @@ HWTEST_F(TabsModifierTest, setBarMode2Test, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "barBackgroundBlurStyle";
+    constexpr auto propName = "barBackgroundBlurStyle";
     ASSERT_NE(modifier_->setBarBackgroundBlurStyle0, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "BlurStyle.NONE");
 
     typedef std::pair<Ark_BlurStyle, std::string> BlurStyleTestStep;
@@ -531,7 +531,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
 
     for (const auto& [value, expectVal] : BlurStyleTestPlan) {
         modifier_->setBarBackgroundBlurStyle0(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }

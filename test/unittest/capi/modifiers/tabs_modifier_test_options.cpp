@@ -69,25 +69,25 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestBarPos, TestSize.Level1)
     };
     auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
 
-    constexpr auto PROP_NAME = "barPosition";
-    constexpr auto EXPECTED_DEFAULT_VALUE = "BarPosition.Start";
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_DEFAULT_VALUE);
+    constexpr auto propName = "barPosition";
+    constexpr auto expectedDefaultValue = "BarPosition.Start";
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, expectedDefaultValue);
 
     using OneTestStep = std::pair<Opt_BarPosition, std::string> ;
     const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Opt_BarPosition>(Ark_BarPosition::ARK_BAR_POSITION_END), "BarPosition.End" },
         { Converter::ArkValue<Opt_BarPosition>(Ark_BarPosition::ARK_BAR_POSITION_START), "BarPosition.Start" },
         { Converter::ArkValue<Opt_BarPosition>(Ark_BarPosition::ARK_BAR_POSITION_END), "BarPosition.End" },
-        { Converter::ArkValue<Opt_BarPosition>(static_cast<Ark_BarPosition>(INT_MIN)), EXPECTED_DEFAULT_VALUE },
+        { Converter::ArkValue<Opt_BarPosition>(static_cast<Ark_BarPosition>(INT_MIN)), expectedDefaultValue },
         { Converter::ArkValue<Opt_BarPosition>(Ark_BarPosition::ARK_BAR_POSITION_END), "BarPosition.End" },
-        { Converter::ArkValue<Opt_BarPosition>(Ark_Empty()), EXPECTED_DEFAULT_VALUE },
+        { Converter::ArkValue<Opt_BarPosition>(Ark_Empty()), expectedDefaultValue },
     };
 
     for (const auto& [value, expected] : testPlan) {
         optionsOpt.value.barPosition = Converter::ArkValue<Opt_BarPosition>(value);
         modifier_->setTabsOptions(node_, &optionsOpt);
-        checkVal = GetAttrValue<std::string>(node_, PROP_NAME);
+        checkVal = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkVal, expected);
     }
 }
@@ -149,23 +149,23 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestIndex, TestSize.Level1)
     };
     auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
 
-    constexpr auto PROP_NAME = "index";
-    constexpr auto EXPECTED_DEFAULT_VALUE = "0";
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_DEFAULT_VALUE);
+    constexpr auto propName = "index";
+    constexpr auto expectedDefaultValue = "0";
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, expectedDefaultValue);
 
     using OneTestStep = std::pair<Opt_Number, std::string> ;
     const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Opt_Number>(1), "1" },
-        { Converter::ArkValue<Opt_Number>(), EXPECTED_DEFAULT_VALUE },
+        { Converter::ArkValue<Opt_Number>(), expectedDefaultValue },
         { Converter::ArkValue<Opt_Number>(1), "1" },
-        { Converter::ArkValue<Opt_Number>(INT_MIN), EXPECTED_DEFAULT_VALUE },
+        { Converter::ArkValue<Opt_Number>(INT_MIN), expectedDefaultValue },
     };
 
     for (const auto& [value, expected] : testPlan) {
         optionsOpt.value.index = value;
         modifier_->setTabsOptions(node_, &optionsOpt);
-        checkVal = GetAttrValue<std::string>(node_, PROP_NAME);
+        checkVal = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkVal, expected);
     }
 }

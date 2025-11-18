@@ -891,11 +891,10 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacity, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Union_ResourceColor_ColoringStrategy, std::string>;
-    constexpr auto PROP_NAME = "foregroundColor";
+    constexpr auto propName = "foregroundColor";
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
     const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
-    const std::string EXPECTED_RESOURCE_COLOR =
-        Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
+    const std::string expectedResourceColor = Color::RED.ToString();
     const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
@@ -908,9 +907,9 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            CreateResourceUnion<Ark_ResourceColor>(RES_NAME)), EXPECTED_RESOURCE_COLOR },
+            CreateResourceUnion<Ark_ResourceColor>(RES_NAME)), expectedResourceColor },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            CreateResourceUnion<Ark_ResourceColor>(RES_ID)), EXPECTED_RESOURCE_COLOR },
+            CreateResourceUnion<Ark_ResourceColor>(RES_ID)), expectedResourceColor },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
             Ark_ColoringStrategy::ARK_COLORING_STRATEGY_INVERT), "#00000001" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ColoringStrategy>(
@@ -923,7 +922,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
 
     for (const auto &[value, expected]: testPlan) {
         modifier_->setForegroundColor(node_, &value);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        auto checkColor = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkColor, expected);
     }
 }

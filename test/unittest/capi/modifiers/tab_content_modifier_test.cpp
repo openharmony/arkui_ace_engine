@@ -70,22 +70,22 @@ class TabContentModifierTest : public ModifierTestBase<GENERATED_ArkUITabContent
  */
 HWTEST_F(TabContentModifierTest, setTabBar0TestLabel, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "text";
-    constexpr auto TEXT_VALUE = "test";
+    constexpr auto propName = "text";
+    constexpr auto textValue = "test";
     std::unique_ptr<JsonValue> jsonValue;
 
     ASSERT_NE(modifier_->setTabBar0, nullptr);
-    auto args = ArkUnion<TestBaseUnionType, Ark_String>(TEXT_VALUE);
+    auto args = ArkUnion<TestBaseUnionType, Ark_String>(textValue);
     modifier_->setTabBar0(node_, &args);
     jsonValue = GetJsonValue(node_);
-    auto checkInitial = GetAttrValue<std::string>(jsonValue, PROP_NAME);
-    EXPECT_EQ(checkInitial, TEXT_VALUE);
+    auto checkInitial = GetAttrValue<std::string>(jsonValue, propName);
+    EXPECT_EQ(checkInitial, textValue);
 
     for (const auto &[label, checkVal]: BUTTON_LABEL_RESOURCES_TEST_PLAN) {
         auto args = ArkUnion<TestBaseUnionType, Ark_Resource>(label);
         modifier_->setTabBar0(node_, &args);
         jsonValue = GetJsonValue(node_);
-        auto checkInitial = GetAttrValue<std::string>(jsonValue, PROP_NAME);
+        auto checkInitial = GetAttrValue<std::string>(jsonValue, propName);
         EXPECT_EQ(checkInitial, checkVal);
     }
 }
@@ -122,22 +122,22 @@ HWTEST_F(TabContentModifierTest, setTabBar0Test_CustomNodeBuilder, TestSize.Leve
  */
 HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
 {
-    constexpr auto PROP_LABEL_NAME = "text";
-    constexpr auto PROP_ICON_NAME = "icon";
-    constexpr auto TEXT_VALUE = "test";
+    constexpr auto propLabelName = "text";
+    constexpr auto propIconName = "icon";
+    constexpr auto textValue = "test";
     std::unique_ptr<JsonValue> jsonValue;
 
     ASSERT_NE(modifier_->setTabBar0, nullptr);
     Ark_TabBarOptions labelIcon;
-    labelIcon.icon = ArkUnion<Opt_Union_String_Resource, Ark_String>(TEXT_VALUE);
-    labelIcon.text = ArkUnion<Opt_Union_String_Resource, Ark_String>(TEXT_VALUE);
+    labelIcon.icon = ArkUnion<Opt_Union_String_Resource, Ark_String>(textValue);
+    labelIcon.text = ArkUnion<Opt_Union_String_Resource, Ark_String>(textValue);
     auto args = ArkUnion<TestBaseUnionType, Ark_TabBarOptions>(labelIcon);
     modifier_->setTabBar0(node_, &args);
     jsonValue = GetJsonValue(node_);
-    auto checkLabel = GetAttrValue<std::string>(jsonValue, PROP_LABEL_NAME);
-    auto checkIcon = GetAttrValue<std::string>(jsonValue, PROP_ICON_NAME);
-    EXPECT_EQ(checkLabel, TEXT_VALUE);
-    EXPECT_EQ(checkIcon, TEXT_VALUE);
+    auto checkLabel = GetAttrValue<std::string>(jsonValue, propLabelName);
+    auto checkIcon = GetAttrValue<std::string>(jsonValue, propIconName);
+    EXPECT_EQ(checkLabel, textValue);
+    EXPECT_EQ(checkIcon, textValue);
 
     for (const auto &[label, checkVal]: BUTTON_LABEL_RESOURCES_TEST_PLAN) {
         Ark_TabBarOptions labelIcon;
@@ -146,8 +146,8 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
         auto args = ArkUnion<TestBaseUnionType, Ark_TabBarOptions>(labelIcon);
         modifier_->setTabBar0(node_, &args);
         jsonValue = GetJsonValue(node_);
-        auto checkLabel = GetAttrValue<std::string>(jsonValue, PROP_LABEL_NAME);
-        auto checkIcon = GetAttrValue<std::string>(jsonValue, PROP_ICON_NAME);
+        auto checkLabel = GetAttrValue<std::string>(jsonValue, propLabelName);
+        auto checkIcon = GetAttrValue<std::string>(jsonValue, propIconName);
         EXPECT_EQ(checkLabel, checkVal);
         EXPECT_EQ(checkIcon, checkVal);
     }
@@ -160,13 +160,13 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
  */
 HWTEST_F(TabContentModifierTest, setTabBar1BottomStyleTestText, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "text";
-    constexpr auto TEXT_VALUE = "test";
+    constexpr auto propName = "text";
+    constexpr auto textValue = "test";
     std::unique_ptr<JsonValue> jsonValue;
 
     ASSERT_NE(modifier_->setTabBar1, nullptr);
     Ark_BottomTabBarStyle style;
-    style._text = Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_VALUE));
+    style._text = Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(textValue));
     style._icon = Converter::ArkValue<Opt_Union_ResourceStr_TabBarSymbol>(Ark_Empty());
     style._iconStyle = Converter::ArkValue<Opt_TabBarIconStyle>(Ark_Empty());
     style._id = Converter::ArkValue<Opt_String>(Ark_Empty());
@@ -178,8 +178,8 @@ HWTEST_F(TabContentModifierTest, setTabBar1BottomStyleTestText, TestSize.Level1)
     auto args = ArkUnion<Ark_Union_SubTabBarStyle_BottomTabBarStyle, Ark_BottomTabBarStyle>(style);
     modifier_->setTabBar1(node_, &args);
     jsonValue = GetJsonValue(node_);
-    auto checkInitial = GetAttrValue<std::string>(jsonValue, PROP_NAME);
-    EXPECT_EQ(checkInitial, TEXT_VALUE);
+    auto checkInitial = GetAttrValue<std::string>(jsonValue, propName);
+    EXPECT_EQ(checkInitial, textValue);
 }
 
 /*

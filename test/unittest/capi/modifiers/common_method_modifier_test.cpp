@@ -709,29 +709,28 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsOtherA
 HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
-    constexpr auto PROP_NAME = "backgroundColor";
+    constexpr auto propName = "backgroundColor";
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
     const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
-    const std::string EXPECTED_RESOURCE_COLOR =
-        Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
+    const std::string expectedResourceColor = Color::RED.ToString();
     const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
         { ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f), "#00000000" },
         { ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { CreateResourceUnion<Opt_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
-        { CreateResourceUnion<Opt_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
+        { CreateResourceUnion<Opt_ResourceColor>(RES_NAME), expectedResourceColor},
+        { CreateResourceUnion<Opt_ResourceColor>(RES_ID), expectedResourceColor},
     };
 
     ASSERT_NE(modifier_->setBackgroundColor, nullptr);
 
-    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    auto checkInitial = GetAttrValue<std::string>(node_, propName);
     EXPECT_EQ(checkInitial, Color::TRANSPARENT.ToString());
 
     for (const auto &[optResColor, expected]: testPlan) {
         modifier_->setBackgroundColor(node_, &optResColor);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        auto checkColor = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkColor, expected);
     }
 }
@@ -1273,7 +1272,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOffsetTestValidLocalizedEdgesValu
     ASSERT_NE(modifier_->setDirection, nullptr);
     ASSERT_NE(modifier_->setOffset, nullptr);
 
-    const std::string ATTRIBUTE_OFFSET_DEFAULT_VALUE{};
+    const std::string attributeOffsetDefaultValue{};
 
     auto lenMetUndef = Converter::ArkValue<Opt_LengthMetrics>();
     auto optDirection = Converter::ArkValue<Opt_Direction>(ARK_DIRECTION_LTR);
@@ -1286,9 +1285,9 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOffsetTestValidLocalizedEdgesValu
         UpdateFrameNode(); // apply localized values
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), expected);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), attributeOffsetDefaultValue);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), attributeOffsetDefaultValue);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), attributeOffsetDefaultValue);
     }
     optDirection = Converter::ArkValue<Opt_Direction>(ARK_DIRECTION_RTL);
     modifier_->setDirection(node_, &optDirection);
@@ -1299,10 +1298,10 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOffsetTestValidLocalizedEdgesValu
         modifier_->setOffset(node_, &value);
         UpdateFrameNode(); // apply localized values
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), attributeOffsetDefaultValue);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), attributeOffsetDefaultValue);
         EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), expected);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), ATTRIBUTE_OFFSET_DEFAULT_VALUE);
+        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), attributeOffsetDefaultValue);
     }
 }
 
@@ -1615,8 +1614,6 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
     Opt_RadialGradientOptions optInputValue;
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
     const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
-    const std::string EXPECTED_RESOURCE_COLOR =
-        Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 
     // center
     inputValue.center.value0 = Converter::ArkValue<Ark_Length>("2.0vp");

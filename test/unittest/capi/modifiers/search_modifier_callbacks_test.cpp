@@ -53,9 +53,8 @@ const std::vector<TextDeleteDirection> DELETE_DIRECTION_TEST_PLAN = {
 
 // events
 bool g_isEditChangeTest(true);
-std::u16string g_EventTestString(u"");
-std::string g_EventErrorTestString("");
-int32_t g_EventTestOffset(0);
+std::u16string g_eventTestString(u"");
+int32_t g_eventTestOffset(0);
 int32_t g_startValue(0);
 int32_t g_endValue(0);
 float g_scrollX(0);
@@ -248,19 +247,19 @@ HWTEST_F(SearchModifierCallbackTest, setOnCopyTest, TestSize.Level1)
     Callback_String_Void onCopyCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, Ark_String value) {
-            g_EventTestString = Convert<std::u16string>(value);
+            g_eventTestString = Convert<std::u16string>(value);
         }
     };
-    g_EventTestString.clear();
+    g_eventTestString.clear();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
     modifier_->setOnCopy(node_, &onCopyCallback);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
+    EXPECT_EQ(g_eventTestString, CHECK_TEXT);
 }
 
 /**
@@ -276,19 +275,19 @@ HWTEST_F(SearchModifierCallbackTest, setOnCutTest, TestSize.Level1)
     Callback_String_Void onCutCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, Ark_String value) {
-            g_EventTestString = Convert<std::u16string>(value);
+            g_eventTestString = Convert<std::u16string>(value);
         }
     };
-    g_EventTestString = EMPTY_TEXT;
+    g_eventTestString = EMPTY_TEXT;
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
     modifier_->setOnCut(node_, &onCutCallback);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
+    EXPECT_EQ(g_eventTestString, CHECK_TEXT);
 }
 
 /**
@@ -663,13 +662,13 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnDidDelete, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    g_EventTestString = u"";
-    g_EventTestOffset = 0;
+    g_eventTestString = u"";
+    g_eventTestOffset = 0;
     Callback_DeleteValue_Void onDidDeleteCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-            g_EventTestString = Convert<std::u16string>(data.deleteValue);
-            g_EventTestOffset = Convert<int32_t>(data.deleteOffset);
+            g_eventTestString = Convert<std::u16string>(data.deleteValue);
+            g_eventTestOffset = Convert<int32_t>(data.deleteOffset);
             auto didDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
             if (didDeleteDirection) {
                 g_deleteDirection = didDeleteDirection.value();
@@ -683,8 +682,8 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
     ASSERT_NE(textFieldEventHub, nullptr);
     DeleteValueInfo checkValueDefault;
     textFieldEventHub->FireOnDidDeleteValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
+    EXPECT_EQ(g_eventTestString, EMPTY_TEXT);
+    EXPECT_EQ(g_eventTestOffset, 0);
     EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
     modifier_->setOnDidDelete(node_, &onDidDeleteCallback);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
@@ -693,8 +692,8 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
                 .deleteOffset = value, .deleteValue = CHECK_TEXT, .direction = deleteDirection
             };
             textFieldEventHub->FireOnDidDeleteValueEvent(checkValue);
-            EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-            EXPECT_EQ(g_EventTestOffset, expectVal);
+            EXPECT_EQ(g_eventTestString, CHECK_TEXT);
+            EXPECT_EQ(g_eventTestOffset, expectVal);
             EXPECT_EQ(g_deleteDirection, deleteDirection);
         }
     }

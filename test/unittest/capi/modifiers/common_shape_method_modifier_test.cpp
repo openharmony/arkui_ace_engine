@@ -80,15 +80,15 @@ class CommonShapeMethodModifierTest : public ModifierTestBase<GENERATED_ArkUICom
  */
 HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "stroke";
+    constexpr auto propName = "stroke";
     ASSERT_NE(modifier_->setStroke, nullptr);
 
-    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    auto checkInitial = GetAttrValue<std::string>(node_, propName);
     EXPECT_EQ(checkInitial, Color::BLACK.ToString());
 
     for (const auto &[arkResColor, expected]: TEST_COLOR_PLAN) {
         modifier_->setStroke(node_, &arkResColor);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        auto checkColor = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkColor, expected);
     }
 }
@@ -100,15 +100,15 @@ HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeTest, TestSize.Level1)
  */
 HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setFillTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "fill";
+    constexpr auto propName = "fill";
     ASSERT_NE(modifier_->setFill, nullptr);
 
-    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    auto checkInitial = GetAttrValue<std::string>(node_, propName);
     EXPECT_EQ(checkInitial, Color::BLACK.ToString());
 
     for (const auto &[arkResColor, expected]: TEST_COLOR_PLAN) {
         modifier_->setFill(node_, &arkResColor);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        auto checkColor = GetAttrValue<std::string>(node_, propName);
         EXPECT_EQ(checkColor, expected);
     }
 }
@@ -559,7 +559,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeMiterLimitTest, TestSize.Level1
  */
 HWTEST_F(CommonShapeMethodModifierTest, setAntiAliasTest, TestSize.Level1)
 {
-    constexpr auto PROP_NAME = "antiAlias";
+    constexpr auto propName = "antiAlias";
     ASSERT_NE(modifier_->setAntiAlias, nullptr);
     using OneBoolStep = std::tuple<Opt_Boolean, std::string>;
     const std::vector<OneBoolStep> BOOL_TEST_PLAN = {
@@ -572,13 +572,13 @@ HWTEST_F(CommonShapeMethodModifierTest, setAntiAliasTest, TestSize.Level1)
         { Converter::ArkValue<Opt_Boolean>(false), "false" }
     };
     auto fullJson = GetJsonValue(node_);
-    auto checkVal = GetAttrValue<std::string>(fullJson, PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(fullJson, propName);
     EXPECT_EQ(checkVal, "true");
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         modifier_->setAntiAlias(node_, &value);
         auto fullJson = GetJsonValue(node_);
-        checkVal = GetAttrValue<std::string>(fullJson, PROP_NAME);
+        checkVal = GetAttrValue<std::string>(fullJson, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
