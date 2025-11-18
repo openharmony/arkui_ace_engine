@@ -439,7 +439,6 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
 
     private disposeAll(): void {
         super.disposeNode();
-        this.__rootStage?.dispose();
         this.__builderProxyNode?.dispose();
         this.__manager.reset();
     }
