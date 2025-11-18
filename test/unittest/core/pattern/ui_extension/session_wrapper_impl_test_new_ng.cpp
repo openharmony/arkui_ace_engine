@@ -1344,7 +1344,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg039, TestSize.L
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg040, TestSize.Level1)
 {
     auto sessionWrapper = GenerateSessionWrapperImpl();
-    std::shared_ptr<AAFwk::Want> wantPtr = nulllptr;
+    std::shared_ptr<AAFwk::Want> wantPtr = nullptr;
     sessionWrapper->UpdateWantPtr(wantPtr);
     auto container = Platform::AceContainer::GetContainer(sessionWrapper->GetInstanceId());
     EXPECT_NE(container, nullptr);
@@ -1352,23 +1352,23 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg040, TestSize.L
     wantPtr = std::make_shared<AAFwk::Want>();
     container->containerHandler_ = nullptr;
     sessionWrapper->UpdateWantPtr(wantPtr);
-    EXPECT_FALSE(wantptr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
 
     container->SetUIContentType(UIContentType::UI_EXTENSION);
     sessionWrapper->UpdateWantPtr(wantPtr);
-    EXPECT_FALSE(wantptr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
 
     auto uIExtensionContainerHandler = AceType::MakeRefPtr<UIExtensionContainerHandler>();
     container->containerHandler_ = uIExtensionContainerHandler;
     uIExtensionContainerHandler->allowCrossProcessNesting_ = true;
     sessionWrapper->UpdateWantPtr(wantPtr);
-    EXPECT_FALSE(wantptr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
 
     container->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
     auto platformContainerHandler = AceType::MakeRefPtr<PlatformContainerHandler>();
     container->containerHandler_ = platformContainerHandler;
     platformContainerHandler->allowCrossProcessNesting_ = true;
     sessionWrapper->UpdateWantPtr(wantPtr);
-    EXPECT_FALSE(wantptr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+    EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
 }
 } // namespace OHOS::Ace::NG

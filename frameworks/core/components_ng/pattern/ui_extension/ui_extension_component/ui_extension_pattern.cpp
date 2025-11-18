@@ -401,8 +401,7 @@ bool UIExtensionPattern::CheckHostUiContentConstraint()
         AceType::DynamicCast<UIExtensionContainerHandler>(containerHandler);
     CHECK_NULL_RETURN(uIExtensionContainerHandler, true);
     UIContentType hostUIContentType = uIExtensionContainerHandler->GetHostUIContentType();
-    if (container->IsSceneBoardWindow() &&
-    hostUIContentType == UIContentType::DYNAMIC_COMPONENT &&
+    if (hostUIContentType == UIContentType::DYNAMIC_COMPONENT &&
         uIExtensionContainerHandler->IsAllowCrossProcessNesting()) {
         UIEXT_LOGI("Allow cross process nesting.");
         return true;

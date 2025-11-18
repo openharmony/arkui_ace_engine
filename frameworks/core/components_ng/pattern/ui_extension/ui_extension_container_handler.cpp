@@ -16,8 +16,8 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/dump_log.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "bool_wrapper.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -92,6 +92,7 @@ void UIExtensionContainerHandler::SetAllowCrossProcessNesting(
     CHECK_NULL_VOID(params);
     auto allowCrossProcessNesting =
         params->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SetAllowCrossProcessNesting: %{public}d.", allowCrossProcessNesting);
     allowCrossProcessNesting_ = allowCrossProcessNesting;
 }
 } // namespace OHOS::Ace::NG

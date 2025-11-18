@@ -1127,7 +1127,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest031, TestSize.Level1)
     PlatformContainerHandler handler;
     EXPECT_FALSE(handler.IsAllowCrossProcessNesting());
 
-    handle.allowCrossProcessNesting_ = true;
+    handler.allowCrossProcessNesting_ = true;
     EXPECT_TRUE(handler.IsAllowCrossProcessNesting());
 
     handler.allowCrossProcessNesting_ = false;

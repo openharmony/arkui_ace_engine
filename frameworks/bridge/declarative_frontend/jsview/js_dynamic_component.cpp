@@ -97,6 +97,8 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto allowCrossProcessNesting = false;
     if (allowCrossProcessNestingValue->IsBoolean()) {
         allowCrossProcessNesting = allowCrossProcessNestingValue->ToBoolean();
+        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent allowCrossProcessNesting = %{public}d",
+            allowCrossProcessNesting);
     }
     NG::UIExtensionConfig config;
     config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
