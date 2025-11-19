@@ -242,7 +242,7 @@ void WebMessagePortOhos::PostMessage(std::string& data) {}
 void WebMessagePortOhos::SetWebMessageCallback(std::function<void(const std::string&)>&& callback) {}
 int ConsoleLogOhos::GetLineNumber()
 {
-    return false;
+    return 0;
 }
 std::string ConsoleLogOhos::GetLog()
 {
@@ -250,11 +250,15 @@ std::string ConsoleLogOhos::GetLog()
 }
 int ConsoleLogOhos::GetLogLevel()
 {
-    return false;
+    return 0;
 }
 std::string ConsoleLogOhos::GetSourceId()
 {
     return "";
+}
+int ConsoleLogOhos::GetSource()
+{
+    return 0;
 }
 void ResultOhos::Confirm() {}
 void ResultOhos::Confirm(const std::string& message) {}

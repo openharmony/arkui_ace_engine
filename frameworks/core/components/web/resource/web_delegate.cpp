@@ -246,6 +246,14 @@ std::string ConsoleLogOhos::GetSourceId()
     return "";
 }
 
+int ConsoleLogOhos::GetSource()
+{
+    if (message_) {
+        return message_->Source();
+    }
+    return -1;
+}
+
 void ResultOhos::Confirm()
 {
     if (result_) {

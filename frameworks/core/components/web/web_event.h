@@ -84,6 +84,7 @@ public:
     virtual std::string GetLog() = 0;
     virtual int GetLogLevel() = 0;
     virtual std::string GetSourceId() = 0;
+    virtual int GetSource() = 0;
 };
 
 class WebConsoleMessageParam : public WebConsoleLog {
@@ -113,11 +114,17 @@ public:
         return messageLevel_;
     }
 
+    int GetSource() override
+    {
+        return source_;
+    }
+
 private:
     std::string message_;
     std::string sourceId_;
     int lineNumber_;
     int messageLevel_;
+    int source_ = 0;
 };
 
 class WebFileSelectorParam : public AceType {
