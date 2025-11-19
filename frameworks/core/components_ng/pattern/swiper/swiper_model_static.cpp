@@ -238,9 +238,13 @@ void SwiperModelStatic::SetDirection(FrameNode* frameNode, Axis axis)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, Direction, axis, frameNode);
 }
 
-void SwiperModelStatic::SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace)
+void SwiperModelStatic::SetItemSpace(FrameNode* frameNode, const std::optional<Dimension>& itemSpace)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ItemSpace, itemSpace, frameNode);
+    if (itemSpace.has_value() && !itemSpace->IsNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ItemSpace, itemSpace.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ItemSpace, frameNode);
+    }
 }
 
 void SwiperModelStatic::SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode)

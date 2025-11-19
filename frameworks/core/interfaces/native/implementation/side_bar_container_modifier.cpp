@@ -339,15 +339,9 @@ void SetDividerImpl(Ark_NativePointer node,
             dividerOpt.strokeWidth->SetValue(DEFAULT_DIVIDER_WIDTH);
         }
         SideBarContainerModelStatic::SetDividerStrokeWidth(frameNode, dividerOpt.strokeWidth);
-        if (dividerOpt.color.has_value()) {
-            SideBarContainerModelStatic::SetDividerColor(frameNode, dividerOpt.color.value());
-        }
-        if (dividerOpt.startMargin.has_value()) {
-            SideBarContainerModelStatic::SetDividerStartMargin(frameNode, dividerOpt.startMargin.value());
-        }
-        if (dividerOpt.endMargin.has_value()) {
-            SideBarContainerModelStatic::SetDividerEndMargin(frameNode, dividerOpt.endMargin.value());
-        }
+        SideBarContainerModelStatic::SetDividerColor(frameNode, dividerOpt.color);
+        SideBarContainerModelStatic::SetDividerStartMargin(frameNode, dividerOpt.startMargin);
+        SideBarContainerModelStatic::SetDividerEndMargin(frameNode, dividerOpt.endMargin);
 }
 void SetMinContentWidthImpl(Ark_NativePointer node,
                             const Opt_Dimension* value)

@@ -44,9 +44,9 @@ public:
     static void SetShowSideBar(FrameNode* frameNode, bool isShow);
 
     static void SetDividerStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth);
-    static void SetDividerColor(FrameNode* frameNode, const Color& color);
-    static void SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin);
-    static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
+    static void SetDividerColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetDividerStartMargin(FrameNode* frameNode, const std::optional<Dimension>& startMargin);
+    static void SetDividerEndMargin(FrameNode* frameNode, const std::optional<Dimension>& endMargin);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const bool)>&& onChangeEvent);
     static void SetOnSideBarWidthChangeEvent(FrameNode* frameNode, OnSideBarWidthChangeEvent&& event);

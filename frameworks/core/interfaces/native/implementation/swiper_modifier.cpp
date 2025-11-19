@@ -377,15 +377,7 @@ void SetItemSpaceImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto aceOptVal = Converter::OptConvertPtr<Dimension>(value);
-    if (!aceOptVal) {
-        CalcDimension value;
-        value.SetValue(0.0);
-        SwiperModelStatic::SetItemSpace(frameNode, value);
-        return;
-    }
-    SwiperModelStatic::SetItemSpace(frameNode,
-        *aceOptVal < OHOS::Ace::Dimension(0) ? OHOS::Ace::Dimension(0) : *aceOptVal);
+    SwiperModelStatic::SetItemSpace(frameNode, Converter::OptConvertPtr<Dimension>(value));
 }
 void SetDisplayModeImpl(Ark_NativePointer node,
                         const Opt_SwiperDisplayMode* value)
