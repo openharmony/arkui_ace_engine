@@ -1059,6 +1059,37 @@ std::string GetItemContent(const std::string& id, const std::string& content,
     return content;
 }
 
+void SetSystemOptionsParam(const MenuOptionsParam& item, std::vector<OptionParam>& params)
+{
+    if (params.empty()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    auto symbolIdFunc = getSymbolIdMap.find(item.id);
+    if (symbolIdFunc != getSymbolIdMap.end()) {
+        params.back().symbolId = (symbolIdFunc->second)(theme);
+    }
+    switch (SelectOverlayNode::ConvertToIntMenuId(item.id)) {
+        case static_cast<int32_t>(NativeMenuId::ID_COPY):
+            params.back().labelInfo = theme->GetCopyLabelInfo();
+            break;
+        case static_cast<int32_t>(NativeMenuId::ID_PASTE):
+            params.back().labelInfo = theme->GetPasteLabelInfo();
+            break;
+        case static_cast<int32_t>(NativeMenuId::ID_CUT):
+            params.back().labelInfo = theme->GetCutLabelInfo();
+            break;
+        case static_cast<int32_t>(NativeMenuId::ID_SELECT_ALL):
+            params.back().labelInfo = theme->GetSelectAllLabelInfo();
+            break;
+        default:
+            break;
+    }
+}
+
 void AddParams(const MenuOptionsParam& item, std::function<void()> callback, std::vector<OptionParam>& params,
                const std::shared_ptr<SelectOverlayInfo>& info)
 {
@@ -1072,6 +1103,7 @@ void AddParams(const MenuOptionsParam& item, std::function<void()> callback, std
     params.back().isAIMenuOption = IsAIMenuOption(item.id);
     params.back().isAskCeliaOption = IsAskCeliaOption(item.id);
     params.back().icon = item.icon.value_or("");
+    SetSystemOptionsParam(item, params);
     if ((params.back().isAIMenuOption || params.back().isAskCeliaOption) && params.back().symbolId != 0) {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
