@@ -6205,6 +6205,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         auto webPattern = delegate->webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->SetAILinkMenuShow(false);
+        webPattern->RegisterMenuLifeCycleCallback();
         if (delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, true, true);
             result = true;
@@ -6231,6 +6232,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
             webPattern->SetAILinkMenuShow(false);
+            webPattern->RegisterMenuLifeCycleCallback();
             if (delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, true, true);
                 result = true;

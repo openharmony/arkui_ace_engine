@@ -1041,6 +1041,33 @@ HWTEST_F(WebPatternTestHandle, HandleBlurEvent003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleBlurEvent004
+ * @tc.desc: HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestHandle, HandleBlurEvent004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->isDragStartFromWeb_ = false;
+    webPattern->HandleBlurEvent(BlurReason::WINDOW_BLUR);
+    EXPECT_FALSE(webPattern->showMenuFromWeb_);
+    webPattern->showMenuFromWeb_ = true;
+    webPattern->HandleBlurEvent(BlurReason::WINDOW_BLUR);
+    EXPECT_FALSE(webPattern->showMenuFromWeb_);
+#endif
+}
+
+/**
  * @tc.name: KeyboardReDispatch001
  * @tc.desc: KeyboardReDispatch
  * @tc.type: FUNC

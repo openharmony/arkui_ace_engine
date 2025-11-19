@@ -377,6 +377,37 @@ HWTEST_F(WebPatternPartOneTest, OnContextMenuShow_005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyMenuLifeCycleEvent_001
+ * @tc.desc: NotifyMenuLifeCycleEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, NotifyMenuLifeCycleEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
+    EXPECT_FALSE(webPattern->showMenuFromWeb_);
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
+    EXPECT_TRUE(webPattern->showMenuFromWeb_);
+    webPattern->isFocus_ = true;
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+    EXPECT_FALSE(webPattern->showMenuFromWeb_);
+    webPattern->isFocus_ = false;
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
+}
+
+/**
  * @tc.name: ShowPreviewMenu_001
  * @tc.desc: ShowPreviewMenu.
  * @tc.type: FUNC
