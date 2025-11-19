@@ -194,7 +194,7 @@ ani_long NativeUiExtension::UiextensionConstruct(
     result = reinterpret_cast<ani_long>(AceType::RawPtr(frameNode));
     return result;
 #else
-    retrun nullptr;
+    return nullptr;
 #endif
 }
 

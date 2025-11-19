@@ -274,7 +274,7 @@ ani_ref CreateSecurityUIExtensionProxyObject(ani_env* env, const RefPtr<NG::Secu
     pattern->SetAsyncCallbacks(
         { [jsProxyObj](const RefPtr<NG::SecurityUIExtensionProxy>&) { jsProxyObj->JsCallback(ANI_FALSE); } });
     pattern->SetSyncCallbacks(
-        { [jsProxyObj](const RefPtr<NG::SecurityUIExtensionProxy>&) { jsProxyObj->JsCallback(ANI_FALSE); } });
+        { [jsProxyObj](const RefPtr<NG::SecurityUIExtensionProxy>&) { jsProxyObj->JsCallback(ANI_TRUE); } });
     return proxyObjectRef;
 }
 
