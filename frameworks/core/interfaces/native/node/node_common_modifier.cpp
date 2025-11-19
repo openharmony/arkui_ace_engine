@@ -5467,6 +5467,7 @@ void SetAccessibilityGroupOptions(ArkUINodeHandle node, ArkUIAccessibilityGroupO
         groupOptions.actionControllerByType = static_cast<AccessibilityRoleType>(options.actionControllerByType);
     }
     groupOptions.actionControllerByInspector = options.actionControllerByInspector;
+    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, groupOptions.accessibilityTextPreferred);
     ViewAbstractModelNG::SetAccessibilityGroupOptions(frameNode, groupOptions);
 }
 
@@ -5475,6 +5476,7 @@ void ResetAccessibilityGroupOptions(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     AccessibilityGroupOptions options;
+    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, options.accessibilityTextPreferred);
     ViewAbstractModelNG::SetAccessibilityGroupOptions(frameNode, options);
 }
 
