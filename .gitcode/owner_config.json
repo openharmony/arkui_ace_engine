@@ -71,7 +71,8 @@
             "zhangboren",
             "spirinandrey",
             "npisanov",
-            "huaweimaxuchu"
+            "huaweimaxuchu",
+            "sergeymalenkov"
         ],
         "arkuieco3": [
             "ZhangYu-Home",
@@ -374,6 +375,9 @@
         },
         "guido_grassel": {
             "info": "[状态管理 guido]"
+        },
+        "sergeymalenkov": {
+            "info": "[default group member sergeymalenkov]"
         },
         "rongShao-Z": {
             "info": "[Scroll zhangrongjie]"

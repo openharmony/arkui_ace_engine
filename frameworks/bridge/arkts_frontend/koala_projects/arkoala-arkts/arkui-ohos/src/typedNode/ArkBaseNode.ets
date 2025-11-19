@@ -604,13 +604,13 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setFocusScopePriorityAttribute(scopeId, priority);
         return this
     }
-    public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public gesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
     public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {

@@ -129,6 +129,7 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
             ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, frameNode);
         }
     }
+    pattern->SetDeleteArea();
 }
 
 void ListItemModelStatic::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,

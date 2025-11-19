@@ -1598,4 +1598,24 @@ bool WebSelectOverlay::QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember& me
     member.fixWrongNewAvoid = !upHandleIsNotShow || !downHandleIsNotShow;
     return !member.fixWrongNewAvoid;
 }
+
+void WebSelectOverlay::UpdateSelectAreaInfo()
+{
+    webSelectInfo_.selectArea = ComputeSelectAreaRect(selectArea_);
+    UpdateSelectArea();
+}
+
+void WebSelectOverlay::UpdateSelectArea()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AREA);
+}
+
+void WebSelectOverlay::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    RectF rect(x, y, width, height);
+    selectArea_ = rect;
+    UpdateSelectAreaInfo();
+}
 } // namespace OHOS::Ace::NG

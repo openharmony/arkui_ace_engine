@@ -148,6 +148,27 @@ int32_t UIContentServiceProxy::RegisterSearchEventCallback(const EventCallback& 
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::RegisterTextChangeEventCallback(const EventCallback& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterTextChangeEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->RegisterTextChangeEventCallback(eventCallback);
+    if (Remote()->SendRequest(REGISTER_TEXT_CHANGE_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterTextChangeEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::RegisterRouterChangeEventCallback(const EventCallback& eventCallback)
 {
     MessageParcel data;
@@ -354,6 +375,27 @@ int32_t UIContentServiceProxy::UnregisterSearchEventCallback()
     report_->UnregisterSearchEventCallback();
     if (Remote()->SendRequest(UNREGISTER_SEARCH_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("UnregisterSearchEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterTextChangeEventCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterTextChangeEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->UnregisterTextChangeEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_TEXT_CHANGE_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterTextChangeEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

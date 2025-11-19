@@ -163,6 +163,11 @@ void FfiOHOSAceFrameworkTextFieldSetPlaceholderColor(uint32_t value)
     TextFieldModel::GetInstance()->SetPlaceholderColor(Color(value));
 }
 
+void FfiOHOSAceFrameworkTextFieldResetPlaceholderColor()
+{
+    TextFieldModel::GetInstance()->ResetPlaceholderColor();
+}
+
 void FfiOHOSAceFrameworkTextFieldSetPlaceholderFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
@@ -225,6 +230,11 @@ void FfiOHOSAceFrameworkTextFieldSetMaxLength(uint32_t value)
     TextFieldModel::GetInstance()->SetMaxLength(value);
 }
 
+void FfiOHOSAceFrameworkTextFieldResetMaxLength()
+{
+    TextFieldModel::GetInstance()->ResetMaxLength();
+}
+
 void FfiOHOSAceFrameworkTextFieldSetFontSize(double value, int32_t unit)
 {
     Dimension size(value, static_cast<DimensionUnit>(unit));
@@ -235,9 +245,24 @@ void FfiOHOSAceFrameworkTextFieldSetFontSize(double value, int32_t unit)
     TextFieldModel::GetInstance()->SetFontSize(size);
 }
 
+void FfiOHOSAceFrameworkTextFieldResetFontSize()
+{
+    CalcDimension fontSize;
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    fontSize = theme->GetFontSize();
+
+    TextFieldModel::GetInstance()->SetFontSize(fontSize);
+}
+
 void FfiOHOSAceFrameworkTextFieldSetFontColor(uint32_t value)
 {
     TextFieldModel::GetInstance()->SetTextColor(Color(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldResetFontColor()
+{
+    TextFieldModel::GetInstance()->ResetTextColor();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetFontWeight(const char* value)

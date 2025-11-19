@@ -20,6 +20,7 @@
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
@@ -200,7 +201,6 @@ void ClickRecognizer::OnAccepted()
     auto lastRefereeState = refereeState_;
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
-    ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (backupTouchPointsForSucceedBlock_.has_value()) {
         touchPoints_ = backupTouchPointsForSucceedBlock_.value();
         backupTouchPointsForSucceedBlock_.reset();
@@ -610,6 +610,10 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
         tapReport.SetFingerList(info.GetFingerList());
         Reporter::GetInstance().HandleUISessionReporting(tapReport);
     }
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(pipeline->GetClickOptimizer());
+    pipeline->GetClickOptimizer()->ReportClick(GetAttachedNode(), info);
 }
 
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const

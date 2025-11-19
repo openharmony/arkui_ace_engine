@@ -1102,6 +1102,7 @@ public:
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
     void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
     void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
+    void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();

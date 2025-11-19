@@ -8496,7 +8496,7 @@ bool JSViewAbstract::ParseBlendMode(const JSCallbackInfo& info, BlendMode& blend
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
-        if (blendApplyTypeNum >= 0 && blendApplyTypeNum < static_cast<int>(BlendApplyType::MAX)) {
+        if (blendApplyTypeNum >= 0 && blendApplyTypeNum <= static_cast<int>(BlendApplyType::OFFSCREEN)) {
             blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
         }
     }

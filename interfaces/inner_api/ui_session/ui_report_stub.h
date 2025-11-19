@@ -49,6 +49,11 @@ public:
      */
     void ReportSearchEvent(const std::string& data) override;
 
+    /**
+     * @description: receive proxy side communication to execute text change callback
+     */
+    void ReportTextChangeEvent(const std::string& data) override;
+
     /*
     * @description: receive proxy side communication to report scroll value
     */
@@ -70,6 +75,12 @@ public:
      * @param eventCallback callback to be performed
      */
     void RegisterRouterChangeEventCallback(const EventCallback& eventCallback);
+
+    /**
+     * @description: register a callback when text change event occurs execute
+     * @param eventCallback callback to be performed
+     */
+    void RegisterTextChangeEventCallback(const EventCallback& eventCallback);
 
     /**
      * @description: register a callback when search component do search occurs execute
@@ -125,6 +136,11 @@ public:
     void UnregisterSearchEventCallback();
 
     /**
+     * @description: unregister the text change callback last register
+     */
+    void UnregisterTextChangeEventCallback();
+
+    /**
      * @description: unregister the switch callback last register
      */
     void UnregisterRouterChangeEventCallback();
@@ -178,6 +194,7 @@ public:
 private:
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
+    EventCallback textChangeEventCallback_;
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
     EventCallback sendBaseInfoCallback_;

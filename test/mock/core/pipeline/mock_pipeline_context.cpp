@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -181,6 +182,11 @@ void MockPipelineContext::TearDown()
 const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
 {
     return touchOptimizer_;
+}
+
+const std::unique_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
+{
+    return clickOptimizer_;
 }
 
 std::string PipelineContext::GetBundleName()

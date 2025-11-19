@@ -43,6 +43,7 @@ namespace {
 const auto DEFAULT_KEYBOARD_APPERANCE = KeyboardAppearance::NONE_IMMERSIVE;
 constexpr int32_t TEXTFIELD_INDEX = 0;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr int32_t DIVIDER_INDEX = 5;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr float MAX_FONT_SCALE = 2.0;
 constexpr int32_t DEFAULT_ALPHA = 255;
@@ -397,6 +398,27 @@ void SearchModelStatic::SetSearchEnterKeyType(FrameNode* frameNode, const std::o
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateTextInputAction(TextInputAction::SEARCH);
+}
+
+void SearchModelStatic::SetDividerColor(FrameNode* frameNode, const std::optional<Color>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        SearchModelNG::SetDividerColor(frameNode, valueOpt.value());
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto color = searchTheme->GetSearchDividerColor();
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, DividerColorSetByUser, frameNode);
+    dividerRenderProperty->UpdateDividerColor(color);
+    dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& valueOpt)

@@ -39,6 +39,7 @@
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/thread/background_task_executor.h"
@@ -178,6 +179,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -203,6 +205,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -223,6 +226,7 @@ PipelineContext::PipelineContext()
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -7048,6 +7052,11 @@ void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
 const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
 {
     return touchOptimizer_;
+}
+
+const std::unique_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
+{
+    return clickOptimizer_;
 }
 
 const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const

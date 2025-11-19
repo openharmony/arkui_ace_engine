@@ -18,6 +18,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components/chart/chart_component.h"
+#include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -27,6 +28,27 @@ namespace {
     const std::vector<ChartType> DataPanel_TYPE = { ChartType::LINE, ChartType::RAINBOW};
     constexpr unsigned int MAX_VALUES_LENGTH = 9;
     constexpr double DEFAULT_STROKE_WIDTH = 24.0;
+
+    void ConvertThemeColor(std::vector<NG::Gradient>& colors)
+    {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        RefPtr<DataPanelTheme> theme = pipeline->GetTheme<DataPanelTheme>();
+        CHECK_NULL_VOID(theme);
+        auto themeColors = theme->GetColorsArray();
+        for (const auto& item : themeColors) {
+            NG::Gradient gradient;
+            NG::GradientColor gradientColorStart;
+            gradientColorStart.SetLinearColor(LinearColor(item.first));
+            gradientColorStart.SetDimension(Dimension(0.0));
+            gradient.AddColor(gradientColorStart);
+            NG::GradientColor gradientColorEnd;
+            gradientColorEnd.SetLinearColor(LinearColor(item.second));
+            gradientColorEnd.SetDimension(Dimension(1.0));
+            gradient.AddColor(gradientColorEnd);
+            colors.emplace_back(gradient);
+        }
+    }
 }
 
 extern "C" {
@@ -109,6 +131,14 @@ void FfiOHOSAceFrameworkDataPanelSetValueColors(VectorStringPtr vecContent)
         valueColors.emplace_back(gradient);
     }
 
+    DataPanelModel::GetInstance()->SetValueColors(valueColors);
+}
+
+// reset valuecolors from datapanel theme
+void FfiOHOSAceFrameworkDataPanelResetValueColors()
+{
+    std::vector<OHOS::Ace::NG::Gradient> valueColors;
+    ConvertThemeColor(valueColors);
     DataPanelModel::GetInstance()->SetValueColors(valueColors);
 }
 

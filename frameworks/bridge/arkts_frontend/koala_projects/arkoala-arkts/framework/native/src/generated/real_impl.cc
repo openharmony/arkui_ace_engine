@@ -5241,6 +5241,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                    const Opt_KeyboardAppearance* value)
     {
     }
+    void SetDividerColorImpl(Ark_NativePointer node,
+                         const Opt_ColorMetrics* value)
+    {
+    }
     void SetSearchButtonImpl(Ark_NativePointer node,
                              const Opt_String* value,
                              const Opt_SearchButtonOptions* option)
@@ -9683,6 +9687,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetStopBackPressImpl,
             SearchAttributeModifier::SetOnWillChangeImpl,
             SearchAttributeModifier::SetKeyboardAppearanceImpl,
+            SearchAttributeModifier::SetDividerColorImpl,
             SearchAttributeModifier::SetSearchButtonImpl,
             SearchAttributeModifier::SetInputFilterImpl,
             SearchAttributeModifier::SetCustomKeyboardImpl,
@@ -12793,11 +12798,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      Ark_unifiedDataChannel_UnifiedData unifiedData)
     {
     }
-    Ark_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
+    Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
+    Opt_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
     {
         return {};
     }
@@ -16725,7 +16730,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_ScrollPageOptions* value)
     {
     }
-    Ark_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+    Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
                                        Ark_Scroller peer)
     {
         return {};
@@ -17965,7 +17970,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
+    Opt_Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
     {
         return {};
     }

@@ -81,9 +81,21 @@ void FfiOHOSAceFrameworkToggleSelectedColor(uint32_t color)
     ToggleModel::GetInstance()->SetSelectedColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkToggleResetSelectedColor()
+{
+    std::optional<Color> selectedColor;
+    ToggleModel::GetInstance()->SetSelectedColor(selectedColor);
+}
+
 void FfiOHOSAceFrameworkToggleSwitchPointColor(uint32_t color)
 {
     ToggleModel::GetInstance()->SetSwitchPointColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkToggleResetSwitchPointColor()
+{
+    std::optional<Color> switchPointColor;
+    ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
 }
 
 void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn))

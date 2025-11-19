@@ -28,6 +28,8 @@ public:
     NavDestinationScrollableProcessor() = default;
     ~NavDestinationScrollableProcessor() override = default;
 
+    virtual void UnbindScrollable() {}
+    virtual void UnbindNestedScrollable() {}
     virtual void UpdateBindingRelation() = 0;
     virtual void SetNodeId(int32_t id) = 0;
     virtual void SetNavDestinationPattern(WeakPtr<NavDestinationPattern> pattern) = 0;

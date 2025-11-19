@@ -562,6 +562,12 @@ void FfiOHOSAceFrameworkViewAbstractSetBorderWidthWithCJEdge(CJEdge params)
     ViewAbstractModel::GetInstance()->SetBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
 }
 
+void FfiOHOSAceFrameworkViewAbstractResetBorderWidth()
+{
+    CalcDimension value = {};
+    ViewAbstractModel::GetInstance()->SetBorderWidth(value);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBorderColor(uint32_t color)
 {
     ViewAbstractModel::GetInstance()->SetBorderColor(Color(color));
@@ -885,6 +891,12 @@ void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFini
     ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect, std::move(finishCallback));
 }
 
+void FfiOHOSAceFrameworkViewAbstractResetTransition()
+{
+    ViewAbstractModel::GetInstance()->CleanTransition();
+    ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr, nullptr);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id)
 {
     auto nativeMatrix = FFIData::GetData<NativeMatrix>(id);
@@ -1131,12 +1143,19 @@ void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, dou
 {
     Dimension dOffsetX(offsetX, DimensionUnit::VP);
     Dimension dOffsetY(offsetY, DimensionUnit::VP);
-    if (LessOrEqual(radius, 0.0)) {
-        LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
-        return;
+    double radiusVal = radius;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        if (LessNotEqual(radius, 0.0)) {
+            radiusVal = 0.0;
+        }
+    } else {
+        if (LessOrEqual(radius, 0.0)) {
+            LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
+            return;
+        }
     }
     std::vector<Shadow> shadows(1);
-    shadows.begin()->SetBlurRadius(radius);
+    shadows.begin()->SetBlurRadius(radiusVal);
     shadows.begin()->SetOffsetX(dOffsetX.Value());
     shadows.begin()->SetOffsetY(dOffsetY.Value());
     shadows.begin()->SetColor(Color(color));
@@ -1397,6 +1416,13 @@ void FfiOHOSAceFrameworkViewAbstractSetFlexBasis(double value, int32_t unit)
 {
     Dimension radius(value, static_cast<DimensionUnit>(unit));
     ViewAbstractModel::GetInstance()->SetFlexBasis(radius);
+}
+
+void FfiOHOSAceFrameworkViewAbstractResetFlexBasis()
+{
+    CalcDimension value;
+    value.SetUnit(DimensionUnit::AUTO);
+    ViewAbstractModel::GetInstance()->SetFlexBasis(value);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetFlexGrow(double value)
@@ -1694,7 +1720,7 @@ void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options)
             from = 0.0;
         }
         if (to > 1.0 || to < 0.0) {
-            from = 1.0;
+            to = 1.0;
         } else if (to < from) {
             to = from;
         }
@@ -2371,6 +2397,22 @@ void FfiOHOSAceFrameworkViewAbstractRadialGradient(RadialGradientParam radialGra
 {
     NG::Gradient newGradient;
     NewCjRadialGradient(radialGradientParam, newGradient);
+    ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
+}
+
+void FfiOHOSAceFrameworkViewAbstractResetRadialGradient(RadialGradientParam radialGradientParam,
+    bool needResetCenter, bool needResetRadius)
+{
+    NG::Gradient newGradient;
+    NewCjRadialGradient(radialGradientParam, newGradient);
+    if (needResetCenter) {
+        newGradient.GetRadialGradient()->radialCenterX.reset();
+        newGradient.GetRadialGradient()->radialCenterY.reset();
+    }
+    if (needResetRadius) {
+        newGradient.GetRadialGradient()->radialVerticalSize.reset();
+        newGradient.GetRadialGradient()->radialHorizontalSize.reset();
+    }
     ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
 }
 

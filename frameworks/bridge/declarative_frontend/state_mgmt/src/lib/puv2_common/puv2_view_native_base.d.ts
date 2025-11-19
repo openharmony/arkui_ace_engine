@@ -50,4 +50,5 @@ declare class NativeViewPartialUpdate {
   getUIContext(): UIContext;
   getUniqueId(): number;
   getDialogController(): object;
+  registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void;
 }

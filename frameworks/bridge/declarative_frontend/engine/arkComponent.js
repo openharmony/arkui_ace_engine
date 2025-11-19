@@ -26108,6 +26108,16 @@ class ArkNavDestinationComponent extends ArkComponent {
       NavDestinationOnNewParamModifier, callback);
     return this;
   }
+  bindToScrollable(scrollers) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBindToScrollableModifier.identity,
+      NavDestinationBindToScrollableModifier, scrollers);
+    return this;
+  }
+  bindToNestedScrollable(scrollInfos) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBindToNestedScrollableModifier.identity,
+      NavDestinationBindToNestedScrollableModifier, scrollInfos);
+    return this;
+  }
 }
 
 class HideTitleBarModifier extends ModifierWithKey {
@@ -26396,6 +26406,34 @@ class NavDestinationOnWillAppearModifier extends ModifierWithKey {
   }
 }
 NavDestinationOnWillAppearModifier.identity = Symbol('onWillAppear');
+
+class NavDestinationBindToScrollableModifier extends ModifierWithKey {
+  constructor(scrollers) {
+    super(scrollers);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetBindToScrollable(node);
+    } else {
+      getUINativeModule().navDestination.setBindToScrollable(node, this.value);
+    }
+  }
+}
+NavDestinationBindToScrollableModifier.identity = Symbol('bindToScrollable');
+
+class NavDestinationBindToNestedScrollableModifier extends ModifierWithKey {
+  constructor(scrollInfos) {
+    super(scrollInfos);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetBindToNestedScrollable(node);
+    } else {
+      getUINativeModule().navDestination.setBindToNestedScrollable(node, this.value);
+    }
+  }
+}
+NavDestinationBindToNestedScrollableModifier.identity = Symbol('bindToNestedScrollable');
 
 class NavDestinationOnWillShowModifier extends ModifierWithKey {
   constructor(value) {

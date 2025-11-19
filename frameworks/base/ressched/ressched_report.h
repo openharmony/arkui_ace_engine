@@ -78,6 +78,8 @@ public:
         std::unordered_map<std::string, std::string>& reply);
     bool AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
+    bool AppClickExtEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+        std::unordered_map<std::string, std::string>& reply);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);

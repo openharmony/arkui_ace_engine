@@ -50,6 +50,19 @@ void UiSessionManagerOhos::ReportSearchEvent(const std::string& data)
     }
 }
 
+void UiSessionManagerOhos::ReportTextChangeEvent(const std::string& data)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->ReportTextChangeEvent(data);
+        } else {
+            LOGW("report text change event failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
 void UiSessionManagerOhos::ReportRouterChangeEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
@@ -172,6 +185,15 @@ void UiSessionManagerOhos::SetSearchEventRegistered(bool status)
     }
 }
 
+void UiSessionManagerOhos::SetTextChangeEventRegistered(bool status)
+{
+    if (status) {
+        textChangeEventRegisterProcesses_.fetch_add(1);
+    } else {
+        textChangeEventRegisterProcesses_.fetch_sub(1);
+    }
+}
+
 void UiSessionManagerOhos::SetRouterChangeEventRegistered(bool status)
 {
     if (status) {
@@ -216,6 +238,11 @@ bool UiSessionManagerOhos::GetClickEventRegistered()
 bool UiSessionManagerOhos::GetSearchEventRegistered()
 {
     return searchEventRegisterProcesses_.load() > 0 ? true : false;
+}
+
+bool UiSessionManagerOhos::GetTextChangeEventRegistered()
+{
+    return textChangeEventRegisterProcesses_.load() > 0 ? true : false;
 }
 
 bool UiSessionManagerOhos::GetRouterChangeEventRegistered()

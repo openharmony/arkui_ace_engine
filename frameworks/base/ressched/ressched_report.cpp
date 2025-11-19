@@ -57,6 +57,7 @@ constexpr int64_t TIME_INTERVAL = 300;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
+constexpr int32_t RSS_TAIHANG_APP_WHITE_LIST_TYPE = 2;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -338,6 +339,13 @@ bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std
     std::unordered_map<std::string, std::string>& reply)
 {
     ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 1, payload, reply);
+    return reply["result"] == "\"true\"" ? true : false;
+}
+
+bool ResSchedReport::AppClickExtEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, RSS_TAIHANG_APP_WHITE_LIST_TYPE, payload, reply);
     return reply["result"] == "\"true\"" ? true : false;
 }
 

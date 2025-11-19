@@ -15,6 +15,7 @@
 
 export const ArkUIAniModule: any = undefined
 export const ArkUIAniUiextensionModal: any = undefined
+export const ArkUIAniSecurityUiextensionModal: any = undefined
 export const ArkUIAniUiextensionProxyModal: any = undefined
 export type AbilityWant = undefined
 export class ArkUIAniUIExtensionOptions {

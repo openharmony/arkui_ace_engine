@@ -18,6 +18,11 @@ declare namespace uiObserver {
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
+        onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        onScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        offScrollEvent(callback: Callback<ScrollEventInfo>): void;
+
         onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
 
         offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
@@ -120,6 +125,26 @@ declare namespace uiObserver {
     }
     export interface NavDestinationSwitchObserverOptions {
         navigationId: ResourceStr;
+    }
+
+    export interface ScrollEventInfo {
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+        axis: Axis;
+    }
+
+    export enum ScrollEventType {
+      SCROLL_START = 0,
+      SCROLL_STOP = 1
+    }
+
+    export enum Axis {
+        VERTICAL = 0,
+        Vertical = 0,
+        HORIZONTAL = 1,
+        Horizontal = 1
     }
 
     export enum TabContentState {

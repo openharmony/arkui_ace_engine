@@ -3779,6 +3779,7 @@ typedef struct Opt_BlankScreenDetectionMethod {
 typedef enum Ark_BlendApplyType {
     ARK_BLEND_APPLY_TYPE_FAST = 0,
     ARK_BLEND_APPLY_TYPE_OFFSCREEN = 1,
+    ARK_BLEND_APPLY_TYPE_OFFSCREEN_WITH_BACKGROUND = 2,
 } Ark_BlendApplyType;
 typedef struct Opt_BlendApplyType {
     Ark_Tag tag;
@@ -8118,7 +8119,7 @@ typedef struct Opt_TextOptions {
 } Opt_TextOptions;
 typedef struct Ark_TextOverflowOptions {
     /* kind: Interface */
-    Ark_TextOverflow overflow;
+    Opt_TextOverflow overflow;
 } Ark_TextOverflowOptions;
 typedef struct Opt_TextOverflowOptions {
     Ark_Tag tag;
@@ -13730,8 +13731,8 @@ typedef struct Opt_EdgeStyles {
 } Opt_EdgeStyles;
 typedef struct Ark_EditMenuOptions {
     /* kind: Interface */
-    OnCreateMenuCallback onCreateMenu;
-    OnMenuItemClickCallback onMenuItemClick;
+    Opt_OnCreateMenuCallback onCreateMenu;
+    Opt_OnMenuItemClickCallback onMenuItemClick;
 } Ark_EditMenuOptions;
 typedef struct Opt_EditMenuOptions {
     Ark_Tag tag;
@@ -17223,7 +17224,7 @@ typedef struct Opt_DecorationStyle {
 } Opt_DecorationStyle;
 typedef struct Ark_DecorationStyleInterface {
     /* kind: Interface */
-    Ark_TextDecorationType type;
+    Opt_TextDecorationType type;
     Opt_ResourceColor color;
     Opt_TextDecorationStyle style;
 } Ark_DecorationStyleInterface;
@@ -23644,6 +23645,8 @@ typedef struct GENERATED_ArkUISearchModifier {
                             const Opt_Callback_EditableTextChangeValue_Boolean* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
                                   const Opt_KeyboardAppearance* value);
+    void (*setDividerColor)(Ark_NativePointer node,
+                        const Opt_ColorMetrics* value);
     void (*setSearchButton)(Ark_NativePointer node,
                             const Opt_String* value,
                             const Opt_SearchButtonOptions* option);
@@ -25997,8 +26000,8 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Float64 (*getWindowY)(Ark_DragEvent peer);
     void (*setData)(Ark_DragEvent peer,
                     Ark_unifiedDataChannel_UnifiedData unifiedData);
-    Ark_unifiedDataChannel_UnifiedData (*getData)(Ark_DragEvent peer);
-    Ark_unifiedDataChannel_Summary (*getSummary)(Ark_DragEvent peer);
+    Opt_unifiedDataChannel_UnifiedData (*getData)(Ark_DragEvent peer);
+    Opt_unifiedDataChannel_Summary (*getSummary)(Ark_DragEvent peer);
     void (*setResult)(Ark_DragEvent peer,
                       Ark_DragResult dragResult);
     Ark_DragResult (*getResult)(Ark_DragEvent peer);
@@ -27738,7 +27741,7 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
     void (*scrollPage)(Ark_VMContext vmContext,
                        Ark_Scroller peer,
                        const Ark_ScrollPageOptions* value);
-    Ark_OffsetResult (*currentOffset)(Ark_VMContext vmContext,
+    Opt_OffsetResult (*currentOffset)(Ark_VMContext vmContext,
                                       Ark_Scroller peer);
     void (*scrollToIndex)(Ark_VMContext vmContext,
                           Ark_Scroller peer,
@@ -28229,7 +28232,7 @@ typedef struct GENERATED_ArkUITouchEventAccessor {
     void (*destroyPeer)(Ark_TouchEvent peer);
     Ark_TouchEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Array_HistoricalPoint (*getHistoricalPoints)(Ark_TouchEvent peer);
+    Opt_Array_HistoricalPoint (*getHistoricalPoints)(Ark_TouchEvent peer);
     Ark_TouchType (*getType)(Ark_TouchEvent peer);
     void (*setType)(Ark_TouchEvent peer,
                     Ark_TouchType type);

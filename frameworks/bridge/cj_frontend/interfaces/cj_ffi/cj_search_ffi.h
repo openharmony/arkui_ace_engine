@@ -41,6 +41,7 @@ struct FFiSearchTextMenuItem {
 CJ_EXPORT void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetSearchButton(const char* text);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetPlaceholderColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSearchResetPlaceholderColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetPlaceholderFont(
     double fontSize, int32_t sizeUnit, const char* fontWeight, int32_t fontStyle, const char* fontFamily);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetTextFont(

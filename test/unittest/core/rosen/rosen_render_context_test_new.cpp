@@ -1282,4 +1282,91 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew047, TestSize.Level1)
     rosenRenderContext->ScheduleBackgroundPaint();
     EXPECT_TRUE(rosenRenderContext->pendingDecodeTask_);
 }
+
+/**
+ * @tc.name: RosenRenderContextTestNew048
+ * @tc.desc: OnBackBlendApplyTypeUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew048, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto property = std::make_shared<Rosen::RSProperty<bool>>();
+    std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::ModifierNG::RSBackgroundShaderModifier>();
+    modifier->AttachProperty(Rosen::ModifierNG::RSPropertyType::BACKGROUND_SHADER, property);
+    rosenRenderContext->AddModifier(modifier);
+    rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
+    rosenRenderContext->OnBackBlendApplyTypeUpdate(BlendApplyType::FAST);
+    rosenRenderContext->OnBackBlendModeUpdate(BlendMode::SATURATION);
+    rosenRenderContext->AnimateHoverEffectScale(true);
+    EXPECT_FALSE(rosenRenderContext->isHoveredScale_);
+    MotionBlurOption motionBlurOption;
+    motionBlurOption.radius = 5;
+    rosenRenderContext->UpdateMotionBlur(motionBlurOption);
+    rosenRenderContext->AnimateHoverEffectBoard(true);
+    EXPECT_FALSE(rosenRenderContext->isHoveredBoard_);
+    rosenRenderContext->UpdateFrontBlurRadius(0.0_px);
+    EXPECT_EQ(rosenRenderContext->GetFrontBlurRadius().value(), 0.0_px);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew049
+ * @tc.desc: OnBackBlendApplyTypeUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew049, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto property = std::make_shared<Rosen::RSProperty<bool>>();
+    std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::ModifierNG::RSBackgroundShaderModifier>();
+    modifier->AttachProperty(Rosen::ModifierNG::RSPropertyType::BACKGROUND_SHADER, property);
+    rosenRenderContext->AddModifier(modifier);
+    rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
+    rosenRenderContext->OnBackBlendApplyTypeUpdate(BlendApplyType::OFFSCREEN_WITH_BACKGROUND);
+    rosenRenderContext->OnBackBlendModeUpdate(BlendMode::SATURATION);
+    rosenRenderContext->AnimateHoverEffectScale(true);
+    EXPECT_FALSE(rosenRenderContext->isHoveredScale_);
+    MotionBlurOption motionBlurOption;
+    motionBlurOption.radius = 5;
+    rosenRenderContext->UpdateMotionBlur(motionBlurOption);
+    rosenRenderContext->AnimateHoverEffectBoard(true);
+    EXPECT_FALSE(rosenRenderContext->isHoveredBoard_);
+    rosenRenderContext->UpdateFrontBlurRadius(0.0_px);
+    EXPECT_EQ(rosenRenderContext->GetFrontBlurRadius().value(), 0.0_px);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew050
+ * @tc.desc: OnBackBlendApplyTypeUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew050, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto property = std::make_shared<Rosen::RSProperty<bool>>();
+    std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::ModifierNG::RSBackgroundShaderModifier>();
+    modifier->AttachProperty(Rosen::ModifierNG::RSPropertyType::BACKGROUND_SHADER, property);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    rosenRenderContext->AddModifier(modifier);
+    rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
+    rosenRenderContext->OnBackBlendApplyTypeUpdate(BlendApplyType::MAX);
+    rosenRenderContext->OnBackBlendModeUpdate(BlendMode::SATURATION);
+    rosenRenderContext->AnimateHoverEffectScale(true);
+    EXPECT_FALSE(rosenRenderContext->isHoveredScale_);
+    MotionBlurOption motionBlurOption;
+    motionBlurOption.radius = 5;
+    rosenRenderContext->UpdateMotionBlur(motionBlurOption);
+    rosenRenderContext->AnimateHoverEffectBoard(true);
+    EXPECT_FALSE(rosenRenderContext->isHoveredBoard_);
+    rosenRenderContext->UpdateFrontBlurRadius(0.0_px);
+    EXPECT_EQ(rosenRenderContext->GetFrontBlurRadius().value(), 0.0_px);
+}
 } // namespace OHOS::Ace::NG

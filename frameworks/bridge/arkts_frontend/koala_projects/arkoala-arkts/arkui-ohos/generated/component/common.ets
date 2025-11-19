@@ -76,6 +76,7 @@ import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
+import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer } from "./../framework/ohos.data.unifiedDataChannel"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
@@ -519,90 +520,6 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         thisSerializer.release()
     }
 }
-export class ChildrenMainSizeInternal {
-    public static fromPtr(ptr: KPointer): ChildrenMainSize {
-        return new ChildrenMainSize(false, ptr)
-    }
-}
-export class ChildrenMainSize implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get childDefaultSize(): double {
-        return this.getChildDefaultSize()
-    }
-    set childDefaultSize(childDefaultSize: double) {
-        this.setChildDefaultSize(childDefaultSize)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, ChildrenMainSize.getFinalizer())
-    }
-    constructor(childDefaultSize: double) {
-        this(false, ChildrenMainSize.construct(childDefaultSize))
-    }
-    static construct(childDefaultSize: double): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_construct(childDefaultSize)
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
-    }
-    public splice(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
-        const start_casted = start as (int32)
-        const deleteCount_casted = deleteCount as (int32 | undefined)
-        const childrenSize_casted = childrenSize as (Array<double> | undefined)
-        this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
-        return
-    }
-    public update(index: int32, childSize: double): void {
-        const index_casted = index as (int32)
-        const childSize_casted = childSize as (double)
-        this.update_serialize(index_casted, childSize_casted)
-        return
-    }
-    private getChildDefaultSize(): double {
-        return this.getChildDefaultSize_serialize()
-    }
-    private setChildDefaultSize(childDefaultSize: double): void {
-        const childDefaultSize_casted = childDefaultSize as (double)
-        this.setChildDefaultSize_serialize(childDefaultSize_casted)
-        return
-    }
-    splice_serialize(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (deleteCount !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const deleteCountTmpValue  = deleteCount!
-            thisSerializer.writeInt32(deleteCountTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (childrenSize !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const childrenSizeTmpValue  = childrenSize!
-            thisSerializer.writeInt32((childrenSizeTmpValue.length).toInt())
-            for (let childrenSizeTmpValueCounterI = 0; childrenSizeTmpValueCounterI < childrenSizeTmpValue.length; childrenSizeTmpValueCounterI++) {
-                const childrenSizeTmpValueTmpElement : double = childrenSizeTmpValue[childrenSizeTmpValueCounterI]
-                thisSerializer.writeFloat64(childrenSizeTmpValueTmpElement)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    update_serialize(index: int32, childSize: double): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
-    }
-    private getChildDefaultSize_serialize(): double {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
-        return retval
-    }
-    private setChildDefaultSize_serialize(childDefaultSize: double): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
-    }
-}
 export interface DismissPopupAction {
     reason: DismissReason
     dismiss(): void
@@ -666,8 +583,8 @@ export interface DragEvent {
     getWindowX(): double
     getWindowY(): double
     setData(unifiedData: unifiedDataChannel.UnifiedData): void
-    getData(): unifiedDataChannel.UnifiedData
-    getSummary(): unifiedDataChannel.Summary
+    getData(): unifiedDataChannel.UnifiedData | undefined
+    getSummary(): unifiedDataChannel.Summary | undefined
     setResult(dragResult: DragResult): void
     getResult(): DragResult
     getPreviewRect(): Rectangle
@@ -675,7 +592,7 @@ export interface DragEvent {
     getVelocityY(): double
     getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
-    startDataLoading(options: unifiedDataChannel.GetDataParams): string
+    startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
     enableInternalDropAnimation(configuration: string): void
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -735,10 +652,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setData_serialize(unifiedData_casted)
         return
     }
-    public getData(): unifiedDataChannel.UnifiedData {
+    public getData(): unifiedDataChannel.UnifiedData | undefined {
         return this.getData_serialize()
     }
-    public getSummary(): unifiedDataChannel.Summary {
+    public getSummary(): unifiedDataChannel.Summary | undefined {
         return hookDragEventGetSummary(this)
     }
     public setResult(dragResult: DragResult): void {
@@ -766,7 +683,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
-    public startDataLoading(options: unifiedDataChannel.GetDataParams): string {
+    public startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined {
         return hookDragEventStartDataLoading(this, options)
     }
     public enableInternalDropAnimation(configuration: string): void {
@@ -817,15 +734,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     setData_serialize(unifiedData: unifiedDataChannel.UnifiedData): void {
         ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, extractors.toUnifiedDataChannelUnifiedDataPtr(unifiedData))
     }
-    getData_serialize(): unifiedDataChannel.UnifiedData {
+    getData_serialize(): unifiedDataChannel.UnifiedData | undefined {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        const obj : unifiedDataChannel.UnifiedData = extractors.fromUnifiedDataChannelUnifiedDataPtr(retval)
-        return obj
-    }
-    getSummary_serialize(): unifiedDataChannel.Summary {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        const obj : unifiedDataChannel.Summary = extractors.fromUnifiedDataChannelSummaryPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : unifiedDataChannel.UnifiedData | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (unifiedDataChannel_UnifiedData_serializer.read(retvalDeserializer) as unifiedDataChannel.UnifiedData)
+        }
+        const returnResult : unifiedDataChannel.UnifiedData | undefined = buffer
+        return returnResult
     }
     setResult_serialize(dragResult: DragResult): void {
         ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, dragResult.valueOf())
@@ -6770,7 +6688,8 @@ export enum BlendMode {
 }
 export enum BlendApplyType {
     FAST = 0,
-    OFFSCREEN = 1
+    OFFSCREEN = 1,
+    OFFSCREEN_WITH_BACKGROUND = 2
 }
 export type OnDragEventCallback = (event: DragEvent, extraParams?: string) => void;
 export interface DropOptions {
@@ -7711,13 +7630,13 @@ export interface CommonMethod {
     transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
         throw new Error("Unimplemented method transition")
     }
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    gesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method gesture")
     }
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method priorityGesture")
     }
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method parallelGesture")
     }
     blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -8505,13 +8424,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
         return this
     }
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    gesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
     blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -10414,19 +10333,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public gesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
             hookGesture(this, gesture, mask)
         }
         return this
     }
-    public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
             hookPriorityGesture(this, gesture, mask)
         }
         return this
     }
-    public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
             hookParallelGesture(this, gesture, mask)
         }
@@ -22360,7 +22279,7 @@ export class PopupOptions_serializer {
         return value
     }
 }
-export interface AccessibilityHoverEvent {
+export interface AccessibilityHoverEvent extends BaseEvent {
     type: AccessibilityHoverType
     x: double
     y: double
@@ -22534,7 +22453,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
 }
-export interface AxisEvent {
+export interface AxisEvent extends BaseEvent {
     action: AxisAction
     displayX: double
     displayY: double
@@ -22780,7 +22699,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
 }
-export interface ClickEvent {
+export interface ClickEvent extends BaseEvent {
     displayX: double
     displayY: double
     windowX: double
@@ -22979,7 +22898,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_preventDefault(this.peer!.ptr)
     }
 }
-export interface FocusAxisEvent {
+export interface FocusAxisEvent extends BaseEvent {
     axisMap: Map<AxisModel, double>
     stopPropagation(): void
 }
@@ -23048,7 +22967,7 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         ArkUIGeneratedNativeModule._FocusAxisEvent_stopPropagation(this.peer!.ptr)
     }
 }
-export interface HoverEvent {
+export interface HoverEvent extends BaseEvent {
     x?: double | undefined
     y?: double | undefined
     windowX?: double | undefined
@@ -23310,7 +23229,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._HoverEvent_stopPropagation(this.peer!.ptr)
     }
 }
-export interface MouseEvent {
+export interface MouseEvent extends BaseEvent {
     button: MouseButton
     action: MouseAction
     displayX: double
@@ -23678,13 +23597,13 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
 }
-export interface TouchEvent {
+export interface TouchEvent extends BaseEvent {
     type: TouchType
     touches: Array<TouchObject>
     changedTouches: Array<TouchObject>
     stopPropagation(): void
     preventDefault(): void
-    getHistoricalPoints(): Array<HistoricalPoint>
+    getHistoricalPoints(): Array<HistoricalPoint> | undefined
 }
 export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
     get type(): TouchType {
@@ -23729,7 +23648,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     public static fromPtr(ptr: KPointer): TouchEventInternal {
         return new TouchEventInternal(ptr)
     }
-    public getHistoricalPoints(): Array<HistoricalPoint> {
+    public getHistoricalPoints(): Array<HistoricalPoint> | undefined {
         return this.getHistoricalPoints_serialize()
     }
     private getType(): TouchType {
@@ -23756,15 +23675,20 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setChangedTouches_serialize(changedTouches_casted)
         return
     }
-    getHistoricalPoints_serialize(): Array<HistoricalPoint> {
+    getHistoricalPoints_serialize(): Array<HistoricalPoint> | undefined {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = HistoricalPoint_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<HistoricalPoint> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = HistoricalPoint_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<HistoricalPoint> = buffer
+        const returnResult : Array<HistoricalPoint> | undefined = buffer
         return returnResult
     }
     private getType_serialize(): TouchType {

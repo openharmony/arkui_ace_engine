@@ -4934,6 +4934,10 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationOnResult)(ArkUINodeHandle node);
     void (*setNavDestinationOnNewParam)(ArkUINodeHandle node, void* callback);
     void (*resetNavDestinationOnNewParam)(ArkUINodeHandle node);
+    void (*setBindToScrollable)(ArkUINodeHandle node, void* callback);
+    void (*resetBindToScrollable)(ArkUINodeHandle node);
+    void (*setBindToNestedScrollable)(ArkUINodeHandle node, void* callback);
+    void (*resetBindToNestedScrollable)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {
@@ -7987,6 +7991,7 @@ struct ArkUIMultiThreadManagerAPI {
     ArkUI_Int32 (*postUITask)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
     ArkUI_Int32 (*postUITaskAndWait)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
     void (*executeAfterAttachTasks)(ArkUINodeHandle node);
+    ArkUI_Bool (*debugThreadSafeNodeEnabled)();
 };
 
 struct ArkUIDialogAPI {

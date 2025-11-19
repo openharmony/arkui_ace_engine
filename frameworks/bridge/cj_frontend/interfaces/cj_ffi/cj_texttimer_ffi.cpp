@@ -128,6 +128,16 @@ void FfiOHOSAceFrameworkTextTimerSetFontColor(uint32_t textColor)
     TextTimerModel::GetInstance()->SetTextColor(Color(textColor));
 }
 
+void FfiOHOSAceFrameworkTextTimerResetFontColor()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    Color textColor = theme->GetTextStyle().GetTextColor();
+    TextTimerModel::GetInstance()->SetTextColor(textColor);
+}
+
 void FfiOHOSAceFrameworkTextTimerSetFontStyle(int32_t fontStyle)
 {
     if (!Utils::CheckParamsValid(fontStyle, FONT_STYLES.size())) {

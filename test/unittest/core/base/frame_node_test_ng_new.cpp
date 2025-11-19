@@ -3515,7 +3515,7 @@ HWTEST_F(FrameNodeTestNg, AttachContext010, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     node->GetOrCreateGestureEventHub();
     SystemProperties::multiInstanceEnabled_ = true;
-    node->isDeleteRsNode_ = false;
+    node->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::PROHIBITED;
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     node->renderContext_ = mockRenderContext;
     node->AttachContext(AceType::RawPtr(context));

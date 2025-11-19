@@ -1785,6 +1785,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SearchAttribute_setKeyboardAppearance(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SearchAttribute_setDividerColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SearchAttribute_setSearchButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SearchAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3933,10 +3935,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _DragEvent_setData(ptr: KPointer, unifiedData: KPointer): void
-    @ani.unsafe.Direct
-    native static _DragEvent_getData(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _DragEvent_getSummary(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _DragEvent_getData(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _DragEvent_getSummary(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _DragEvent_setResult(ptr: KPointer, dragResult: KInt): void
     @ani.unsafe.Direct

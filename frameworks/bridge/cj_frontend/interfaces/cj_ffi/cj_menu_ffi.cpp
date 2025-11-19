@@ -77,6 +77,11 @@ void FfiOHOSAceFrameworkMenuSetRadiusByBorderRadiuses(CBorderRadiuses radius)
     MenuModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
 }
 
+void FfiOHOSAceFrameworkMenuResetRadius()
+{
+    MenuModel::GetInstance()->ResetBorderRadius();
+}
+
 void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool hasValue)
 {
     V2::ItemDivider divider;

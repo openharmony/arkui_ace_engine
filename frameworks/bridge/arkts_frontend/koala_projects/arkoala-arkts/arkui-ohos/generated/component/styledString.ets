@@ -1135,7 +1135,7 @@ export interface TextStyleInterface {
     fontStyle?: FontStyle;
 }
 export interface DecorationStyleInterface {
-    type: TextDecorationType;
+    type: TextDecorationType | undefined;
     color?: ResourceColor;
     style?: TextDecorationStyle;
 }
@@ -1454,7 +1454,13 @@ export class DecorationStyleInterface_serializer {
     public static write(buffer: SerializerBase, value: DecorationStyleInterface): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForType  = value.type
-        valueSerializer.writeInt32(valueHolderForType.valueOf())
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = (valueHolderForType as TextDecorationType)
+            valueSerializer.writeInt32(valueHolderForTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForColor  = value.color
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1490,7 +1496,12 @@ export class DecorationStyleInterface_serializer {
     }
     public static read(buffer: DeserializerBase): DecorationStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
-        const typeTmpResult : TextDecorationType = TextDecorationType.fromValue(valueDeserializer.readInt32())
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : TextDecorationType | undefined = undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = TextDecorationType.fromValue(valueDeserializer.readInt32())
+        }
+        const typeTmpResult : TextDecorationType | undefined = typeTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

@@ -25,6 +25,7 @@
 #include "test/mock/core/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"

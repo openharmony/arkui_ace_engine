@@ -43,7 +43,7 @@ export class ArkDynamicComponentPeer extends ArkCommonMethodPeer {
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkDynamicComponentPeer {
         InteropNativeModule._NativeLog("[AceDynamicComponent] create ArkDynamicComponentPeer start");
         const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._UIExtensionComponent_construct(peerId, flags)
+        const _peerPtr  = ArkUIAniDynamicModal._Dynamic_Construct(peerId, flags)
         const _peer  = new ArkDynamicComponentPeer(_peerPtr, peerId, "DynamicComponent", flags)
         component?.setPeer(_peer)
         return _peer

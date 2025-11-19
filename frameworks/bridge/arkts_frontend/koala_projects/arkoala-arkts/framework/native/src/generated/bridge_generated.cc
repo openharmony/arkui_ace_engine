@@ -14779,6 +14779,19 @@ void impl_SearchAttribute_setKeyboardAppearance(Ark_NativePointer thisPtr, KSeri
         GetNodeModifiers()->getSearchModifier()->setKeyboardAppearance(self, static_cast<Opt_KeyboardAppearance*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SearchAttribute_setKeyboardAppearance, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SearchAttribute_setDividerColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ColorMetrics valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = ColorMetrics_serializer::read(thisDeserializer);
+        }
+        Opt_ColorMetrics valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSearchModifier()->setDividerColor(self, static_cast<Opt_ColorMetrics*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SearchAttribute_setDividerColor, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SearchAttribute_setSearchButton(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -29140,16 +29153,34 @@ void impl_DragEvent_setData(Ark_NativePointer thisPtr, Ark_NativePointer unified
         GetAccessors()->getDragEventAccessor()->setData(self, static_cast<Ark_unifiedDataChannel_UnifiedData>(unifiedData));
 }
 KOALA_INTEROP_DIRECT_V2(DragEvent_setData, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_DragEvent_getData(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_DragEvent_getData(Ark_NativePointer thisPtr) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
-        return GetAccessors()->getDragEventAccessor()->getData(self);
+        const auto &retValue = GetAccessors()->getDragEventAccessor()->getData(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            unifiedDataChannel_UnifiedData_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(DragEvent_getData, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_DragEvent_getSummary(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_1(DragEvent_getData, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_DragEvent_getSummary(Ark_NativePointer thisPtr) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
-        return GetAccessors()->getDragEventAccessor()->getSummary(self);
+        const auto &retValue = GetAccessors()->getDragEventAccessor()->getSummary(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            unifiedDataChannel_Summary_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(DragEvent_getSummary, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(DragEvent_getSummary, KInteropReturnBuffer, Ark_NativePointer)
 void impl_DragEvent_setResult(Ark_NativePointer thisPtr, Ark_Int32 dragResult) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
         GetAccessors()->getDragEventAccessor()->setResult(self, static_cast<Ark_DragResult>(dragResult));
@@ -35383,7 +35414,13 @@ KInteropReturnBuffer impl_Scroller_currentOffset(KVMContext vmContext, Ark_Nativ
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         const auto &retValue = GetAccessors()->getScrollerAccessor()->currentOffset(reinterpret_cast<Ark_VMContext>(vmContext), self);
         SerializerBase _retSerializer {};
-        OffsetResult_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            OffsetResult_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_CTX_1(Scroller_currentOffset, KInteropReturnBuffer, Ark_NativePointer)
@@ -37180,10 +37217,16 @@ KInteropReturnBuffer impl_TouchEvent_getHistoricalPoints(Ark_NativePointer thisP
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
         const auto &retValue = GetAccessors()->getTouchEventAccessor()->getHistoricalPoints(self);
         SerializerBase _retSerializer {};
-        _retSerializer.writeInt32(retValue.length);
-        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
-            const Ark_HistoricalPoint retValueTmpElement = retValue.array[retValueCounterI];
-            HistoricalPoint_serializer::write(_retSerializer, retValueTmpElement);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(retValueTmpValue.length);
+            for (int retValueTmpValueCounterI = 0; retValueTmpValueCounterI < retValueTmpValue.length; retValueTmpValueCounterI++) {
+                const Ark_HistoricalPoint retValueTmpValueTmpElement = retValueTmpValue.array[retValueTmpValueCounterI];
+                HistoricalPoint_serializer::write(_retSerializer, retValueTmpValueTmpElement);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
         }
         return _retSerializer.toReturnBuffer();
 }
