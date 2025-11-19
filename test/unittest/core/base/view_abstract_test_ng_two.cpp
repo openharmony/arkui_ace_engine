@@ -14,6 +14,8 @@
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "base/geometry/calc_dimension_rect.h"
+#include "base/geometry/response_region.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -108,5 +110,37 @@ HWTEST_F(ViewAbstractTestNg, BindMenuTest001, TestSize.Level1)
         std::move(buildFunc), targetNode, OFFSETF, menuParam, std::move(previewBuildFunc));
     ASSERT_NE(targetNode->GetOrCreateGestureEventHub(), nullptr);
     EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isShow, false);
+}
+
+/**
+ * @tc.name: SetResponseRegionListWithMap001
+ * @tc.desc: Test SetResponseRegionList and GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetResponseRegionListWithMap001, TestSize.Level1)
+{
+    std::vector<ResponseRegion> regionNotRect;
+    ViewAbstract::SetResponseRegionList(std::move(regionNotRect));
+    auto regionMapResult = ViewAbstract::GetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(regionMapResult.size(), 1);
+
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::ALL;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+
+    ViewAbstract::SetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(regionMap));
+    auto regionMapResult2 = ViewAbstract::GetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER));
+    EXPECT_EQ(regionMapResult2.size(), 1);
+
+    auto region = regionMapResult[toolType][0];
+    EXPECT_EQ(region.GetX().Value(), xDimen.Value());
+    EXPECT_EQ(region.GetY().Value(), yDimen.Value());
+    EXPECT_EQ(region.GetWidth().Value(), widthDimen.Value());
+    EXPECT_EQ(region.GetHeight().Value(), heightDimen.Value());
 }
 } // namespace OHOS::Ace::NG

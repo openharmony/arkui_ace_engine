@@ -7893,6 +7893,15 @@ void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
         CalcDimensionRect responseRect(responseRegion.GetWidth(), responseRegion.GetHeight(), responseRegion.GetX(), responseRegion.GetY());
         responseRegionMap[responseRegion.GetTool()].emplace_back(responseRect);
     }
+    if (responseRegions.empty()) {
+        auto toolType = NG::ResponseRegionSupportedTool::ALL;
+        CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+        responseRegionMap[toolType].push_back(dimenRect);
+    }
     SetResponseRegionList(frameNode, responseRegionMap);
 }
 

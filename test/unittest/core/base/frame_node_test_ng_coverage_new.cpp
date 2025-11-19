@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
+#include "base/geometry/calc_dimension_rect.h"
 #include "core/event/touch_event.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -1552,4 +1553,258 @@ HWTEST_F(FrameNodeTestNg, FrameNodeInResponseRegionListTest001, TestSize.Level1)
     auto test3 = frameNode->InResponseRegionList(point, responseRegionList, true);
     EXPECT_FALSE(test3);
 }
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionList001
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect GetResponseRegionList is not empty.
+     */
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::ALL;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+
+    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegionMap(regionMap);
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
+    EXPECT_FALSE(region.empty());
+
+    auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
+    EXPECT_FALSE(region1.empty());
+
+    auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
+    EXPECT_FALSE(region2.empty());
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionList002
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect GetResponseRegionList is not empty.
+     */
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::FINGER;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+
+    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegionMap(regionMap);
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
+    EXPECT_TRUE(region.empty());
+
+    auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
+    EXPECT_FALSE(region1.empty());
+
+    auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
+    EXPECT_TRUE(region2.empty());
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionList003
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect GetResponseRegionList is not empty.
+     */
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::PEN;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+
+    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegionMap(regionMap);
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
+    EXPECT_TRUE(region.empty());
+
+    auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
+    EXPECT_TRUE(region1.empty());
+
+    auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
+    EXPECT_FALSE(region2.empty());
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionList004
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect GetResponseRegionList is not empty.
+     */
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::ALL;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegionMap(regionMap);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(responseRect);
+    gestureEventHub->SetResponseRegion(responseRegion);
+
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
+    EXPECT_EQ(region.size(), 1);
+
+    auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
+    EXPECT_EQ(region1.size(), 1);
+
+    auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
+    EXPECT_EQ(region2.size(), 1);
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionList005
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect GetResponseRegionList is not empty.
+     */
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::FINGER;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegionMap(regionMap);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(responseRect);
+    gestureEventHub->SetResponseRegion(responseRegion);
+
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
+    EXPECT_EQ(region.size(), 0);
+
+    auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
+    EXPECT_EQ(region1.size(), 1);
+
+    auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
+    EXPECT_EQ(region2.size(), 0);
+}
+
+/**
+ * @tc.name: FrameNodeTouchToJsonValue03
+ * @tc.desc: Test the function TouchToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. update the regionMap.
+     */
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::ALL;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+    auto gestureEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegionMap(regionMap);
+
+    /**
+     * @tc.steps: step3. call the function TouchToJsonValue.
+     */
+    InspectorFilter testFilter;
+    auto jsonValue = std::make_unique<JsonValue>();
+    frameNode->TouchToJsonValue(jsonValue, testFilter);
+    EXPECT_FALSE(jsonValue->GetBool("enabled", false));
+}
+
 } // namespace OHOS::Ace::NG
