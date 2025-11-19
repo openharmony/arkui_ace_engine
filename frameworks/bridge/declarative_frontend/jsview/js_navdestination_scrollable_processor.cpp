@@ -68,14 +68,14 @@ ScrollerObserver CreateObserver(
     return observer;
 }
 
-std::vector<WeakPtr<JSScroller>> ParseScrollerArray(const JSCallbackInfo& info)
+std::vector<WeakPtr<JSScroller>> ParseScrollerArray(const JSRef<JSVal>& param)
 {
     std::vector<WeakPtr<JSScroller>> scrollers;
-    if (info.Length() < 1 || !info[0]->IsArray()) {
+    if (param->IsEmpty() || !param->IsArray()) {
         return scrollers;
     }
 
-    auto scrollerArray = JSRef<JSArray>::Cast(info[0]);
+    auto scrollerArray = JSRef<JSArray>::Cast(param);
     auto arraySize = scrollerArray->Length();
     for (size_t idx = 0; idx < arraySize; idx++) {
         auto item = scrollerArray->GetValueAt(idx);
@@ -91,14 +91,14 @@ std::vector<WeakPtr<JSScroller>> ParseScrollerArray(const JSCallbackInfo& info)
     return scrollers;
 }
 
-std::vector<std::pair<WeakPtr<JSScroller>, WeakPtr<JSScroller>>> ParseNestedScrollerArray(const JSCallbackInfo& info)
+std::vector<std::pair<WeakPtr<JSScroller>, WeakPtr<JSScroller>>> ParseNestedScrollerArray(const JSRef<JSVal>& param)
 {
     std::vector<std::pair<WeakPtr<JSScroller>, WeakPtr<JSScroller>>> nestedScrollers;
-    if (info.Length() < 1 || !info[0]->IsArray()) {
+    if (param->IsEmpty() || !param->IsArray()) {
         return nestedScrollers;
     }
 
-    auto nestedScrollerArray = JSRef<JSArray>::Cast(info[0]);
+    auto nestedScrollerArray = JSRef<JSArray>::Cast(param);
     auto arraySize = nestedScrollerArray->Length();
     for (size_t idx = 0; idx < arraySize; idx++) {
         auto item = nestedScrollerArray->GetValueAt(idx);
@@ -283,21 +283,33 @@ void JSNavDestinationScrollableProcessor::HandleOnDidScrollEvent(
     scrollInfo.isAtBottom = isAtBottom;
 }
 
-void JSNavDestinationScrollableProcessor::BindToScrollable(const JSCallbackInfo& info)
+void JSNavDestinationScrollableProcessor::UnbindScrollable()
 {
     needUpdateBindingRelation_ = true;
     incommingScrollers_.clear();
-    std::vector<WeakPtr<JSScroller>> scrollers = ParseScrollerArray(info);
+}
+
+void JSNavDestinationScrollableProcessor::BindToScrollable(const JSRef<JSVal>& param)
+{
+    needUpdateBindingRelation_ = true;
+    incommingScrollers_.clear();
+    std::vector<WeakPtr<JSScroller>> scrollers = ParseScrollerArray(param);
     for (const auto& scroller : scrollers) {
         incommingScrollers_.emplace(scroller);
     }
 }
 
-void JSNavDestinationScrollableProcessor::BindToNestedScrollable(const JSCallbackInfo& info)
+void JSNavDestinationScrollableProcessor::UnbindNestedScrollable()
 {
     needUpdateBindingRelation_ = true;
     incommingNestedScrollers_.clear();
-    auto nestedScrollers = ParseNestedScrollerArray(info);
+}
+
+void JSNavDestinationScrollableProcessor::BindToNestedScrollable(const JSRef<JSVal>& param)
+{
+    needUpdateBindingRelation_ = true;
+    incommingNestedScrollers_.clear();
+    auto nestedScrollers = ParseNestedScrollerArray(param);
     for (const auto& scrollerPair : nestedScrollers) {
         incommingNestedScrollers_.emplace(scrollerPair.second, std::nullopt);
         incommingNestedScrollers_.emplace(scrollerPair.first, scrollerPair.second);

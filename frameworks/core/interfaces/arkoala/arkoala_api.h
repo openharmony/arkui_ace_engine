@@ -4934,6 +4934,10 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationOnResult)(ArkUINodeHandle node);
     void (*setNavDestinationOnNewParam)(ArkUINodeHandle node, void* callback);
     void (*resetNavDestinationOnNewParam)(ArkUINodeHandle node);
+    void (*setBindToScrollable)(ArkUINodeHandle node, void* callback);
+    void (*resetBindToScrollable)(ArkUINodeHandle node);
+    void (*setBindToNestedScrollable)(ArkUINodeHandle node, void* callback);
+    void (*resetBindToNestedScrollable)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {
