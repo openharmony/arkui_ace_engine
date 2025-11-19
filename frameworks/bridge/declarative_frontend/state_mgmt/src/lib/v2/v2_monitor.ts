@@ -84,9 +84,7 @@ class MonitorValueV2<T> {
   // this.lastSureValuePath_.path: objLevel00.objectLevel01
   private lastSureValuePath_: MonitorValueV2<T> | undefined;
 
-  private addedByAPI_: boolean;
-
-  constructor(path: string, apiAdded: boolean, id?: number) {
+  constructor(path: string, id?: number) {
     this.path = path;
     this.dirty = false;
     this.props = path.split('.');
@@ -95,7 +93,6 @@ class MonitorValueV2<T> {
     this.isAccessible = false;
     this.wildcardPath_ = undefined;
     this.lastSureValuePath_ = undefined;
-    this.addedByAPI_ = apiAdded;
   }
 
   setValue(isInit: boolean, newValue: T): boolean {
@@ -144,10 +141,6 @@ class MonitorValueV2<T> {
     return this.wildCard_;
   }
 
-  isLastSureValue(): boolean {
-    return this.wildcardPath_ !== undefined;
-  }
-
   getWildcardPath(): MonitorValueV2<T> | undefined {
     return this.wildcardPath_;
   }
@@ -162,16 +155,6 @@ class MonitorValueV2<T> {
 
   setLastSureValuePath(path: MonitorValueV2<T> | undefined): void {
     this.lastSureValuePath_ = path;
-  }
-
-  isAddedByAPi(): boolean {
-    return this.addedByAPI_;
-  }
-  clearAddedByAPI() {
-    this.addedByAPI_ = false;
-  }
-  setAddedByAPI() {
-    this.addedByAPI_ = true;
   }
 }
 
@@ -207,30 +190,33 @@ class MonitorV2 {
   private monitorFunction: (m: IMonitor) => void;
   private watchId_: number; // unique id, similar to elmtId but identifies this object
   private isSync_: boolean = false;
-  private isDecorator_: boolean = true;
+  private isMonitorDecorator_: boolean = true;
+  private isSyncMonitorDecorator_: boolean = false;
 
   constructor(target: object, pathsString: string, func: (m: IMonitor) => void, isDecorator: boolean, isSync: boolean = false) {
     this.target_ = target;
     this.monitorFunction = func;
-    this.isDecorator_ = isDecorator;
+    this.isMonitorDecorator_ = isDecorator && !isSync;
+    this.isSyncMonitorDecorator_ = isDecorator && isSync;
     this.isSync_ = isSync;
     // split space separated array of paths
     let paths = pathsString.split(/\s+/g);
 
-    if (this.isDecorator_) {
+    if (this.isMonitorDecorator_) {
       this.watchId_ = ++MonitorV2.nextWatchId_;
       paths.forEach(path => {
         if (!MonitorPathHelper.isValidForMonitorDecorator(path)) {
           stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
-          throw new Error(`AddMonitor/@SyncMonitor - not a valid path string  '${path}'`);
+          return;
         }
-        this.values_.set(path, new MonitorValueV2<unknown>(path, true));
+        this.values_.set(path, new MonitorValueV2<unknown>(path));
       });
       this.monitorFunction = func;
     } else {
+      // SyncMonitor and addMonitor
       this.watchId_ = this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_;
       paths.forEach(path => {
-        this.addPath(path, true);
+        this.addPath(path);
       });
     }
   }
@@ -244,30 +230,24 @@ class MonitorV2 {
   }
 
   // path - path to monitored value separated with dots
-  // apiAdded:
-  //    true if monitor added by AddMonitor call or vai @SyncMonitor decarator
-  //    false if monitor path is injected as LSV path before wildcard
   // @Monitor does not use addPath method
-  public addPath(path: string, apiAdded: boolean): MonitorValueV2<unknown> {
-    console.error("### addPath: " + path + " api: " + apiAdded);
-    if (!MonitorPathHelper.isValid(path)) {
+  public addPath(path: string): MonitorValueV2<unknown> | undefined {
+    console.error("### addPath: " + path);
+    if ((!this.isSyncDecorator() && !MonitorPathHelper.isValidForMonitorDecorator(path)) ||
+      (this.isSyncDecorator() && !MonitorPathHelper.isValid(path))) {
       stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
-      throw new Error(`AddMonitor/@SyncMonitor - not a valid path string  '${path}'`);
+      return undefined;
     }
     if (this.values_.has(path)) {
       stateMgmtConsole.applicationError(`AddMonitor ${this.getMonitorFuncName()} failed when adding path ${path} because duplicate key`);
       let monitorPath = this.values_.get(path)!;
-      if (apiAdded) {
-        console.error("### addPath: PATH EXISTS setting apiAdded to true");
-        monitorPath.setAddedByAPI();
-      }
       console.error("### addPath: PATH EXISTS, return");
       return monitorPath;
     }
-    let monitorValue = new MonitorValueV2<unknown>(path, apiAdded, this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_)
-    if (apiAdded && MonitorPathHelper.hasWildcardEnding(path)) { // check for this.isSync_ to restrict for sync paths
-      let lastSureValuePath = this.addPath(MonitorPathHelper.pathBeforeWildcard(path), false);
-      lastSureValuePath.setWildcardPath(monitorValue);
+    let monitorValue = new MonitorValueV2<unknown>(path, this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_)
+    if (this.isSyncDecorator() && MonitorPathHelper.hasWildcardEnding(path)) {
+      let lastSureValuePath = this.addPath(MonitorPathHelper.pathBeforeWildcard(path));
+      lastSureValuePath?.setWildcardPath(monitorValue);
       monitorValue.setLastSureValuePath(lastSureValuePath);
     }
     // Add wildcard path after last sure value path
@@ -277,57 +257,24 @@ class MonitorV2 {
     return monitorValue;
   }
 
-  // lastSurePath === true if we want to remove injected path to last sure value
-  private doRemovePath(monitorValue: MonitorValueV2<unknown> | undefined, lastSurePath: boolean): boolean {
-    if(monitorValue === undefined) {
-      return false;
-    }
-
-    console.log("### doRemovePath, start: " + monitorValue.path + " LSV " + monitorValue.isLastSureValue() + " API " + monitorValue.isAddedByAPi());
-
-    if (monitorValue.isLastSureValue() && monitorValue.isAddedByAPi())
-    {
-      if (lastSurePath) {
-        console.log("### doRemovePath - clear setWildcardPath");
-        // LSV path has a wildcardPath set, mark path as a non LSV path anymore
-        monitorValue.setWildcardPath(undefined);
-      } else {
-        console.log("### doRemovePath - clear clearAddedByAPI");
-        monitorValue.clearAddedByAPI();
-      }
-      return false;
-    }
-
-    if (!lastSurePath && !monitorValue.isAddedByAPi()) {
-      console.log("### doRemovePath - !lastSurePath && !monitorValue.isAddedByAPi(), return");
-      return false;
-    }
-
-    if (lastSurePath && !monitorValue.isLastSureValue()) {
-      console.log("### doRemovePath - lastSurePath && !monitorValue.isLastSureValue(), return");
-      return false;
-    }
-
-    console.log("### doRemovePath, removing " + monitorValue.path);
-    const path = monitorValue.path;
-    // In case wildcard path was added with AddMonitor API call
-    if (monitorValue.isAddedByAPi() && monitorValue.isWildcard()) { // check this.isSync_ to restrict to sync only
-      this.doRemovePath(monitorValue.getLastSureValuePath(), true);
-    }
-    if (!(this.target_ instanceof PUV2ViewBase)) {
-      WeakRefPool.clearMonitorId(this.target_, monitorValue.id);
-    }
-    ObserveV2.getObserve().clearBinding(monitorValue.id);
-    delete ObserveV2.getObserve().id2Others_[monitorValue.id];
-    this.values_.delete(path);
-    console.log("### doRemovePath, end " + monitorValue.path);
-    return true;
-  }
-
   public removePath(path: string): boolean {
     console.log("### removePath: " + path);
     const monitorValue = this.values_.get(path);
-    return this.doRemovePath(monitorValue, false);
+    if (monitorValue) {
+      if (!(this.target_ instanceof PUV2ViewBase)) {
+        WeakRefPool.clearMonitorId(this.target_, monitorValue.id);
+      }
+      ObserveV2.getObserve().clearBinding(monitorValue.id);
+      delete ObserveV2.getObserve().id2Others_[monitorValue.id];
+      this.values_.delete(path);
+      return true;
+    }
+    return false;
+  }
+
+  // Returns true for @SyncMonitor
+  public isSyncDecorator(): boolean {
+    return this.isSyncMonitorDecorator_;
   }
 
   public getWatchId(): number {
@@ -374,7 +321,7 @@ class MonitorV2 {
 
   InitRun(): MonitorV2 {
     // if @Monitor, run the bindRun which is the same logic as before
-    if (this.isDecorator_) {
+    if (this.isMonitorDecorator_) {
       this.bindRun(true);
       return this;
     }
@@ -438,7 +385,7 @@ class MonitorV2 {
   private recordDependenciesForProp(monitoredValue: MonitorValueV2<unknown>, initRun = false): boolean {
     let success: boolean = false;
     let value = undefined;
-    if (monitoredValue.isWildcard()) { // use this.isSync_ or check for apiAdded
+    if (this.isSyncDecorator() && monitoredValue.isWildcard()) {
       let sureValue = monitoredValue.getLastSureValuePath()?.now
       if (sureValue === undefined && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
         // For single top level wildcard

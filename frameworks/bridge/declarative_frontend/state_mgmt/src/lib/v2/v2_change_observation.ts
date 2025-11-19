@@ -1127,14 +1127,14 @@ class ObserveV2 {
       Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
         if (monitorFunc && pathString && typeof monitorFunc === 'function') {
             this.AddMonitorPath(owningObject, pathString,
-                monitorFunc as MonitorCallback, {isSynchronous: true});
+                monitorFunc as MonitorCallback, {isSynchronous: true}, true);
         }
       });
       delete owningObject[watchProp];
     }
   }
 
-  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions): void {
+  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions, decorator: boolean = false): void {
     const funcName = monitorFunc.name;
     const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
     let monitor = refs[funcName] as MonitorV2;
@@ -1142,18 +1142,22 @@ class ObserveV2 {
     const isSync: boolean = options ? options.isSynchronous : false;
     const paths = Array.isArray(path) ? path : [path];
     if (monitor && monitor instanceof MonitorV2) {
+      if (monitor.isSyncDecorator()) {
+        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSyncDecorator()? `SyncMonitor`: `API added Monitor`}, cannot change to ${decorator? `SyncMonitor`: `API added Monitor`} anymore`);
+        return;
+      }
       if (isSync !== monitor.isSync()) {
         stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSync()? `sync`: `async`}, cannot change to ${isSync? `sync`: `async`} anymore`);
         return;
       }
       paths.forEach(path => {
-        monitor.addPath(path, true);
+        monitor.addPath(path);
       });
       monitor.InitRun();
       return;
     }
 
-    monitor = new MonitorV2(target, pathsUniqueString, monitorFunc, false, isSync);
+    monitor = new MonitorV2(target, pathsUniqueString, monitorFunc, decorator, isSync);
     monitor.InitRun();
     // store a reference inside target
     // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2 to prevent the MonitorV2 is GC
@@ -1173,6 +1177,11 @@ class ObserveV2 {
       const funcName = monitorFunc.name;
       let monitor = refs[funcName];
       if (monitor && monitor instanceof MonitorV2) {
+        if(monitor.isSyncDecorator()) {
+          stateMgmtConsole.applicationError(
+            `cannot clear path ${paths} of ${funcName} for '@SyncMonitor'`);
+          return;
+        }
         paths.forEach(item => {
           if (!monitor.removePath(item)) {
             stateMgmtConsole.applicationError(
@@ -1194,6 +1203,9 @@ class ObserveV2 {
     paths.forEach(item => {
       let res = false;
       monitors.forEach(monitor => {
+        if (monitor.isSyncDecorator()) {
+          return;
+        }
         if (monitor.removePath(item)) {
           res = true;
         }
