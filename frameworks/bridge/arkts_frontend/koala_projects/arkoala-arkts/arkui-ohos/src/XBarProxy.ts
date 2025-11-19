@@ -40,7 +40,10 @@ export class XBarProxy {
     // static titleBarComponentMap: Map<KLong, CustomComponent> = new Map();
     static initializeXBarProxy(): void {
         InteropNativeModule._NativeLog(`[createXBarCustomComponent]initializeXBarProxy`)
-        ArkUIAniModule._XBar_Set_ComponentCreateFunc(createXBarCustomComponent)
+        const createFunc = (xbarType: int32, instanceID: int32): KLong => {
+            return createXBarCustomComponent(xbarType, instanceID);
+        };
+        ArkUIAniModule._XBar_Set_ComponentCreateFunc(createFunc)
     }
 
     public static CallNative(xBarType: int32, callType: string, message: string): void {

@@ -349,16 +349,29 @@ export function registerCreateStaticObservedCallback(): void {
     registerCallback.invoke(makeObservedcallback);
 }
 
+
+export function compatibleStaticComponentForInterop(
+    factory: () => Object,
+    options?: () => Object,
+    content?: () => void
+): [() => void, number] {
+    return compatibleStaticComponent<never, never>(
+        factory as () => never,
+        options as (() => never) | undefined,
+        content
+    );
+}
+
 export function registerCompatibleStaticComponentCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
-    registerCallback.invoke(compatibleStaticComponent);
+    registerCallback.invoke(compatibleStaticComponentForInterop);
 }
 
 export function registerMakeBuilderParameterStaticProxy(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerMakeBuilderParameterStaticProxy');
-    registerCallback.invoke(makeBuilderParameterStaticProxy);
+    registerCallback.invoke(makeBuilderParameterStaticProxyForInterop);
 }
 
 export function registerTransferCompatibleBuilderCallback(): void {
@@ -556,6 +569,14 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
 function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: T, sourceGetter: Any): T {
     const result = proxy.Proxy.create(value, new InteropBuilderLiteralProxyHandler<T>(sourceGetter));
     return result;
+}
+
+function makeBuilderParameterStaticProxyForInterop(
+    name: string,
+    value: Any,
+    sourceGetter: Any
+): Any {
+    return makeBuilderParameterStaticProxy(name, value, sourceGetter);
 }
 
 /**
@@ -1058,18 +1079,18 @@ export function registerCreateCompatibleStaticState(): void {
     registerCallback.invoke(createCompatibleStaticState);
 }
 
-function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVariable<T> {
+function createCompatibleStaticState(dynamicValue: Object): IStateDecoratedVariable<Any> {
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
-        const stateVar = new StateDecoratedVariable<T>(undefined, 'proxy', uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as T);
+        const stateVar = new StateDecoratedVariable<Any>(undefined, 'proxy', uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as Any);
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
-        const setProxyValue = ((newVal: T): void => {
+        const setProxyValue = ((newVal: Any): void => {
             value.invokeMethod('set', ESValue.wrap(newVal));
         });
         stateVar.setProxyValue = setProxyValue;
         const global = ESValue.getGlobal();
-        const setSource = ((newVal: T): void => {
+        const setSource = ((newVal: Any): void => {
             stateVar.set(newVal);
         });
         const fireChange = (): void => {
@@ -1084,6 +1105,6 @@ function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVa
         return stateVar;
     }
     else {
-        return getProxy as IStateDecoratedVariable<T>
+        return getProxy as IStateDecoratedVariable<Any>
     }
 }
