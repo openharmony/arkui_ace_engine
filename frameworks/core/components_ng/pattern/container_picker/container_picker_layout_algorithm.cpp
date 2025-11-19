@@ -60,6 +60,7 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MeasureWidth(layoutWrapper, contentIdealSize);
     HandleAspectRatio(layoutWrapper, contentIdealSize);
+    SetPatternHeight(layoutWrapper);
     HandleOffScreenItems(layoutWrapper);
 
     const auto& padding = pickerLayoutProperty->CreatePaddingAndBorder();
@@ -237,15 +238,34 @@ void ContainerPickerLayoutAlgorithm::SetPatternContentMainSize(LayoutWrapper* la
     pickerPattern->SetContentMainSize(contentMainSize_);
 }
 
+void ContainerPickerLayoutAlgorithm::SetPatternHeight(LayoutWrapper* layoutWrapper)
+{
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pickerPattern = hostNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetHeightFromAlgo(height_);
+}
+
+float ContainerPickerLayoutAlgorithm::GetPatternHeight(LayoutWrapper* layoutWrapper)
+{
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, height_);
+    auto pickerPattern = hostNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, height_);
+    return pickerPattern->GetHeightFromAlgo();
+}
+
 void ContainerPickerLayoutAlgorithm::MeasurePickerItems(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
     float startPos = middleItemStartPos_;
     float endPos = middleItemEndPos_;
     if (!itemPosition_.empty()) {
+        auto prevHeight = GetPatternHeight(layoutWrapper);
         auto middleItem =
-            ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, prevHeight_, totalItemCount_, isLoop_);
-        currentOffsetFromMiddle_ = (middleItem.second.startPos + middleItem.second.endPos - prevHeight_) / HALF;
+            ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, prevHeight, totalItemCount_, isLoop_);
+        currentOffsetFromMiddle_ = (middleItem.second.startPos + middleItem.second.endPos - prevHeight) / HALF;
         middleIndexInVisibleWindow_ = middleItem.first;
         startPos += currentOffsetFromMiddle_;
         endPos += currentOffsetFromMiddle_;

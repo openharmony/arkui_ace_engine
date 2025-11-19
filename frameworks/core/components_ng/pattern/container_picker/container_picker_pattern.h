@@ -78,6 +78,16 @@ public:
         return MakeRefPtr<ContainerPickerEventHub>();
     }
 
+    void SetHeightFromAlgo(float height)
+    {
+        height_ = height;
+    }
+
+    float GetHeightFromAlgo()
+    {
+        return height_;
+    }
+
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
