@@ -30,10 +30,12 @@ using CreateFunc = UIContent* (*)(void*, void*, int32_t);
 using CreateFunction = UIContent* (*)(void*);
 using GetUIContentFunc = UIContent* (*)(int32_t);
 using GetCurrentUIStackInfoFunction = char* (*)();
+using  GetWindowIdFuction = int32_t (*)(int32_t);
 constexpr char UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateUIContent";
 constexpr char Card_CREATE_FUNC[] = "OHOS_ACE_CreateFormContent";
 constexpr char SUB_WINDOW_UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateSubWindowUIContent";
 constexpr char GET_UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_GetUIContent";
+constexpr char OHOS_ACE_GET_UI_CONTENT_WINDOW_ID[] = "OHOS_ACE_GetUIContentWindowID";
 
 OHOS::AbilityRuntime::Context* context_ = nullptr;
 
@@ -155,6 +157,21 @@ UIContent* UIContent::GetUIContent(int32_t instanceId)
 
     auto content = entry(instanceId);
     return content;
+}
+
+int32_t UIContent::GetUIContentWindowID(int32_t instanceId)
+{
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    if (handle == nullptr) {
+        return -1;
+    }
+    auto entry = reinterpret_cast<GetWindowIdFuction>(LOADSYM(handle, OHOS_ACE_GET_UI_CONTENT_WINDOW_ID));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return -1;
+    }
+    auto windowId = entry(instanceId);
+    return windowId;
 }
 
 std::string UIContent::GetCurrentUIStackInfo()

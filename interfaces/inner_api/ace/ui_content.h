@@ -132,7 +132,7 @@ public:
     static UIContent* GetUIContent(int32_t instanceId);
     static std::string GetCurrentUIStackInfo();
     static std::unique_ptr<UIContent> CreateWithAniEnv(OHOS::AbilityRuntime::Context* context, ani_env* env);
-
+    static int32_t GetUIContentWindowID(int32_t instanceId);
     virtual ~UIContent() = default;
 
     // UI content life-cycles

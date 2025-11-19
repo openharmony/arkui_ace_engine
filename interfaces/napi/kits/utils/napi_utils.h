@@ -120,6 +120,7 @@ bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& styl
 bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy);
 bool HasGetter(napi_env env, napi_value value, const std::string& key);
 int32_t GetStringFormatStartIndex(bool hasGetter);
+int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

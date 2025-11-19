@@ -124,18 +124,6 @@ bool IsUIAbilityContext(napi_env env, napi_value context)
     return false;
 }
 
-int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext)
-{
-    int32_t result = 0;
-    if (IsUIAbilityContext(env, uiContext)) {
-        return result;
-    }
-    napi_value instanceId = nullptr;
-    napi_get_named_property(env, uiContext, "instanceId_", &instanceId);
-    napi_get_value_int32(env, instanceId, &result);
-    return result;
-}
-
 bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)
 {
     napi_valuetype valueType = napi_undefined;
