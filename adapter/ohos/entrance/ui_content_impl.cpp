@@ -3633,9 +3633,6 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     const RefPtr<Platform::AceContainer>& container)
 {
     CHECK_NULL_VOID(info);
-    if (reason != OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-        return;
-    }
     auto rect = info->rect_;
     Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetKeyboardInfo(pipelineContext, keyboardRect.Height());
@@ -3860,19 +3857,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
-            pipelineContext, info, container] {
-                if (avoidAreas.empty() && !info) {
+        if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
+            KeyboardAvoid(reason, instanceId_, pipelineContext, info, container);
+        }
+        taskExecutor->PostTask([context, config, avoidAreas] {
+                if (avoidAreas.empty()) {
                     return;
                 }
                 if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
                     context->AnimateOnSafeAreaUpdate();
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
-                if (pipelineContext) {
-                    TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in advance");
-                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
-                }
             },
             TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
@@ -3943,7 +3938,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
         viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
-        if (pipelineContext) {
+        if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
             TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
             KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
         }
