@@ -22360,7 +22360,7 @@ export class PopupOptions_serializer {
         return value
     }
 }
-export interface AccessibilityHoverEvent {
+export interface AccessibilityHoverEvent extends BaseEvent {
     type: AccessibilityHoverType
     x: double
     y: double
@@ -22534,7 +22534,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
 }
-export interface AxisEvent {
+export interface AxisEvent extends BaseEvent {
     action: AxisAction
     displayX: double
     displayY: double
@@ -22780,7 +22780,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
 }
-export interface ClickEvent {
+export interface ClickEvent extends BaseEvent {
     displayX: double
     displayY: double
     windowX: double
@@ -22979,7 +22979,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_preventDefault(this.peer!.ptr)
     }
 }
-export interface FocusAxisEvent {
+export interface FocusAxisEvent extends BaseEvent {
     axisMap: Map<AxisModel, double>
     stopPropagation(): void
 }
@@ -23048,7 +23048,7 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         ArkUIGeneratedNativeModule._FocusAxisEvent_stopPropagation(this.peer!.ptr)
     }
 }
-export interface HoverEvent {
+export interface HoverEvent extends BaseEvent {
     x?: double | undefined
     y?: double | undefined
     windowX?: double | undefined
@@ -23310,7 +23310,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._HoverEvent_stopPropagation(this.peer!.ptr)
     }
 }
-export interface MouseEvent {
+export interface MouseEvent extends BaseEvent {
     button: MouseButton
     action: MouseAction
     displayX: double
@@ -23678,7 +23678,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
 }
-export interface TouchEvent {
+export interface TouchEvent extends BaseEvent {
     type: TouchType
     touches: Array<TouchObject>
     changedTouches: Array<TouchObject>
