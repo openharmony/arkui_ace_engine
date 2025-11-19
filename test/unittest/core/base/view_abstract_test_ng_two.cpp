@@ -120,7 +120,7 @@ HWTEST_F(ViewAbstractTestNg, BindMenuTest001, TestSize.Level1)
 HWTEST_F(ViewAbstractTestNg, SetResponseRegionListWithMap001, TestSize.Level1)
 {
     std::vector<ResponseRegion> regionNotRect;
-    ViewAbstract::SetResponseRegionList(std::move(regionNotRect));
+    ViewAbstract::SetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(regionNotRect));
     auto regionMapResult = ViewAbstract::GetResponseRegionList(AceType::RawPtr(FRAME_NODE_REGISTER));
     EXPECT_EQ(regionMapResult.size(), 1);
 
