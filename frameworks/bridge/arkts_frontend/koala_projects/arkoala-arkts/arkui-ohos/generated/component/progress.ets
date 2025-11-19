@@ -194,6 +194,7 @@ export interface LinearStyleOptions extends ScanEffectOptions, CommonProgressSty
 export interface CapsuleStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     borderColor?: ResourceColor;
     borderWidth?: Length;
+    content?: string;
     font?: Font;
     fontColor?: ResourceColor;
     showDefaultPercentage?: boolean;
@@ -772,6 +773,14 @@ export class CapsuleStyleOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForContent  = value.content
+        if (valueHolderForContent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForContentTmpValue  = valueHolderForContent!
+            valueSerializer.writeString(valueHolderForContentTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForFont  = value.font
         if (valueHolderForFont !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -865,6 +874,12 @@ export class CapsuleStyleOptions_serializer {
             borderWidthTmpBuf = (borderWidthTmpBuf_ as string | number | Resource)
         }
         const borderWidthTmpResult : Length | undefined = borderWidthTmpBuf
+        const contentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let contentTmpBuf : string | undefined = undefined
+        if ((contentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            contentTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const contentTmpResult : string | undefined = contentTmpBuf
         const fontTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontTmpBuf : Font | undefined = undefined
         if ((fontTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -902,7 +917,7 @@ export class CapsuleStyleOptions_serializer {
             borderRadiusTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const borderRadiusTmpResult : LengthMetrics | undefined = borderRadiusTmpBuf
-        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)
+        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, content: contentTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)
         return value
     }
 }

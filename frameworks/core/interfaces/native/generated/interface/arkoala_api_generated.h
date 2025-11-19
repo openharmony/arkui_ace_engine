@@ -20200,6 +20200,7 @@ typedef struct Ark_CapsuleStyleOptions {
     Opt_Boolean enableScanEffect;
     Opt_ResourceColor borderColor;
     Opt_Length borderWidth;
+    Opt_String content;
     Opt_Font font;
     Opt_ResourceColor fontColor;
     Opt_Boolean showDefaultPercentage;
