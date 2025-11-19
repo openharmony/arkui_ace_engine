@@ -81,7 +81,7 @@ export class ParallelNode<T> {
                     try {
                         const frozen = this.manager!.frozen
                         this.manager!.frozen = true
-                        memoEntry1<T, void>(context, 0, builder, this._args!)
+                        memoEntry1<T, void>(context, 0, builder, this._args as T)
                         this.manager!.frozen = frozen
                     } catch (err: Error) {
                         console.error('parallel run in taskpool error :', err)
@@ -156,7 +156,7 @@ export class ParallelNode<T> {
                     try {
                         const frozen = this.manager!.frozen
                         this.manager!.frozen = true
-                        memoEntry<void>(context, 0, () => { content_(this._args!) })
+                        memoEntry<void>(context, 0, () => { content_(this._args as T) })
                         this.manager!.frozen = frozen
                     } catch (err: Error) {
                         console.error('parallel run in taskpool error :', err)
