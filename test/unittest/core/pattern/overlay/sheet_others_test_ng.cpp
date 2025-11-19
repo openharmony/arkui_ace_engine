@@ -1158,8 +1158,10 @@ HWTEST_F(SheetOthersTestNg, BuildTitleColumn006, TestSize.Level1)
 HWTEST_F(SheetOthersTestNg, GetOverlayFromPage001, TestSize.Level1)
 {
     SheetOthersTestNg::SetUpTestCase();
-
-    auto overlayManager = SheetManager::GetOverlayFromPage(-1, RootNodeType::PAGE_ETS_TAG);
+    auto target = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto overlayManager = SheetManager::GetOverlayFromPage(-1, RootNodeType::PAGE_ETS_TAG, target);
     EXPECT_EQ(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
@@ -1178,8 +1180,10 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage002, TestSize.Level1)
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     auto sheetPattern = sheetNode->GetPattern<PagePattern>();
     sheetPattern->CreateOverlayManager(true);
-
-    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::PAGE_ETS_TAG);
+    auto target = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::PAGE_ETS_TAG, target);
     EXPECT_NE(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
@@ -1199,8 +1203,11 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage003, TestSize.Level1)
         rootNodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationPattern->CreateOverlayManager(true);
-
-    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
+    auto target = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto overlayManager =
+        SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::NAVDESTINATION_VIEW_ETS_TAG, target);
     EXPECT_NE(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
@@ -1220,8 +1227,10 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage004, TestSize.Level1)
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     auto windowScenePattern = windowSceneNode->GetPattern<PagePattern>();
     windowScenePattern->CreateOverlayManager(true);
-
-    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::WINDOW_SCENE_ETS_TAG);
+    auto target = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::WINDOW_SCENE_ETS_TAG, target);
     EXPECT_EQ(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
