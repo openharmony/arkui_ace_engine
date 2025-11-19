@@ -3862,9 +3862,6 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             KeyboardAvoid(reason, instanceId_, pipelineContext, info, container);
         }
         taskExecutor->PostTask([context, config, avoidAreas] {
-                if (avoidAreas.empty()) {
-                    return;
-                }
                 if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
                     context->AnimateOnSafeAreaUpdate();
                 }
@@ -3966,9 +3963,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             viewportConfigMgr_->CancelUselessTaskLocked();
             viewportConfigMgr_->CancelAllPromiseTaskLocked();
         }
-    } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
+    } else if (rsTransaction != nullptr) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
-        // When avoidAreas need updating, the task shouldn't be cancelled.
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container, taskId,
             "ArkUIPromiseViewportConfig");
     } else {
