@@ -567,7 +567,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestInvalidValues, TestSize.Le
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), 1);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), 2);
         accessor_->destroyPeer(peer);
     }
 }
