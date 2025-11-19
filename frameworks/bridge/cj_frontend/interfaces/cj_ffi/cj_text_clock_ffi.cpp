@@ -217,6 +217,17 @@ void FfiOHOSAceFrameworkTextClockTextColor(uint32_t color)
     TextClockModel::GetInstance()->SetTextColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkTextClockResetTextColor()
+{
+    Color textColor;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    textColor = theme->GetTextStyle().GetTextColor();
+    TextClockModel::GetInstance()->SetTextColor(textColor);
+}
+
 void FfiOHOSAceFrameworkTextClockFontSize(double size, int32_t unit)
 {
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));

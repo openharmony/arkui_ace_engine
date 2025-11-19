@@ -26,6 +26,7 @@ using namespace OHOS::Ace::Framework;
 namespace {
 constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
@@ -126,6 +127,21 @@ void FfiOHOSAceFrameworkSideBarShowControlButton(bool isShow)
 {
     SideBarContainerModel::GetInstance()->SetShowControlButton(isShow);
 }
+
+void FfiOHOSAceFrameworkSideBarResetControlButton()
+{
+    SideBarContainerModel::GetInstance()->SetControlButtonWidth(DEFAULT_CONTROL_BUTTON_WIDTH);
+    SideBarContainerModel::GetInstance()->SetControlButtonHeight(DEFAULT_CONTROL_BUTTON_HEIGHT);
+    SideBarContainerModel::GetInstance()->ResetControlButtonLeft();
+    SideBarContainerModel::GetInstance()->SetControlButtonTop(DEFAULT_CONTROL_BUTTON_TOP);
+    SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+}
+
+void FfiOHOSAceFrameworkSideBarResetControlButtonIcons()
+{
+    SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+}
+
 void FfiOHOSAceFrameworkSideBarOnChange(void (*callback)(bool isShow))
 {
     auto onChange = [ffiCallback = CJLambda::Create(callback)](bool isShow) { ffiCallback(isShow); };

@@ -31,7 +31,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkToggleSize(double width, int32_t widthUnit, do
 CJ_EXPORT void FfiOHOSAceFrameworkTogglePadding(double left, int32_t leftUnit, double top, int32_t topUnit,
     double right, int32_t rightUnit, double bottom, int32_t bottomUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkToggleSelectedColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkToggleResetSelectedColor();
 CJ_EXPORT void FfiOHOSAceFrameworkToggleSwitchPointColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkToggleResetSwitchPointColor();
 CJ_EXPORT void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn));
 CJ_EXPORT void FfiOHOSAceFrameworkTogglePop();
 CJ_EXPORT void FfiToggleSetResponseRegion(CJResponseRegion value);

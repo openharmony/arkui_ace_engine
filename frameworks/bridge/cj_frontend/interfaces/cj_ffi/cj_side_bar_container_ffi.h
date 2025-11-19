@@ -50,6 +50,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkSideBarCreate(int32_t type);
 CJ_EXPORT void FfiOHOSAceFrameworkSideBarShowSideBar(bool isShow);
 CJ_EXPORT void FfiOHOSAceFrameworkSideBarControlButton(CJSideBarButtonStyle style);
 CJ_EXPORT void FfiOHOSAceFrameworkSideBarShowControlButton(bool isShow);
+CJ_EXPORT void FfiOHOSAceFrameworkSideBarResetControlButton();
+CJ_EXPORT void FfiOHOSAceFrameworkSideBarResetControlButtonIcons();
 CJ_EXPORT void FfiOHOSAceFrameworkSideBarOnChange(void (*callback)(bool isShow));
 CJ_EXPORT void FfiOHOSAceFrameworkSideBarSideBarWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkSideBarMinSideBarWidth(double width, int32_t unit);

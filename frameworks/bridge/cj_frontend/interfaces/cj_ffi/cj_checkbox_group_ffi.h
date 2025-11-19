@@ -32,6 +32,7 @@ struct FFiCheckboxGroupResult {
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupCreate(const char* name);
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSelectAll(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetSelectedColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupResetSelectedColor();
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetWidth(double width, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetHeight(double height, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxGroupSetSize(

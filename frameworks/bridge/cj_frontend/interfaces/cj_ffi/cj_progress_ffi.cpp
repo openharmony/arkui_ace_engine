@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_progress_ffi.h"
 
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components/progress/progress_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::NG;
@@ -64,9 +65,55 @@ void FfiOHOSAceFrameworkProgressSetColor(uint32_t color)
     ProgressModel::GetInstance()->SetColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkProgressResetColor(int32_t type)
+{
+    if (!Utils::CheckParamsValid(type, PROGRESS_TYPES.size())) {
+        LOGE("invalid value for progress type");
+        return;
+    }
+    Color colorVal;
+    NG::Gradient gradient;
+    bool gradientColorByUser = true;
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    Color endColor;
+    Color beginColor;
+    colorVal = (PROGRESS_TYPES[type] == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
+                                                               : theme->GetTrackSelectedColor();
+
+    endColor = theme->GetRingProgressEndSideColor();
+    beginColor = theme->GetRingProgressBeginSideColor();
+    gradientColorByUser = false;
+    NG::GradientColor endSideColor;
+    NG::GradientColor beginSideColor;
+    endSideColor.SetLinearColor(LinearColor(endColor));
+    endSideColor.SetDimension(Dimension(0.0f));
+    beginSideColor.SetLinearColor(LinearColor(beginColor));
+    beginSideColor.SetDimension(Dimension(1.0f));
+    gradient.AddColor(endSideColor);
+    gradient.AddColor(beginSideColor);
+    ProgressModel::GetInstance()->SetGradientColor(gradient);
+    ProgressModel::GetInstance()->SetColor(colorVal);
+}
+
 void FfiOHOSAceFrameworkProgressSetBackgroundColor(uint32_t color)
 {
     ProgressModel::GetInstance()->SetBackgroundColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkProgressResetBackgroundColor(int32_t type)
+{
+    if (!Utils::CheckParamsValid(type, PROGRESS_TYPES.size())) {
+        LOGE("invalid value for progress type");
+        return;
+    }
+    Color colorVal;
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    colorVal = (PROGRESS_TYPES[type] == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
+               : (PROGRESS_TYPES[type] == ProgressType::RING)  ? theme->GetRingProgressBgColor()
+                                                               : theme->GetTrackBgColor();
+    ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
 }
 
 void FfiOHOSAceFrameworkProgressSetGradientColor(
