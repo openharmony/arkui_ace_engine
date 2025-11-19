@@ -48,6 +48,11 @@ public:
     void ReportSearchEvent(const std::string& data) override;
 
     /**
+     * @description: notify stub side to execute text change callback
+     */
+    void ReportTextChangeEvent(const std::string& data) override;
+
+    /**
      * @description: notify stub side to report inspector value
      */
     void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;

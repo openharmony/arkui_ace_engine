@@ -2090,6 +2090,7 @@ private:
     bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
     bool IsContentRectNonPositive();
     void ReportEvent();
+    void ReportTextChangeEvent(const std::string& eventType);
     void ResetPreviewTextState();
     void CalculateBoundsRect();
     TextFieldInfo GenerateTextFieldInfo();

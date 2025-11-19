@@ -1466,4 +1466,46 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level0
     EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
 }
 
+/**
+ * @tc.name: HandleStyledStringInsertion001
+ * @tc.desc: test HandleStyledStringInsertion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, HandleStyledStringInsertion001, TestSize.Level0)
+{
+    /**
+     * @tc.steps1: Initialize richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"qwer");
+
+    /**
+     * @tc.steps: step2. initialization parameter.
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"");
+    UndoRedoRecord record;
+    record.rangeBefore = TextRange { 0, 2 };
+    std::u16string subValue = u"handlestyledstringinsertiontest";
+    bool needReplaceInTextPreview = false;
+    bool shouldCommitInput = false;
+
+    /**
+     * @tc.steps: step2. initialization parameter.
+     */
+    richEditorPattern->textSelector_.Update(0, 0);
+
+    /**
+     * @tc.steps: step3. test HandleStyledStringInsertion.
+     */
+    richEditorPattern->HandleStyledStringInsertion(
+        spanString, record, subValue, needReplaceInTextPreview, shouldCommitInput);
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->previewLongPress_ = true;
+    ASSERT_EQ(richEditorPattern->BeforeStyledStringChange(0, 10, u""), true);
+    ASSERT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
+}
+
 } // namespace OHOS::Ace::NG

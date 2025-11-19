@@ -59,6 +59,11 @@ public:
     virtual void ReportSearchEvent(const std::string& data) {};
 
     /**
+     * @description: execute text change callback when component text change event occurs
+     */
+    virtual void ReportTextChangeEvent(const std::string& data) {};
+
+    /**
      * @description: execute switch callback when page switch to another page occurs
      */
     virtual void ReportRouterChangeEvent(const std::string& data) {};
@@ -106,6 +111,7 @@ public:
     virtual int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) { return 11; };
     virtual void SetClickEventRegistered(bool status) {};
     virtual void SetSearchEventRegistered(bool status) {};
+    virtual void SetTextChangeEventRegistered(bool status) {};
     virtual void OnRouterChange(const std::string& path, const std::string& event) {};
     virtual void SetRouterChangeEventRegistered(bool status) {};
     virtual void SetComponentChangeEventRegistered(bool status) {};
@@ -116,6 +122,10 @@ public:
         return false;
     };
     virtual bool GetSearchEventRegistered()
+    {
+        return false;
+    };
+    virtual bool GetTextChangeEventRegistered()
     {
         return false;
     };
@@ -177,6 +187,7 @@ protected:
     std::map<std::string, int32_t> processMap_;
     std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
     std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
