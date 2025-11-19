@@ -1131,12 +1131,19 @@ void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, dou
 {
     Dimension dOffsetX(offsetX, DimensionUnit::VP);
     Dimension dOffsetY(offsetY, DimensionUnit::VP);
-    if (LessOrEqual(radius, 0.0)) {
-        LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
-        return;
+    double radiusVal = radius;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        if (LessNotEqual(radius, 0.0)) {
+            radiusVal = 0.0;
+        }
+    } else {
+        if (LessOrEqual(radius, 0.0)) {
+            LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
+            return;
+        }
     }
     std::vector<Shadow> shadows(1);
-    shadows.begin()->SetBlurRadius(radius);
+    shadows.begin()->SetBlurRadius(radiusVal);
     shadows.begin()->SetOffsetX(dOffsetX.Value());
     shadows.begin()->SetOffsetY(dOffsetY.Value());
     shadows.begin()->SetColor(Color(color));
@@ -1694,7 +1701,7 @@ void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options)
             from = 0.0;
         }
         if (to > 1.0 || to < 0.0) {
-            from = 1.0;
+            to = 1.0;
         } else if (to < from) {
             to = from;
         }
