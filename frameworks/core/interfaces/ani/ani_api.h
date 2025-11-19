@@ -260,7 +260,7 @@ struct ArkUIDragControllerAsync {
     ArkUIDragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
-    OHOS::Ace::Ani::DragAction* dragAction = nullptr;
+    std::shared_ptr<OHOS::Ace::Ani::DragAction> dragAction = nullptr;
 };
 
 struct ArkUIPreviewStyle {

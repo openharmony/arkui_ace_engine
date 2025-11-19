@@ -226,7 +226,7 @@ static ani_object getRectangleById([[maybe_unused]] ani_env* env, ani_string id)
         .AddClass("@ohos.arkui.componentUtils.componentUtils.TranslateResult")
         .AddClass("@ohos.arkui.componentUtils.componentUtils.ScaleResult")
         .AddClass("@ohos.arkui.componentUtils.componentUtils.RotateResult")
-        .AddClass("std::core.Tuple16");
+        .AddClass("std.core.Tuple16");
     std::string signatureStr = signatureBuilder.BuildSignatureDescriptor();
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", signatureStr.c_str(), &ctor)) {
         return nullptr;

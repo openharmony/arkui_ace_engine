@@ -82,24 +82,16 @@ struct DragControllerAsyncCtx {
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
     std::optional<DimensionOffset> touchPoint;
-    DragAction *dragAction = nullptr;
+    std::shared_ptr<DragAction> dragAction = nullptr;
     NG::DragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
-    ~DragControllerAsyncCtx();
 };
 } // namespace
 void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx);
 void CreatePixelMapArrayByCustom(
     std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ArkUINodeHandle customBuilder, int arrayLength);
 ParameterType GetParameterType(std::shared_ptr<DragControllerAsyncCtx> asyncCtx);
-
-DragControllerAsyncCtx::~DragControllerAsyncCtx()
-{
-    if (!dragAction) {
-        dragAction = nullptr;
-    }
-}
 
 static bool CheckDragging(const RefPtr<Container>& container)
 {
