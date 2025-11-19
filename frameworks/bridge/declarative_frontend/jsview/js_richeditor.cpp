@@ -715,7 +715,13 @@ void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
     NG::FrameNode* contentNode = nullptr;
     bool isBuilder = true;
     if (JSTextField::ParseJsCustomKeyboardBuilder(args, 0, buildFunc, contentNode, isBuilder)) {
-        RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+        if (isBuilder) {
+            RichEditorModel::GetInstance()->SetCustomKeyboardWithNode(nullptr, supportAvoidance);
+            RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc), supportAvoidance);
+        } else {
+            RichEditorModel::GetInstance()->SetCustomKeyboard(nullptr, supportAvoidance);
+            RichEditorModel::GetInstance()->SetCustomKeyboardWithNode(contentNode, supportAvoidance);
+        }
     }
 }
 

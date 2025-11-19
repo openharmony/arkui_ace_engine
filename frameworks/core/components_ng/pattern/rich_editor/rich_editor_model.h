@@ -385,6 +385,7 @@ public:
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) = 0;
+    virtual void SetCustomKeyboardWithNode(NG::FrameNode* customKeyboard, bool supportAvoidance = false) {};
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) = 0;

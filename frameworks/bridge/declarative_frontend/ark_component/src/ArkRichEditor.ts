@@ -420,6 +420,20 @@ class RichEditorMaxLinesModifier extends ModifierWithKey<number | undefined> {
   }
 }
 
+class RichEditorCustomKeyboardModifier extends ModifierWithKey<ArkCustomKeyboard> {
+  constructor(value: ArkCustomKeyboard) {
+    super(value);
+  }
+  static identity = Symbol('richEditorCustomKeyboard');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().richEditor.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
+  }
+}
+
 class RichEditorOnDidIMEInputModifier extends ModifierWithKey<(value: TextRange) => void> {
   constructor(value: (value: TextRange) => void) {
     super(value);
@@ -580,8 +594,13 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute {
     throw new Error('Method not implemented.');
   }
-  customKeyboard(value: CustomBuilder): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+  customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): RichEditorAttribute {
+    let arkValue: ArkCustomKeyboard = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, RichEditorCustomKeyboardModifier.identity,
+      RichEditorCustomKeyboardModifier, arkValue);
+    return this;
   }
   onEditingChange(callback: (value: boolean) => void): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);

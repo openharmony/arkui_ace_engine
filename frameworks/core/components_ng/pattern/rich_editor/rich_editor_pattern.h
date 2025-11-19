@@ -56,6 +56,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/text/text_emoji_processor.h"
 
 #ifndef ACE_UNITTEST
@@ -670,7 +671,7 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         lastCaretPos_.reset();
         CHECK_NULL_VOID(HasFocus());
-        CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
+        CHECK_NULL_VOID(!((customKeyboardBuilder_ || customKeyboardNode_) && isCustomKeyboardAttached_));
 
         // lost focus in floating window mode
         auto windowMode = GetWindowMode();
@@ -916,6 +917,9 @@ public:
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
+    void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
+    void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
+    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
@@ -934,6 +938,7 @@ public:
         WindowSizeChangeReason type) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
+    void RequestCustomKeyboardBuilder();
     bool CloseCustomKeyboard();
     void UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt);
     const std::u16string& GetPasteStr() const
@@ -998,6 +1003,7 @@ public:
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
+    RefPtr<TextFieldManagerNG> GetTextFieldManager();
 
     RectF GetCaretRelativeRect();
     // Add for Scroll
@@ -1113,8 +1119,12 @@ public:
     Color GetSelectedBackgroundColor() const;
 
     void SetCustomKeyboardOption(bool supportAvoidance);
+    void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
     void StopEditing();
     void ResetKeyboardIfNeed();
+    void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
+    bool NeedCloseKeyboard() override;
+    void CloseTextCustomKeyboard(int32_t nodeId) override;
 
     void HandleOnEnter() override
     {
@@ -1450,6 +1460,7 @@ private:
     void HandleBlurEvent();
     void HandleFocusEvent(FocusReason focusReason = FocusReason::DEFAULT);
     void OnFocusNodeChange(FocusReason focusReason) override;
+    void OnFocusCustomKeyboardChange();
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
@@ -1934,6 +1945,7 @@ private:
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    RefPtr<UINode> customKeyboardNode_;
     LRUMap<uint64_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;

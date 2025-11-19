@@ -68,7 +68,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_utils.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 #include "core/text/html_utils.h"
 
@@ -3739,7 +3738,6 @@ void RichEditorPattern::HandleBlurEvent()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
         CloseSelectOverlay();
         ResetSelection();
-        CloseKeyboard(false);
     }
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
@@ -3767,6 +3765,7 @@ void RichEditorPattern::HandleBlurEvent()
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent frameId:%{public}d reason:%{public}d", frameId_, focusReason);
+    OnFocusCustomKeyboardChange();
     IF_TRUE(focusReason == FocusReason::WINDOW_FOCUS, ScheduleFirstClickResetAfterWindowFocus());
     blockKbInFloatingWindow_= false;
     UseHostToUpdateTextFieldManager();
@@ -3856,7 +3855,7 @@ void RichEditorPattern::UseHostToUpdateTextFieldManager()
 
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
-    if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+    if ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
         return CloseCustomKeyboard();
     }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Request close soft keyboard.");
@@ -5285,7 +5284,7 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
-    if (needShowSoftKeyboard && customKeyboardBuilder_) {
+    if (needShowSoftKeyboard && (customKeyboardNode_ || customKeyboardBuilder_)) {
         return RequestCustomKeyboard();
     }
 #if defined(ENABLE_STANDARD_INPUT)
@@ -5691,6 +5690,26 @@ void RichEditorPattern::UpdateCaretInfoToController()
 #endif
 }
 
+void RichEditorPattern::SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldManager = GetTextFieldManager();
+    CHECK_NULL_VOID(textFieldManager);
+    WeakPtr<FrameNode> weakNode = frameNode;
+    textFieldManager->SetPreNode(weakNode);
+    auto customKeyboardId = customKeyboardNode ? customKeyboardNode->GetId() : -1;
+    textFieldManager->SetCustomKeyboardId(customKeyboardId);
+}
+
+bool RichEditorPattern::GetCustomKeyboardIsMatched(int32_t customKeyboardId)
+{
+    auto textFieldManager = GetTextFieldManager();
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto id = textFieldManager->GetCustomKeyboardId();
+    return customKeyboardId == id;
+}
+
 bool RichEditorPattern::HasConnection() const
 {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -5703,6 +5722,31 @@ bool RichEditorPattern::HasConnection() const
 void RichEditorPattern::SetCustomKeyboardOption(bool supportAvoidance)
 {
     keyboardAvoidance_ = supportAvoidance;
+}
+
+void RichEditorPattern::SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)
+{
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (customKeyboardNode_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        // close customKeyboard and request system keyboard
+        CloseCustomKeyboard();
+        customKeyboardNode_ = keyboardBuilder; // refresh current keyboard
+        return;
+    }
+#endif
+    if (!customKeyboardNode_ && keyboardBuilder) {
+        // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        if (isEditing_) {
+            CloseKeyboard(true);
+            customKeyboardNode_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboard(false, true, true);
+            StartTwinkling();
+            return;
+        }
+#endif
+    }
+    customKeyboardNode_ = keyboardBuilder;
 }
 
 bool RichEditorPattern::RequestCustomKeyboard()
@@ -5728,7 +5772,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
     if (isCustomKeyboardAttached_) {
         return true;
     }
-    CHECK_NULL_RETURN(customKeyboardBuilder_, false);
+    CHECK_NULL_RETURN(customKeyboardNode_ || customKeyboardBuilder_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = frameNode->GetContext();
@@ -5741,13 +5785,30 @@ bool RichEditorPattern::RequestCustomKeyboard()
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
         textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
     }
-    overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+    RequestCustomKeyboardBuilder();
     isCustomKeyboardAttached_ = true;
     contentChange_ = false;
     keyboardOverlay_ = overlayManager;
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), caretHeight);
     return true;
+}
+
+void RichEditorPattern::RequestCustomKeyboardBuilder()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (customKeyboardBuilder_) {
+        SetCustomKeyboardNode(nullptr);
+        overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+    } else {
+        SetCustomKeyboardNode(customKeyboardNode_);
+        overlayManager->BindKeyboardWithNode(customKeyboardNode_, frameNode->GetId());
+    }
 }
 
 bool RichEditorPattern::CloseCustomKeyboard()
@@ -6839,6 +6900,13 @@ bool RichEditorPattern::OnBackPressed()
     CloseKeyboard(false);
     FocusHub::LostFocusToViewRoot();
     return isStopBackPress_;
+}
+
+RefPtr<TextFieldManagerNG> RichEditorPattern::GetTextFieldManager()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
 }
 
 void RichEditorPattern::SetInputMethodStatus(bool keyboardShown)
@@ -9497,7 +9565,11 @@ void RichEditorPattern::DumpInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
     if (customKeyboardBuilder_) {
-        dumpLog.AddDesc(std::string("CustomKeyboard, Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
+        dumpLog.AddDesc(std::string("CustomKeyboard is customBuilder, Attached: ")
+                            .append(std::to_string(isCustomKeyboardAttached_)));
+    } else if (customKeyboardNode_) {
+        dumpLog.AddDesc(std::string("CustomKeyboard is ComponentContent, Attached: ")
+                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -9945,7 +10017,7 @@ void RichEditorPattern::UpdateSelectMenuInfo(SelectMenuInfo& menuInfo)
     isSupportCameraInput =
         inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
 #endif
-    menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !customKeyboardBuilder_;
+    menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !(customKeyboardBuilder_ || customKeyboardNode_);
     if (textResponseType_.has_value()) {
         menuInfo.responseType = static_cast<int32_t>(textResponseType_.value());
     }
@@ -11342,6 +11414,55 @@ void RichEditorPattern::ResetKeyboardIfNeed()
         RequestKeyboard(false, true, true);
     }
 #endif
+}
+
+void RichEditorPattern::OnFocusCustomKeyboardChange()
+{
+    auto currentNode = GetHost();
+    CHECK_NULL_VOID(currentNode);
+    auto textFieldManager = GetTextFieldManager();
+    CHECK_NULL_VOID(textFieldManager);
+    if (!textFieldManager->NeedCloseKeyboard()) {
+        return;
+    }
+    if (customKeyboardNode_) {
+        bool matched = GetCustomKeyboardIsMatched(customKeyboardNode_->GetId());
+        textFieldManager->ProcessCustomKeyboard(matched, currentNode->GetId());
+        SetCustomKeyboardNode(customKeyboardNode_);
+        return;
+    }
+    textFieldManager->ProcessCustomKeyboard(false, currentNode->GetId());
+    SetCustomKeyboardNode(nullptr);
+}
+
+void RichEditorPattern::ProcessCustomKeyboard(bool matched, int32_t nodeId)
+{
+    auto preNode = GetHost();
+    CHECK_NULL_VOID(preNode);
+    if (!matched) {
+        CloseKeyboard(true);
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textfield %{public}d customKeyboard unmatched, close custom keyboard",
+            preNode->GetId());
+    } else if (nodeId != preNode->GetId()) {
+        isCustomKeyboardAttached_ = false;
+    }
+}
+
+bool RichEditorPattern::NeedCloseKeyboard()
+{
+    return (customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
+}
+
+void RichEditorPattern::CloseTextCustomKeyboard(int32_t nodeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "CloseTextCustomKeyboard hostId=%{public}d nodeId=%{public}d NeedCloseKeyboard=%{public}d", host->GetId(),
+        nodeId, NeedCloseKeyboard());
+    if (NeedCloseKeyboard() && nodeId != host->GetId()) {
+        CloseCustomKeyboard();
+    }
 }
 
 void RichEditorPattern::OnTextInputActionUpdate(TextInputAction value) {}
@@ -13261,7 +13382,7 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
 
 bool RichEditorPattern::IsTextEditableForStylus() const
 {
-    CHECK_NULL_RETURN(!customKeyboardBuilder_, false);
+    CHECK_NULL_RETURN(!(customKeyboardBuilder_ || customKeyboardNode_), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
@@ -13281,7 +13402,7 @@ bool RichEditorPattern::IsTextEditableForStylus() const
 
 void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    if (customKeyboardBuilder_) {
+    if (customKeyboardBuilder_ || customKeyboardNode_) {
         json->Put("CustomKeyboard, Attached", std::to_string(isCustomKeyboardAttached_).c_str());
     }
     auto host = GetHost();

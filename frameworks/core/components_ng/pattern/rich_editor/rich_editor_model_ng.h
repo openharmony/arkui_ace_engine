@@ -33,6 +33,7 @@ public:
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
     void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance) override;
+    void SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance = false) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(TextSpanType& editorType, TextResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
@@ -92,6 +93,10 @@ public:
     static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetCustomKeyboard(
+        FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
+    static void SetCustomKeyboardWithNode(
+        FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
     static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
