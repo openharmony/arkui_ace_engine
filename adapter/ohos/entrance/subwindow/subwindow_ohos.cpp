@@ -447,6 +447,7 @@ void SubwindowOhos::InitContainer()
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
+    //ArkTS1.2 need set subwindow vsyncListener because subwindow does not enter into ArktsFrontend::RunPage
     SetSubWindowVsyncListener(parentPipeline, container->GetPipelineContext());
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
