@@ -22792,6 +22792,7 @@ if (globalThis.Toggle !== undefined) {
 class ArkSelectComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+    this._menuItemMap = new Map();
   }
   allowChildCount() {
     return 0;
@@ -22903,7 +22904,11 @@ class ArkSelectComponent extends ArkComponent {
       getUINativeModule().select.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
-    this.builder = modifier.applyContent();
+    this.applyContent = modifier.applyContent();
+    if (this.builder !== this.applyContent) {
+      this._menuItemMap.clear();
+      this.builder = this.applyContent;
+    }
     this.modifier = modifier;
     getUINativeModule().select.setContentModifierBuilder(this.nativePtr, this);
   }
@@ -22911,9 +22916,13 @@ class ArkSelectComponent extends ArkComponent {
     menuItemConfiguration.contentModifier = this.modifier;
     const index = menuItemConfiguration.index;
     const xNode = globalThis.requireNapi('arkui.node');
-    this.menuItemNodes = new xNode.BuilderNode(context);
-    this.menuItemNodes.build(this.builder, menuItemConfiguration);
-    return this.menuItemNodes.getFrameNode();
+    if (!this._menuItemMap.has(index)) {
+      this._menuItemMap.set(index, new xNode.BuilderNode(context));
+      this._menuItemMap.get(index).build(this.builder, menuItemConfiguration);
+    } else {
+      this._menuItemMap.get(index).update(menuItemConfiguration);
+    }
+    return this._menuItemMap.get(index).getFrameNode();
   }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
