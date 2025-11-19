@@ -170,6 +170,10 @@ void ControlledAnimator::PostPlayTask(int32_t idx, int32_t iteration, int32_t id
             innerRepeatEvent_ = nullptr;
         }
     }
+    if (idx < 0 || idx >= static_cast<int32_t>(pictureInfos_.size())) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Index out of range: %d", idx);
+        return;
+    }
     playbackListener_(pictureInfos_[idx].second);
     // records the task start time, and calculates the remaining playback time for the current frame.
     currentTaskStartTime_ = std::chrono::steady_clock::now();
