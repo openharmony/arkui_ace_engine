@@ -49,3 +49,7 @@ export { LocalStorage } from "./stateManagement"
 
 export * from "./extractors";
 export * from "./hooks"
+
+export {
+  ArkUIExtensionComponentPeerBase
+} from "./component/uiExtensionComponent"

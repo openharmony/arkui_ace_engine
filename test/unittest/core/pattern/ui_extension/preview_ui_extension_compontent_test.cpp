@@ -533,7 +533,8 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, SeucurityUIExtensionHandleMouseEvent
     pattern->displayArea_ = RectF(100.0, 100.0, 100.0, 100.0);
     pattern->DispatchDisplayArea(true);
     pattern->DispatchDisplayArea(false);
-    auto sessionWrapper = AceType::DynamicCast<PreviewSessionWrapperImpl>(pattern->sessionWrapper_);
+    auto sessionWrapper =
+        AceType::DynamicCast<PreviewSessionWrapperImpl>(pattern->sessionWrapper_);
     EXPECT_NE(sessionWrapper, nullptr);
     pattern->isVisible_ = true;
     pattern->OnWindowHide();

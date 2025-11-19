@@ -40,6 +40,19 @@ int32_t SecurityUIExtensionProxy::SendDataSync(
     return sessionWrapper_ ? sessionWrapper_->SendDataSync(params, reWantParams) : 0;
 }
 
+/* only for ArkTS static begin*/
+void SecurityUIExtensionProxy::SendData(const AAFwk::WantParams& wantParams)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->SendDataAsync(wantParams);
+}
+
+int32_t SecurityUIExtensionProxy::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
+{
+    return sessionWrapper_ ? sessionWrapper_->SendDataSync(wantParams, reWantParams) : 0;
+}
+/* only for ArkTS static end*/
+
 RefPtr<SecurityUIExtensionPattern> SecurityUIExtensionProxy::GetPattern() const
 {
     return pattern_.Upgrade();

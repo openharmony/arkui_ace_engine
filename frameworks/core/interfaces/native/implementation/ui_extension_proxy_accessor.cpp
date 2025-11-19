@@ -31,7 +31,9 @@ void DestroyPeerImpl(Ark_UIExtensionProxy peer)
 }
 Ark_UIExtensionProxy ConstructImpl()
 {
-    return new UIExtensionProxyPeer();
+    auto peerHost = Referenced::MakeRefPtr<UIExtensionProxyPeerHost>();
+    peerHost->IncRefCount();
+    return reinterpret_cast<UIExtensionProxyPeer *>(Referenced::RawPtr(peerHost));
 }
 Ark_NativePointer GetFinalizerImpl()
 {

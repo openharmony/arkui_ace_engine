@@ -45,7 +45,7 @@ ani_status NativeUiExtensionCommon::BindNativeUiExtensionCommon(ani_env *env)
 ani_status NativeUiExtensionCommon::BindNativeUiExtensionProxy(ani_env *env)
 {
     static const char *className =
-        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionProxyModal;";
+        "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUiextensionProxyModal";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,

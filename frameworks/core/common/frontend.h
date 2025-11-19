@@ -119,6 +119,7 @@ public:
 
     virtual void AttachPipelineContext(const RefPtr<PipelineBase>& context) = 0;
     virtual void AttachSubPipelineContext(const RefPtr<PipelineBase>& context) {};
+
     virtual void SetAssetManager(const RefPtr<AssetManager>& assetManager) = 0;
 
     virtual void AddPage(const RefPtr<AcePage>& page) = 0;

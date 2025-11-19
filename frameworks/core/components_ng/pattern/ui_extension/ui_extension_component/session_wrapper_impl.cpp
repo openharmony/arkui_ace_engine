@@ -642,8 +642,9 @@ Rosen::SessionViewportConfig ConvertToRosenSessionViewportConfig(const SessionVi
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
     ContainerScope scope(instanceId_);
-    UIEXT_LOGI("The session is created with bundle=%{public}s, ability=%{public}s, componentId=%{public}d.",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), GetFrameNodeId());
+    UIEXT_LOGI("The session is created with bundle=%{public}s, ability=%{public}s,"
+        " componentId=%{public}d, sessionType=%{public}d.", want.GetElement().GetBundleName().c_str(),
+        want.GetElement().GetAbilityName().c_str(), GetFrameNodeId(), static_cast<int32_t>(sessionType_));
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
