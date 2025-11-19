@@ -160,12 +160,14 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
+    bool useHighPrecisionTouch = useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     if (pointerItem.GetPredictExist()) {
         // Predict is for window X/Y coordinates only.
+        // In effect in game scenario only, display coords mismatch do not matter.
         touchPoint.x = pointerItem.GetWindowXPredict();
         touchPoint.y = pointerItem.GetWindowYPredict();
     } else {
-        if (useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        if (useHighPrecisionTouch) {
             touchPoint.x = NonZeroOrInteger(pointerItem.GetWindowXPos(), pointerItem.GetWindowX());
             touchPoint.y = NonZeroOrInteger(pointerItem.GetWindowYPos(), pointerItem.GetWindowY());
         } else {
@@ -173,7 +175,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
             touchPoint.y = pointerItem.GetWindowY();
         }
     }
-    if (useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+    if (useHighPrecisionTouch) {
         touchPoint.screenX = NonZeroOrInteger(pointerItem.GetDisplayXPos(), pointerItem.GetDisplayX());
         touchPoint.screenY = NonZeroOrInteger(pointerItem.GetDisplayYPos(), pointerItem.GetDisplayY());
     } else {
