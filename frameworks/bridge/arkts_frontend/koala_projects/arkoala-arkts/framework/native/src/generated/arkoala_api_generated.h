@@ -23616,6 +23616,8 @@ typedef struct GENERATED_ArkUISearchModifier {
                             const Opt_Callback_EditableTextChangeValue_Boolean* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
                                   const Opt_KeyboardAppearance* value);
+    void (*setDividerColor)(Ark_NativePointer node,
+                        const Opt_ColorMetrics* value);
     void (*setSearchButton)(Ark_NativePointer node,
                             const Opt_String* value,
                             const Opt_SearchButtonOptions* option);
