@@ -857,6 +857,16 @@ public:
     }
 
     std::vector<SwiperItemInfoNG> GetShownItemInfoFromIndex(int32_t index);
+
+    void SetIsPureSwiper(bool isPureSwiper)
+    {
+        isPureSwiper_ = isPureSwiper;
+    }
+
+    bool IsPureSwiper() const
+    {
+        return isPureSwiper_;
+    }
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -893,6 +903,7 @@ protected:
     int32_t newMinTurnPageVelocity_ = NEW_STYLE_MIN_TURN_PAGE_VELOCITY;
     int32_t propertyAnimationIndex_ = -1;
 
+    bool isPureSwiper_ = false;
     bool hasTabsAncestor_ = false;
     bool usePropertyAnimation_ = false;
     bool stopIndicatorAnimation_ = true;

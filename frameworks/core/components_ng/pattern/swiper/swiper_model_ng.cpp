@@ -59,6 +59,7 @@ RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetIsPureSwiper(true);
     return pattern->GetSwiperController();
 }
 

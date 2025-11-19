@@ -53,6 +53,8 @@ ace_unittest("swiper_test_ng") {
     "swiper_overlength_indicator_modifier_test_ng.cpp",
     "swiper_pattern_test_ng.cpp",
     "swiper_test_ng.cpp",
+    "swiper_test_ng_impl.cpp",
+    "swiper_ui_observer_test_ng.cpp",
     "swiper_utils_test_ng.cpp",
   ]
 }
