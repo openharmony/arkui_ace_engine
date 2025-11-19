@@ -2557,7 +2557,10 @@ void NavigationPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(layoutProperty);
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(Dimension(0.0));
     auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(Dimension(0.0));
-    bool navBarWidthRangeEqual = userSetMinNavBarWidthValue.Value() >= userSetMaxNavBarWidthValue.Value();
+    double frameWidth = GetNavigationFrameSize().Width();
+    double userSetMinNavBarWidthPx = userSetMinNavBarWidthValue.ConvertToPxWithSize(frameWidth);
+    double userSetMaxNavBarWidthPx = userSetMaxNavBarWidthValue.ConvertToPxWithSize(frameWidth);
+    bool navBarWidthRangeEqual = GreatOrEqual(userSetMinNavBarWidthPx, userSetMaxNavBarWidthPx);
     if ((userSetNavBarWidthFlag_ && !userSetNavBarRangeFlag_) || (userSetNavBarRangeFlag_ && navBarWidthRangeEqual)) {
         isDividerDraggable_ = false;
         return;
@@ -5242,13 +5245,18 @@ void NavigationPattern::ClearPageAndNavigationConfig()
 
 void NavigationPattern::UpdateNavigationStatus()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameWidth = geometryNode->GetFrameSize().Width();
+    auto frameWidth = GetNavigationFrameSize().Width();
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
     SetNavigationWidthToolBarManager(initNavBarWidth_, frameWidth - initNavBarWidth_ - dividerWidth, dividerWidth);
+}
+
+SizeF NavigationPattern::GetNavigationFrameSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    return geometryNode->GetFrameSize();
 }
 
 void NavigationPattern::SetNavigationWidthToolBarManager(float navBarWidth, float navDestWidth, float dividerWidth)

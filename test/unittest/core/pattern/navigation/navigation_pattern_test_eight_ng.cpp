@@ -128,4 +128,39 @@ HWTEST_F(NavigationPatternTestEightNg, OnWindowSizeChanged002, TestSize.Level1)
     pattern->OnWindowSizeChanged(TEST_WINDOW_WIDTH, TEST_WINDOW_HEIGHT, WindowSizeChangeReason::UNDEFINED);
     EXPECT_FALSE(pattern->windowSizeChangedDuringTransition_);
 }
+
+/**
+ * @tc.name: onHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, onHover, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
+    navNode->GetGeometryNode()->SetFrameSize(SizeF(1000.0, 1000.0));
+    pattern->userSetNavBarWidthFlag_ = false;
+    pattern->userSetNavBarRangeFlag_ = true;
+    pattern->isInDividerDrag_ = false;
+
+    /*
+        test 500 < 1000 * 0.8
+    */
+    layoutProperty->UpdateMinNavBarWidth(Dimension(500, DimensionUnit::PX));
+    layoutProperty->UpdateMaxNavBarWidth(Dimension(0.8, DimensionUnit::PERCENT));
+    pattern->isDividerDraggable_ = false;
+    pattern->OnHover(true);
+    EXPECT_TRUE(pattern->isDividerDraggable_);
+
+    /*
+        test 1000 * 0.5 > 400
+    */
+    layoutProperty->UpdateMinNavBarWidth(Dimension(0.5, DimensionUnit::PERCENT));
+    layoutProperty->UpdateMaxNavBarWidth(Dimension(400, DimensionUnit::PX));
+    pattern->OnHover(true);
+    EXPECT_FALSE(pattern->isDividerDraggable_);
+}
 } // namespace OHOS::Ace::NG
