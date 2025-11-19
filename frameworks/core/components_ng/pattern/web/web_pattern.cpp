@@ -3120,7 +3120,8 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         return;
     }
     if (showMenuFromWeb_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "ContextMenu intercept web blur blurReason:%{public}d", static_cast<int>(blurReason);
+        TAG_LOGI(
+            AceLogTag::ACE_WEB, "ContextMenu intercept web blur blurReason:%{public}d", static_cast<int>(blurReason));
         showMenuFromWeb_ = false;
         return;
     }
