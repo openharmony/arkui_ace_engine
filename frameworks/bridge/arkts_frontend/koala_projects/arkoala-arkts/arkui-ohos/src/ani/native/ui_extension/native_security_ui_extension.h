@@ -28,6 +28,9 @@ public:
 
 private:
     // SecurityUiExtensionModal
+    static ani_long Construct(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_int id, [[maybe_unused]] ani_int flags);
     static ani_status SetSecurityUiextensionOption(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj);
@@ -38,6 +41,9 @@ private:
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
     static ani_status SetSecurityOnError(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
+    static ani_status SetSecurityOnRemoteReady(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
     static ani_status SetSecurityOnRecive(
