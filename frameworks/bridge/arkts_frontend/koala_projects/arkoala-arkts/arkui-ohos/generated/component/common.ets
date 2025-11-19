@@ -3179,6 +3179,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnAccessibilityHoverTransparentAttribute(value: AccessibilityTransparentCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityHoverTransparent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setHoverEffectAttribute(value: HoverEffect | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -4828,7 +4840,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBackgroundImage0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBackgroundImage2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackgroundBlurStyleAttribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
@@ -7295,6 +7307,9 @@ export interface CommonMethod {
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         throw new Error("Unimplemented method onAccessibilityHover")
     }
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        throw new Error("Unimplemented method onAccessibilityHoverTransparent")
+    }
     hoverEffect(value: HoverEffect | undefined): this {
         throw new Error("Unimplemented method hoverEffect")
     }
@@ -7504,7 +7519,7 @@ export interface CommonMethod {
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         throw new Error("Unimplemented method onDragEnd")
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         throw new Error("Unimplemented method allowDrop")
     }
     draggable(value: boolean | undefined): this {
@@ -7846,6 +7861,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onHover_value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
     onHoverMove_value?: ((value0: HoverEvent) => void) | undefined
     onAccessibilityHover_value?: AccessibilityCallback | undefined
+    onAccessibilityHoverTransparent_value?: AccessibilityTransparentCallback | undefined
     hoverEffect_value?: HoverEffect | undefined
     onMouse_value?: ((event: MouseEvent) => void) | undefined
     onTouch_value?: ((event: TouchEvent) => void) | undefined
@@ -7912,7 +7928,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDragLeave_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDrop_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragEnd_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    allowDrop_value?: Array<uniformTypeDescriptor.UniformDataType> | null | undefined
+    allowDrop_value?: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined
     draggable_value?: boolean | undefined
     dragPreview_value?: CustomBuilder | DragItemInfo | string | undefined
     onPreDrag_value?: ((value0: PreDragStatus) => void) | undefined
@@ -8085,6 +8101,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {
+        return this
+    }
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
         return this
     }
     hoverEffect(value: HoverEffect | undefined): this {
@@ -8294,7 +8313,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         return this
     }
     draggable(value: boolean | undefined): this {
@@ -8893,6 +8912,7 @@ export interface KeyframeState {
 export type Callback<T = void,V = void> = (data: T) => V;
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
 export type AccessibilityCallback = (isHover: boolean, event: AccessibilityHoverEvent) => void;
+export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
     ratios: Array<double>;
     expectedUpdateInterval?: int32;
@@ -9277,6 +9297,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("onAccessibilityHover")) {
             const value_casted = value as (AccessibilityCallback | undefined)
             this.getPeer()?.setOnAccessibilityHoverAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        if (this.checkPriority("onAccessibilityHoverTransparent")) {
+            const value_casted = value as (AccessibilityTransparentCallback | undefined)
+            this.getPeer()?.setOnAccessibilityHoverTransparentAttribute(value_casted)
             return this
         }
         return this
@@ -9838,7 +9866,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         if (this.checkPriority("allowDrop")) {
             hookAllowDrop(this, value)
             return this

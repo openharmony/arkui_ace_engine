@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -203,7 +204,8 @@ void TabsPattern::FireTabChangeCallback(int32_t preIndex, int32_t nextIndex)
     CHECK_NULL_VOID(swiperNode);
     std::string id = tabsNode->GetInspectorId().value_or("");
     int32_t uniqueId = tabsNode->GetId();
-    auto preTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(preIndex));
+    auto preTabContent = (preIndex < 0) ? nullptr :
+        AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(static_cast<uint32_t>(preIndex)));
     // The first event cannot be hide state.
     if (preTabContent && lastTabChangeInfo_.has_value() && IsValidFireTabChange(lastTabChangeInfo_, preIndex, false)) {
         std::string preTabContentId = preTabContent->GetInspectorId().value_or("");
@@ -217,7 +219,8 @@ void TabsPattern::FireTabChangeCallback(int32_t preIndex, int32_t nextIndex)
         lastTabChangeInfo_->index = preIndex;
         lastTabChangeInfo_->isShow = false;
     }
-    auto nextTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(nextIndex));
+    auto nextTabContent = (nextIndex < 0) ? nullptr :
+        AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(static_cast<uint32_t>(nextIndex)));
     if (nextTabContent && IsValidFireTabChange(lastTabChangeInfo_, nextIndex, true)) {
         std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
         int32_t nextTabContentUniqueId = nextTabContent->GetId();
@@ -840,6 +843,13 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
             }
         }
         AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
+        auto host = GetHost();
+        if (host) {
+            auto pipeline = host->GetContextWithCheck();
+            if (pipeline) {
+                pipeline->GetLoadCompleteManager()->StartCollect("");
+            }
+        }
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
     }

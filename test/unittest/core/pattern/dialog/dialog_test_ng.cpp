@@ -734,18 +734,12 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg004, TestSize.Level1)
      */
     auto result = DialogView::CreateDialogNode(param, nullptr);
     EXPECT_TRUE(result);
-    if (!result) {
-        return;
-    }
     /**
      * @tc.steps: step3. create dialogPattern.
      * @tc.expected: the dialogPattern created successfully.
      */
     auto dialogPattern = result->GetPattern<DialogPattern>();
     EXPECT_TRUE(dialogPattern);
-    if (!dialogPattern) {
-        return;
-    }
     if (dialogPattern->GetOpenAnimation().has_value()) {
         EXPECT_EQ(dialogPattern->GetOpenAnimation().value().GetDelay(), animationOption.GetDelay());
     }

@@ -880,11 +880,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     window_->FlushModifier();
     FlushFrameRate();
     FlushDragWindowVisibleCallback();
+    frameMetrics.firstDrawFrame = isFirstFlushMessages_;
     if (isFirstFlushMessages_) {
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-    frameMetrics.firstDrawFrame = isFirstFlushMessages_;
     taskScheduler_->FlushAfterModifierTask();
     endTimestamp = GetSysTimestamp();
     frameMetrics.layoutMeasureDuration = endTimestamp - startTimestamp;
@@ -892,7 +892,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64
                                     "][layoutMeasureDurationStartTimestamp:%" PRIu64
                                     "][layoutMeasureDurationEndTimestamp:%" PRIu64 "][firstDrawFrame:%d]",
-            nanoTimestamp, frameCount, startTimestamp, endTimestamp, isFirstFlushMessages_);
+            nanoTimestamp, frameCount, startTimestamp, endTimestamp, frameMetrics.firstDrawFrame);
     }
     // the application is in the background and the dark and light colors are switched.
     if (!onShow_ && backgroundColorModeUpdated_) {
@@ -1638,7 +1638,8 @@ void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
 void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
+    CHECK_NULL_VOID(rsUIDirector);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
         auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
         auto shadowSurface = surfaceNode->CreateShadowSurfaceNode();
@@ -1650,6 +1651,8 @@ void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::R
         rsTransaction->Begin();
         shadowSurface->SetAbilityBGAlpha(appBgColor_.GetAlpha());
         rsTransaction->Commit();
+    } else {
+        rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
     }
 #endif
 }

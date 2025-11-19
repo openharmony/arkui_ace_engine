@@ -966,7 +966,7 @@ export class EventTargetInfoTransfer {
         
         let objectInternal: EventTargetInfo = input as EventTargetInfo;
         const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('WrapEventTargetInfoPointer');
+        const wrapFunc = global.getProperty('wrapEventTargetInfoPointer');
         if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
             return new Object();
         }

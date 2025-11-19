@@ -78,6 +78,12 @@ void AssignArkValue(Ark_Int32& dst, const uint32_t& src)
     dst = static_cast<Ark_Int32>(src);
 }
 
+void AssignArkValue(Ark_Int32& dst, const Dimension& src)
+{
+    auto value = static_cast<uint32_t>(src.ConvertToVp());
+    AssignArkValue(dst, value);
+}
+
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx)
 {
     CHECK_NULL_VOID(src.size());
@@ -698,8 +704,8 @@ void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
 
 void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
-    dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
-    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
+    dst.fontSize = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(src.fontSize);
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(src.fontWeight);
     auto arkEffectStrategy = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
     dst.effectStrategy = Converter::ArkValue<Opt_SymbolEffectStrategy>(arkEffectStrategy);
     auto arkRenderingStrategy = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
@@ -808,8 +814,8 @@ void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 
 void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)
 {
-    dst.size.value0 = ArkValue<Ark_Number>(src.size[0]);
-    dst.size.value1 = ArkValue<Ark_Number>(src.size[1]);
+    dst.size.value0 = ArkValue<Ark_Int32>(src.size[0]);
+    dst.size.value1 = ArkValue<Ark_Int32>(src.size[1]);
     dst.verticalAlign = ArkValue<Ark_ImageSpanAlignment>(
         static_cast<OHOS::Ace::VerticalAlign>(src.verticalAlign));
     dst.objectFit = ArkValue<Ark_ImageFit>(
@@ -921,8 +927,8 @@ void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
             end = selectionRangeInfo->end_;
         }
     }
-    dst.start = Converter::ArkValue<Opt_Number>(start);
-    dst.end = Converter::ArkValue<Opt_Number>(end);
+    dst.start = Converter::ArkValue<Opt_Int32>(start);
+    dst.end = Converter::ArkValue<Opt_Int32>(end);
 }
 
 void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, ConvContext *ctx)

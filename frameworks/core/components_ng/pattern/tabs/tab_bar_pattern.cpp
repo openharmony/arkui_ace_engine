@@ -31,6 +31,7 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
@@ -1591,6 +1592,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+            LoadCompleteManagerStartCollect();
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
@@ -1980,6 +1982,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     } else {
         if (duration> 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+            LoadCompleteManagerStartCollect();
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
@@ -3314,6 +3317,7 @@ void TabBarPattern::InitTurnPageRateEvent()
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                pattern->LoadCompleteManagerStopCollect();
                 auto host = pattern->GetHost();
                 CHECK_NULL_VOID(host);
                 if (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f)) {
@@ -3854,5 +3858,21 @@ void TabBarPattern::UpdateSubTabBarImageIndicator()
     }
 
     indicatorNode->MarkModifyDone();
+}
+
+void TabBarPattern::LoadCompleteManagerStartCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StartCollect("");
+    }
+}
+
+void TabBarPattern::LoadCompleteManagerStopCollect()
+{
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->StopCollect();
+    }
 }
 } // namespace OHOS::Ace::NG

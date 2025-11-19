@@ -183,6 +183,7 @@ ace_unittest("theme_manager_test_ng") {
     "$ace_root/frameworks/core/components/picker/picker_theme.cpp",
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
     "theme_manager_test_ng.cpp",
   ]
 }

@@ -25,6 +25,7 @@ enum class CollectStatus {
     INIT = 0,
     COLLECTING,
     ANALYSIS,
+    COMPLETE,
 };
 class LoadCompleteManager final : public std::enable_shared_from_this<LoadCompleteManager> {
 public:

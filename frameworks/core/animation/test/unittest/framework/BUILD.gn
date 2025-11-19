@@ -169,6 +169,7 @@ ohos_unittest("AnimationTest") {
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$ace_root/frameworks/core/components/transform/click_spring_effect.cpp",
     "$ace_root/frameworks/core/components/transform/render_transform.cpp",

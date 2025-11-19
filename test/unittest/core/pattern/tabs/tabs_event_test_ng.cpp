@@ -1536,6 +1536,43 @@ HWTEST_F(TabsEventTestNg, FireTabChangeCallbackTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FireTabChangeCallbackTest002
+ * @tc.desc: Test FireTabChangeCallback of TabsPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, FireTabChangeCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Init tabContent
+     * @tc.expected: steps1. Check state value.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+
+    pattern_->lastTabChangeInfo_.reset();
+    auto canCallback = [](const TabContentInfo& info) {
+        EXPECT_TRUE(true);
+    };
+    auto cannotCallback = [](const TabContentInfo& info) {
+        EXPECT_TRUE(false);
+    };
+
+    UIObserverHandler::GetInstance().SetHandleTabChangeFunc(canCallback);
+    pattern_->FireTabChangeCallback(-1, 0); // 0 show
+    UIObserverHandler::GetInstance().SetHandleTabChangeFunc(cannotCallback);
+    pattern_->FireTabChangeCallback(-1, 0); // 0 show again
+    UIObserverHandler::GetInstance().SetHandleTabChangeFunc(nullptr);
+
+    UIObserverHandler::GetInstance().SetHandleTabChangeFunc(canCallback);
+    pattern_->FireTabChangeCallback(0, -1); // 0 hide
+    UIObserverHandler::GetInstance().SetHandleTabChangeFunc(cannotCallback);
+    pattern_->FireTabChangeCallback(0, -1); // 0 hide again
+    UIObserverHandler::GetInstance().SetHandleTabChangeFunc(nullptr);
+}
+
+/**
  * @tc.name: OnAppearAndOnDisappearTest001
  * @tc.desc: test OnAppear and OnDisappear
  * @tc.type: FUNC

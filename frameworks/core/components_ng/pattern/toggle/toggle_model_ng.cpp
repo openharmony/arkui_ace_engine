@@ -663,6 +663,22 @@ void ToggleModelNG::SetToggleState(FrameNode* frameNode, bool isOn)
     }
 }
 
+bool ToggleModelNG::GetToggleState(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    bool result = false;
+    if (AceType::InstanceOf<SwitchPattern>(pattern)) {
+        result = GetSwitchIsOn(frameNode);
+    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+        result = GetCheckboxIsOn(frameNode);
+    } else if (AceType::InstanceOf<ButtonPattern>(pattern)) {
+        result = GetToggleButtonIsOn(frameNode);
+    }
+    return result;
+}
+
 Color ToggleModelNG::GetSelectedColor(FrameNode* frameNode)
 {
     Color value = Color(DEFAULT_COLOR);
@@ -1007,6 +1023,22 @@ bool ToggleModelNG::GetSwitchIsOn(FrameNode* frameNode)
     auto property = frameNode->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(property, value);
     return property->GetIsOnValue(value);
+}
+
+bool ToggleModelNG::GetToggleButtonIsOn(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ToggleButtonPaintProperty, IsOn, value, frameNode, value);
+    return value;
+}
+
+bool ToggleModelNG::GetCheckboxIsOn(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode, value);
+    return value;
 }
 
 Color ToggleModelNG::GetUnselectedColor(FrameNode* frameNode)

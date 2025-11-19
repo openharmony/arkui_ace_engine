@@ -212,9 +212,13 @@ std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool&
         return "";
     }
     ani_string dataTypeAni;
-    if ((ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(modeRef), &dataTypeAni))) {
-        isSuccess = false;
-        return "";
+    if (AniUtils::IsString(env, static_cast<ani_object>(modeRef))) {
+        dataTypeAni = static_cast<ani_string>(modeRef);
+    } else {
+        if ((ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(modeRef), &dataTypeAni))) {
+            isSuccess = false;
+            return "";
+        }
     }
     return AniUtils::ANIStringToStdString(env, dataTypeAni);
 }

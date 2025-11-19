@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/implementation/image_common_methods.h"
-
-#include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-void ImageCommonMethods::ApplyColorFilterValues(
+namespace ImageCommonMethods {
+void ApplyColorFilterValues(
     Ark_NativePointer node, const Opt_Union_ColorFilter_DrawingColorFilter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -41,8 +40,10 @@ void ImageCommonMethods::ApplyColorFilterValues(
             }
         },
         []() {});
-    if (isValid)
+    if (isValid) {
         return;
+    }
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLORFILTER_MATRIX);
 }
+} // namespace ImageCommonMethods
 } // namespace OHOS::Ace::NG::GeneratedModifier

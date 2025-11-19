@@ -315,6 +315,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setOnAccessibilityHover(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setOnAccessibilityHoverTransparent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setHoverEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setOnMouse(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3199,9 +3201,7 @@ export class ArkUIGeneratedNativeModule {
     native static _AnimationExtender_OpenImplicitAnimation(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AnimationExtender_CloseImplicitAnimation(): void
-    @ani.unsafe.Direct
     native static _AnimationExtender_OpenImplicitAnimationForAnimation(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _AnimationExtender_CloseImplicitAnimationForAnimation(node: KPointer): void
     @ani.unsafe.Direct
     native static _AnimationExtender_StartDoubleAnimation(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -4711,6 +4711,40 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Measurable_setUniqueId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _MenuItemConfiguration_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_triggerSelect(ptr: KPointer, index: KInt, value: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getEnabled(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setEnabled(ptr: KPointer, enabled: KInt): void
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getContentModifier(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setContentModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getValue(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setValue(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getIcon(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getSymbolIcon(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setSymbolIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getSelected(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setSelected(ptr: KPointer, selected: KInt): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getIndex(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setIndex(ptr: KPointer, index: KInt): void
+    @ani.unsafe.Direct
     native static _MouseEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _MouseEvent_getFinalizer(): KPointer
@@ -4834,6 +4868,8 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): int32
     @ani.unsafe.Direct
     native static _NavExtender_setCreateNavDestinationCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavExtender_getRouteMapInConfig(context: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _NavigationTransitionProxy_construct(): KPointer
     @ani.unsafe.Direct
@@ -5307,9 +5343,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorBaseController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _RichEditorBaseController_getCaretOffset(ptr: KPointer): number
+    native static _RichEditorBaseController_getCaretOffset(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _RichEditorBaseController_setCaretOffset(ptr: KPointer, offset: number): boolean
+    native static _RichEditorBaseController_setCaretOffset(ptr: KPointer, offset: KInt): boolean
     @ani.unsafe.Direct
     native static _RichEditorBaseController_closeSelectionMenu(ptr: KPointer): void
     @ani.unsafe.Quick
@@ -5317,7 +5353,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorBaseController_setTypingStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RichEditorBaseController_setSelection(ptr: KPointer, selectionStart: number, selectionEnd: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _RichEditorBaseController_setSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorBaseController_isEditing(ptr: KPointer): boolean
     @ani.unsafe.Direct
@@ -5333,13 +5369,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _RichEditorController_addTextSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addTextSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
-    native static _RichEditorController_addImageSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addImageSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
-    native static _RichEditorController_addBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
-    native static _RichEditorController_addSymbolSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _RichEditorController_addSymbolSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
     native static _RichEditorController_updateSpanStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

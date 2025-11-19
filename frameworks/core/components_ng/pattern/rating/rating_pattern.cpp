@@ -256,6 +256,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     ratingModifier_->SetImageInfoFromTheme(isForegroundImageInfoFromTheme_ &&
         isSecondaryImageInfoFromTheme_ && isBackgroundImageInfoFromTheme_);
     ratingModifier_->SetUseContentModifier(UseContentModifier());
+    ratingModifier_->SetIsNeedFocusStyle(isNeedFocusStyle_);
     auto direction = ratingLayoutProperty->GetLayoutDirection();
     auto reverse = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
         direction == TextDirection::RTL;

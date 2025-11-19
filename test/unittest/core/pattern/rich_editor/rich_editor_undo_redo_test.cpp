@@ -179,9 +179,8 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag003, TestSize.Level0)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorPattern::OperationRecord record;
     record.deleteCaretPosition = 1;
-    auto caretPosition = richEditorPattern->caretPosition_;
     richEditorPattern->RedoDrag(record);
-    EXPECT_EQ(richEditorPattern->caretPosition_, caretPosition);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 

@@ -78,12 +78,12 @@ void GaugeModelStatic::SetIndicatorSpace(FrameNode* frameNode, const std::option
 
 void GaugeModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
 {
-    // if (flag) {
-    //     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsSensitive, *flag, frameNode);
-    // } else {
-    //     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
-    // }
-    // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
+    if (flag) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsSensitive, *flag, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
 }
 
 void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode)
@@ -100,5 +100,21 @@ void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType
 void GaugeModelStatic::SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue, frameNode);
+}
+
+void GaugeModelStatic::SetGradientColors(FrameNode* frameNode, const std::vector<LinearGradientColorSteps>& colors,
+    const std::vector<float>& values, const GaugeType& type)
+{
+    std::vector<ColorStopArray> convColors;
+    for (const auto& item1: colors) {
+        ColorStopArray colorStopArray;
+        for (const auto& item2: item1) {
+            colorStopArray.push_back(std::make_pair(item2.first.value_or(ERROR_COLOR), item2.second));
+        }
+        convColors.push_back(colorStopArray);
+    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, convColors, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Values, values, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GaugeType, type, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -41,7 +41,7 @@ import { LoadingProgressConfiguration } from "./loadingProgress"
 import { ProgressConfiguration } from "./progress"
 import { RadioConfiguration } from "./radio"
 import { RatingConfiguration } from "./rating"
-import { MenuItemConfiguration } from "./select"
+import { MenuItemConfiguration, MenuItemConfigurationInternal } from "./select"
 import { SliderConfiguration } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
@@ -2699,6 +2699,17 @@ export class NavExtender {
         ArkUIGeneratedNativeModule._NavExtender_setCreateNavDestinationCallback(toPeerPtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    static getRouteMapInConfig_serialize(context: KPointer): Array<string> {
+        const retval = ArkUIGeneratedNativeModule._NavExtender_getRouteMapInConfig(context)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult: Array<string> = buffer
+        return returnResult
+    }
     public static setNavigationOptions(ptr: KPointer, pathStack: NavPathStack): void {
         const ptr_casted = ptr as (KPointer)
         const pathStack_casted = pathStack as (NavPathStack)
@@ -2781,6 +2792,10 @@ export class NavExtender {
         const callback_casted = callback as (NavExtender_CreateNavDestination)
         NavExtender.setCreateNavDestinationCallback_serialize(peer_casted, callback_casted)
         return
+    }
+    public static getRouteMapInConfig(context: KPointer): Array<string> {
+        const context_casted = context as (KPointer)
+        return NavExtender.getRouteMapInConfig_serialize(context_casted)
     }
 }
 export class NodeContainerOps {

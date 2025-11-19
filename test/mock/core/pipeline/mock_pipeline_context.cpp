@@ -259,7 +259,7 @@ PipelineContext::PipelineContext()
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
-    if (loadCompleteMgr_) {
+    if (!loadCompleteMgr_) {
         loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
     }
 }

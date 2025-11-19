@@ -290,6 +290,7 @@ const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAcce
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor();
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
 const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor();
+const GENERATED_ArkUIMenuItemConfigurationAccessor* GetMenuItemConfigurationAccessor();
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor();
@@ -610,6 +611,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLongPressRecognizerAccessor,
         GetMatrix2DAccessor,
         GetMeasurableAccessor,
+        GetMenuItemConfigurationAccessor,
         GetMouseEventAccessor,
         GetMutableStyledStringAccessor,
         GetNavDestinationContextAccessor,

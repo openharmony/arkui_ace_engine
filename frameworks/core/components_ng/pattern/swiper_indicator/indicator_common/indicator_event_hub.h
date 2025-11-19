@@ -38,6 +38,9 @@ public:
     {
         if (!changeEvents_.empty()) {
             std::for_each(changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+                if (!changeEvent || !(*changeEvent)) {
+                    return;
+                }
                 auto event = *changeEvent;
                 event(index);
             });

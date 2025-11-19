@@ -52,6 +52,7 @@ import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
 import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
+import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
@@ -124,7 +125,7 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
 }
 
-export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | undefined) : void {
+export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | Array<string> | undefined) : void {
   if (!node) {
       return
   }
@@ -138,7 +139,7 @@ export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPe
     }
     return
   }
-  let array = value as (Array<UniformDataType> | undefined)
+  let array = value as (Array<UniformDataType> | Array<string> | undefined)
   if (node instanceof ArkCommonMethodComponent) {
     let nodeComponent = node as ArkCommonMethodComponent
     ArkUIAniModule._Drag_Set_AllowDrop(nodeComponent.getPeer().getPeerPtr(), array)
@@ -352,6 +353,10 @@ export function hookSetNavDestination(component: ArkNavigationComponent, value: 
   NavigationOpsHandWritten.hookSetNavDestinationImpl(component, value);
 }
 
+export function hookGetConfigInRouteMap(info: NavDestinationContextInternal): RouteMapConfig | undefined {
+  return NavigationOpsHandWritten.hookGetRouteConfigImpl(info);
+}
+
 const DIFF: number = 1e-10
 const int_MAX: number = 2147483647
 const PIXEL_SIZE: int = 4
@@ -530,6 +535,7 @@ export function unregisterDetach(peerPtr: CanvasRenderingContext2D, callback?: V
   }
   ArkUIAniModule._CanvasRenderingContext_setDetachCallbackId(peerPtr.peer!.ptr, id)
 }
+
 export function hookSetCanvasOptions(component: ArkCanvasComponent,
   context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
   CanvasOpsHandWritten.hookSetCanvasOptionsImpl(component, context, imageAIOptions);

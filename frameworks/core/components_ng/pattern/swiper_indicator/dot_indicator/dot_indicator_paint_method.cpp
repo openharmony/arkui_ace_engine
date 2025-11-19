@@ -731,9 +731,16 @@ bool DotIndicatorPaintMethod::AdjustPointCenterXForTouchBottomNew(StarAndEndPoin
                               touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
     bool releaseRightBottom = (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT &&
                                touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    if (!NearZero(pageRate) && touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        isInBottomTranslate_ = true;
+    }
     if ((releaseLeftBottom && (!NearZero(touchBottomPageRate_) && pageRate <= FIFTY_PERCENT)) ||
-        (releaseRightBottom && (pageRate >= FIFTY_PERCENT || NearZero(pageRate)))) {
+        (releaseRightBottom && (pageRate >= FIFTY_PERCENT || (NearZero(pageRate) && isInBottomTranslate_)))) {
+        isInBottomTranslate_ = false;
         return true;
+    }
+    if (NearZero(pageRate)) {
+        isInBottomTranslate_ = false;
     }
 
     bool dragLeftBottom = (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&

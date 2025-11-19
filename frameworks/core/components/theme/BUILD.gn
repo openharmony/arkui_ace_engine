@@ -48,6 +48,7 @@ template("ace_core_components_theme_set") {
       "theme_attributes.cpp",
       "theme_constants.cpp",
       "theme_manager_impl.cpp",
+      "theme_manager_multi_thread.cpp",
       "theme_utils.cpp",
     ]
 

@@ -232,6 +232,8 @@ export class FrameNode implements MaterializedBase {
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
+                ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
+                ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
             } else {
                 const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
@@ -244,8 +246,6 @@ export class FrameNode implements MaterializedBase {
             this._nodeId = FrameNodeExtender.getIdByFrameNode(this.peer!.ptr);
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
-            ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
-            ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
         }
     }
     static getFinalizer(): KPointer {

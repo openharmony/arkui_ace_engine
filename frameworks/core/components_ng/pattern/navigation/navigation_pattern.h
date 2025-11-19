@@ -812,6 +812,8 @@ private:
     void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
         const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
     void NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames);
+    void LoadCompleteManagerStartCollect();
+    void LoadCompleteManagerStopCollect();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;

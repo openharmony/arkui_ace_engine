@@ -1724,4 +1724,31 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithItemHeightAlignBottom, TestSize.Le
     RectF childRect = GetChildRect(frameNode_, 0);
     EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
 }
+
+/**
+ * @tc.name: LargeScrollOffsetAccuracy
+ * @tc.desc: Test large scroll offset accuracy
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, LargeScrollOffsetAccuracy, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent(16777216);
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. Scroll to a large offset.
+     * @tc.expected: the current offset is 16770000
+     */
+    ScrollBy(0, -16770000.0);
+    EXPECT_DOUBLE_EQ(pattern_->currentOffset_, -16770000.0);
+
+    /**
+     * @tc.steps: step3. Scroll to a small offset.
+     * @tc.expected: the current offset is 16770000.0625
+     */
+    pattern_->UpdateCurrentOffset(-0.0625, SCROLL_FROM_JUMP);
+    FlushUITasks();
+    EXPECT_DOUBLE_EQ(pattern_->currentOffset_, -16770000.0625);
+}
 } // namespace OHOS::Ace::NG

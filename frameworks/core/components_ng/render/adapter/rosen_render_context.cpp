@@ -2074,6 +2074,11 @@ void RosenRenderContext::AddOrUpdateModifier(std::shared_ptr<ModifierName>& modi
 {
     if (modifier != nullptr) {
         (*modifier.*Setter)(value);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetNeedCallbackAreaChange(true);
     } else {
         modifier = std::make_shared<ModifierName>();
         (*modifier.*Setter)(value);

@@ -168,6 +168,7 @@ generated_sources = [
   "implementation/measurable_accessor.cpp",
   "implementation/media_cached_image_modifier.cpp",
   "implementation/menu_item_group_modifier.cpp",
+  "implementation/menu_item_configuration_accessor.cpp",
   "implementation/menu_item_modifier.cpp",
   "implementation/menu_modifier.cpp",
   "implementation/mouse_event_accessor.cpp",

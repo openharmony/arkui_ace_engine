@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
@@ -126,6 +126,8 @@ export class CommonMethodModifier implements CommonMethod {
     _onHoverMove_0_0value?: ((value0: HoverEvent) => void) | undefined
     _onAccessibilityHover_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAccessibilityHover_0_0value?: AccessibilityCallback | undefined
+    _onAccessibilityHoverTransparent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAccessibilityHoverTransparent_0_0value?: AccessibilityTransparentCallback | undefined
     _hoverEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hoverEffect_0_0value?: HoverEffect | undefined
     _onMouse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -259,7 +261,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onDragEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDragEnd_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     _allowDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | undefined
+    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined
     _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _draggable_0_0value?: boolean | undefined
     _dragPreview_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1240,6 +1242,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._onAccessibilityHover_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnAccessibilityHoverAttribute((undefined as AccessibilityCallback | undefined));
+                }
+            }
+        }
+        if (this._onAccessibilityHoverTransparent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAccessibilityHoverTransparent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAccessibilityHoverTransparentAttribute((this._onAccessibilityHoverTransparent_0_0value as AccessibilityTransparentCallback | undefined));
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAccessibilityHoverTransparentAttribute((undefined as AccessibilityTransparentCallback | undefined));
                 }
             }
         }
@@ -2435,7 +2455,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._allowDrop_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                     this._allowDrop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2445,7 +2465,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._allowDrop_0_flag = AttributeUpdaterFlag.INITIAL;
-                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                 }
             }
         }
@@ -4563,6 +4583,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._onAccessibilityHoverTransparent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAccessibilityHoverTransparent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAccessibilityHoverTransparent(modifier._onAccessibilityHoverTransparent_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAccessibilityHoverTransparent((undefined as AccessibilityTransparentCallback | undefined));
+                }
+            }
+        }
         if (modifier._hoverEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hoverEffect_0_flag) {
@@ -5430,7 +5463,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                 }
             }
         }
@@ -7028,6 +7061,17 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        if (((this._onAccessibilityHoverTransparent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAccessibilityHoverTransparent_0_0value = value
+        } else
+        {
+            this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     hoverEffect(value: HoverEffect | undefined): this {
         if (((this._hoverEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -7754,7 +7798,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         if (((this._allowDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._allowDrop_0_flag = AttributeUpdaterFlag.UPDATE

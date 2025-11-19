@@ -741,4 +741,60 @@ HWTEST_F(ScrollPatternThreeTestNg, ScrollEdgeAnimationWithContentOffset, TestSiz
     EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
     EXPECT_EQ(pattern_->currentOffset_, 0);
 }
+
+/**
+ * @tc.name: SnapWithContentOffset
+ * @tc.desc: Test Snap with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, SnapWithContentOffset, TestSize.Level1)
+{
+    Dimension intervalSize(50.0);
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, true);
+    std::vector<float> offsets = {};
+    for (int i = 0; i <= 13; ++i) {
+        offsets.emplace_back(-i * 50);
+    }
+
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->snapOffsets_, offsets);
+}
+
+/**
+ * @tc.name: SnapWithContentOffset
+ * @tc.desc: Test Snap with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, SnapWithContentOffsetUpdate, TestSize.Level1)
+{
+    Dimension intervalSize(130.0);
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, true);
+
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+
+    layoutProperty_->UpdateContentStartOffset(0);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+
+    layoutProperty_->UpdateContentStartOffset(CONTENT_END_OFFSET);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_END_OFFSET);
+}
 } // namespace OHOS::Ace::NG

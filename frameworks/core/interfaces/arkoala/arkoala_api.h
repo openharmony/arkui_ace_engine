@@ -2083,6 +2083,14 @@ struct ArkUIAccessibilityValue {
     ArkUIOptionalCharPtr text;
 };
 
+struct ArkUIAccessibilityGroupOptions {
+    ArkUI_Bool accessibilityTextPreferred = false;
+    ArkUI_Int32 stateControllerByType = -1;
+    ArkUI_CharPtr stateControllerByInspector;
+    ArkUI_Int32 actionControllerByType = -1;
+    ArkUI_CharPtr actionControllerByInspector;
+};
+
 struct ArkUIProgressLinearStyleOption {
     bool scanEffectEnable;
     bool smoothEffectEnable;
@@ -2751,6 +2759,8 @@ struct ArkUICommonModifier {
     void (*resetUseShadowBatching)(ArkUINodeHandle node);
     void (*setDraggable)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetDraggable)(ArkUINodeHandle node);
+    void (*setAccessibilityGroupOptions)(ArkUINodeHandle node, ArkUIAccessibilityGroupOptions options);
+    void (*resetAccessibilityGroupOptions)(ArkUINodeHandle node);
     void (*setAccessibilityGroup)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAccessibilityGroup)(ArkUINodeHandle node);
     void (*setAccessibilityNextFocusId)(ArkUINodeHandle node, ArkUI_CharPtr value);
@@ -3014,6 +3024,9 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityChecked)(ArkUINodeHandle node);
     void (*setAccessibilitySelected)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAccessibilitySelected)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getAccessibilityRoleByType)(ArkUI_Int32 type);
+    void (*setOnAccessibilityActionIntercept)(ArkUINodeHandle node,
+        uint32_t (*onAccessibilityActionIntercept)(ArkUINodeHandle node, uint32_t action));
     void (*setVisualEffect)(ArkUINodeHandle node, void* visualEffect);
     void (*resetVisualEffect)(ArkUINodeHandle node);
     void (*setBackgroundFilter)(ArkUINodeHandle node, void* backgroundFilter);
@@ -3546,8 +3559,8 @@ struct ArkUIImageModifier {
     ArkUI_Int32 (*getFitOriginalSize)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getFillColor)(ArkUINodeHandle node);
     void (*setPixelMap)(ArkUINodeHandle node, void* drawableDescriptor);
-    void (*setPixelMapArray)(ArkUINodeHandle node, void* animatedDrawableDescriptor);
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
+    void (*setDrawableDescriptor)(ArkUINodeHandle node, void* newDrawableDescriptor);
     void (*enableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setImagePrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
@@ -5943,6 +5956,7 @@ struct ArkUIToggleModifier {
     void (*setToggleTrackBorderRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
         ArkUI_VoidPtr radiusRawPtr);
     void (*setIsUserSetMargin)(ArkUINodeHandle node);
+    ArkUI_Bool (*getToggleState)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigationModifier {

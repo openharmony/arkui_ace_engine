@@ -93,9 +93,9 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _barState_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barState_0_0value?: BarState | undefined
     _maxLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLength_0_0value?: number | undefined
+    _maxLength_0_0value?: int32 | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLines_0_0value?: number | undefined
+    _maxLines_0_0value?: int32 | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
     _stopBackPress_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -586,7 +586,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._maxLength_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLengthAttribute((this._maxLength_0_0value as number | undefined));
+                    peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
                     this._maxLength_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -596,7 +596,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
                 default: {
                     this._maxLength_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLengthAttribute((undefined as number | undefined));
+                    peer.setMaxLengthAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -604,7 +604,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as number | undefined));
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
                     this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -614,7 +614,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
                 default: {
                     this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLinesAttribute((undefined as number | undefined));
+                    peer.setMaxLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -1058,7 +1058,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                     break;
                 }
                 default: {
-                    this.maxLength((undefined as number | undefined));
+                    this.maxLength((undefined as int32 | undefined));
                 }
             }
         }
@@ -1071,7 +1071,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                     break;
                 }
                 default: {
-                    this.maxLines((undefined as number | undefined));
+                    this.maxLines((undefined as int32 | undefined));
                 }
             }
         }
@@ -1427,7 +1427,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         if (((this._maxLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLength_0_0value) !== (value)))
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1438,7 +1438,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE

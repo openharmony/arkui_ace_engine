@@ -25,7 +25,7 @@
 namespace OHOS::Ace::Ani {
 
 ani_long ExtractorsToDrawableDescriptorPtr(
-    ani_env* env, [[maybe_unused]] ani_object obj, ani_object drawableAni, ani_int drawableType)
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_object drawableAni)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
@@ -38,9 +38,7 @@ ani_long ExtractorsToDrawableDescriptorPtr(
         HILOGE("image construct with drawable descriptor failed, nativeObj is nullptr");
         return 0;
     }
-    auto drawableDescriptorPeer =
-        modifier->getImageAniModifier()->getDrawableDescriptorPeer(drawable, static_cast<int>(drawableType));
-    return reinterpret_cast<ani_long>(drawableDescriptorPeer);
+    return reinterpret_cast<ani_long>(drawable);
 }
 
 ani_long ExtractorsToDrawingColorFilterPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object colorFilterAni)
@@ -159,7 +157,7 @@ void ImageConstructPixelMap(ani_env* env, [[maybe_unused]] ani_object obj, ani_l
 }
 
 void ImageConstructDrawableDescriptor(
-    ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object drawableAni, ani_int drawableType)
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object drawableAni)
 {
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
     const auto* modifier = GetNodeAniModifier();
@@ -173,7 +171,7 @@ void ImageConstructDrawableDescriptor(
         HILOGE("image construct with drawable descriptor failed, nativeObj is nullptr");
         return;
     }
-    modifier->getImageAniModifier()->setDrawableDescriptor(arkNode, drawable, static_cast<int>(drawableType));
+    modifier->getImageAniModifier()->setDrawableDescriptor(arkNode, drawable);
 }
 
 void ImageDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object colorFilterAni)

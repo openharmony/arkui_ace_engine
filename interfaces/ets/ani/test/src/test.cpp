@@ -116,7 +116,7 @@ KeyEvent GetKeyEvent(ani_env* env, ani_object obj)
         return keyEvent;
     }
     ani_long aniValue;
-    if (ANI_OK == env->Object_CallMethodByName_Long(aniValueObject, "unboxed", ":l", &aniValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Long(aniValueObject, "toLong", nullptr, &aniValue)) {
         keyEvent.unicode = static_cast<int64_t>(aniValue);
     }
     return keyEvent;

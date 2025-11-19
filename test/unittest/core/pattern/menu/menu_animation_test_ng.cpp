@@ -493,13 +493,10 @@ HWTEST_F(MenuAnimationTestNg, GetAnimationOffset001, TestSize.Level1)
      */
     wrapperPattern->menuPlacement_ = Placement::LEFT;
     wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::LEFT);
     wrapperPattern->menuPlacement_ = Placement::RIGHT;
     wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::RIGHT);
     wrapperPattern->menuPlacement_ = Placement::TOP;
     wrapperPattern->GetAnimationOffset();
-    EXPECT_EQ(wrapperPattern->menuPlacement_, Placement::TOP);
 }
 
 /**

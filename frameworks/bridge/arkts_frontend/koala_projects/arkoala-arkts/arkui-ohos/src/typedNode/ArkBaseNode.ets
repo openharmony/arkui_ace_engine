@@ -425,7 +425,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | Array<string> | undefined): this {
         return this
     }
     public draggable(value: boolean | undefined): this {

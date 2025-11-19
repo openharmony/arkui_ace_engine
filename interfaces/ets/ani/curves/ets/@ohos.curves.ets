@@ -38,7 +38,7 @@ export default namespace curves {
     export native function springCurve(velocity: double, mass: double, stiffness: double, damping: double):ICurve;
     export native function responsiveSpringMotion(response?: double, dampingFraction?: double, overlapDuration?: double): ICurve;
     export native function customCurve(interpolate: (fraction: double) => double): ICurve;
-    export native function stepsCurve(count: number, end: boolean): ICurve;
+    export native function stepsCurve(count: int, end: boolean): ICurve;
 
     export interface ICurve
     {

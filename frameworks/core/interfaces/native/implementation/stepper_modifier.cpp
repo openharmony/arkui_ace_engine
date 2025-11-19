@@ -75,7 +75,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        StepperModelStatic::SetOnFinish(frameNode, nullptr);
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
@@ -88,7 +88,7 @@ void SetOnSkipImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        StepperModelStatic::SetOnSkip(frameNode, nullptr);
         return;
     }
     auto onSkip = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
@@ -101,7 +101,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        StepperModelStatic::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](int32_t prevIndex, int32_t index) {
@@ -116,7 +116,7 @@ void SetOnNextImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        StepperModelStatic::SetOnNext(frameNode, nullptr);
         return;
     }
     auto onNext = [arkCallback = CallbackHelper(*optValue)](int32_t index, int32_t pendingIndex) {
@@ -131,7 +131,7 @@ void SetOnPreviousImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        StepperModelStatic::SetOnPrevious(frameNode, nullptr);
         return;
     }
     auto onPrevious = [arkCallback = CallbackHelper(*optValue)](int32_t index, int32_t pendingIndex) {

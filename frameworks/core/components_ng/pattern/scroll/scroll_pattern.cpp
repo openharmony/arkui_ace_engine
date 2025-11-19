@@ -1091,7 +1091,7 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, c
                             ? intervalSize_.Value() * mainSize
                             : (pipeline ? pipeline->NormalizeToPx(intervalSize_) : intervalSize_.ConvertToPx());
     CHECK_NULL_VOID(GreatOrEqual(intervalSize, SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
-    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
+    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis()) + contentStartOffset_ + contentEndOffset_;
     auto start = 0.0f;
     auto end = -scrollableDistance_;
     auto snapOffset = 0.0f;
@@ -1140,7 +1140,7 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, c
 void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign)
 {
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
-    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
+    auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis()) + contentStartOffset_ + contentEndOffset_;
     auto start = 0.0f;
     auto end = -scrollableDistance_;
     auto snapOffset = 0.0f;
