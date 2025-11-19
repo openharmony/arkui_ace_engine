@@ -7991,6 +7991,7 @@ struct ArkUIMultiThreadManagerAPI {
     ArkUI_Int32 (*postUITask)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
     ArkUI_Int32 (*postUITaskAndWait)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
     void (*executeAfterAttachTasks)(ArkUINodeHandle node);
+    ArkUI_Bool (*debugThreadSafeNodeEnabled)();
 };
 
 struct ArkUIDialogAPI {
