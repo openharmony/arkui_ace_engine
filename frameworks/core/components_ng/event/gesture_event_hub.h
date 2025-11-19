@@ -234,6 +234,7 @@ public:
     bool IsClickEventsEmpty() const;
     GestureEventFunc GetClickEvent();
     void BindMenu(GestureEventFunc&& showMenu);
+    void RemoveBindMenu();
     void RegisterMenuOnTouch(TouchEventFunc&& callback);
     void AddTouchEventForTips(TouchEventFunc&& tipsTouchEventFunc);
     bool IsLongClickable() const;
