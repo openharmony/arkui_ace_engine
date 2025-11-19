@@ -21,6 +21,7 @@ group("advanced_ui_component_static") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [
+      "treeview:treeView",
       "gridobjectsortcomponent:gridObjectSortComponent",
       "counter:counter",
       "composeListItem:composeListItem",
