@@ -30,7 +30,6 @@ import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
-let arkLazyTotalCount: int32 = 0 // update dataSource totalCount changes
 
 export function updateLazyItems() {
     globalLazyItems.forEach((age, node, map) => {
@@ -52,10 +51,6 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     isRepeat: boolean = false,
 ) {
     const node = createLazyNode(isRepeat)
-    if (arkLazyTotalCount !== dataSource.totalCount()) {
-        console.log(`dataSource totalCount changed from ${arkLazyTotalCount} to ${dataSource.totalCount()}`)
-        arkLazyTotalCount = dataSource.totalCount()
-    }
 
     let pool = rememberDisposable(
         () => new LazyItemPool(node, CustomComponent.current),
@@ -63,6 +58,10 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
             pool?.dispose()
         }
     )
+    if (pool.total !== dataSource.totalCount()) {
+        console.log(`dataSource totalCount changed from ${pool.total} to ${dataSource.totalCount()}`)
+        pool.total = dataSource.totalCount()
+    }
     let changeCounter = rememberMutableState(0)
     changeCounter.value //subscribe
     let listener = remember(() => {
@@ -162,6 +161,7 @@ class LazyItemPool implements Disposable {
     private _parent: PeerNode
     private _componentRoot?: Object
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
+    public total: int32 = 0 // total count of data source
     disposed: boolean = false
 
     /**
@@ -257,7 +257,7 @@ class LazyItemPool implements Disposable {
                     cacheStart,
                     cacheEnd,
                     isLoop,
-                    arkLazyTotalCount
+                    this.total
                 )
             })
         } catch (error) {
