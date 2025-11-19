@@ -432,7 +432,7 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest004, TestSize.Level0)
         return true;
     };
     eventHub->SetAboutToDelete(std::move(onAboutToDelete));
-    auto onSelectionChange = [&step, &onSelectionNum](const BaseEventInfo* info) { step++; };
+    auto onSelectionChange = [&step](const BaseEventInfo* info) { step++; };
     eventHub->SetOnSelectionChange(std::move(onSelectionChange));
     auto onIMEInputComplete = [&step](const RichEditorAbstractSpanResult& info) {
         EXPECT_EQ(step, 4);
@@ -453,11 +453,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest004, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest004
+ * @tc.name: UndoRedoCallBackTest005
  * @tc.desc: Test redo insert with selection.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest004, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -510,11 +510,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest004, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest005
+ * @tc.name: UndoRedoCallBackTest006
  * @tc.desc: Test redo insert with selection.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest005, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest006, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -533,7 +533,7 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest005, TestSize.Level0)
         return true;
     };
     eventHub->SetOnWillChange(std::move(onWillChange));
-    auto onSelectionChange = [&step, &onSelectionNum](const BaseEventInfo* info) {
+    auto onSelectionChange = [&step](const BaseEventInfo* info) {
         step++;
     };
     eventHub->SetOnSelectionChange(std::move(onSelectionChange));
@@ -561,11 +561,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest006
+ * @tc.name: UndoRedoCallBackTest007
  * @tc.desc: Test undo delete backward.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest006, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest007, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -614,11 +614,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest007
+ * @tc.name: UndoRedoCallBackTest008
  * @tc.desc: Test redo delete backward.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest007, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest008, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -670,11 +670,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest007, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest008
+ * @tc.name: UndoRedoCallBackTest009
  * @tc.desc: Test undo delete backward word
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest008, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest009, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -723,11 +723,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest008, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest009
+ * @tc.name: UndoRedoCallBackTest010
  * @tc.desc: Test redo delete backward word
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest009, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest010, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -779,11 +779,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest010
+ * @tc.name: UndoRedoCallBackTest011
  * @tc.desc: Test undo delete forward.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest010, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest011, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -832,11 +832,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest010, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest011
+ * @tc.name: UndoRedoCallBackTest012
  * @tc.desc: Test redo delete forward.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest011, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest012, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -888,11 +888,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest011, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest012
+ * @tc.name: UndoRedoCallBackTest013
  * @tc.desc: Test undo delete forward word
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest012, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest013, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -941,11 +941,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest012, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest013
+ * @tc.name: UndoRedoCallBackTest014
  * @tc.desc: Test redo delete forward word
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest013, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest014, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -997,11 +997,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest013, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest0014
+ * @tc.name: UndoRedoCallBackTest0015
  * @tc.desc: Test undo delete backward with selection.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest014, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest015, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1050,11 +1050,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest014, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest015
+ * @tc.name: UndoRedoCallBackTest016
  * @tc.desc: Test redo delete backward with selection.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest015, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest016, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1106,11 +1106,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest015, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest016
+ * @tc.name: UndoRedoCallBackTest017
  * @tc.desc: Test undo delete forward with selection.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest016, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest017, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1159,11 +1159,11 @@ HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest016, TestSize.Level0)
 }
 
 /**
- * @tc.name: UndoRedoCallBackTest017
+ * @tc.name: UndoRedoCallBackTest018
  * @tc.desc: Test redo delete forward with selection.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest017, TestSize.Level0)
+HWTEST_F(RichEditorStringUndoTestNg, UndoRedoCallBackTest018, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
