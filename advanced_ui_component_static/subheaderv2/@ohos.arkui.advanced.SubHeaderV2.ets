@@ -650,7 +650,10 @@ import {
       }
       children.forEach((child) => {
         constraint.minHeight = Math.min(Number(this.getMinHeight() as number), Number(constraint.maxHeight as number));
-        result.height = child.measure(constraint).height;
+        let childMeasureResult = child.measure(constraint);
+        if (childMeasureResult) {
+         result.height = childMeasureResult.height;
+        }
         result.width = Number(constraint.maxWidth as number);
       })
       return result;
@@ -1158,7 +1161,10 @@ import {
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
       constraint: ConstraintSizeOptions): SizeResult {
       children.forEach((child) => {
-        this.result = child.measure(constraint);
+        let childMeasureResult = child.measure(constraint);
+        if (childMeasureResult) {
+          this.result = childMeasureResult!;
+        }
       })
       console.log(`zzzz Child onMeasureSize ${JSON.stringify(this.result)}`)
       this.changeSymbolWidth(this.result)
@@ -1511,9 +1517,11 @@ import {
         minHeight: Math.max(textArrowHeight, Number(constraint.minHeight as number)),
         maxHeight: constraint.maxHeight,
       };
-      let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
-      textArrowWidth = Math.max(textArrowWidth, textMeasureResult.width);
-      textArrowHeight = Math.max(textArrowHeight, textMeasureResult.height);
+      let textMeasureResult: MeasureResult | undefined = textChild.measure(textConstraint);
+      if (textMeasureResult) {
+        textArrowWidth = Math.max(textArrowWidth, textMeasureResult.width);
+        textArrowHeight = Math.max(textArrowHeight, textMeasureResult.height);
+      }
   
       let arrowChild: Measurable = children[INDEX_ONE];
       let arrowConstraint: ConstraintSizeOptions = {
