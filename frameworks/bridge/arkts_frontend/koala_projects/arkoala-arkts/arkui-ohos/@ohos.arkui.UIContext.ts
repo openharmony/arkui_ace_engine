@@ -33,7 +33,7 @@ import { TextMenuOptions } from 'arkui/framework';
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { default as mediaquery } from '@ohos/mediaquery';
+import { default as mediaquery } from '@ohos.mediaquery';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
 import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
