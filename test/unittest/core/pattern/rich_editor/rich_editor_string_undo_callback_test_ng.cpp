@@ -269,7 +269,7 @@ HWTEST_F(RichEditorStringUndoCallBackTestNg, CallBackTest004, TestSize.Level0)
         return true;
     };
     eventHub->SetAboutToDelete(std::move(onAboutToDelete));
-    auto onSelectionChange = [&step, &onSelectionNum](const BaseEventInfo* info) {
+    auto onSelectionChange = [&step](const BaseEventInfo* info) {
         step++;
     };
     eventHub->SetOnSelectionChange(std::move(onSelectionChange));
@@ -372,8 +372,7 @@ HWTEST_F(RichEditorStringUndoCallBackTestNg, CallBackTest006, TestSize.Level0)
         return true;
     };
     eventHub->SetOnWillChange(std::move(onWillChange));
-    int32_t onSelectionNum = 0;
-    auto onSelectionChange = [&step, &onSelectionNum](const BaseEventInfo* info) {
+    auto onSelectionChange = [&step](const BaseEventInfo* info) {
         step++;
     };
     eventHub->SetOnSelectionChange(std::move(onSelectionChange));
