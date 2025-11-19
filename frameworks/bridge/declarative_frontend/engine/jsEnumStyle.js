@@ -461,6 +461,7 @@ let BlendApplyType;
 (function (BlendApplyType) {
   BlendApplyType[BlendApplyType.FAST = 0] = 'FAST';
   BlendApplyType[BlendApplyType.OFFSCREEN = 1] = 'OFFSCREEN';
+  BlendApplyType[BlendApplyType.OFFSCREEN_WITH_BACKGROUND = 2] = 'OFFSCREEN_WITH_BACKGROUND';
 })(BlendApplyType || (BlendApplyType = {}));
 
 let TextOverflow;
