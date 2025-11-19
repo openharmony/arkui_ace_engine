@@ -883,8 +883,22 @@ bool EventManager::DispatchMultiContainerEvent(const TouchEvent& point)
     return dispatchSuccess;
 }
 
+void EventManager::AddDumpTouchInfo(const TouchEvent& event)
+{
+    CHECK_RUN_ON(UI);
+    if (IsUseDumpTouchInfo()) {
+        NG::EventTouchInfoRecord& eventTouchInfoRecord = GetEventTouchInfoRecord();
+        eventTouchInfoRecord.AddTouchPoint(event, std::chrono::high_resolution_clock::now());
+        if (eventTouchInfoRecord.dequeMaxCnt_ > 1) {
+            SetIsUseDumpTouchInfo(false);
+            eventTouchInfoRecord.dequeMaxCnt_ = 0;
+        }
+    }
+}
+
 bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 {
+    AddDumpTouchInfo(event);
     if (event.sourceType == SourceType::TOUCH) {
         NG::GestureExtraHandler::NotifiyTouchEvent(event);
     }
@@ -2637,6 +2651,47 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
             for (auto& item : dumpList) {
                 DumpLog::GetInstance().Print(item.first, item.second);
             }
+        }
+    }
+}
+
+
+void EventManager::DoDumpTouchInfo(bool hasJson)
+{
+    CHECK_RUN_ON(UI);
+    if (hasJson) {
+        std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        eventTouchInfo_.DumpAndClear(children);
+        json->Put("DumpTouchInfo", children);
+        DumpLog::GetInstance().PrintJson(json->ToString());
+    } else {
+        std::list<std::string> dumpList;
+        eventTouchInfo_.DumpAndClear(dumpList);
+        for (const auto& item : dumpList) {
+            DumpLog::GetInstance().Print(item);
+        }
+    }
+}
+
+void EventManager::DumpTouchInfo(const std::vector<std::string>& params, bool hasJson)
+{
+    CHECK_RUN_ON(UI);
+    if (params.size() >= DUMP_DOUBLE_NUMBER) {
+        if (params[1] == "-b") {
+            SetIsUseDumpTouchInfo(true);
+            eventTouchInfo_.ClearDumpDeque();
+            return;
+        } else if (params[1] == "-d") {
+            DoDumpTouchInfo(hasJson);
+            return;
+        } else if (params[1] == "-e") {
+            SetIsUseDumpTouchInfo(false);
+            eventTouchInfo_.ClearDumpDeque();
+            return;
+        } else if (params[1] == "-c") {
+            DumpLog::GetInstance().Print(std::to_string(eventTouchInfo_.touchHistory_.size()));
+            return;
         }
     }
 }

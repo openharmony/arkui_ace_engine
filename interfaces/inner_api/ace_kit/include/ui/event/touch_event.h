@@ -76,6 +76,7 @@ struct TouchEvent final : public PointerEvent {
     int64_t deviceId = 0;
     uint64_t modifierKeyState = 0;
     TimeStamp pressedTime;
+    TimeStamp processTime;
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
     std::optional<float> tiltX;
