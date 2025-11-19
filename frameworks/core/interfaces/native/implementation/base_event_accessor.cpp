@@ -75,12 +75,10 @@ Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
     return Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(tstamp));
 }
-void SetTimestampImpl(Ark_BaseEvent peer,
-                      const Ark_Int64* timestamp)
+void SetTimestampImpl(Ark_BaseEvent peer, Ark_Int64 timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(timestamp);
-    int64_t value = Converter::Convert<int64_t>(*timestamp);
+    int64_t value = Converter::Convert<int64_t>(timestamp);
     std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
@@ -134,12 +132,10 @@ Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
     return Converter::ArkValue<Ark_Float64>(static_cast<float>(peer->GetBaseInfo()->GetForce()));
 }
-void SetPressureImpl(Ark_BaseEvent peer,
-                     const Ark_Float64* pressure)
+void SetPressureImpl(Ark_BaseEvent peer, Ark_Float64 pressure)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(pressure);
-    peer->GetBaseInfo()->SetForce(Converter::Convert<float>(*pressure));
+    peer->GetBaseInfo()->SetForce(Converter::Convert<float>(pressure));
 }
 Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
 {
@@ -147,12 +143,10 @@ Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
     auto value = peer->GetBaseInfo()->GetTiltX();
     return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
 }
-void SetTiltXImpl(Ark_BaseEvent peer,
-                  const Ark_Float64* tiltX)
+void SetTiltXImpl(Ark_BaseEvent peer, Ark_Float64 tiltX)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(tiltX);
-    peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(*tiltX));
+    peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(tiltX));
 }
 Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
 {
@@ -160,12 +154,10 @@ Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
     auto value = peer->GetBaseInfo()->GetTiltY();
     return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
 }
-void SetTiltYImpl(Ark_BaseEvent peer,
-                  const Ark_Float64* tiltY)
+void SetTiltYImpl(Ark_BaseEvent peer, Ark_Float64 tiltY)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(tiltY);
-    peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(*tiltY));
+    peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(tiltY));
 }
 Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
 {
