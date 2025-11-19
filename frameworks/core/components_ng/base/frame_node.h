@@ -344,7 +344,7 @@ public:
     template<typename T>
     RefPtr<T> GetAccessibilityProperty() const
     {
-        return DynamicCast<T>(accessibilityProperty_);
+        return DynamicCast<T>(const_cast<FrameNode*>(this)->GetOrCreateAccessibilityProperty());
     }
 
     template<typename T>
@@ -1660,6 +1660,8 @@ private:
     void UpdateBackground();
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
+    RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
+    bool isAccessibilityPropertyInitialized_ = false;
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

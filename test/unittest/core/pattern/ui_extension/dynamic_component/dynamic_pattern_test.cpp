@@ -395,7 +395,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest009, TestSize.Level1)
     EXPECT_EQ(property->GetChildWindowId(), 1);
     EXPECT_EQ(property->GetChildTreeId(), 1);
 
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     pattern->InitializeAccessibility();
     pattern->OnSetAccessibilityChildTree(1, 1);
     pattern->OnAccessibilityChildTreeRegister(1, 1, 1);

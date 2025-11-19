@@ -173,13 +173,16 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilitySelected001, TestSize.Level
         tag, nodeId, AceType::MakeRefPtr<Pattern>());
     NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
     viewAbstractModelNG.SetAccessibilitySelected(selected, resetValue);
-    EXPECT_FALSE(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isSelected_.has_value());
+    EXPECT_FALSE(NG::ViewStackProcessor::GetInstance()
+                     ->GetMainFrameNode()
+                     ->GetOrCreateAccessibilityProperty()
+                     ->isSelected_.has_value());
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilitySelected(selected, resetValue);
     EXPECT_EQ(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isSelected_, selected);
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetOrCreateAccessibilityProperty()->isSelected_,
+        selected);
 }
 
 /**
@@ -197,13 +200,16 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityChecked001, TestSize.Level1
         tag, nodeId, AceType::MakeRefPtr<Pattern>());
     NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
     viewAbstractModelNG.SetAccessibilityChecked(checked, resetValue);
-    EXPECT_FALSE(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->checkedType_.has_value());
+    EXPECT_FALSE(NG::ViewStackProcessor::GetInstance()
+                     ->GetMainFrameNode()
+                     ->GetOrCreateAccessibilityProperty()
+                     ->checkedType_.has_value());
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityChecked(checked, resetValue);
     EXPECT_EQ(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->checkedType_, checked);
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetOrCreateAccessibilityProperty()->checkedType_,
+        checked);
 }
 
 /**
@@ -221,13 +227,17 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityScrollTriggerable001, TestS
         tag, nodeId, AceType::MakeRefPtr<Pattern>());
     NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
     viewAbstractModelNG.SetAccessibilityScrollTriggerable(triggerable, resetValue);
-    EXPECT_TRUE(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isUserScrollTriggerable_);
+    EXPECT_TRUE(NG::ViewStackProcessor::GetInstance()
+                    ->GetMainFrameNode()
+                    ->GetOrCreateAccessibilityProperty()
+                    ->isUserScrollTriggerable_);
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityScrollTriggerable(triggerable, resetValue);
-    EXPECT_TRUE(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isUserScrollTriggerable_);
+    EXPECT_TRUE(NG::ViewStackProcessor::GetInstance()
+                    ->GetMainFrameNode()
+                    ->GetOrCreateAccessibilityProperty()
+                    ->isUserScrollTriggerable_);
 }
 
 /**
@@ -245,14 +255,18 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityRole001, TestSize.Level1)
         tag, nodeId, AceType::MakeRefPtr<Pattern>());
     NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
     viewAbstractModelNG.SetAccessibilityRole(role, resetValue);
-    EXPECT_EQ(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->accessibilityCustomRole_,
+    EXPECT_EQ(NG::ViewStackProcessor::GetInstance()
+                  ->GetMainFrameNode()
+                  ->GetOrCreateAccessibilityProperty()
+                  ->accessibilityCustomRole_,
         "");
 
     resetValue = false;
     viewAbstractModelNG.SetAccessibilityRole(role, resetValue);
-    EXPECT_EQ(
-        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->accessibilityCustomRole_,
+    EXPECT_EQ(NG::ViewStackProcessor::GetInstance()
+                  ->GetMainFrameNode()
+                  ->GetOrCreateAccessibilityProperty()
+                  ->accessibilityCustomRole_,
         role);
 }
 
