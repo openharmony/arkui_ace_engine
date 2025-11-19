@@ -405,6 +405,7 @@ HWTEST_F(WebPatternPartOneTest, NotifyMenuLifeCycleEvent_001, TestSize.Level1)
     webPattern->isFocus_ = false;
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
     EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
+#endif
 }
 
 /**
