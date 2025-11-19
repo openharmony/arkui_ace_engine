@@ -35,7 +35,7 @@ public:
     void TriggerFling(Ark_VMContext vmContext, const Ark_Float64 velocity);
     void TriggerScrollPage0(Ark_VMContext vmContext, const Ark_ScrollPageOptions* value);
     void TriggerScrollPage1(bool next);
-    Ark_OffsetResult TriggerCurrentOffset(Ark_VMContext vmContext);
+    Opt_OffsetResult TriggerCurrentOffset(Ark_VMContext vmContext);
     void TriggerScrollToIndex(Ark_VMContext vmContext, const Ark_Int32 value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
     void TriggerScrollBy(Ark_VMContext vmContext, const Dimension& xOffset, const Dimension& yOffset);

@@ -757,6 +757,30 @@ export class UIObserver {
         }
     }
 
+    public onScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(options, callback);
+        }
+    }
+
+    public offScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(options, callback);
+        }
+    }
+
+    public onScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(callback);
+        }
+    }
+
+    public offScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(callback);
+        }
+    }
+
     public onNavDestinationUpdate(
         options: uiObserver.NavDestinationSwitchObserverOptions,
         callback: Callback<uiObserver.NavDestinationInfo>

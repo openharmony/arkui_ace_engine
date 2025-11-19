@@ -74,6 +74,9 @@ import { ArkTextPickerComponent, ArkTextPickerPeer, DividerOptions } from "#gene
 import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
 import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
+import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from '#generated';
+import { ListHandWritten } from "./ListHandWritten"
+import { ArkWebComponent, JavaScriptProxy } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 
 export function hookId(component: object, value?: string) {}
@@ -610,6 +613,14 @@ export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkText
 
   const value_casted = value as (DividerOptions | null | undefined)
   peer.setDividerAttribute(value_casted)
+}
+
+export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListChildrenMainSizeImpl(node, value)
+}
+
+export function hookListItemGroupChildrenMainSizeImpl(node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListItemGroupChildrenMainSizeImpl(node, value)
 }
 
 export function hookJavaScriptProxy(

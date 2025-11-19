@@ -39968,7 +39968,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+    Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
                                        Ark_Scroller peer)
     {
         if (!needGroupedLog(1))

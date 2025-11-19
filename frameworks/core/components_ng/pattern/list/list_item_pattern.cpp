@@ -413,6 +413,26 @@ void ListItemPattern::OnModifyDone()
     SetAccessibilityAction();
 }
 
+void ListItemPattern::SetDeleteArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
+    if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
+        auto axis = GetAxis();
+        bool axisChanged = axis_ != axis;
+        axis_ = axis;
+        InitSwiperAction(axisChanged);
+        return;
+    }
+    auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemovePanEvent(panEvent_);
+    panEvent_.Reset();
+    springController_.Reset();
+}
+
 V2::SwipeEdgeEffect ListItemPattern::GetEdgeEffect()
 {
     auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();

@@ -222,6 +222,26 @@ void SetOnWillScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    std::optional<OnWillScrollCallback> arkCallback;
+    if (value) {
+        arkCallback = Converter::OptConvert<OnWillScrollCallback>(*value);
+    }
+    if (arkCallback) {
+        auto modelCallback = [callback = CallbackHelper(arkCallback.value())]
+            (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
+                ScrollFrameResult {
+            auto arkScrollOffset = Converter::ArkValue<Ark_Float64>(scrollOffset);
+            auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
+            auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
+            auto resultOpt = callback.InvokeWithOptConvertResult<ScrollFrameResult, Opt_ScrollResult,
+                Callback_Opt_ScrollResult_Void>(arkScrollOffset, arkScrollState, arkScrollSource);
+            ScrollFrameResult defaultResult { .offset = scrollOffset };
+            return resultOpt.value_or(defaultResult);
+        };
+        ScrollableModelStatic::SetOnWillScroll(frameNode, std::move(modelCallback));
+    } else {
+        ScrollableModelStatic::SetOnWillScroll(frameNode, nullptr);
+    }
 }
 void SetOnDidScrollImpl(Ark_NativePointer node,
                         const Opt_OnScrollCallback* value)
