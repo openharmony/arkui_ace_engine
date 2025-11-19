@@ -1886,6 +1886,15 @@ let ContextMenuMediaType;
   ContextMenuMediaType[ContextMenuMediaType.Image = 1] = 'Image';
 })(ContextMenuMediaType || (ContextMenuMediaType = {}));
 
+let ContextMenuDataMediaType;
+(function (ContextMenuDataMediaType) {
+  ContextMenuDataMediaType[ContextMenuDataMediaType.None = 0] = 'None';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Image = 1] = 'Image';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Video = 2] = 'Video';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Audio = 3] = 'Audio';
+  ContextMenuDataMediaType[ContextMenuDataMediaType.Canvas = 4] = 'Canvas';
+})(ContextMenuDataMediaType || (ContextMenuDataMediaType = {}));
+
 let ContextMenuInputFieldType;
 (function (ContextMenuInputFieldType) {
   ContextMenuInputFieldType[ContextMenuInputFieldType.None = 0] = 'None';
