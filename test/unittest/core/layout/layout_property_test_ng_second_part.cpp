@@ -106,17 +106,26 @@ HWTEST_F(LayoutPropertyTestNg, SetOverlayOffset001, TestSize.Level0)
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
 
     /**
-     * @tc.steps3 Call UpdateFlexBasis with overlayOffsetX and overlayOffsetY.
+     * @tc.steps3 Call UpdateFlexBasis with only overlayOffsetY.
+            xChanged = false, yChanged = false.
+     */
+    overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("1px"));
+    overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("2px"));
+    layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+
+    /**
+     * @tc.steps4 Call UpdateFlexBasis with overlayOffsetX and overlayOffsetY.
         @tc.expect: overlayOffsetX_ == overlayOffsetX and overlayOffsetY_ == overlayOffsetY
      */
     overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("2px"));
-    overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("2px"));
+    overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("3px"));
     layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
     EXPECT_EQ(layoutProperty->overlayOffsetX_, overlayOffsetX.value());
     EXPECT_EQ(layoutProperty->overlayOffsetY_, overlayOffsetY.value());
 
     /**
-     * @tc.steps3 Call UpdateFlexBasis with overlayOffsetX and overlayOffsetY.
+     * @tc.steps5 Call UpdateFlexBasis with overlayOffsetX and overlayOffsetY.
         @tc.expect: overlayOffsetX_ == overlayOffsetX and overlayOffsetY_ == overlayOffsetY
      */
     overlayOffsetX = std::nullopt;
