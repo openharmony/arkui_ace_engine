@@ -4787,12 +4787,13 @@ void ScrollablePattern::GetRepeatCountInfo(
             }
             repeatDifference += repeatVirtualCount - repeatRealCount;
             totalChildCount += repeatRealCount;
-        } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
-                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
-                   AceType::InstanceOf<CustomNode>(child) || AceType::InstanceOf<ParallelizeUIAdapterNode>(child)
-#ifdef ACE_STATIC
-                   || InstanceOf<ArkoalaLazyNode>(child)
-#endif
+        } else if (AceType::InstanceOf<FrameNode>(child) ||
+                   AceType::InstanceOf<LazyForEachNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
+                   AceType::InstanceOf<ForEachNode>(child) ||
+                   AceType::InstanceOf<CustomNode>(child) ||
+                   AceType::InstanceOf<ParallelizeUIAdapterNode>(child) ||
+                   AceType::InstanceOf<ArkoalaLazyNode>(child)
         ) {
             totalChildCount += child->FrameCount();
         } else {
