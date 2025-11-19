@@ -942,17 +942,16 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     }
     if (!needLayout) {
         loadingCtx_->FinishMeasure();
-    }
-    ClearReloadFlagsAfterLoad();
-    ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
-    {
+    } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
-        if (pipeline) {
+        if (pipeline && host->IsActive()) {
             pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
         }
     }
+    ClearReloadFlagsAfterLoad();
+    ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
     loadingCtx_->LoadImageData();
 }
 
