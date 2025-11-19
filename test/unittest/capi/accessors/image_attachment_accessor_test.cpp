@@ -529,7 +529,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestInvalidValues, TestSiz
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), 1);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), 3);
         accessor_->destroyPeer(peer);
     }
 }

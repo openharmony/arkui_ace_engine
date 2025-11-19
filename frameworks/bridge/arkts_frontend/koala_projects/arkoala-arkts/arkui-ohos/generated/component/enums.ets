@@ -551,10 +551,10 @@ export enum FunctionKey {
     DPAD_RIGHT = 17
 }
 export enum ImageSpanAlignment {
-    BASELINE = 0,
-    BOTTOM = 1,
+    BASELINE = 4,
+    BOTTOM = 3,
     CENTER = 2,
-    TOP = 3
+    TOP = 1
 }
 export enum ObscuredReasons {
     PLACEHOLDER = 0
