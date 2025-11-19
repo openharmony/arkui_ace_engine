@@ -41,6 +41,9 @@ type EnvRegistry = { [K in keyof EnvTypeMap]?: IEnvironmentValue<EnvTypeMap[K]> 
 // need to be unregister when UIContext destroyed
 type SystemEnvRegistry = { number?: EnvRegistry };
 
+// varName -> envKey
+type EnvMeta = Record<string, keyof EnvTypeMap>;
+
 /**
  * EnvV2
  *
@@ -54,17 +57,110 @@ type SystemEnvRegistry = { number?: EnvRegistry };
  */
 class EnvV2 {
   private static envValues: SystemEnvRegistry = {};
+  public static readonly ENV_DECO_META = Symbol('__env_deco_meta__');
+  public static readonly ENV_KEY_PREFIX: string = '__env_key__';
 
-  /**
-   * Registers an environment value for the given key using the provided context.
-   * Creates and stores the environment instance for later retrieval or cleanup.
-   */
-  public static registerEnv<K extends keyof EnvTypeMap>(key: K, context: UIContext, instanceId: number): IEnvironmentValue<EnvTypeMap[K]> {
-    const envRegister = EnvV2.envValues[instanceId] ??= {};
-    let existingEnv = envRegister[key];
-    if (existingEnv) {
-      stateMgmtConsole.debug(`Instance ${instanceId} already has an IEnvironmentValue for key ${key}. Returning the existing one.`);
-      return existingEnv;
+
+  public static addEnvKeyVariableDecoMeta<K extends keyof EnvTypeMap>(proto: Object, varName: string, key: K): void {
+    // add decorator meta data to prototype
+    const meta = proto[EnvV2.ENV_DECO_META] ??= {} as EnvMeta;
+    // find varName -> key, key -> [varName1, varName2,..., varNameN]
+    meta[varName] = key ;
+    const prefixKey: string = `${EnvV2.ENV_KEY_PREFIX}${key}`;
+    if (!meta[prefixKey]) {
+      meta[prefixKey] = new Array<string>();
+    }
+    meta[prefixKey].push(varName);
+  }
+
+  public static findEnvValueFromView<K extends keyof EnvTypeMap>(key: K, view: ViewBuildNodeBase): IEnvironmentValue<EnvTypeMap[K]> | undefined {
+    if (view instanceof PUV2ViewBase) {
+      const meta = view[EnvV2.ENV_DECO_META];
+      if (meta) {
+        const prefixKey: string = `${EnvV2.ENV_KEY_PREFIX}${key}`;
+        const varNames = meta[prefixKey];
+        if (varNames && Array.isArray(varNames) && varNames.length > 0) {
+          const varName: string = varNames[0];
+          const storeProp = ObserveV2.ENV_PREFIX + varName;
+          const existingEnvValue = view[storeProp];
+          if (existingEnvValue) {
+            stateMgmtConsole.debug(`find envValue key ${key} from view ${view.debugInfo__()}. Returning the existing one.`);
+            return existingEnvValue;
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+
+
+  public static findEnvRecursively<K extends keyof EnvTypeMap>(key: K, view: ViewBuildNodeBase): IEnvironmentValue<EnvTypeMap[K]> | undefined {
+    stateMgmtConsole.debug(`findEnv: searching '${key}' from view: ${view.debugInfo__()}`);
+
+    // if view is viewpu or viewv2, check if it has the @Env(key)
+    // if it contains @Env(key), return existingEnvValue
+    const existingEnvValue = EnvV2.findEnvValueFromView(key, view);
+    if (existingEnvValue) {
+      return existingEnvValue;
+    }
+
+    let parent: ViewBuildNodeBase | undefined;
+    if (view instanceof PUV2ViewBase) {
+      // view may be created by view or buildernode
+      parent = (view.getParent()  || view.__parentViewBuildNode__) as PUV2ViewBase;
+    } else {
+      // if view is buildernode
+      parent = (view as any).__parentViewOfBuildNode?.deref();
+    }
+
+    if (parent) {
+      stateMgmtConsole.debug(`findEnvRecursively: view ${view.debugInfo__()} has parent ${parent.debugInfo__()}, find @Env(${key}) in parent`);
+      return EnvV2.findEnvRecursively(key, parent);
+    }
+
+    // if parent is undefined, stop finding and return undefined
+    stateMgmtConsole.debug(`findEnvRecursively: view ${view.debugInfo__()} cannot find @Env(${key}) return undefined`);
+    return undefined;
+  }
+
+/**
+ * Registers an environment value for the specified key using the given context.
+ * Creates and stores the corresponding environment instance, and it will be cleaned up when the associated context is destroyed.
+ *
+ * @param newInstanceId Optional. If provided, indicates that this call occurs during a UI context switch
+ *                      and the environment binding should be re-associated with the new instance.
+ */
+  public static registerEnv<K extends keyof EnvTypeMap>(key: K, view: PUV2ViewBase, varName: string, newInstanceId?: number): IEnvironmentValue<EnvTypeMap[K]> {
+    const instanceId = view.getMainInstanceId();
+
+    stateMgmtConsole.debug(`registerEnv: Env '${key}' for view: ${view.debugInfo__()} view instanceId ${instanceId} newInstanceId: ${newInstanceId}`);
+
+    const envRegister = newInstanceId ? EnvV2.envValues[newInstanceId] ??= {} : EnvV2.envValues[instanceId] ??= {};
+
+    // step one: find EnvValue in parent recursively
+    let parent: ViewBuildNodeBase | undefined;
+
+    if (view instanceof PUV2ViewBase) {
+      // view may be created by view or buildernode
+      parent = (view.getParent()  || view.__parentViewBuildNode__) as PUV2ViewBase;
+    } else {
+      // if view is buildernode
+      parent =(view as any).__parentViewOfBuildNode?.deref();
+    }
+    if (parent) {
+      stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} has parent ${parent.debugInfo__()}, find @Env(${key}) ${varName} in parent`);
+      const existingEnv = EnvV2.findEnvRecursively(key, parent);
+      if (existingEnv) {
+        return existingEnv;
+      }
+    }
+
+    // step two: find EnvValue in envRegister Global
+    const storeProp = ObserveV2.ENV_PREFIX + varName;
+    const envValueInGlobal = envRegister[key];
+    if (envValueInGlobal) {
+        view[storeProp] = envValueInGlobal;
+        return envValueInGlobal;
     }
 
     const factory = envFactoryMap[key];
@@ -73,8 +169,10 @@ class EnvV2 {
       stateMgmtConsole.error(message);
       throw new Error(message);
     }
-    const newEnv: IEnvironmentValue<EnvTypeMap[K]> = factory(context);
+    const uiContext = newInstanceId ? getUIContextUsingInstanceId(newInstanceId): view.getUIContext();
+    const newEnv: IEnvironmentValue<EnvTypeMap[K]> = factory(uiContext);
     envRegister[key] = newEnv;
+    view[storeProp] = newEnv;
     return newEnv;
   }
 
@@ -110,5 +208,16 @@ class EnvV2 {
 
 function unregisterInstanceIdForEnv(instanceId: number): void {
   stateMgmtConsole.debug(`instanceid ${instanceId} destroy, unregister all key for @Env`);
-  EnvV2.unregisterAll(instanceId);
+  try {
+    EnvV2.unregisterAll(instanceId);
+  } catch (e) {
+    stateMgmtConsole.error(`Failed to unregister all environment keys for instance ${instanceId}: ${e.message} ${e.stack}`);
+  }
+}
+
+function getUIContextUsingInstanceId(instanceId: number): UIContext {
+  if (typeof globalThis.__getUIContext__ !== 'function') {
+    throw Error(`there is no __getUIContext__ in globalThis, internal error`)
+  }
+  return globalThis.__getUIContext__(instanceId);
 }

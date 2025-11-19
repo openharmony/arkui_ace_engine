@@ -101,6 +101,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
   public __isBlockRecycleOrReuse__: boolean = false;
 
+  // view is switched to new instance by builderNode
+  protected __updatedInstanceId__?: number;
+
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
@@ -242,6 +245,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public allowReusableV2Descendant(): boolean {
     return this.nativeViewPartialUpdate.allowReusableV2Descendant();
+  }
+
+  public __registerUpdateInstanceForEnvFunc__Internal(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void {
+    return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
   }
   
   // globally unique id, this is different from compilerAssignedUniqueChildId!
@@ -395,6 +402,42 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public dumpReport(): void {
     stateMgmtConsole.warn(`Printing profiler information`);
     stateMgmtProfiler.report();
+  }
+
+  protected __lastestInstanceId_value__: number = -1;
+
+  get __lastestInstanceId__Internal(): number {
+    if (this.__lastestInstanceId_value__ === -1) {
+      this.__lastestInstanceId_value__ = this.getMainInstanceId();
+    }
+    return this.__lastestInstanceId_value__;
+  }
+
+  set __lastestInstanceId__Internal(newInstanceId: number) {
+    if (newInstanceId !== -1) {
+      this.__lastestInstanceId_value__ = newInstanceId;
+    }
+  }
+
+  public __updateInstanceIdForEnvValue__Internal(newInstanceId: number): void {
+    stateMgmtConsole.debug(`updateInstanceIdForEnvValue ${this.debugInfo__()} instance id ${this.__lastestInstanceId__Internal} -> new InstanceId ${newInstanceId}`);
+    this.__lastestInstanceId__Internal = newInstanceId;
+    // there is no env in current view
+    const meta = this[EnvV2.ENV_DECO_META] as EnvMeta | undefined;
+    if (!meta || !(typeof meta === 'object')) {
+      return;
+    }
+
+    const propertyVariableNames = Object.entries(meta);
+    propertyVariableNames
+    // loop the varName, filer the key
+    .filter(([varName, _]) => !varName.startsWith(EnvV2.ENV_KEY_PREFIX))
+    .forEach(([varName, envKey]) => {
+      EnvV2.registerEnv(envKey, this, varName, newInstanceId);
+      ObserveV2.getObserve().fireChange(this, varName);
+    })
+    // update ui synchronously 
+    ObserveV2.getObserve().updateDirty2(true);
   }
 
   /**

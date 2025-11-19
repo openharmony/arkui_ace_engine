@@ -34,7 +34,9 @@ abstract class ViewBuildNodeBase {
     // Refer to the buildNode parent if it exists.
     // It is undefined, if current node is created in view.
     // It is not undefined, if current node is created in buildNode.
-    protected __parentViewBuildNode__: ViewBuildNodeBase = undefined;
+    // view's builder parent, only view has __parentViewBuildNode__, buildernode does not have this
+    // buildernode parent see: __parentViewOfBuildNode
+    public __parentViewBuildNode__: ViewBuildNodeBase = undefined;
 
     // will find provide for consume only when __enableBuilderNodeConsume__ is true
     // to avoid the affect the performance for builderNode
