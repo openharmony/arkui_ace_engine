@@ -786,12 +786,12 @@ HWTEST_F(UIExtensionComponentTestTwoNg, DispatchDisplayAreaWithDelay001, TestSiz
      */
     uint32_t delayTime = 0;
     pattern->DispatchDisplayAreaWithDelay(delayTime);
-    EXPECT_TRUE(pattern->dispatchDisplayAreaTaskTime_->lastTaskTime > 0);
+    EXPECT_TRUE(pattern->dispatchDisplayAreaTaskTime_.lastTaskTime > 0);
     delayTime = 2;
     pattern->DispatchDisplayAreaWithDelay(delayTime);
     pattern->DispatchDisplayAreaWithDelay(delayTime);
     pattern->DispatchDisplayAreaWithDelay(delayTime);
-    EXPECT_TRUE(pattern->dispatchDisplayAreaTaskTime_->lastTaskTime > 0);
+    EXPECT_TRUE(pattern->dispatchDisplayAreaTaskTime_.lastTaskTime > 0);
 #endif
 }
 /**
