@@ -538,9 +538,15 @@ public:
             if (type == CREDENTIAL_UKEY && !g_huksCryptoExtensionAbility) {
                 napi_throw_error(GetNapiEnv(), std::to_string(CAPABILITY_NOT_SUPPORTED_ERROR).c_str(),
                                  CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
-                result_->HandleCancel();
+                if (result_) {
+                    result_->HandleCancel();
+                }
                 return;
             }
+            if (result_) {
+                result_->HandleConfirm(identity, type);	
+            }
+            return;
         } else {
             return;
         }
