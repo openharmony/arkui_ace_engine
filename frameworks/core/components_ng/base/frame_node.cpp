@@ -2724,7 +2724,7 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
-    if (isDeleteRsNode_) {
+    if (isDeleteRsNode_ == RsNodeDeleteFlag::ALLOWED) {
         auto parentFrameNode = GetParentFrameNode();
         if (parentFrameNode) {
             parentFrameNode->MarkNeedSyncRenderTree();
@@ -6492,7 +6492,7 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto renderContext = GetRenderContext();
-        if (!isDeleteRsNode_ && renderContext) {
+        if (isDeleteRsNode_ != RsNodeDeleteFlag::ALLOWED && renderContext) {
             renderContext->SetRSUIContext(context);
         }
     }
