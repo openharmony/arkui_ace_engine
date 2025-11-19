@@ -55,7 +55,7 @@ void ParseSize(std::pair<Dimension, Dimension>& size, const Ark_Tuple_Dimension_
         size.second = *height;
     }
 }
-int32_t ParseEmitRate(const Opt_Number& value)
+int32_t ParseEmitRate(const Opt_Int32& value)
 {
     int32_t emitRate = PARTICLE_DEFAULT_EMITTER_RATE;
     std::optional<int32_t> emitRateOpt = Converter::OptConvert<int32_t>(value);
@@ -64,7 +64,25 @@ int32_t ParseEmitRate(const Opt_Number& value)
     }
     return emitRate;
 }
-std::pair<float, float> ParseParticleRange(const Ark_Tuple_Number_Number& src, float defaultValue)
+std::pair<float, float> ParseParticleRange(const Ark_Tuple_Double_Double& src, float defaultValue)
+{
+    auto from = Converter::Convert<float>(src.value0);
+    auto to = Converter::Convert<float>(src.value1);
+    if (GreatNotEqual(from, to)) {
+        return std::pair<float, float>(defaultValue, defaultValue);
+    }
+    return std::pair<float, float>(from, to);
+}
+std::pair<float, float> ParseParticleRange(const Ark_Tuple_I32_I32 & src, float defaultValue)
+{
+    auto from = Converter::Convert<float>(src.value0);
+    auto to = Converter::Convert<float>(src.value1);
+    if (GreatNotEqual(from, to)) {
+        return std::pair<float, float>(defaultValue, defaultValue);
+    }
+    return std::pair<float, float>(from, to);
+}
+std::pair<float, float> ParseParticleRange(const Ark_Tuple_F64_F64  & src, float defaultValue)
 {
     auto from = Converter::Convert<float>(src.value0);
     auto to = Converter::Convert<float>(src.value1);
@@ -94,7 +112,7 @@ void SetNoneColorUpdater(ParticleColorPropertyUpdater& updater)
     noneUpdaterConfig.SetInValid(0);
     updater.SetConfig(noneUpdaterConfig);
 }
-void ParseFloatInitRange(const Ark_Tuple_Number_Number& arkRange, ParticleFloatPropertyOption& floatOption,
+void ParseFloatInitRange(const Ark_Tuple_Double_Double & arkRange, ParticleFloatPropertyOption& floatOption,
     float defaultValue, float minValue, float maxValue)
 {
     float from = Converter::Convert<float>(arkRange.value0);
@@ -128,17 +146,14 @@ RefPtr<Curve> ParseCurve(const Opt_Union_Curve_ICurve arkCurve)
     return Curves::LINEAR;
 }
 
-bool ParseFloatRandomConfig(const Opt_Union_Tuple_Number_Number_Array_ParticlePropertyAnimationNumberInner& arkObject,
+bool ParseFloatRandomConfig(const Ark_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner& arkObject,
     ParticleFloatPropertyUpdater& updater)
 {
-    if (arkObject.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        return false;
-    }
     constexpr int RANDOM_INDEX = 0;
-    if (arkObject.value.selector != RANDOM_INDEX) {
+    if (arkObject.selector != RANDOM_INDEX) {
         return false;
     }
-    auto randomRangePair = ParseParticleRange(arkObject.value.value0, 0.0f);
+    auto randomRangePair = ParseParticleRange(arkObject.value0, 0.0f);
     ParticleFloatPropertyUpdaterConfig randomUpdaterConfig;
     randomUpdaterConfig.SetRandomConfig(randomRangePair);
     updater.SetConfig(randomUpdaterConfig);
@@ -183,18 +198,18 @@ std::list<NG::ParticlePropertyAnimation<float>> ParseAnimationFloatArray(
     }
     return particleAnimationFloatArray;
 }
-bool ParseFloatCurveConfig(const Opt_Union_Tuple_Number_Number_Array_ParticlePropertyAnimationNumberInner& arkObject,
+bool ParseFloatCurveConfig(const Ark_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner& arkObject,
     ParticleFloatPropertyUpdater& updater, float defaultValue, float minValue, float maxValue)
 {
-    if (arkObject.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        return false;
-    }
+ 
+ 
+ 
     constexpr int ANIMATION_INDEX = 1;
-    if (arkObject.value.selector != ANIMATION_INDEX) {
+    if (arkObject.selector != ANIMATION_INDEX) {
         return false;
     }
     auto particleAnimationFloatArray =
-        ParseAnimationFloatArray(arkObject.value.value1, defaultValue, minValue, maxValue);
+        ParseAnimationFloatArray(arkObject.value1, defaultValue, minValue, maxValue);
     NG::ParticleFloatPropertyUpdaterConfig updateConfig;
     updateConfig.SetAnimations(particleAnimationFloatArray);
     updater.SetConfig(updateConfig);
@@ -210,7 +225,7 @@ bool ParseFloatUpdater(const Ark_ParticleUpdaterOptionsInner& arkObject, Particl
     }
     updater.SetUpdaterType(type);
     if (type == UpdaterType::RANDOM) {
-        if (!ParseFloatRandomConfig(arkObject.config, updater)) {
+        if (!ParseFloatRandomConfig(arkObject.config.value, updater)) {
             auto randomRangePair = std::pair<float, float>(0.0f, 0.0f);
             NG::ParticleFloatPropertyUpdaterConfig randomUpdaterConfig;
             randomUpdaterConfig.SetRandomConfig(randomRangePair);
@@ -218,7 +233,7 @@ bool ParseFloatUpdater(const Ark_ParticleUpdaterOptionsInner& arkObject, Particl
         }
         return true;
     } else if (type == NG::UpdaterType::CURVE) {
-        if (!ParseFloatCurveConfig(arkObject.config, updater, defaultValue, minValue, maxValue)) {
+        if (!ParseFloatCurveConfig(arkObject.config.value, updater, defaultValue, minValue, maxValue)) {
             std::list<NG::ParticlePropertyAnimation<float>> particleAnimationFloatArray;
             NG::ParticleFloatPropertyUpdaterConfig updateConfig;
             updateConfig.SetAnimations(particleAnimationFloatArray);
@@ -418,14 +433,15 @@ bool ParseParticleObject(const Ark_EmitterParticleOptions& src, Particle& result
     }
     result.SetCount(count);
     int64_t lifeTime = 1000;
-    std::optional<long> lifeTimeIntValue =
-        Converter::OptConvert<long>(src.lifetime); // notice: long is not supported now
+    std::optional<int32_t> arkLifeTime = Converter::OptConvert<int32_t>(src.lifetime);
+    std::optional<long> lifeTimeIntValue = static_cast<long>(arkLifeTime.value_or(lifeTime));
     if (lifeTimeIntValue && *lifeTimeIntValue >= -1) {
         lifeTime = *lifeTimeIntValue;
     }
     result.SetLifeTime(lifeTime);
     int64_t lifeTimeRange = 0;
-    std::optional<long> lifeTimeRangeIntValue = Converter::OptConvert<long>(src.lifetimeRange);
+    std::optional<int32_t> arkLifeTimeRange = Converter::OptConvert<int32_t>(src.lifetimeRange);
+    std::optional<long> lifeTimeRangeIntValue = static_cast<long>(arkLifeTimeRange.value_or(lifeTimeRange));
     if (lifeTimeRangeIntValue && *lifeTimeRangeIntValue >= 0) {
         lifeTimeRange = *lifeTimeRangeIntValue;
     }
