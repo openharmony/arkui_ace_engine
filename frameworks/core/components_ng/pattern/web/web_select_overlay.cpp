@@ -200,6 +200,13 @@ void WebSelectOverlay::SetEditMenuOptions(SelectOverlayInfo& selectInfo)
 
 bool WebSelectOverlay::IsSelectHandleReverse()
 {
+    if (selectOverlayDragging_) {
+        if (startSelectionHandle_->IsDragging()) {
+            return !isCurrentStartHandleDragging_;
+        } else if (endSelectionHandle_->IsDragging()) {
+            return isCurrentStartHandleDragging_;
+        }
+    }
     if (startSelectionHandle_->GetTouchHandleType() ==
         OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE &&
         endSelectionHandle_->GetTouchHandleType() ==
