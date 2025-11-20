@@ -63,6 +63,11 @@ public:
         }
     }
 
+    static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+    {
+        ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutPolicy, isWidth);
+    }
+
     static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
     {
         if (height.Unit() == DimensionUnit::CALC) {

@@ -70,6 +70,7 @@
 #include "core/interfaces/native/implementation/text_field_modifier.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
+#include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
 #include "dismiss_popup_action_peer.h"
@@ -1303,6 +1304,12 @@ BiasOpt Convert(const Ark_Bias& src)
 }
 
 template<>
+LayoutCalPolicy Convert(const Ark_LayoutPolicy& src)
+{
+    return src ? src->layoutPolicy :LayoutCalPolicy::NO_MATCH;
+}
+
+template<>
 void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
 {
     switch (src) {
@@ -2032,7 +2039,9 @@ void SetWidthImpl(Ark_NativePointer node,
             SetWidthInternal(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
-            LOGE("WidthImpl: Ark_LayoutPolicy processint is not implemented yet!");
+            auto result = Converter::OptConvert<LayoutCalPolicy>(src);
+            ViewAbstractModelStatic::UpdateLayoutPolicyProperty(
+                frameNode, result.value_or(LayoutCalPolicy::NO_MATCH), true);
         },
         [frameNode]() {
             SetWidthInternal(frameNode, std::nullopt);
@@ -2070,7 +2079,9 @@ void SetHeightImpl(Ark_NativePointer node,
             SetHeightInternal(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
-            LOGE("HeightImpl: Ark_LayoutPolicy processint is not implemented yet!");
+            auto result = Converter::OptConvert<LayoutCalPolicy>(src);
+            ViewAbstractModelStatic::UpdateLayoutPolicyProperty(
+                frameNode, result.value_or(LayoutCalPolicy::NO_MATCH), false);
         },
         [frameNode]() {
             SetHeightInternal(frameNode, std::nullopt);
