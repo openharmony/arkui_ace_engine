@@ -240,12 +240,13 @@ public:
     void SetSelectDetectEnable(bool value);
     bool GetSelectDetectEnable();
     void ResetSelectDetectEnable();
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types);
-    std::vector<TextDataDetectType> GetSelectDetectConfig();
-    void ResetSelectDetectConfig();
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {}
+    std::vector<TextDataDetectType> GetSelectDetectConfig()
+    {
+        return std::vector<TextDataDetectType>();
+    }
+    void ResetSelectDetectConfig() {}
     void SelectAIDetect();
-    void UseSelectDetectConfigFollow(std::unordered_map<TextDataDetectType, bool>& optionTypes);
-    void UseSelectDetectConfigUserSet(std::unordered_map<TextDataDetectType, bool>& optionTypes);
     // --------------- select AI detect end -------------------
     void SetTextDetectEnableMultiThread(bool enable);
     bool GetTextDetectEnable()
@@ -1112,8 +1113,6 @@ protected:
     RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
     bool selectDetectEnabledIsUserSet_ = false; // Process the logic following interface dataDetectorConfig
     bool selectDetectEnabled_ = true;
-    bool selectDetectConfigIsUserSet_ = false; // Process the logic following interface dataDetectorConfig
-    std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;

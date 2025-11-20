@@ -11961,22 +11961,6 @@ class SearchSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 SearchSelectDetectorEnableModifier.identity = Symbol('searchSelectDetectorEnable');
-class SearchSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().search.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-SearchSelectDetectorConfigModifier.identity = Symbol('searchSelectDetectorConfig');
 class SearchOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12061,10 +12045,6 @@ class ArkSearchComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorEnableModifier.identity, SearchSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorConfigModifier.identity, SearchSelectDetectorConfigModifier, config);
     return this;
   }
   showCounter(value) {
@@ -14515,22 +14495,6 @@ class TextSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextSelectDetectorEnableModifier.identity = Symbol('textSelectDetectorEnable');
-class TextSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().text.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().text.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-TextSelectDetectorConfigModifier.identity = Symbol('textSelectDetectorConfig');
 class TextOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14804,10 +14768,6 @@ class ArkTextComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextSelectDetectorEnableModifier.identity, TextSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextSelectDetectorConfigModifier.identity, TextSelectDetectorConfigModifier, config);
     return this;
   }
   font(value, options) {
@@ -16447,22 +16407,6 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextAreaSelectDetectorEnableModifier.identity = Symbol('textAreaSelectDetectorEnable');
-class TextAreaSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textArea.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textArea.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-TextAreaSelectDetectorConfigModifier.identity = Symbol('textAreaSelectDetectorConfig');
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16483,10 +16427,6 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
     return this;
   }
   allowChildCount() {
@@ -18486,22 +18426,6 @@ class TextInputSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextInputSelectDetectorEnableModifier.identity = Symbol('textInputSelectDetectorEnable');
-class TextInputSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textInput.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textInput.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-TextInputSelectDetectorConfigModifier.identity = Symbol('textInputSelectDetectorConfig');
 
 class TextInputOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
@@ -18531,10 +18455,6 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorEnableModifier.identity, TextInputSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorConfigModifier.identity, TextInputSelectDetectorConfigModifier, config);
     return this;
   }
   setText(value) {

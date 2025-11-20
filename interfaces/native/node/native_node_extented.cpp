@@ -68,35 +68,6 @@ void* OH_ArkUI_LayoutConstraint_Dispose(ArkUI_LayoutConstraint* constraint)
     return nullptr;
 }
 
-ArkUI_SelectedDataDetectorConfig* OH_ArkUI_SelectedDataDetectorConfig_Create()
-{
-    ArkUI_SelectedDataDetectorConfig* config = new ArkUI_SelectedDataDetectorConfig();
-    return config;
-}
-
-void OH_ArkUI_SelectedDataDetectorConfig_Dispose(ArkUI_SelectedDataDetectorConfig* config)
-{
-    delete config;
-    config = nullptr;
-}
-
-void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length)
-{
-    CHECK_NULL_VOID(config);
-    config->types.clear();
-    for (uint32_t i = 0; i < length; ++i) {
-        config->types.push_back(types[i]);
-    }
-}
-
-int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length)
-{
-    CHECK_NULL_RETURN(config, 0);
-    return config->types.size();
-}
-
 ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(ArkUI_NodeCustomEvent* event)
 {
     CHECK_NULL_RETURN(event, nullptr);

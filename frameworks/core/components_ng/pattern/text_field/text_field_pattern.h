@@ -1787,9 +1787,6 @@ public:
     void SetSelectDetectEnable(bool value);
     bool GetSelectDetectEnable();
     void ResetSelectDetectEnable();
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types);
-    std::vector<TextDataDetectType> GetSelectDetectConfig();
-    void ResetSelectDetectConfig();
     void SelectAIDetect();
     void HandleAIMenuOption(const std::string& labelInfo = "");
     void UpdateAIMenuOptions();
@@ -1846,8 +1843,6 @@ protected:
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool selectDetectEnabledIsUserSet_ = false;
     bool selectDetectEnabled_ = true;
-    bool selectDetectConfigIsUserSet_ = false;
-    std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
 private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;

@@ -111,7 +111,6 @@ public:
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
-    static void SetSelectDetectConfig(const JSCallbackInfo& info);
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void SetSearchButtonOptions(const JSCallbackInfo& info);

@@ -43,7 +43,6 @@ public:
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
-    static void SetSelectDetectConfig(const JSCallbackInfo& info);
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetCaretStyle(const JSCallbackInfo& info);
