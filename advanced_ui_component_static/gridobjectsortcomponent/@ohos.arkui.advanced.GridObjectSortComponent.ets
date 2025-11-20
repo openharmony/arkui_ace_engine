@@ -119,10 +119,10 @@ const DELETE = 'delete';
 
 // declaring interface, enum, class
 export interface GridObjectSortComponentItem {
-  id: number | string;
+  id: Int | string;
   text: ResourceStr;
   selected: boolean;
-  order: number;
+  order: Int;
   url?: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
   visibility?: Visibility;
@@ -130,7 +130,7 @@ export interface GridObjectSortComponentItem {
 
 export interface GridObjectSortComponentOptions {
   type?: GridObjectSortComponentType;
-  imageSize?: number | Resource;
+  imageSize?: Int | Resource;
   normalTitle?: ResourceStr;
   editTitle?: ResourceStr;
   showAreaTitle?: ResourceStr;
@@ -318,12 +318,12 @@ export struct GridObjectSortComponent {
   }
 
   // translate option imageSize to symbol fontSize
-  getSymbolFontSizeFrom(imageSize?: number | Resource | undefined): string | Resource {
+  getSymbolFontSizeFrom(imageSize?: Int | Resource | undefined): string | Resource {
     if (imageSize === undefined) {
       return SYMBOL_DEFAULT;
     }
-    if (typeof imageSize === 'number') {
-      return `${imageSize as number}vp`;
+    if (typeof imageSize === 'Int') {
+      return `${imageSize as Int}vp`;
     }
     return imageSize as Resource;
   }
@@ -404,7 +404,7 @@ export struct GridObjectSortComponent {
 
   sortBy() {
     return (a: GridObjectSortComponentItem, b: GridObjectSortComponentItem) => {
-      return a.order - b.order;
+      return (a.order - b.order) as Number;
     };
   }
 
@@ -604,11 +604,11 @@ export struct GridObjectSortComponent {
   }
 
   getNewData(data: GridObjectSortComponentItem[],
-    state: boolean, startIndex: number): GridObjectSortComponentItem[] {
+    state: boolean, startIndex: Int): GridObjectSortComponentItem[] {
     data.forEach((val, index) => {
       if (val && typeof val === 'object') {
         val.selected = state;
-        val.order = startIndex + index;
+        val.order = startIndex + (index as Int);
         val.visibility = Visibility.Visible;
       }
     });
@@ -886,6 +886,7 @@ export struct GridObjectSortComponent {
     return { x: 0, y: 0 };
   }
 
+
   @Builder
   PixelMapBuilder(url: ResourceStr | SymbolGlyphModifier | undefined, text: ResourceStr) {
     Stack({ alignContent: Alignment.Center }) {
@@ -894,14 +895,14 @@ export struct GridObjectSortComponent {
           if (url === undefined) {
             SymbolGlyph()
               .draggable(false)
-              .height(this.options.imageSize || SYMBOL_DEFAULT)
-              .width(this.options.imageSize || SYMBOL_DEFAULT)
+              .height(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
+              .width(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
               .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
-              .height(this.options.imageSize || SYMBOL_DEFAULT)
-              .width(this.options.imageSize || SYMBOL_DEFAULT)
+              .height(this.getSymbolFontSizeFrom(this.options.imageSize)|| SYMBOL_DEFAULT)
+              .width(this.getSymbolFontSizeFrom(this.options.imageSize)|| SYMBOL_DEFAULT)
               .attributeModifier(url as SymbolGlyphModifier)
               .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
               .symbolEffect(new SymbolEffect(), false)
@@ -1355,7 +1356,7 @@ export struct GridObjectSortComponent {
           }
           .onHover((isHover: boolean, event: HoverEvent) => {
             if (isHover) {
-              this.hoverId = item.id;
+              this.hoverId = item.id as Int;
             } else {
               this.hoverId = '';
             }
@@ -1604,7 +1605,7 @@ export struct GridObjectSortComponent {
             }
             .onHover((isHover: boolean, event: HoverEvent) => {
               if (isHover) {
-                this.hoverId = select.id;
+                this.hoverId = select.id as Int;
               } else {
                 this.hoverId = '';
               }
@@ -1721,6 +1722,33 @@ export struct GridObjectSortComponent {
         duration: ENTER_EXIT_ICON_DURATION,
         curve: this.imageText ? REMOVE_ADD_SPRING as ICurve : COMMON_BEZIER as ICurve,
       } as AnimateParam : { duration: 0 } as AnimateParam)
+      .onItemDragStart((event: ItemDragInfo, itemIndex: Int) => {
+        this.itemIndex = itemIndex;
+        this.selectedIndex = -1;
+        if (!this.gridComState) {
+          return undefined;
+        }
+        this.isStartDrag = true;
+        this.insertIndex = itemIndex;
+        this.dragContent = this.selected[itemIndex as Int];
+        this.dragContentIndex = itemIndex;
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START,
+          this.getAccessibilityText(this.dragContent?.text ?? ''));
+        this.sendAccessibility();
+        this.PixelMapBuilder(this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text ?? '');
+        return undefined
+      })
+      .onItemDrop((event: ItemDragInfo, itemIndex: Int, insertIndex: Int, isSuccess: Boolean) => {
+        this.insertItem(itemIndex, insertIndex);
+      })
+      .onItemDragMove(
+        (event: ItemDragInfo, itemIndex: Int, insertIndex: Int) =>
+        this.onDragMoveEvent(event, itemIndex, insertIndex)
+      )
+      .onItemDragLeave((event: ItemDragInfo, itemIndex: Int) => {
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_ILLEGAL_AREA);
+        this.sendAccessibility();
+      })
     }
     .accessibilityLevel((this.selected.length === 0) ? YES : NO)
     .parallelGesture(
