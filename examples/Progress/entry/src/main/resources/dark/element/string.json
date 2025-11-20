@@ -1,0 +1,159 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "FontWeight",
+      "value": "Length"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "contentOpacity",
+      "value": "0.9"
+    },
+    {
+      "name": "QRcode",
+      "value": "hellooooo"
+    },
+    {
+      "name": "number_1",
+      "value": "5"
+    },
+    {
+      "name": "number_10",
+      "value": "50"
+    },
+    {
+      "name": "number_30",
+      "value": "80"
+    },
+    {
+      "name": "number_50",
+      "value": "100"
+    },
+    {
+      "name": "number_120",
+      "value": "320"
+    },
+    {
+      "name": "number_300",
+      "value": "600"
+    },
+    {
+      "name": "HarmonyOS_Sans",
+      "value": "medium"
+    },
+    {
+      "name": "medium",
+      "value": "HarmonyOS_Sans"
+    },
+    {
+      "name": "format",
+      "value": "yyyy-dd-MM"
+    },
+
+    {
+      "name": "fp",
+      "value": "15fp"
+    },
+    {
+      "name": "vp",
+      "value": "40vp"
+    },
+    {
+      "name": "px",
+      "value": "50px"
+    },
+    {
+      "name": "number",
+      "value": "50"
+    },
+    {
+      "name": "scaleWidth",
+      "value": "50fp"
+    },
+    {
+      "name": "scaleWidth2",
+      "value": "50vp"
+    },
+    {
+      "name": "scaleWidth3",
+      "value": "50px"
+    },
+    {
+      "name": "scaleWidth4",
+      "value": "50"
+    },
+    {
+      "name": "LittleCat",
+      "value": "30vp"
+    },
+    {
+      "name": "ResourceString",
+      "value": "现在看到的这句就是通过string.json引用的"
+    },
+    {
+      "name": "string_value_40fp",
+      "value": "45fp"
+    },
+    {
+      "name": "LineSpacingExample",
+      "value": "25fp"
+    },
+    {
+      "name": "TextShadowOffSetX",
+      "value": "10"
+    },
+    {
+      "name": "TextShadowOffSetY",
+      "value": "10"
+    },
+    {
+      "name": "TextFontSize",
+      "value": "10vp"
+    },
+    {
+      "name": "string_value_40",
+      "value": "1"
+    },
+    {
+      "name": "string_value_30",
+      "value": "55"
+    },
+    {
+      "name": "string_value_20",
+      "value": "45"
+    },
+    {
+      "name": "string_value_n20",
+      "value": "-20"
+    },
+    {
+      "name": "string_value_10",
+      "value": "1"
+    },
+    {
+      "name": "string_value_5",
+      "value": "15"
+    },
+    {
+      "name": "fontFamily01",
+      "value": "HarmonyOS Sans"
+    },
+    {
+      "name": "offsetX",
+      "value": "100"
+    }
+
+
+  ]
+}
