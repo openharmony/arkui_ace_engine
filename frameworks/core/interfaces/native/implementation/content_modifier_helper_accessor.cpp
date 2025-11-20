@@ -316,15 +316,14 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
         MenuItemConfiguration config) -> RefPtr<FrameNode> {
         Ark_ContentModifier contentModifier = (*objectKeeper).get();
         Ark_MenuItemConfiguration arkConfig = PeerUtils::CreatePeer<MenuItemConfigurationPeer>();
-        arkConfig->contentModifier = contentModifier;
-        arkConfig->enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig->value = Converter::ArkValue<Ark_ResourceStr>(config.value_);
-        arkConfig->icon = Converter::ArkValue<Opt_ResourceStr>(config.icon_);
-        LOGE("Opt_SymbolGlyphModifiers is a stub.");
-        arkConfig->symbolIcon = Converter::ArkValue<Opt_SymbolGlyphModifier>(std::nullopt);
-        arkConfig->selected = Converter::ArkValue<Ark_Boolean>(config.selected_);
-        arkConfig->index = Converter::ArkValue<Ark_Int32>(config.index_);
-        arkConfig->node = node;
+        arkConfig->contentModifier_ = contentModifier;
+        arkConfig->enabled_ = config.enabled_;
+        arkConfig->value_ = config.value_;
+        arkConfig->icon_ = config.icon_;
+        arkConfig->symbolModifier_ = config.symbolModifier_;
+        arkConfig->selected_ = config.selected_;
+        arkConfig->index_ = config.index_;
+        arkConfig->node_ = node;
         auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
