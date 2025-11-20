@@ -4793,14 +4793,14 @@ struct ArkUISliderModifier {
     void (*resetPrefix)(ArkUINodeHandle node);
     void (*setSuffix)(ArkUINodeHandle node, ArkUINodeHandle suffix, ArkUISliderCustomContentOptions* options);
     void (*resetSuffix)(ArkUINodeHandle node);
+    void (*setShowStepsWithOptions)(
+        ArkUINodeHandle node, ArkUI_Bool showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length);
     void (*setShowTipsPtr)(ArkUINodeHandle node, ArkUI_Bool isShow, ArkUI_CharPtr value, ArkUI_VoidPtr strRawPtr);
     void (*setStepColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setBlockBorderColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setBlockColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setTrackBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setSelectColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
-    void (*setShowStepsWithOptions)(
-        ArkUINodeHandle node, ArkUI_Bool showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length);
     void (*setLinearBlockColor)(
         ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength);
 
@@ -5955,6 +5955,7 @@ struct ArkUIToggleModifier {
     void (*setToggleState)(ArkUINodeHandle node, ArkUI_Bool isOn);
     void (*setToggleOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetToggleOnChange)(ArkUINodeHandle node);
+    void (*setIsUserSetMargin)(ArkUINodeHandle node);
     void (*setToggleSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 selectedColor, ArkUI_VoidPtr colorRawPtr);
     void (*setToggleSwitchPointColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor,
         ArkUI_VoidPtr colorRawPtr);
@@ -5963,7 +5964,6 @@ struct ArkUIToggleModifier {
     void (*setToggleUnselectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, ArkUI_VoidPtr colorRawPtr);
     void (*setToggleTrackBorderRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
         ArkUI_VoidPtr radiusRawPtr);
-    void (*setIsUserSetMargin)(ArkUINodeHandle node);
     ArkUI_Bool (*getToggleState)(ArkUINodeHandle node);
 };
 
@@ -7012,9 +7012,9 @@ struct ArkUIRadioModifier {
     void (*setRadioOptions)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType);
     void (*setRadioOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetRadioOnChange)(ArkUINodeHandle node);
+    void (*setIsUserSetMargin)(ArkUINodeHandle node);
     void (*setRadioStylePtr)(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor,
         ArkUI_Uint32 uncheckedBorderColor, ArkUI_Uint32 indicatorColor, const ArkUIRadioColorStruct& resObjStru);
-    void (*setIsUserSetMargin)(ArkUINodeHandle node);
     void (*setRadioColorSetByUser)(ArkUINodeHandle node, ArkUI_Bool isCheckedBackgroundColorSetByUser,
         ArkUI_Bool isUncheckedBorderColorSetByUser, ArkUI_Bool isIndicatorColorSetByUser);
 };
