@@ -228,8 +228,69 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_005, TestSize.Level1)
     info.SetRawDeltaX(1);
     info.SetRawDeltaY(1);
     info.SetAction(MouseAction::HOVER_EXIT);
-    g_webPattern->WebSendMouseEvent(info, 0);
+    g_webPattern->CheckShouldBlockMouseEvent(info);
     EXPECT_EQ(g_webPattern->delegate_->IsFileSelectorShow(), true);
+#endif
+}
+
+/**
+ * @tc.name: WebPatternTestNg_006
+ * @tc.desc: SupplementMouseEventsIfNeeded.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebPatternTestNg_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+
+    g_webPattern->isLastEventMenuClose_ = true;
+    MouseInfo info;
+    info.SetAction(MouseAction::WINDOW_ENTER);
+    g_webPattern->SupplementMouseEventsIfNeeded(info, 1, std::vector<int32_t>());
+
+    g_webPattern->isHoverNWeb_ = true;
+    g_webPattern->isSupplementMouseLeave_ = true;
+    MouseInfo infoHover;
+    infoHover.SetAction(MouseAction::HOVER);
+    g_webPattern->SupplementMouseEventsIfNeeded(infoHover, 1, std::vector<int32_t>());
+
+    g_webPattern->isHoverNWeb_ = false;
+    g_webPattern->isSupplementMouseLeave_ = false;
+    g_webPattern->isUpSupplementDown_ = true;
+    MouseInfo infoRelease;
+    infoRelease.SetAction(MouseAction::RELEASE);
+    g_webPattern->SupplementMouseEventsIfNeeded(infoRelease, 1, std::vector<int32_t>());
+    EXPECT_FALSE(g_webPattern->isLastEventMenuClose_);
+#endif
+}
+
+/**
+ * @tc.name: WebPatternTestNg_007
+ * @tc.desc: CheckShouldBlockMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebPatternTestNg_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->isMenuShownFromWeb_ = true;
+    MouseInfo info;
+    info.SetAction(MouseAction::PRESS);
+    bool result = g_webPattern->CheckShouldBlockMouseEvent(info);
+    EXPECT_TRUE(result);
+
+    g_webPattern->isMenuShownFromWeb_ = true;
+    MouseInfo infoHoverExit;
+    infoHoverExit.SetAction(MouseAction::HOVER_EXIT);
+    bool resultExit = g_webPattern->CheckShouldBlockMouseEvent(infoHoverExit);
+    EXPECT_TRUE(resultExit);
+    ASSERT_NE(g_webPattern->delegate_, nullptr);
+    g_webPattern->delegate_->SetIsFileSelectorShow(false);
+    g_webPattern->isMenuShownFromWeb_ = false;
+    g_webPattern->isDragging_ = true;
+    MouseInfo infoDrag;
+    infoDrag.SetAction(MouseAction::HOVER_EXIT);
+    bool resultDrag = g_webPattern->CheckShouldBlockMouseEvent(infoDrag);
+    g_webPattern->WebOnMouseEvent(infoDrag);
+    EXPECT_TRUE(resultDrag);
 #endif
 }
 

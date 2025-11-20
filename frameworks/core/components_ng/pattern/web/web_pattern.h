@@ -1278,6 +1278,8 @@ private:
     bool IsDialogNested();
     void SelectCancel() const;
     bool IsSelectInfoValid();
+    bool CheckShouldBlockMouseEvent(const MouseInfo& info);
+    void SupplementMouseEventsIfNeeded(const MouseInfo& info, int32_t clickNum, std::vector<int32_t> pressedCodes);
     std::optional<RectF> GetViewPort() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -1563,6 +1565,11 @@ private:
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
+    bool isMenuShownFromWeb_ = false;
+    bool isLastEventMenuClose_ = false;
+    bool isHoverNWeb_ = false;
+    bool isUpSupplementDown_ = false;
+    bool isSupplementMouseLeave_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
