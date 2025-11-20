@@ -1062,7 +1062,7 @@ HWTEST_F(WebPatternTestHandle, HandleBlurEvent004, TestSize.Level1)
     webPattern->selectPopupMenuShowing_ = false;
     webPattern->isMenuShownFromWeb_ = true;
     webPattern->HandleBlurEvent(BlurReason::VIEW_SWITCH);
-    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::FOUCS_SWITCH);
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::FOCUS_SWITCH);
     webPattern->isMenuShownFromWeb_ = false;
     webPattern->HandleBlurEvent(BlurReason::VIEW_SWITCH);
     EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
