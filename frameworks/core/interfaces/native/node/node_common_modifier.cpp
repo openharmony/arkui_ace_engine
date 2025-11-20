@@ -11452,18 +11452,25 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         auto size = static_cast<int32_t>(touchInfo.size());
-
-        ArkUITouchTestInfoItemArray touchTestInfoItemArray = nullptr;
+        std::vector<std::shared_ptr<ArkUITouchTestInfoItem>> touchTestItems;
+        touchTestItems.reserve(size);
+        for (const auto& info : touchInfo) {
+            auto item = NodeModifier::CreateTouchTestInfoItem(info);
+            if (item) {
+                touchTestItems.emplace_back(std::move(item));
+            } else {
+                return NG::TouchResult();
+            }
+        }
+        std::unique_ptr<ArkUITouchTestInfoItemHandle[]> touchTestInfoItemArray;
         if (size > 0) {
-            touchTestInfoItemArray = new ArkUITouchTestInfoItemHandle[size];
-            int32_t index = 0;
-            for (const auto& info : touchInfo) {
-                touchTestInfoItemArray[index] = NodeModifier::CreateTouchTestInfoItem(info);
-                index++;
+            touchTestInfoItemArray = std::make_unique<ArkUITouchTestInfoItemHandle[]>(size);
+            for (size_t i = 0; i < touchTestItems.size(); ++i) {
+                touchTestInfoItemArray[i] = touchTestItems[i].get();
             }
         }
         ArkUITouchTestInfo touchTestInfo;
-        touchTestInfo.array = touchTestInfoItemArray;
+        touchTestInfo.array = touchTestInfoItemArray.get();
         touchTestInfo.subKind = ON_CHILD_TOUCH_TEST;
         touchTestInfo.strategy = ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_DEFAULT;
         touchTestInfo.size = size;
@@ -11477,8 +11484,6 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
             delete event.touchTestInfo.resultId;
             event.touchTestInfo.resultId = nullptr;
         }
-        delete[] touchTestInfoItemArray;
-        touchTestInfoItemArray = nullptr;
         return touchRes;
     };
     ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));
