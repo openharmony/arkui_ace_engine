@@ -5292,6 +5292,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): int32
     @ani.unsafe.Direct
+    native static _RenderNodeExtender_insertChild(peer: KPointer, child: KPointer): int32
+    @ani.unsafe.Direct
     native static _RenderNodeExtender_removeChild(peer: KPointer, node: KPointer): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_clearChildren(peer: KPointer): void
