@@ -712,13 +712,13 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectMenuAndInnerInitProperty_ColorMode_Ed
 
 /**
  * @tc.name: SelectOverlayNodeUpdateSelectMenuBg001
- * @tc.desc: Test UpdateSelectMenuBg with normal process
+ * @tc.desc: Test UpdateSelectMenuBg with normal process.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set up test environment
+     * @tc.steps: step1. Set up test environment.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
@@ -733,7 +733,7 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, Tes
         AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
     ASSERT_NE(selectOverlayNode, nullptr);
 
-    // Create a mock caller with specific color mode
+    // Create a mock caller with specific color mode.
     MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     auto text = FrameNode::GetOrCreateFrameNode(
         "test", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -744,13 +744,13 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, Tes
     text->themeScopeId_ = 100;
 
     /**
-     * @tc.steps: step2. Call UpdateSelectMenuBg with valid caller
-     * @tc.expected: Should update render context with correct properties
+     * @tc.steps: step2. Call UpdateSelectMenuBg with valid caller.
+     * @tc.expected: Should update render context with correct properties.
      */
     selectOverlayNode->UpdateSelectMenuBg(text);
 
     /**
-     * @tc.steps: step3. Verify the render context properties
+     * @tc.steps: step3. Verify the render context properties.
      */
     auto selectMenu = selectOverlayNode->selectMenu_;
     ASSERT_NE(selectMenu, nullptr);
@@ -765,7 +765,7 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, Tes
     ASSERT_NE(groupProperty, nullptr);
     BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
     EXPECT_EQ(actualStyleOption.blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
-    EXPECT_EQ(actualStyleOption.colorMode, ThemeColorMode::DARK); // Should convert from ColorMode::DARK
+    EXPECT_EQ(actualStyleOption.colorMode, ThemeColorMode::DARK); // Should convert from ColorMode::DARK.
 }
 
 /**
