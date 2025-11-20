@@ -3147,10 +3147,10 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
     WebModel::GetInstance()->SetWebNativeMessageDisconnectFunction(
         std::move(webNativeMessageDisconnectFunctionCallback));
 
-    auto isHuksCryptoExtensionFunc = controller->GetProperty("isHuksCryptoExtension");
-    if (isHuksCryptoExtensionFunc->IsFunction()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::isHuksCryptoExtension");
-        auto func = JSRef<JSFunc>::Cast(isHuksCryptoExtensionFunc);
+    auto canIUseFunc = controller->GetProperty("canIUse");
+    if (canIUseFunc->IsFunction()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::canIUse");
+        auto func = JSRef<JSFunc>::Cast(canIUseFunc);
         JSRef<JSVal> syscap = JSRef<JSVal>::Make(ToJSValue(HUKS_CRYPTO_EXTENSION_CAPABILITY));
         JSRef<JSObject> obj = JSRef<JSObject>::New();
         obj->SetPropertyObject("syscap", syscap);
