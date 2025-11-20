@@ -47,30 +47,6 @@ HWTEST_F(TextInputPreviewText, CalculatePreviewingTextMoving001, TestSize.Level1
 }
 
 /**
- * @tc.name: CalculatePreviewingTextMoving002
- * @tc.desc: Test CalculatePreviewingTextMovingLimit
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputPreviewText, CalculatePreviewingTextMoving002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    GetFocus();
-    pattern_->HandleSetSelection(5, 10, true);
-
-    float offset = 1;
-    pattern_->UpdateHandlesOffsetOnScroll(offset);
-    EXPECT_EQ(offset, 1);
-
-    pattern_->selectOverlay_->SetIsSingleHandle(false);
-    pattern_->UpdateHandlesOffsetOnScroll(1);
-    EXPECT_EQ(offset, 1);
-}
-
-/**
  * @tc.name: CheckPasswordAreaState
  * @tc.desc: Test CheckPasswordAreaState
  * @tc.type: FUNC

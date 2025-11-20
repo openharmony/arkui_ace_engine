@@ -17,6 +17,10 @@ ace_unittest("select_overlay_test_ng") {
   module_name = "Component-Text"
   module_output = ""
   type = "new"
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
   sources = [
     "select_overlay_content_modifier_test_ng.cpp",
     "select_overlay_paint_method_test_ng.cpp",
@@ -24,5 +28,10 @@ ace_unittest("select_overlay_test_ng") {
     "select_overlay_testthree_ng.cpp",
     "select_overlay_testtwo_ng.cpp",
     "select_overlay_testfive_ng.cpp",
+    "select_overlay_testfour_ng.cpp",
+    "select_overlay_testsix_ng.cpp",
+    "select_overlay_testseven_ng.cpp",
+    "select_overlay_testeight_ng.cpp",
+    "select_overlay_testnine_ng.cpp",
   ]
 }
