@@ -32381,6 +32381,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
     return this;
   }
+  onCameraCaptureStateChanged(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangedModifier.identity, WebOnCameraCaptureStateChangedModifier, callback);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -34002,6 +34006,21 @@ class WebBackToTopModifier extends ModifierWithKey {
   }
 }
 WebBackToTopModifier.identity = Symbol('webBackToTopModifier');
+
+class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnCameraCaptureStateChanged(node);
+    }
+    else {
+      getUINativeModule().web.setOnCameraCaptureStateChanged(node, this.value);
+    }
+  }
+}
+WebOnCameraCaptureStateChangedModifier.identity = Symbol('webOnCameraCaptureStateChangedModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

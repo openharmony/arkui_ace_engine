@@ -2342,6 +2342,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                           webCom->GetOnLoadFinishedEventId(), oldContext);
         onSafeBrowsingCheckFinishV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckFinishEvent()
                                                       : nullptr;
+        onCameraCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnCameraCaptureStateChangedEvent()
+                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                           webCom->GetCameraCaptureStateChangedId(), oldContext);
     }
     return true;
 }
@@ -8747,6 +8750,22 @@ void WebDelegate::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebViewportFitChanged");
+}
+
+void WebDelegate::OnCameraCaptureStateChanged(int originalState, int newState)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), originalState, newState]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onCameraCaptureStateChangedV2 = delegate->onCameraCaptureStateChangedV2_;
+            if (onCameraCaptureStateChangedV2) {
+                onCameraCaptureStateChangedV2(std::make_shared<CameraCaptureStateEvent>(
+                    static_cast<int32_t>(originalState), static_cast<int32_t>(newState)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebCameraStateChanged");
 }
 
 void WebDelegate::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)

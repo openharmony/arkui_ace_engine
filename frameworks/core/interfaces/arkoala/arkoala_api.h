@@ -5631,6 +5631,8 @@ struct ArkUIWebModifier {
     void (*resetForceEnableZoom)(ArkUINodeHandle node);
     void (*setBackToTop)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetBackToTop)(ArkUINodeHandle node);
+    void (*setOnCameraCaptureStateChanged)(ArkUINodeHandle node, void* callback);
+    void (*resetOnCameraCaptureStateChanged)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

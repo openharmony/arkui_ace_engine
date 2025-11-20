@@ -2343,6 +2343,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
+    JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChanged", &JSWeb::OnCameraCaptureStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
@@ -5563,6 +5564,38 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetAudioStateChangedId(std::move(uiCallback));
+}
+
+JSRef<JSVal> CameraCaptureStateToJSValue(const CameraCaptureStateEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("originalState", eventInfo.GetOriginalCameraCaptureState());
+    obj->SetProperty("newState", eventInfo.GetNewCameraCaptureState());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnCameraCaptureStateChanged(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CameraCaptureStateEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), CameraCaptureStateToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<CameraCaptureStateEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetCameraCaptureStateChangedId(jsCallback);
 }
 
 void JSWeb::MediaOptions(const JSCallbackInfo& args)

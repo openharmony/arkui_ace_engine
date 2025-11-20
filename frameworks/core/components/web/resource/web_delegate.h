@@ -1370,6 +1370,7 @@ public:
     int GetSelectEndIndex() const;
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
+    void OnCameraCaptureStateChanged(int originalState, int newState);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
@@ -1681,6 +1682,7 @@ private:
     EventCallbackV2 onLoadStartedV2_;
     EventCallbackV2 onLoadFinishedV2_;
     EventCallbackV2 onSafeBrowsingCheckFinishV2_;
+    EventCallbackV2 onCameraCaptureStateChangedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;

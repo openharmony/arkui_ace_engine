@@ -1567,6 +1567,20 @@ class WebBackToTopModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey<(OnCameraCaptureStateChangeCallback) => void> {
+  constructor(value: (OnCameraCaptureStateChangeCallback) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnCameraCaptureStateChangedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnCameraCaptureStateChanged(node);
+    } else {
+      getUINativeModule().web.setOnCameraCaptureStateChanged(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2105,6 +2119,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   backToTop(backToTop: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
+    return this;
+  }
+  onCameraCaptureStateChanged(callback: OnCameraCaptureStateChangeCallback): this{
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangedModifier.identity, WebOnCameraCaptureStateChangedModifier, callback);
     return this;
   }
 }
