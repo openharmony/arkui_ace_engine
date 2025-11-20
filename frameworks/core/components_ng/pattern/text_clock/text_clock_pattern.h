@@ -127,8 +127,6 @@ public:
         return true;
     }
 
-    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
-
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void OnColorModeChange(uint32_t colorMode) override;
@@ -164,8 +162,8 @@ private:
     std::string ParseDateTime(const std::string& dateTimeValue, int32_t week, int32_t month, int32_t hour);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
-    static void UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>& layoutProperty,
-        RefPtr<TextLayoutProperty>& textLayoutProperty, const TextStyle& textStyleTheme);
+    static void UpdateTextLayoutProperty(
+        RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     void ParseInputFormat();
     std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
     void GetDateTimeIndex(const char& element, TextClockFormatElement& tempFormatElement);
