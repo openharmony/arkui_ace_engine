@@ -28,6 +28,10 @@
 #include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr Dimension MAX_OVERLAY_MENU_WIDTH = 442.0_vp;
+constexpr Dimension OVERLAY_MENU_HORIZONTAL_GAP = 16.0_vp;
+}
 
 /**
  * DialogTheme defines color and styles of PopupComponent. PopupTheme should be built
@@ -150,6 +154,10 @@ public:
                 pattern->GetAttr<std::string>("text_overlay_menu_more_accessibility_text", "more");
             theme->backAccessibilityText_ =
                 pattern->GetAttr<std::string>("text_overlay_menu_back_accessibility_text", "back");
+            theme->maxOverlayMenuWidth_ =
+                pattern->GetAttr<Dimension>("text_overlay_menu_max_width", MAX_OVERLAY_MENU_WIDTH);
+            theme->overlayMenuHorizontalGap_ =
+                pattern->GetAttr<Dimension>("text_overlay_menu_horizontal_gap", OVERLAY_MENU_HORIZONTAL_GAP);
         }
         void ParseAIMenu(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
         {
@@ -598,6 +606,16 @@ public:
     {
         return previewMenuPadding_;
     }
+
+    Dimension GetMaxOverlayMenuWidth()
+    {
+        return maxOverlayMenuWidth_;
+    }
+
+    Dimension GetOverlayMenuHorizontalGap()
+    {
+        return overlayMenuHorizontalGap_;
+    }
 protected:
     TextOverlayTheme() = default;
     TextStyle menuButtonTextStyle_;
@@ -669,6 +687,8 @@ private:
     Color aiMenuSymbolColor_;
     Dimension menuButtonRadius_;
     std::string askCelia_;
+    Dimension maxOverlayMenuWidth_ = MAX_OVERLAY_MENU_WIDTH;
+    Dimension overlayMenuHorizontalGap_ = OVERLAY_MENU_HORIZONTAL_GAP;
 };
 
 } // namespace OHOS::Ace
