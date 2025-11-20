@@ -24,7 +24,7 @@ import { AnimateParam } from 'arkui/framework';
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from '@ohos/animator';
 import { Context, PointerStyle, PixelMap } from '#external';
 import { UIAbilityContext, ExtensionContext } from "#external"
-import { UIContextImpl } from 'arkui/handwritten/UIContextImpl'
+import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';

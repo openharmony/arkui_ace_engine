@@ -18,7 +18,7 @@ import { ArkUIGeneratedNativeModule } from '#components';
 import { ArkUINativeModule } from '#components'
 import { UIAbilityContext, ExtensionContext } from "#external"
 import { int32, int64 } from '@koalaui/common';
-import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType, runtimeType, Finalizable,
+import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
     registerNativeModuleLibraryName, wrapSystemCallback,
     runtimeType, Finalizable, SerializerBase, DeserializerBase } from '@koalaui/interop';
 import { _animateTo } from 'arkui/base/ArkAnimation';
