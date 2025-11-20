@@ -17,6 +17,7 @@ import { FrameNode, FrameNodeUtils } from 'arkui/FrameNode';
 import { ArkUIGeneratedNativeModule } from '#components';
 import { ArkUINativeModule } from '#components'
 import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { int32, int64 } from '@koalaui/common';
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
     registerNativeModuleLibraryName, wrapSystemCallback,
@@ -1478,7 +1479,7 @@ export class UIContextImpl extends UIContext {
         if (!UIContextImpl.initFlag_) {
             UIContextImpl.initFlag_ = true;
             wrapSystemCallback(1, (buff : KSerializerBuffer, len : int32) => {
-                deserializeAndCallCallback(new Deserializer(buff, len))
+                deserializeAndCallCallback(new DeserializerBase(buff, len))
                 return 0
             })
         }
