@@ -142,6 +142,6 @@ void CheckBoxModelStatic::TriggerChange(FrameNode* frameNode, bool value)
 {
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateUIStatus(value);
+    pattern->SetCheckBoxSelect(value);
 }
 } // namespace OHOS::Ace::NG

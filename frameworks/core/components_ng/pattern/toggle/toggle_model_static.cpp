@@ -111,7 +111,7 @@ void ToggleModelStatic::TriggerChange(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
     if (checkboxPattern) {
-        checkboxPattern->UpdateUIStatus(value);
+        checkboxPattern->SetCheckBoxSelect(std::move(value));
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
