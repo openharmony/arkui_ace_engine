@@ -1331,6 +1331,17 @@ HWTEST_F(TextFieldPatternTestNine, RegisterFontCallback, TestSize.Level0)
     familyMap.emplace("myFont", fontChangeCallback);
     fontManager->externalLoadCallbacks_.emplace(WeakPtr(frameNode_), familyMap);
     fontChangeCallback();
+    fontManager->RegisterCallbackNG(WeakPtr(frameNode_), "myFont", fontChangeCallback);
+    bool hasRegister = false;
+    std::call_once(fontManager->load_font_flag_, [&hasRegister]() { hasRegister = true; });
+    std::call_once(fontManager->load_font_flag_, [&hasRegister, weak = WeakPtr(fontManager)]() {
+        hasRegister = false;
+        auto fontMgr = weak.Upgrade();
+        ASSERT_NE(fontMgr, nullptr);
+        fontMgr->externalLoadCallbacks_.clear();
+    });
+    EXPECT_FALSE(fontManager->externalLoadCallbacks_.empty());
+    EXPECT_TRUE(hasRegister);
     EXPECT_TRUE(hasChanged);
 }
 

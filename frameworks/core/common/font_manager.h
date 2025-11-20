@@ -192,7 +192,6 @@ private:
     std::set<WeakPtr<FontChangeObserver>> observers_;
     std::map<WeakPtr<NG::UINode>, std::map<std::string, std::function<void()>>> externalLoadCallbacks_;
     std::map<WeakPtr<NG::UINode>, std::map<std::string, FormLoadFontCallbackInfo>> formLoadCallbacks_;
-    bool hasRegisterLoadFontCallback_ = false;
 
     StartAbilityOnInstallAppInStoreHandler startAbilityOnInstallAppInStoreHandler_;
     StartAbilityOnJumpBrowserHandler startAbilityOnJumpBrowserHandler_;
@@ -201,6 +200,9 @@ private:
 
     std::mutex hybridRenderNodesMutex_;
     std::set<WeakPtr<NG::UINode>> hybridRenderNodes_;
+    std::once_flag load_font_flag_;
+    std::shared_mutex mutable formCallbackLock_;
+    std::shared_mutex mutable externalCallbackLock_;
 };
 
 } // namespace OHOS::Ace
