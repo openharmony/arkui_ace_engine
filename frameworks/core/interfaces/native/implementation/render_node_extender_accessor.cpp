@@ -764,6 +764,20 @@ void InsertChildAfterImpl(Ark_RenderNode peer,
     currentNode->AddChild(childNode, index + 1);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
+
+void InsertChildImpl(Ark_RenderNode peer,
+                     Ark_RenderNode child)
+{
+    if (!peer || !child) {
+        LOGW("This renderNode or child is nullptr when InsertChildAfter !");
+        return;
+    }
+    auto currentNode = peer->GetFrameNode();
+    auto childNode = child->GetFrameNode();
+    currentNode->AddChild(childNode, 0);
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+}
+
 void RemoveChildImpl(Ark_RenderNode peer,
                      Ark_RenderNode node)
 {
@@ -845,6 +859,7 @@ const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor()
         RenderNodeExtenderAccessor::SetPathClipImpl,
         RenderNodeExtenderAccessor::AppendChildImpl,
         RenderNodeExtenderAccessor::InsertChildAfterImpl,
+        RenderNodeExtenderAccessor::InsertChildImpl,
         RenderNodeExtenderAccessor::RemoveChildImpl,
         RenderNodeExtenderAccessor::ClearChildrenImpl,
         RenderNodeExtenderAccessor::InvalidateImpl,

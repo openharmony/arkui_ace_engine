@@ -26850,6 +26850,8 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
     void (*insertChildAfter)(Ark_RenderNode peer,
                              Ark_RenderNode child,
                              Ark_RenderNode sibling);
+    void (*insertChild)(Ark_RenderNode peer,
+                        Ark_RenderNode child);
     void (*removeChild)(Ark_RenderNode peer,
                         Ark_RenderNode node);
     void (*clearChildren)(Ark_RenderNode peer);
