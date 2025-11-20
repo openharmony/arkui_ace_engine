@@ -787,10 +787,12 @@ void StringUndoManager::ProcessDragUndo(const UndoRedoRecord& record)
     auto insertOffset = record.rangeBefore.start;
     OptionsListHandler handler(
         [&](const ImageSpanOptions&) {
+            pattern->caretPosition_ = insertOffset;
             pattern->InsertValueOperation(u" ", nullptr, OperationType::UNDO);
             insertOffset++;
         },
         [&](const TextSpanOptions& opts) {
+            pattern->caretPosition_ = insertOffset;
             pattern->InsertValueOperation(opts.value, nullptr, OperationType::UNDO);
             insertOffset += static_cast<int32_t>(opts.value.length());
         },
@@ -852,14 +854,17 @@ bool StringUndoManager::BeforeStringChange(const UndoRedoRecord& record, bool is
     CHECK_NULL_RETURN(pattern, false);
     auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
+    RichEditorChangeValue changeValue(isUndo ? TextChangeReason::UNDO : TextChangeReason::REDO);
     auto rangeBefore = isUndo ? record.rangeAfter : record.rangeBefore;
+    changeValue.SetRangeBefore(rangeBefore);
     auto rangeAfter = isUndo ? record.rangeBefore : record.rangeAfter;
+    changeValue.SetRangeAfter(rangeAfter);
     auto deleteLength = rangeBefore.GetLength();
     CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
     auto insertStart = rangeAfter.start;
     auto deleteEnd = rangeBefore.end;
-    RichEditorChangeValue changeValue(isUndo ? TextChangeReason::UNDO : TextChangeReason::REDO);
-    pattern->GetDeletedSpan(changeValue, deleteEnd, deleteLength, RichEditorDeleteDirection::BACKWARD);
+    IF_TRUE(deleteLength > 0, pattern->GetDeletedSpan(changeValue, deleteEnd, deleteLength,
+        RichEditorDeleteDirection::BACKWARD));
     auto replaceStr = isUndo ? record.GetStringBefore() : record.GetStringAfter();
     IF_TRUE(!replaceStr.empty(), pattern->GetReplacedSpan(changeValue, insertStart, replaceStr, insertStart,
         std::nullopt, std::nullopt));

@@ -6696,8 +6696,8 @@ void RichEditorPattern::DeleteBackward(int32_t oriLength, TextChangeReason reaso
 
 std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isIME)
 {
-    length = CalculateDeleteLength(length, true);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete length=%{public}d", length);
+    IF_TRUE(isIME, length = CalculateDeleteLength(length, true));
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete length=%{public}d isIME=%{public}d", length, isIME);
     std::u16string textContent;
     GetContentBySpans(textContent);
 
