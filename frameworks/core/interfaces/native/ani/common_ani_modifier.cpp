@@ -322,12 +322,12 @@ ani_long CreateRenderNodePeerWithNodePtr(ani_long ptr)
 
 ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::Context> nativeContext)
 {
-    // auto container = Platform::WindowFreeContainer::CreateWindowFreeContainer(env,
-    //     &nativeContext, FrontendType::ARK_TS);
-    // CHECK_NULL_RETURN(container, -1);
-    // int32_t instanceId = container->GetInstanceId();
-    // ContainerScope::Add(instanceId);
-    // return instanceId;
+    auto container = Platform::WindowFreeContainer::CreateWindowFreeContainer(env,
+        &nativeContext, FrontendType::ARK_TS);
+    CHECK_NULL_RETURN(container, -1);
+    int32_t instanceId = container->GetInstanceId();
+    ContainerScope::Add(instanceId);
+    return instanceId;
     return -1;
 }
 
