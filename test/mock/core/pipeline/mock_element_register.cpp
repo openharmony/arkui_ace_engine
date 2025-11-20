@@ -562,7 +562,8 @@ ElementIdType ElementRegister::GetLatestElementId() const
     DELEGATE(GetLatestElementId(), ElementRegister::UndefinedElementId);
 }
 
-RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
+RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(
+    const std::string& key, bool willGetAll, int32_t instanceId)
 {
     DELEGATE(GetAttachedFrameNodeById(key, willGetAll), nullptr);
 }

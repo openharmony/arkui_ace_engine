@@ -1053,7 +1053,11 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
         } else {
-            auto targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(targetIdString);
+            auto targetNode =
+                ElementRegister::GetInstance()->GetAttachedFrameNodeById(targetIdString, false, Container::CurrentId());
+            if (!targetNode) {
+                targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(targetIdString);
+            }
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
         }
