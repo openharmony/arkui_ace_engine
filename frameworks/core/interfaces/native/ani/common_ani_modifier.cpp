@@ -328,7 +328,6 @@ ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRun
     int32_t instanceId = container->GetInstanceId();
     ContainerScope::Add(instanceId);
     return instanceId;
-    return -1;
 }
 
 void DestroyWindowFreeContainer(ani_int id)
