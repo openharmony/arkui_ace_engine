@@ -28,14 +28,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-    constexpr int32_t WIDTH = 10;
-    constexpr int32_t HEIGHT = 5;
-    constexpr int32_t WIDTH_2 = 100;
-    constexpr int32_t HEIGHT_2 = 50;
-    constexpr int32_t ARRAY_LENGTH = 4;
-    uint8_t g_dataArray[] = { 1, 55, 0, 255 };
-    uint8_t g_dataArray2[] = { 10, 56, 1, 0 };
-}
+constexpr int32_t WIDTH = 10;
+constexpr int32_t HEIGHT = 5;
+constexpr int32_t WIDTH_2 = 100;
+constexpr int32_t HEIGHT_2 = 50;
+constexpr int32_t ARRAY_LENGTH = 4;
+uint8_t g_dataArray[] = { 1, 55, 0, 255 };
+uint8_t g_dataArray2[] = { 10, 56, 1, 0 };
+} // namespace
 
 class ImageDataAccessorTest
     : public AccessorTestBaseParent<GENERATED_ArkUIImageDataAccessor,

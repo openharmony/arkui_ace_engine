@@ -596,7 +596,6 @@ void TextPickerModelStatic::SetCascadeColumnsNode(FrameNode* frameNode,
         auto differ = columnCount - reOptions.size();
         for (uint32_t i = 0; i < differ; i++) {
             NG::TextCascadePickerOptions differOption;
-            memset_s(&differOption, sizeof(differOption), 0, sizeof(differOption));
             reOptions.emplace_back(differOption);
         }
     }

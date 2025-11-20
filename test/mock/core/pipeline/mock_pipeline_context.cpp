@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
@@ -159,12 +161,12 @@ MockPipelineContext::~MockPipelineContext() = default;
 
 void MockPipelineContext::SetUp()
 {
-    pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
+    pipeline_ = AceType::MakeRefPtr<::testing::NiceMock<MockPipelineContext>>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
     pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
-    pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    pipeline_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
@@ -213,6 +215,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
+}
+
+void MockPipelineContext::SetDensity(double density)
+{
+    density_ = density;
 }
 
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
@@ -648,6 +655,14 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+
+void PipelineContext::FlushAnimationClosure()
+{
+    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
+    for (const auto& animation : temp) {
+        animation();
+    }
+}
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
 
@@ -1418,12 +1433,32 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
+void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    if (fontManager_) {
+        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this), bundleName, moduleName);
+    }
+}
+
+void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    if (fontManager_) {
+        fontManager_->GetSystemFontList(fontList);
+    }
+}
+
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
     return false;
 }
 
 void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+
+RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
+{
+    return nullptr;
+}
 
 bool NG::PipelineContext::CheckThreadSafe()
 {

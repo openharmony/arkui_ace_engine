@@ -35,6 +35,23 @@ void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container
     }
 }
 
+void AceEngine::NotifyContainersOrderly(const std::function<void(const RefPtr<Container>&)>& callback)
+{
+    CHECK_NULL_VOID(callback);
+    std::map<int32_t, RefPtr<Container>> copied;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        for (const auto& pair : containerMap_) {
+            copied.insert(pair);
+        }
+    }
+    for (const auto& [first, second] : copied) {
+        // first = container ID
+        ContainerScope scope(first);
+        callback(second);
+    }
+}
+
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 {
     auto container = containerMap_.find(instanceId);

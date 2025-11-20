@@ -94,7 +94,9 @@ public:
         if (callback_.callSync) {
             Ark_VMContext vmContext = GetVMContext();
             if (vmContext == nullptr) {
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
                 LOGF_ABORT("InvokeSync VMContext is null.");
+#endif
             }
             (*callback_.callSync)(vmContext, callback_.resource.resourceId, std::forward<Params>(args)...);
         }

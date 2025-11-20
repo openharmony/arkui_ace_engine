@@ -48,6 +48,11 @@ public:
     MOCK_METHOD0(UpdateCustomBackground, void());
     MOCK_METHOD1(SetSurfaceBufferOpaque, void(bool));
 
+    const RefPtr<NG::ChainedTransitionEffect> GetChainedTransitionEffect()
+    {
+        return chainedTransitionEffect_;
+    }
+
     void SetVisible(bool visible) override
     {
         isVisible_ = visible;
@@ -90,6 +95,11 @@ public:
     RectF GetPaintRectWithoutTransform() override
     {
         return paintRect_;
+    }
+
+    void SetTransitionUserCallback(TransitionFinishCallback&& callback) override
+    {
+        transitionUserCallback_ = std::move(callback);
     }
 
 #ifdef ENHANCED_ANIMATION
@@ -166,6 +176,8 @@ public:
     std::function<void()> transitionOutCallback_;
     Color actualForegroundColor_;
 
+    RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
+    TransitionFinishCallback transitionUserCallback_;
 private:
     size_t animationsCount_ = 0;
 };

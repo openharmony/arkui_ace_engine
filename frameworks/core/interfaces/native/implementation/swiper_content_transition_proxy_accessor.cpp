@@ -21,11 +21,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_SwiperContentTransitionProxy ConstructImpl()
 {
-    return new SwiperContentTransitionProxyPeer();
+    return PeerUtils::CreatePeer<SwiperContentTransitionProxyPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
