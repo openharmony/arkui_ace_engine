@@ -967,4 +967,14 @@ void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& s
     dst.name = ArkValue<Opt_String>(src.name);
     dst.value = ArkValue<Opt_String>(src.value);
 }
+
+void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src)
+{
+    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
+    dst.y =  ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
+    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetX()));
+    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
+}
 } // namespace OHOS::Ace::NG::Converter

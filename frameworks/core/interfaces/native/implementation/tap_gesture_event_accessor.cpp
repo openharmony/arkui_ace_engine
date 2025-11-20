@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureEventAccessor {
@@ -31,6 +32,24 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Ark_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetBaseGestureInfo();
+    CHECK_NULL_RETURN(info, {});
+
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    EventLocationInfo tapLocation;
+    if (!fingerList.empty()) {
+        tapLocation = {
+            fingerList.back().localLocation_,
+            fingerList.back().screenLocation_,
+            fingerList.back().globalLocation_
+        };
+    }
+
+    return Converter::ArkValue<Ark_EventLocationInfo>(tapLocation);
+}
 } // TapGestureEventAccessor
 const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
 {
@@ -38,6 +57,7 @@ const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
         TapGestureEventAccessor::DestroyPeerImpl,
         TapGestureEventAccessor::ConstructImpl,
         TapGestureEventAccessor::GetFinalizerImpl,
+        TapGestureEventAccessor::GetTapLocationImpl,
     };
     return &TapGestureEventAccessorImpl;
 }
