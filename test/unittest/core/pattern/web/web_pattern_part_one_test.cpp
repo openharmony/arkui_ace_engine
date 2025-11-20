@@ -396,12 +396,12 @@ HWTEST_F(WebPatternPartOneTest, NotifyMenuLifeCycleEvent_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
-    EXPECT_FALSE(webPattern->showMenuFromWeb_);
+    EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
-    EXPECT_TRUE(webPattern->showMenuFromWeb_);
+    EXPECT_TRUE(webPattern->isMenuShownFromWeb_);
     webPattern->isFocus_ = true;
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
-    EXPECT_FALSE(webPattern->showMenuFromWeb_);
+    EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
     webPattern->isFocus_ = false;
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
     EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);

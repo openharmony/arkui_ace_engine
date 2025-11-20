@@ -669,6 +669,7 @@ WebPattern::~WebPattern()
         pipController_.clear();
     }
     UninitRotationEventCallback();
+    UninitMenuLifeCycleCallback();
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -1169,22 +1170,27 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
     TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent:%{public}d.",
         static_cast<int>(menuLifeCycleEvent));
     if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
-        showMenuFromWeb_ = true;
+        isMenuShownFromWeb_ = true;
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
-        showMenuFromWeb_ = false;
+        isMenuShownFromWeb_ = false;
         if (!isFocus_) {
             CHECK_NULL_VOID(delegate_);
             delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
             delegate_->OnBlur();
         }
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->UnRegisterMenuLifeCycleCallback(host->GetId());
+        UninitMenuLifeCycleCallback();
     }
+}
+
+void WebPattern::UninitMenuLifeCycleCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->UnRegisterMenuLifeCycleCallback(host->GetId());
 }
 
 void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
@@ -3119,10 +3125,9 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     if (isDragStartFromWeb_) {
         return;
     }
-    if (showMenuFromWeb_) {
+    if (isMenuShownFromWeb_) {
         TAG_LOGI(
             AceLogTag::ACE_WEB, "ContextMenu intercept web blur blurReason:%{public}d", static_cast<int>(blurReason));
-        showMenuFromWeb_ = false;
         return;
     }
     if (!selectPopupMenuShowing_) {

@@ -636,6 +636,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void RegisterMenuLifeCycleCallback();
     void NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent);
+    void UninitMenuLifeCycleCallback();
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
     void OnQuickMenuDismissed();
@@ -1563,7 +1564,7 @@ private:
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
-    bool showMenuFromWeb_ = false;
+    bool isMenuShownFromWeb_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

@@ -1059,11 +1059,13 @@ HWTEST_F(WebPatternTestHandle, HandleBlurEvent004, TestSize.Level1)
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern->delegate_, nullptr);
     webPattern->isDragStartFromWeb_ = false;
-    webPattern->HandleBlurEvent(BlurReason::WINDOW_BLUR);
-    EXPECT_FALSE(webPattern->showMenuFromWeb_);
-    webPattern->showMenuFromWeb_ = true;
-    webPattern->HandleBlurEvent(BlurReason::WINDOW_BLUR);
-    EXPECT_FALSE(webPattern->showMenuFromWeb_);
+    webPattern->selectPopupMenuShowing_ = false;
+    webPattern->isMenuShownFromWeb_ = true;
+    webPattern->HandleBlurEvent(BlurReason::VIEW_SWITCH);
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::FOUCS_SWITCH);
+    webPattern->isMenuShownFromWeb_ = false;
+    webPattern->HandleBlurEvent(BlurReason::VIEW_SWITCH);
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
 #endif
 }
 
