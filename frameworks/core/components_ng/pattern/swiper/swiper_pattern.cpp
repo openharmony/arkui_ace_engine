@@ -5302,8 +5302,8 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             auto stepItems = swiper->IsSwipeByGroup() ? displayCount : 1;
             swiper->targetIndex_ = swiper->CheckTargetIndex(swiper->currentIndex_ + stepItems);
             ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d id %d",
-                delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_,
-                swiper->swiperId_);
+                delayTime, swiper->GetLoopIndex(swiper->targetIndex_.value()), swiper->isVisibleArea_,
+                swiper->isWindowShow_, swiper->swiperId_);
             swiper->MarkDirtyNodeSelf();
         }
     });
