@@ -544,7 +544,7 @@ public:
                 return;
             }
             if (result_) {
-                result_->HandleConfirm(identity, type);	
+                result_->HandleConfirm(identity, type);
             }
             return;
         } else {
