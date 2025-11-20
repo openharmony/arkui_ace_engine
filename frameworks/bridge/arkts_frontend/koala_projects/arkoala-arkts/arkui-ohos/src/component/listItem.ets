@@ -40,6 +40,6 @@ export function ListItemImpl(
         const peerPtr : pointer = receiver.getPeer().getPeerPtr()
         const isInLazyForEach : undefined| Boolean = receiver.getPeer()?.parent?.isKind(LazyForEachType)
         receiver.setPeer(undefined)
-        LazyBuild.SetListItemLazyBuilder(peerPtr, content_!)
+        LazyBuild.SetListItemLazyBuilder(peerPtr, content_ ? content_! : @memo (): void => {})
     })
 }

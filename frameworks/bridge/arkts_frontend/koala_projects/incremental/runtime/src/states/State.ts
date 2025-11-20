@@ -57,6 +57,7 @@ export interface StateManager extends StateContext {
     isUpdateNeeded(): boolean
     updateSnapshot(): uint32
     updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node>
+    updatableNodeEx<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node>
     scheduleCallback(callback: () => void): void
     callCallbacks(): void
     frozen: boolean
@@ -670,6 +671,11 @@ export class StateManagerImpl implements StateManager {
 
     updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node> {
         this.checkForStateComputing()
+        return this.updatableNodeEx(node, update, cleanup)
+    }
+
+    
+    updatableNodeEx<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node> {
         const scope = ScopeImpl.create<Node>(KoalaCallsiteKeys.empty, 0, (): Node => {
             update(this)
             return node
