@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 struct PanGestureOptionsInfo {
     std::optional<int32_t> fingers;
     std::optional<PanDirection> direction;
-    std::optional<float> distance;
+    std::optional<double> distance;
     std::optional<bool> isFingerCountLimited;
 };
 
@@ -34,7 +34,7 @@ void AssignCast(std::optional<PanGestureOptionsInfo>& dst, const Ark_PanGestureH
     PanGestureOptionsInfo result;
     result.fingers = Converter::OptConvert<int32_t>(src.fingers);
     result.direction = Converter::OptConvert<PanDirection>(src.direction);
-    result.distance = Converter::OptConvert<float>(src.distance);
+    result.distance = Converter::OptConvert<double>(src.distance);
     result.isFingerCountLimited = Converter::OptConvert<bool>(src.isFingerCountLimited);
     dst = result;
 }
@@ -99,7 +99,7 @@ void SetDistanceImpl(Ark_PanGestureOptions peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->handler);
     auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
-    auto convDistance = Converter::OptConvert<float>(value);
+    auto convDistance = Converter::OptConvert<double>(value);
     if (convDistance.has_value()) {
         Dimension dimension = LessNotEqual(convDistance.value(), 0.0) ?
             DEFAULT_PAN_DISTANCE : Dimension(convDistance.value(), DimensionUnit::VP);
