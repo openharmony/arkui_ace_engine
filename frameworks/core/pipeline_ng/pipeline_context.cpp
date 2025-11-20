@@ -3207,6 +3207,7 @@ void PipelineContext::OnTouchEvent(
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
         touchRestrict.sourceTool = point.sourceTool;
+        eventManager_->UnregisterTouchDelegate(point.id);
 
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
