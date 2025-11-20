@@ -825,4 +825,20 @@ HWTEST_F(GridAttrTestTwoNg, GetSupportAnimation, TestSize.Level1)
 
     EXPECT_EQ(gridModel.GetSupportAnimation(nullptr), false);
 }
+
+/*
+ * @tc.name: ResetLayoutPolicy
+ * @tc.desc: GridModelNG ResetLayoutPolicy test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, ResetLayoutPolicy, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    ViewAbstract::UpdateLayoutPolicyProperty(AceType::RawPtr(frameNode_), LayoutCalPolicy::MATCH_PARENT, false);
+    EXPECT_TRUE(layoutProperty_->GetLayoutPolicyProperty().value().IsHeightMatch());
+    gridModel.ReSetGridHeightLayoutPolicy();
+    EXPECT_TRUE(layoutProperty_->GetLayoutPolicyProperty().value().IsHeightNoMatch());
+    CreateDone();
+}
 } // namespace OHOS::Ace::NG

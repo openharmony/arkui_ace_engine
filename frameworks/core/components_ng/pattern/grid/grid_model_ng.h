@@ -39,6 +39,7 @@ public:
     void SetColumnsGap(const Dimension& value) override;
     void SetRowsGap(const Dimension& value) override;
     void SetGridHeight(const Dimension& value) override;
+    void ReSetGridHeightLayoutPolicy() override;
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarColor(const std::optional<Color>& scrollBarColor) override;
