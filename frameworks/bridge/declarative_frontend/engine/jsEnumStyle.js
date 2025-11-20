@@ -4977,6 +4977,12 @@ let NativeEmbedParamStatus;
   NativeEmbedParamStatus.DELETE = 2;
 })(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
 
+let DetectedBlankScreenReason;
+(function (DetectedBlankScreenReason) {
+  DetectedBlankScreenReason.NO_CONTENTFUL_NODES = 0;
+  DetectedBlankScreenReason.SUB_THRESHOLD_CONTENTFUL_NODES = 1;
+})(DetectedBlankScreenReason || (DetectedBlankScreenReason = {}));
+
 let WebRotateEffect;
 (function (WebRotateEffect) {
   WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
