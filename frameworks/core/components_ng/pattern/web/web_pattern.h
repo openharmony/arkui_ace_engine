@@ -1565,6 +1565,7 @@ private:
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
     bool isMenuShownFromWeb_ = false;
+    bool isLastEventMenuClose_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

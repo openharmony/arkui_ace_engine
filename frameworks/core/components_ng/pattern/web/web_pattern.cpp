@@ -1171,8 +1171,10 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
         static_cast<int>(menuLifeCycleEvent));
     if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
         isMenuShownFromWeb_ = true;
+        isLastEventMenuClose_ = false;
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
         isMenuShownFromWeb_ = false;
+        isLastEventMenuClose_ = true;
         if (!isFocus_) {
             CHECK_NULL_VOID(delegate_);
             delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
