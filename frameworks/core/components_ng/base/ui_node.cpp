@@ -639,6 +639,9 @@ void UINode::AllowForceDark(bool forceDarkAllowed)
         context_->AddNeedReloadNodes(this);
     }
     for (const auto& child : GetChildren()) {
+        if (!child) {
+            continue;
+        }
         child->AllowForceDark(forceDarkAllowed);
     }
 }
@@ -1789,6 +1792,9 @@ void UINode::NotifyColorModeChange(uint32_t colorMode)
         }
     }
     for (const auto& child : GetChildren()) {
+        if (!child) {
+            continue;
+        }
         child->SetShouldClearCache(CheckShouldClearCache());
         child->SetRerenderable(GetRerenderable());
         child->SetMeasureAnyway(CheckMeasureAnyway());

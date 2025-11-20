@@ -1412,16 +1412,24 @@ HWTEST_F(UINodeTestNgTwo, UpdateBuilderNodeColorMode001, TestSize.Level1)
     parentNode->AddChild(childNode);
     parentNode->onMainTree_ = false;
     parentNode->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+    /**
+     * @tc.steps: step2. set parentNode is darkMode childNode is lightMode
+     */
     parentNode->SetDarkMode(true);
     childNode->SetDarkMode(false);
     g_isConfigChangePerform = true;
 
     /**
-     * @tc.steps: step2. parentNode AttachToMainTree
+     * @tc.steps: step3. parentNode AttachToMainTree
      * @tc.expected: parentNode->CheckIsDarkMode() equles childNode->CheckIsDarkMode()
      */
     PipelineContext* context = parentNode->GetContextWithCheck();
     parentNode->AttachToMainTree(true, context);
     EXPECT_EQ(parentNode->CheckIsDarkMode(), childNode->CheckIsDarkMode());
+
+    /**
+     * @tc.steps: step4. close configchangeperform
+     */
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG
