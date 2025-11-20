@@ -319,6 +319,16 @@ public:
         return !!ndkDrawCompletedCallback_;
     }
 
+    void SetCompensateOnSizeChangeEvent(bool compensateOnSizeChangeEvent)
+    {
+        compensateOnSizeChangeEvent_ = compensateOnSizeChangeEvent;
+    }
+
+    bool IsCompensateOnSizeChangeEvent() const
+    {
+        return compensateOnSizeChangeEvent_;
+    }
+
 protected:
     virtual void OnModifyDone() {}
     std::function<void()> onAppear_;
@@ -347,6 +357,7 @@ private:
     bool enabled_ { true };
     bool developerEnabled_ { true };
     bool disableDataPrefetch_ { false };
+    bool compensateOnSizeChangeEvent_ { false };
     std::vector<KeyboardShortcut> keyboardShortcut_;
     std::vector<int32_t> hasInnerAreaChangeUntriggered_;
 

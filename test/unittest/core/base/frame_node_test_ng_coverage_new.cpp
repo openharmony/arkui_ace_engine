@@ -1071,6 +1071,53 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback04, TestSize.Level
 }
 
 /**
+ * @tc.name: FrameNodeTriggerOnSizeChangeCallback05
+ * @tc.desc: Test the function TriggerOnSizeChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback05, TestSize.Level1)
+{
+    NG::RectF testLastFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    NG::RectF testCurrFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    FrameNode::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    auto pattern = frameNode->GetPattern<PagePattern>();
+    pattern->isOnShow_ = true;
+    OnSizeChangedFunc onSizeChanged = [](const RectF& oldRect, const RectF& rect) {};
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
+    // auto
+    frameNode->lastFrameNodeRect_ =
+        std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
+    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
+    OnSizeChangedFunc onJsFrameNodeSizeChanged = [node = frameNode](const RectF& oldRect, const RectF& rect) {
+        node->lastFrameNodeRect_ = nullptr;
+    };
+    eventHub->SetFrameNodeCommonOnSizeChangeCallback(std::move(onJsFrameNodeSizeChanged));
+    /**
+     * @tc.steps: step3. call the function TriggerOnSizeChangeCallback.
+     */
+    frameNode->isActive_ = false;
+    frameNode->TriggerOnSizeChangeCallback();
+    EXPECT_TRUE(eventHub->IsCompensateOnSizeChangeEvent());
+    frameNode->SetActive(true, false);
+    EXPECT_FALSE(eventHub->IsCompensateOnSizeChangeEvent());
+    frameNode->isActive_ = false;
+    frameNode->SetActive(true, false);
+    EXPECT_FALSE(eventHub->IsCompensateOnSizeChangeEvent());
+    frameNode->eventHub_ = nullptr;
+    frameNode->isActive_ = false;
+    frameNode->SetActive(true, false);
+    EXPECT_TRUE(frameNode->isActive_);
+}
+
+/**
  * @tc.name: FrameNodeNotifyColorModeChange01
  * @tc.desc: Test the function NotifyColorModeChange
  * @tc.type: FUNC
