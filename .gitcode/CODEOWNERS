@@ -247,6 +247,7 @@ advanced_ui_component/tabtitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbarv2/ @arkuiadvancedcomponent
 advanced_ui_component/treeview/ @arkuiadvancedcomponent
+advanced_ui_component_static/multinavigation/ @arkui_navigation
 
 [Extend UI Components]
 component_ext/arc_swiper/
