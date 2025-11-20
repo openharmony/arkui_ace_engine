@@ -83,6 +83,7 @@ const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0f, 3.0f, 
 constexpr int32_t CREDENTIAL_UKEY = 4;
 constexpr int CAPABILITY_NOT_SUPPORTED_ERROR = 801;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
+const char* HUKS_CRYPTO_EXTENSION_CAPABILITY = "SystemCapability.Security.Huks.CryptoExtension";
 
 bool g_huksCryptoExtensionAbility = false;
 
@@ -3150,7 +3151,10 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
     if (isHuksCryptoExtensionFunc->IsFunction()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::isHuksCryptoExtension");
         auto func = JSRef<JSFunc>::Cast(isHuksCryptoExtensionFunc);
-        JSRef<JSVal> argv[] = {};
+        JSRef<JSVal> syscap = JSRef<JSVal>::Make(ToJSValue(HUKS_CRYPTO_EXTENSION_CAPABILITY));
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetPropertyObject("syscap", syscap);
+        JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
         JSRef<JSVal> result = func->Call(controller, 1, argv);
         if (result->IsBoolean()) {
             g_huksCryptoExtensionAbility = result->ToBoolean();
