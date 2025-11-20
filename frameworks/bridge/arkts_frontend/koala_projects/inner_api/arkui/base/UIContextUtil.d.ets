@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import { memo } from '@koalaui/runtime/annotations'
+import { int32 } from '@koalaui/compat';
 
-@memo
-export declare function remember<Value>(
-    compute: () => Value
-): Value;
+export declare class UIContextUtil {
+    static getCurrentInstanceId(): int32;
+}

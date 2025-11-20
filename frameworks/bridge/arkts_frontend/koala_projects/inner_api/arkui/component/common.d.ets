@@ -16,7 +16,7 @@
  * @file
  * @kit ArkUI
  */
-import { memo_stable } from '@koalaui.runtime.annotations';
+import { memo_stable } from '@koalaui/runtime/annotations';
 import { Resource } from 'global.resource';
 import { CircleShape, EllipseShape, PathShape, RectShape } from '@ohos.arkui.shape';
 import { LengthMetrics } from 'arkui.Graphics';
@@ -75,8 +75,8 @@ import {
     TransitionType,
 } from 'arkui.component.enums';
 import { CustomBuilder } from 'arkui.component.builder';
-import { PeerNode } from 'arkui.PeerNode';
-import { ComponentBase } from 'arkui.ComponentBase';
+import { PeerNode } from 'arkui/PeerNode';
+import { ComponentBase } from 'arkui/ComponentBase';
 import {
     LayoutPolicy,
     CrownEvent,
@@ -170,7 +170,7 @@ import image from '@ohos.multimedia.image';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import drawing from '@ohos.graphics.drawing';
 
-type KPointer = LockGrantedCallback;
+type KPointer = long;
 type int32 = int;
 
 type PixelMap = image.PixelMap;
