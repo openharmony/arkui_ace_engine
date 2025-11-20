@@ -114,7 +114,7 @@ std::string AccessibilityPropertyUtils::GetComponentType(
     } else {
         type = node->GetTag();
     }
-    if (accessibilityProperty->HasAccessibilityCustomRole()) {
+    if (!accessibilityProperty->GetAccessibilityCustomRole().empty()) {
         type = accessibilityProperty->GetAccessibilityCustomRole();
     }
     return type;
