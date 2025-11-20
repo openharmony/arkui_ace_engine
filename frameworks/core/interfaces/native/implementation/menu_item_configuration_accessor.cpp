@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
 #include "arkoala_api_generated.h"
 
@@ -38,15 +39,16 @@ void TriggerSelectImpl(Ark_MenuItemConfiguration peer,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
     CHECK_NULL_VOID(peer);
-    auto node = peer->node;
+    auto node = peer->node_;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetChangeValue(frameNode, index, convValue);
 }
 Ark_Boolean GetEnabledImpl(Ark_MenuItemConfiguration peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return peer->enabled;
+    auto invalid = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Ark_Boolean>(peer->enabled_);
 }
 void SetEnabledImpl(Ark_MenuItemConfiguration peer,
                     Ark_Boolean enabled)
@@ -55,7 +57,7 @@ void SetEnabledImpl(Ark_MenuItemConfiguration peer,
 Ark_ContentModifier GetContentModifierImpl(Ark_MenuItemConfiguration peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    return peer->contentModifier;
+    return peer->contentModifier_;
 }
 void SetContentModifierImpl(Ark_MenuItemConfiguration peer,
                             const Ark_Object* contentModifier)
@@ -63,8 +65,9 @@ void SetContentModifierImpl(Ark_MenuItemConfiguration peer,
 }
 Ark_ResourceStr GetValueImpl(Ark_MenuItemConfiguration peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return peer->value;
+    auto invalid = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("");
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkUnion<Ark_ResourceStr, Ark_String>(peer->value_);
 }
 void SetValueImpl(Ark_MenuItemConfiguration peer,
                   const Ark_ResourceStr* value)
@@ -72,8 +75,9 @@ void SetValueImpl(Ark_MenuItemConfiguration peer,
 }
 Opt_ResourceStr GetIconImpl(Ark_MenuItemConfiguration peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return peer->icon;
+    auto invalid = Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty());
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkUnion<Opt_ResourceStr, Ark_String>(peer->icon_, nullptr);
 }
 void SetIconImpl(Ark_MenuItemConfiguration peer,
                  const Opt_ResourceStr* icon)
@@ -81,8 +85,8 @@ void SetIconImpl(Ark_MenuItemConfiguration peer,
 }
 Opt_SymbolGlyphModifier GetSymbolIconImpl(Ark_MenuItemConfiguration peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return peer->symbolIcon;
+    auto optModifier = Converter::ArkValue<Opt_SymbolGlyphModifier>();
+    return optModifier;
 }
 void SetSymbolIconImpl(Ark_MenuItemConfiguration peer,
                        const Opt_SymbolGlyphModifier* symbolIcon)
@@ -90,8 +94,9 @@ void SetSymbolIconImpl(Ark_MenuItemConfiguration peer,
 }
 Ark_Boolean GetSelectedImpl(Ark_MenuItemConfiguration peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return peer->selected;
+    auto invalid = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Ark_Boolean>(peer->selected_);
 }
 void SetSelectedImpl(Ark_MenuItemConfiguration peer,
                      Ark_Boolean selected)
@@ -99,8 +104,9 @@ void SetSelectedImpl(Ark_MenuItemConfiguration peer,
 }
 Ark_Int32 GetIndexImpl(Ark_MenuItemConfiguration peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return peer->index;
+    auto invalid = Converter::ArkValue<Ark_Int32>(0);
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Ark_Int32>(peer->index_);
 }
 void SetIndexImpl(Ark_MenuItemConfiguration peer,
                   const Ark_Int32 index)

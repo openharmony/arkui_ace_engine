@@ -59,6 +59,9 @@ static constexpr int TEST_DEFAULT_INDEX = 0;
 HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAccessorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierMenuItem, nullptr);
+    /**
+     * @tc.steps: step1. create menu node.
+     */
     const auto menuNode = MenuModelStatic::CreateFrameNode(TEST_NODE_ID);
     ASSERT_NE(menuNode, nullptr);
     RefPtr<FrameNode> menuItemNode = FrameNode::GetOrCreateFrameNode(
@@ -99,7 +102,9 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAcc
             .release = [](InteropInt32){},
         }
     };
-
+    /**
+     * @tc.steps: step2. create modifierCallback.
+     */
     auto modifierCallback = [](const Ark_Int32 resourceId,
         const Ark_NativePointer parentNode,
         const Ark_MenuItemConfiguration config,
@@ -108,9 +113,9 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAcc
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
                 .resourceId = resourceId,
-                .objId = config->contentModifier.resource.resourceId,
-                .selected = Converter::Convert<bool>(config->selected),
-                .index = Converter::Convert<int>(config->index)
+                .objId = config->contentModifier_.resource.resourceId,
+                .selected = config->selected_,
+                .index = config->index_
             };
     };
 
@@ -118,6 +123,9 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAcc
 
     auto builder = Converter::ArkValue<MenuItemModifierBuilder>(modifierCallback, TEST_BUILDER_ID);
     Ark_NativePointer nodePtr = reinterpret_cast<Ark_NativePointer>(menuItemNode.GetRawPtr());
+    /**
+     * @tc.steps: step3. call FireBuilder.
+     */
     accessor_->contentModifierMenuItem(nodePtr, &obj, &builder);
     FireBuilder(pattern.GetRawPtr());
 
