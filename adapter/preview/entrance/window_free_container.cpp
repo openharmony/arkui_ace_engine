@@ -26,7 +26,7 @@
 namespace OHOS::Ace::Platform {
 static RefPtr<AceContainer> g_windowFreeContainer = nullptr;
 static RefPtr<Framework::JsEngine> g_jsEngine = nullptr;
-RefPtr<Container> WindowFreeContainer::CreateWindowFreeContainer(void *runtime, void *ctx)
+RefPtr<Container> WindowFreeContainer::CreateWindowFreeContainer(void *runtime, void *ctx, FrontendType frontendType)
 {
     LOGI("Create container without window.");
     auto container = AceContainer::GetContainerInstance(WINDOW_FREE_CONTAINER_ID);
