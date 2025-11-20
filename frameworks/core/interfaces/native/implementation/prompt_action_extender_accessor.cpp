@@ -24,6 +24,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "frameworks/base/utils/utils.h"
@@ -162,6 +163,16 @@ auto g_parseLayoutRegionMargin = [](const auto& menuOptions, MenuParam& menuPara
     menuParam.layoutRegionMargin = layoutRegionMargin;
 };
 
+auto g_parsePreviewAnimationOptions = [](const auto& menuOptions, MenuParam& menuParam) {
+    if (menuOptions.previewAnimationOptions.tag != INTEROP_TAG_UNDEFINED) {
+        auto previewAnimationOptions =
+            Converter::OptConvert<MenuPreviewAnimationOptions>(menuOptions.previewAnimationOptions.value.scale);
+        if (previewAnimationOptions.has_value()) {
+            menuParam.previewAnimationOptions = previewAnimationOptions.value();
+        }
+    }
+};
+
 auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) {
     auto offsetVal =
         OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
@@ -207,6 +218,7 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     menuParam.outlineWidth = OptConvert<BorderWidthProperty>(menuOptions.outlineWidth);
     menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
     menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
+    g_parsePreviewAnimationOptions(menuOptions, menuParam);
 };
 
 auto g_onWillDismissPopup = [](
