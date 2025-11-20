@@ -6,6 +6,7 @@ import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
 import { ArkUIAniModule } from "arkui.ani"
 import { DrawContext } from "arkui.Graphics"
+import { Bindable, Callback } from "#generated"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
@@ -1122,4 +1123,8 @@ export class ArkCommonPeer extends ArkCommonMethodPeer {
 export interface DynamicNode {
     onMove(handler?: OnMoveHandler): this;
     onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
+}
+
+export function makeBindable<T>(value: T, onChange: Callback<T>): Bindable<T> {
+    return { value, onChange } as Bindable<T>;
 }
