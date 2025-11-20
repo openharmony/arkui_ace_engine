@@ -5002,10 +5002,10 @@ typedef struct Opt_ImageSize {
     Ark_ImageSize value;
 } Opt_ImageSize;
 typedef enum Ark_ImageSpanAlignment {
-    ARK_IMAGE_SPAN_ALIGNMENT_BASELINE = 0,
-    ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM = 1,
+    ARK_IMAGE_SPAN_ALIGNMENT_BASELINE = 4,
+    ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM = 3,
     ARK_IMAGE_SPAN_ALIGNMENT_CENTER = 2,
-    ARK_IMAGE_SPAN_ALIGNMENT_TOP = 3,
+    ARK_IMAGE_SPAN_ALIGNMENT_TOP = 1,
 } Ark_ImageSpanAlignment;
 typedef struct Opt_ImageSpanAlignment {
     Ark_Tag tag;
