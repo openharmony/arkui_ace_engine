@@ -471,7 +471,7 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
     }
 }
 
-bool ArkoalaLazyNode::IsInActiveRange(int32_t index, const ActiveRangeParam& param)
+bool ArkoalaLazyNode::IsInActiveRange(int32_t index, const ActiveRangeParam& param) const
 {
     if (isLoop_ && param.start > param.end) {
         return index >= param.start || index <= param.end;
@@ -479,7 +479,7 @@ bool ArkoalaLazyNode::IsInActiveRange(int32_t index, const ActiveRangeParam& par
     return index >= param.start && index <= param.end;
 }
 
-bool ArkoalaLazyNode::IsInCacheRange(int32_t index, const ActiveRangeParam& param)
+bool ArkoalaLazyNode::IsInCacheRange(int32_t index, const ActiveRangeParam& param) const
 {
     const auto total = totalCount_;
     if (total <= 0 || index < 0 || index >= total) {
@@ -538,8 +538,11 @@ void ArkoalaLazyNode::ForEachL1Node(
     const std::function<void(int32_t index, const RefPtr<UINode>& node)>& cbFunc) const
 {
     for (auto it = node4Index_.begin(); it != node4Index_.end(); ++it) {
-        if (const RefPtr<UINode> node = it->second) {
-            cbFunc(static_cast<int32_t>(it->first), node);
+        const auto index = it->first;
+        const RefPtr<UINode> node = it->second;
+        CHECK_NULL_CONTINUE(node);
+        if (isRepeat_ || IsInActiveRange(index, activeRangeParam_)) { // LazyForEach only return active nodes
+            cbFunc(index, node);
         }
     }
 }

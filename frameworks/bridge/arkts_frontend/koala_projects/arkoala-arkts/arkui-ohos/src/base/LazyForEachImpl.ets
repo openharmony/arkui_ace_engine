@@ -15,7 +15,7 @@
 
 import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
     rememberDisposable, rememberMutableState, scheduleCallback } from '@koalaui/runtime'
-import { StateContext } from 'arkui.incremental.runtime.state';
+import { StateContext } from 'arkui.incremental.runtime.state'
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'
@@ -23,8 +23,7 @@ import { InternalListener } from './DataChangeListener'
 import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
 import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
-import { LazyItemNode } from './LazyItemNode'
-import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+import { LazyNodePeer, LazyItemNode, NodeHolder } from './SyntaxNodeBase'
 import { CustomComponent } from '../component/customComponent'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
@@ -48,7 +47,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     keyGenerator?: (item: T, index: int32) => string,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
-    isRepeat: boolean = false,
+    isRepeat: boolean = false
 ) {
     const node = createLazyNode(isRepeat)
 
@@ -106,32 +105,17 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     LazyForEachOps.SyncOnMoveOps(node.getPeerPtr(), pool.onMoveFromTo, onMove, itemDragEvent)
 }
 
-export class NodeHolder {
-    node?: PeerNode
-}
-
 /** @memo:intrinsic */
 function createLazyNode(isRepeat: boolean): PeerNode {
     /**
      * We don't want cache behavior with LazyForEach (to support Repeat's non-memo data updates),
      *   therefore LazyForEach implementation is outside NodeAttach,
-     *   and LazyForEachNode is provided through a remembered NodeHolder.
+     *   and LazyNode is provided through a remembered NodeHolder.
      */
     let nodeHolder = remember(() => new NodeHolder())
-    NodeAttach(
-        () => {
-            const peerId = PeerNode.nextId()
-            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId, isRepeat)
-            if (!_peerPtr) {
-                throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
-            }
-            const _peer = new PeerNode(_peerPtr, peerId, isRepeat ? 'Repeat' : 'LazyForEach', 0)
-            return _peer
-        },
-        (node: PeerNode) => {
-            nodeHolder.node = node
-        }
-    )
+    NodeAttach(() => LazyNodePeer.create(isRepeat), (node: PeerNode) => {
+        nodeHolder.node = node
+    })
     return nodeHolder.node!
 }
 
@@ -232,7 +216,7 @@ class LazyItemPool implements Disposable {
      */
     pruneBy(criteria: (index: int32) => boolean) {
         this._activeItems.forEach((node, index) => {
-            if (criteria(index)) {
+            if (criteria(index)) { // dispose items outside the active range
                 console.log(`LazyItemPool.pruneBy(): node will be disposed for index ${index}`)
                 node.dispose()
                 this._activeItems.delete(index)
