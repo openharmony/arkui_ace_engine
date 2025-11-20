@@ -3875,7 +3875,7 @@ HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG001, TestSize.Level1)
     auto root = context->GetRootElement();
     ASSERT_NE(root, nullptr);
     root->focusHub_ = nullptr;
-    root->accessibilityProperty_ = nullptr;
+    root->GetOrCreateAccessibilityProperty() = nullptr;
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
     jsAccessibilityManager->SetPipelineContext(context);

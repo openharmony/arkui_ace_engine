@@ -992,7 +992,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     EXPECT_EQ(result, std::make_tuple(true, true, false));
     accessibilityPropertyNew->SetAccessibilityLevel(levelBak);
 
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     auto accessibilityProperty2 = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     EXPECT_EQ(accessibilityProperty2, nullptr);
 

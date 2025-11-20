@@ -890,14 +890,14 @@ HWTEST_F(WebPatternFocusTestNg, OnSetAccessibilityChildTree_001, TestSize.Level1
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->OnSetAccessibilityChildTree(33, 33);
-    EXPECT_EQ(frameNode->accessibilityProperty_, nullptr);
+    EXPECT_EQ(frameNode->GetOrCreateAccessibilityProperty(), nullptr);
 #endif
 }
 
@@ -920,7 +920,7 @@ HWTEST_F(WebPatternFocusTestNg, OnSetAccessibilityChildTree_002, TestSize.Level1
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->OnSetAccessibilityChildTree(33, 33);
-    EXPECT_EQ(frameNode->accessibilityProperty_->GetChildTreeId(), 33);
+    EXPECT_EQ(frameNode->GetOrCreateAccessibilityProperty()->GetChildTreeId(), 33);
 #endif
 }
 /**

@@ -1224,7 +1224,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionChildTreeTest, T
     EXPECT_EQ(property->GetChildWindowId(), 1);
     EXPECT_EQ(property->GetChildTreeId(), 1);
 
-    uiExtensionNode->accessibilityProperty_ = nullptr;
+    uiExtensionNode->GetOrCreateAccessibilityProperty() = nullptr;
     InvalidSessionWrapper(pattern);
     pattern->InitializeAccessibility();
     pattern->OnSetAccessibilityChildTree(1, 1);

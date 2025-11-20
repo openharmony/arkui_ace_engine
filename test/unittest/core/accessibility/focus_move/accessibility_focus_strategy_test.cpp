@@ -344,7 +344,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor003, TestSize.
     AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
     // 1. parent can not GetPropActionName
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     auto result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
     EXPECT_EQ(targetNodes.size(), 0);

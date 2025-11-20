@@ -368,17 +368,17 @@ HWTEST_F(FormNodeTest, FormNodeTest_012, TestSize.Level1)
 
     int32_t childWindowId = 2;
     int32_t childTreeId = 1;
-    auto accessibilityProperty = formNode->accessibilityProperty_;
+    auto accessibilityProperty = formNode->GetOrCreateAccessibilityProperty();
     ASSERT_NE(accessibilityProperty, nullptr);
-    formNode->accessibilityProperty_ = nullptr;
+    formNode->GetOrCreateAccessibilityProperty() = nullptr;
     formNode->OnSetAccessibilityChildTree(childWindowId, childTreeId);
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
-    formNode->accessibilityProperty_ = accessibilityProperty;
+    formNode->GetOrCreateAccessibilityProperty() = accessibilityProperty;
 
     formNode->OnSetAccessibilityChildTree(childWindowId, childTreeId);
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
-    EXPECT_EQ(formNode->accessibilityProperty_->childWindowId_, 2);
-    EXPECT_EQ(formNode->accessibilityProperty_->childTreeId_, 1);
+    EXPECT_EQ(formNode->GetOrCreateAccessibilityProperty()->childWindowId_, 2);
+    EXPECT_EQ(formNode->GetOrCreateAccessibilityProperty()->childTreeId_, 1);
 }
 
 /**

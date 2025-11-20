@@ -422,7 +422,7 @@ HWTEST_F(ListItemGroupPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
     ASSERT_NE(frameNode, nullptr);
     frameNode->layoutProperty_ = listItemGroupLayoutProperty;
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     listItemGroupPattern->frameNode_ = frameNode;
     auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
