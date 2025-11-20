@@ -7144,6 +7144,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetJavaScriptProxy));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJavaScriptProxy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetJavaScriptProxy));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableImageAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableImageAnalyzer));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableImageAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableImageAnalyzer));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForceEnableZoom"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetForceEnableZoom));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForceEnableZoom"),

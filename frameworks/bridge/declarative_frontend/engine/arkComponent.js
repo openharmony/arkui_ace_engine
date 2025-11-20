@@ -32365,6 +32365,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
   }
+  enableImageAnalyzer(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableImageAnalyzerModifier.identity, WebEnableImageAnalyzerModifier, enabled);
+    return this;
+  }
   forceEnableZoom(enabled) {
     modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, enabled);
     return this;
@@ -33956,6 +33960,20 @@ class WebJavaScriptProxyModifier extends ModifierWithKey {
   }
 }
 WebJavaScriptProxyModifier.identity = Symbol('webJavaScriptProxyModifier');
+
+class WebEnableImageAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableImageAnalyzer(node);
+    } else {
+      getUINativeModule().web.setEnableImageAnalyzer(node, this.value);
+    }
+  }
+}
+WebEnableImageAnalyzerModifier.identity = Symbol('webEnableImageAnalyzerModifier');
 
 class WebForceEnableZoomModifier extends ModifierWithKey {
   constructor(value) {

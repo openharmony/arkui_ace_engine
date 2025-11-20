@@ -2601,6 +2601,13 @@ void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<do
     webPattern->UpdateBlankScreenDetectionConfig(config);
 }
 
+void WebModelNG::SetEnableImageAnalyzer(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableImageAnalyzer(isEnabled);
+}
+
 void WebModelNG::SetOnDetectedBlankScreen(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
@@ -2619,6 +2626,14 @@ void WebModelNG::SetBlankScreenDetectionConfig(FrameNode* frameNode, const Blank
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateBlankScreenDetectionConfig(detectConfig);
+}
+
+void WebModelNG::SetEnableImageAnalyzer(FrameNode* frameNode,  bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableImageAnalyzer(isEnabled);
 }
 
 void WebModelNG::SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback)
