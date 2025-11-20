@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class HyperlinkModifier extends CommonMethodModifier implements HyperlinkAttribute,AttributeModifier<HyperlinkAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,6 +41,7 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: Color | int32 | string | Resource | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkHyperlinkPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -62,6 +65,7 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
     }
     mergeModifier(modifier: HyperlinkModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._color_0_flag) {

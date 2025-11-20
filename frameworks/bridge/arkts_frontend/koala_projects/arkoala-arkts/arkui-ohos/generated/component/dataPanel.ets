@@ -28,6 +28,7 @@ import { ResourceColor, Length } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, hookDataPanelAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -344,7 +345,9 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
         return this
     }
     public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookDataPanelAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookDataPanelAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

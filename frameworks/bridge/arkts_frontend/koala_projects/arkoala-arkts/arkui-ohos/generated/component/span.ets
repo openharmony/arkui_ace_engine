@@ -32,6 +32,7 @@ import { DecorationStyleInterface_serializer, DecorationStyleInterface } from ".
 import { Color, FontStyle, FontWeight, TextCase, InteractionHand } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookBaseSpanAttributeModifier, AttributeUpdater, hookSpanAttributeModifier } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { BaseSpanModifier } from "./../BaseSpanModifier"
@@ -599,7 +600,9 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
         return this
     }
     public attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        hookBaseSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookBaseSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -772,7 +775,9 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         return this
     }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
-        hookSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -22,6 +22,7 @@ import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
 import { Resource } from "global.resource"
 import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -30,6 +31,7 @@ import { int32 } from "@koalaui/common"
 import { ShapePoint } from "./component/line"
 export class PolygonModifier extends CommonMethodModifier implements PolygonAttribute,AttributeModifier<PolygonAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -64,6 +66,7 @@ export class PolygonModifier extends CommonMethodModifier implements PolygonAttr
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkPolygonPeer;
         if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -285,6 +288,7 @@ export class PolygonModifier extends CommonMethodModifier implements PolygonAttr
     }
     mergeModifier(modifier: PolygonModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._points_0_flag) {

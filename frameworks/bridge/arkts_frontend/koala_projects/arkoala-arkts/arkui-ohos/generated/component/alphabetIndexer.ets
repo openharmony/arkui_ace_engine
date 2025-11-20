@@ -27,6 +27,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookAlphabetIndexerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -983,7 +984,9 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookAlphabetIndexerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookAlphabetIndexerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

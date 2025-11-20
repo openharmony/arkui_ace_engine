@@ -23,6 +23,7 @@ import { extractors, AttributeModifier } from "#handwritten"
 import { RectShape } from "@ohos.arkui.shape"
 import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkScrollPeer, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollSnapOptions, OffsetOptions, ScrollAttribute } from "./component/scroll"
@@ -31,6 +32,7 @@ import { ScrollState } from "./component/list"
 import { VoidCallback } from "./component/units"
 export class ScrollModifier extends CommonMethodModifier implements ScrollAttribute,AttributeModifier<ScrollAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -91,6 +93,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkScrollPeer;
         if (this._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -528,6 +531,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     }
     mergeModifier(modifier: ScrollModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._scrollable_0_flag) {

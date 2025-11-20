@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 export class RadioModifier extends CommonMethodModifier implements RadioAttribute,AttributeModifier<RadioAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,6 +43,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
     _radioStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radioStyle_0_0value?: RadioStyle | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRadioPeer;
         if (this._checked_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -100,6 +103,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
     }
     mergeModifier(modifier: RadioModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._checked_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._checked_0_flag) {

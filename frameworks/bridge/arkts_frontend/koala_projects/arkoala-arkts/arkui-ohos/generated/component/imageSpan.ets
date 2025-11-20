@@ -28,6 +28,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle } from "./span"
 import { ImageSpanAlignment, ImageFit } from "./enums"
 import { extractors, AttributeModifier, hookImageSpanAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as drawing } from "@ohos.graphics.drawing"
 import { ImageErrorCallback, ImageError } from "./image"
 import { default as image } from "@ohos.multimedia.image"
@@ -291,7 +292,9 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookImageSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

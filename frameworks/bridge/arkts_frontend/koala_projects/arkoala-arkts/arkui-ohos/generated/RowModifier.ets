@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { VerticalAlign, FlexAlign } from "./component/enums"
 export class RowModifier extends CommonMethodModifier implements RowAttribute,AttributeModifier<RowAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -42,6 +44,7 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
     _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _reverse_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRowPeer;
         if (this._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -101,6 +104,7 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
     }
     mergeModifier(modifier: RowModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alignItems_0_flag) {

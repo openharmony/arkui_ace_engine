@@ -27,6 +27,7 @@ import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookBlankAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -144,7 +145,9 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
         return this
     }
     public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookBlankAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookBlankAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

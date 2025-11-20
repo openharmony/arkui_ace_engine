@@ -30,6 +30,7 @@ import { CopyOptions, Color, BarState, ResponseType, FontStyle, FontWeight, Text
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./textInput"
 import { AttributeModifier, extractors, hookRichEditorAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -1531,7 +1532,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRichEditorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRichEditorAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -28,6 +28,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomTheme } from "@ohos.arkui.theme"
 import { ThemeColorMode } from "./common"
 import { hookWithThemeAttributeModifier, AttributeModifier, AttributeUpdater, hookWithThemeOptions } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { WithThemeModifier } from "./../WithThemeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomTheme_serializer } from "./../framework/ohos.arkui.theme"
@@ -89,7 +90,9 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
         return this
     }
     public attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
-        hookWithThemeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => { 
+          hookWithThemeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

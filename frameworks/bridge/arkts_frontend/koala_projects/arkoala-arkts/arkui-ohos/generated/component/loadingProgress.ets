@@ -27,6 +27,7 @@ import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookLoadingProgressContentModifier, hookLoadingProgressAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -177,7 +178,9 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookLoadingProgressAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookLoadingProgressAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

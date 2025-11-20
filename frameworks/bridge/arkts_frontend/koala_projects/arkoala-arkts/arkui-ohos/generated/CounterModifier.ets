@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class CounterModifier extends CommonMethodModifier implements CounterAttribute,AttributeModifier<CounterAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -44,6 +46,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
     _enableInc_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableInc_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkCounterPeer;
         if (this._onInc_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -121,6 +124,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
     }
     mergeModifier(modifier: CounterModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onInc_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onInc_0_flag) {

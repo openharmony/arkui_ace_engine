@@ -27,8 +27,10 @@ import { Resource } from "global.resource"
 import { DecorationStyleInterface } from "./component/styledString"
 import { ShadowOptions, ClickEvent, HoverCallback, HoverEvent } from "./component/common"
 import { LengthMetrics } from "arkui.Graphics"
+import { ModifierState } from './CommonModifier'
 export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -76,6 +78,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
     _onClick_1_0value?: ((value0: ClickEvent) => void) | undefined
     _onClick_1_1value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkSpanPeer;
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -403,6 +406,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         }
     }
     mergeModifier(modifier: SpanModifier): void {
+        this._state = modifier._state;
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {

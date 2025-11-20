@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { AnimationStatus, FillMode, PlayMode } from "./component/enums"
 import { default as curves } from "@ohos.curves"
 export class AnimatorModifier extends CommonMethodModifier implements AnimatorAttribute,AttributeModifier<AnimatorAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -65,6 +67,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
     _onFrame_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFrame_0_0value?: ((value: number) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkAnimatorPeer;
         if (this._state_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -322,6 +325,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
     }
     mergeModifier(modifier: AnimatorModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._state_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._state_0_flag) {

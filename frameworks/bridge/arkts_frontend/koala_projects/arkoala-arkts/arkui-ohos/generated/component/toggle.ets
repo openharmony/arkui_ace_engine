@@ -24,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
 import { ContentModifier, AttributeModifier, hookToggleContentModifier, hookToggleAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
@@ -263,7 +264,9 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
         return this
     }
     public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookToggleAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookToggleAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

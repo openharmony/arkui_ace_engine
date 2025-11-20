@@ -32,6 +32,7 @@ import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent, ContentType } from "./textInput"
 import { LengthMetrics } from "arkui.Graphics"
 import { AttributeModifier, hookTextAreaAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -1934,7 +1935,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextAreaAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextAreaAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

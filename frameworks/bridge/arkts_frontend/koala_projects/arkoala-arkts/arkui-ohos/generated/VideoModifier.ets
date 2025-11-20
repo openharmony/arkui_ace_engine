@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -29,6 +30,7 @@ import { ImageAnalyzerConfig } from "./component/imageCommon"
 import { ColorMetrics } from "arkui.Graphics"
 export class VideoModifier extends CommonMethodModifier implements VideoAttribute,AttributeModifier<VideoAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -77,6 +79,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _surfaceBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _surfaceBackgroundColor_0_0value?: ColorMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkVideoPeer;
         if (this._muted_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -424,6 +427,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     }
     mergeModifier(modifier: VideoModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._muted_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._muted_0_flag) {

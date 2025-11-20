@@ -27,6 +27,7 @@ import { ResourceColor, ResourceStr } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookQRCodeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -214,7 +215,9 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
         return this
     }
     public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookQRCodeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookQRCodeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

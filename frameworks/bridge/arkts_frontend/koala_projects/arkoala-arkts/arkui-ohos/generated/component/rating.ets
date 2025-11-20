@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_F64_serializer } from "./common"
 import { ContentModifier, AttributeModifier, hookRatingContentModifier, hookRatingAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -230,7 +231,9 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         return this
     }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRatingAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRatingAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

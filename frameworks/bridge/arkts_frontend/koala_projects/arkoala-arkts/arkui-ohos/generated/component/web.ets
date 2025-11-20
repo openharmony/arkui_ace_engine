@@ -21,6 +21,7 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as webview } from "@ohos.web.webview"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
@@ -5689,7 +5690,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWebAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookWebAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

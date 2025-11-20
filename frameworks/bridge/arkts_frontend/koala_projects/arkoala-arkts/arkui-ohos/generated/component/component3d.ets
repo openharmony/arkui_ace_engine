@@ -26,6 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { ResourceStr, Dimension } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, extractors, hookComponent3DAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -358,7 +359,9 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookComponent3DAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookComponent3DAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

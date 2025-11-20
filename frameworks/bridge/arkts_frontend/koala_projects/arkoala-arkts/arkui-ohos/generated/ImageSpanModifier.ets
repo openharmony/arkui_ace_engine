@@ -21,6 +21,7 @@ import { TextBackgroundStyle, BaseSpan } from "./component/span"
 import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -33,6 +34,7 @@ import { ImageErrorCallback, ImageError } from "./component/image"
 import { default as image } from "@ohos.multimedia.image"
 export class ImageSpanModifier extends CommonMethodModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -59,6 +61,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
     _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _baselineOffset_0_0value?: LengthMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImageSpanPeer;
         if (this._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -208,6 +211,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
     }
     mergeModifier(modifier: ImageSpanModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._verticalAlign_0_flag) {

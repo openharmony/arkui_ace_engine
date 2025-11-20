@@ -23,6 +23,7 @@ import { extractors, AttributeModifier } from "#handwritten"
 import { RectShape } from "@ohos.arkui.shape"
 import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkWaterFlowPeer, WaterFlowAttribute } from "./component/waterFlow"
@@ -32,6 +33,7 @@ import { OnScrollFrameBeginCallback } from "./component/scroll"
 import { ScrollState } from "./component/list"
 export class WaterFlowModifier extends CommonMethodModifier implements WaterFlowAttribute,AttributeModifier<WaterFlowAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -101,6 +103,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkWaterFlowPeer;
         if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -610,6 +613,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     }
     mergeModifier(modifier: WaterFlowModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._columnsTemplate_0_flag) {

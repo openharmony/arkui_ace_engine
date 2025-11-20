@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -37,6 +38,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         }
     }
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -63,6 +65,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
     _id_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _id_0_0value?: string | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkSymbolSpanPeer;
         if (this._setSymbolSpanOptions_flag !== AttributeUpdaterFlag.INITIAL) {
             switch (this._setSymbolSpanOptions_flag) {
@@ -208,6 +211,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         }
     }
     mergeModifier(modifier: SymbolSpanModifier): void {
+        this._state = modifier._state;
         if (modifier._setSymbolSpanOptions_flag !== AttributeUpdaterFlag.INITIAL) {
             switch (modifier._setSymbolSpanOptions_flag) {
                 case AttributeUpdaterFlag.UPDATE:

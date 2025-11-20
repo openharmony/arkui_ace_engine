@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier, hookGaugeContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -30,6 +31,7 @@ import { LinearGradient } from "./component/dataPanel"
 import { CustomBuilder } from "./component/builder"
 export class GaugeModifier extends CommonMethodModifier implements GaugeAttribute,AttributeModifier<GaugeAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -60,6 +62,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<GaugeConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkGaugePeer;
         if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -245,6 +248,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
     }
     mergeModifier(modifier: GaugeModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._value_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._value_0_flag) {

@@ -27,6 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { default as intl } from "@ohos.intl"
 import { CrownSensitivity, Color } from "./enums"
 import { AttributeModifier, hookTimePickerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -462,7 +463,9 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTimePickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTimePickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

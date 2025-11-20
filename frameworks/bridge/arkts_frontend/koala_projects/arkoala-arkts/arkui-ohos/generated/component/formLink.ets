@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookFormLinkAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -91,7 +92,9 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
         return this
     }
     public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFormLinkAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFormLinkAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

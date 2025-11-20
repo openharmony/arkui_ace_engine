@@ -29,6 +29,7 @@ import { ImageFit } from "./enums"
 import { VoidCallback } from "./units"
 import { ErrorCallback } from "@ohos.base"
 import { AttributeModifier, extractors, hookVideoAttributeModifier, AttributeUpdater, hookSetVideoOptions, hookVideoAnalyzerConfig } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { ColorMetrics } from "arkui.Graphics"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -740,7 +741,9 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookVideoAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookVideoAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

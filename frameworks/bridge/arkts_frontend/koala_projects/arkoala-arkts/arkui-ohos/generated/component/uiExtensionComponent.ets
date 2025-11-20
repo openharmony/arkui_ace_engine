@@ -25,6 +25,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ErrorCallback, BusinessError, RecordData } from "@ohos.base"
 import { extractors, AttributeModifier, hookUIExtensionComponentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as Want } from "@ohos.app.ability.Want"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -343,7 +344,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         return this
     }
     public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookUIExtensionComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookUIExtensionComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

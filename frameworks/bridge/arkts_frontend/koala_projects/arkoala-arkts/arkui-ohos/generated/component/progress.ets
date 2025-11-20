@@ -28,6 +28,7 @@ import { ResourceColor, Length, PX, VP, LPX, Font, Font_serializer } from "./uni
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookProgressContentModifier, hookProgressAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -326,7 +327,9 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
         return this
     }
     public attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookProgressAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookProgressAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

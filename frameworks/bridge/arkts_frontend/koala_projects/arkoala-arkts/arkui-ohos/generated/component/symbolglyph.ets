@@ -28,6 +28,7 @@ import { Resource } from "global.resource"
 import { ResourceColor } from "./units"
 import { Color, FontWeight } from "./enums"
 import { AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -483,7 +484,9 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSymbolGlyphAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSymbolGlyphAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

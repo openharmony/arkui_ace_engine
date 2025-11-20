@@ -23,6 +23,7 @@ import { CommonConfiguration, Bindable_I32_serializer, Bindable_Global_Resource_
 import { ResourceStr, Font_serializer, DividerStyleOptions_serializer, Offset_serializer, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
 import { Resource } from "global.resource"
 import { extractors, ContentModifier, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -1325,7 +1326,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         return this
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSelectAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSelectAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -33,6 +33,7 @@ import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptiveP
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
 import { AttributeModifier, hookTextAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -1578,7 +1579,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

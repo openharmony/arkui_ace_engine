@@ -25,6 +25,7 @@ import { Offset_serializer, Offset, Length, VoidCallback, ResourceColor } from "
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { AttributeModifier, hookCalendarPickerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -280,7 +281,9 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCalendarPickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookCalendarPickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -27,6 +27,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookStepperAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { StepperModifier } from "./../StepperModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkStepperPeer extends ArkCommonMethodPeer {
@@ -226,7 +227,9 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookStepperAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookStepperAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

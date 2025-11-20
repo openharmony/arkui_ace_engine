@@ -33,6 +33,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier, hookImageAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { Color, ImageFit, ImageRepeat, CopyOptions } from "./enums"
 import { ColorMetrics } from "arkui.Graphics"
@@ -1006,7 +1007,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookImageAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

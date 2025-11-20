@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookBadgeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -123,7 +124,9 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
         return this
     }
     public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookBadgeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookBadgeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

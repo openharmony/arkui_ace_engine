@@ -25,8 +25,10 @@ import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, BorderRadius
 import { Resource } from "global.resource"
 import { FontStyle, FontWeight, Color, BorderStyle, Alignment, Axis, TextHeightAdaptivePolicy } from "./component/enums"
 import { AlignRuleOption, LocalizedAlignRuleOptions, ChainStyle } from "./component/common"
+import { ModifierState } from './CommonModifier'
 export class SecurityComponentMethodModifier implements SecurityComponentMethod,AttributeModifier<SecurityComponentMethod> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -106,6 +108,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
     _enabled_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enabled_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkSecurityComponentMethodPeer;
         if (this._iconSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -721,6 +724,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         }
     }
     mergeModifier(modifier: SecurityComponentMethodModifier): void {
+        this._state = modifier._state;
         if (modifier._iconSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._iconSize_0_flag) {

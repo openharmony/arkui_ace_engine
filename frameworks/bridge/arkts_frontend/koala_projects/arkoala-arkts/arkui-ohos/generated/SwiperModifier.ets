@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -30,6 +31,7 @@ import { Length } from "./component/units"
 import { Resource } from "global.resource"
 export class SwiperModifier extends CommonMethodModifier implements SwiperAttribute,AttributeModifier<SwiperAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -108,6 +110,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _nextMargin_0_0value?: Length | undefined
     _nextMargin_0_1value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSwiperPeer;
         if (this._index_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -671,6 +674,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     }
     mergeModifier(modifier: SwiperModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._index_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._index_0_flag) {

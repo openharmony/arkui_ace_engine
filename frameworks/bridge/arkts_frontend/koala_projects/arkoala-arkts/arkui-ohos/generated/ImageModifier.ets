@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -36,6 +37,7 @@ import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class ImageModifier extends CommonMethodModifier implements ImageAttribute,AttributeModifier<ImageAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -100,6 +102,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _orientation_0_0value?: ImageRotateOrientation | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImagePeer;
         if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -591,6 +594,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     }
     mergeModifier(modifier: ImageModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alt_0_flag) {

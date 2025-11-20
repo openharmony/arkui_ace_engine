@@ -27,6 +27,7 @@ import { ResourceColor } from "./units"
 import { Color, LineCapStyle } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookDividerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -215,7 +216,9 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
         return this
     }
     public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookDividerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookDividerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
