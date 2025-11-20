@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DotIndicatorAccessor {
 void DestroyPeerImpl(Ark_DotIndicator peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_DotIndicator ConstructImpl()
 {
@@ -37,63 +38,63 @@ void ItemWidthImpl(Ark_DotIndicator peer,
                    const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optItemWidth = Converter::OptConvert<Dimension>(*value);
+    auto optItemWidth = Converter::OptConvertPtr<Dimension>(value);
     peer->SetItemWidth(optItemWidth);
 }
 void ItemHeightImpl(Ark_DotIndicator peer,
                     const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optItemHeight = Converter::OptConvert<Dimension>(*value);
+    auto optItemHeight = Converter::OptConvertPtr<Dimension>(value);
     peer->SetItemHeight(optItemHeight);
 }
 void SelectedItemWidthImpl(Ark_DotIndicator peer,
                            const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optSelectedItemWidth = Converter::OptConvert<Dimension>(*value);
+    auto optSelectedItemWidth = Converter::OptConvertPtr<Dimension>(value);
     peer->SetSelectedItemWidth(optSelectedItemWidth);
 }
 void SelectedItemHeightImpl(Ark_DotIndicator peer,
                             const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optSelectedItemHeight = Converter::OptConvert<Dimension>(*value);
+    auto optSelectedItemHeight = Converter::OptConvertPtr<Dimension>(value);
     peer->SetSelectedItemHeight(optSelectedItemHeight);
 }
 void MaskImpl(Ark_DotIndicator peer,
               const Opt_Boolean* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optMask = Converter::OptConvert<bool>(*value);
+    auto optMask = Converter::OptConvertPtr<bool>(value);
     peer->SetMask(optMask);
 }
 void ColorImpl(Ark_DotIndicator peer,
                const Opt_ResourceColor* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optColor = Converter::OptConvert<Color>(*value);
+    auto optColor = Converter::OptConvertPtr<Color>(value);
     peer->SetColor(optColor);
 }
 void SelectedColorImpl(Ark_DotIndicator peer,
                        const Opt_ResourceColor* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optSelectedColor = Converter::OptConvert<Color>(*value);
+    auto optSelectedColor = Converter::OptConvertPtr<Color>(value);
     peer->SetSelectedColor(optSelectedColor);
 }
 void MaxDisplayCountImpl(Ark_DotIndicator peer,
                          const Opt_Int32* maxDisplayCount)
 {
     CHECK_NULL_VOID(peer);
-    auto optMaxDisplayCount = Converter::OptConvert<int32_t>(*maxDisplayCount);
+    auto optMaxDisplayCount = Converter::OptConvertPtr<int32_t>(maxDisplayCount);
     peer->SetMaxDisplayCount(optMaxDisplayCount);
 }
 void SpaceImpl(Ark_DotIndicator peer,
                const Opt_LengthMetrics* space)
 {
     CHECK_NULL_VOID(peer);
-    auto optSpace = Converter::OptConvert<Dimension>(*space);
+    auto optSpace = Converter::OptConvertPtr<Dimension>(space);
     peer->SetSpace(optSpace);
 }
 } // DotIndicatorAccessor

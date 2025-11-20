@@ -39,7 +39,7 @@ public:
         dimBottom_ = value;
     }
 
-    void SetBottomIgnoreSize(const std::optional<bool>& value)
+    void SetBottomIgnoreSize(const bool& value)
     {
         ignoreSize_ = value;
     }
