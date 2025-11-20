@@ -7619,7 +7619,7 @@ void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue
 void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 {
     if (keyFrameNode_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW, "FreezeKeyFrameNode: %{public}d", freezeFlag);
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeKeyFrameNode: %{public}d", freezeFlag);
         keyFrameNode_->SetFreeze(freezeFlag);
     }
 }
@@ -7627,12 +7627,12 @@ void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 void RosenRenderContext::RemoveKeyFrameNode()
 {
     if (reDraggingFlag_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for redragging");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for redragging");
         reDraggingFlag_ = false;
         return;
     }
     if (keyFrameNode_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: removed");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: removed");
         keyFrameNode_->RemoveFromTree();
         keyFrameNode_ = nullptr;
     }
