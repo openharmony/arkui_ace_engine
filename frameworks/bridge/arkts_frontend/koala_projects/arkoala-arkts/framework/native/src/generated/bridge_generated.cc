@@ -7078,50 +7078,50 @@ void impl_GaugeAttribute_setValue(Ark_NativePointer thisPtr, KSerializerBuffer t
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Float64 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGaugeModifier()->setValue(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Float64 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGaugeModifier()->setValue(self, static_cast<Opt_Float64*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GaugeAttribute_setValue, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GaugeAttribute_setStartAngle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Float64 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGaugeModifier()->setStartAngle(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Float64 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGaugeModifier()->setStartAngle(self, static_cast<Opt_Float64*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GaugeAttribute_setStartAngle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GaugeAttribute_setEndAngle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Float64 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGaugeModifier()->setEndAngle(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Float64 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGaugeModifier()->setEndAngle(self, static_cast<Opt_Float64*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GaugeAttribute_setEndAngle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GaugeAttribute_setColors(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number valueValueTempTmpBuf = {};
+        Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number valueValueTempTmpBuf_ = {};
+            Ark_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64 valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
@@ -7150,11 +7150,11 @@ void impl_GaugeAttribute_setColors(Ark_NativePointer thisPtr, KSerializerBuffer 
             } else if (valueValueTempTmpBuf_UnionSelector == 2) {
                 valueValueTempTmpBuf_.selector = 2;
                 const Ark_Int32 valueValueTempTmpBuf_BufULength = thisDeserializer.readInt32();
-                Array_Tuple_Union_ResourceColor_LinearGradient_Number valueValueTempTmpBuf_BufU = {};
+                Array_Tuple_Union_ResourceColor_LinearGradient_F64 valueValueTempTmpBuf_BufU = {};
                 thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBuf_BufU)>::type,
         std::decay<decltype(*valueValueTempTmpBuf_BufU.array)>::type>(&valueValueTempTmpBuf_BufU, valueValueTempTmpBuf_BufULength);
                 for (int valueValueTempTmpBuf_BufUBufCounterI = 0; valueValueTempTmpBuf_BufUBufCounterI < valueValueTempTmpBuf_BufULength; valueValueTempTmpBuf_BufUBufCounterI++) {
-                    Ark_Tuple_Union_ResourceColor_LinearGradient_Number valueValueTempTmpBuf_BufUTempBuf = {};
+                    Ark_Tuple_Union_ResourceColor_LinearGradient_F64 valueValueTempTmpBuf_BufUTempBuf = {};
                     const Ark_Int8 valueValueTempTmpBuf_BufUTempBufValue0TempBufUnionSelector = thisDeserializer.readInt8();
                     Ark_Union_ResourceColor_LinearGradient valueValueTempTmpBuf_BufUTempBufValue0TempBuf = {};
                     valueValueTempTmpBuf_BufUTempBufValue0TempBuf.selector = valueValueTempTmpBuf_BufUTempBufValue0TempBufUnionSelector;
@@ -7186,17 +7186,17 @@ void impl_GaugeAttribute_setColors(Ark_NativePointer thisPtr, KSerializerBuffer 
                         INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_BufUTempBufValue0TempBuf has to be chosen through deserialisation.");
                     }
                     valueValueTempTmpBuf_BufUTempBuf.value0 = static_cast<Ark_Union_ResourceColor_LinearGradient>(valueValueTempTmpBuf_BufUTempBufValue0TempBuf);
-                    valueValueTempTmpBuf_BufUTempBuf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                    valueValueTempTmpBuf_BufUTempBuf.value1 = thisDeserializer.readFloat64();
                     valueValueTempTmpBuf_BufU.array[valueValueTempTmpBuf_BufUBufCounterI] = valueValueTempTmpBuf_BufUTempBuf;
                 }
                 valueValueTempTmpBuf_.value2 = valueValueTempTmpBuf_BufU;
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64>(valueValueTempTmpBuf_);
         }
-        Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGaugeModifier()->setColors(self, static_cast<Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number*>(&valueValueTemp));
+        Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getGaugeModifier()->setColors(self, static_cast<Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GaugeAttribute_setColors, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GaugeAttribute_setStrokeWidth(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -8456,13 +8456,13 @@ void impl_ImageAttribute_setEdgeAntialiasing(Ark_NativePointer thisPtr, KSeriali
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Float64 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getImageModifier()->setEdgeAntialiasing(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Float64 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getImageModifier()->setEdgeAntialiasing(self, static_cast<Opt_Float64*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ImageAttribute_setEdgeAntialiasing, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ImageAttribute_setOnComplete(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -8628,13 +8628,13 @@ void impl_ImageAnimatorAttribute_setDuration(Ark_NativePointer thisPtr, KSeriali
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Int32 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = thisDeserializer.readInt32();
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getImageAnimatorModifier()->setDuration(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Int32 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getImageAnimatorModifier()->setDuration(self, static_cast<Opt_Int32*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ImageAnimatorAttribute_setDuration, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ImageAnimatorAttribute_setReverse(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -8680,13 +8680,13 @@ void impl_ImageAnimatorAttribute_setIterations(Ark_NativePointer thisPtr, KSeria
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Int32 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = thisDeserializer.readInt32();
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getImageAnimatorModifier()->setIterations(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Int32 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getImageAnimatorModifier()->setIterations(self, static_cast<Opt_Int32*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ImageAnimatorAttribute_setIterations, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ImageAnimatorAttribute_setMonitorInvisibleArea(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -11883,38 +11883,38 @@ void impl_PatternLockAttribute_setPathStrokeWidth(Ark_NativePointer thisPtr, KSe
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_String valueValueTempTmpBuf = {};
+        Opt_Union_F64_String valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_String valueValueTempTmpBuf_ = {};
+            Ark_Union_F64_String valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readFloat64();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = static_cast<Ark_String>(thisDeserializer.readString());
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_String>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_F64_String>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_String valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPatternLockModifier()->setPathStrokeWidth(self, static_cast<Opt_Union_Number_String*>(&valueValueTemp));
+        Opt_Union_F64_String valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getPatternLockModifier()->setPathStrokeWidth(self, static_cast<Opt_Union_F64_String*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(PatternLockAttribute_setPathStrokeWidth, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_PatternLockAttribute_setOnPatternComplete(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Array_Number_Void valueValueTempTmpBuf = {};
+        Opt_Callback_Array_I32_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_Number input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Array_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_Number input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Array_Number_Void))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_Int32 input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Array_I32_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_Int32 input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Array_I32_Void))))};
         }
-        Opt_Callback_Array_Number_Void valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPatternLockModifier()->setOnPatternComplete(self, static_cast<Opt_Callback_Array_Number_Void*>(&valueValueTemp));
+        Opt_Callback_Array_I32_Void valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getPatternLockModifier()->setOnPatternComplete(self, static_cast<Opt_Callback_Array_I32_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(PatternLockAttribute_setOnPatternComplete, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_PatternLockAttribute_setAutoReset(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -11934,13 +11934,13 @@ void impl_PatternLockAttribute_setOnDotConnect(Ark_NativePointer thisPtr, KSeria
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Number_Void valueValueTempTmpBuf = {};
+        Opt_Callback_I32_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_I32_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_I32_Void))))};
         }
-        Opt_Callback_Number_Void valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPatternLockModifier()->setOnDotConnect(self, static_cast<Opt_Callback_Number_Void*>(&valueValueTemp));
+        Opt_Callback_I32_Void valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getPatternLockModifier()->setOnDotConnect(self, static_cast<Opt_Callback_I32_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(PatternLockAttribute_setOnDotConnect, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_PatternLockAttribute_setActivateCircleStyle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -12346,25 +12346,25 @@ void impl_QRCodeAttribute_setContentOpacity(Ark_NativePointer thisPtr, KSerializ
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_Resource valueValueTempTmpBuf = {};
+        Opt_Union_F64_Resource valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_Resource valueValueTempTmpBuf_ = {};
+            Ark_Union_F64_Resource valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readFloat64();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = Resource_serializer::read(thisDeserializer);
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_Resource>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_F64_Resource>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_Resource valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getQRCodeModifier()->setContentOpacity(self, static_cast<Opt_Union_Number_Resource*>(&valueValueTemp));
+        Opt_Union_F64_Resource valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getQRCodeModifier()->setContentOpacity(self, static_cast<Opt_Union_F64_Resource*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(QRCodeAttribute_setContentOpacity, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Radio_construct(Ark_Int32 id, Ark_Int32 flags) {
@@ -21385,13 +21385,13 @@ void impl_TextClockAttribute_setOnDateChange(Ark_NativePointer thisPtr, KSeriali
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Number_Void valueValueTempTmpBuf = {};
+        Opt_Callback_I64_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_I64_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_I64_Void))))};
         }
-        Opt_Callback_Number_Void valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextClockModifier()->setOnDateChange(self, static_cast<Opt_Callback_Number_Void*>(&valueValueTemp));
+        Opt_Callback_I64_Void valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextClockModifier()->setOnDateChange(self, static_cast<Opt_Callback_I64_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextClockAttribute_setOnDateChange, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextClockAttribute_setFontColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -21470,15 +21470,15 @@ void impl_TextClockAttribute_setFontWeight(Ark_NativePointer thisPtr, KSerialize
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_FontWeight_String valueValueTempTmpBuf = {};
+        Opt_Union_I32_FontWeight_String valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_FontWeight_String valueValueTempTmpBuf_ = {};
+            Ark_Union_I32_FontWeight_String valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readInt32();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = static_cast<Ark_FontWeight>(thisDeserializer.readInt32());
@@ -21488,10 +21488,10 @@ void impl_TextClockAttribute_setFontWeight(Ark_NativePointer thisPtr, KSerialize
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_FontWeight_String>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_FontWeight_String>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_FontWeight_String valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextClockModifier()->setFontWeight(self, static_cast<Opt_Union_Number_FontWeight_String*>(&valueValueTemp));
+        Opt_Union_I32_FontWeight_String valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextClockModifier()->setFontWeight(self, static_cast<Opt_Union_I32_FontWeight_String*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextClockAttribute_setFontWeight, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextClockAttribute_setFontFamily(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -22851,25 +22851,25 @@ void impl_TextPickerAttribute_setDefaultPickerItemHeight(Ark_NativePointer thisP
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_String valueValueTempTmpBuf = {};
+        Opt_Union_F64_String valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_String valueValueTempTmpBuf_ = {};
+            Ark_Union_F64_String valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readFloat64();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = static_cast<Ark_String>(thisDeserializer.readString());
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_String>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_F64_String>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_String valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextPickerModifier()->setDefaultPickerItemHeight(self, static_cast<Opt_Union_Number_String*>(&valueValueTemp));
+        Opt_Union_F64_String valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextPickerModifier()->setDefaultPickerItemHeight(self, static_cast<Opt_Union_F64_String*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextPickerAttribute_setDefaultPickerItemHeight, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextPickerAttribute_setCanLoop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -22957,7 +22957,7 @@ void impl_TextPickerAttribute_setOnChange(Ark_NativePointer thisPtr, KSerializer
         Opt_OnTextPickerChangeCallback valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnTextPickerChangeCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnTextPickerChangeCallback))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnTextPickerChangeCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnTextPickerChangeCallback))))};
         }
         Opt_OnTextPickerChangeCallback valueValueTemp = valueValueTempTmpBuf;;
         GetNodeModifiers()->getTextPickerModifier()->setOnChange(self, static_cast<Opt_OnTextPickerChangeCallback*>(&valueValueTemp));
@@ -22970,7 +22970,7 @@ void impl_TextPickerAttribute_setOnScrollStop(Ark_NativePointer thisPtr, KSerial
         Opt_TextPickerScrollStopCallback valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerScrollStopCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerScrollStopCallback))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerScrollStopCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerScrollStopCallback))))};
         }
         Opt_TextPickerScrollStopCallback valueValueTemp = valueValueTempTmpBuf;;
         GetNodeModifiers()->getTextPickerModifier()->setOnScrollStop(self, static_cast<Opt_TextPickerScrollStopCallback*>(&valueValueTemp));
@@ -22983,7 +22983,7 @@ void impl_TextPickerAttribute_setOnEnterSelectedArea(Ark_NativePointer thisPtr, 
         Opt_TextPickerEnterSelectedAreaCallback valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerEnterSelectedAreaCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerEnterSelectedAreaCallback))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerEnterSelectedAreaCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerEnterSelectedAreaCallback))))};
         }
         Opt_TextPickerEnterSelectedAreaCallback valueValueTemp = valueValueTempTmpBuf;;
         GetNodeModifiers()->getTextPickerModifier()->setOnEnterSelectedArea(self, static_cast<Opt_TextPickerEnterSelectedAreaCallback*>(&valueValueTemp));
@@ -22993,32 +22993,32 @@ void impl_TextPickerAttribute_setSelectedIndex(Ark_NativePointer thisPtr, KSeria
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_Array_Number valueValueTempTmpBuf = {};
+        Opt_Union_I32_Array_I32 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_Array_Number valueValueTempTmpBuf_ = {};
+            Ark_Union_I32_Array_I32 valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readInt32();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 const Ark_Int32 valueValueTempTmpBuf_BufULength = thisDeserializer.readInt32();
-                Array_Number valueValueTempTmpBuf_BufU = {};
+                Array_Int32 valueValueTempTmpBuf_BufU = {};
                 thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBuf_BufU)>::type,
         std::decay<decltype(*valueValueTempTmpBuf_BufU.array)>::type>(&valueValueTempTmpBuf_BufU, valueValueTempTmpBuf_BufULength);
                 for (int valueValueTempTmpBuf_BufUBufCounterI = 0; valueValueTempTmpBuf_BufUBufCounterI < valueValueTempTmpBuf_BufULength; valueValueTempTmpBuf_BufUBufCounterI++) {
-                    valueValueTempTmpBuf_BufU.array[valueValueTempTmpBuf_BufUBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                    valueValueTempTmpBuf_BufU.array[valueValueTempTmpBuf_BufUBufCounterI] = thisDeserializer.readInt32();
                 }
                 valueValueTempTmpBuf_.value1 = valueValueTempTmpBuf_BufU;
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_Array_Number>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_Array_I32>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_Array_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextPickerModifier()->setSelectedIndex(self, static_cast<Opt_Union_Number_Array_Number*>(&valueValueTemp));
+        Opt_Union_I32_Array_I32 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextPickerModifier()->setSelectedIndex(self, static_cast<Opt_Union_I32_Array_I32*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextPickerAttribute_setSelectedIndex, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextPickerAttribute_setDivider(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -23194,15 +23194,15 @@ void impl_TextTimerAttribute_setFontWeight(Ark_NativePointer thisPtr, KSerialize
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_FontWeight_ResourceStr valueValueTempTmpBuf = {};
+        Opt_Union_I32_FontWeight_ResourceStr valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_Number_FontWeight_ResourceStr valueValueTempTmpBuf_ = {};
+            Ark_Union_I32_FontWeight_ResourceStr valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                valueValueTempTmpBuf_.value0 = thisDeserializer.readInt32();
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = static_cast<Ark_FontWeight>(thisDeserializer.readInt32());
@@ -23224,10 +23224,10 @@ void impl_TextTimerAttribute_setFontWeight(Ark_NativePointer thisPtr, KSerialize
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_Number_FontWeight_ResourceStr>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_FontWeight_ResourceStr>(valueValueTempTmpBuf_);
         }
-        Opt_Union_Number_FontWeight_ResourceStr valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextTimerModifier()->setFontWeight(self, static_cast<Opt_Union_Number_FontWeight_ResourceStr*>(&valueValueTemp));
+        Opt_Union_I32_FontWeight_ResourceStr valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextTimerModifier()->setFontWeight(self, static_cast<Opt_Union_I32_FontWeight_ResourceStr*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextTimerAttribute_setFontWeight, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextTimerAttribute_setFontFamily(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -23259,13 +23259,13 @@ void impl_TextTimerAttribute_setOnTimer(Ark_NativePointer thisPtr, KSerializerBu
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Number_Number_Void valueValueTempTmpBuf = {};
+        Opt_TimerCallback valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number utc, const Ark_Number elapsedTime)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number utc, const Ark_Number elapsedTime)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Number_Void))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 utc, const Ark_Int64 elapsedTime)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TimerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 utc, const Ark_Int64 elapsedTime)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TimerCallback))))};
         }
-        Opt_Callback_Number_Number_Void valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextTimerModifier()->setOnTimer(self, static_cast<Opt_Callback_Number_Number_Void*>(&valueValueTemp));
+        Opt_TimerCallback valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextTimerModifier()->setOnTimer(self, static_cast<Opt_TimerCallback*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextTimerAttribute_setOnTimer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextTimerAttribute_setTextShadow(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

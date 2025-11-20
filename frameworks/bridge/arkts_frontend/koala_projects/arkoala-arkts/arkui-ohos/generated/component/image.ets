@@ -32,7 +32,7 @@ import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLig
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookImageSetImageOptions, hookImageAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookImageAttributeModifier, AttributeUpdater } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { Color, ImageFit, ImageRepeat, CopyOptions } from "./enums"
 import { ColorMetrics } from "arkui.Graphics"
@@ -380,12 +380,12 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setEdgeAntialiasingAttribute(value: number | undefined): void {
+    setEdgeAntialiasingAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -541,19 +541,19 @@ export enum ImageRotateOrientation {
     LEFT_MIRRORED = 8
 }
 export interface ImageCompleteEvent {
-    width: number;
-    height: number;
-    componentWidth: number;
-    componentHeight: number;
-    loadingStatus: number;
-    contentWidth: number;
-    contentHeight: number;
-    contentOffsetX: number;
-    contentOffsetY: number;
+    width: int32;
+    height: int32;
+    componentWidth: int32;
+    componentHeight: int32;
+    loadingStatus: int32;
+    contentWidth: int32;
+    contentHeight: int32;
+    contentOffsetX: int32;
+    contentOffsetY: int32;
 }
 export interface ImageSourceSize {
-    width: number;
-    height: number;
+    width: double;
+    height: double;
 }
 export interface ImageAttribute extends CommonMethod {
     setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
@@ -608,7 +608,7 @@ export interface ImageAttribute extends CommonMethod {
     pointLight(value: PointLightStyle | undefined): this {
         throw new Error("Unimplemented method pointLight")
     }
-    edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: double | undefined): this {
         throw new Error("Unimplemented method edgeAntialiasing")
     }
     onComplete(value: ImageOnCompleteCallback | undefined): this {
@@ -660,7 +660,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     copyOption_value?: CopyOptions | undefined
     draggable_value?: boolean | undefined
     pointLight_value?: PointLightStyle | undefined
-    edgeAntialiasing_value?: number | undefined
+    edgeAntialiasing_value?: double | undefined
     onComplete_value?: ImageOnCompleteCallback | undefined
     onError_value?: ImageErrorCallback | undefined
     onFinish_value?: (() => void) | undefined
@@ -725,7 +725,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     pointLight(value: PointLightStyle | undefined): this {
         return this
     }
-    edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: double | undefined): this {
         return this
     }
     onComplete(value: ImageOnCompleteCallback | undefined): this {
@@ -762,8 +762,8 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
 export type ImageErrorCallback = (error: ImageError) => void;
 export type ImageOnCompleteCallback = (loadEvent?: ImageCompleteEvent) => void;
 export interface ImageError {
-    componentWidth: number;
-    componentHeight: number;
+    componentWidth: int32;
+    componentHeight: int32;
     message: string;
     error?: BusinessError;
 }
@@ -781,7 +781,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            hookImageSetImageOptions(this, src, imageAIOptions)
+            const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
+            const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
+            this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
             this.applyOptionsFinish('ImageAttribute');
             return this
         }
@@ -923,9 +925,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public edgeAntialiasing(value: number | undefined): this {
+    public edgeAntialiasing(value: double | undefined): this {
         if (this.checkPriority("edgeAntialiasing")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setEdgeAntialiasingAttribute(value_casted)
             return this
         }
@@ -1045,56 +1047,56 @@ export class ColorContent_serializer {
         return ColorContentInternal.fromPtr(ptr)
     }
 }
-export class ImageCompleteEvent_serializer {
-    public static write(buffer: SerializerBase, value: ImageCompleteEvent): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
-        const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
-        const valueHolderForComponentWidth  = value.componentWidth
-        valueSerializer.writeNumber(valueHolderForComponentWidth)
-        const valueHolderForComponentHeight  = value.componentHeight
-        valueSerializer.writeNumber(valueHolderForComponentHeight)
-        const valueHolderForLoadingStatus  = value.loadingStatus
-        valueSerializer.writeNumber(valueHolderForLoadingStatus)
-        const valueHolderForContentWidth  = value.contentWidth
-        valueSerializer.writeNumber(valueHolderForContentWidth)
-        const valueHolderForContentHeight  = value.contentHeight
-        valueSerializer.writeNumber(valueHolderForContentHeight)
-        const valueHolderForContentOffsetX  = value.contentOffsetX
-        valueSerializer.writeNumber(valueHolderForContentOffsetX)
-        const valueHolderForContentOffsetY  = value.contentOffsetY
-        valueSerializer.writeNumber(valueHolderForContentOffsetY)
-    }
-    public static read(buffer: DeserializerBase): ImageCompleteEvent {
-        let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const loadingStatusTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetYTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : ImageCompleteEvent = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageCompleteEvent)
-        return value
-    }
-}
 export class ImageSourceSize_serializer {
     public static write(buffer: SerializerBase, value: ImageSourceSize): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
+        valueSerializer.writeFloat64(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): ImageSourceSize {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
         let value : ImageSourceSize = ({width: widthTmpResult, height: heightTmpResult} as ImageSourceSize)
+        return value
+    }
+}
+export class ImageCompleteEvent_serializer {
+    public static write(buffer: SerializerBase, value: ImageCompleteEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeInt32(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeInt32(valueHolderForHeight)
+        const valueHolderForComponentWidth  = value.componentWidth
+        valueSerializer.writeInt32(valueHolderForComponentWidth)
+        const valueHolderForComponentHeight  = value.componentHeight
+        valueSerializer.writeInt32(valueHolderForComponentHeight)
+        const valueHolderForLoadingStatus  = value.loadingStatus
+        valueSerializer.writeInt32(valueHolderForLoadingStatus)
+        const valueHolderForContentWidth  = value.contentWidth
+        valueSerializer.writeInt32(valueHolderForContentWidth)
+        const valueHolderForContentHeight  = value.contentHeight
+        valueSerializer.writeInt32(valueHolderForContentHeight)
+        const valueHolderForContentOffsetX  = value.contentOffsetX
+        valueSerializer.writeInt32(valueHolderForContentOffsetX)
+        const valueHolderForContentOffsetY  = value.contentOffsetY
+        valueSerializer.writeInt32(valueHolderForContentOffsetY)
+    }
+    public static read(buffer: DeserializerBase): ImageCompleteEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const widthTmpResult : int32 = valueDeserializer.readInt32()
+        const heightTmpResult : int32 = valueDeserializer.readInt32()
+        const componentWidthTmpResult : int32 = valueDeserializer.readInt32()
+        const componentHeightTmpResult : int32 = valueDeserializer.readInt32()
+        const loadingStatusTmpResult : int32 = valueDeserializer.readInt32()
+        const contentWidthTmpResult : int32 = valueDeserializer.readInt32()
+        const contentHeightTmpResult : int32 = valueDeserializer.readInt32()
+        const contentOffsetXTmpResult : int32 = valueDeserializer.readInt32()
+        const contentOffsetYTmpResult : int32 = valueDeserializer.readInt32()
+        let value : ImageCompleteEvent = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageCompleteEvent)
         return value
     }
 }
@@ -1102,9 +1104,9 @@ export class ImageError_serializer {
     public static write(buffer: SerializerBase, value: ImageError): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForComponentWidth  = value.componentWidth
-        valueSerializer.writeNumber(valueHolderForComponentWidth)
+        valueSerializer.writeInt32(valueHolderForComponentWidth)
         const valueHolderForComponentHeight  = value.componentHeight
-        valueSerializer.writeNumber(valueHolderForComponentHeight)
+        valueSerializer.writeInt32(valueHolderForComponentHeight)
         const valueHolderForMessage  = value.message
         valueSerializer.writeString(valueHolderForMessage)
         const valueHolderForError  = value.error
@@ -1118,8 +1120,8 @@ export class ImageError_serializer {
     }
     public static read(buffer: DeserializerBase): ImageError {
         let valueDeserializer : DeserializerBase = buffer
-        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentWidthTmpResult : int32 = valueDeserializer.readInt32()
+        const componentHeightTmpResult : int32 = valueDeserializer.readInt32()
         const messageTmpResult : string = (valueDeserializer.readString() as string)
         const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let errorTmpBuf : BusinessError | undefined = undefined

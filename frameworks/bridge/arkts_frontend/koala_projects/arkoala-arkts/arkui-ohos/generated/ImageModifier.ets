@@ -80,7 +80,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pointLight_0_0value?: PointLightStyle | undefined
     _edgeAntialiasing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _edgeAntialiasing_0_0value?: number | undefined
+    _edgeAntialiasing_0_0value?: double | undefined
     _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onComplete_0_0value?: ImageOnCompleteCallback | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -412,7 +412,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             switch (this._edgeAntialiasing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeAntialiasingAttribute((this._edgeAntialiasing_0_0value as number | undefined));
+                    peer.setEdgeAntialiasingAttribute((this._edgeAntialiasing_0_0value as double | undefined));
                     this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -422,7 +422,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
                 default: {
                     this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEdgeAntialiasingAttribute((undefined as number | undefined));
+                    peer.setEdgeAntialiasingAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -821,7 +821,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                     break;
                 }
                 default: {
-                    this.edgeAntialiasing((undefined as number | undefined));
+                    this.edgeAntialiasing((undefined as double | undefined));
                 }
             }
         }
@@ -1130,7 +1130,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         }
         return this
     }
-    edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: double | undefined): this {
         if (((this._edgeAntialiasing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._edgeAntialiasing_0_0value) !== (value)))
         {
             this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.UPDATE

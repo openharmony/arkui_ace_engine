@@ -218,9 +218,9 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
     }
 }
 export interface TimePickerResult {
-    hour: number;
-    minute: number;
-    second: number;
+    hour: int32;
+    minute: int32;
+    second: int32;
 }
 export enum TimePickerFormat {
     HOUR_MINUTE = 0,
@@ -507,17 +507,17 @@ export class TimePickerResult_serializer {
     public static write(buffer: SerializerBase, value: TimePickerResult): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForHour  = value.hour
-        valueSerializer.writeNumber(valueHolderForHour)
+        valueSerializer.writeInt32(valueHolderForHour)
         const valueHolderForMinute  = value.minute
-        valueSerializer.writeNumber(valueHolderForMinute)
+        valueSerializer.writeInt32(valueHolderForMinute)
         const valueHolderForSecond  = value.second
-        valueSerializer.writeNumber(valueHolderForSecond)
+        valueSerializer.writeInt32(valueHolderForSecond)
     }
     public static read(buffer: DeserializerBase): TimePickerResult {
         let valueDeserializer : DeserializerBase = buffer
-        const hourTmpResult : number = (valueDeserializer.readNumber() as number)
-        const minuteTmpResult : number = (valueDeserializer.readNumber() as number)
-        const secondTmpResult : number = (valueDeserializer.readNumber() as number)
+        const hourTmpResult : int32 = valueDeserializer.readInt32()
+        const minuteTmpResult : int32 = valueDeserializer.readInt32()
+        const secondTmpResult : int32 = valueDeserializer.readInt32()
         let value : TimePickerResult = ({hour: hourTmpResult, minute: minuteTmpResult, second: secondTmpResult} as TimePickerResult)
         return value
     }

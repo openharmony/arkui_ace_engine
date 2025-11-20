@@ -1493,6 +1493,22 @@ std::map<std::string, std::string> Convert(const Map_String_String& src)
 }
 
 template<>
+std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src)
+{
+    std::pair<Color, Dimension> gradientColor;
+    // color
+    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
+    if (colorOpt) {
+        gradientColor.first = colorOpt.value();
+    }
+    // stop value
+    float value = Converter::Convert<float>(src.value1);
+    value = std::clamp(value, 0.0f, 1.0f);
+    gradientColor.second = Dimension(value, DimensionUnit::VP);
+    return gradientColor;
+}
+
+template<>
 std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
 {
     std::pair<Color, Dimension> gradientColor;
@@ -3007,7 +3023,7 @@ PickerValueType Convert(const Array_ResourceStr& src)
 }
 
 template<>
-PickerSelectedType Convert(const Ark_Number& src)
+PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
     if (selected < 0) {
@@ -3017,7 +3033,7 @@ PickerSelectedType Convert(const Ark_Number& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_Number& src)
+PickerSelectedType Convert(const Array_Int32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3447,8 +3463,8 @@ template<>
 NavigationOptions Convert(const Ark_NavigationOptions& src)
 {
     return {
-        .animated = Converter::OptConvert<bool>(src.animated).value_or(true),
-        .launchMode = Converter::OptConvert<LaunchMode>(src.launchMode).value_or(LaunchMode::STANDARD)
+        .launchMode = Converter::OptConvert<LaunchMode>(src.launchMode).value_or(LaunchMode::STANDARD),
+        .animated = Converter::OptConvert<bool>(src.animated).value_or(true)
     };
 }
 

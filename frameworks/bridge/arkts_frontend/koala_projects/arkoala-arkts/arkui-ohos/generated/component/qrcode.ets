@@ -115,15 +115,15 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._QRCodeAttribute_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setContentOpacityAttribute(value: number | Resource | undefined): void {
+    setContentOpacityAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -144,7 +144,7 @@ export interface QRCodeAttribute extends CommonMethod {
         throw new Error("Unimplemented method color")
     }
     backgroundColor(value: ResourceColor | undefined): this
-    contentOpacity(value: number | Resource | undefined): this {
+    contentOpacity(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method contentOpacity")
     }
     attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -154,7 +154,7 @@ export interface QRCodeAttribute extends CommonMethod {
 export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttribute {
     color_value?: ResourceColor | undefined
     backgroundColor_value?: ResourceColor | undefined
-    contentOpacity_value?: number | Resource | undefined
+    contentOpacity_value?: double | Resource | undefined
     attributeModifier_value?: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined
     setQRCodeOptions(value: ResourceStr): this {
         return this
@@ -165,7 +165,7 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
     backgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    contentOpacity(value: number | Resource | undefined): this {
+    contentOpacity(value: double | Resource | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -205,9 +205,9 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
         }
         return this
     }
-    public contentOpacity(value: number | Resource | undefined): this {
+    public contentOpacity(value: double | Resource | undefined): this {
         if (this.checkPriority("contentOpacity")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setContentOpacityAttribute(value_casted)
             return this
         }

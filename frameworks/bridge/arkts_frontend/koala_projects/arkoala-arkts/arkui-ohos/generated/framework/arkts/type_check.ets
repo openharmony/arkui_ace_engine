@@ -76,6 +76,7 @@ import { default as uiObserver } from "@ohos.arkui.observer"
 import { FormDimension, FormRenderingMode, FormShape, FormSize, ErrorInformation, FormCallbackInfo, FormInfo, RouterCallbackInfo } from "./../../component/formComponent"
 import { FrictionMotion, ScrollMotion, SpringProp, SpringMotion } from "./../../component/animator"
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, PosterOptions, VideoOptions } from "./../../component/video"
+import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOptions } from "./../../component/gauge"
 import { GridDirection, GridItemAlignment, ComputedBarAttribute, GridLayoutOptions } from "./../../component/grid"
 import { GridItemStyle, GridItemOptions } from "./../../component/gridItem"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -159,7 +160,6 @@ import { EllipseOptions } from "./../../component/ellipse"
 import { default as font } from "@ohos.font"
 import { FormLinkOptions } from "./../../component/formLink"
 import { RenderNode } from "arkui.RenderNode"
-import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOptions } from "./../../component/gauge"
 import { GridColColumnOption, GridColOptions } from "./../../component/gridCol"
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo"
 import { Metadata } from "bundleManager.Metadata"
@@ -6308,7 +6308,7 @@ export class TypeChecker {
         }
         return false
     }
-    static isArray_Tuple_Union_ResourceColor_LinearGradient_Number(value: Object | string | number | undefined): boolean {
+    static isArray_Tuple_Union_ResourceColor_LinearGradient_F64(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
             const array = value as Array<Object>
             if (array.length == 0) return true

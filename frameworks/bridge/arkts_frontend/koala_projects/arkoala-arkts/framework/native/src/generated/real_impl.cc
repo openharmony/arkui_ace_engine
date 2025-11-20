@@ -2891,19 +2891,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // GaugeInterfaceModifier
     namespace GaugeAttributeModifier {
     void SetValueImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Float64* value)
     {
     }
     void SetStartAngleImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Float64* value)
     {
     }
     void SetEndAngleImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
     }
     void SetColorsImpl(Ark_NativePointer node,
-                       const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
+                       const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64* value)
     {
     }
     void SetStrokeWidthImpl(Ark_NativePointer node,
@@ -3266,7 +3266,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetEdgeAntialiasingImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
     }
     void SetOnCompleteImpl(Ark_NativePointer node,
@@ -3328,7 +3328,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetDurationImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetReverseImpl(Ark_NativePointer node,
@@ -3344,7 +3344,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetIterationsImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Int32* value)
     {
     }
     void SetMonitorInvisibleAreaImpl(Ark_NativePointer node,
@@ -4277,11 +4277,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetPathStrokeWidthImpl(Ark_NativePointer node,
-                                const Opt_Union_Number_String* value)
+                                const Opt_Union_F64_String* value)
     {
     }
     void SetOnPatternCompleteImpl(Ark_NativePointer node,
-                                  const Opt_Callback_Array_Number_Void* value)
+                                  const Opt_Callback_Array_I32_Void* value)
     {
     }
     void SetAutoResetImpl(Ark_NativePointer node,
@@ -4289,7 +4289,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnDotConnectImpl(Ark_NativePointer node,
-                             const Opt_Callback_Number_Void* value)
+                             const Opt_Callback_I32_Void* value)
     {
     }
     void SetActivateCircleStyleImpl(Ark_NativePointer node,
@@ -4416,7 +4416,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetContentOpacityImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_Resource* value)
+                               const Opt_Union_F64_Resource* value)
     {
     }
     } // QRCodeAttributeModifier
@@ -6814,7 +6814,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnDateChangeImpl(Ark_NativePointer node,
-                             const Opt_Callback_Number_Void* value)
+                             const Opt_Callback_I64_Void* value)
     {
     }
     void SetFontColorImpl(Ark_NativePointer node,
@@ -6830,7 +6830,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -7171,7 +7171,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // TextPickerInterfaceModifier
     namespace TextPickerAttributeModifier {
     void SetDefaultPickerItemHeightImpl(Ark_NativePointer node,
-                                        const Opt_Union_Number_String* value)
+                                        const Opt_Union_F64_String* value)
     {
     }
     void SetCanLoopImpl(Ark_NativePointer node,
@@ -7211,7 +7211,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetSelectedIndexImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_Array_Number* value)
+                              const Opt_Union_I32_Array_I32* value)
     {
     }
     void SetDividerImpl(Ark_NativePointer node,
@@ -7262,7 +7262,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_ResourceStr* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -7270,7 +7270,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnTimerImpl(Ark_NativePointer node,
-                        const Opt_Callback_Number_Number_Void* value)
+                        const Opt_TimerCallback* value)
     {
     }
     void SetTextShadowImpl(Ark_NativePointer node,

@@ -332,6 +332,12 @@ namespace Converter {
     }
 
     template<>
+    inline std::vector<uint32_t> Convert(const Ark_Int32& src)
+    {
+        return { Convert<uint32_t>(src) };
+    }
+
+    template<>
     inline long long Convert(const Ark_Number& src)
     {
         LOGE("Ark_Number doesn`t support int64_t type");
@@ -382,9 +388,27 @@ namespace Converter {
     }
 
     template<>
+    inline uint32_t Convert(const Array_Int32& src)
+    {
+        return src.array ? Convert<uint32_t>(src.array[0]) : 0;
+    }
+
+    template<>
     inline std::vector<uint32_t> Convert(const Ark_Number& src)
     {
         return { Convert<uint32_t>(src) };
+    }
+
+    template<>
+    inline std::vector<uint32_t> Convert(const Array_Int32& src)
+    {
+        std::vector<uint32_t> dst;
+        auto length = Converter::Convert<int>(src.length);
+        for (int i = 0; i < length; i++) {
+            auto value = Converter::Convert<uint32_t>(*(src.array + i));
+            dst.push_back(value);
+        }
+        return dst;
     }
 
     template<>
@@ -609,8 +633,8 @@ namespace Converter {
     template<> PickerRangeType Convert(const Array_String& src);
     template<> PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src);
     template<> PickerRangeType Convert(const Array_TextPickerRangeContent& src);
-    template<> PickerSelectedType Convert(const Ark_Number& src);
-    template<> PickerSelectedType Convert(const Array_Number& src);
+    template<> PickerSelectedType Convert(const Ark_Int32& src);
+    template<> PickerSelectedType Convert(const Array_Int32& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
     template<> PickerTextStyle Convert(const Ark_TextPickerTextStyle& src);
     template<> PickerTime Convert(const Ark_TimePickerResult& src);
@@ -665,6 +689,7 @@ namespace Converter {
     template<> float Convert(const Ark_Float64& src);
     template<> int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
+    template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
