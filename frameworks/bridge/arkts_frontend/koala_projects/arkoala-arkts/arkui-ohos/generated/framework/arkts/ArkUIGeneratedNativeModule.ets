@@ -4658,8 +4658,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MenuItemConfiguration_getContentModifier(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MenuItemConfiguration_setContentModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _MenuItemConfiguration_getValue(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getValue(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MenuItemConfiguration_setValue(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
