@@ -5751,7 +5751,12 @@ bool RichEditorPattern::RequestCustomKeyboard()
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RequestCKeyboard,close softkeyboard.");
-        inputMethod->RequestHideInput();
+        auto tmpHost = GetHost();
+        CHECK_NULL_RETURN(tmpHost, false);
+        auto pipeline = tmpHost->GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto systemWindowId = pipeline->GetFocusWindowId();
+        inputMethod->RequestHideInput(systemWindowId);
         inputMethod->Close();
     }
 #else

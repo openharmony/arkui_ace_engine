@@ -2133,6 +2133,7 @@ private:
     void HandleInputOperations();
     void ReprocessAllRelatedToLPX();
     bool HasLPXBorder();
+    uint32_t GetWindowIdFromPipeline();
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);
 #endif

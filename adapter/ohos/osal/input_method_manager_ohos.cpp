@@ -285,7 +285,13 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
         TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
         return;
     }
-    inputMethod->RequestHideInput();
+    
+    auto currentFocusNode = curFocusNode_.Upgrade();
+    CHECK_NULL_VOID(currentFocusNode);
+    auto pipeline = currentFocusNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto systemWindowId = pipeline->GetFocusWindowId();
+    inputMethod->RequestHideInput(systemWindowId);
     inputMethod->Close();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard Successfully.");
 #endif

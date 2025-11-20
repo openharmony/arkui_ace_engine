@@ -5259,7 +5259,8 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextField Request CustomKeyboard, Close keyboard Successfully.");
-        inputMethod->RequestHideInput();
+        auto systemWindowId = GetWindowIdFromPipeline();
+        inputMethod->RequestHideInput(systemWindowId);
         inputMethod->Close();
     }
 #else
@@ -12614,5 +12615,15 @@ void TextFieldPattern::ReprocessAllRelatedToLPX()
             }
         }
     }
+}
+
+uint32_t TextFieldPattern::GetWindowIdFromPipeline()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, 0);
+    auto pipeline = tmpHost->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0);
+    auto systemWindowId = pipeline->GetFocusWindowId();
+    return systemWindowId;
 }
 } // namespace OHOS::Ace::NG

@@ -48,6 +48,7 @@ public:
     virtual void SetColumnsGap(const Dimension& value) = 0;
     virtual void SetRowsGap(const Dimension& value) = 0;
     virtual void SetGridHeight(const Dimension& value) = 0;
+    virtual void ReSetGridHeightLayoutPolicy() {};
     virtual void SetScrollBarMode(DisplayMode value) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
     virtual void SetScrollBarColor(const std::optional<Color>& scrollBarColor) {};
