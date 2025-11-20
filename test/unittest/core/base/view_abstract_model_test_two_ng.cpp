@@ -49,6 +49,7 @@ namespace {
     int32_t flag = 0;
     const std::string TEST_TEXT_HINT = "testTextHint";
     constexpr int32_t TEST_NODE_ID = 1;
+    const std::string VALUE_TAB = "TAB";
 }; // namespace
 
 class ViewAbstractModelTestTwoNg : public testing::Test {
@@ -786,5 +787,35 @@ HWTEST_F(ViewAbstractModelTestTwoNg, BindContextMenuTest001, TestSize.Level1)
     menuParam.isShow = true;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+}
+
+/**
+ * @tc.name: ResetKeyboardShortcutTest001
+ * @tc.desc: Test the ResetKeyboardShortcutAll of View_Abstract for tab/Up arrow/Down arrow/Left arrow/Right arrow key.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestTwoNg, ResetKeyboardShortcutTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a FrameNode and get eventManager.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto eventManager = PipelineContext::GetCurrentContext()->GetEventManager();
+    /**
+     * @tc.steps: step2. call SetKeyboardShortcut with tab and ModifierKey.
+     * @tc.expected: add fail
+     */
+    std::vector<ModifierKey> keys;
+    keys.push_back(ModifierKey::SHIFT);
+    viewAbstractModelNG.SetKeyboardShortcut(AceType::RawPtr(targetNode), VALUE_TAB, std::move(keys), nullptr);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+    keys.clear();
+
+    /**
+     * @tc.steps: step3. call ResetKeyboardShortcutAll.
+     * @tc.expected: add success
+     */
+    viewAbstractModelNG.ResetKeyboardShortcutAll(AceType::RawPtr(targetNode));
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
 }
 } // namespace OHOS::Ace::NG
