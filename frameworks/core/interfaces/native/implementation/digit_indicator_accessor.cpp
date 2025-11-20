@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DigitIndicatorAccessor {
 void DestroyPeerImpl(Ark_DigitIndicator peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_DigitIndicator ConstructImpl()
 {
@@ -37,21 +38,21 @@ void FontColorImpl(Ark_DigitIndicator peer,
                    const Opt_ResourceColor* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optFontColor = Converter::OptConvert<Color>(*value);
+    auto optFontColor = Converter::OptConvertPtr<Color>(value);
     peer->SetFontColor(optFontColor);
 }
 void SelectedFontColorImpl(Ark_DigitIndicator peer,
                            const Opt_ResourceColor* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optSelectedFontColor = Converter::OptConvert<Color>(*value);
+    auto optSelectedFontColor = Converter::OptConvertPtr<Color>(value);
     peer->SetSelectedFontColor(optSelectedFontColor);
 }
 void DigitFontImpl(Ark_DigitIndicator peer,
                    const Opt_Font* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optDigitFont = Converter::OptConvert<Converter::FontMetaData>(*value);
+    auto optDigitFont = Converter::OptConvertPtr<Converter::FontMetaData>(value);
     std::optional<OHOS::Ace::Dimension> fontSize;
     std::optional<OHOS::Ace::FontWeight> fontWeight;
     if (optDigitFont) {
@@ -64,7 +65,7 @@ void SelectedDigitFontImpl(Ark_DigitIndicator peer,
                            const Opt_Font* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optSelectedDigitFont = Converter::OptConvert<Converter::FontMetaData>(*value);
+    auto optSelectedDigitFont = Converter::OptConvertPtr<Converter::FontMetaData>(value);
     std::optional<OHOS::Ace::Dimension> fontSize;
     std::optional<OHOS::Ace::FontWeight> fontWeight;
     if (optSelectedDigitFont) {

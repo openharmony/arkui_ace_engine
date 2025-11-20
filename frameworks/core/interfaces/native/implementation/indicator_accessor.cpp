@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IndicatorAccessor {
 void DestroyPeerImpl(Ark_Indicator peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_Indicator ConstructImpl()
 {
@@ -39,28 +40,28 @@ void LeftImpl(Ark_Indicator peer,
               const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optLeft = Converter::OptConvert<Dimension>(*value);
+    auto optLeft = Converter::OptConvertPtr<Dimension>(value);
     peer->SetLeft(optLeft);
 }
 void TopImpl(Ark_Indicator peer,
              const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optTop = Converter::OptConvert<Dimension>(*value);
+    auto optTop = Converter::OptConvertPtr<Dimension>(value);
     peer->SetTop(optTop);
 }
 void RightImpl(Ark_Indicator peer,
                const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optRight = Converter::OptConvert<Dimension>(*value);
+    auto optRight = Converter::OptConvertPtr<Dimension>(value);
     peer->SetRight(optRight);
 }
 void Bottom0Impl(Ark_Indicator peer,
                  const Opt_Length* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optBottom = Converter::OptConvert<Dimension>(*value);
+    auto optBottom = Converter::OptConvertPtr<Dimension>(value);
     peer->SetBottom(optBottom);
 }
 void Bottom1Impl(Ark_Indicator peer,
@@ -77,22 +78,22 @@ void Bottom1Impl(Ark_Indicator peer,
             auto optBottom = Converter::OptConvert<Dimension>(bottom);
             peer->SetBottom(optBottom);
         },
-        [](){});
-    auto hasIgnoreSize = Converter::OptConvert<bool>(ignoreSize);
+        []() {});
+    auto hasIgnoreSize = Converter::Convert<bool>(ignoreSize);
     peer->SetBottomIgnoreSize(hasIgnoreSize);
 }
 void StartImpl(Ark_Indicator peer,
                const Opt_LengthMetrics* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optStart = Converter::OptConvert<Dimension>(*value);
+    auto optStart = Converter::OptConvertPtr<Dimension>(value);
     peer->SetStart(optStart);
 }
 void EndImpl(Ark_Indicator peer,
              const Opt_LengthMetrics* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optEnd = Converter::OptConvert<Dimension>(*value);
+    auto optEnd = Converter::OptConvertPtr<Dimension>(value);
     peer->SetEnd(optEnd);
 }
 Ark_DotIndicator DotImpl()
