@@ -134,7 +134,6 @@ public:
 
     void SetHeight(float height)
     {
-        prevHeight_ = height;
         height_ = height;
     }
 
@@ -186,6 +185,8 @@ private:
     void HandleOffScreenItems(LayoutWrapper* layoutWrapper);
     void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index) const;
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
+    void SetPatternHeight(LayoutWrapper* layoutWrapper);
+    float GetPatternHeight(LayoutWrapper* layoutWrapper);
     void MeasureBelow(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
         float startPos, bool cachedLayout = false);
     void MeasureAbove(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
@@ -220,7 +221,6 @@ private:
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
     float height_ = 0.0f; // usage: record picker real height
-    float prevHeight_ = 0.0f;
     float contentMainSize_ = 0.0f;  // usage: picker content area height
     float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
