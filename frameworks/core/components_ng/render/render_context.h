@@ -374,6 +374,12 @@ public:
     virtual void SetScrollScale(float scale) {}
     virtual void ResetScrollScale() {}
     virtual void SetBackgroundColor(uint32_t colorValue) {}
+    // Bind a dynamic color picker to this node so the render service can periodically sample
+    // its rendered pixels and resolve a concrete color for the given placeholder. Strategy
+    // controls the sampling algorithm (e.g. dominant, average, contrast). Interval (ms) hints
+    // the desired sampling period; 0 uses a backend default. Rebinding replaces previous values.
+    // Passing ColorPlaceholder::NONE clears any existing binding.
+    virtual void BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval) {}
     virtual void SetRenderPivot(float pivotX, float pivotY) {}
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
     virtual void SetOpacity(float opacity) {}

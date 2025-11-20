@@ -28,6 +28,7 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_base/include/common/rs_color.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
@@ -438,6 +439,14 @@ void RosenRenderContext::SetSurfaceChangedCallBack(const std::function<void(floa
 #endif
 }
 
+void RosenRenderContext::BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval)
+{
+    CHECK_NULL_VOID(rsNode_);
+    // Forward placeholder + strategy + interval to RSNode. Backend decides actual sampling cadence.
+    rsNode_->SetColorPickerParams(
+        static_cast<RSColorPlaceholder>(placeholder), static_cast<Rosen::ColorPickStrategyType>(strategy), interval);
+}
+
 void RosenRenderContext::RemoveSurfaceChangedCallBack()
 {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -840,9 +849,11 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     }
 }
 
-void RosenRenderContext::ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor)
+void RosenRenderContext::ColorToRSColor(const Color& color, Rosen::RSColor& rsColor)
 {
-    rsColor = OHOS::Rosen::RSColor::FromArgbInt(color.GetValue());
+    rsColor = ACE_UNLIKELY(color.IsPlaceholder())
+                  ? Rosen::RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()))
+                  : Rosen::RSColor::FromArgbInt(color.GetValue());
     GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
     if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
         colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;

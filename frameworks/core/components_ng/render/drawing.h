@@ -68,6 +68,7 @@ using RSColorFilter = Rosen::Drawing::ColorFilter;
 using RSColorMatrix = Rosen::Drawing::ColorMatrix;
 using RSPen = Rosen::Drawing::Pen;
 using RSColor = Rosen::Drawing::Color;
+using RSColorPlaceholder = Rosen::ColorPlaceholder;
 using RSRect = Rosen::Drawing::Rect;
 using RSPoint = Rosen::Drawing::Point;
 using RSPoint3 = Rosen::Drawing::Point3;

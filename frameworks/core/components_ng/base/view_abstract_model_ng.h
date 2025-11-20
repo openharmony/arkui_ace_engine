@@ -201,6 +201,12 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
+    void SetColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy = ColorPickStrategy::NONE,
+        uint32_t interval = 0) override
+    {
+        ViewAbstract::BindColorPicker(placeholder, strategy, interval);
+    }
+
     void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override
     {
         ViewAbstract::SetBackgroundColorWithResourceObj(color, resObj);

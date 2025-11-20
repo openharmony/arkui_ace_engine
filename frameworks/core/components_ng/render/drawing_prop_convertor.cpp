@@ -23,6 +23,9 @@ constexpr uint8_t UINT32_LEFT_SHIFT_8 = 8;
 } // namespace
 RSColor ToRSColor(const Color& color)
 {
+    if (ACE_UNLIKELY(color.IsPlaceholder())) {
+        return RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+    }
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 }
 
