@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TOUCH_GESTURE_PEER_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TOUCH_GESTURE_PEER_H
 
-#include "core/components/common/properties/paint_state.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
-struct ImageDataPeer final {
-    OHOS::Ace::ImageData value;
-
+struct TouchRecognizerPeer {
 protected:
-    explicit ImageDataPeer(const OHOS::Ace::ImageData& src) : value(src) {}
-    ~ImageDataPeer() = default;
+    TouchRecognizerPeer() = default;
+    ~TouchRecognizerPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };
+
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TOUCH_GESTURE_PEER_H

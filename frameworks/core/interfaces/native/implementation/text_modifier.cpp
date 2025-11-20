@@ -517,7 +517,7 @@ void SetLineBreakStrategyImpl(Ark_NativePointer node,
     TextModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
 void SetOnCopyImpl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+                   const Opt_synthetic_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -704,7 +704,7 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     TextModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* fontValue,
+                 const Opt_arkui_component_units_Font* fontValue,
                  const Opt_FontSettingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

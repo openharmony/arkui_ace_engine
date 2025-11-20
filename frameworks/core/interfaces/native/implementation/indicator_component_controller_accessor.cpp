@@ -48,11 +48,7 @@ void ChangeIndexImpl(Ark_IndicatorComponentController peer,
                      const Opt_Boolean* useAnimation)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(index);
-    int32_t idx = 0;
-    if (index->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        idx = Converter::Convert<int32_t>(index->value);
-    }
+    auto idx = Converter::OptConvertPtr<int32_t>(index).value_or(0);
     idx = idx < 0 ? 0 : idx;
     auto useAnim = Converter::OptConvertPtr<bool>(useAnimation).value_or(false);
     peer->ChangeIndex(idx, useAnim);

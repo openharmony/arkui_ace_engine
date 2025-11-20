@@ -42,14 +42,13 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ScreenModifier
 namespace ScreenInterfaceModifier {
 void SetScreenOptionsImpl(Ark_NativePointer node,
-                          const Ark_Number* screenId)
+                          Ark_Int64 screenId)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(screenId);
 
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-    auto convValue = Converter::Convert<uint32_t>(*screenId);
+    auto convValue = Converter::Convert<int64_t>(screenId);
     ScreenModel::SetOptions(frameNode, convValue);
 #endif //WINDOW_SCENE_SUPPORTED
 }

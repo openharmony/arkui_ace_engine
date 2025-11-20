@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
@@ -98,7 +98,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
 } // RadioInterfaceModifier
 namespace RadioAttributeModifier {
 void SetCheckedImpl(Ark_NativePointer node,
-                    const Opt_Union_Boolean_Bindable* value)
+                    const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

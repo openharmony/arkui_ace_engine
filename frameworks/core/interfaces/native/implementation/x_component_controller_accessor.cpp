@@ -156,7 +156,7 @@ void StopImageAnalyzerImpl(Ark_XComponentController peer)
     peerImpl->controller->StopImageAnalyzer();
 #endif //XCOMPONENT_SUPPORTED
 }
-Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
+synthetic_Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
@@ -168,7 +168,7 @@ Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
 }
 void SetOnSurfaceCreatedImpl(Ark_XComponentController peer,
-                             const Callback_String_Void* onSurfaceCreated)
+                             const synthetic_Callback_String_Void* onSurfaceCreated)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -202,7 +202,7 @@ void SetOnSurfaceChangedImpl(Ark_XComponentController peer,
     peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChanged);
 #endif //XCOMPONENT_SUPPORTED
 }
-Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
+synthetic_Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
@@ -214,7 +214,7 @@ Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
 }
 void SetOnSurfaceDestroyedImpl(Ark_XComponentController peer,
-                               const Callback_String_Void* onSurfaceDestroyed)
+                               const synthetic_Callback_String_Void* onSurfaceDestroyed)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);

@@ -52,9 +52,6 @@ typedef enum {
     ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
 } ArkUIDirtyFlag;
 } // namespace OHOS::Ace::NG
-std::map<int32_t, std::shared_ptr<FrameNodePeer>> FrameNodePeer::peerMap_;
-std::mutex FrameNodePeer::peerMapMutex_;
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 Opt_LengthMetrics GetOptLengthMetricsFromDimension(const std::optional<Dimension>& dimension)
@@ -191,8 +188,8 @@ FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expand
 }
 
 Ark_NativePointer GetChildImpl(Ark_FrameNode peer,
-                           const Ark_Number* index,
-                           const Ark_Number* expandMode)
+                               const Ark_Number* index,
+                               const Ark_Number* expandMode)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, nullptr);
@@ -416,7 +413,8 @@ void DisposeTreeImpl(Ark_FrameNode peer)
         parent->RemoveChild(frameNode);
     }
 }
-Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
+Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
+                                        Ark_Boolean options)
 {
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
@@ -571,7 +569,6 @@ Ark_Vector2 GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
     offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
     return Converter::ArkValue<Ark_Vector2>(offset);
 }
-
 Ark_NodeEdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
 {
     if (!peer) {
@@ -589,7 +586,6 @@ Ark_NodeEdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
     };
     return retValue;
 }
-
 Ark_NodeEdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
 {
     if (!peer) {
@@ -607,7 +603,6 @@ Ark_NodeEdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
     };
     return retValue;
 }
-
 Ark_NodeEdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
 {
     if (!peer) {
@@ -625,7 +620,6 @@ Ark_NodeEdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
     };
     return retValue;
 }
-
 Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
 {
     if (!peer) {
@@ -651,7 +645,6 @@ Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
     };
     return retValue;
 }
-
 Ark_NativePointer GetFrameNodeByKeyImpl(const Ark_String* name)
 {
     auto valueName = Converter::Convert<std::string>(*name);
@@ -891,6 +884,14 @@ Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
     auto nodePeer = reinterpret_cast<FrameNodePeer*>(peer);
     return nodePeer->GetRenderNodePeer();
 }
+Array_F64 ConvertPointImpl(Ark_FrameNode peer,
+                           Ark_FrameNode node,
+                           const Ark_Vector2* vector2)
+{
+    LOGE("ARKOALA DragEventAccessor.StartDataLoading not implemented yet");
+    std::vector<double> empty;
+    return Converter::ArkValue<Array_F64>(empty, Converter::FC);
+}
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
 {
@@ -955,6 +956,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
         FrameNodeExtenderAccessor::GetCommonEventImpl,
         FrameNodeExtenderAccessor::GetRenderNodeImpl,
+        FrameNodeExtenderAccessor::ConvertPointImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

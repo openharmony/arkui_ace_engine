@@ -29,7 +29,8 @@ public:
     ~CustomDialogControllerPeerImpl() override = default;
 
     void SetOwnerView(Ark_NativePointer node);
-    void SetBuilder(CustomNodeBuilder builder, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetBuilder(Ark_Union_CustomNodeBuilder_ExtendableComponent builder,
+        const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnCancel(Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetBuilderExtender(CustomNodeBuilder builder, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetOnCancelExtender(Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
@@ -38,7 +39,7 @@ public:
     void SetOffset(Opt_Offset offset);
     void SetCustomStyle(Opt_Boolean customStyle);
     Opt_Boolean GetCustomStyle();
-    void SetGridCount(Opt_Int32 gridCount);
+    void SetGridCount(std::optional<int32_t> gridCount);
     void SetMaskColor(Opt_ResourceColor maskColor);
     void SetMaskRect(Opt_Rectangle maskRect);
     void SetOpenAnimation(Opt_AnimateParam openAnimation);
@@ -48,6 +49,7 @@ public:
     void SetCornerRadius(Opt_Union_Dimension_BorderRadiuses cornerRadius);
     void SetIsModal(Opt_Boolean isModal);
     void SetDismiss(Opt_Callback_DismissDialogAction_Void onWillDismiss);
+    void SetDismiss(Opt_synthetic_Callback_DismissDialogAction_Void onWillDismiss);
     void SetWidth(Opt_Dimension width);
     void SetHeight(Opt_Dimension height);
     void SetBorderWidth(Opt_Union_Dimension_EdgeWidths borderWidth);
@@ -55,15 +57,15 @@ public:
     void SetBorderStyle(Opt_Union_BorderStyle_EdgeStyles borderStyle);
     void SetShadow(Opt_Union_ShadowOptions_ShadowStyle shadow);
     void SetBlurStyle(Opt_BlurStyle backgroundBlurStyle);
-    void SetKeyboardAvoidMode(Opt_KeyboardAvoidMode keyboardAvoidMode);
+    void SetKeyboardAvoidMode(Opt_arkui_component_common_KeyboardAvoidMode keyboardAvoidMode);
     void SetEnableHoverMode(Opt_Boolean enableHoverMode);
     void SetHoverModeArea(Opt_HoverModeAreaType hoverModeArea);
     void SetBackgroundBlurStyleOptions(Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions);
     void SetBackgroundEffect(Opt_BackgroundEffectOptions backgroundEffect);
-    void SetOnDidAppear(Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerPeer>& peer);
-    void SetOnDidDisappear(Opt_Callback_Void onDidDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
-    void SetOnWillAppear(Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerPeer>& peer);
-    void SetOnWillDisappear(Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnDidAppear(Opt_VoidCallback onDidAppear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnDidDisappear(Opt_VoidCallback onDidDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnWillAppear(Opt_VoidCallback onWillAppear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnWillDisappear(Opt_VoidCallback onWillDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnDidAppearExtender(Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetOnDidDisappearExtender(Opt_Callback_Void onDidDisappear,
         const RefPtr<CustomDialogControllerExtenderPeer>& peer);
@@ -73,7 +75,7 @@ public:
         const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance);
     void SetLevelMode(Opt_Boolean showInSubWindow, Opt_LevelMode levelMode);
-    void SetLevelUniqueId(Opt_Int32 levelUniqueId);
+    void SetLevelUniqueId(std::optional<int32_t> levelUniqueId);
     void SetImersiveMode(Opt_ImmersiveMode immersiveMode);
     void SetLevelOrder(Opt_LevelOrder levelOrder);
     void SetLevelOrderExtender(Opt_LevelOrderExtender levelOrderExtender);
@@ -97,9 +99,10 @@ private:
     RefPtr<UINode> GetWindowScene() const;
     std::function<void()> TransformCallbackToFunctionVoid(
         Opt_Callback_Void callback, const RefPtr<CustomDialogControllerPeer>& peer);
+    std::function<void()> TransformCallbackToFunctionVoid(
+        Opt_VoidCallback callback, const RefPtr<CustomDialogControllerPeer>& peer);
     std::function<void()> TransformCallbackToFunctionVoidExtender(
         Opt_Callback_Void callback, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
-
     WeakPtr<FrameNode> ownerView_;
     DialogProperties dialogProperties_;
     std::vector<WeakPtr<AceType>> dialogs_;

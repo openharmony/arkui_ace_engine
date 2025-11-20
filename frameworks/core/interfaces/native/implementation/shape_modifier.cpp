@@ -210,7 +210,7 @@ void SetAntiAliasImpl(Ark_NativePointer node,
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
 }
 void SetMeshImpl(Ark_NativePointer node,
-                 const Opt_Array_Float64* value,
+                 const Opt_Array_F64* value,
                  const Opt_Int32* column,
                  const Opt_Int32* row)
 {

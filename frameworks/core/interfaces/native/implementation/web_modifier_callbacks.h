@@ -70,7 +70,7 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
 bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Type_WebAttribute_onInterceptRequest>& arkCallback,
+    const CallbackHelper<Callback_OnInterceptRequestEvent_Opt_WebResourceResponse>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
@@ -94,7 +94,7 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
 void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback,
+bool OnInterceptKey(const CallbackHelper<synthetic_Callback_KeyEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo);
 void OnTouchIconUrlReceived(const CallbackHelper<Callback_OnTouchIconUrlReceivedEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);

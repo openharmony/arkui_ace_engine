@@ -674,7 +674,7 @@ Opt_Int32 AddTextSpanImpl(Ark_RichEditorController peer,
     return Converter::ArkValue<Opt_Int32>(peerImpl->AddTextSpanImpl(locOptions));
 }
 Opt_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
-                           const Ark_Union_PixelMap_ResourceStr* value,
+                           const Ark_Union_image_PixelMap_ResourceStr* value,
                            const Opt_RichEditorImageSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);

@@ -30,16 +30,14 @@ void DestroyPeerImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_OffscreenCanvasRenderingContext2D ConstructImpl(const Ark_Number* width,
-                                                    const Ark_Number* height,
+Ark_OffscreenCanvasRenderingContext2D ConstructImpl(Ark_Float64 width,
+                                                    Ark_Float64 height,
                                                     const Opt_RenderingContextSettings* settings,
                                                     const Opt_LengthMetricsUnit* unit)
 {
     auto offscreenContext = PeerUtils::CreatePeer<OffscreenCanvasRenderingContext2DPeer>();
-    CHECK_NULL_RETURN(width, offscreenContext);
-    CHECK_NULL_RETURN(height, offscreenContext);
-    auto fWidth = static_cast<double>(Converter::Convert<float>(*width));
-    auto fHeight = static_cast<double>(Converter::Convert<float>(*height));
+    auto fWidth = static_cast<double>(Converter::Convert<float>(width));
+    auto fHeight = static_cast<double>(Converter::Convert<float>(height));
     auto optSettings = Converter::GetOptPtr(settings);
     auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
     if (optUnit) {
@@ -54,7 +52,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                          const Opt_String* type,
-                         const Opt_Number* quality)
+                         const Opt_Float64* quality)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);

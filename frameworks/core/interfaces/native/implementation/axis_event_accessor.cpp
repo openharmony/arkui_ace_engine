@@ -49,6 +49,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void PropagationImpl(Ark_AxisEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    AxisInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(false);
+}
 Ark_Float64 GetHorizontalAxisValueImpl(Ark_AxisEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Float64>(0);
@@ -67,6 +74,16 @@ Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     CHECK_NULL_RETURN(event, errValue);
 
     double value = event->GetVerticalAxis();
+    return Converter::ArkValue<Ark_Float64>(value);
+}
+Ark_Float64 GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+
+    auto value = event->GetPinchAxisScale();
     return Converter::ArkValue<Ark_Float64>(value);
 }
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
@@ -99,7 +116,8 @@ Ark_Float64 GetDisplayXImpl(Ark_AxisEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetDisplayXImpl(Ark_AxisEvent peer, Ark_Float64 displayX)
+void SetDisplayXImpl(Ark_AxisEvent peer,
+                     Ark_Float64 displayX)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -121,7 +139,8 @@ Ark_Float64 GetDisplayYImpl(Ark_AxisEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetDisplayYImpl(Ark_AxisEvent peer, Ark_Float64 displayY)
+void SetDisplayYImpl(Ark_AxisEvent peer,
+                     Ark_Float64 displayY)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -143,7 +162,8 @@ Ark_Float64 GetWindowXImpl(Ark_AxisEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetWindowXImpl(Ark_AxisEvent peer, Ark_Float64 windowX)
+void SetWindowXImpl(Ark_AxisEvent peer,
+                    Ark_Float64 windowX)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -165,7 +185,8 @@ Ark_Float64 GetWindowYImpl(Ark_AxisEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetWindowYImpl(Ark_AxisEvent peer, Ark_Float64 windowY)
+void SetWindowYImpl(Ark_AxisEvent peer,
+                    Ark_Float64 windowY)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -187,7 +208,8 @@ Ark_Float64 GetXImpl(Ark_AxisEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetXImpl(Ark_AxisEvent peer, Ark_Float64 x)
+void SetXImpl(Ark_AxisEvent peer,
+              Ark_Float64 x)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -209,7 +231,8 @@ Ark_Float64 GetYImpl(Ark_AxisEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetYImpl(Ark_AxisEvent peer, Ark_Float64 y)
+void SetYImpl(Ark_AxisEvent peer,
+              Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -238,13 +261,6 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(info);
     LOGE("Arkoala method AxisEventAccessor.SetScrollStep doesn't have sense. Not implemented...");
 }
-void PropagationImpl(Ark_AxisEvent peer)
-{
-    CHECK_NULL_VOID(peer);
-    AxisInfo* info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetStopPropagation(false);
-}
 } // AxisEventAccessor
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
 {
@@ -252,8 +268,10 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::DestroyPeerImpl,
         AxisEventAccessor::ConstructImpl,
         AxisEventAccessor::GetFinalizerImpl,
+        AxisEventAccessor::PropagationImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,
+        AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
         AxisEventAccessor::GetDisplayXImpl,
@@ -270,7 +288,6 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
-        AxisEventAccessor::PropagationImpl,
     };
     return &AxisEventAccessorImpl;
 }

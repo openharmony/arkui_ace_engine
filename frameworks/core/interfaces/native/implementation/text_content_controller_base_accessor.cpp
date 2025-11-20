@@ -65,8 +65,8 @@ Opt_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
     return Converter::ArkValue<Opt_Int32>(peer->controller_->GetTextContentLinesNum());
 }
 Opt_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
-                       const Ark_String* text,
-                       const Opt_TextContentControllerOptions* textOperationOptions)
+                      const Ark_String* text,
+                      const Opt_TextContentControllerOptions* textOperationOptions)
 {
     const auto errValue = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     CHECK_NULL_RETURN(peer && peer->controller_ && text, errValue);

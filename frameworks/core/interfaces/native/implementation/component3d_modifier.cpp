@@ -210,7 +210,7 @@ void SetShaderImageTextureImpl(Ark_NativePointer node,
 #endif
 }
 void SetShaderInputBufferImpl(Ark_NativePointer node,
-                              const Opt_Array_Number* value)
+                              const Opt_Array_F64* value)
 {
 #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);

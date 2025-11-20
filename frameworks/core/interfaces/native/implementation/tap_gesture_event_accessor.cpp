@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -31,6 +32,16 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Opt_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
+{
+    LOGE("ARKOALA TapGestureEventAccessor::GetTapLocation not implemented yet");
+    return Converter::ArkValue<Opt_EventLocationInfo>();
+}
+void SetTapLocationImpl(Ark_TapGestureEvent peer,
+                        const Opt_EventLocationInfo* tapLocation)
+{
+    LOGE("ARKOALA TapGestureEventAccessor::SetTapLocation not implemented yet");
+}
 } // TapGestureEventAccessor
 const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
 {
@@ -38,6 +49,8 @@ const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
         TapGestureEventAccessor::DestroyPeerImpl,
         TapGestureEventAccessor::ConstructImpl,
         TapGestureEventAccessor::GetFinalizerImpl,
+        TapGestureEventAccessor::GetTapLocationImpl,
+        TapGestureEventAccessor::SetTapLocationImpl,
     };
     return &TapGestureEventAccessorImpl;
 }

@@ -69,7 +69,7 @@ HWTEST_F(BaselineOffsetStyleAccessorTest, getBaselineOffsetTest, TestSize.Level1
     ASSERT_NE(accessor_->getBaselineOffset, nullptr);
     for (auto& [input, value, expected] : testFixtureOffsetValues) {
         DestroyPeer(peer_);
-        peer_ = accessor_->construct(&value);
+        peer_ = accessor_->construct(value);
         auto offset = accessor_->getBaselineOffset(peer_);
         EXPECT_NEAR(expected.ConvertToVp(), Converter::Convert<double>(offset), EPSILON) <<
             "Input value is: " << input << ", method: getType";

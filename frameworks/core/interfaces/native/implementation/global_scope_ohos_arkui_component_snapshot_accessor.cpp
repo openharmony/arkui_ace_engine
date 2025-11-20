@@ -38,7 +38,7 @@ SnapshotOptions Convert(const Ark_SnapshotOptions& src)
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
 void GetImpl(const Ark_String* id,
-             const AsyncCallback_image_PixelMap_Void* callback,
+             const synthetic_AsyncCallback_image_PixelMap_Void* callback,
              const Opt_SnapshotOptions* options)
 {
     CHECK_NULL_VOID(id);
@@ -51,9 +51,9 @@ void GetImpl(const Ark_String* id,
             return;
         }
         RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&mediaPixelMap);
-        image_PixelMapPeer peer;
-        peer.pixelMap = pixelMapRef;
-        arkCallback.Invoke(&peer);
+        auto peer = image_PixelMapPeer::Create(pixelMapRef);
+        auto data = Converter::ArkValue<Ark_image_PixelMap>(peer);
+        arkCallback.Invoke(data);
     };
     ComponentSnapshot::Get(componentId, std::move(onDone), opts.value_or(SnapshotOptions()));
 }

@@ -41,11 +41,12 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // WindowSceneModifier
 namespace WindowSceneInterfaceModifier {
 void SetWindowSceneOptionsImpl(Ark_NativePointer node,
-                               const Ark_Number* persistentId)
+                               Ark_Int32 persistentId)
 {
-    CHECK_NULL_VOID(persistentId);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-    auto persistId = Converter::Convert<int32_t>(*persistentId);
+    auto persistId = Converter::Convert<int32_t>(persistentId);
     WindowSceneModel::Create(persistId);
 #endif
 }
@@ -53,7 +54,7 @@ void SetWindowSceneOptionsImpl(Ark_NativePointer node,
 namespace WindowSceneAttributeModifier {
 void SetAttractionEffectImpl(Ark_NativePointer node,
                              const Opt_Position* destination,
-                             const Opt_Number* fraction)
+                             const Opt_Float64* fraction)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

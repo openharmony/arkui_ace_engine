@@ -204,15 +204,13 @@ void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
     peer->SetTypingStyle(typingStyle, textStyle);
 }
 void SetSelectionImpl(Ark_RichEditorBaseController peer,
-                      const Ark_Int32* selectionStart,
-                      const Ark_Int32* selectionEnd,
+                      Ark_Int32 selectionStart,
+                      Ark_Int32 selectionEnd,
                       const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(selectionStart);
-    CHECK_NULL_VOID(selectionEnd);
-    int32_t start = Converter::Convert<int32_t>(*selectionStart);
-    int32_t end = Converter::Convert<int32_t>(*selectionEnd);
+    int32_t start = Converter::Convert<int32_t>(selectionStart);
+    int32_t end = Converter::Convert<int32_t>(selectionEnd);
     auto optOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(start, end, optOptions, start < end);
 }

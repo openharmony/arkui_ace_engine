@@ -37,6 +37,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void StopPropagationImpl(Ark_HoverEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    HoverInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
+}
 Opt_Float64 GetXImpl(Ark_HoverEvent peer)
 {
     CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
@@ -158,13 +165,6 @@ void SetDisplayYImpl(Ark_HoverEvent peer,
     location.SetY(value, location.GetYAnimationOption());
     info->SetScreenLocation(location);
 }
-void StopPropagationImpl(Ark_HoverEvent peer)
-{
-    CHECK_NULL_VOID(peer);
-    HoverInfo* info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetStopPropagation(true);
-}
 } // HoverEventAccessor
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
 {
@@ -172,6 +172,7 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::DestroyPeerImpl,
         HoverEventAccessor::ConstructImpl,
         HoverEventAccessor::GetFinalizerImpl,
+        HoverEventAccessor::StopPropagationImpl,
         HoverEventAccessor::GetXImpl,
         HoverEventAccessor::SetXImpl,
         HoverEventAccessor::GetYImpl,
@@ -184,7 +185,6 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::SetDisplayXImpl,
         HoverEventAccessor::GetDisplayYImpl,
         HoverEventAccessor::SetDisplayYImpl,
-        HoverEventAccessor::StopPropagationImpl,
     };
     return &HoverEventAccessorImpl;
 }

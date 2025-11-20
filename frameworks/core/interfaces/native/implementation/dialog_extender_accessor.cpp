@@ -14,7 +14,6 @@
  */
 
 #include "arkoala_api_generated.h"
-#include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/interfaces/native/implementation/date_picker_dialog_extender.h"
 #include "frameworks/core/interfaces/native/implementation/text_picker_dialog_extender.h"
 #include "frameworks/core/interfaces/native/implementation/time_picker_dialog_extender.h"
@@ -33,7 +32,7 @@ void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)
 {
     DatePickerDialogExtender::Show(options);
 }
-} // namespace DialogExtenderAccessor
+} // DialogExtenderAccessor
 const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor()
 {
     static const GENERATED_ArkUIDialogExtenderAccessor DialogExtenderAccessorImpl {
@@ -43,4 +42,5 @@ const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor()
     };
     return &DialogExtenderAccessorImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+
+}

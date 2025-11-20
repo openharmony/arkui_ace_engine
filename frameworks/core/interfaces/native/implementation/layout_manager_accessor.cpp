@@ -56,8 +56,8 @@ Opt_Int32 GetLineCountImpl(Ark_LayoutManager peer)
     return Converter::ArkValue<Opt_Int32>(count);
 }
 Opt_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
-                                                          const Ark_Float64 x,
-                                                          const Ark_Float64 y)
+                                                          Ark_Float64 x,
+                                                          Ark_Float64 y)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();

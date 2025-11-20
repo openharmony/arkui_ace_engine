@@ -227,7 +227,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollModelStatic::SetScrollBar(frameNode, displayMode);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String* value)
+                           const Opt_Union_arkui_component_enums_Color_I32_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

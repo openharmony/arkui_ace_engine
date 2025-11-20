@@ -257,7 +257,7 @@ void SetProgressOptionsImpl(Ark_NativePointer node,
 } // ProgressInterfaceModifier
 namespace ProgressAttributeModifier {
 void SetValueImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+                  const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

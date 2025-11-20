@@ -39,16 +39,12 @@ void SetEffectComponentOptionsImpl(Ark_NativePointer node)
 } // EffectComponentInterfaceModifier
 namespace EffectComponentAttributeModifier {
 void SetAlwaysSnapshotImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+                           Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    if (!convValue) {
-        EffectComponentModelStatic::SetAlwaysSnapshot(frameNode, false);
-        return;
-    }
-    EffectComponentModelStatic::SetAlwaysSnapshot(frameNode, *convValue);
+    auto convValue = Converter::Convert<bool>(value);
+    EffectComponentModelStatic::SetAlwaysSnapshot(frameNode, convValue);
 }
 } // EffectComponentAttributeModifier
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier()

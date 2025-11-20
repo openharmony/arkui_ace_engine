@@ -78,8 +78,8 @@ void ResourceManagerResetImpl()
 {
     ResourceManager::GetInstance().Reset();
 }
-void SetFrameCallbackImpl(const Callback_Long_Void* onFrameCallback,
-                          const Callback_Long_Void* onIdleCallback,
+void SetFrameCallbackImpl(const FrameCallbackHandler* onFrameCallback,
+                          const FrameCallbackHandler* onIdleCallback,
                           Ark_Int64 delayTime)
 {
     CHECK_NULL_VOID(onFrameCallback);
@@ -115,6 +115,31 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const std::string& bundleName, con
     auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     return resourceWrapper;
 }
+void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
+{
+    indexes.clear();
+    if (result) {
+        indexes.emplace_back(1);
+        indexes.emplace_back(color.GetRed());
+        indexes.emplace_back(color.GetGreen());
+        indexes.emplace_back(color.GetBlue());
+        indexes.emplace_back(color.GetAlpha());
+    } else {
+        indexes.emplace_back(0);
+    }
+}
+Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
+{
+    Color colorColor;
+    std::vector<uint32_t> indexes;
+    ParseArrayNumber(colorColor, indexes, false);
+    Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(color, errValue);
+    auto result = Converter::OptConvert<Color>(*color);
+    CHECK_NULL_RETURN(result, errValue);
+    ParseArrayNumber(*result, indexes, true);
+    return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+}
 Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
 {
     CalcDimension result;
@@ -127,7 +152,7 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     CHECK_NULL_RETURN(resourceWrapper, errValue);
     if (resId == -1) {
         auto optParams = Converter::OptConvert<std::vector<Ark_Union_String_I32_I64_F64_Resource>>(res->params);
-        
+
         if (!optParams.has_value() || optParams->size() < 1) {
             return errValue;
         }
@@ -156,31 +181,6 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
         result = resourceWrapper->GetDimension(resId);
     }
     return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
-}
-void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
-{
-    indexes.clear();
-    if (result) {
-        indexes.emplace_back(1);
-        indexes.emplace_back(color.GetRed());
-        indexes.emplace_back(color.GetGreen());
-        indexes.emplace_back(color.GetBlue());
-        indexes.emplace_back(color.GetAlpha());
-    } else {
-        indexes.emplace_back(0);
-    }
-}
-Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
-{
-    Color colorColor;
-    std::vector<uint32_t> indexes;
-    ParseArrayNumber(colorColor, indexes, false);
-    Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    CHECK_NULL_RETURN(color, errValue);
-    auto result = Converter::OptConvert<Color>(*color);
-    CHECK_NULL_RETURN(result, errValue);
-    ParseArrayNumber(*result, indexes, true);
-    return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
 }
 Array_Number BlendColorByColorMetricsImpl(const Ark_Number* color,
                                           const Ark_Number* overlayColor)
@@ -211,10 +211,10 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::ResourceManagerResetImpl,
         SystemOpsAccessor::SetFrameCallbackImpl,
         SystemOpsAccessor::ColorMetricsResourceColorImpl,
-        SystemOpsAccessor::BlendColorByColorMetricsImpl,
         SystemOpsAccessor::ResourceToLengthMetricsImpl,
+        SystemOpsAccessor::BlendColorByColorMetricsImpl,
     };
     return &SystemOpsAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

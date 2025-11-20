@@ -101,7 +101,7 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
 void SetOnTerminatedImpl(Ark_NativePointer node,
-                         const Opt_Callback_TerminationInfo_Void* value)
+                         const Opt_Callback_TerminationInfo* value)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -149,7 +149,7 @@ void SetOnTerminatedImpl(Ark_NativePointer node,
 #endif
 }
 void SetOnErrorImpl(Ark_NativePointer node,
-                    const Opt_ErrorCallback_Ohos_Base_BusinessError* value)
+                    const Opt_ErrorCallback_BusinessErrorInterface_Void* value)
 {
 }
 } // EmbeddedComponentAttributeModifier

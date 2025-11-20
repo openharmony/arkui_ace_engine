@@ -159,17 +159,6 @@ Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
     CHECK_NULL_RETURN(peer, invalidVal);
     return Converter::ArkValue<Opt_String>(peer->data.navDestinationId_, Converter::FC);
 }
-void SetNavDestinationIdImpl(Ark_NavPathInfo peer,
-                             const Opt_String* navDestinationId)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(navDestinationId);
-    if (navDestinationId->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        peer->data.navDestinationId_ = "";
-        return;
-    }
-    peer->data.navDestinationId_ = Converter::Convert<std::string>(navDestinationId->value);
-}
 } // NavPathInfoAccessor
 const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()
 {
@@ -186,7 +175,6 @@ const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()
         NavPathInfoAccessor::GetIsEntryImpl,
         NavPathInfoAccessor::SetIsEntryImpl,
         NavPathInfoAccessor::GetNavDestinationIdImpl,
-        NavPathInfoAccessor::SetNavDestinationIdImpl,
     };
     return &NavPathInfoAccessorImpl;
 }

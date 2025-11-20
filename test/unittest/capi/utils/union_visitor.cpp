@@ -50,8 +50,9 @@ HWTEST_F(UnionVisitorTest, SimpleUnionTest, TestSize.Level1)
 
 HWTEST_F(UnionVisitorTest, DefaultCaseTest, TestSize.Level1)
 {
-    static_assert(Converter::UnionLastIndex<Ark_Union_Color_String_Resource_ColoringStrategy> == 3);
-    auto test1 = Converter::ArkUnion<Ark_Union_Color_String_Resource_ColoringStrategy, Ark_String>("abc");
+    using TestType = Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy;
+    static_assert(Converter::UnionLastIndex<TestType> == 3);
+    auto test1 = Converter::ArkUnion<TestType, Ark_String>("abc");
     bool calledStrategy = false;
     bool calledDef = false;
     bool calledVoid = false;
@@ -63,8 +64,7 @@ HWTEST_F(UnionVisitorTest, DefaultCaseTest, TestSize.Level1)
     EXPECT_FALSE(calledStrategy);
     EXPECT_FALSE(calledVoid);
 
-    auto test2 = Converter::ArkUnion<Ark_Union_Color_String_Resource_ColoringStrategy,
-        Ark_ColoringStrategy>(Ark_ColoringStrategy());
+    auto test2 = Converter::ArkUnion<TestType, Ark_ColoringStrategy>(Ark_ColoringStrategy());
     calledStrategy = false;
     calledDef = false;
     calledVoid = false;

@@ -205,23 +205,6 @@ RefPtr<ThemeConstants> GetThemeConstants(Ark_NodeHandle node, Ark_CharPtr bundle
 }
 
 void AssignGradientColors(Gradient *gradient,
-    const Array_Tuple_ResourceColor_Number *colors)
-{
-    for (int32_t i = 0; i < colors->length; i++) {
-        auto color = OptConvert<Color>(colors->array[i].value0);
-        auto position = Convert<float>(colors->array[i].value1);
-        if (color.has_value()) {
-            NG::GradientColor gradientColor;
-            position = std::clamp(position, 0.0f, 1.0f);
-            gradientColor.SetColor(color.value());
-            gradientColor.SetHasValue(true);
-            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
-            gradient->AddColor(gradientColor);
-        }
-    }
-}
-
-void AssignGradientColors(Gradient *gradient,
     const Array_Tuple_ResourceColor_F64 *colors)
 {
     for (int32_t i = 0; i < colors->length; i++) {
@@ -690,6 +673,34 @@ ScaleOpt Convert(const Ark_ScaleOptions& src)
 }
 
 template<>
+ScaleOptions Convert(const Ark_ScaleOptions& src)
+{
+    ScaleOptions scaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto coord = OptConvert<float>(src.x);
+    if (coord.has_value()) {
+        scaleOptions.xScale = coord.value();
+    }
+    coord = OptConvert<float>(src.y);
+    if (coord.has_value()) {
+        scaleOptions.yScale = coord.value();
+    }
+    coord = OptConvert<float>(src.z);
+    if (coord.has_value()) {
+        scaleOptions.zScale = coord.value();
+    }
+
+    auto center = OptConvert<Dimension>(src.centerX);
+    if (center.has_value()) {
+        scaleOptions.centerX = center.value();
+    }
+    center = OptConvert<Dimension>(src.centerY);
+    if (center.has_value()) {
+        scaleOptions.centerY = center.value();
+    }
+    return scaleOptions;
+}
+
+template<>
 SelectionOptions Convert(const Ark_SelectionOptions& options)
 {
     SelectionOptions selectionOptions;
@@ -995,12 +1006,6 @@ CalcDimension Convert(const Ark_Float64& src)
 }
 
 template<>
-CalcLength Convert(const Ark_Number& src)
-{
-    return CalcLength(Convert<Dimension>(src));
-}
-
-template<>
 CalcLength Convert(const Ark_Float64& src)
 {
     return CalcLength(Convert<Dimension>(src));
@@ -1045,13 +1050,6 @@ template<>
 Color Convert(const Ark_String& src)
 {
     return Color::FromString(src.chars);
-}
-
-template<>
-Color Convert(const Ark_Int64& src)
-{
-    uint32_t value = static_cast<uint32_t>(src);
-    return Color(ColorAlphaAdapt(value));
 }
 
 template<>
@@ -1200,14 +1198,14 @@ DimensionOffset Convert(const Ark_Position& src)
 }
 
 template<>
-FontMetaData Convert(const Ark_Font& src)
+FontMetaData Convert(const Ark_arkui_component_units_Font& src)
 {
     DefaultDimensionUnit defaultUnit(DimensionUnit::FP);
     return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
 }
 
 template<>
-ShadowColorStrategy Convert(const Ark_Color& src)
+ShadowColorStrategy Convert(const Ark_arkui_component_enums_Color& src)
 {
     return ShadowColorStrategy::NONE;
 }
@@ -1234,7 +1232,7 @@ FontFamilies Convert(const Ark_String& src)
 }
 
 template<>
-Font Convert(const Ark_Font& src)
+Font Convert(const Ark_arkui_component_units_Font& src)
 {
     Font font;
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.family); fontfamiliesOpt) {
@@ -1393,28 +1391,6 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
 }
 
 template<>
-GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
-{
-    GradientColor gradientColor;
-    gradientColor.SetHasValue(false);
-
-    // color
-    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
-    if (colorOpt) {
-        gradientColor.SetColor(colorOpt.value());
-        gradientColor.SetHasValue(true);
-    }
-
-    // stop value
-    float value = Converter::Convert<float>(src.value1);
-    value = std::clamp(value, 0.0f, 1.0f);
-    //  [0, 1] -> [0, 100.0];
-    gradientColor.SetDimension(CalcDimension(value * Converter::PERCENT_100, DimensionUnit::PERCENT));
-
-    return gradientColor;
-}
-
-template<>
 GradientColor Convert(const Ark_Tuple_ResourceColor_F64& src)
 {
     GradientColor gradientColor;
@@ -1469,22 +1445,6 @@ std::map<std::string, std::string> Convert(const Map_String_String& src)
 
 template<>
 std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src)
-{
-    std::pair<Color, Dimension> gradientColor;
-    // color
-    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
-    if (colorOpt) {
-        gradientColor.first = colorOpt.value();
-    }
-    // stop value
-    float value = Converter::Convert<float>(src.value1);
-    value = std::clamp(value, 0.0f, 1.0f);
-    gradientColor.second = Dimension(value, DimensionUnit::VP);
-    return gradientColor;
-}
-
-template<>
-std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
 {
     std::pair<Color, Dimension> gradientColor;
     // color
@@ -2509,7 +2469,7 @@ PaddingProperty Convert(const Ark_LengthMetrics& src)
 template<>
 PaddingProperty Convert(const Ark_Number& src)
 {
-    return PaddingPropertyFromCalcLength(OptConvert<CalcLength>(src));
+    return PaddingPropertyFromCalcLength(CalcLength(Convert<Dimension>(src)));
 }
 
 template<>
@@ -2577,10 +2537,20 @@ AnimationOption Convert(const Ark_AnimateParam& src)
 }
 
 template<>
+std::tuple<double, double> Convert(const Ark_Tuple_F64_F64& src)
+{
+    return {Convert<double>(src.value0), Convert<double>(src.value1)};
+}
+
+template<>
 BlurOption Convert(const Ark_BlurOptions& src)
 {
-    auto value0 = Converter::Convert<int32_t>(src.grayscale.value0);
-    auto value1 = Converter::Convert<int32_t>(src.grayscale.value1);
+    auto grayscale = OptConvert<std::tuple<double, double>>(src.grayscale);
+    if (!grayscale) {
+        return BlurOption();
+    }
+    auto value0 = std::get<0>(*grayscale);
+    auto value1 = std::get<1>(*grayscale);
     constexpr int32_t GRAYSCALE_MAX = 127;
     constexpr int32_t GRAYSCALE_MIN = 0;
     value0 = (value0 < GRAYSCALE_MIN || value0 > GRAYSCALE_MAX) ? 0 : value0;
@@ -3020,6 +2990,12 @@ PickerValueType Convert(const Array_ResourceStr& src)
 }
 
 template<>
+PickerValueType Convert(const Array_String& src)
+{
+    return Converter::Convert<std::vector<std::string>>(src);
+}
+
+template<>
 PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
@@ -3030,7 +3006,7 @@ PickerSelectedType Convert(const Ark_Int32& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_Int32& src)
+PickerSelectedType Convert(const Array_I32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3119,14 +3095,6 @@ LightSource Convert(const Ark_LightSource& src)
     Validator::ValidateIntensity(lightSource.intensity);
     lightSource.lightColor = Converter::OptConvert<Color>(src.color);
     return lightSource;
-}
-
-template<>
-Point Convert(const Ark_Tuple_Number_Number& src)
-{
-    auto x = Converter::Convert<double>(src.value0);
-    auto y = Converter::Convert<double>(src.value1);
-    return Point(x, y);
 }
 
 template<>
@@ -3271,7 +3239,7 @@ ImageResizableSlice Convert(const Ark_EdgeWidths& src)
 }
 
 template<>
-NG::PreviewMenuOptions Convert(const Ark_PreviewMenuOptions& src)
+NG::PreviewMenuOptions Convert(const Ark_RichEditorPreviewMenuOptions& src)
 {
     NG::PreviewMenuOptions previewMenuOptions;
     auto feedbackMode = Converter::OptConvert<HapticFeedbackMode>(src.hapticFeedbackMode);
@@ -3654,13 +3622,13 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
 }
 
 template<>
-void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
+OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
 {
-    uint8_t red = static_cast<uint8_t>(src.red_);
-    uint8_t green = static_cast<uint8_t>(src.green_);
-    uint8_t blue = static_cast<uint8_t>(src.blue_);
-    uint8_t alpha = static_cast<uint8_t>(src.alpha_);
-    dst = Color::FromARGB(alpha, red, green, blue);
+    uint8_t red = static_cast<uint8_t>(src.red);
+    uint8_t green = static_cast<uint8_t>(src.green);
+    uint8_t blue = static_cast<uint8_t>(src.blue);
+    uint8_t alpha = static_cast<uint8_t>(src.alpha);
+    return Color::FromARGB(alpha, red, green, blue);
 }
 
 template<>

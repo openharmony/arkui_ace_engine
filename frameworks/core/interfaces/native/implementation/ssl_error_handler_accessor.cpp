@@ -48,7 +48,8 @@ void HandleCancel0Impl(Ark_SslErrorHandler peer)
         peer->sslErrorHandler->HandleCancel();
     }
 }
-void HandleCancel1Impl(Ark_SslErrorHandler peer, Ark_Boolean abortLoading)
+void HandleCancel1Impl(Ark_SslErrorHandler peer,
+                       Ark_Boolean abortLoading)
 {
     CHECK_NULL_VOID(peer);
     if (peer->type == ALL_SSL_ERROR_HANDLER && peer->allSslErrorHandler) {

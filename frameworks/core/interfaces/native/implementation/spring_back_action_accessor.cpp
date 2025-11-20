@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,25 +23,22 @@ SpringBackActionPeer g_springBackPeer = {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SpringBackActionAccessor {
-void DestroyPeerImpl([[maybe_unused]] Ark_SpringBackAction peer)
-{}
-
+void DestroyPeerImpl(Ark_SpringBackAction peer)
+{
+}
 Ark_SpringBackAction ConstructImpl()
 {
     return &g_springBackPeer;
 }
-
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-
-void SpringBackImpl([[maybe_unused]] Ark_SpringBackAction peer)
+void SpringBackImpl(Ark_SpringBackAction peer)
 {
     ViewAbstractModelStatic::SheetSpringBackStatic();
 }
-} // namespace SpringBackActionAccessor
-
+} // SpringBackActionAccessor
 const GENERATED_ArkUISpringBackActionAccessor* GetSpringBackActionAccessor()
 {
     static const GENERATED_ArkUISpringBackActionAccessor SpringBackActionAccessorImpl {
@@ -53,7 +50,4 @@ const GENERATED_ArkUISpringBackActionAccessor* GetSpringBackActionAccessor()
     return &SpringBackActionAccessorImpl;
 }
 
-struct SpringBackActionPeer {
-    virtual ~SpringBackActionPeer() = default;
-};
 }

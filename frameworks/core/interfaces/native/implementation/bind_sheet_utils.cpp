@@ -98,10 +98,10 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
             arkCallback.Invoke(parameter);
         };
     }
-    auto onHeightDidChange = Converter::OptConvert<Callback_I32_Void>(sheetOptions.onHeightDidChange);
+    auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
     if (onHeightDidChange) {
         callbacks.onHeightDidChange = [arkCallback = CallbackHelper(onHeightDidChange.value())](int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value));
+            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
         };
     }
     auto onWidthDidChange = Converter::OptConvert<Callback_I32_Void>(sheetOptions.onWidthDidChange);

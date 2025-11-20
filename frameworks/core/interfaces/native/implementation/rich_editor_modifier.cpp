@@ -508,7 +508,7 @@ void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
     RichEditorModelStatic::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void SetOnEditingChangeImpl(Ark_NativePointer node,
-                            const Opt_Callback_Boolean_Void* value)
+                            const Opt_arkui_component_common_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -26,7 +26,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ThemeOpsAccessor {
-void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, Ark_Int32 elmtId)
+void SendThemeToNativeImpl(const Array_ResourceColor* colorArray,
+                           Ark_Int32 elmtId)
 {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
@@ -50,7 +51,8 @@ void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, Ark_Int32 elmt
     }
 #endif
 }
-void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDark)
+void SetDefaultThemeImpl(const Array_ResourceColor* colorArray,
+                         Ark_Boolean isDark)
 {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
@@ -65,8 +67,11 @@ void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDa
     NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
 #endif
 }
-void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Array_ResourceColor* colorArray,
-    Ark_ThemeColorMode colorMode, const Callback_Void* onThemeScopeDestroy)
+void CreateAndBindThemeImpl(Ark_Int32 themeScopeId,
+                            Ark_Int32 themeId,
+                            const Array_ResourceColor* colorArray,
+                            Ark_ThemeColorMode colorMode,
+                            const synthetic_Callback_Void* onThemeScopeDestroy)
 {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
@@ -118,4 +123,4 @@ const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor()
     return &ThemeOpsAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

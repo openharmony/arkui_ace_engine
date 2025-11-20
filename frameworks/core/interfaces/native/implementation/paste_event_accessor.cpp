@@ -23,24 +23,20 @@ void DestroyPeerImpl(Ark_PasteEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-
 Ark_PasteEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<PasteEventPeer>();
 }
-
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-
 void PreventDefaultImpl(Ark_PasteEvent peer)
 {
     CHECK_NULL_VOID(peer);
     peer->HandlePreventDefault();
 }
 } // PasteEventAccessor
-
 const GENERATED_ArkUIPasteEventAccessor* GetPasteEventAccessor()
 {
     static const GENERATED_ArkUIPasteEventAccessor PasteEventAccessorImpl {
@@ -51,4 +47,5 @@ const GENERATED_ArkUIPasteEventAccessor* GetPasteEventAccessor()
     };
     return &PasteEventAccessorImpl;
 }
+
 }

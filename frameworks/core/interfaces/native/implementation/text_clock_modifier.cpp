@@ -117,7 +117,7 @@ void SetFormatImpl(Ark_NativePointer node,
     TextClockModelStatic::SetFormat(frameNode, convValue);
 }
 void SetOnDateChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_I64_Void* value)
+                         const Opt_arkui_component_common_Callback_I64_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -127,7 +127,7 @@ void SetOnDateChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onDateChange = [arkCallback = CallbackHelper(*optValue)](const std::string& data) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Int64>(std::stoi(data)));
+        arkCallback.Invoke(Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(std::stoll(data))));
     };
     TextClockModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }

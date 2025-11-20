@@ -69,7 +69,8 @@ void SetOnTouchImpl(Ark_UICommonEvent peer, const Opt_Callback_TouchEvent_Void* 
         ViewAbstract::ClearJSFrameNodeOnTouch(rawPtr);
     }
 }
-void SetOnAppearImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
+void SetOnAppearImpl(Ark_UICommonEvent peer,
+                     const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
@@ -83,7 +84,8 @@ void SetOnAppearImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
         ViewAbstract::ClearJSFrameNodeOnAppear(rawPtr);
     }
 }
-void SetOnDisappearImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
+void SetOnDisappearImpl(Ark_UICommonEvent peer,
+                        const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
@@ -117,7 +119,8 @@ void SetOnKeyEventImpl(Ark_UICommonEvent peer, const Opt_Callback_KeyEvent_Void*
         ViewAbstract::ClearJSFrameNodeOnKeyCallback(rawPtr);
     }
 }
-void SetOnFocusImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
+void SetOnFocusImpl(Ark_UICommonEvent peer,
+                    const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
@@ -131,7 +134,8 @@ void SetOnFocusImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
         ViewAbstract::ClearJSFrameNodeOnFocusCallback(rawPtr);
     }
 }
-void SetOnBlurImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
+void SetOnBlurImpl(Ark_UICommonEvent peer,
+                   const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();

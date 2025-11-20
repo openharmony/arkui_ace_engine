@@ -76,14 +76,12 @@ BarrierInfo Convert(const Ark_BarrierStyle& src)
     }
     return info;
 }
-
 template<>
 BarrierInfo Convert(const Ark_LocalizedBarrierStyle& src)
 {
-    BarrierInfo info = {
-        .id = Converter::Convert<std::string>(src.id),
-        .referencedId = Converter::Convert<std::vector<std::string>>(src.referencedId)
-    };
+    LocalizedBarrierInfo info;
+    info.id = Convert<std::string>(src.id);
+    info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
     auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
     if (direction.has_value()) {
         info.direction = direction.value();
@@ -128,7 +126,7 @@ void SetBarrierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<std::vector<BarrierInfo>>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<std::vector<BarrierInfo>>(value);
     if (!convValue) {
         std::vector<BarrierInfo> emptyVector;
         RelativeContainerModelNG::SetBarrier(frameNode, emptyVector);

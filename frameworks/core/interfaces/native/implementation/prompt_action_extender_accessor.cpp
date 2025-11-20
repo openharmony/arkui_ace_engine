@@ -454,11 +454,11 @@ void OpenPopupImpl(Ark_VMContext vmContext,
     ReturnPromise(outputArgumentForReturningPromise, result);
 }
 void UpdatePopupImpl(Ark_VMContext vmContext,
-                    Ark_AsyncWorkerPtr asyncWorker,
-                    Ark_NativePointer content,
-                    const Ark_PopupCommonOptions* options,
-                    const Opt_Boolean* partialUpdate,
-                    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+                     Ark_AsyncWorkerPtr asyncWorker,
+                     Ark_NativePointer content,
+                     const Ark_PopupCommonOptions* options,
+                     const Opt_Boolean* partialUpdate,
+                     const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
@@ -618,4 +618,5 @@ const GENERATED_ArkUIPromptActionExtenderAccessor* GetPromptActionExtenderAccess
     };
     return &PromptActionExtenderAccessorImpl;
 }
+
 }

@@ -70,7 +70,7 @@ void RegisterOnDragStartImpl(Ark_NativePointer node, const Callback_onDragStart*
     ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStartLambda));
 }
 
-void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomNodeBuilder_DragItemInfo_String* preview,
     const Opt_PreviewConfiguration* config)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

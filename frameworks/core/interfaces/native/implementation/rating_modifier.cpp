@@ -28,7 +28,7 @@ struct StarStyleOptions {
     std::string foregroundUri = {};
     std::string secondaryUri = {};
 };
-std::optional<float> ProcessBindableRating(FrameNode* frameNode, const Opt_Union_F64_Bindable& value)
+std::optional<float> ProcessBindableRating(FrameNode* frameNode, const Opt_Union_F64_Bindable_F64& value)
 {
     std::optional<float> result;
     Converter::VisitUnion(value,

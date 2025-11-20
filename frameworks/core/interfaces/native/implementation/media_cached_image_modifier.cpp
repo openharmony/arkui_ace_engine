@@ -65,7 +65,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // MediaCachedImageModifier
 namespace MediaCachedImageInterfaceModifier {
 void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
-                                    const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource* src)
+                                    const Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource* src)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

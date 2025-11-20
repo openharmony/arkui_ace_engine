@@ -55,10 +55,6 @@ Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
     CHECK_NULL_RETURN(peerImpl, {});
     return Converter::ArkValue<Ark_Size>(peerImpl->GetSize());
 }
-void SetSizeImpl(Ark_DrawingRenderingContext peer,
-                 const Ark_Size* size)
-{
-}
 Opt_drawing_Canvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
 {
     auto invalid = Converter::ArkValue<Opt_drawing_Canvas>();
@@ -67,10 +63,6 @@ Opt_drawing_Canvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
     CHECK_NULL_RETURN(peerImpl, invalid);
     auto canvas = peerImpl->GetCanvas();
     return Converter::ArkValue<Opt_drawing_Canvas>(canvas);
-}
-void SetCanvasImpl(Ark_DrawingRenderingContext peer,
-                   const Opt_drawing_Canvas* canvas)
-{
 }
 } // DrawingRenderingContextAccessor
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
@@ -81,9 +73,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
         DrawingRenderingContextAccessor::GetSizeImpl,
-        DrawingRenderingContextAccessor::SetSizeImpl,
         DrawingRenderingContextAccessor::GetCanvasImpl,
-        DrawingRenderingContextAccessor::SetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;
 }

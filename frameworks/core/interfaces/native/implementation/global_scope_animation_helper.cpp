@@ -233,7 +233,7 @@ void FillTraceStream(std::shared_ptr<std::stringstream>& traceStreamPtr, const A
                     << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
 }
 void AnimateToInner(const Ark_AnimateParam* value,
-                    const Callback_Void* event,
+                    const synthetic_Callback_Void* event,
                     bool immediately)
 {
     CHECK_NULL_VOID(value);

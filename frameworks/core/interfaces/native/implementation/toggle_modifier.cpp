@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<bool> ProcessBindableIsOn(FrameNode* frameNode, const Opt_Union_Boolean_Bindable& value)
+std::optional<bool> ProcessBindableIsOn(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean& value)
 {
     std::optional<bool> result;
     Converter::VisitUnion(value,
@@ -111,7 +111,7 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Boolean_Void* value)
+                     const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -158,6 +158,16 @@ void SetEnableSecureImpl(Ark_NativePointer node,
     XComponentModelNG::EnableSecure(frameNode, *convValue);
 #endif // XCOMPONENT_SUPPORTED
 }
+void SetEnableTransparentLayerImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    #ifdef XCOMPONENT_SUPPORTED
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    XComponentModelNG::EnableTransparentLayer(frameNode, convValue.value_or(false));
+    #endif // XCOMPONENT_SUPPORTED
+}
 void SetHdrBrightnessImpl(Ark_NativePointer node,
                           const Opt_Float64* value)
 {
@@ -170,16 +180,6 @@ void SetHdrBrightnessImpl(Ark_NativePointer node,
         return;
     }
     XComponentModelNG::HdrBrightness(frameNode, *convValue);
-    #endif // XCOMPONENT_SUPPORTED
-}
-void SetEnableTransparentLayerImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    #ifdef XCOMPONENT_SUPPORTED
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    XComponentModelNG::EnableTransparentLayer(frameNode, convValue.value_or(false));
     #endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentAttributeModifier

@@ -147,16 +147,16 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // FormComponentModifier
 namespace FormComponentInterfaceModifier {
 void SetFormComponentOptionsImpl(Ark_NativePointer node,
-                                 const Ark_FormInfo* value)
+                                 const Ark_FormInfo* formInfo)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto formInfo = Converter::Convert<OptRequestFormInfo>(*value);
-    FormModelStatic::SetModuleName(frameNode, formInfo.module);
-    if (formInfo.dimension) {
-        FormModelStatic::SetDimension(frameNode, *formInfo.dimension);
+    CHECK_NULL_VOID(formInfo);
+    auto convValue = Converter::Convert<OptRequestFormInfo>(*formInfo);
+    FormModelStatic::SetModuleName(frameNode, convValue.module);
+    if (convValue.dimension) {
+        FormModelStatic::SetDimension(frameNode, *convValue.dimension);
     }
     LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
          "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
@@ -165,12 +165,13 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
 void SetSizeImpl(Ark_NativePointer node,
-                 const Opt_FormSize* value)
+                 const Ark_FormSize* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto dimension = Converter::OptConvertPtr<LiteralDimension>(value);
+    CHECK_NULL_VOID(value);
+    auto dimension = Converter::OptConvert<LiteralDimension>(*value);
     if (!dimension) {
         dimension = LiteralDimension {
             .width = 0.0_vp,
@@ -184,7 +185,7 @@ void SetModuleNameImpl(Ark_NativePointer node,
                        const Opt_String* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value).value_or(FormComponentModifier::DEFAULT_MODULE_NAME);
     FormModelStatic::SetModuleName(frameNode, convValue);
@@ -194,7 +195,7 @@ void SetDimensionImpl(Ark_NativePointer node,
                       const Opt_FormDimension* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value).value_or(FormComponentModifier::DEFAULT_DIMENSION);
     FormModelStatic::SetDimension(frameNode, convValue);
@@ -204,7 +205,7 @@ void SetAllowUpdateImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value).value_or(FormComponentModifier::DEFAULT_ALLOW_UPDATE);
     FormModelStatic::AllowUpdate(frameNode, convValue);
@@ -214,7 +215,7 @@ void SetVisibilityImpl(Ark_NativePointer node,
                        const Opt_Visibility* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto opt = Converter::OptConvertPtr<VisibleType>(value);
     CHECK_NULL_VOID(opt);
@@ -225,7 +226,7 @@ void SetOnAcquiredImpl(Ark_NativePointer node,
                        const Opt_Callback_FormCallbackInfo_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_FormCallbackInfo_Void>();
@@ -255,7 +256,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
                     const Opt_Callback_ErrorInformation_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_ErrorInformation_Void>();
@@ -283,7 +284,7 @@ void SetOnRouterImpl(Ark_NativePointer node,
                      const Opt_Callback_Object_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - Callback_Any_Void  is not supported "
         "the type Callback_Any_Void should be replaced by Callback_String_Void.");
@@ -293,7 +294,7 @@ void SetOnUninstallImpl(Ark_NativePointer node,
                         const Opt_Callback_FormCallbackInfo_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_FormCallbackInfo_Void>();
@@ -323,7 +324,7 @@ void SetOnLoadImpl(Ark_NativePointer node,
                    const Opt_VoidCallback* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<VoidCallback>();

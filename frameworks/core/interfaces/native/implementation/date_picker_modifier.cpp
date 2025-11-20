@@ -41,7 +41,7 @@ const auto DEFAULT_SELECTED_TEXT_STYLE = PickerTextStyle { .textColor = Color(0x
 const bool DEFAULT_SHOW_LUNAR = false;
 const bool DEFAULT_ENABLE_HAPTIC = true;
 
-std::optional<PickerDate> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable& value)
+std::optional<PickerDate> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable_Date& value)
 {
     std::optional<PickerDate> result;
     Converter::VisitUnion(value,

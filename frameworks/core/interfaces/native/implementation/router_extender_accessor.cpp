@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,9 @@
 #include "core/interfaces/native/utility/promise_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
-#include <cstring>
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RouterExtenderAccessor {
@@ -178,7 +180,8 @@ void Replace1Impl(Ark_NativePointer jsView,
     CHECK_NULL_VOID(delegate);
     delegate->ReplaceExtender(routerOptions, std::move(callback), jsView);
 }
-void Back0Impl(const Opt_router_RouterOptions* options)
+void Back0Impl(Ark_VMContext vmContext,
+               const Opt_router_RouterOptions* options)
 {
     CHECK_NULL_VOID(options);
     auto container = Container::Current();
@@ -191,7 +194,8 @@ void Back0Impl(const Opt_router_RouterOptions* options)
     }
     delegate->BackExtender(url, "");
 }
-void Back1Impl(Ark_Int32 index,
+void Back1Impl(Ark_VMContext vmContext,
+               Ark_Int32 index,
                const Opt_Object* params)
 {
     auto container = Container::Current();
@@ -201,9 +205,10 @@ void Back1Impl(Ark_Int32 index,
     auto indexNum = Converter::Convert<int32_t>(index);
     delegate->BackToIndexExtender(indexNum, "");
 }
-void RunPageImpl(Ark_NativePointer jsView,
-                              const Ark_PageRouterOptions* options,
-                              const Opt_RouterFinishCallback* finishCallback)
+void RunPageImpl(Ark_VMContext vmContext,
+                 Ark_NativePointer jsView,
+                 const Ark_PageRouterOptions* options,
+                 const Opt_RouterFinishCallback* finishCallback)
 {
     CHECK_NULL_VOID(jsView && options && finishCallback);
     PageRouterOptions routerOptions;
@@ -353,11 +358,14 @@ void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
                             Ark_NativePointer jsView,
                             const Ark_PageRouterOptions* options,
-                            const Opt_RouterFinishCallback* finishCallback,
+                            const Opt_RouterFinishCallback* enterFinishCallback,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(
-        vmContext && asyncWorker && jsView && options && finishCallback && outputArgumentForReturningPromise);
+    CHECK_NULL_VOID(vmContext);
+    CHECK_NULL_VOID(asyncWorker);
+    CHECK_NULL_VOID(jsView);
+    CHECK_NULL_VOID(options);
+    CHECK_NULL_VOID(outputArgumentForReturningPromise);
     auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
     auto finishFunc = [promise](const std::string& errStr, int32_t errCode) {
         if (errCode == ERROR_CODE_NO_ERROR) {
@@ -377,8 +385,9 @@ void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
         routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
     }
     std::function<void()> callback;
-    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+    auto optCallback = Converter::GetOptPtr(enterFinishCallback);
+    if (optCallback) {
+        callback = [finish = CallbackHelper(*optCallback), jsNode = jsView]() {
             finish.InvokeSync(jsNode);
         };
     }

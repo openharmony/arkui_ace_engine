@@ -18,27 +18,23 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace PixelMapDrawableDescriptorAccessor {
-void DestroyPeerImpl(Ark_PixelMapDrawableDescriptor peer)
+namespace SelectExtenderAccessor {
+void SetDividerImpl(Ark_NativePointer node,
+                    const Opt_DividerOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetDivider(frameNode, convValue);
 }
-Ark_PixelMapDrawableDescriptor CtorImpl(const Opt_PixelMap* src)
+} // SelectExtenderAccessor
+const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor()
 {
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-} // PixelMapDrawableDescriptorAccessor
-const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor()
-{
-    static const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor PixelMapDrawableDescriptorAccessorImpl {
-        PixelMapDrawableDescriptorAccessor::DestroyPeerImpl,
-        PixelMapDrawableDescriptorAccessor::CtorImpl,
-        PixelMapDrawableDescriptorAccessor::GetFinalizerImpl,
+    static const GENERATED_ArkUISelectExtenderAccessor SelectExtenderAccessorImpl {
+        SelectExtenderAccessor::SetDividerImpl,
     };
-    return &PixelMapDrawableDescriptorAccessorImpl;
+    return &SelectExtenderAccessorImpl;
 }
 
 }

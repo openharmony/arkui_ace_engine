@@ -63,7 +63,8 @@ Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
     const auto keyCode = info->GetKeyCode();
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(keyCode));
 }
-void SetKeyCodeImpl(Ark_KeyEvent peer, Ark_Int32 keyCode)
+void SetKeyCodeImpl(Ark_KeyEvent peer,
+                    Ark_Int32 keyCode)
 {
     LOGW("ARKOALA KeyEventAccessor::SetKeyCodeImpl doesn't have sense.");
 }
@@ -98,7 +99,8 @@ Ark_Int32 GetDeviceIdImpl(Ark_KeyEvent peer)
     auto id = GetBaseEventAccessor()->getDeviceId(peer);
     return Converter::GetOpt(id).value_or(Converter::ArkValue<Ark_Int32>(-1));
 }
-void SetDeviceIdImpl(Ark_KeyEvent peer, Ark_Int32 deviceId)
+void SetDeviceIdImpl(Ark_KeyEvent peer,
+                     Ark_Int32 deviceId)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(deviceId));
@@ -111,7 +113,8 @@ Ark_Int32 GetMetaKeyImpl(Ark_KeyEvent peer)
     const auto metaKey = info->GetMetaKey();
     return Converter::ArkValue<Ark_Int32>(metaKey);
 }
-void SetMetaKeyImpl(Ark_KeyEvent peer, Ark_Int32 metaKey)
+void SetMetaKeyImpl(Ark_KeyEvent peer,
+                    Ark_Int32 metaKey)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -123,7 +126,8 @@ Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
 {
     return GetBaseEventAccessor()->getTimestamp(peer);
 }
-void SetTimestampImpl(Ark_KeyEvent peer, Ark_Int64 timestamp)
+void SetTimestampImpl(Ark_KeyEvent peer,
+                      Ark_Int64 timestamp)
 {
     GetBaseEventAccessor()->setTimestamp(peer, timestamp);
 }

@@ -70,6 +70,21 @@ void SetFingerListImpl(Ark_GestureEvent peer,
     auto convValue = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     event->SetFingerList(convValue);
 }
+Opt_Array_FingerInfo GetFingerInfosImpl(Ark_GestureEvent peer)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_FingerInfo>(Ark_Empty()));
+    auto value = GetFingerListImpl(peer);
+    return Converter::ArkValue<Opt_Array_FingerInfo>(value);
+}
+void SetFingerInfosImpl(Ark_GestureEvent peer,
+                        const Opt_Array_FingerInfo* fingerInfos)
+{
+    CHECK_NULL_VOID(peer);
+    auto convValue = Converter::GetOptPtr(fingerInfos);
+    if (convValue) {
+        SetFingerListImpl(peer, &convValue.value());
+    }
+}
 Ark_Float64 GetOffsetXImpl(Ark_GestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Float64>(0);
@@ -273,6 +288,14 @@ void SetVelocityImpl(Ark_GestureEvent peer,
 {
     LOGE("GestureEventAccessor::SetVelocityImpl not implemented");
 }
+Opt_EventLocationInfo GetTapLocationImpl(Ark_GestureEvent peer)
+{
+    return {};
+}
+void SetTapLocationImpl(Ark_GestureEvent peer,
+                        const Opt_EventLocationInfo* tapLocation)
+{
+}
 } // GestureEventAccessor
 const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
 {
@@ -284,6 +307,8 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
         GestureEventAccessor::SetRepeatImpl,
         GestureEventAccessor::GetFingerListImpl,
         GestureEventAccessor::SetFingerListImpl,
+        GestureEventAccessor::GetFingerInfosImpl,
+        GestureEventAccessor::SetFingerInfosImpl,
         GestureEventAccessor::GetOffsetXImpl,
         GestureEventAccessor::SetOffsetXImpl,
         GestureEventAccessor::GetOffsetYImpl,
@@ -304,6 +329,8 @@ const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
         GestureEventAccessor::SetVelocityYImpl,
         GestureEventAccessor::GetVelocityImpl,
         GestureEventAccessor::SetVelocityImpl,
+        GestureEventAccessor::GetTapLocationImpl,
+        GestureEventAccessor::SetTapLocationImpl,
     };
     return &GestureEventAccessorImpl;
 }

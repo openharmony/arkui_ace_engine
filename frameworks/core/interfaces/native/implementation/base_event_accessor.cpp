@@ -24,10 +24,8 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
-namespace OHOS::Ace::NG {
-namespace GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseEventAccessor {
-
 namespace {
 const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
 const Ark_Float64 DefaultValueArkNumber = Converter::ArkValue<Ark_Float64>(0);
@@ -75,7 +73,8 @@ Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
     return Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(tstamp));
 }
-void SetTimestampImpl(Ark_BaseEvent peer, Ark_Int64 timestamp)
+void SetTimestampImpl(Ark_BaseEvent peer,
+                      Ark_Int64 timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     int64_t value = Converter::Convert<int64_t>(timestamp);
@@ -137,7 +136,8 @@ Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
     peer->pressure_ = pressure;
     return pressure;
 }
-void SetPressureImpl(Ark_BaseEvent peer, Ark_Float64 pressure)
+void SetPressureImpl(Ark_BaseEvent peer,
+                     Ark_Float64 pressure)
 {
     CHECK_NULL_VOID(peer);
     peer->pressure_ = pressure;
@@ -153,7 +153,8 @@ Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
     peer->tiltX_ = tiltX;
     return tiltX;
 }
-void SetTiltXImpl(Ark_BaseEvent peer, Ark_Float64 tiltX)
+void SetTiltXImpl(Ark_BaseEvent peer,
+                  Ark_Float64 tiltX)
 {
     CHECK_NULL_VOID(peer);
     peer->tiltX_ = tiltX;
@@ -169,7 +170,8 @@ Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
     peer->tiltY_ = tiltY;
     return tiltY;
 }
-void SetTiltYImpl(Ark_BaseEvent peer, Ark_Float64 tiltY)
+void SetTiltYImpl(Ark_BaseEvent peer,
+                  Ark_Float64 tiltY)
 {
     CHECK_NULL_VOID(peer);
     peer->tiltY_ = tiltY;
@@ -209,8 +211,8 @@ Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
     auto info = peer->GetBaseInfo();
     CHECK_NULL_RETURN(info, invalid);
     auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
-            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
-            (const Array_String keys, const Callback_Boolean_Void continuation) {
+            std::function<void(const Array_String, const synthetic_Callback_Boolean_Void)>>([info]
+            (const Array_String keys, const synthetic_Callback_Boolean_Void continuation) {
         auto eventKeys = info->GetPressedKeyCodes();
         auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
         Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
@@ -256,8 +258,17 @@ void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetTargetDisplayId(id.value());
     }
 }
+Opt_Float64 GetAxisPinchImpl(Ark_BaseEvent peer)
+{
+    LOGE("ARKOALA BaseEventAccessor.GetAxisPinch not implemented yet");
+    return Converter::ArkValue<Opt_Float64>();
+}
+void SetAxisPinchImpl(Ark_BaseEvent peer,
+                      const Opt_Float64* axisPinch)
+{
+    LOGE("ARKOALA BaseEventAccessor.SetAxisPinch not implemented yet");
+}
 } // BaseEventAccessor
-
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
 {
     static const GENERATED_ArkUIBaseEventAccessor BaseEventAccessorImpl {
@@ -290,8 +301,10 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetDeviceIdImpl,
         BaseEventAccessor::GetTargetDisplayIdImpl,
         BaseEventAccessor::SetTargetDisplayIdImpl,
+        BaseEventAccessor::GetAxisPinchImpl,
+        BaseEventAccessor::SetAxisPinchImpl,
     };
     return &BaseEventAccessorImpl;
 }
-}
+
 }

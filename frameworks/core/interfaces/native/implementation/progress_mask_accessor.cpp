@@ -21,22 +21,21 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-inline std::optional<float> ConvertProgressMaskValue(const Ark_Float64* value)
+std::optional<float> ConvertProgressMaskValue(Ark_Float64 value)
 {
-    CHECK_NULL_RETURN(value, std::nullopt);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvert<float>(value);
     Validator::ValidateNonNegative(convValue);
     return convValue;
 }
 
-void SetProgressMaskValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Float64* value)
+void SetProgressMaskValue(const RefPtr<ProgressMaskProperty>& property, Ark_Float64 value)
 {
     auto convValue = ConvertProgressMaskValue(value);
     CHECK_NULL_VOID(convValue);
     property->SetValue(*convValue);
 }
 
-void SetProgressMaskMaxValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Float64* value)
+void SetProgressMaskMaxValue(const RefPtr<ProgressMaskProperty>& property, Ark_Float64 value)
 {
     auto convValue = ConvertProgressMaskValue(value);
     CHECK_NULL_VOID(convValue);
@@ -62,8 +61,8 @@ Ark_ProgressMask ConstructImpl(Ark_Float64 value,
 {
     auto peer = new ProgressMaskPeer();
     const auto& property = peer->GetProperty();
-    SetProgressMaskValue(property, &value);
-    SetProgressMaskMaxValue(property, &total);
+    SetProgressMaskValue(property, value);
+    SetProgressMaskMaxValue(property, total);
     SetProgressMaskColor(property, color);
     return peer;
 }
@@ -75,7 +74,7 @@ void UpdateProgressImpl(Ark_ProgressMask peer,
                         Ark_Float64 value)
 {
     CHECK_NULL_VOID(peer);
-    SetProgressMaskValue(peer->GetProperty(), &value);
+    SetProgressMaskValue(peer->GetProperty(), value);
 }
 void UpdateColorImpl(Ark_ProgressMask peer,
                      const Ark_ResourceColor* value)

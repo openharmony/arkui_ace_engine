@@ -103,7 +103,6 @@ void SetOpacityImpl(Ark_RenderNode peer,
         LOGW("This renderNode is nullptr when SetOpacity !");
         return;
     }
-    CHECK_NULL_VOID(opacity);
     auto opacityValue = Converter::Convert<float>(opacity);
 
     auto frameNode = peer->GetFrameNode();
@@ -491,10 +490,10 @@ void SetRectMaskImpl(Ark_RenderNode peer,
     renderContext->RequestNextFrame();
 }
 void SetCircleMaskImpl(Ark_RenderNode peer,
-                   const Ark_Circle* circle,
-                   const Ark_Number* fillColor,
-                   const Ark_Number* strokeColor,
-                   const Ark_Number* strokeWidth)
+                       const Ark_Circle* circle,
+                       const Ark_Number* fillColor,
+                       const Ark_Number* strokeColor,
+                       const Ark_Number* strokeWidth)
 {
     if (!peer) {
         LOGW("This renderNode is nullptr when SetCircleMask !");
@@ -764,7 +763,6 @@ void InsertChildAfterImpl(Ark_RenderNode peer,
     currentNode->AddChild(childNode, index + 1);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
-
 void InsertChildImpl(Ark_RenderNode peer,
                      Ark_RenderNode child)
 {
@@ -777,7 +775,6 @@ void InsertChildImpl(Ark_RenderNode peer,
     currentNode->AddChild(childNode, 0);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
-
 void RemoveChildImpl(Ark_RenderNode peer,
                      Ark_RenderNode node)
 {

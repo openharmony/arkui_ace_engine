@@ -72,13 +72,18 @@ void SyncItemDragEvent(
     lazyNode->SetItemDragEvent(std::move(onLongPressCallback), std::move(onDragStartCallback),
         std::move(onMoveThroughCallback), std::move(onDropCallback));
 }
-void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
+void NotifyChangeImpl(Ark_NativePointer node,
+                      Ark_Int32 startIndex,
+                      Ark_Int32 endIndex,
+                      Ark_Int32 count)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
     CHECK_NULL_VOID(lazyNode);
-    lazyNode->OnDataChange(startIdx, changeCnt, UINode::NotificationType::START_CHANGE_POSITION);
+    lazyNode->OnDataChange(
+        static_cast<int32_t>(startIndex), static_cast<int32_t>(count),
+        UINode::NotificationType::START_CHANGE_POSITION);
 }
 void SyncImpl(Ark_NativePointer node,
               Ark_Int32 totalCount,

@@ -68,7 +68,8 @@ Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
 {
     auto invalid = Converter::ArkValue<Opt_OffsetResult>();
     CHECK_NULL_RETURN(peer, invalid);
-    return peer->TriggerCurrentOffset(reinterpret_cast<ani_env*>(vmContext));
+    auto env = reinterpret_cast<ani_env*>(vmContext);
+    return Converter::ArkValue<Opt_OffsetResult>(peer->TriggerCurrentOffset(env), Converter::FC);
 }
 void ScrollToIndexImpl(Ark_VMContext vmContext,
                        Ark_Scroller peer,

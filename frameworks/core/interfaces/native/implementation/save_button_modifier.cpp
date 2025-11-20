@@ -120,7 +120,7 @@ void SetOnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        auto error = Converter::ArkValue<Opt_BusinessError>();
+        auto error = Converter::ArkValue<Opt_BusinessErrorInterface_Void>();
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
 
@@ -131,16 +131,14 @@ void SetSetIconImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetSetIcon(frameNode, convValue);
+    LOGI("ARKOALA SaveButtonAttributeModifier::SetSetIconImpl: is not implemented yet");
 }
 void SetSetTextImpl(Ark_NativePointer node,
                     const Opt_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetSetText(frameNode, convValue);
+    LOGI("ARKOALA SaveButtonAttributeModifier::SetSetTextImpl: is not implemented yet");
 }
 void SetIconSizeImpl(Ark_NativePointer node,
                      const Opt_Union_Dimension_SizeOptions* value)
@@ -182,16 +180,14 @@ void SetIconBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetIconBorderRadius(frameNode, convValue);
+    LOGI("ARKOALA SaveButtonAttributeModifier::SetIconBorderRadiusImpl: is not implemented yet");
 }
 void SetStateEffectImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // SaveButtonModelNG::SetSetStateEffect(frameNode, convValue);
+    LOGI("ARKOALA SaveButtonAttributeModifier::SetStateEffectImpl: is not implemented yet");
 }
 } // SaveButtonAttributeModifier
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()

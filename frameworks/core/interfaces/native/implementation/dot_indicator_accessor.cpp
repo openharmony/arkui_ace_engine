@@ -116,8 +116,4 @@ const GENERATED_ArkUIDotIndicatorAccessor* GetDotIndicatorAccessor()
     };
     return &DotIndicatorAccessorImpl;
 }
-
-struct DotIndicatorPeer {
-    virtual ~DotIndicatorPeer() = default;
-};
 }

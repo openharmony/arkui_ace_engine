@@ -97,6 +97,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ButtonModifier
 namespace ButtonInterfaceModifier {
+void SetButtonOptions1Impl(Ark_NativePointer node,
+                           const Opt_ButtonOptions* options);
 void SetButtonOptions0Impl(Ark_NativePointer node,
                            const Ark_ResourceStr* label,
                            const Opt_ButtonOptions* options)
@@ -104,15 +106,7 @@ void SetButtonOptions0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(label);
-    auto arkButtonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options);
-    if (arkButtonOptions.has_value()) {
-        auto buttonOptions = Converter::Convert<ButtonOptions>(*arkButtonOptions);
-        ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
-        ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
-        ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
-        ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
-        ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
-    }
+    SetButtonOptions1Impl(node, options);
     auto labelString = Converter::OptConvert<std::string>(*label);
     if (labelString) {
         ButtonModelStatic::SetLabel(frameNode, labelString->c_str());
@@ -124,9 +118,9 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkButtonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options);
+    auto arkButtonOptions = Converter::OptConvertPtr<ButtonOptions>(options);
     if (arkButtonOptions.has_value()) {
-        auto buttonOptions = Converter::Convert<ButtonOptions>(*arkButtonOptions);
+        auto& buttonOptions = *arkButtonOptions;
         ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
         ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
         ButtonModelStatic::SetRole(frameNode, buttonOptions.role);

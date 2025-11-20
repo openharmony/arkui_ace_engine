@@ -43,6 +43,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void PreventDefaultImpl(Ark_ClickEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    GestureEvent* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetPreventDefault(true);
+}
 Ark_Float64 GetDisplayXImpl(Ark_ClickEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Float64>(0);
@@ -53,7 +60,8 @@ Ark_Float64 GetDisplayXImpl(Ark_ClickEvent peer)
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     return Converter::ArkValue<Ark_Float64>(x);
 }
-void SetDisplayXImpl(Ark_ClickEvent peer, Ark_Float64 displayX)
+void SetDisplayXImpl(Ark_ClickEvent peer,
+                     Ark_Float64 displayX)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -75,7 +83,8 @@ Ark_Float64 GetDisplayYImpl(Ark_ClickEvent peer)
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return Converter::ArkValue<Ark_Float64>(y);
 }
-void SetDisplayYImpl(Ark_ClickEvent peer, Ark_Float64 displayY)
+void SetDisplayYImpl(Ark_ClickEvent peer,
+                     Ark_Float64 displayY)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -97,7 +106,8 @@ Ark_Float64 GetWindowXImpl(Ark_ClickEvent peer)
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     return Converter::ArkValue<Ark_Float64>(x);
 }
-void SetWindowXImpl(Ark_ClickEvent peer, Ark_Float64 windowX)
+void SetWindowXImpl(Ark_ClickEvent peer,
+                    Ark_Float64 windowX)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -119,7 +129,8 @@ Ark_Float64 GetWindowYImpl(Ark_ClickEvent peer)
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return Converter::ArkValue<Ark_Float64>(y);
 }
-void SetWindowYImpl(Ark_ClickEvent peer, Ark_Float64 windowY)
+void SetWindowYImpl(Ark_ClickEvent peer,
+                    Ark_Float64 windowY)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -141,7 +152,8 @@ Ark_Float64 GetXImpl(Ark_ClickEvent peer)
     const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
     return Converter::ArkValue<Ark_Float64>(x);
 }
-void SetXImpl(Ark_ClickEvent peer, Ark_Float64 x)
+void SetXImpl(Ark_ClickEvent peer,
+              Ark_Float64 x)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -163,7 +175,8 @@ Ark_Float64 GetYImpl(Ark_ClickEvent peer)
     const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return Converter::ArkValue<Ark_Float64>(y);
 }
-void SetYImpl(Ark_ClickEvent peer, Ark_Float64 y)
+void SetYImpl(Ark_ClickEvent peer,
+              Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -204,13 +217,6 @@ void SetHandImpl(Ark_ClickEvent peer,
 {
     LOGE("ClickEventAccessor::SetHandImpl we can only GET hand");
 }
-void PreventDefaultImpl(Ark_ClickEvent peer)
-{
-    CHECK_NULL_VOID(peer);
-    GestureEvent* info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetPreventDefault(true);
-}
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
 {
@@ -218,6 +224,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::DestroyPeerImpl,
         ClickEventAccessor::ConstructImpl,
         ClickEventAccessor::GetFinalizerImpl,
+        ClickEventAccessor::PreventDefaultImpl,
         ClickEventAccessor::GetDisplayXImpl,
         ClickEventAccessor::SetDisplayXImpl,
         ClickEventAccessor::GetDisplayYImpl,
@@ -232,7 +239,6 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetYImpl,
         ClickEventAccessor::GetHandImpl,
         ClickEventAccessor::SetHandImpl,
-        ClickEventAccessor::PreventDefaultImpl,
     };
     return &ClickEventAccessorImpl;
 }

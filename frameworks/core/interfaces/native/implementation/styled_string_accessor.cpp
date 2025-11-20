@@ -196,8 +196,8 @@ Ark_String GetStringImpl(Ark_StyledString peer)
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Opt_Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
-                                  const Ark_Int32 start,
-                                  const Ark_Int32 length,
+                                  Ark_Int32 start,
+                                  Ark_Int32 length,
                                   const Opt_StyledStringKey* styledKey)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_SpanStyle>(Ark_Empty()));
@@ -227,7 +227,7 @@ Ark_Boolean EqualsImpl(Ark_StyledString peer,
     return peer->spanString->IsEqualToSpanString(other->spanString);
 }
 Opt_StyledString SubStyledStringImpl(Ark_StyledString peer,
-                                     const Ark_Int32 start,
+                                     Ark_Int32 start,
                                      const Opt_Int32* length)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_StyledString>(Ark_Empty()));
@@ -343,7 +343,7 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
             Ark_Buffer arkBuffer = BufferKeeper::Allocate(buff.size());
             std::copy(buff.begin(), buff.end(), reinterpret_cast<uint8_t*>(arkBuffer.data));
             RefPtr<ExtSpan> result;
-            auto continuation = CallbackKeeper::Claim<Callback_StyledStringMarshallingValue_Void>(
+            auto continuation = CallbackKeeper::Claim<Callback_UserDataSpan_Void>(
                 [&result, spanStart, spanLength](Ark_UserDataSpan arkUserDataSpan) {
                 result = AceType::MakeRefPtr<UserDataSpanHolder>(arkUserDataSpan, spanStart, spanStart + spanLength);
             });
@@ -389,10 +389,6 @@ Ark_Int32 GetLengthImpl(Ark_StyledString peer)
     CHECK_NULL_RETURN(peer->spanString, errValue);
     return Converter::ArkValue<Ark_Int32>(peer->spanString->GetLength());
 }
-void SetLengthImpl(Ark_StyledString peer,
-                   Ark_Int32 length)
-{
-}
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
 {
@@ -411,7 +407,6 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::Marshalling1Impl,
         StyledStringAccessor::Unmarshalling1Impl,
         StyledStringAccessor::GetLengthImpl,
-        StyledStringAccessor::SetLengthImpl,
     };
     return &StyledStringAccessorImpl;
 }

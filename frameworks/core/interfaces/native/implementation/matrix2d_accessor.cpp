@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix2DAccessor {
-const auto ERROR_VALUE = Converter::ArkValue<Opt_Number>();
+const auto ERROR_VALUE = Converter::ArkValue<Opt_Float64>();
 
 void DestroyPeerImpl(Ark_Matrix2D peer)
 {
@@ -53,21 +53,20 @@ Ark_Matrix2D InvertImpl(Ark_Matrix2D peer)
     return peer;
 }
 Ark_Matrix2D RotateImpl(Ark_Matrix2D peer,
-                        const Ark_Number* degree,
-                        const Opt_Number* rx,
-                        const Opt_Number* ry)
+                        Ark_Float64 degree,
+                        const Opt_Float64* rx,
+                        const Opt_Float64* ry)
 {
     CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(degree, {});
-    auto angle = static_cast<double>(Converter::Convert<float>(*degree));
+    auto angle = Converter::Convert<float>(degree);
     auto optX = Converter::OptConvertPtr<float>(rx);
     auto optY = Converter::OptConvertPtr<float>(ry);
-    peer->Rotate(angle, optX, optY);
+    peer->Rotate(static_cast<double>(angle), optX, optY);
     return peer;
 }
 Ark_Matrix2D TranslateImpl(Ark_Matrix2D peer,
-                           const Opt_Number* tx,
-                           const Opt_Number* ty)
+                           const Opt_Float64* tx,
+                           const Opt_Float64* ty)
 {
     CHECK_NULL_RETURN(peer, {});
     auto optX = Converter::OptConvertPtr<float>(tx);
@@ -76,8 +75,8 @@ Ark_Matrix2D TranslateImpl(Ark_Matrix2D peer,
     return peer;
 }
 Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
-                       const Opt_Number* sx,
-                       const Opt_Number* sy)
+                       const Opt_Float64* sx,
+                       const Opt_Float64* sy)
 {
     CHECK_NULL_RETURN(peer, {});
     auto optX = Converter::OptConvertPtr<float>(sx);
@@ -85,78 +84,78 @@ Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
     peer->Scale(optX, optY);
     return peer;
 }
-Opt_Number GetScaleXImpl(Ark_Matrix2D peer)
+Opt_Float64 GetScaleXImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetScaleX());
+    return Converter::ArkValue<Opt_Float64>(peer->GetScaleX());
 }
 void SetScaleXImpl(Ark_Matrix2D peer,
-                   const Opt_Number* scaleX)
+                   const Opt_Float64* scaleX)
 {
     CHECK_NULL_VOID(peer);
     auto sx = Converter::OptConvertPtr<float>(scaleX);
     CHECK_NULL_VOID(sx);
     peer->SetScaleX(static_cast<double>(*sx));
 }
-Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
+Opt_Float64 GetScaleYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetScaleY());
+    return Converter::ArkValue<Opt_Float64>(peer->GetScaleY());
 }
 void SetScaleYImpl(Ark_Matrix2D peer,
-                   const Opt_Number* scaleY)
+                   const Opt_Float64* scaleY)
 {
     CHECK_NULL_VOID(peer);
     auto sy = Converter::OptConvertPtr<float>(scaleY);
     CHECK_NULL_VOID(sy);
     peer->SetScaleY(static_cast<double>(*sy));
 }
-Opt_Number GetRotateXImpl(Ark_Matrix2D peer)
+Opt_Float64 GetRotateXImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetRotateX());
+    return Converter::ArkValue<Opt_Float64>(peer->GetRotateX());
 }
 void SetRotateXImpl(Ark_Matrix2D peer,
-                    const Opt_Number* rotateX)
+                    const Opt_Float64* rotateX)
 {
     CHECK_NULL_VOID(peer);
     auto rx = Converter::OptConvertPtr<float>(rotateX);
     CHECK_NULL_VOID(rx);
     peer->SetRotateX(static_cast<double>(*rx));
 }
-Opt_Number GetRotateYImpl(Ark_Matrix2D peer)
+Opt_Float64 GetRotateYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetRotateY());
+    return Converter::ArkValue<Opt_Float64>(peer->GetRotateY());
 }
 void SetRotateYImpl(Ark_Matrix2D peer,
-                    const Opt_Number* rotateY)
+                    const Opt_Float64* rotateY)
 {
     CHECK_NULL_VOID(peer);
     auto ry = Converter::OptConvertPtr<float>(rotateY);
     CHECK_NULL_VOID(ry);
     peer->SetRotateY(static_cast<double>(*ry));
 }
-Opt_Number GetTranslateXImpl(Ark_Matrix2D peer)
+Opt_Float64 GetTranslateXImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetTranslateX());
+    return Converter::ArkValue<Opt_Float64>(peer->GetTranslateX());
 }
 void SetTranslateXImpl(Ark_Matrix2D peer,
-                       const Opt_Number* translateX)
+                       const Opt_Float64* translateX)
 {
     CHECK_NULL_VOID(peer);
     auto tx = Converter::OptConvertPtr<float>(translateX);
     CHECK_NULL_VOID(tx);
     peer->SetTranslateX(static_cast<double>(*tx));
 }
-Opt_Number GetTranslateYImpl(Ark_Matrix2D peer)
+Opt_Float64 GetTranslateYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetTranslateY());
+    return Converter::ArkValue<Opt_Float64>(peer->GetTranslateY());
 }
 void SetTranslateYImpl(Ark_Matrix2D peer,
-                       const Opt_Number* translateY)
+                       const Opt_Float64* translateY)
 {
     CHECK_NULL_VOID(peer);
     auto ty = Converter::OptConvertPtr<float>(translateY);

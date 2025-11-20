@@ -54,14 +54,29 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void StopPropagationImpl(Ark_TouchEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    TouchEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
+}
 Opt_Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    auto invalid = Converter::ArkValue<Opt_Array_HistoricalPoint>();
+    CHECK_NULL_RETURN(peer, invalid);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, {});
+    CHECK_NULL_RETURN(info, invalid);
     std::list<TouchLocationInfo> history;
     history = info->GetHistory();
     return Converter::ArkValue<Opt_Array_HistoricalPoint>(history, Converter::FC);
+}
+void PreventDefaultImpl(Ark_TouchEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    TouchEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetPreventDefault(true);
 }
 Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 {
@@ -126,20 +141,6 @@ void SetChangedTouchesImpl(Ark_TouchEvent peer,
     auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(*changedTouches);
     info->SetChangedTouches(std::move(touchList));
 }
-void StopPropagationImpl(Ark_TouchEvent peer)
-{
-    CHECK_NULL_VOID(peer);
-    TouchEventInfo* info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetStopPropagation(true);
-}
-void PreventDefaultImpl(Ark_TouchEvent peer)
-{
-    CHECK_NULL_VOID(peer);
-    TouchEventInfo* info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetPreventDefault(true);
-}
 } // TouchEventAccessor
 const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
 {
@@ -147,15 +148,15 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
         TouchEventAccessor::DestroyPeerImpl,
         TouchEventAccessor::ConstructImpl,
         TouchEventAccessor::GetFinalizerImpl,
+        TouchEventAccessor::StopPropagationImpl,
         TouchEventAccessor::GetHistoricalPointsImpl,
+        TouchEventAccessor::PreventDefaultImpl,
         TouchEventAccessor::GetTypeImpl,
         TouchEventAccessor::SetTypeImpl,
         TouchEventAccessor::GetTouchesImpl,
         TouchEventAccessor::SetTouchesImpl,
         TouchEventAccessor::GetChangedTouchesImpl,
         TouchEventAccessor::SetChangedTouchesImpl,
-        TouchEventAccessor::StopPropagationImpl,
-        TouchEventAccessor::PreventDefaultImpl,
     };
     return &TouchEventAccessorImpl;
 }

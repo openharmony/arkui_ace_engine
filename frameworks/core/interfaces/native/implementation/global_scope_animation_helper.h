@@ -18,5 +18,5 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-void AnimateToInner(const Ark_AnimateParam* value, const Callback_Void* event, bool immediately);
+void AnimateToInner(const Ark_AnimateParam* value, const synthetic_Callback_Void* event, bool immediately);
 }

@@ -37,13 +37,13 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetSelectionImpl(Ark_TextBaseController peer,
-                      const Ark_Number* selectionStart,
-                      const Ark_Number* selectionEnd,
+                      Ark_Int32 selectionStart,
+                      Ark_Int32 selectionEnd,
                       const Opt_SelectionOptions* options)
 {
-    CHECK_NULL_VOID(peer && selectionStart && selectionEnd);
-    auto selectionStartConv = Converter::Convert<int32_t>(*selectionStart);
-    auto selectionEndConv = Converter::Convert<int32_t>(*selectionEnd);
+    CHECK_NULL_VOID(peer);
+    auto selectionStartConv = Converter::Convert<int32_t>(selectionStart);
+    auto selectionEndConv = Converter::Convert<int32_t>(selectionEnd);
     auto optionsConv = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(selectionStartConv, selectionEndConv, optionsConv);
 }

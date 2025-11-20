@@ -23,24 +23,20 @@ void DestroyPeerImpl(Ark_CutEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-
 Ark_CutEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<CutEventPeer>();
 }
-
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-
 void PreventDefaultImpl(Ark_CutEvent peer)
 {
     CHECK_NULL_VOID(peer);
     peer->HandlePreventDefault();
 }
 } // CutEventAccessor
-
 const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor()
 {
     static const GENERATED_ArkUICutEventAccessor CutEventAccessorImpl {
@@ -51,4 +47,5 @@ const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor()
     };
     return &CutEventAccessorImpl;
 }
+
 }

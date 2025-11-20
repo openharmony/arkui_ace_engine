@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<PickerTime> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable& value)
+std::optional<PickerTime> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable_Date& value)
 {
     std::optional<PickerTime> result;
     Converter::VisitUnion(value,

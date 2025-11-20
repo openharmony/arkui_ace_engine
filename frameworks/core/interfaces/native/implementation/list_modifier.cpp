@@ -325,21 +325,6 @@ void SetScrollSnapAlignImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ListModelStatic::SetScrollSnapAlign(frameNode, Converter::OptConvertPtr<ScrollSnapAlign>(value));
 }
-void SetChildrenMainSizeImpl(Ark_NativePointer node,
-                             const Opt_ChildrenMainSize* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        ListModelStatic::ResetListChildrenMainSize(frameNode);
-        return;
-    }
-    auto peer = *optValue;
-    CHECK_NULL_VOID(peer);
-    RefPtr<ListChildrenMainSize> handler = ListModelStatic::GetOrCreateListChildrenMainSize(frameNode);
-    peer->SetHandler(handler);
-}
 void SetMaintainVisibleContentPositionImpl(Ark_NativePointer node,
                                            const Opt_Boolean* value)
 {
@@ -422,11 +407,12 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
-                               const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
+        const ItemDragInfo& dragInfo, int32_t itemIndex
+    ) -> RefPtr<AceType> {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
         auto builderOpt = callback.InvokeWithOptConvertResult<CustomNodeBuilder, Opt_CustomNodeBuilder,
-            Callback_Opt_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
+            Callback_Opt_CustomNodeBuilder_Void>(arkDragInfo, arkItemIndex);
         if (!builderOpt.has_value()) {
             return nullptr;
         }
@@ -629,7 +615,6 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetChainAnimationOptionsImpl,
         ListAttributeModifier::SetStickyImpl,
         ListAttributeModifier::SetScrollSnapAlignImpl,
-        ListAttributeModifier::SetChildrenMainSizeImpl,
         ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
         ListAttributeModifier::SetStackFromEndImpl,
         ListAttributeModifier::SetOnScrollIndexImpl,

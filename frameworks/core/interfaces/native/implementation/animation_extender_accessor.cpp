@@ -214,7 +214,8 @@ void ExecuteSharedRuntimeAnimation(const RefPtr<Container>& container, const Ref
     StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, true);
 }
 
-void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_Void* event)
+void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param,
+                                  const synthetic_Callback_Void* event)
 {
     std::function<void()> onEventFinish;
     if (event) {
@@ -251,7 +252,6 @@ void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_
 
     ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, true);
 }
-
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
@@ -406,6 +406,29 @@ void StartDoubleAnimationImpl(Ark_NativePointer node,
     frameNode->UpdateAnimatablePropertyFloat(propertyName, endValue);
     AnimationUtils::CloseImplicitAnimation();
 }
+void AnimationTranslateImpl(Ark_NativePointer node,
+                            const Ark_TranslateOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+
+    TranslateOptions translateOptions = Converter::Convert<TranslateOptions>(*options);
+
+    if (translateOptions.x.Unit() == DimensionUnit::PERCENT) {
+        translateOptions.x = Dimension(
+            translateOptions.x.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX(),
+            DimensionUnit::PX);
+    }
+
+    if (translateOptions.y.Unit() == DimensionUnit::PERCENT) {
+        translateOptions.x = Dimension(
+            translateOptions.y.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY(),
+            DimensionUnit::PX);
+    }
+
+    ViewAbstract::SetTranslate(frameNode, translateOptions);
+}
 
 struct Keyframe {
     int32_t duration = 0;
@@ -478,8 +501,8 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     // close KeyframeAnimation.
     AnimationUtils::CloseImplicitAnimation();
 }
-
-void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param, const Array_KeyframeState* keyframes)
+void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param,
+                               const Array_KeyframeState* keyframes)
 {
     auto scopedDelegate = Container::CurrentIdSafelyWithCheck();
     if (!scopedDelegate) {
@@ -534,28 +557,6 @@ void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param, const Arra
     option.SetCurve(Curves::EASE_IN_OUT);
     StartKeyframeAnimation(pipelineContext, option, parsedKeyframes, count);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
-}
-
-void AnimationTranslateImpl(Ark_NativePointer node,
-                            const Ark_TranslateOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-
-    TranslateOptions options = Converter::Convert<TranslateOptions>(*value);
-
-    if (options.x.Unit() == DimensionUnit::PERCENT) {
-        options.x = Dimension(options.x.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX(),
-                              DimensionUnit::PX);
-    }
-
-    if (options.y.Unit() == DimensionUnit::PERCENT) {
-        options.x = Dimension(options.y.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY(),
-                              DimensionUnit::PX);
-    }
-
-    ViewAbstract::SetTranslate(frameNode, options);
 }
 } // AnimationExtenderAccessor
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
