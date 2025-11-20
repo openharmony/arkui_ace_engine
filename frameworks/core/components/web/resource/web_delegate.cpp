@@ -446,6 +446,77 @@ bool FileSelectorParamOhos::IsAcceptAllOptionExcluded()
     return false;
 }
 
+std::vector<std::string> JsStringToAcceptTypes(std::unique_ptr<JsonValue> acceptTypesJsonString)
+{
+    std::vector<std::string> result;
+    if (!acceptTypesJsonString->IsString()) {
+        return result;
+    }
+    std::unique_ptr<JsonValue> acceptTypesJson = JsonUtil::ParseJsonString(acceptTypesJsonString->GetString());
+    if (!acceptTypesJson || !acceptTypesJson->IsArray()) {
+        return result;
+    }
+    int32_t n = acceptTypesJson->GetArraySize();
+    for (int32_t k = 0; k < n; k++) {
+        if (auto acceptTypeJson = acceptTypesJson->GetArrayItem(k)) {
+            if (acceptTypeJson->IsString()) {
+                result.emplace_back(acceptTypeJson->GetString());
+            }
+        }
+    }
+    return result;
+}
+
+std::vector<AcceptFileType> JsStringToFileTypeList(std::unique_ptr<JsonValue> acceptJson)
+{
+    std::vector<AcceptFileType> result;
+    if (!acceptJson || !acceptJson->IsArray()) {
+        return result;
+    }
+    int32_t m = acceptJson->GetArraySize();
+    for (int32_t j = 0; j < m; j++) {
+        AcceptFileType acceptFileType;
+        auto fileTypeJsonString = acceptJson->GetArrayItem(j);
+        if (!fileTypeJsonString || !fileTypeJsonString->IsString()) {
+            continue;
+        }
+        std::unique_ptr<JsonValue> fileTypeJson = JsonUtil::ParseJsonString(fileTypeJsonString->GetString());
+        if (!fileTypeJson || !fileTypeJson->IsObject()) {
+            continue;
+        }
+        if (auto mimeTypeJson = fileTypeJson->GetValue("mime_type")) {
+            acceptFileType.mimeType = mimeTypeJson->IsString() ? mimeTypeJson->GetString() : "";
+        }
+        if (auto acceptTypesJsonString = fileTypeJson->GetValue("accept_type")) {
+            acceptFileType.acceptType = JsStringToAcceptTypes(std::move(acceptTypesJsonString));
+        }
+        result.emplace_back(acceptFileType);
+    }
+    return result;
+}
+
+AcceptFileTypeLists FileSelectorParamOhos::GetAccepts()
+{
+    AcceptFileTypeLists result = AcceptFileTypeLists();
+    if (param_) {
+        std::unique_ptr<JsonValue> acceptsJson = JsonUtil::ParseJsonString(param_->Accepts());
+        if (!acceptsJson || !acceptsJson->IsArray()) {
+            return result;
+        }
+        int32_t n = acceptsJson->GetArraySize();
+        for (int32_t i = 0; i < n; i++) {
+            auto acceptJsonString = acceptsJson->GetArrayItem(i);
+            if (!acceptJsonString || !acceptJsonString->IsString()) {
+                continue;
+            }
+            std::unique_ptr<JsonValue> acceptJson = JsonUtil::ParseJsonString(acceptJsonString->GetString());
+            std::vector<AcceptFileType> acceptFileTypeList = JsStringToFileTypeList(std::move(acceptJson));
+            result.push_back(acceptFileTypeList);
+        }
+    }
+    return result;
+}
+
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {

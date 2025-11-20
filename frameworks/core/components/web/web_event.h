@@ -127,6 +127,13 @@ private:
     int source_ = 0;
 };
 
+struct AcceptFileType {
+    std::string mimeType;
+    std::vector<std::string> acceptType;
+};
+using AcceptFileTypeList = std::vector<AcceptFileType>;
+using AcceptFileTypeLists = std::vector<AcceptFileTypeList>;
+
 class WebFileSelectorParam : public AceType {
     DECLARE_ACE_TYPE(WebFileSelectorParam, AceType);
 public:
@@ -142,6 +149,7 @@ public:
     virtual std::string GetDefaultPath() = 0;
     virtual std::vector<std::string> GetDescriptions() = 0;
     virtual bool IsAcceptAllOptionExcluded() = 0;
+    virtual AcceptFileTypeLists GetAccepts() = 0;
 };
 
 class ACE_EXPORT WebError : public AceType {

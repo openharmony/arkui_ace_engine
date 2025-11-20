@@ -263,6 +263,7 @@ public:
     std::string GetDefaultPath() override;
     std::vector<std::string> GetDescriptions() override;
     bool IsAcceptAllOptionExcluded() override;
+    AcceptFileTypeLists GetAccepts() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param_;
