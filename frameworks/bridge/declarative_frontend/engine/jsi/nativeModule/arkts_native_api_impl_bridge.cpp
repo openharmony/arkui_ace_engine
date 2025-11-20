@@ -7160,6 +7160,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnCameraCaptureStateChanged));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCameraCaptureStateChanged"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnCameraCaptureStateChanged));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnMicrophoneCaptureStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnMicrophoneCaptureStateChanged));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnMicrophoneCaptureStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnMicrophoneCaptureStateChanged));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

@@ -2738,4 +2738,24 @@ void WebModelNG::SetCameraCaptureStateChangedId(
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnCameraCaptureStateChangedEvent(std::move(uiCallback));
 }
+
+void WebModelNG::SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnMicrophoneCaptureStateChangedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetMicrophoneCaptureStateChangedId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnMicrophoneCaptureStateChangedEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG
