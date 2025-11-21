@@ -4884,6 +4884,46 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
+void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
+                                    const Opt_Array_LayoutSafeAreaType* types,
+                                    const Opt_Array_LayoutSafeAreaEdge* edges)
+{
+    constexpr int32_t LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+    constexpr int32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(types);
+    CHECK_NULL_VOID(edges);
+    NG::IgnoreLayoutSafeAreaOpts opts {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    if (types->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto typeRawArray = Converter::Convert<std::vector<uint32_t>>(types->value);
+        uint32_t layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
+        for (auto typeValue : typeRawArray) {
+            if (typeValue > LAYOUT_SAFE_AREA_TYPE_LIMIT) {
+                layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+            layoutSafeAreaType |= NG::IgnoreLayoutSafeAreaOpts::TypeToMask(typeValue);
+        }
+        opts.type = layoutSafeAreaType;
+    }
+    if (edges->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(edges->value);
+        uint32_t layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+        for (auto edgeValue : edgeRawArray) {
+            if (edgeValue > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+                layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            layoutSafeAreaEdge |= NG::IgnoreLayoutSafeAreaOpts::EdgeToMask(edgeValue);
+        }
+        opts.rawEdges = layoutSafeAreaEdge;
+    }
+    ViewAbstractModelStatic::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
+}
 void SetBackgroundImpl(Ark_NativePointer node,
                        const Opt_CustomNodeBuilder* builder,
                        const Opt_BackgroundOptions* options)
@@ -6044,6 +6084,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
+        CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,
         CommonMethodModifier::SetBackgroundImage0Impl,
         CommonMethodModifier::SetBackgroundImage1Impl,

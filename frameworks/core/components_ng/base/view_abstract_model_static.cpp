@@ -1192,6 +1192,12 @@ void ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(FrameNode* frameNode, con
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 
+void ViewAbstractModelStatic::UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
+}
+
 void ViewAbstractModelStatic::SetAlignRules(FrameNode* frameNode,
     const std::optional<std::map<AlignDirection, AlignRule>>& alignRules)
 {

@@ -22142,6 +22142,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);
+    void (*setIgnoreLayoutSafeArea)(Ark_NativePointer node,
+                                const Opt_Array_LayoutSafeAreaType* types,
+                                const Opt_Array_LayoutSafeAreaEdge* edges);
     void (*setBackground)(Ark_NativePointer node,
                           const Opt_CustomNodeBuilder* builder,
                           const Opt_BackgroundOptions* options);

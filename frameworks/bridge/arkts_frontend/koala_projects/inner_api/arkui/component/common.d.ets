@@ -164,6 +164,8 @@ import {
     ForegroundBlurStyleOptions,
     AttributeModifier,
     UIGestureEvent,
+    LayoutSafeAreaType,
+    LayoutSafeAreaEdge,
 } from 'arkui.component.common';
 import uiEffect from '@ohos.graphics.uiEffect';
 import image from '@ohos.multimedia.image';
@@ -668,6 +670,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public accessibilityFocusDrawLevelAttribute(value: FocusDrawLevel | undefined): void;
     public customPropertyAttribute(name: string | undefined, value: Object | undefined): void;
     public expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void;
+    public ignoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void;
     public backgroundAttribute(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): void;
     public backgroundImage0Attribute(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat): void;
     public backgroundImage1Attribute(src: ResourceStr | PixelMap | undefined, options?: BackgroundImageOptions): void;
@@ -943,6 +946,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this;
     public customProperty(name: string | undefined, value: Object | undefined): this;
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this;
+    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this;
     public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this;
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this;
     public backgroundBlurStyle(

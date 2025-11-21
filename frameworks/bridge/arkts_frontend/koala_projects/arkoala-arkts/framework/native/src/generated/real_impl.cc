@@ -2200,6 +2200,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_Array_SafeAreaEdge* edges)
     {
     }
+    void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
+                                     const Opt_Array_LayoutSafeAreaType* types,
+                                     const Opt_Array_LayoutSafeAreaEdge* edges)
+    {
+    }
     void SetBackgroundImpl(Ark_NativePointer node,
                            const Opt_CustomNodeBuilder* builder,
                            const Opt_BackgroundOptions* options)
@@ -8565,6 +8570,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
+            CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
             CommonMethodModifier::SetBackgroundImpl,
             CommonMethodModifier::SetBackgroundImage0Impl,
             CommonMethodModifier::SetBackgroundImage1Impl,
