@@ -6848,8 +6848,38 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     MountCustomKeyboard(customKeyboard, targetId);
 }
 
+bool OverlayManager::ChangeBindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
+{
+    CHECK_NULL_RETURN(keyboard, false);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto pipeline = rootNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto customKeyboardId = textFieldManager->GetCustomKeyboardId();
+    bool isCustomKeyboardNodeIdMatched = customKeyboardId == keyboard->GetId();
+    auto customKeyboardNode = customKeyboardNode_.Upgrade();
+    if (customKeyboardNode && isCustomKeyboardNodeIdMatched && oldTargetId_ != targetId &&
+        customKeyboardMap_.find(oldTargetId_) != customKeyboardMap_.end()) {
+        if (oldTargetId_ != -1) {
+            customKeyboardMap_.erase(oldTargetId_);
+        }
+        customKeyboardMap_[targetId] = customKeyboardNode;
+        oldTargetId_ = targetId;
+        auto pattern = customKeyboardNode->GetPattern<KeyboardPattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->SetTargetId(oldTargetId_);
+        return true;
+    }
+    return false;
+}
+
 void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
 {
+    if (ChangeBindKeyboardWithNode(keyboard, targetId)) {
+        return;
+    }
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
         return;
     }
@@ -6857,6 +6887,8 @@ void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto customKeyboard = KeyboardView::CreateKeyboardWithNode(targetId, keyboard);
+    customKeyboardNode_ = WeakClaim(RawPtr(customKeyboard));
+    oldTargetId_ = targetId;
     if (!customKeyboard) {
         return;
     }

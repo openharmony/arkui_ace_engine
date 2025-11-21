@@ -77,6 +77,11 @@ public:
     void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override {}
     void RemovePageId(int32_t pageId) override {}
 
+    void SetPreNode(WeakPtr<FrameNode>& preNode)
+    {
+        preNode_ = preNode;
+    }
+
     WeakPtr<Pattern>& GetOnFocusTextField()
     {
         return onFocusTextField_;
@@ -261,6 +266,9 @@ public:
     void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
+    bool NeedCloseKeyboard();
+    void ProcessCustomKeyboard(bool matched, int32_t nodeId);
+    void CloseTextCustomKeyboard(int32_t nodeId);
 
     int32_t GetFocusFieldOrientation() const
     {
@@ -304,6 +312,16 @@ public:
     void SetAttachInputId(int32_t attachInputId)
     {
         attachInputId_ = attachInputId;
+    }
+
+    void SetCustomKeyboardId(int32_t id)
+    {
+        currentCustomId_ = id;
+    }
+
+    int32_t GetCustomKeyboardId()
+    {
+        return currentCustomId_;
     }
 
     bool CheckInRichEditor()
@@ -355,6 +373,8 @@ private:
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
     std::unordered_map<int32_t, FillContentMap> textFieldFillContentMaps_;
+    int32_t currentCustomId_ = -1;
+    WeakPtr<FrameNode> preNode_;
     int32_t attachInputId_ = -1;
     std::optional<bool> isAskCeliaSupported_;
 };

@@ -184,6 +184,15 @@ public:
 
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
 
+    virtual bool NeedCloseKeyboard()
+    {
+        return false;
+    }
+
+    virtual void ProcessCustomKeyboard(bool matched, int32_t nodeId) {}
+
+    virtual void CloseTextCustomKeyboard(int32_t nodeId) {}
+
     virtual void OnVirtualKeyboardAreaChanged() {}
 
     virtual RefPtr<Clipboard> GetClipboard()

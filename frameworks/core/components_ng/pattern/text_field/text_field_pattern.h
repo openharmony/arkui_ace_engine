@@ -1757,6 +1757,7 @@ public:
     void UpdateMarginResource() override;
     void SetBackBorderRadius();
     void OnColorModeChange(uint32_t colorMode) override;
+    void OnFocusCustomKeyboardChange();
 
     void ProcessDefaultStyleAndBehaviors();
     void ProcessDefaultStyleAndBehaviorsMultiThread();
@@ -1794,6 +1795,11 @@ public:
     void HandleAIMenuOption(const std::string& labelInfo = "");
     void UpdateAIMenuOptions();
     bool MaybeNeedShowSelectAIDetect();
+    void SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeyboardNode);
+    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
+    bool NeedCloseKeyboard() override;
+    void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
+    void CloseTextCustomKeyboard(int32_t nodeId) override;
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
 protected:
     virtual void InitDragEvent();
@@ -1921,6 +1927,7 @@ private:
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
+    void RequestCustomKeyboardBuilder();
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void CancelDelayProcessOverlay();
@@ -2010,6 +2017,7 @@ private:
     void PaintCancelRect();
     void PaintUnitRect();
     void PaintPasswordRect();
+    void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     bool CancelNodeIsShow()
     {
         auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
