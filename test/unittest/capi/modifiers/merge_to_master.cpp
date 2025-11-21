@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+// declarations
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
