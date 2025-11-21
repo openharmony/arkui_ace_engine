@@ -1329,23 +1329,5 @@ bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, con
     formMajorInfo.dimension = dimension;
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormDueControl(formMajorInfo, isDisablePolicy);
 }
-
-void FormManagerDelegate::ProcessCheckForm()
-{
-    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessCheckForm formId:%{public}" PRId64, runningCardId_);
-    auto form = formPattern_.Upgrade();
-    if (!form) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formPattern_ is null");
-        return;
-    }
-    form->ProcessCheckForm();
-}
-
-void FormManagerDelegate::SendNonTransparencyRatio(int32_t ratio)
-{
-    TAG_LOGI(AceLogTag::ACE_FORM, "SendNonTransparencyRatio ratio:%{public}d formId:%{public}" PRId64, ratio,
-        runningCardId_);
-    OHOS::AppExecFwk::FormMgr::GetInstance().SendNonTransparencyRatio(runningCardId_, ratio);
-}
 #endif
 } // namespace OHOS::Ace

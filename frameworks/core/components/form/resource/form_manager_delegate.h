@@ -35,7 +35,6 @@
 #include "want_params_wrapper.h"
 
 #include "core/components/form/resource/form_utils.h"
-#include "core/components_ng/pattern/form/form_layout_wrapper.h"
 #endif
 
 namespace OHOS::Rosen {
@@ -113,10 +112,6 @@ public:
 #endif
     void ReleasePlatformResource();
 
-    void SetFormLayoutWrapper(WeakPtr<NG::FormLayoutWrapper> formPattern)
-    {
-        formPattern_ = formPattern;
-    };
     void AddFormAcquireCallback(const OnFormAcquiredCallback& callback);
     void AddFormUpdateCallback(const OnFormUpdateCallback& callback);
     void AddFormErrorCallback(const OnFormErrorCallback& callback);
@@ -177,7 +172,6 @@ public:
     void ProcessEnableForm(bool enable);
     void ProcessLockForm(bool lock);
     void ProcessDueControlForm(bool isDisablePolicy, bool isControl);
-    void ProcessCheckForm();
 #endif
     void HandleCachedClickEvents();
     void ReAddForm();
@@ -188,7 +182,6 @@ public:
     bool CheckFormDueControl(const std::string &bundleName, const std::string &moduleName,
         const std::string &abilityName, const std::string &formName,
         const int32_t dimension, const bool isDisablePolicy);
-    void SendNonTransparencyRatio(int32_t ratio);
 
 private:
     void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
@@ -247,7 +240,6 @@ private:
     UpdateFormDoneCallback updateFormDoneCallback_;
     DueControlFormCallback dueControlFormCallback_;
     FormRenderDiedCallback onFormRenderDiedCallback_;
-    WeakPtr<NG::FormLayoutWrapper> formPattern_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;

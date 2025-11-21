@@ -21,24 +21,17 @@
 
 namespace OHOS::Ace::NG {
 /**
- * @class FormSnapshotUtil
- * form snapshot util.
+ * @class FormUtil
+ * form util.
  */
-class FormSnapshotUtil {
+class FormUtil {
 public:
     /**
-     * @brief Determine whether the snapshot is transparent by using 5 sampling points.
+     * @brief Determine whether the snapshot is transparent.
      * @param pixelMap the snapshot of SurfaceNode
      * @return true if the snapshot is transparent, false otherwise.
      */
-    static bool IsTransparent(const std::shared_ptr<Media::PixelMap> &pixelMap);
-
-    /**
-     * @brief Get the snapshot transparency percentage value.
-     * @param pixelMap the snapshot of SurfaceNode
-     * @return Non-transparent percentage value, The value range is 0 to 100.
-     */
-    static int32_t GetNonTransparentRatio(const std::shared_ptr<Media::PixelMap> &pixelMap);
+    static bool IsTransparent(std::shared_ptr<Media::PixelMap>& pixelMap);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_UTIL_H
