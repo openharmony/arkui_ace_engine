@@ -2882,14 +2882,15 @@ int32_t JSViewAbstract::CloseMenu(const RefPtr<NG::UINode>& customNode)
     return ViewAbstractModel::GetInstance()->CloseMenu(customNode);
 }
 
-void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
+void JSViewAbstract::ParseDialogCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
     std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
 {
     auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
     if (onWillDismissFunc->IsFunction()) {
-        auto jsFunc =
-            AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
-        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info, const int32_t& instanceId) {
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        onWillDismiss = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                            const int32_t& info, const int32_t& instanceId) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
             objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
             JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
