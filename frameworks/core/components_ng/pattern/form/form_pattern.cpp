@@ -22,6 +22,7 @@
 #include "locale_info.h"
 #include "pointer_event.h"
 #include "transaction/rs_interfaces.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -31,20 +32,19 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
+#include "core/components_ng/pattern/form/form_snapshot_check.h"
+#include "core/components_ng/pattern/form/form_snapshot_util.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
 #endif
-
-#include "core/common/udmf/udmf_client.h"
-#include "form_util.h"
 
 static const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
@@ -384,6 +384,34 @@ void FormPattern::HandleEnableForm(const bool enable)
     HandleFormStyleOperation(newFormSpecialStyle);
 }
 
+void FormPattern::ProcessCheckForm()
+{
+    if (isSnapshot_) {
+        auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+        if (!pixelMap) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm pixelMap_ is null");
+            return;
+        }
+        if (!formManagerBridge_) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm formManagerBridge_ is null");
+            return;
+        }
+        int32_t ratio = FormSnapshotUtil::GetNonTransparentRatio(pixelMap);
+        formManagerBridge_->SendNonTransparencyRatio(ratio);
+        return;
+    }
+
+    ContainerScope scope(scopeId_);
+    PostUITask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->formManagerBridge_);
+            pattern->SnapshotSurfaceNode(std::make_shared<FormSnapshotCheck>(pattern->formManagerBridge_));
+        },
+        "ArkUIFormSnapshotSurfaceNodeForChecking");
+}
+
 void FormPattern::TakeSurfaceCaptureForUI()
 {
     if (isFrsNodeDetached_) {
@@ -414,7 +442,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
             TAG_LOGW(AceLogTag::ACE_FORM, "IsAccessibilityState, static form not recycled");
             return;
         }
-        SnapshotSurfaceNode();
+        SnapshotSurfaceNode(std::make_shared<FormSnapshotCallback>(WeakClaim(this)));
         return;
     }
     UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
@@ -430,12 +458,12 @@ void FormPattern::TakeSurfaceCaptureForUI()
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SnapshotSurfaceNode();
+            pattern->SnapshotSurfaceNode(std::make_shared<FormSnapshotCallback>(weak));
         },
         DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA, "ArkUIFormDelaySnapshotSurfaceNode");
 }
 
-void FormPattern::SnapshotSurfaceNode()
+void FormPattern::SnapshotSurfaceNode(std::shared_ptr<Rosen::SurfaceCaptureCallback> callback)
 {
     auto externalContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalContext);
@@ -443,7 +471,7 @@ void FormPattern::SnapshotSurfaceNode()
     CHECK_NULL_VOID(rsNode);
     externalContext->AddRsNodeForCapture();
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<FormSnapshotCallback>(WeakClaim(this)));
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, callback);
 }
 
 void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -458,7 +486,7 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         return;
     }
 
-    if (!isDynamic_ && FormUtil::IsTransparent(pixelMap)) {
+    if (!isDynamic_ && FormSnapshotUtil::IsTransparent(pixelMap)) {
         TAG_LOGW(AceLogTag::ACE_FORM, "FormPattern::OnSnapshot pixelmap is transparent");
         needSnapshotAgain_ = true;
         return;
@@ -1638,6 +1666,7 @@ void FormPattern::InitFormManagerDelegate()
     }
     int32_t instanceID = context->GetInstanceId();
     accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
+    formManagerBridge_->SetFormLayoutWrapper(WeakClaim(this));
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t id,
                                                    const std::string& path,
                                                    const std::string& module, const std::string& data,
