@@ -198,7 +198,23 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     }
     private getValue_serialize(): ResourceStr {
         const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getValue(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ResourceStr = ""
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
+            let buffer_ : string | Resource | undefined
+            if (buffer_UnionSelector == (0).toChar()) {
+                buffer_ = (retvalDeserializer.readString() as string)
+            } else if (buffer_UnionSelector == (1).toChar()) {
+                buffer_ = Resource_serializer.read(retvalDeserializer)
+            } else {
+                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+            }
+            buffer = (buffer_ as string | Resource)
+        }
+        const returnResult : ResourceStr = buffer
+        return returnResult
     }
     private setValue_serialize(value: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
