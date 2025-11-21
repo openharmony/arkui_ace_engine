@@ -40,14 +40,14 @@ class MonitorPathHelper {
     return path.substring(0, path.length - 2);
   }
 
-  public static isValid(path: string): boolean {
+  public static isValidForSyncMonitor(path: string): boolean {
     let count = path.split('*').length - 1;
     // Allow top level "*"
     return ((count <= 0)
       || (count == 1 && (path.endsWith(".*") || (path == "*"))));
   }
 
-  public static isValidForMonitorDecorator(path: string): boolean {
+  public static isValidForMonitor(path: string): boolean {
     return !path.includes("*");
   }
 }
@@ -205,7 +205,7 @@ class MonitorV2 {
     if (this.isMonitorDecorator_) {
       this.watchId_ = ++MonitorV2.nextWatchId_;
       paths.forEach(path => {
-        if (!MonitorPathHelper.isValidForMonitorDecorator(path)) {
+        if (!MonitorPathHelper.isValidForMonitor(path)) {
           stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
           return;
         }
@@ -233,8 +233,8 @@ class MonitorV2 {
   // @Monitor does not use addPath method
   public addPath(path: string): MonitorValueV2<unknown> | undefined {
     console.error("### addPath: " + path);
-    if ((!this.isSyncDecorator() && !MonitorPathHelper.isValidForMonitorDecorator(path)) ||
-      (this.isSyncDecorator() && !MonitorPathHelper.isValid(path))) {
+    if ((!this.isSyncDecorator() && !MonitorPathHelper.isValidForMonitor(path)) ||
+      (this.isSyncDecorator() && !MonitorPathHelper.isValidForSyncMonitor(path))) {
       stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
       return undefined;
     }
