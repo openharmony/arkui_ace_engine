@@ -2895,7 +2895,7 @@ void SetOnDigitalCrownImpl(Ark_NativePointer node,
     if (optOnDigitalCrown) {
         auto onDigitalCrown = [callback = CallbackHelper(*optOnDigitalCrown), node = weakNode](CrownEventInfo& info) {
             PipelineContext::SetCallBackNode(node);
-            auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>([&info]() {
+            auto stopPropagation = CallbackKeeper::Claim<Callback_Void>([&info]() {
                 info.SetStopPropagation(true);
             });
             Ark_CrownEvent crownEvent {
@@ -2903,7 +2903,7 @@ void SetOnDigitalCrownImpl(Ark_NativePointer node,
                 .angularVelocity = ArkValue<Ark_Number>(info.GetAngularVelocity()),
                 .degree = ArkValue<Ark_Number>(info.GetDegree()),
                 .action = ArkValue<Ark_CrownAction>(info.GetAction()),
-                .stopPropagation = stopPropagation,
+                .stopPropagation = stopPropagation.ArkValue(),
             };
             callback.Invoke(crownEvent);
         };
@@ -3828,16 +3828,14 @@ void SetOnDragStartImpl(Ark_NativePointer node,
                 result.customNode = CallbackHelper(builder.value()).BuildSync(Referenced::RawPtr(fnode));
             }
         };
-        auto handler = [custB = std::move(parseCustBuilder), dragI = std::move(parseDragI)](const void *rawResultPtr) {
-            auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
-            CHECK_NULL_VOID(arkResultPtr);
-            Converter::VisitUnionPtr(arkResultPtr, custB, dragI, []() {});
+        auto handler = [&parseCustBuilder, &parseDragI](Ark_Union_CustomBuilder_DragItemInfo arkResult) {
+            Converter::VisitUnion(arkResult, parseCustBuilder, parseDragI, []() {});
         };
 
         PipelineContext::SetCallBackNode(weakNode);
 
-        CallbackKeeper::InvokeWithResultHandler<Ark_Union_CustomBuilder_DragItemInfo,
-            Callback_Union_CustomBuilder_DragItemInfo_Void>(handler, callback, arkDragInfo, arkExtraParam);
+        auto continuation = CallbackKeeper::Claim<Callback_Union_CustomBuilder_DragItemInfo_Void>(handler);
+        callback.InvokeSync(arkDragInfo, arkExtraParam, continuation.ArkValue());
         return result;
     };
     ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStart));

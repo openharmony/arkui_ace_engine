@@ -21,7 +21,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-    template<>
+template<>
 WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
 {
     WaterFlowSections::Section dst;
@@ -64,14 +64,13 @@ void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& s
         auto helper = CallbackHelper(continuation);
         helper.Invoke(Converter::ArkValue<Ark_Float64>(result));
     };
-    auto rc = CallbackKeeper::RegisterReverseCallback<::GetItemMainSizeByIndex,
-                                                   std::function<void(Ark_Int32, Callback_F64_Void)>>(cb);
+    auto rc = CallbackKeeper::ReturnReverseCallback<::GetItemMainSizeByIndex>(cb);
     dst.onGetItemMainSizeByIndex = Converter::ArkValue<Opt_GetItemMainSizeByIndex>(rc);
     dst.columnsGap = Converter::ArkValue<Opt_Dimension>(src.columnsGap, ctx);
     dst.rowsGap = Converter::ArkValue<Opt_Dimension>(src.rowsGap, ctx);
     dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin, ctx);
 }
-}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {

@@ -251,7 +251,7 @@ void SetYImpl(Ark_MouseEvent peer,
 Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_Void>([peer]() {
         MouseInfo* info = peer->GetEventInfo();
         CHECK_NULL_VOID(info);
         info->SetStopPropagation(true);

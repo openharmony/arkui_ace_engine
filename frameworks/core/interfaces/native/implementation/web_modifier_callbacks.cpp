@@ -451,10 +451,10 @@ RefPtr<WebResponse> OnInterceptRequest(
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.request = peer;
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Opt_WebResourceResponse,
+    const auto arkResult = arkCallback.InvokeWithOptConvertResult<Ark_WebResourceResponse, Opt_WebResourceResponse,
         Callback_Opt_WebResourceResponse_Void>(parameter);
-    CHECK_NULL_RETURN(arkResult.value, nullptr);
-    Ark_WebResourceResponse value = arkResult.value;
+    CHECK_NULL_RETURN(arkResult.has_value(), nullptr);
+    Ark_WebResourceResponse value = arkResult.value();
     return value->handler;
 }
 
@@ -1215,21 +1215,23 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     parameter.attributes = attributes;
 
     auto frameNode = Referenced::RawPtr(refNode);
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebKeyboardOptions,
-        Callback_WebKeyboardOptions_Void>(parameter);
-    opt.isSystemKeyboard_ = Converter::Convert<bool>(arkResult.useSystemKeyboard);
-    if (auto enterKeyType = Converter::OptConvert<int32_t>(arkResult.enterKeyType); enterKeyType) {
-        opt.enterKeyTpye_ = enterKeyType.value();
-    }
-    if (auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(arkResult.customKeyboard); optBuilder) {
-        opt.customKeyboardBuilder_ = [
-            callback = CallbackHelper(optBuilder.value()),
-            node = reinterpret_cast<Ark_NativePointer>(frameNode)
-        ]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-    }
+    auto cont = CallbackKeeper::Claim<Callback_WebKeyboardOptions_Void>(
+        [&opt, frameNode](Ark_WebKeyboardOptions arkResult) {
+        opt.isSystemKeyboard_ = Converter::Convert<bool>(arkResult.useSystemKeyboard);
+        if (auto enterKeyType = Converter::OptConvert<int32_t>(arkResult.enterKeyType); enterKeyType) {
+            opt.enterKeyTpye_ = enterKeyType.value();
+        }
+        if (auto optBuilder = Converter::OptConvert<CustomNodeBuilder>(arkResult.customKeyboard); optBuilder) {
+            opt.customKeyboardBuilder_ = [
+                callback = CallbackHelper(optBuilder.value()),
+                node = reinterpret_cast<Ark_NativePointer>(frameNode)
+            ]() {
+                auto builderNode = callback.BuildSync(node);
+                NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+            };
+        }
+    });
+    arkCallback.InvokeSync(parameter, cont.ArkValue());
     return opt;
 }
 
