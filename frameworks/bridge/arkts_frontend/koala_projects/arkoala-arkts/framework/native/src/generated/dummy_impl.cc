@@ -29696,7 +29696,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
