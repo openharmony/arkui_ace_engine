@@ -500,7 +500,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         }
 
         std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismissFunc = nullptr;
-        ParseDialogCallback(obj, onWillDismissFunc);
+        ParseDialogCallback(args, obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 
         JSViewAbstract::ParseAppearDialogCallback(args, properties);
