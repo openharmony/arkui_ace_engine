@@ -23,7 +23,7 @@ import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "#generated"
 import { UserView, UserViewBuilder } from "./UserView"
 import { EntryPoint } from './component/customComponent';
-import { ClickEvent, ClickEventInternal } from "#generated"
+import { ClickEvent, ClickEventInternal, SystemOps } from "#generated"
 import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
 import { setUIDetachedRootCreator } from "./CallbackTransformer"
@@ -239,16 +239,19 @@ export class Application {
         router.runPage(routerOption, builder)
     }
 
-    private computeRoot(): PeerNode {
-        // let handle = ArkUINativeModule._SystemAPI_StartFrame()
-        let result: PeerNode
+    private trackFrame<T>(frame: () => T): T {
+        const handle = SystemOps.StartFrame()
         try {
-            result = this.rootState!.value
-            this.rootPointer = result.peer.ptr
+            return frame()
         } finally {
-            // ArkUINativeModule._SystemAPI_EndFrame(handle)
+            SystemOps.EndFrame(handle)
         }
-        return result
+    }
+
+    private computeRoot(): PeerNode {
+        const peerNode = this.rootState!.value
+        this.rootPointer = peerNode.peer.ptr
+        return peerNode
     }
 
     start(plugin: boolean): pointer {
@@ -294,7 +297,7 @@ export class Application {
                 this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
             }
             InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
-            root = this.rootState!.value
+            root = this.trackFrame(() => this.rootState!.value)
             InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
         } catch (e) {
             if (e instanceof Error) {
@@ -365,13 +368,12 @@ export class Application {
             preState = uiContextRouter.getPreState();
         }
         ObserveSingleton.instance.updateDirty();
-        this.uiContext!.flushCallback()
-        this.updateStates(this.manager!, rootState, preState);
+        this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
             ObserveSingleton.instance.updateDirty();
-            this.updateStates(this.manager!, rootState, preState);
+            this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
             ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
