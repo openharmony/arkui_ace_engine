@@ -4485,6 +4485,14 @@ export class ArkUIGeneratedNativeModule {
     native static _IUIContext_updateBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _IUIContext_closeBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _IUIContext_bindTabsToScrollable(tabsController: KPointer, scroller: KPointer): void
+    @ani.unsafe.Direct
+    native static _IUIContext_unbindTabsFromScrollable(tabsController: KPointer, scroller: KPointer): void
+    @ani.unsafe.Direct
+    native static _IUIContext_bindTabsToNestedScrollable(tabsController: KPointer, parentScroller: KPointer, scrollerchildScroller: KPointer): void
+    @ani.unsafe.Direct
+    native static _IUIContext_unbindTabsFromNestedScrollable(tabsController: KPointer, parentScroller: KPointer, childScroller: KPointer): void
+    @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
     @ani.unsafe.Direct
     native static _JsGeolocation_getFinalizer(): KPointer

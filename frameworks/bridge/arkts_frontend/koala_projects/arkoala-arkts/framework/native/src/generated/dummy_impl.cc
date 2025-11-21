@@ -32937,6 +32937,68 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void BindTabsToScrollableImpl(Ark_TabsController tabsController,
+                                  Ark_Scroller scroller)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("bindTabsToScrollable(");
+        WriteToString(&out, tabsController);
+        out.append(", ");
+        WriteToString(&out, scroller);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UnbindTabsFromScrollableImpl(Ark_TabsController tabsController,
+                                      Ark_Scroller scroller)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("unbindTabsFromScrollable(");
+        WriteToString(&out, tabsController);
+        out.append(", ");
+        WriteToString(&out, scroller);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void BindTabsToNestedScrollableImpl(Ark_TabsController tabsController,
+                                        Ark_Scroller parentScroller,
+                                        Ark_Scroller scrollerchildScroller)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("bindTabsToNestedScrollable(");
+        WriteToString(&out, tabsController);
+        out.append(", ");
+        WriteToString(&out, parentScroller);
+        out.append(", ");
+        WriteToString(&out, scrollerchildScroller);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UnbindTabsFromNestedScrollableImpl(Ark_TabsController tabsController,
+                                            Ark_Scroller parentScroller,
+                                            Ark_Scroller childScroller)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("unbindTabsFromNestedScrollable(");
+        WriteToString(&out, tabsController);
+        out.append(", ");
+        WriteToString(&out, parentScroller);
+        out.append(", ");
+        WriteToString(&out, childScroller);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -46812,6 +46874,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
             IUIContextAccessor::DispatchKeyEventImpl,
+            IUIContextAccessor::BindTabsToScrollableImpl,
+            IUIContextAccessor::UnbindTabsFromScrollableImpl,
+            IUIContextAccessor::BindTabsToNestedScrollableImpl,
+            IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         };
         return &IUIContextAccessorImpl;
     }

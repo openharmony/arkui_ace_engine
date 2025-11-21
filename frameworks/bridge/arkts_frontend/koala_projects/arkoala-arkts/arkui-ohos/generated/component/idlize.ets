@@ -61,6 +61,8 @@ import { default as font } from "@ohos.font"
 import { MeasureOptions_serializer } from "./../framework/ohos.measure"
 import { MeasureOptions } from "@ohos.measure"
 import { TextMenuOptions_serializer, TextMenuOptions } from "./textCommon"
+import { TabsController, TabsControllerInternal } from "./tabs"
+import { Scroller, ScrollerInternal } from "./scroll"
 import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
@@ -2467,6 +2469,18 @@ export class IUIContext {
         thisSerializer.release()
         return retval
     }
+    static bindTabsToScrollable_serialize(tabsController: TabsController, scroller: Scroller): void {
+        ArkUIGeneratedNativeModule._IUIContext_bindTabsToScrollable(toPeerPtr(tabsController), toPeerPtr(scroller))
+    }
+    static unbindTabsFromScrollable_serialize(tabsController: TabsController, scroller: Scroller): void {
+        ArkUIGeneratedNativeModule._IUIContext_unbindTabsFromScrollable(toPeerPtr(tabsController), toPeerPtr(scroller))
+    }
+    static bindTabsToNestedScrollable_serialize(tabsController: TabsController, parentScroller: Scroller, scrollerchildScroller: Scroller): void {
+        ArkUIGeneratedNativeModule._IUIContext_bindTabsToNestedScrollable(toPeerPtr(tabsController), toPeerPtr(parentScroller), toPeerPtr(scrollerchildScroller))
+    }
+    static unbindTabsFromNestedScrollable_serialize(tabsController: TabsController, parentScroller: Scroller, childScroller: Scroller): void {
+        ArkUIGeneratedNativeModule._IUIContext_unbindTabsFromNestedScrollable(toPeerPtr(tabsController), toPeerPtr(parentScroller), toPeerPtr(childScroller))
+    }
     public static freezeUINode(id: string, isFrozen: boolean): void {
         const id_casted = id as (string)
         const isFrozen_casted = isFrozen as (boolean)
@@ -2499,6 +2513,32 @@ export class IUIContext {
     public static closeBindSheet(bindSheetContent: KPointer): Promise<void> {
         const bindSheetContent_casted = bindSheetContent as (KPointer)
         return IUIContext.closeBindSheet_serialize(bindSheetContent_casted)
+    }
+    public static bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
+        const tabsController_casted = tabsController as (TabsController)
+        const scroller_casted = scroller as (Scroller)
+        IUIContext.bindTabsToScrollable_serialize(tabsController_casted, scroller_casted)
+        return
+    }
+    public static unbindTabsFromScrollable(tabsController: TabsController, scroller: Scroller): void {
+        const tabsController_casted = tabsController as (TabsController)
+        const scroller_casted = scroller as (Scroller)
+        IUIContext.unbindTabsFromScrollable_serialize(tabsController_casted, scroller_casted)
+        return
+    }
+    public static bindTabsToNestedScrollable(tabsController: TabsController, parentScroller: Scroller, scrollerchildScroller: Scroller): void {
+        const tabsController_casted = tabsController as (TabsController)
+        const parentScroller_casted = parentScroller as (Scroller)
+        const scrollerchildScroller_casted = scrollerchildScroller as (Scroller)
+        IUIContext.bindTabsToNestedScrollable_serialize(tabsController_casted, parentScroller_casted, scrollerchildScroller_casted)
+        return
+    }
+    public static unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller, childScroller: Scroller): void {
+        const tabsController_casted = tabsController as (TabsController)
+        const parentScroller_casted = parentScroller as (Scroller)
+        const childScroller_casted = childScroller as (Scroller)
+        IUIContext.unbindTabsFromNestedScrollable_serialize(tabsController_casted, parentScroller_casted, childScroller_casted)
+        return
     }
 }
 export class LazyBuild {

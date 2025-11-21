@@ -31110,6 +31110,22 @@ void impl_IUIContext_closeBindSheet(KVMContext vmContext, Ark_NativePointer bind
         GetAccessors()->getIUIContextAccessor()->closeBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), bindSheetContent, static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
 }
 KOALA_INTEROP_CTX_V3(IUIContext_closeBindSheet, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_IUIContext_bindTabsToScrollable(Ark_NativePointer tabsController, Ark_NativePointer scroller) {
+        GetAccessors()->getIUIContextAccessor()->bindTabsToScrollable(static_cast<Ark_TabsController>(tabsController), static_cast<Ark_Scroller>(scroller));
+}
+KOALA_INTEROP_DIRECT_V2(IUIContext_bindTabsToScrollable, Ark_NativePointer, Ark_NativePointer)
+void impl_IUIContext_unbindTabsFromScrollable(Ark_NativePointer tabsController, Ark_NativePointer scroller) {
+        GetAccessors()->getIUIContextAccessor()->unbindTabsFromScrollable(static_cast<Ark_TabsController>(tabsController), static_cast<Ark_Scroller>(scroller));
+}
+KOALA_INTEROP_DIRECT_V2(IUIContext_unbindTabsFromScrollable, Ark_NativePointer, Ark_NativePointer)
+void impl_IUIContext_bindTabsToNestedScrollable(Ark_NativePointer tabsController, Ark_NativePointer parentScroller, Ark_NativePointer scrollerchildScroller) {
+        GetAccessors()->getIUIContextAccessor()->bindTabsToNestedScrollable(static_cast<Ark_TabsController>(tabsController), static_cast<Ark_Scroller>(parentScroller), static_cast<Ark_Scroller>(scrollerchildScroller));
+}
+KOALA_INTEROP_DIRECT_V3(IUIContext_bindTabsToNestedScrollable, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+void impl_IUIContext_unbindTabsFromNestedScrollable(Ark_NativePointer tabsController, Ark_NativePointer parentScroller, Ark_NativePointer childScroller) {
+        GetAccessors()->getIUIContextAccessor()->unbindTabsFromNestedScrollable(static_cast<Ark_TabsController>(tabsController), static_cast<Ark_Scroller>(parentScroller), static_cast<Ark_Scroller>(childScroller));
+}
+KOALA_INTEROP_DIRECT_V3(IUIContext_unbindTabsFromNestedScrollable, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_JsGeolocation_construct() {
         return GetAccessors()->getJsGeolocationAccessor()->construct();
 }

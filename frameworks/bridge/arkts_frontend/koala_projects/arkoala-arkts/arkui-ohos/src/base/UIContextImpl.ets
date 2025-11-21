@@ -79,6 +79,8 @@ import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 import { IUIContext, SystemOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
+import { TabsController } from 'arkui/component/tabs';
+import { Scroller } from 'arkui/component/scroll';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1534,6 +1536,28 @@ export class UIContextImpl extends UIContext {
         let result = IUIContext.closeBindSheet(ptr);
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.bindTabsToScrollable(tabsController, scroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public unbindTabsFromScrollable(tabsController: TabsController, scroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.unbindTabsFromScrollable(tabsController, scroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public bindTabsToNestedScrollable(tabsController: TabsController, parentScroller: Scroller, childScroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.bindTabsToNestedScrollable(tabsController, parentScroller, childScroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller, childScroller: Scroller): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public getFocusController(): FocusController {
