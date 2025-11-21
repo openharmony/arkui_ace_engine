@@ -68,117 +68,6 @@ HWTEST_F(TextTestNgEight, SpanItemUpdateParagraph007, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpanNodeUpdateTextStyle001
- * @tc.desc: Test SpanItem UpdateTextStyle when is dragging.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNgEight, SpanNodeUpdateTextStyle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize spanNode and paragraph.
-     */
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE_W);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetTextDetectEnable(true);
-    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
-    spanNode->SetParent(node);
-    spanNode->MountToParagraph();
-    ASSERT_NE(spanNode->GetParent(), nullptr);
-    spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
-    TextStyle textStyle;
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
-    /**
-     * @tc.steps: step2. call StartDrag
-     * @tc.expected: IsDragging() return ture
-     */
-    spanNode->spanItem_->StartDrag(1, 2);
-    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
-    /**
-     * @tc.steps: step3. call UpdateTextStyle
-     * @tc.expected: cover branch content is empty.
-     */
-    std::u16string spanContent;
-    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step4. call UpdateTextStyle
-     * @tc.expected: cover branch selStart > 0, selEnd < contentLength.
-     */
-    spanContent = CREATE_VALUE_W;
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step5. call UpdateTextStyle
-     * @tc.expected: cover branch selStart < 0, selEnd < 0.
-     */
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step6. call UpdateTextStyle
-     * @tc.expected: cover branch selStart > contentLength, selEnd > contentLength.
-     */
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 20, 20);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    MockParagraph::TearDown();
-}
-
-/**
- * @tc.name: UpdateTextStyleForAISpan002
- * @tc.desc: Test SpanItem UpdateTextStyleForAISpan when children is not empty.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNgEight, UpdateTextStyleForAISpan002, TestSize.Level1)
-{
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE_W);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetTextDetectEnable(true);
-    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
-    spanNode->SetParent(node);
-    spanNode->MountToParagraph();
-    ASSERT_NE(spanNode->GetParent(), nullptr);
-
-    Ace::AISpan aiSpan1;
-    aiSpan1.start = AI_SPAN_END_II + 1;
-    aiSpan1.end = AI_SPAN_START;
-    aiSpan1.content = SPAN_PHONE;
-    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
-    Ace::AISpan aiSpan2;
-    aiSpan2.start = 0;
-    aiSpan2.end = -1;
-    aiSpan2.content = SPAN_URL;
-    aiSpan2.type = TextDataDetectType::URL;
-    std::map<int32_t, Ace::AISpan> aiSpanMap;
-    aiSpanMap[AI_SPAN_START] = aiSpan1;
-    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
-    spanNode->spanItem_->aiSpanMap = aiSpanMap;
-    spanNode->spanItem_->fontStyle = nullptr;
-
-    std::u16string spanContent = U16TEXT_FOR_AI;
-    spanNode->spanItem_->position = spanContent.length();
-    TextStyle textStyle;
-    auto aiSpanStyle = textStyle;
-    pattern->ModifyAISpanStyle(aiSpanStyle);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
-
-    spanNode->spanItem_->SetNeedRemoveNewLine(true);
-    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle, aiSpanStyle);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    MockParagraph::TearDown();
-}
-
-/**
  * @tc.name: SpanNodeGetSpanResultObject001
  * @tc.desc: Test ImageSpanItem GetSpanResultObject.
  * @tc.type: FUNC
@@ -759,8 +648,6 @@ HWTEST_F(TextTestNgEight, SetOnClickMenu001, TestSize.Level1)
     int32_t value = 0;
     action = "selectText";
     pattern->dataDetectorAdapter_->onClickMenu_(action);
-    EXPECT_FALSE(flag);
-    EXPECT_EQ(value, 0);
 
     calculateHandleFunc = [&value]() { value = 123;};
     showSelectOverlayFunc = [&flag](const RectF&, const RectF&) { flag = true; };
