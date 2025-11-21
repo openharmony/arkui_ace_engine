@@ -40,7 +40,7 @@ export class CoroutineLocalValue<T> {
     get(): T | undefined {
         return this.value
     }
-    set(value: T | undefined) {
+    set(value: T | undefined): void {
         this.value = value
     }
 }

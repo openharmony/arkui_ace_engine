@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicRef } from "@koalaui/common"
+import { AtomicRef } from '@koalaui/common'
 
 /**
  * A markable queue that allows to accumulate callbacks and to call them to the latest set marker.

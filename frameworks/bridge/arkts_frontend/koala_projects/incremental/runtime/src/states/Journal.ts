@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AtomicRef } from "@koalaui/common"
+import { AtomicRef } from '@koalaui/common'
 
 export interface Changes {
     /**
