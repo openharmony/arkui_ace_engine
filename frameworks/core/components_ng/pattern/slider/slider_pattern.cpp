@@ -515,10 +515,36 @@ void SliderPattern::UpdateStepAccessibilityVirtualNode()
     }
     for (uint32_t i = 0; i < pointCount; i++) {
         std::string txt = GetPointAccessibilityTxt(i, step, min, max);
-        SetStepPointAccessibilityVirtualNode(pointAccessibilityNodeVec_[i], pointSize,
-            PointF(stepPointVec[i].GetX() - pointOffsetWidth, stepPointVec[i].GetY() - pointOffsetHeight), txt, i);
+        auto point = PointF(stepPointVec[i].GetX() - pointOffsetWidth, stepPointVec[i].GetY() - pointOffsetHeight);
+        auto adjustPointSize = pointSize;
+        AdjustStepAccessibilityVirtualNode(adjustPointSize, point, pointCount, i);
+        SetStepPointAccessibilityVirtualNode(pointAccessibilityNodeVec_[i], adjustPointSize, point, txt, i);
     }
     parentAccessibilityNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SliderPattern::AdjustStepAccessibilityVirtualNode(
+    SizeF& pointSize, PointF& point, uint32_t pointCount, uint32_t index)
+{
+    if (index == 0) {
+        if (LessNotEqual(point.GetX(), 0.0f)) {
+            pointSize.AddWidth(point.GetX());
+            point.SetX(0.0f);
+        }
+        if (LessNotEqual(point.GetY(), 0.0f)) {
+            pointSize.AddHeight(point.GetY());
+            point.SetY(0.0f);
+        }
+    }
+    if (index == pointCount - 1) {
+        auto contentSize = GetHostContentSize().value_or(SizeF());
+        if (GreatNotEqual(point.GetX() + pointSize.Width(), contentSize.Width())) {
+            pointSize.MinusWidth(point.GetX() + pointSize.Width() - contentSize.Width());
+        }
+        if (GreatNotEqual(point.GetY() + pointSize.Height(), contentSize.Height())) {
+            pointSize.MinusHeight(point.GetY() + pointSize.Height() - contentSize.Height());
+        }
+    }
 }
 
 std::string SliderPattern::GetPointAccessibilityTxt(uint32_t pointIndex, float step, float min, float max)

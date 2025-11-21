@@ -423,6 +423,7 @@ private:
     bool InitAccessibilityVirtualNode();
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
+    void AdjustStepAccessibilityVirtualNode(SizeF& pointSize, PointF& point, uint32_t pointCount, uint32_t index);
     void UpdateStepAccessibilityVirtualNode();
     void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
