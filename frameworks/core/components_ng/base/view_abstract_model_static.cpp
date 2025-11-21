@@ -1529,9 +1529,19 @@ void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::op
 void ViewAbstractModelStatic::SetUseEffect(
     FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt)
 {
-    auto useEffect = useEffectOpt.value_or(false);
-    auto effectType = effectTypeOpt.value_or(EffectType::DEFAULT);
-    ViewAbstract::SetUseEffect(frameNode, useEffect, effectType);
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    if (useEffectOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, *useEffectOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    }
+    if (effectTypeOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffectType, *effectTypeOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffectType, frameNode);
+    }
 }
 
 void ViewAbstractModelStatic::SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt)
