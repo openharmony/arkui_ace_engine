@@ -222,4 +222,12 @@ void TextFieldController::SetPlaceholderStyledString(const RefPtr<SpanStringBase
         textFieldPattern->SetPlaceholderStyledString(spanString);
     }
 }
+
+void TextFieldController::DeleteBackward()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->HandleOnDelete(true);
+}
+
 } // namespace OHOS::Ace::NG

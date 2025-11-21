@@ -183,4 +183,19 @@ HWTEST_F(TextFieldPatternTesteleven, ReprocessAllRelatedToLPX, TestSize.Level1)
     EXPECT_FALSE(textFieldPattern->lpxInfo_.initTextRectWithLPX);
 }
 
+/**
+ * @tc.name: TextInputAreaDeleteBackwardModel001
+ * @tc.desc: test DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, TextInputAreaDeleteBackwardModel001, TestSize.Level1)
+{
+    CreateTextField("挖矿时间到!⛏️", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    pattern_->textFieldController_->DeleteBackward();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "挖矿时间到!");
+}
+
 } // namespace OHOS::Ace::NG

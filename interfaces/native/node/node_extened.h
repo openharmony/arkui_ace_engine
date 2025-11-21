@@ -245,6 +245,11 @@ struct ArkUI_ShowCounterConfig {
     ArkUI_OptionalUint counterTextOverflowColor;
 };
 
+struct ArkUI_TextContentBaseController {
+    ArkUI_NodeHandle node;
+    ArkUI_NodeAttributeType textFieldType;
+};
+
 struct ArkUI_TextLayoutManager {
     ArkUI_NodeHandle node;
 };

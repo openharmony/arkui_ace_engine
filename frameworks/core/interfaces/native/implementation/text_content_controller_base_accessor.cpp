@@ -125,6 +125,11 @@ Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
     result = content.substr(startIndex, endIndex - startIndex);
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
+void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
+{
+    CHECK_NULL_VOID(peer && peer->controller_);
+    peer->controller_->DeleteBackward();
+}
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
 {
@@ -140,6 +145,7 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
         TextContentControllerBaseAccessor::GetSelectionImpl,
         TextContentControllerBaseAccessor::ClearPreviewTextImpl,
         TextContentControllerBaseAccessor::GetTextImpl,
+        TextContentControllerBaseAccessor::DeleteBackwardImpl,
     };
     return &TextContentControllerBaseAccessorImpl;
 }

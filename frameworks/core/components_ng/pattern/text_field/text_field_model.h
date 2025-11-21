@@ -280,6 +280,7 @@ public:
     }
 
     virtual void SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value) {};
+    virtual void DeleteBackward() {};
 
 protected:
     std::function<void(const int32_t)> setCaretPosition_;

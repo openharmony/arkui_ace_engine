@@ -1690,6 +1690,10 @@ export class TextContentControllerBase implements MaterializedBase {
         const range_casted = range as (TextRange | undefined)
         return this.getText_serialize(range_casted)
     }
+    public deleteBackward(): void {
+        this.deleteBackward_serialize()
+        return
+    }
     getCaretOffset_serialize(): CaretOffset {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -1752,6 +1756,9 @@ export class TextContentControllerBase implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
+    }
+    deleteBackward_serialize(): void {
+        ArkUIGeneratedNativeModule._TextContentControllerBase_deleteBackward(this.peer!.ptr)
     }
 }
 export class TransitionEffectInternal {

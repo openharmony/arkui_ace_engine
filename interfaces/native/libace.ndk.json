@@ -4586,5 +4586,17 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextContentBaseController_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextContentBaseController_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextContentBaseController_DeleteBackward"
     }
 ]
