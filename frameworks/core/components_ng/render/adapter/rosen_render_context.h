@@ -31,6 +31,7 @@
 #include "render_service_client/core/modifier_ng/geometry/rs_bounds_clip_modifier.h"
 #include "render_service_client/core/modifier_ng/geometry/rs_frame_clip_modifier.h"
 #include "render_service_client/core/modifier_ng/geometry/rs_transform_modifier.h"
+#include "render_service_client/core/feature/window_keyframe/rs_window_keyframe_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_texture_export.h"
@@ -496,13 +497,13 @@ public:
     static bool initDrawNodeChangeCallback_;
     static bool initPropertyNodeChangeCallback_;
 
-    void FreezeCanvasNode(bool freezeFlag = false);
-    void RemoveCanvasNode();
+    void FreezeKeyFrameNode(bool freezeFlag = false);
+    void RemoveKeyFrameNode();
     void CheckAnimationParametersValid(int32_t& animationParam);
-    bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
-    void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
-    void CreateCanvasNode();
-    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode() const;
+    bool SetKeyFrameNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
+    void LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& rootNode);
+    void CreateKeyFrameNode();
+    std::shared_ptr<Rosen::RSWindowKeyFrameNode> GetKeyFrameNode() const;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
     {
@@ -892,7 +893,7 @@ protected:
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
-    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_;
+    std::shared_ptr<Rosen::RSWindowKeyFrameNode> keyFrameNode_;
     std::function<void()> callbackAnimateEnd_ = nullptr;
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
