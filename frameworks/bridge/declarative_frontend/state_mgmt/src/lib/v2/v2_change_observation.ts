@@ -1143,7 +1143,7 @@ class ObserveV2 {
     const paths = Array.isArray(path) ? path : [path];
     if (monitor && monitor instanceof MonitorV2) {
       if (monitor.isSyncDecorator()) {
-        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSyncDecorator()? `SyncMonitor`: `API added Monitor`}, cannot change to ${decorator? `SyncMonitor`: `API added Monitor`} anymore`);
+        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as @SyncMonitor, cannot add path(s)`);
         return;
       }
       if (isSync !== monitor.isSync()) {

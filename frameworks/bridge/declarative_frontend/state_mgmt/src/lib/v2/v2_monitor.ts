@@ -64,8 +64,8 @@ class MonitorValueV2<T> {
   // only used for AddMonitor
   private isAccessible: boolean;
 
-  // Properties for wildcard suuport below:
-  // Flag telling that this path is wildcard path
+  // Properties for wildcard support below:
+  // Flag telling that this path is a wildcard path
   // Wildcard path: objLevel00.objectLevel01.*
   // Last sure value path: objLevel00.objectLevel01
   private readonly wildCard_: boolean;
@@ -386,22 +386,22 @@ class MonitorV2 {
     let success: boolean = false;
     let value = undefined;
     if (this.isSyncDecorator() && monitoredValue.isWildcard()) {
-      let sureValue = monitoredValue.getLastSureValuePath()?.now
-      if (sureValue === undefined && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
+      let lastSureValue = monitoredValue.getLastSureValuePath()?.now
+      if (lastSureValue === undefined && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
         // For single top level wildcard
-        sureValue = this.target_;
+        lastSureValue = this.target_;
       }
-      if (sureValue !== undefined && (sureValue instanceof Object)) {
+      if (lastSureValue !== undefined && (lastSureValue instanceof Object)) {
         ObserveV2.getObserve().startRecordDependencies(this, monitoredValue.id);
-        if (ObserveV2.IsObservedObjectV2(sureValue)) {
-          ObserveV2.getObserve().addRef(sureValue as unknown as Object, MonitorV2.OB_ANY);
-        } else if (ObserveV2.IsProxiedObservedV2(sureValue) || ObserveV2.IsMakeObserved(sureValue)) {
+        if (ObserveV2.IsObservedObjectV2(lastSureValue)) {
+          ObserveV2.getObserve().addRef(lastSureValue as unknown as Object, MonitorV2.OB_ANY);
+        } else if (ObserveV2.IsProxiedObservedV2(lastSureValue) || ObserveV2.IsMakeObserved(lastSureValue)) {
           // Proxy handler will add ref to "make observed" container object
-          sureValue[MonitorV2.OB_ANY];
+          lastSureValue[MonitorV2.OB_ANY];
         } else {
           // That should not happen
           // TODO: do we need it?
-          ObserveV2.getObserve().addRef(sureValue as unknown as Object, MonitorV2.OB_ANY);
+          ObserveV2.getObserve().addRef(lastSureValue as unknown as Object, MonitorV2.OB_ANY);
         }
         ObserveV2.getObserve().stopRecordDependencies();
         success = true;
