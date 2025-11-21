@@ -79,6 +79,7 @@ void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
 
 void ViewFunctions::InitJsParam(NG::LayoutWrapper* layoutWrapper)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     JSMeasureLayoutParamNG::GetInstance(layoutWrapper);
 }
 
