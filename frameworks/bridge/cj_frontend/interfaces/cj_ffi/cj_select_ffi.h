@@ -51,19 +51,24 @@ CJ_EXPORT void FfiOHOSAceFrameworkSelectSetDivider(DividerParams params);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetFont(
     int32_t style, const char* weight, double size, int32_t sizeUnit, const char* family);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetFontColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectResetFontColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetSelectedOptionBgColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectResetSelectedOptionBgColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetSelectedOptionFont(
     int32_t style, const char* weight, double size, int32_t sizeUnit, const char* family);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetSelectedOptionFontColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectResetSelectedOptionFontColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionBgColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionFont(
     int32_t style, const char* weight, double size, int32_t sizeUnit, const char* family);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionFontColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectResetOptionFontColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetSpace(double width, int32_t widthUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetArrowPosition(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetMenuAlign(
     int32_t value, double dx, int32_t dxUnit, double dy, int32_t dyUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionWidth(double width, int32_t widthUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectResetOptionWidth();
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionWidthWithMode(const char* value);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionHeight(double height, int32_t heightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetMenuBackgroundColor(uint32_t color);

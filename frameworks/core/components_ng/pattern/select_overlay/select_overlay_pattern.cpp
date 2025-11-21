@@ -890,4 +890,81 @@ void SelectOverlayPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(host);
     host->UpdateToolBarFromMainWindow(true, true);
 }
+
+void SelectOverlayPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    pipeline_ = context;
+    InitSurfaceChangedCallback();
+}
+
+void SelectOverlayPattern::OnDetachFromMainTree()
+{
+    if (surfaceChangeCallbackId_.has_value()) {
+        auto context = pipeline_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->UnregisterSurfaceChangedCallback(surfaceChangeCallbackId_.value());
+        surfaceChangeCallbackId_.reset();
+    }
+}
+
+void SelectOverlayPattern::InitSurfaceChangedCallback()
+{
+    CHECK_NULL_VOID(info_);
+    if (overlayMode_ == SelectOverlayMode::HANDLE_ONLY || info_->menuInfo.menuBuilder != nullptr ||
+        surfaceChangeCallbackId_.has_value()) {
+        return;
+    }
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    surfaceChangeCallbackId_ = context->RegisterSurfaceChangedCallback(
+        [weak = WeakClaim(this)](
+            int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason reason) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->HandleSurfaceChanged();
+            }
+        });
+}
+
+void SelectOverlayPattern::HandleSurfaceChanged()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateToolBarWidth();
+    });
+}
+
+void SelectOverlayPattern::UpdateToolBarWidth()
+{
+    auto node = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(node);
+    ContainerScope scope(node->GetScopeId());
+    float newMaxWidth;
+    node->GetDefaultButtonAndMenuWidth(newMaxWidth);
+    auto currentMaxWidth = node->GetMaxDefaultButtonAndMenuWidth();
+    if (NearEqual(currentMaxWidth, newMaxWidth)) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "UpdateToolBarWidth old %{public}f, new %{public}f", currentMaxWidth,
+        newMaxWidth);
+    node->UpdateToolBar(true, true);
+}
+
+void SelectOverlayPattern::OnMountToSubWindow()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateToolBarWidth();
+    });
+}
 } // namespace OHOS::Ace::NG

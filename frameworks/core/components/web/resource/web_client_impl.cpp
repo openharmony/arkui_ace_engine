@@ -1677,4 +1677,20 @@ bool WebClientImpl::OnVerifyPinRequestByJS(
         }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientVerifyPinRequest");
     return jsResult;
 }
+
+void WebClientImpl::OnClippedSelectionBoundsChanged(int x, int y, int width, int height)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnClippedSelectionBoundsChanged(x, y, width, height);
+}
+
+void WebClientImpl::OnCameraCaptureStateChanged(int originalState, int newState)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnCameraCaptureStateChanged(originalState, newState);
+}
 } // namespace OHOS::Ace

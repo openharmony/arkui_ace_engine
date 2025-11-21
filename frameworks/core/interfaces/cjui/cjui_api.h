@@ -864,8 +864,8 @@ struct CJUIImageModifier {
     ArkUI_Int32 (*getFitOriginalSize)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getFillColor)(ArkUINodeHandle node);
     void (*setPixelMap)(ArkUINodeHandle node, void* drawableDescriptor);
-    void (*setPixelMapArray)(ArkUINodeHandle node, void* animatedDrawableDescriptor);
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
+    void (*setDrawableDescriptor)(ArkUINodeHandle node, void* newDrawableDescriptor);
     void (*enableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setImagePrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
@@ -2211,10 +2211,14 @@ struct CJUIWebModifier {
     void (*resetOnBeforeUnload)(ArkUINodeHandle node);
     void (*setJavaScriptProxy)(ArkUINodeHandle node, void* callback);
     void (*resetJavaScriptProxy)(ArkUINodeHandle node);
+    void (*setEnableImageAnalyzer)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableImageAnalyzer)(ArkUINodeHandle node);
     void (*setForceEnableZoom)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetForceEnableZoom)(ArkUINodeHandle node);
     void (*setBackToTop)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetBackToTop)(ArkUINodeHandle node);
+    void (*setOnCameraCaptureStateChanged)(ArkUINodeHandle node, void* callback);
+    void (*resetOnCameraCaptureStateChanged)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

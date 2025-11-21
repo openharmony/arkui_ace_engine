@@ -72,7 +72,9 @@ export class ArkResource implements Resource {
     }
     get id(): long {
         if (this._id == -1) {
-            this._id = SystemOps.getResourceId(this.bundleName, this.moduleName, [this.params![0] as string]);
+            this._id = SystemOps.getResourceId(this.bundleName, this.moduleName, [
+                (this.params![0] as string).replace(re, 'app'),
+            ]);
             if (this.id > -1 && this.params!.length > 0) {
                 this.params!.shift();
             }

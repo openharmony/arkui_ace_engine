@@ -28,6 +28,7 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_base/include/common/rs_color.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
@@ -438,6 +439,14 @@ void RosenRenderContext::SetSurfaceChangedCallBack(const std::function<void(floa
 #endif
 }
 
+void RosenRenderContext::BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval)
+{
+    CHECK_NULL_VOID(rsNode_);
+    // Forward placeholder + strategy + interval to RSNode. Backend decides actual sampling cadence.
+    rsNode_->SetColorPickerParams(
+        static_cast<RSColorPlaceholder>(placeholder), static_cast<Rosen::ColorPickStrategyType>(strategy), interval);
+}
+
 void RosenRenderContext::RemoveSurfaceChangedCallBack()
 {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -840,9 +849,11 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     }
 }
 
-void RosenRenderContext::ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor)
+void RosenRenderContext::ColorToRSColor(const Color& color, Rosen::RSColor& rsColor)
 {
-    rsColor = OHOS::Rosen::RSColor::FromArgbInt(color.GetValue());
+    rsColor = ACE_UNLIKELY(color.IsPlaceholder())
+                  ? Rosen::RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()))
+                  : Rosen::RSColor::FromArgbInt(color.GetValue());
     GraphicColorGamut colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
     if (ColorSpace::DISPLAY_P3 == color.GetColorSpace()) {
         colorSpace = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DISPLAY_P3;
@@ -4506,7 +4517,7 @@ void RosenRenderContext::SetDrawNode()
 bool RosenRenderContext::AddNodeToRsTree()
 {
     auto node = GetHost();
-    if (!node || !node->GetIsDelete()) {
+    if (!node || node->GetIsDelete() != FrameNode::RsNodeDeleteFlag::ALLOWED) {
         return true;
     }
     if (SystemProperties::GetDebugEnabled()) {
@@ -4529,7 +4540,7 @@ bool RosenRenderContext::AddNodeToRsTree()
         rsNode->AddChild(childRsNode, rsNodeIndex);
         rsNodeIndex++;
     }
-    node->SetDeleteRsNode(false);
+    node->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::PROHIBITED);
     // rebuild parent node
     auto parentNode = node->GetParentFrameNode();
     CHECK_NULL_RETURN(parentNode, false);
@@ -4554,6 +4565,9 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetRsNodeByFrame(const RefPtr
 bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
 {
     CHECK_NULL_RETURN(node, false);
+    if (node->GetIsDelete() == FrameNode::RsNodeDeleteFlag::PROHIBITED) {
+        return false;
+    }
     auto rsNode = GetRsNodeByFrame(node);
     CHECK_NULL_RETURN(rsNode, false);
     std::list <RefPtr<FrameNode>> childChildrenList;
@@ -4563,6 +4577,7 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     if (rsNode->GetIsDrawn() || rsNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE
         || childChildrenList.empty() || node->GetTag() == V2::PAGE_ETS_TAG
         || node->GetTag() == V2::STAGE_ETS_TAG || node->GetTag() == V2::NODE_CONTAINER_ETS_TAG) {
+        node->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::PROHIBITED);
         return false;
     }
     return true;
@@ -4582,7 +4597,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
                 pipeline->AddPositionZNode(child->GetId());
             }
         } else {
-            child->SetDeleteRsNode(true);
+            child->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
             GetLiveChildren(child, childNodes);
         }
     }
@@ -4603,7 +4618,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
                 pipeline->AddPositionZNode(overlayNode->GetId());
             }
         } else {
-            overlayNode->SetDeleteRsNode(true);
+            overlayNode->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
             GetLiveChildren(overlayNode, childNodes);
         }
     }
@@ -4613,7 +4628,7 @@ void RosenRenderContext::AddRsNodeForCapture()
 {
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
-    if (host && host->GetIsDelete()) {
+    if (host && host->GetIsDelete() == FrameNode::RsNodeDeleteFlag::ALLOWED) {
         rsNode_->SetDrawNode();
         auto pipeline = host->GetContext();
         if (pipeline) {
@@ -4636,12 +4651,25 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     auto childNodesNew = children;
     if (SystemProperties::GetContainerDeleteFlag()) {
         auto frameNode = GetHost();
-        if (!frameNode || frameNode->GetIsDelete()) {
+        if (!frameNode || frameNode->GetIsDelete() == FrameNode::RsNodeDeleteFlag::ALLOWED) {
+            return;
+        }
+        if (CanNodeBeDeleted(frameNode)) {
+            frameNode->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
+            if (auto parentFrameNode = frameNode->GetParentFrameNode()) {
+                parentFrameNode->MarkNeedSyncRenderTree();
+                parentFrameNode->RebuildRenderContextTree();
+            }
             return;
         }
         childNodesNew.clear();
         GetLiveChildren(frameNode, childNodesNew);
     }
+    ReCreateRsNodeTreeInner(childNodesNew);
+}
+
+void RosenRenderContext::ReCreateRsNodeTreeInner(const std::list<RefPtr<FrameNode>>& childNodesNew)
+{
     // now rsNode's children, key is id of rsNode, value means whether the node exists in previous children of rsNode.
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
     auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);
@@ -4939,6 +4967,8 @@ void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyTyp
     CHECK_NULL_VOID(rsNode_);
     if (blendApplyType == BlendApplyType::FAST) {
         rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::FAST);
+    } else if (blendApplyType == BlendApplyType::OFFSCREEN_WITH_BACKGROUND) {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER_INIT_WITH_PREVIOUS_CONTENT);
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER_ALPHA);
     } else {

@@ -4244,6 +4244,7 @@ void WebPattern::OnModifyDone()
                 GetBlankScreenDetectionConfig().value().detectionMethods,
                 GetBlankScreenDetectionConfig().value().contentfulNodesCountThreshold);
         }
+        delegate_->UpdateEnableImageAnalyzer(GetEnableImageAnalyzerValue(true));
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
@@ -5022,6 +5023,13 @@ void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, i
     }
 }
 
+void WebPattern::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    if (webSelectOverlay_) {
+        webSelectOverlay_->OnClippedSelectionBoundsChanged(x, y, width, height);
+    }
+}
+
 void WebPattern::SelectCancel() const
 {
     if (isReceivedArkDrag_) {
@@ -5083,6 +5091,16 @@ void WebPattern::OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionCo
     if (delegate_) {
         delegate_->UpdateBlankScreenDetectionConfig(
             config.enable, config.detectionTiming, config.detectionMethods, config.contentfulNodesCountThreshold);
+    }
+}
+
+void WebPattern::OnEnableImageAnalyzerUpdate(bool isEnabled)
+{
+    if (delegate_) {
+        delegate_->UpdateEnableImageAnalyzer(isEnabled);
+    }
+    if (!isEnabled) {
+        DestroyAnalyzerOverlay();
     }
 }
 
@@ -5321,6 +5339,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
             }
         }
         hintToTypeWrap.autoFillType = type;
+        hintToTypeWrap.metadata = node->GetMetadata();
     } else if (!placeholder.empty()) {
         // try hint2Type
         auto host = GetHost();
@@ -5356,7 +5375,13 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
             continue;
         }
         for (auto child = object->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
-            if (child->IsString()) {
+            if (child->IsArray() && child->GetKey() ==
+                    OHOS::NWeb::NWEB_VIEW_DATA_KEY_SELECTABLE_USER_NAMES) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "[Password Autofill] the number of selectable usernames: %{public}d",
+                        child->GetArraySize());
+                node->SetMetadata(object->ToString());
+            } else if (child->IsString()) {
                 ParseViewDataString(child->GetKey(), child->GetString(), node);
             } else if (child->IsNumber()) {
                 ParseViewDataNumber(child->GetKey(), child->GetInt(), node, rect, viewScale);

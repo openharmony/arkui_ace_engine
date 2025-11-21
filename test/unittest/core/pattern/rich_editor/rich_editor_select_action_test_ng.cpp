@@ -551,9 +551,8 @@ HWTEST_F(RichEditorSelectActionTestNg, FireOnSelectionChange003, TestSize.Level0
     bool isForced = true;
     richEditorPattern->caretTwinkling_ = false;
     richEditorPattern->selectOverlay_->isSingleHandle_ = false;
-    auto range = richEditorPattern->lastSelectionRange_;
     richEditorPattern->FireOnSelectionChange(start, end, isForced);
-    EXPECT_TRUE(richEditorPattern->lastSelectionRange_ == range);
+    EXPECT_TRUE(richEditorPattern->caretPosition_ == 0);
 }
 
 /**

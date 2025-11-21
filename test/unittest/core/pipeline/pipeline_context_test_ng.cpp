@@ -25,6 +25,7 @@
 #include "test/mock/core/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -2832,6 +2833,40 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     // 重置状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
     context_->touchOptimizer_->slideAccepted_ = true;
+}
+
+/**
+ * @tc.name: RSTransactionBeginAndCommit
+ * @tc.desc: Test the function ChangeDarkModeBrightness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, RSTransactionBeginAndCommit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    context_->SetAppBgColor(Color::BLACK);
+    context_->ChangeDarkModeBrightness();
+    context_->SetIsJsCard(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsFormRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsDynamicRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->appBgColor_ = Color::TRANSPARENT;
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    context_->ChangeDarkModeBrightness();
+    EXPECT_NE(context_->stageManager_, nullptr);
 }
 
 /**

@@ -102,7 +102,7 @@ void TextModelStatic::SetTextOverflow(FrameNode* frameNode, const std::optional<
     if (value.has_value()) {
         TextModelNG::SetTextOverflow(frameNode, value.value());
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextOverflow, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

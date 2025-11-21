@@ -46,6 +46,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetMargin(double value, int32_t unit)
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetMargins(CJEdge params);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetType(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetPlaceholderColor(uint32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldResetPlaceholderColor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetPlaceholderFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetFont(
@@ -53,9 +54,12 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetFont(
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetEnterKeyType(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetCaretColor(uint32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetMaxLength(uint32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldResetMaxLength();
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetTextAlign(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetFontSize(double value, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldResetFontSize();
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetFontColor(uint32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldResetFontColor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetFontWeight(const char* value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetFontStyle(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetFontFamily(const char* value);

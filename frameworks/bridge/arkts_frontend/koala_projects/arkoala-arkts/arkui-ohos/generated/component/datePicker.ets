@@ -170,9 +170,9 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
     }
 }
 export interface DatePickerResult {
-    year?: number;
-    month?: number;
-    day?: number;
+    year?: int32;
+    month?: int32;
+    day?: int32;
 }
 export enum DatePickerMode {
     DATE = 0,

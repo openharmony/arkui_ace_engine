@@ -315,12 +315,13 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyle001, TestSize
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretTwinkling_ = true;
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
     richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     KeyCode code = KeyCode::KEY_UNKNOWN;
     richEditorPattern->HandleSelectFontStyle(code);
-    EXPECT_EQ(richEditorPattern->isSpanStringMode_, true);
+    EXPECT_EQ(richEditorPattern->caretTwinkling_, true);
 }
 
 /**
@@ -817,11 +818,9 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper008, TestSize.Level0
     ASSERT_NE(richEditorPattern, nullptr);
     KeyCode code = KeyCode::KEY_HEADSETHOOK;
     TextStyle style;
-    FontWeight result1 = style.GetFontWeight();
-    TextDecoration result3 = style.GetTextDecorationFirst();
     richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetFontWeight(), result1);
-    EXPECT_EQ(style.GetTextDecorationFirst(), result3);
+    EXPECT_EQ(style.GetFontWeight(), FontWeight::NORMAL);
+    EXPECT_EQ(style.GetTextDecorationFirst(), TextDecoration::NONE);
 }
 
 /**
@@ -898,7 +897,6 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyle002, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = false;
     KeyCode code = KeyCode::KEY_UNKNOWN;
     richEditorPattern->HandleSelectFontStyle(code);
     EXPECT_EQ(richEditorPattern->isSpanStringMode_, false);
@@ -918,8 +916,8 @@ HWTEST_F(RichEditorStyleTestNg, GetTextStyleBySpanItem001, TestSize.Level0)
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     spanItem->fontStyle = nullptr;
     spanItem->textLineStyle = nullptr;
-    richEditorPattern->GetTextStyleBySpanItem(spanItem);
-    ASSERT_EQ(spanItem->fontStyle, nullptr);
+    auto textStyle = richEditorPattern->GetTextStyleBySpanItem(spanItem);
+    EXPECT_FALSE(textStyle.textBackgroundStyle.has_value());
 }
 
 /**

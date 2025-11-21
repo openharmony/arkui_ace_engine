@@ -113,7 +113,7 @@ export struct FullScreenLaunchComponent {
     }
     if (this.options?.parameters) {
       const options: AtomicServiceOptions = this.options as AtomicServiceOptions;
-      const parameters: Record<string, Object> = options.parameters as Record<string, Object>;
+      const parameters: Record<string, RecordData> = options.parameters as Record<string, RecordData>;
       parameters['ohos.extra.param.key.showMode'] = 1;
       parameters['ability.want.params.IsNotifyOccupiedAreaChange'] = true;
       parameters['ability.want.params.IsModal'] = true;
@@ -126,7 +126,7 @@ export struct FullScreenLaunchComponent {
           'ability.want.params.IsNotifyOccupiedAreaChange': true,
           'ability.want.params.IsModal': true,
           'ohos.extra.atomicservice.param.key.isFollowHostWindowMode': isFollowHostWindowMode
-        } as Record<string, Object>
+        } as Record<string, RecordData>
       } as AtomicServiceOptions
     }
   }

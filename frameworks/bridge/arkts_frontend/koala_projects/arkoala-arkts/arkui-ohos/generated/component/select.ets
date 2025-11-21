@@ -16,29 +16,282 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
-import { Bindable_I32_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Font_serializer, DividerStyleOptions_serializer, Offset_serializer, ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
-import { DividerOptions } from "./textPicker"
-import { TextModifier_serializer } from "./../TextModifier"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
+import { CommonConfiguration, Bindable_I32_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ResourceStr, Font_serializer, DividerStyleOptions_serializer, Offset_serializer, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
+import { Resource } from "global.resource"
+import { extractors, ContentModifier, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
+import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { CallbackTransformer } from "./../CallbackTransformer"
+import { TextModifier_serializer } from "./../TextModifier"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { Resource } from "global.resource"
 import { Color, OptionWidthMode } from "./enums"
 import { ControlSize } from "./button"
-import { ContentModifier, extractors, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
+import { DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { TextModifier } from "arkui.TextModifier"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SelectModifier } from "./../SelectModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+export interface MenuItemConfiguration {
+    value: ResourceStr
+    icon?: ResourceStr | undefined
+    symbolIcon?: SymbolGlyphModifier | undefined
+    selected: boolean
+    index: int32
+    triggerSelect(index: int32, value: string): void
+}
+export class MenuItemConfigurationInternal implements MaterializedBase,CommonConfiguration<MenuItemConfiguration>,MenuItemConfiguration {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get enabled(): boolean {
+        return this.getEnabled()
+    }
+    set enabled(enabled: boolean) {
+        this.setEnabled(enabled)
+    }
+    get contentModifier(): ContentModifier<MenuItemConfiguration> {
+        return this.getContentModifier()
+    }
+    set contentModifier(contentModifier: ContentModifier<MenuItemConfiguration>) {
+        this.setContentModifier(contentModifier)
+    }
+    get value(): ResourceStr {
+        return this.getValue()
+    }
+    set value(value: ResourceStr) {
+        this.setValue(value)
+    }
+    get icon(): ResourceStr | undefined {
+        return this.getIcon()
+    }
+    set icon(icon: ResourceStr | undefined) {
+        const icon_NonNull  = (icon as ResourceStr)
+        this.setIcon(icon_NonNull)
+    }
+    get symbolIcon(): SymbolGlyphModifier | undefined {
+        return this.getSymbolIcon()
+    }
+    set symbolIcon(symbolIcon: SymbolGlyphModifier | undefined) {
+        const symbolIcon_NonNull  = (symbolIcon as SymbolGlyphModifier)
+        this.setSymbolIcon(symbolIcon_NonNull)
+    }
+    get selected(): boolean {
+        return this.getSelected()
+    }
+    set selected(selected: boolean) {
+        this.setSelected(selected)
+    }
+    get index(): int32 {
+        return this.getIndex()
+    }
+    set index(index: int32) {
+        this.setIndex(index)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, MenuItemConfigurationInternal.getFinalizer())
+    }
+    constructor() {
+        this(MenuItemConfigurationInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._MenuItemConfiguration_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): MenuItemConfigurationInternal {
+        return new MenuItemConfigurationInternal(ptr)
+    }
+    public triggerSelect(index: int32, value: string): void {
+        const index_casted = index as (int32)
+        const value_casted = value as (string)
+        this.triggerSelect_serialize(index_casted, value_casted)
+        return
+    }
+    private getEnabled(): boolean {
+        return this.getEnabled_serialize()
+    }
+    private setEnabled(enabled: boolean): void {
+        const enabled_casted = enabled as (boolean)
+        this.setEnabled_serialize(enabled_casted)
+        return
+    }
+    private getContentModifier(): ContentModifier<MenuItemConfiguration> {
+        return this.getContentModifier_serialize()
+    }
+    private setContentModifier(contentModifier: ContentModifier<MenuItemConfiguration>): void {
+        const contentModifier_casted = contentModifier as (ContentModifier<MenuItemConfiguration>)
+        this.setContentModifier_serialize(contentModifier_casted)
+        return
+    }
+    private getValue(): ResourceStr {
+        return this.getValue_serialize()
+    }
+    private setValue(value: ResourceStr): void {
+        const value_casted = value as (ResourceStr)
+        this.setValue_serialize(value_casted)
+        return
+    }
+    private getIcon(): ResourceStr | undefined {
+        return this.getIcon_serialize()
+    }
+    private setIcon(icon: ResourceStr | undefined): void {
+        const icon_casted = icon as (ResourceStr | undefined)
+        this.setIcon_serialize(icon_casted)
+        return
+    }
+    private getSymbolIcon(): SymbolGlyphModifier | undefined {
+        return this.getSymbolIcon_serialize()
+    }
+    private setSymbolIcon(symbolIcon: SymbolGlyphModifier | undefined): void {
+        const symbolIcon_casted = symbolIcon as (SymbolGlyphModifier | undefined)
+        this.setSymbolIcon_serialize(symbolIcon_casted)
+        return
+    }
+    private getSelected(): boolean {
+        return this.getSelected_serialize()
+    }
+    private setSelected(selected: boolean): void {
+        const selected_casted = selected as (boolean)
+        this.setSelected_serialize(selected_casted)
+        return
+    }
+    private getIndex(): int32 {
+        return this.getIndex_serialize()
+    }
+    private setIndex(index: int32): void {
+        const index_casted = index as (int32)
+        this.setIndex_serialize(index_casted)
+        return
+    }
+    triggerSelect_serialize(index: int32, value: string): void {
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_triggerSelect(this.peer!.ptr, index, value)
+    }
+    private getEnabled_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getEnabled(this.peer!.ptr)
+        return retval
+    }
+    private setEnabled_serialize(enabled: boolean): void {
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setEnabled(this.peer!.ptr, enabled ? 1 : 0)
+    }
+    private getContentModifier_serialize(): ContentModifier<MenuItemConfiguration> {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getContentModifier(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : ContentModifier<MenuItemConfiguration> = (retvalDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
+        return returnResult
+    }
+    private setContentModifier_serialize(contentModifier: ContentModifier<MenuItemConfiguration>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteObject(contentModifier)
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setContentModifier(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getValue_serialize(): ResourceStr {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getValue(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private setValue_serialize(value: ResourceStr): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value instanceof string) {
+            thisSerializer.writeInt8((0).toByte())
+            const valueForIdx0  = value as string
+            thisSerializer.writeString(valueForIdx0)
+        } else if (value instanceof Resource) {
+            thisSerializer.writeInt8((1).toByte())
+            const valueForIdx1  = value as Resource
+            Resource_serializer.write(thisSerializer, valueForIdx1)
+        }
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setValue(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getIcon_serialize(): ResourceStr | undefined {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getIcon(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ResourceStr | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
+            let buffer_ : string | Resource | undefined
+            if (buffer_UnionSelector == (0).toChar()) {
+                buffer_ = (retvalDeserializer.readString() as string)
+            } else if (buffer_UnionSelector == (1).toChar()) {
+                buffer_ = Resource_serializer.read(retvalDeserializer)
+            } else {
+                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+            }
+            buffer = (buffer_ as string | Resource)
+        }
+        const returnResult : ResourceStr | undefined = buffer
+        return returnResult
+    }
+    private setIcon_serialize(icon: ResourceStr | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (icon !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const iconTmpValue  = icon!
+            if (iconTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const iconTmpValueForIdx0  = iconTmpValue as string
+                thisSerializer.writeString(iconTmpValueForIdx0)
+            } else if (iconTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const iconTmpValueForIdx1  = iconTmpValue as Resource
+                Resource_serializer.write(thisSerializer, iconTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setIcon(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getSymbolIcon_serialize(): SymbolGlyphModifier | undefined {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getSymbolIcon(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : SymbolGlyphModifier | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (SymbolGlyphModifier_serializer.read(retvalDeserializer) as SymbolGlyphModifier)
+        }
+        const returnResult : SymbolGlyphModifier | undefined = buffer
+        return returnResult
+    }
+    private setSymbolIcon_serialize(symbolIcon: SymbolGlyphModifier | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (symbolIcon !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const symbolIconTmpValue  = symbolIcon!
+            SymbolGlyphModifier_serializer.write(thisSerializer, symbolIconTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setSymbolIcon(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getSelected_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getSelected(this.peer!.ptr)
+        return retval
+    }
+    private setSelected_serialize(selected: boolean): void {
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setSelected(this.peer!.ptr, selected ? 1 : 0)
+    }
+    private getIndex_serialize(): int32 {
+        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getIndex(this.peer!.ptr)
+        return retval
+    }
+    private setIndex_serialize(index: int32): void {
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setIndex(this.peer!.ptr, index)
+    }
+}
 export class ArkSelectPeer extends ArkCommonMethodPeer {
     attributeSet?: SelectModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -825,13 +1078,6 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
         throw new Error("Not implemented")
     }
 }
-export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfiguration> {
-    value: ResourceStr;
-    icon?: ResourceStr;
-    symbolIcon?: SymbolGlyphModifier;
-    selected: boolean;
-    index: int32;
-}
 
 export class ArkSelectComponent extends ArkCommonMethodComponent implements SelectAttribute {
     getPeer(): ArkSelectPeer {
@@ -1112,88 +1358,12 @@ export function SelectImpl(
 export class MenuItemConfiguration_serializer {
     public static write(buffer: SerializerBase, value: MenuItemConfiguration): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForEnabled  = value.enabled
-        valueSerializer.writeBoolean(valueHolderForEnabled)
-        const valueHolderForContentModifier  = value.contentModifier
-        valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
-        const valueHolderForValue  = value.value
-        if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toByte())
-            const valueHolderForValueForIdx0  = valueHolderForValue as string
-            valueSerializer.writeString(valueHolderForValueForIdx0)
-        } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toByte())
-            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
-        }
-        const valueHolderForIcon  = value.icon
-        if (valueHolderForIcon !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForIconTmpValue  = valueHolderForIcon!
-            if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
-                valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
-            } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForSymbolIcon  = value.symbolIcon
-        if (valueHolderForSymbolIcon !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSymbolIconTmpValue  = valueHolderForSymbolIcon!
-            SymbolGlyphModifier_serializer.write(valueSerializer, valueHolderForSymbolIconTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForSelected  = value.selected
-        valueSerializer.writeBoolean(valueHolderForSelected)
-        const valueHolderForIndex  = value.index
-        valueSerializer.writeInt32(valueHolderForIndex)
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): MenuItemConfiguration {
         let valueDeserializer : DeserializerBase = buffer
-        const enabledTmpResult : boolean = valueDeserializer.readBoolean()
-        const contentModifierTmpResult : ContentModifier<MenuItemConfiguration> = (valueDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
-        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let valueTmpBuf : string | Resource | undefined
-        if (valueTmpBufUnionSelector == (0).toChar()) {
-            valueTmpBuf = (valueDeserializer.readString() as string)
-        } else if (valueTmpBufUnionSelector == (1).toChar()) {
-            valueTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
-        }
-        const valueTmpResult : ResourceStr = (valueTmpBuf as string | Resource)
-        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iconTmpBuf : ResourceStr | undefined = undefined
-        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let iconTmpBuf_ : string | Resource | undefined
-            if (iconTmpBuf_UnionSelector == (0).toChar()) {
-                iconTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
-                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
-            }
-            iconTmpBuf = (iconTmpBuf_ as string | Resource)
-        }
-        const iconTmpResult : ResourceStr | undefined = iconTmpBuf
-        const symbolIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let symbolIconTmpBuf : SymbolGlyphModifier | undefined = undefined
-        if ((symbolIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            symbolIconTmpBuf = (SymbolGlyphModifier_serializer.read(valueDeserializer) as SymbolGlyphModifier)
-        }
-        const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
-        const selectedTmpResult : boolean = valueDeserializer.readBoolean()
-        const indexTmpResult : int32 = valueDeserializer.readInt32()
-        let value : MenuItemConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, selected: selectedTmpResult, index: indexTmpResult} as MenuItemConfiguration)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return MenuItemConfigurationInternal.fromPtr(ptr)
     }
 }
 export class SelectOption_serializer {

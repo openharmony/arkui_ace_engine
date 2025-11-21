@@ -51,8 +51,8 @@ export default namespace componentSnapshot {
     }
 
     export native function get(id: string, callback: AsyncCallback<image.PixelMap>, options?: SnapshotOptions): void;
-    export native function get(id: string, options?: SnapshotOptions): Promise<image.PixelMap>;
-    export native function getSync(id: string, options?: SnapshotOptions): image.PixelMap;
-    export native function getWithUniqueId(uniqueId: number, options?: SnapshotOptions): Promise<image.PixelMap>;
+    export native function get(id: string, options?: SnapshotOptions): Promise<image.PixelMap> | null;
+    export native function getSync(id: string, options?: SnapshotOptions): image.PixelMap | null;
+    export native function getWithUniqueId(uniqueId: number, options?: SnapshotOptions): Promise<image.PixelMap> | null;
     export native function getSyncWithUniqueId(uniqueId: number, options?: SnapshotOptions): image.PixelMap;
 }

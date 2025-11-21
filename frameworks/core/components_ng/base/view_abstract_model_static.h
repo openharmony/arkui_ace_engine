@@ -63,6 +63,11 @@ public:
         }
     }
 
+    static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+    {
+        ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutPolicy, isWidth);
+    }
+
     static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
     {
         if (height.Unit() == DimensionUnit::CALC) {
@@ -365,7 +370,8 @@ public:
     };
 
 private:
-    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
+    static bool CheckMenuIsShow(
+        const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode,  bool isBuildFuncNull);
     static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
     static void CreateCustomMenuWithPreview(FrameNode* targetNode,

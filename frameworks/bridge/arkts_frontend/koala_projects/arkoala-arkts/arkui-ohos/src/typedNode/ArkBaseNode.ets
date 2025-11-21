@@ -425,7 +425,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | Array<string> | undefined): this {
         return this
     }
     public draggable(value: boolean | undefined): this {
@@ -604,13 +604,13 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setFocusScopePriorityAttribute(scopeId, priority);
         return this
     }
-    public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public gesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
     public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {

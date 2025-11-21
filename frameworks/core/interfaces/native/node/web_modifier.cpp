@@ -44,6 +44,7 @@ constexpr bool DEFAULT_PINCH_SMOOTH_ENABLED = false;
 constexpr bool DEFAULT_META_VIEWPORT_ENABLED = true;
 constexpr bool DEFAULT_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT = false;
 constexpr bool DEFAULT_NATIVE_EMBED_MODE_ENABLE = false;
+constexpr bool DEFAULT_ENABLE_IMAGE_ANALYZER = true;
 constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
@@ -2377,6 +2378,20 @@ void ResetJavaScriptProxy(ArkUINodeHandle node)
     WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
 }
 
+void SetEnableImageAnalyzer(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableImageAnalyzer(frameNode, value);
+}
+
+void ResetEnableImageAnalyzer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableImageAnalyzer(frameNode, DEFAULT_ENABLE_IMAGE_ANALYZER);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2403,6 +2418,36 @@ void ResetBackToTop(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetBackToTop(frameNode, DEFAULT_BACK_TO_TOP_ENABLED);
+}
+
+void SetOnCameraCaptureStateChanged(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* onCameraCaptureStateChangedCallBackPtr =
+            reinterpret_cast<std::function<void(const CameraCaptureStateEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onCameraCaptureStateChangedCallBackPtr);
+        auto onCameraCaptureStateChangedCallBack = *onCameraCaptureStateChangedCallBackPtr;
+        auto callback = [onCameraCaptureStateChangedCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto cameraCaptureStateEvent = static_cast<const CameraCaptureStateEvent*>(event);
+            if (cameraCaptureStateEvent) {
+                auto& nonConstEvent = const_cast<CameraCaptureStateEvent&>(*cameraCaptureStateEvent);
+                onCameraCaptureStateChangedCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetCameraCaptureStateChangedId(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetCameraCaptureStateChangedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnCameraCaptureStateChanged(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetCameraCaptureStateChangedId(frameNode, nullptr);
 }
 
 namespace NodeModifier {
@@ -2582,6 +2627,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
         .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
+        .setEnableImageAnalyzer = SetEnableImageAnalyzer,
+        .resetEnableImageAnalyzer = ResetEnableImageAnalyzer,
         .setOnContextMenuShow = SetOnContextMenuShow,
         .resetOnContextMenuShow = ResetOnContextMenuShow,
         .setOnSafeBrowsingCheckResultCallBack = SetOnSafeBrowsingCheckResultCallBack,
@@ -2632,6 +2679,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetForceEnableZoom = ResetForceEnableZoom,
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
+        .setOnCameraCaptureStateChanged = SetOnCameraCaptureStateChanged,
+        .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2813,6 +2862,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
         .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
+        .setEnableImageAnalyzer = SetEnableImageAnalyzer,
+        .resetEnableImageAnalyzer = ResetEnableImageAnalyzer,
         .setOnContextMenuShow = SetOnContextMenuShow,
         .resetOnContextMenuShow = ResetOnContextMenuShow,
         .setOnSafeBrowsingCheckResultCallBack = SetOnSafeBrowsingCheckResultCallBack,
@@ -2863,6 +2914,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetForceEnableZoom = ResetForceEnableZoom,
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
+        .setOnCameraCaptureStateChanged = SetOnCameraCaptureStateChanged,
+        .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -461,6 +461,7 @@ let BlendApplyType;
 (function (BlendApplyType) {
   BlendApplyType[BlendApplyType.FAST = 0] = 'FAST';
   BlendApplyType[BlendApplyType.OFFSCREEN = 1] = 'OFFSCREEN';
+  BlendApplyType[BlendApplyType.OFFSCREEN_WITH_BACKGROUND = 2] = 'OFFSCREEN_WITH_BACKGROUND';
 })(BlendApplyType || (BlendApplyType = {}));
 
 let TextOverflow;
@@ -4475,6 +4476,26 @@ let StyledStringKey;
   StyledStringKey[StyledStringKey.USER_DATA = 500] = 'USER_DATA';
 })(StyledStringKey || (StyledStringKey = {}));
 
+// ColorPlaceholder enum declaration synchronized with units.d.ts as a pure string enum.
+// Using a simple object literal avoids generating numeric reverse mappings.
+const ColorPlaceholder = {
+  NONE: 'NONE',
+  SURFACE: 'SURFACE',
+  SURFACE_CONTRAST: 'SURFACE_CONTRAST',
+  TEXT_CONTRAST: 'TEXT_CONTRAST',
+  ACCENT: 'ACCENT',
+  FOREGROUND: 'FOREGROUND',
+};
+let ColorPickStrategy;
+(function (ColorPickStrategy) {
+  ColorPickStrategy[ColorPickStrategy.NONE = 0] = 'NONE';
+  ColorPickStrategy[ColorPickStrategy.DOMINANT = 1] = 'DOMINANT';
+  ColorPickStrategy[ColorPickStrategy.AVERAGE = 2] = 'AVERAGE';
+  ColorPickStrategy[ColorPickStrategy.CONTRAST = 3] = 'CONTRAST';
+})(ColorPickStrategy || (ColorPickStrategy = {}));
+
+globalThis.ColorPlaceholder = ColorPlaceholder;
+
 class CustomSpan extends NativeCustomSpan {
   type_ = 'CustomSpan';
 }
@@ -4955,6 +4976,12 @@ let NativeEmbedParamStatus;
   NativeEmbedParamStatus.UPDATE = 1;
   NativeEmbedParamStatus.DELETE = 2;
 })(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
+
+let DetectedBlankScreenReason;
+(function (DetectedBlankScreenReason) {
+  DetectedBlankScreenReason.NO_CONTENTFUL_NODES = 0;
+  DetectedBlankScreenReason.SUB_THRESHOLD_CONTENTFUL_NODES = 1;
+})(DetectedBlankScreenReason || (DetectedBlankScreenReason = {}));
 
 let WebRotateEffect;
 (function (WebRotateEffect) {

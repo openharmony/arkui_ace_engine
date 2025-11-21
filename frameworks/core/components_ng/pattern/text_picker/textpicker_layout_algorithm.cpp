@@ -108,7 +108,8 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
     isDefaultPickerItemHeight_ = layoutProperty->HasDefaultPickerItemHeight();
     if (isDefaultPickerItemHeight_) {
         auto defaultPickerItemHeightValue = layoutProperty->GetDefaultPickerItemHeightValue();
-        if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0f)) {
+        if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0f) ||
+            !std::isfinite(defaultPickerItemHeightValue.ConvertToPx())) {
             isDefaultPickerItemHeight_ = false;
         } else {
             UpdateDefaultPickerItemHeightLPX(pickerNode, defaultPickerItemHeightValue);

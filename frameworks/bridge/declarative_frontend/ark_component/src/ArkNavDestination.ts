@@ -147,6 +147,14 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnReadyModifier.identity, NavDestinationOnReadyModifier, callback);
     return this;
   }
+  bindToScrollable(scrollers: Array<Scroller>): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBindToScrollableModifier.identity, NavDestinationBindToScrollableModifier, scrollers);
+    return this;
+  }
+  bindToNestedScrollable(scrollInfos: Array<NestedScrollInfo>): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBindToNestedScrollableModifier.identity, NavDestinationBindToNestedScrollableModifier, scrollInfos);
+    return this;
+  }
   ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
     let opts = new ArkSafeAreaExpandOpts();
     if (types && types.length >= 0) {
@@ -532,6 +540,34 @@ class NavDestinationOnWillAppearModifier extends ModifierWithKey<Callback<void>>
       getUINativeModule().navDestination.resetOnWillAppear(node);
     } else {
       getUINativeModule().navDestination.setOnWillAppear(node, this.value);
+    }
+  }
+}
+
+class NavDestinationBindToScrollableModifier extends ModifierWithKey<Array<Scroller>> {
+  constructor(scrollers: Array<Scroller>) {
+    super(scrollers);
+  }
+  static identity: Symbol = Symbol('bindToScrollable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetBindToScrollable(node);
+    } else {
+      getUINativeModule().navDestination.setBindToScrollable(node, this.value);
+    }
+  }
+}
+
+class NavDestinationBindToNestedScrollableModifier extends ModifierWithKey<Array<NestedScrollInfo>> {
+  constructor(scrollInfos: Array<NestedScrollInfo>) {
+    super(scrollInfos);
+  }
+  static identity: Symbol = Symbol('bindToNestedScrollable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetBindToNestedScrollable(node);
+    } else {
+      getUINativeModule().navDestination.setBindToNestedScrollable(node, this.value);
     }
   }
 }

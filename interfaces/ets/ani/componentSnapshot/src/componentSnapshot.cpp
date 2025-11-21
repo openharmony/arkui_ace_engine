@@ -279,7 +279,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
     }
     ani_double aniValue = 0.0;
     if (ANI_OK !=
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "toDouble", ":d", &aniValue)) {
         return false;
     }
     if (OHOS::Ace::GreatNotEqual(aniValue, 0.0)) {
@@ -322,7 +322,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     }
     ani_boolean aniValue;
     if (ANI_OK !=
-        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(propertyRef), "toBoolean", ":z", &aniValue)) {
         return false;
     }
     value = static_cast<bool>(aniValue);
@@ -614,12 +614,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         .AddClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions");
     std::string get_SignatureStr = get_SignatureBuilder.BuildSignatureDescriptor();
 
-    SignatureBuilder getWithPromise_SignatureBuilder {};
-    getWithPromise_SignatureBuilder
-        .AddClass("std.core.String")
-        .AddClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions")
-        .SetReturnClass("std.core.Promise");
-    std::string getWithPromise_SignatureStr = getWithPromise_SignatureBuilder.BuildSignatureDescriptor();
+    std::string getWithPromise_SignatureStr =
+        "C{std.core.String}C{@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions}:"
+        "X{C{std.core.Null}C{std.core.Promise}}";
 
     std::array methods = {
         ani_native_function { "get", get_SignatureStr.c_str(), reinterpret_cast<void*>(ANI_GetWithCallback) },

@@ -76,6 +76,11 @@ import hilog from '@ohos.hilog'
         public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
+        public native onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        public native offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
+        public native onScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        public native offScrollEvent(callback: Callback<ScrollEventInfo>): void;
+
         public native onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
 
         public native offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
@@ -437,7 +442,110 @@ import hilog from '@ohos.hilog'
 
     export interface ObserverOptions {}
 
-    export interface ScrollEventInfo {}
+    export enum ScrollEventType {
+      SCROLL_START = 0,
+      SCROLL_STOP = 1
+    }
+
+    export enum Axis {
+        VERTICAL = 0,
+        Vertical = 0,
+        HORIZONTAL = 1,
+        Horizontal = 1
+    }
+
+    export interface ScrollEventInfo {
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+        axis: Axis;
+    }
+
+    export class ScrollEventInfoImpl implements ScrollEventInfo{
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+        axis: Axis;
+
+        static castToScrollEventType(value: number): ScrollEventType {
+            if (value === 0) {
+                return ScrollEventType.SCROLL_START;
+            } else if (value === 1) {
+                return ScrollEventType.SCROLL_STOP;
+            } else {
+                throw Error("mode in ScrollEventInfo type Error");
+            }
+        }
+
+        static castToAxis(value: number): Axis {
+            if (value === 0) {
+                return Axis.Vertical;
+            } else if (value === 1) {
+                return Axis.Horizontal;
+            } else {
+                throw Error("mode in ScrollEventInfo type Error");
+            }
+        }
+        
+        static transferStatic(input: Any): Object {
+            let dynamicValue = ESValue.wrap(input);
+            let staticValue = new ScrollEventInfoImpl();
+            if (dynamicValue.isUndefined() || dynamicValue.isNull()) {
+                return staticValue;
+            }
+            let id = dynamicValue.getProperty("id");
+            if (!id.isString()) {
+                throw Error("id in ScrollEventInfo type Error");
+            }
+
+            let uniqueId = dynamicValue.getProperty("uniqueId");
+            if (!uniqueId.isNumber()) {
+                throw Error("uniqueId in ScrollEventInfo type Error");
+            }
+            staticValue.uniqueId = uniqueId.toNumber();
+
+            let scrollEvent = dynamicValue.getProperty("scrollEvent");
+            if (!scrollEvent.isNumber()) {
+                throw Error("scrollEvent in ScrollEventInfo type Error");
+            }
+            staticValue.scrollEvent = ScrollEventInfoImpl.castToScrollEventType(scrollEvent.toNumber());
+
+            let offset = dynamicValue.getProperty("offset");
+            if (!offset.isNumber()) {
+                throw Error("offset in ScrollEventInfo type Error");
+            }
+            staticValue.offset = offset.toNumber();
+
+            let axis = dynamicValue.getProperty("axis");
+            if (!axis.isNumber()) {
+                throw Error("axis in ScrollEventInfo type Error");
+            }
+            staticValue.axis = ScrollEventInfoImpl.castToAxis(axis.toNumber());
+
+            return staticValue;
+        }
+
+        static transferDynamic(input: Object): Any {
+            let dynamicValue = ESValue.instantiateEmptyObject();
+            if (input == null || input == undefined) {
+                return dynamicValue;
+            }
+            let staticValue = input as ScrollEventInfoImpl;
+            if (staticValue == null || staticValue == undefined) {
+                return dynamicValue;
+            }
+            dynamicValue.setProperty('id', ESValue.wrap(staticValue.id));
+            dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            dynamicValue.setProperty('scrollEvent', ESValue.wrapNumber(staticValue.scrollEvent));
+            dynamicValue.setProperty('offset', ESValue.wrap(staticValue.offset));
+            dynamicValue.setProperty('axis', ESValue.wrapNumber(staticValue.axis));
+
+
+            return dynamicValue as Any;
+        }
+    }
 
     export interface NavDestinationSwitchInfo {
         context: UIAbilityContext | UIContext;

@@ -70,6 +70,7 @@
 #include "core/interfaces/native/implementation/text_field_modifier.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
+#include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
 #include "dismiss_popup_action_peer.h"
@@ -1303,6 +1304,12 @@ BiasOpt Convert(const Ark_Bias& src)
 }
 
 template<>
+LayoutCalPolicy Convert(const Ark_LayoutPolicy& src)
+{
+    return src ? src->layoutPolicy :LayoutCalPolicy::NO_MATCH;
+}
+
+template<>
 void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
 {
     switch (src) {
@@ -2032,7 +2039,9 @@ void SetWidthImpl(Ark_NativePointer node,
             SetWidthInternal(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
-            LOGE("WidthImpl: Ark_LayoutPolicy processint is not implemented yet!");
+            auto result = Converter::OptConvert<LayoutCalPolicy>(src);
+            ViewAbstractModelStatic::UpdateLayoutPolicyProperty(
+                frameNode, result.value_or(LayoutCalPolicy::NO_MATCH), true);
         },
         [frameNode]() {
             SetWidthInternal(frameNode, std::nullopt);
@@ -2070,7 +2079,9 @@ void SetHeightImpl(Ark_NativePointer node,
             SetHeightInternal(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
-            LOGE("HeightImpl: Ark_LayoutPolicy processint is not implemented yet!");
+            auto result = Converter::OptConvert<LayoutCalPolicy>(src);
+            ViewAbstractModelStatic::UpdateLayoutPolicyProperty(
+                frameNode, result.value_or(LayoutCalPolicy::NO_MATCH), false);
         },
         [frameNode]() {
             SetHeightInternal(frameNode, std::nullopt);
@@ -2578,11 +2589,13 @@ void SetBorderColorImpl(Ark_NativePointer node,
         return;
     }
     auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
-    if (color) {
-        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
-    } else {
-        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
+    if (!color) {
+        BorderColorProperty defaultColor;
+        defaultColor.SetColor(Color::BLACK);
+        ViewAbstractModelStatic::SetBorderColor(frameNode, defaultColor);
+        return;
     }
+    ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
 }
 void SetBorderRadiusImpl(Ark_NativePointer node,
                          const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
@@ -3847,7 +3860,7 @@ void SetMarkAnchorImpl(Ark_NativePointer node,
         }
         ViewAbstractModelStatic::MarkAnchor(frameNode, anchorOpt->first);
     } else {
-        ViewAbstractModelStatic::MarkAnchor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::MarkAnchor(frameNode, OffsetT<Dimension>(0.0_vp, 0.0_vp));
     }
     ViewAbstractModelStatic::ResetMarkAnchorStart(frameNode);
 }
@@ -5424,7 +5437,9 @@ void BindMenuBase(Ark_NativePointer node,
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
                 }, node);
         },
-        []() {});
+        [frameNode, node, menuParam]() {
+            ViewAbstractModelStatic::BindMenu(frameNode, {}, nullptr, menuParam);
+        });
 }
 void SetBindMenu0Impl(Ark_NativePointer node,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
@@ -5462,6 +5477,7 @@ void BindContextMenuBase(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(content);
     menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isShowInSubWindow = true;
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     std::function<void(MenuParam, std::function<void()> &&)> contentBuilder;
     if (!optValue) {
@@ -5525,6 +5541,7 @@ void SetBindContextMenu0Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
     menuParam.isShow = false;
+    menuParam.setShow = false;
     BindContextMenuBase(node, content, responseType, options, menuParam);
 }
 void SetBindContextMenu1Impl(Ark_NativePointer node,
@@ -5535,6 +5552,7 @@ void SetBindContextMenu1Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.isShow = Converter::OptConvertPtr<bool>(isShown).value_or(menuParam.isShow);
+    menuParam.setShow = true;
     auto type = Converter::ArkValue<Opt_ResponseType>(ARK_RESPONSE_TYPE_LONG_PRESS);
     BindContextMenuBase(node, content, &type, options, menuParam);
 }

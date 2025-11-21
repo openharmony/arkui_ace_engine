@@ -261,7 +261,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onDragEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDragEnd_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     _allowDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | undefined
+    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined
     _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _draggable_0_0value?: boolean | undefined
     _dragPreview_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2455,7 +2455,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._allowDrop_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                     this._allowDrop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2465,7 +2465,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._allowDrop_0_flag = AttributeUpdaterFlag.INITIAL;
-                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                 }
             }
         }
@@ -5463,7 +5463,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                 }
             }
         }
@@ -7798,7 +7798,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         if (((this._allowDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._allowDrop_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8095,6 +8095,17 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    accessibilityText(value: Resource | string | undefined): this {
+        if (value instanceof Resource) {
+            const value_casted = value as (Resource | undefined)
+            this.accessibilityText(value_casted)
+            return this
+        } else {
+            const value_casted = value as (string | undefined)
+            this.accessibilityText(value_casted)
+            return this
+        }
+    }
     accessibilityRole(value: AccessibilityRoleType | undefined): this {
         if (((this._accessibilityRole_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -8160,6 +8171,17 @@ export class CommonMethodModifier implements CommonMethod {
             this._accessibilityDescription_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
+    }
+    accessibilityDescription(value: Resource | string | undefined): this {
+        if (value instanceof Resource) {
+            const value_casted = value as (Resource | undefined)
+            this.accessibilityDescription(value_casted)
+            return this
+        } else {
+            const value_casted = value as (string | undefined)
+            this.accessibilityDescription(value_casted)
+            return this
+        }
     }
     accessibilityLevel(value: string | undefined): this {
         if (((this._accessibilityLevel_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._accessibilityLevel_0_0value) !== (value)))

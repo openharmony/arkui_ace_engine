@@ -277,6 +277,16 @@ SkColor ConvertSkColor(Color color)
 {
     return color.GetValue();
 }
+namespace {
+RSColor ConvertToRSColor(Color color)
+{
+    if (ACE_UNLIKELY(color.IsPlaceholder())) {
+        return RSColor(
+            static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+    }
+    return color.GetValue();
+}
+}
 
 Rosen::TextDecoration ConvertTxtTextDecoration(const std::vector<TextDecoration>& textDecorations)
 {
@@ -342,7 +352,7 @@ double NormalizeToPx(const Dimension& dimension)
 
 void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {
-    txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
+    txtStyle.color = ConvertToRSColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
 
     txtStyle.fontSize = NormalizeToPx(textStyle.GetFontSize());
@@ -361,7 +371,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
     ConvertSymbolTxtStyle(textStyle, txtStyle);
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
-    txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
+    txtStyle.decorationColor = ConvertToRSColor(textStyle.GetTextDecorationColor());
     txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
@@ -544,7 +554,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 {
     ConvertBitmap(textStyle.GetReLayoutTextStyleBitmap(), txtStyle.relayoutChangeBitmap);
     txtStyle.textStyleUid  = static_cast<unsigned long>(textStyle.GetTextStyleUid());
-    txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
+    txtStyle.color = ConvertToRSColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
     txtStyle.symbol.SetSymbolType(ConvertTxtSymbolType(textStyle.GetSymbolType()));
     auto fontWeightValue = (static_cast<int32_t>(
@@ -587,7 +597,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     ConvertSymbolTxtStyle(textStyle, txtStyle);
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
-    txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
+    txtStyle.decorationColor = ConvertToRSColor(textStyle.GetTextDecorationColor());
     txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.decorationThicknessScale = static_cast<double>(textStyle.GetLineThicknessScale());
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -757,9 +767,9 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
     txtStyle.isSymbolGlyph = true;
     txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
     const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
-    std::vector<Rosen::Drawing::Color> symbolColors;
+    std::vector<RSColor> symbolColors;
     for (size_t i = 0; i < symbolColor.size(); i++) {
-        symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
+        symbolColors.emplace_back(ConvertToRSColor(symbolColor[i]));
     }
     txtStyle.symbol.SetRenderColor(symbolColors);
 
@@ -919,11 +929,11 @@ std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient
     }
 }
 
-std::vector<Rosen::Drawing::ColorQuad> ConvertColors(const std::vector<Color>& colors)
+std::vector<Rosen::Drawing::Color> ConvertColors(const std::vector<Color>& colors)
 {
-    std::vector<Rosen::Drawing::ColorQuad> symbolColors;
+    std::vector<Rosen::Drawing::Color> symbolColors;
     for (const auto& color : colors) {
-        symbolColors.emplace_back(ConvertSkColor(color));
+        symbolColors.emplace_back(ConvertToRSColor(color));
     }
     return symbolColors;
 }

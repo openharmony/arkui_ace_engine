@@ -137,7 +137,9 @@ void SetMarkImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        CheckBoxModelStatic::SetCheckMarkColor(frameNode, std::nullopt);
+        CheckBoxModelStatic::SetCheckMarkSize(frameNode, std::nullopt);
+        CheckBoxModelStatic::SetCheckMarkWidth(frameNode, std::nullopt);
         return;
     }
     auto color = Converter::OptConvert<Color>(optValue->strokeColor);

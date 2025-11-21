@@ -20,6 +20,8 @@
 #include "base/utils/utils.h"
 #include "base/geometry/calc_dimension_rect.h"
 #include "bridge/common/utils/utils.h"
+#include "core/accessibility/accessibility_utils.h"
+#include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
 #include "core/common/ime/text_input_type.h"
@@ -44,6 +46,7 @@
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
@@ -4378,6 +4381,30 @@ void ResetAccessibilitySelected(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilitySelected(frameNode, false, true);
 }
 
+ArkUI_CharPtr GetAccessibilityRoleByType(ArkUI_Int32 type)
+{
+    auto roleType = static_cast<AccessibilityRoleType>(type);
+    g_strValue = AccessibilityStaticUtils::GetRoleByType(roleType);
+    return g_strValue.c_str();
+}
+
+void SetOnAccessibilityActionIntercept(ArkUINodeHandle node,
+    uint32_t (*onAccessibilityActionIntercept)(ArkUINodeHandle node, uint32_t action))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback =
+        [node = AceType::WeakClaim(frameNode), onAccessibilityActionIntercept](AccessibilityInterfaceAction action) {
+            auto frameNode = node.Upgrade();
+            CHECK_NULL_RETURN(frameNode, AccessibilityActionInterceptResult::ACTION_CONTINUE);
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+            auto actionFunc = static_cast<uint32_t>(action);
+            auto result = onAccessibilityActionIntercept(nodeHandle, actionFunc);
+            return static_cast<AccessibilityActionInterceptResult>(result);
+        };
+    ViewAbstractModelNG::SetOnAccessibilityActionIntercept(frameNode, std::move(callback));
+}
+
 void SetAllowDrop(ArkUINodeHandle node, ArkUI_CharPtr* allowDropCharArray, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5424,6 +5451,33 @@ void ResetDraggable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetDraggable(frameNode, false);
+}
+
+void SetAccessibilityGroupOptions(ArkUINodeHandle node, ArkUIAccessibilityGroupOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    AccessibilityGroupOptions groupOptions;
+    groupOptions.accessibilityTextPreferred = options.accessibilityTextPreferred;
+    if (options.stateControllerByType >= 0) {
+        groupOptions.stateControllerByType = static_cast<AccessibilityRoleType>(options.stateControllerByType);
+    }
+    groupOptions.stateControllerByInspector = options.stateControllerByInspector;
+    if (options.actionControllerByType >= 0) {
+        groupOptions.actionControllerByType = static_cast<AccessibilityRoleType>(options.actionControllerByType);
+    }
+    groupOptions.actionControllerByInspector = options.actionControllerByInspector;
+    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, groupOptions.accessibilityTextPreferred);
+    ViewAbstractModelNG::SetAccessibilityGroupOptions(frameNode, groupOptions);
+}
+
+void ResetAccessibilityGroupOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    AccessibilityGroupOptions options;
+    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, options.accessibilityTextPreferred);
+    ViewAbstractModelNG::SetAccessibilityGroupOptions(frameNode, options);
 }
 
 void SetAccessibilityGroup(ArkUINodeHandle node, ArkUI_Bool value)
@@ -10239,6 +10293,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetUseShadowBatching = ResetUseShadowBatching,
         .setDraggable = SetDraggable,
         .resetDraggable = ResetDraggable,
+        .setAccessibilityGroupOptions = SetAccessibilityGroupOptions,
+        .resetAccessibilityGroupOptions = ResetAccessibilityGroupOptions,
         .setAccessibilityGroup = SetAccessibilityGroup,
         .resetAccessibilityGroup = ResetAccessibilityGroup,
         .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
@@ -10471,6 +10527,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityChecked = ResetAccessibilityChecked,
         .setAccessibilitySelected = SetAccessibilitySelected,
         .resetAccessibilitySelected = ResetAccessibilitySelected,
+        .getAccessibilityRoleByType = GetAccessibilityRoleByType,
+        .setOnAccessibilityActionIntercept = SetOnAccessibilityActionIntercept,
         .setVisualEffect = SetVisualEffect,
         .resetVisualEffect = ResetVisualEffect,
         .setBackgroundFilter = SetBackgroundFilter,
@@ -11394,18 +11452,25 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         auto size = static_cast<int32_t>(touchInfo.size());
-
-        ArkUITouchTestInfoItemArray touchTestInfoItemArray = nullptr;
+        std::vector<std::shared_ptr<ArkUITouchTestInfoItem>> touchTestItems;
+        touchTestItems.reserve(size);
+        for (const auto& info : touchInfo) {
+            auto item = NodeModifier::CreateTouchTestInfoItem(info);
+            if (item) {
+                touchTestItems.emplace_back(std::move(item));
+            } else {
+                return NG::TouchResult();
+            }
+        }
+        std::unique_ptr<ArkUITouchTestInfoItemHandle[]> touchTestInfoItemArray;
         if (size > 0) {
-            touchTestInfoItemArray = new ArkUITouchTestInfoItemHandle[size];
-            int32_t index = 0;
-            for (const auto& info : touchInfo) {
-                touchTestInfoItemArray[index] = NodeModifier::CreateTouchTestInfoItem(info);
-                index++;
+            touchTestInfoItemArray = std::make_unique<ArkUITouchTestInfoItemHandle[]>(size);
+            for (size_t i = 0; i < touchTestItems.size(); ++i) {
+                touchTestInfoItemArray[i] = touchTestItems[i].get();
             }
         }
         ArkUITouchTestInfo touchTestInfo;
-        touchTestInfo.array = touchTestInfoItemArray;
+        touchTestInfo.array = touchTestInfoItemArray.get();
         touchTestInfo.subKind = ON_CHILD_TOUCH_TEST;
         touchTestInfo.strategy = ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_DEFAULT;
         touchTestInfo.size = size;
@@ -11419,8 +11484,6 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
             delete event.touchTestInfo.resultId;
             event.touchTestInfo.resultId = nullptr;
         }
-        delete[] touchTestInfoItemArray;
-        touchTestInfoItemArray = nullptr;
         return touchRes;
     };
     ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));

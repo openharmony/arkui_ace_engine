@@ -104,9 +104,25 @@ void FfiOHOSAceFrameworkSelectSetFontColor(uint32_t color)
     SelectModel::GetInstance()->SetFontColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkSelectResetFontColor()
+{
+    SelectModel::GetInstance()->ResetFontColor();
+}
+
 void FfiOHOSAceFrameworkSelectSetSelectedOptionBgColor(uint32_t color)
 {
     SelectModel::GetInstance()->SetSelectedOptionBgColor(Color(color));
+}
+
+// reset select SelectedOptionBgColor from SelectTheme
+void FfiOHOSAceFrameworkSelectResetSelectedOptionBgColor()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    Color bgColor = theme->GetSelectedColor();
+    SelectModel::GetInstance()->SetSelectedOptionBgColor(bgColor);
 }
 
 void FfiOHOSAceFrameworkSelectSetSelectedOptionFont(
@@ -121,6 +137,16 @@ void FfiOHOSAceFrameworkSelectSetSelectedOptionFont(
 void FfiOHOSAceFrameworkSelectSetSelectedOptionFontColor(uint32_t color)
 {
     SelectModel::GetInstance()->SetSelectedOptionFontColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkSelectResetSelectedOptionFontColor()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    Color textColor = theme->GetSelectedColorText();
+    SelectModel::GetInstance()->SetSelectedOptionFontColor(textColor);
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionBgColor(uint32_t color)
@@ -140,6 +166,16 @@ void FfiOHOSAceFrameworkSelectSetOptionFont(
 void FfiOHOSAceFrameworkSelectSetOptionFontColor(uint32_t color)
 {
     SelectModel::GetInstance()->SetOptionFontColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkSelectResetOptionFontColor()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    Color textColor = theme->GetMenuFontColor();
+    SelectModel::GetInstance()->SetOptionFontColor(textColor);
 }
 
 void FfiOHOSAceFrameworkSelectSetSpace(double width, int32_t widthUnit)
@@ -173,6 +209,13 @@ void FfiOHOSAceFrameworkSelectSetOptionWidth(double width, int32_t widthUnit)
     SelectModel::GetInstance()->SetHasOptionWidth(true);
     Dimension dimStrokeWidth(width, static_cast<DimensionUnit>(widthUnit));
     SelectModel::GetInstance()->SetOptionWidth(dimStrokeWidth);
+}
+
+void FfiOHOSAceFrameworkSelectResetOptionWidth()
+{
+    CalcDimension value;
+    SelectModel::GetInstance()->SetHasOptionWidth(false);
+    SelectModel::GetInstance()->SetOptionWidth(value);
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionWidthWithMode(const char* value)

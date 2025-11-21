@@ -285,7 +285,9 @@ void SvgGraphic::SetBrushColor(RSBrush& brush, bool useFillColor)
         brush.SetColor(attributes_.fillState.GetColor().BlendOpacity(curOpacity).GetValue());
         return;
     }
-    if (imageComponentColor->GetColorSpace() == ColorSpace::DISPLAY_P3) {
+    if (imageComponentColor->IsPlaceholder()) {
+        brush.SetColor(RSColor(static_cast<RSColorPlaceholder>(imageComponentColor->GetPlaceholder())));
+    } else if (imageComponentColor->GetColorSpace() == ColorSpace::DISPLAY_P3) {
         auto p3Color = imageComponentColor->BlendOpacity(curOpacity);
         brush.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
                        p3Color.GetAlpha() / 255.0 },
@@ -342,7 +344,9 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         return SetGradientStyle(curOpacity);
     } else {
         auto fillColor = (color) ? *color : fillState_.GetColor();
-        if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
+        if (fillColor.IsPlaceholder()) {
+            fillBrush_.SetColor(RSColor(static_cast<RSColorPlaceholder>(fillColor.GetPlaceholder())));
+        } else if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
             auto p3Color = fillColor.BlendOpacity(curOpacity);
             fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
                                     p3Color.GetAlpha() / 255.0 },

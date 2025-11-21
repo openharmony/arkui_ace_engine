@@ -408,6 +408,8 @@ void FfiOHOSAceFrameworkWebBackgroundColor(uint32_t color)
     WebModel::GetInstance()->SetBackgroundColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkWebSetRotate(CJSetRotate value) {}
+
 void OnCommonDialog(bool (*callback)(FfiWebEvent event), int64_t dialogEventType)
 {
     auto instanceId = Container::CurrentId();

@@ -7045,7 +7045,7 @@ ArkUINativeModuleValue CommonBridge::SetAdvancedBlendMode(ArkUIRuntimeCallInfo *
     if (blendApplyTypeArg->IsNumber()) {
         int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
         if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
-            blendApplyTypeNum <= static_cast<int>(OHOS::Ace::BlendApplyType::OFFSCREEN)) {
+            blendApplyTypeNum < static_cast<int>(OHOS::Ace::BlendApplyType::MAX)) {
             blendApplyTypeValue = blendApplyTypeNum;
         }
     }
@@ -7430,12 +7430,23 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
 }
 
 ArkUINativeModuleValue CommonBridge::ResetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{	
+    EcmaVM* vm = runtimeCallInfo->GetVM();	
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));	
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);	
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());	
+    GetArkUINodeModifiers()->getCommonModifier()->resetKeyBoardShortCut(nativeNode);	
+    return panda::JSValueRef::Undefined(vm);	
+}
+
+ArkUINativeModuleValue CommonBridge::ResetKeyBoardShortCutAll(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getCommonModifier()->resetKeyBoardShortCut(nativeNode);
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    ViewAbstractModelNG::ResetKeyboardShortcutAll(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

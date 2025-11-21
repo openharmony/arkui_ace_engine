@@ -31,6 +31,7 @@ public:
     virtual int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterTextChangeEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterWebUnfocusEventCallback(
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
@@ -41,6 +42,7 @@ public:
     virtual int32_t SendCommand(const std::string command) override;
     virtual int32_t UnregisterClickEventCallback() override;
     virtual int32_t UnregisterSearchEventCallback() override;
+    virtual int32_t UnregisterTextChangeEventCallback() override;
     virtual int32_t UnregisterRouterChangeEventCallback() override;
     virtual int32_t UnregisterComponentChangeEventCallback() override;
     virtual int32_t UnregisterWebUnfocusEventCallback() override;

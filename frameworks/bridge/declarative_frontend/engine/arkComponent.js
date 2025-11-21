@@ -3431,15 +3431,20 @@ class KeyBoardShortCutModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().common.resetKeyBoardShortCut(node);
-    } else if (this.value.action === undefined) {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+      getUINativeModule().common.resetKeyBoardShortCutAll(node);
     } else {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
+      while (this.value.length !== 0) {
+        let item = this.value.shift();
+        if (item === undefined) {
+          continue;
+        }
+        if (item.action === undefined) {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys);
+        } else {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys, item.action);
+        }
+      }
     }
-  }
-  checkObjectDiff() {
-    return !this.value.isEqual(this.stageValue);
   }
 }
 KeyBoardShortCutModifier.identity = Symbol('keyboardShortcut');
@@ -3825,6 +3830,7 @@ class ArkComponent {
     this._changed = false;
     this._classType = classType;
     this._needDiff = true;
+    this._keyboardShortcutList = new Array();
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -5228,7 +5234,9 @@ class ArkComponent {
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
     keyboardShortCut.action = action;
-    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
+    this._keyboardShortcutList.push(keyboardShortCut);
+    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier,
+      this._keyboardShortcutList);
     return this;
   }
   accessibilityGroup(value) {
@@ -26108,6 +26116,16 @@ class ArkNavDestinationComponent extends ArkComponent {
       NavDestinationOnNewParamModifier, callback);
     return this;
   }
+  bindToScrollable(scrollers) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBindToScrollableModifier.identity,
+      NavDestinationBindToScrollableModifier, scrollers);
+    return this;
+  }
+  bindToNestedScrollable(scrollInfos) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBindToNestedScrollableModifier.identity,
+      NavDestinationBindToNestedScrollableModifier, scrollInfos);
+    return this;
+  }
 }
 
 class HideTitleBarModifier extends ModifierWithKey {
@@ -26396,6 +26414,34 @@ class NavDestinationOnWillAppearModifier extends ModifierWithKey {
   }
 }
 NavDestinationOnWillAppearModifier.identity = Symbol('onWillAppear');
+
+class NavDestinationBindToScrollableModifier extends ModifierWithKey {
+  constructor(scrollers) {
+    super(scrollers);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetBindToScrollable(node);
+    } else {
+      getUINativeModule().navDestination.setBindToScrollable(node, this.value);
+    }
+  }
+}
+NavDestinationBindToScrollableModifier.identity = Symbol('bindToScrollable');
+
+class NavDestinationBindToNestedScrollableModifier extends ModifierWithKey {
+  constructor(scrollInfos) {
+    super(scrollInfos);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetBindToNestedScrollable(node);
+    } else {
+      getUINativeModule().navDestination.setBindToNestedScrollable(node, this.value);
+    }
+  }
+}
+NavDestinationBindToNestedScrollableModifier.identity = Symbol('bindToNestedScrollable');
 
 class NavDestinationOnWillShowModifier extends ModifierWithKey {
   constructor(value) {
@@ -32327,6 +32373,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
   }
+  enableImageAnalyzer(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableImageAnalyzerModifier.identity, WebEnableImageAnalyzerModifier, enabled);
+    return this;
+  }
   forceEnableZoom(enabled) {
     modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, enabled);
     return this;
@@ -32337,6 +32387,10 @@ class ArkWebComponent extends ArkComponent {
   }
   backToTop(backToTop) {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
+    return this;
+  }
+  onCameraCaptureStateChanged(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangedModifier.identity, WebOnCameraCaptureStateChangedModifier, callback);
     return this;
   }
 }
@@ -33919,6 +33973,20 @@ class WebJavaScriptProxyModifier extends ModifierWithKey {
 }
 WebJavaScriptProxyModifier.identity = Symbol('webJavaScriptProxyModifier');
 
+class WebEnableImageAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableImageAnalyzer(node);
+    } else {
+      getUINativeModule().web.setEnableImageAnalyzer(node, this.value);
+    }
+  }
+}
+WebEnableImageAnalyzerModifier.identity = Symbol('webEnableImageAnalyzerModifier');
+
 class WebForceEnableZoomModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -33946,6 +34014,21 @@ class WebBackToTopModifier extends ModifierWithKey {
   }
 }
 WebBackToTopModifier.identity = Symbol('webBackToTopModifier');
+
+class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnCameraCaptureStateChanged(node);
+    }
+    else {
+      getUINativeModule().web.setOnCameraCaptureStateChanged(node, this.value);
+    }
+  }
+}
+WebOnCameraCaptureStateChangedModifier.identity = Symbol('webOnCameraCaptureStateChangedModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

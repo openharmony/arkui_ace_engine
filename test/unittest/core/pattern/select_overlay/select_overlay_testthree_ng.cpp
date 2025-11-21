@@ -68,6 +68,13 @@ void SelectOverlayPatternTestNg::SetUpTestCase()
     // set SelectTheme to themeManager before using themeManager to get SelectTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto rootNode = MockPipelineContext::GetCurrent()->rootNode_;
+    if (rootNode) {
+        auto rootRenderContext = rootNode->GetRenderContext();
+        if (rootRenderContext) {
+            rootRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 1280.0f, 2480.0f));
+        }
+    }
 }
 
 void SelectOverlayPatternTestNg::TearDownTestCase()
@@ -705,13 +712,13 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectMenuAndInnerInitProperty_ColorMode_Ed
 
 /**
  * @tc.name: SelectOverlayNodeUpdateSelectMenuBg001
- * @tc.desc: Test UpdateSelectMenuBg with normal process
+ * @tc.desc: Test UpdateSelectMenuBg with normal process.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set up test environment
+     * @tc.steps: step1. Set up test environment.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
@@ -726,7 +733,7 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, Tes
         AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
     ASSERT_NE(selectOverlayNode, nullptr);
 
-    // Create a mock caller with specific color mode
+    // Create a mock caller with specific color mode.
     MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     auto text = FrameNode::GetOrCreateFrameNode(
         "test", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -737,13 +744,13 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, Tes
     text->themeScopeId_ = 100;
 
     /**
-     * @tc.steps: step2. Call UpdateSelectMenuBg with valid caller
-     * @tc.expected: Should update render context with correct properties
+     * @tc.steps: step2. Call UpdateSelectMenuBg with valid caller.
+     * @tc.expected: Should update render context with correct properties.
      */
     selectOverlayNode->UpdateSelectMenuBg(text);
 
     /**
-     * @tc.steps: step3. Verify the render context properties
+     * @tc.steps: step3. Verify the render context properties.
      */
     auto selectMenu = selectOverlayNode->selectMenu_;
     ASSERT_NE(selectMenu, nullptr);
@@ -758,7 +765,7 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeUpdateSelectMenuBg001, Tes
     ASSERT_NE(groupProperty, nullptr);
     BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
     EXPECT_EQ(actualStyleOption.blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
-    EXPECT_EQ(actualStyleOption.colorMode, ThemeColorMode::DARK); // Should convert from ColorMode::DARK
+    EXPECT_EQ(actualStyleOption.colorMode, ThemeColorMode::DARK); // Should convert from ColorMode::DARK.
 }
 
 /**

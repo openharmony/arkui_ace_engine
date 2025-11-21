@@ -565,7 +565,8 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionHandleMouseEventIn
     pattern->displayArea_ = RectF(100.0, 100.0, 100.0, 100.0);
     pattern->DispatchDisplayArea(true);
     pattern->DispatchDisplayArea(false);
-    auto sessionWrapper = AceType::DynamicCast<PreviewSessionWrapperImpl>(pattern->sessionWrapper_);
+    auto sessionWrapper =
+        AceType::DynamicCast<PreviewSessionWrapperImpl>(pattern->sessionWrapper_);
     EXPECT_NE(sessionWrapper, nullptr);
     pattern->isVisible_ = true;
     pattern->OnWindowHide();
@@ -925,7 +926,7 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionChildTreeTest, Tes
     EXPECT_EQ(property->GetChildWindowId(), 1);
     EXPECT_EQ(property->GetChildTreeId(), 1);
 
-    uiExtensionNode->accessibilityProperty_ = nullptr;
+    uiExtensionNode->GetOrCreateAccessibilityProperty() = nullptr;
     InvalidSessionWrapper(pattern);
     pattern->InitializeAccessibility();
     pattern->OnSetAccessibilityChildTree(1, 1);

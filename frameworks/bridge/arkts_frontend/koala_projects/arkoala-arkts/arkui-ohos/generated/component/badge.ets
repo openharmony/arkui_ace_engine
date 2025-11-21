@@ -70,20 +70,20 @@ export enum BadgePosition {
 }
 export interface BadgeStyle {
     color?: ResourceColor;
-    fontSize?: number | ResourceStr;
-    badgeSize?: number | ResourceStr;
+    fontSize?: double | ResourceStr;
+    badgeSize?: double | ResourceStr;
     badgeColor?: ResourceColor;
     borderColor?: ResourceColor;
     borderWidth?: Length;
-    fontWeight?: number | FontWeight | ResourceStr;
+    fontWeight?: int32 | FontWeight | ResourceStr;
 }
 export interface BadgeParam {
     position?: BadgePosition | Position;
     style: BadgeStyle;
 }
 export interface BadgeParamWithNumber extends BadgeParam {
-    count: number;
-    maxCount?: number;
+    count: int32;
+    maxCount?: int32;
 }
 export interface BadgeParamWithString extends BadgeParam {
     value: ResourceStr;
@@ -166,10 +166,10 @@ export class BadgeStyle_serializer {
         if (valueHolderForFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
-            if (valueHolderForFontSizeTmpValue instanceof number) {
+            if (valueHolderForFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontSizeTmpValueForIdx0)
+                const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForFontSizeTmpValueForIdx0)
             } else if (valueHolderForFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as ResourceStr
@@ -190,10 +190,10 @@ export class BadgeStyle_serializer {
         if (valueHolderForBadgeSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBadgeSizeTmpValue  = valueHolderForBadgeSize!
-            if (valueHolderForBadgeSizeTmpValue instanceof number) {
+            if (valueHolderForBadgeSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForBadgeSizeTmpValueForIdx0  = valueHolderForBadgeSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBadgeSizeTmpValueForIdx0)
+                const valueHolderForBadgeSizeTmpValueForIdx0  = valueHolderForBadgeSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForBadgeSizeTmpValueForIdx0)
             } else if (valueHolderForBadgeSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBadgeSizeTmpValueForIdx1  = valueHolderForBadgeSizeTmpValue as ResourceStr
@@ -282,10 +282,10 @@ export class BadgeStyle_serializer {
         if (valueHolderForFontWeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
-            if (valueHolderForFontWeightTmpValue instanceof number) {
+            if (valueHolderForFontWeightTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx0)
+                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
@@ -329,12 +329,12 @@ export class BadgeStyle_serializer {
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
         const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let fontSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontSizeTmpBuf_ : number | ResourceStr | undefined
+            let fontSizeTmpBuf_ : double | ResourceStr | undefined
             if (fontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                fontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (fontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const fontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let fontSizeTmpBuf_BufU : string | Resource | undefined
@@ -349,16 +349,16 @@ export class BadgeStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontSizeTmpBuf = (fontSizeTmpBuf_ as number | ResourceStr)
+            fontSizeTmpBuf = (fontSizeTmpBuf_ as double | ResourceStr)
         }
-        const fontSizeTmpResult : number | ResourceStr | undefined = fontSizeTmpBuf
+        const fontSizeTmpResult : double | ResourceStr | undefined = fontSizeTmpBuf
         const badgeSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let badgeSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let badgeSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((badgeSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const badgeSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let badgeSizeTmpBuf_ : number | ResourceStr | undefined
+            let badgeSizeTmpBuf_ : double | ResourceStr | undefined
             if (badgeSizeTmpBuf_UnionSelector == (0).toChar()) {
-                badgeSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                badgeSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (badgeSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const badgeSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let badgeSizeTmpBuf_BufU : string | Resource | undefined
@@ -373,9 +373,9 @@ export class BadgeStyle_serializer {
             } else {
                 throw new Error("One of the branches for badgeSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            badgeSizeTmpBuf = (badgeSizeTmpBuf_ as number | ResourceStr)
+            badgeSizeTmpBuf = (badgeSizeTmpBuf_ as double | ResourceStr)
         }
-        const badgeSizeTmpResult : number | ResourceStr | undefined = badgeSizeTmpBuf
+        const badgeSizeTmpResult : double | ResourceStr | undefined = badgeSizeTmpBuf
         const badgeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let badgeColorTmpBuf : ResourceColor | undefined = undefined
         if ((badgeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -432,12 +432,12 @@ export class BadgeStyle_serializer {
         }
         const borderWidthTmpResult : Length | undefined = borderWidthTmpBuf
         const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeightTmpBuf : number | FontWeight | ResourceStr | undefined = undefined
+        let fontWeightTmpBuf : int32 | FontWeight | ResourceStr | undefined = undefined
         if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontWeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontWeightTmpBuf_ : number | FontWeight | ResourceStr | undefined
+            let fontWeightTmpBuf_ : int32 | FontWeight | ResourceStr | undefined
             if (fontWeightTmpBuf_UnionSelector == (0).toChar()) {
-                fontWeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontWeightTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontWeightTmpBuf_UnionSelector == (1).toChar()) {
                 fontWeightTmpBuf_ = FontWeight.fromValue(valueDeserializer.readInt32())
             } else if (fontWeightTmpBuf_UnionSelector == (2).toChar()) {
@@ -454,9 +454,9 @@ export class BadgeStyle_serializer {
             } else {
                 throw new Error("One of the branches for fontWeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontWeightTmpBuf = (fontWeightTmpBuf_ as number | FontWeight | ResourceStr)
+            fontWeightTmpBuf = (fontWeightTmpBuf_ as int32 | FontWeight | ResourceStr)
         }
-        const fontWeightTmpResult : number | FontWeight | ResourceStr | undefined = fontWeightTmpBuf
+        const fontWeightTmpResult : int32 | FontWeight | ResourceStr | undefined = fontWeightTmpBuf
         let value : BadgeStyle = ({color: colorTmpResult, fontSize: fontSizeTmpResult, badgeSize: badgeSizeTmpResult, badgeColor: badgeColorTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, fontWeight: fontWeightTmpResult} as BadgeStyle)
         return value
     }
@@ -483,12 +483,12 @@ export class BadgeParamWithNumber_serializer {
         const valueHolderForStyle  = value.style
         BadgeStyle_serializer.write(valueSerializer, valueHolderForStyle)
         const valueHolderForCount  = value.count
-        valueSerializer.writeNumber(valueHolderForCount)
+        valueSerializer.writeInt32(valueHolderForCount)
         const valueHolderForMaxCount  = value.maxCount
         if (valueHolderForMaxCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxCountTmpValue  = valueHolderForMaxCount!
-            valueSerializer.writeNumber(valueHolderForMaxCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForMaxCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -511,13 +511,13 @@ export class BadgeParamWithNumber_serializer {
         }
         const positionTmpResult : BadgePosition | Position | undefined = positionTmpBuf
         const styleTmpResult : BadgeStyle = BadgeStyle_serializer.read(valueDeserializer)
-        const countTmpResult : number = (valueDeserializer.readNumber() as number)
+        const countTmpResult : int32 = valueDeserializer.readInt32()
         const maxCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxCountTmpBuf : number | undefined = undefined
+        let maxCountTmpBuf : int32 | undefined = undefined
         if ((maxCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxCountTmpBuf = (valueDeserializer.readNumber() as number)
+            maxCountTmpBuf = valueDeserializer.readInt32()
         }
-        const maxCountTmpResult : number | undefined = maxCountTmpBuf
+        const maxCountTmpResult : int32 | undefined = maxCountTmpBuf
         let value : BadgeParamWithNumber = ({position: positionTmpResult, style: styleTmpResult, count: countTmpResult, maxCount: maxCountTmpResult} as BadgeParamWithNumber)
         return value
     }

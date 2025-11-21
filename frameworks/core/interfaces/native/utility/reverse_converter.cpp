@@ -78,6 +78,12 @@ void AssignArkValue(Ark_Int32& dst, const uint32_t& src)
     dst = static_cast<Ark_Int32>(src);
 }
 
+void AssignArkValue(Ark_Int32& dst, const Dimension& src)
+{
+    auto value = static_cast<uint32_t>(src.ConvertToVp());
+    AssignArkValue(dst, value);
+}
+
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx)
 {
     CHECK_NULL_VOID(src.size());
@@ -122,9 +128,9 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     auto minute = data->GetValue(MINUTE)->GetInt();
     auto second = data->GetValue(SECOND)->GetInt();
     dst = {
-        .hour = ArkValue<Ark_Number>(hour),
-        .minute = ArkValue<Ark_Number>(minute),
-        .second = ArkValue<Ark_Number>(second),
+        .hour = ArkValue<Ark_Int32>(hour),
+        .minute = ArkValue<Ark_Int32>(minute),
+        .second = ArkValue<Ark_Int32>(second),
     };
 }
 
@@ -678,8 +684,8 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {
-    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
-    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Int32>(src.GetComponentHeight());
     dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
 }
 
@@ -960,5 +966,15 @@ void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& s
     dst.id = ArkValue<Ark_String>(src.id);
     dst.name = ArkValue<Opt_String>(src.name);
     dst.value = ArkValue<Opt_String>(src.value);
+}
+
+void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src)
+{
+    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
+    dst.y =  ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
+    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetX()));
+    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -144,8 +144,8 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
     }
 }
 export interface ProgressOptions {
-    value: number;
-    total?: number;
+    value: double;
+    total?: double;
     type?: ProgressType;
 }
 export enum ProgressType {
@@ -166,7 +166,7 @@ export enum ProgressStatus {
 }
 export interface ProgressStyleOptions extends CommonProgressStyleOptions {
     strokeWidth?: Length;
-    scaleCount?: number;
+    scaleCount?: int32;
     scaleWidth?: Length;
 }
 export interface CommonProgressStyleOptions {
@@ -180,7 +180,7 @@ export interface EclipseStyleOptions extends CommonProgressStyleOptions {
 export interface ScaleRingStyleOptions extends CommonProgressStyleOptions {
     strokeWidth?: Length;
     scaleWidth?: Length;
-    scaleCount?: number;
+    scaleCount?: int32;
 }
 export interface RingStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     strokeWidth?: Length;
@@ -194,6 +194,7 @@ export interface LinearStyleOptions extends ScanEffectOptions, CommonProgressSty
 export interface CapsuleStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     borderColor?: ResourceColor;
     borderWidth?: Length;
+    content?: string;
     font?: Font;
     fontColor?: ResourceColor;
     showDefaultPercentage?: boolean;
@@ -266,8 +267,8 @@ export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAt
     }
 }
 export interface ProgressConfiguration extends CommonConfiguration<ProgressConfiguration> {
-    value: number;
-    total: number;
+    value: double;
+    total: double;
 }
 
 export class ArkProgressComponent extends ArkCommonMethodComponent implements ProgressAttribute {
@@ -363,16 +364,16 @@ export class ProgressConfiguration_serializer {
         const valueHolderForContentModifier  = value.contentModifier
         valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
         const valueHolderForValue  = value.value
-        valueSerializer.writeNumber(valueHolderForValue)
+        valueSerializer.writeFloat64(valueHolderForValue)
         const valueHolderForTotal  = value.total
-        valueSerializer.writeNumber(valueHolderForTotal)
+        valueSerializer.writeFloat64(valueHolderForTotal)
     }
     public static read(buffer: DeserializerBase): ProgressConfiguration {
         let valueDeserializer : DeserializerBase = buffer
         const enabledTmpResult : boolean = valueDeserializer.readBoolean()
         const contentModifierTmpResult : ContentModifier<ProgressConfiguration> = (valueDeserializer.readObject() as ContentModifier<ProgressConfiguration>)
-        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
-        const totalTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpResult : double = valueDeserializer.readFloat64()
+        const totalTmpResult : double = valueDeserializer.readFloat64()
         let value : ProgressConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, total: totalTmpResult} as ProgressConfiguration)
         return value
     }
@@ -381,12 +382,12 @@ export class ProgressOptions_serializer {
     public static write(buffer: SerializerBase, value: ProgressOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
-        valueSerializer.writeNumber(valueHolderForValue)
+        valueSerializer.writeFloat64(valueHolderForValue)
         const valueHolderForTotal  = value.total
         if (valueHolderForTotal !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTotalTmpValue  = valueHolderForTotal!
-            valueSerializer.writeNumber(valueHolderForTotalTmpValue)
+            valueSerializer.writeFloat64(valueHolderForTotalTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -401,13 +402,13 @@ export class ProgressOptions_serializer {
     }
     public static read(buffer: DeserializerBase): ProgressOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpResult : double = valueDeserializer.readFloat64()
         const totalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let totalTmpBuf : number | undefined = undefined
+        let totalTmpBuf : double | undefined = undefined
         if ((totalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            totalTmpBuf = (valueDeserializer.readNumber() as number)
+            totalTmpBuf = valueDeserializer.readFloat64()
         }
-        const totalTmpResult : number | undefined = totalTmpBuf
+        const totalTmpResult : double | undefined = totalTmpBuf
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : ProgressType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -551,7 +552,7 @@ export class ProgressStyleOptions_serializer {
         if (valueHolderForScaleCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleCountTmpValue  = valueHolderForScaleCount!
-            valueSerializer.writeNumber(valueHolderForScaleCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForScaleCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -602,11 +603,11 @@ export class ProgressStyleOptions_serializer {
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
         const scaleCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleCountTmpBuf : number | undefined = undefined
+        let scaleCountTmpBuf : int32 | undefined = undefined
         if ((scaleCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleCountTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleCountTmpBuf = valueDeserializer.readInt32()
         }
-        const scaleCountTmpResult : number | undefined = scaleCountTmpBuf
+        const scaleCountTmpResult : int32 | undefined = scaleCountTmpBuf
         const scaleWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scaleWidthTmpBuf : Length | undefined = undefined
         if ((scaleWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -772,6 +773,14 @@ export class CapsuleStyleOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForContent  = value.content
+        if (valueHolderForContent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForContentTmpValue  = valueHolderForContent!
+            valueSerializer.writeString(valueHolderForContentTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForFont  = value.font
         if (valueHolderForFont !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -865,6 +874,12 @@ export class CapsuleStyleOptions_serializer {
             borderWidthTmpBuf = (borderWidthTmpBuf_ as string | number | Resource)
         }
         const borderWidthTmpResult : Length | undefined = borderWidthTmpBuf
+        const contentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let contentTmpBuf : string | undefined = undefined
+        if ((contentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            contentTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const contentTmpResult : string | undefined = contentTmpBuf
         const fontTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontTmpBuf : Font | undefined = undefined
         if ((fontTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -902,7 +917,7 @@ export class CapsuleStyleOptions_serializer {
             borderRadiusTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const borderRadiusTmpResult : LengthMetrics | undefined = borderRadiusTmpBuf
-        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)
+        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, content: contentTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)
         return value
     }
 }

@@ -198,6 +198,8 @@ public:
         rsNode_->SetVisible(visible);
     }
 
+    void BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval) override;
+
     template<typename ModifierName, auto Setter, typename T>
     void AddOrUpdateModifier(std::shared_ptr<ModifierName>& modifier, const T& value);
 
@@ -905,6 +907,7 @@ protected:
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 
 private:
+    void ReCreateRsNodeTreeInner(const std::list<RefPtr<FrameNode>>& childNodesNew);
     void ModifyCustomBackground();
     bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
 

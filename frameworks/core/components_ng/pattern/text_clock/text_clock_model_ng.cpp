@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -117,16 +116,7 @@ void TextClockModelNG::SetTextColor(const Color& value)
 
 void TextClockModelNG::ResetTextColor()
 {
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextClockLayoutProperty, TextColor, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, false);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
-    auto textClockNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(textClockNode);
-    auto textNode = AceType::DynamicCast<FrameNode>(textClockNode->GetLastChild());
-    CHECK_NULL_VOID(textNode);
-    TextModelNG::ResetTextColor(Referenced::RawPtr<FrameNode>(textNode));
 }
 
 void TextClockModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -185,9 +175,9 @@ RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
     }
     auto pipeline = textClockNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto textTheme = pipeline->GetTheme<TextClockTheme>(textClockNode->GetThemeScopeId());
+    auto textTheme = pipeline->GetTheme<TextTheme>();
     if (textTheme) {
-        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyleClock());
+        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyle());
     }
     return textClockNode;
 }
@@ -260,16 +250,7 @@ void TextClockModelNG::SetFontColorByUser(FrameNode* frameNode, bool isSetByUser
 
 void TextClockModelNG::ResetFontColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
-        TextClockLayoutProperty, TextColor, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, false, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
-    CHECK_NULL_VOID(frameNode);
-    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-    CHECK_NULL_VOID(textNode);
-    TextModelNG::ResetTextColor(Referenced::RawPtr<FrameNode>(textNode));
 }
 
 void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
@@ -461,9 +442,9 @@ void TextClockModelNG::CreateWithFontWeightResourceObj(FrameNode* frameNode, con
         } else {
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
-            auto textClockTheme = pipeline->GetTheme<TextClockTheme>(pattern->GetThemeScopeId());
-            CHECK_NULL_VOID(textClockTheme);
-            SetFontWeight(AceType::RawPtr(node), textClockTheme->GetTextStyleClock().GetFontWeight());
+            auto textTheme = pipeline->GetTheme<TextTheme>(pattern->GetThemeScopeId());
+            CHECK_NULL_VOID(textTheme);
+            SetFontWeight(AceType::RawPtr(node), textTheme->GetTextStyle().GetFontWeight());
         }
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));

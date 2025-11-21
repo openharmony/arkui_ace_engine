@@ -76,33 +76,33 @@ std::optional<Converter::PickerValueType> ProcessBindableValue(FrameNode* frameN
 }
 
 std::optional<Converter::PickerSelectedType> ProcessBindableSelected(FrameNode* frameNode,
-    const Opt_Union_Number_Array_Number_Bindable_Bindable& value)
+    const Opt_Union_I32_Array_I32_Bindable_Bindable& value)
 {
     std::optional<Converter::PickerSelectedType> result;
     Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Int32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src);
         },
-        [&result](const Array_Number& src) {
+        [&result](const Array_Int32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::vector<double>& index) {
                 CHECK_NULL_VOID(index.size());
-                auto result = Converter::ArkValue<Ark_Number>(index[0]);
+                auto result = Converter::ArkValue<Ark_Int32>(index[0]);
                 PipelineContext::SetCallBackNode(weakNode);
                 arkCallback.Invoke(result);
             };
             TextPickerModelStatic::SetOnSelectedChangeEvent(frameNode, std::move(onEvent));
         },
-        [&result, frameNode](const Ark_Bindable_Array_Number& src) {
+        [&result, frameNode](const Ark_Bindable_Array_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::vector<double>& index) {
                 Converter::ConvContext ctx;
-                auto result = Converter::ArkValue<Array_Number>(index, &ctx);
+                auto result = Converter::ArkValue<Array_Int32>(index, &ctx);
                 PipelineContext::SetCallBackNode(weakNode);
                 arkCallback.Invoke(result);
             };
@@ -375,7 +375,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // TextPickerModifier
 namespace TextPickerInterfaceModifier {
-void SetSingleRange(FrameNode* frameNode, const Opt_Union_Number_Array_Number* value)
+void SetSingleRange(FrameNode* frameNode, const Opt_Union_I32_Array_I32* value)
 {
     std::vector<OHOS::Ace::NG::RangeContent> rangeResult;
     TextPickerModelStatic::GetSingleRange(frameNode, rangeResult);
@@ -386,7 +386,7 @@ void SetSingleRange(FrameNode* frameNode, const Opt_Union_Number_Array_Number* v
     }
     TextPickerModelStatic::SetSelected(frameNode, index);
 }
-void SetMultiRange(FrameNode* frameNode, const Opt_Union_Number_Array_Number* value)
+void SetMultiRange(FrameNode* frameNode, const Opt_Union_I32_Array_I32* value)
 {
     std::vector<OHOS::Ace::NG::TextCascadePickerOptions> options;
     TextPickerModelStatic::GetMultiOptions(frameNode, options);
@@ -453,7 +453,7 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
 } // TextPickerInterfaceModifier
 namespace TextPickerAttributeModifier {
 void SetDefaultPickerItemHeightImpl(Ark_NativePointer node,
-                                    const Opt_Union_Number_String* value)
+                                    const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -549,9 +549,9 @@ void SetOnChangeImpl(Ark_NativePointer node,
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
 
-        Converter::ArkArrayHolder<Array_Number> numberHolder(selectedIndexes);
-        Array_Number intArrayValues = numberHolder.ArkValue();
-        auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
+        Converter::ArkArrayHolder<Array_Int32> numberHolder(selectedIndexes);
+        Array_Int32 intArrayValues = numberHolder.ArkValue();
+        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
     TextPickerModelStatic::SetOnCascadeChange(frameNode, std::move(onChange));
@@ -574,8 +574,8 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
-        Array_Number intArrayValues = Converter::ArkValue<Array_Number>(selectedIndexes, Converter::FC);
-        auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
+        Array_Int32 intArrayValues = Converter::ArkValue<Array_Int32>(selectedIndexes, Converter::FC);
+        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
     TextPickerModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));
@@ -598,14 +598,14 @@ void SetOnEnterSelectedAreaImpl(Ark_NativePointer node,
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
-        Array_Number intArrayValues = Converter::ArkValue<Array_Number>(selectedIndexes, Converter::FC);
-        auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
+        Array_Int32 intArrayValues = Converter::ArkValue<Array_Int32>(selectedIndexes, Converter::FC);
+        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
     TextPickerModelStatic::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));
 }
 void SetSelectedIndexImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Array_Number* value)
+                          const Opt_Union_I32_Array_I32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

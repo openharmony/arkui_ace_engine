@@ -319,9 +319,12 @@ const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescr
  * @partof SDK
  * @since 22
  */
-const Env = (envKey: string) => {
+const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Env`, envKey);
+
   return (proto: object, varName: string): void => {
+    EnvV2.addEnvKeyVariableDecoMeta(proto, varName, envKey);
+    const storeProp = ObserveV2.ENV_PREFIX + varName;
     Reflect.defineProperty(proto, varName, {
       get() {
         if (!(envKey in envFactoryMap)) {
@@ -335,7 +338,14 @@ const Env = (envKey: string) => {
           stateMgmtConsole.applicationError(message);
           throw new Error(message);
         }
-        return EnvV2.registerEnv(envKey as keyof EnvTypeMap, this.getUIContext(), this.getMainInstanceId());
+        ObserveV2.getObserve().addRef(this, varName);
+        if (!this[storeProp]) {
+          // first init env value
+          stateMgmtConsole.debug(`Env get first register EnvValue key ${envKey} varName ${varName} in ${this.debugInfo__()}`);
+          this.__registerUpdateInstanceForEnvFunc__Internal(this.__updateInstanceIdForEnvValue__Internal.bind(this));
+          return EnvV2.registerEnv(envKey, this, varName);
+        }
+        return this[storeProp];
       },
       set(_) {
           const message = `@Env(${envKey}) is read-only and cannot assign value for it.`;

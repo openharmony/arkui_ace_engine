@@ -941,6 +941,13 @@ public:
     virtual void MarkContentNodeForRender() {};
     float TextContentAlignOffsetY();
 
+    bool AllowVisibleAreaCheck() const override
+    {
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProperty, false);
+        return textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE;
+    }
+
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
     int32_t GetClickedSpanPosition()

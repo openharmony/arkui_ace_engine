@@ -235,6 +235,7 @@ public:
     virtual void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold) {}
+    virtual void SetEnableImageAnalyzer(bool isEnabled) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetForceEnableZoom(bool isEnabled) {}
@@ -242,6 +243,7 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
     virtual void SetBackToTop(bool isBackToTop) {};
     virtual void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) {};
+    virtual void SetCameraCaptureStateChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

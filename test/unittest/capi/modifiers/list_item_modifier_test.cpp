@@ -260,21 +260,21 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t resourceId;
-        int32_t offset;
+        double offset;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    void (*checkCallback)(const Ark_Int32, const Ark_Float64) =
+    auto checkCallback =
         [](const Ark_Int32 resourceId, const Ark_Float64 offset) {
             checkEvent = {
                 .resourceId = resourceId,
-                .offset = Converter::Convert<int32_t>(offset)
+                .offset = Converter::Convert<double>(offset)
             };
         };
 
     Ark_SwipeActionOptions arkOptions = {
         .onOffsetChange = Converter::ArkValue<Opt_Callback_F64_Void>(
-            Converter::ArkValue<Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1))
+            Converter::ArkValue<Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1)),
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -287,7 +287,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
     eventHub->FireOffsetChangeEvent(offsetArg);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().resourceId, TEST_RESOURCE_ID_1);
-    EXPECT_EQ(checkEvent.value().offset, offsetArg);
+    EXPECT_FLOAT_EQ(checkEvent.value().offset, offsetArg);
 }
 
 /**

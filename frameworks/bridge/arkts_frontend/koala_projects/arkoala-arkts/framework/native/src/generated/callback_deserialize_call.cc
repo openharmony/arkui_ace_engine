@@ -260,36 +260,36 @@ void deserializeAndCallSyncCallback_Area_Area_Void(Ark_VMContext vmContext, KSer
     Ark_Area newValue = Area_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, oldValue, newValue);
 }
-void deserializeAndCallCallback_Array_Number_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallCallback_Array_I32_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_Number input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Array_Number_Void))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_Int32 input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Array_I32_Void))));
     thisDeserializer.readPointer();
     const Ark_Int32 inputTmpBufLength = thisDeserializer.readInt32();
-    Array_Number inputTmpBuf = {};
+    Array_Int32 inputTmpBuf = {};
     thisDeserializer.resizeArray<std::decay<decltype(inputTmpBuf)>::type,
         std::decay<decltype(*inputTmpBuf.array)>::type>(&inputTmpBuf, inputTmpBufLength);
     for (int inputTmpBufBufCounterI = 0; inputTmpBufBufCounterI < inputTmpBufLength; inputTmpBufBufCounterI++) {
-        inputTmpBuf.array[inputTmpBufBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        inputTmpBuf.array[inputTmpBufBufCounterI] = thisDeserializer.readInt32();
     }
-    Array_Number input = inputTmpBuf;
+    Array_Int32 input = inputTmpBuf;
     _call(_resourceId, input);
 }
-void deserializeAndCallSyncCallback_Array_Number_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallSyncCallback_Array_I32_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_Number input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Array_Number_Void))));
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_Int32 input)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Array_I32_Void))));
     const Ark_Int32 inputTmpBufLength = thisDeserializer.readInt32();
-    Array_Number inputTmpBuf = {};
+    Array_Int32 inputTmpBuf = {};
     thisDeserializer.resizeArray<std::decay<decltype(inputTmpBuf)>::type,
         std::decay<decltype(*inputTmpBuf.array)>::type>(&inputTmpBuf, inputTmpBufLength);
     for (int inputTmpBufBufCounterI = 0; inputTmpBufBufCounterI < inputTmpBufLength; inputTmpBufBufCounterI++) {
-        inputTmpBuf.array[inputTmpBufBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        inputTmpBuf.array[inputTmpBufBufCounterI] = thisDeserializer.readInt32();
     }
-    Array_Number input = inputTmpBuf;
+    Array_Int32 input = inputTmpBuf;
     callSyncMethod(vmContext, resourceId, input);
 }
 void deserializeAndCallCallback_Array_String_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -1249,6 +1249,24 @@ void deserializeAndCallSyncCallback_I32_Tuple_I32_I32_I32_I32(Ark_VMContext vmCo
     Ark_Int32 index = thisDeserializer.readInt32();
     Callback_Tuple_I32_I32_I32_I32_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Tuple_I32_I32_I32_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Tuple_I32_I32_I32_I32_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Tuple_I32_I32_I32_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Tuple_I32_I32_I32_I32_Void))))};
     callSyncMethod(vmContext, resourceId, index, continuationResult);
+}
+void deserializeAndCallCallback_I64_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_I64_Void))));
+    thisDeserializer.readPointer();
+    Ark_Int64 value = thisDeserializer.readInt64();
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_I64_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_I64_Void))));
+    Ark_Int64 value = thisDeserializer.readInt64();
+    callSyncMethod(vmContext, resourceId, value);
 }
 void deserializeAndCallCallback_I32_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -3574,36 +3592,36 @@ void deserializeAndCallSyncCallback_T_Void_Array_Global_Resource_Resource(Ark_VM
     Array_Resource value0 = value0TmpBuf;
     callSyncMethod(vmContext, resourceId, value0);
 }
-void deserializeAndCallCallback_T_Void_Array_Number(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallCallback_T_Void_Array_I32(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_T_Void_Array_Number))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_Int32 value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_T_Void_Array_I32))));
     thisDeserializer.readPointer();
     const Ark_Int32 value0TmpBufLength = thisDeserializer.readInt32();
-    Array_Number value0TmpBuf = {};
+    Array_Int32 value0TmpBuf = {};
     thisDeserializer.resizeArray<std::decay<decltype(value0TmpBuf)>::type,
         std::decay<decltype(*value0TmpBuf.array)>::type>(&value0TmpBuf, value0TmpBufLength);
     for (int value0TmpBufBufCounterI = 0; value0TmpBufBufCounterI < value0TmpBufLength; value0TmpBufBufCounterI++) {
-        value0TmpBuf.array[value0TmpBufBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        value0TmpBuf.array[value0TmpBufBufCounterI] = thisDeserializer.readInt32();
     }
-    Array_Number value0 = value0TmpBuf;
+    Array_Int32 value0 = value0TmpBuf;
     _call(_resourceId, value0);
 }
-void deserializeAndCallSyncCallback_T_Void_Array_Number(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallSyncCallback_T_Void_Array_I32(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_T_Void_Array_Number))));
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_Int32 value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_T_Void_Array_I32))));
     const Ark_Int32 value0TmpBufLength = thisDeserializer.readInt32();
-    Array_Number value0TmpBuf = {};
+    Array_Int32 value0TmpBuf = {};
     thisDeserializer.resizeArray<std::decay<decltype(value0TmpBuf)>::type,
         std::decay<decltype(*value0TmpBuf.array)>::type>(&value0TmpBuf, value0TmpBufLength);
     for (int value0TmpBufBufCounterI = 0; value0TmpBufBufCounterI < value0TmpBufLength; value0TmpBufBufCounterI++) {
-        value0TmpBuf.array[value0TmpBufBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        value0TmpBuf.array[value0TmpBufBufCounterI] = thisDeserializer.readInt32();
     }
-    Array_Number value0 = value0TmpBuf;
+    Array_Int32 value0 = value0TmpBuf;
     callSyncMethod(vmContext, resourceId, value0);
 }
 void deserializeAndCallCallback_T_Void_Array_String(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -4581,7 +4599,7 @@ void deserializeAndCallMenuItemModifierBuilder(KSerializerBuffer thisArray, Ark_
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_MenuItemConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuItemModifierBuilder))));
     thisDeserializer.readPointer();
     Ark_NativePointer parentNode = thisDeserializer.readPointer();
-    Ark_MenuItemConfiguration config = MenuItemConfiguration_serializer::read(thisDeserializer);
+    Ark_MenuItemConfiguration config = static_cast<Ark_MenuItemConfiguration>(MenuItemConfiguration_serializer::read(thisDeserializer));
     Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     _call(_resourceId, parentNode, config, continuationResult);
 }
@@ -4592,7 +4610,7 @@ void deserializeAndCallSyncMenuItemModifierBuilder(Ark_VMContext vmContext, KSer
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_MenuItemConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuItemModifierBuilder))));
     Ark_NativePointer parentNode = thisDeserializer.readPointer();
-    Ark_MenuItemConfiguration config = MenuItemConfiguration_serializer::read(thisDeserializer);
+    Ark_MenuItemConfiguration config = static_cast<Ark_MenuItemConfiguration>(MenuItemConfiguration_serializer::read(thisDeserializer));
     Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     callSyncMethod(vmContext, resourceId, parentNode, config, continuationResult);
 }
@@ -5702,7 +5720,7 @@ void deserializeAndCallOnTextPickerChangeCallback(KSerializerBuffer thisArray, A
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnTextPickerChangeCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnTextPickerChangeCallback))));
     thisDeserializer.readPointer();
     const Ark_Int8 selectItemTmpBufUnionSelector = thisDeserializer.readInt8();
     Ark_Union_String_Array_String selectItemTmpBuf = {};
@@ -5725,25 +5743,25 @@ void deserializeAndCallOnTextPickerChangeCallback(KSerializerBuffer thisArray, A
     }
     Ark_Union_String_Array_String selectItem = static_cast<Ark_Union_String_Array_String>(selectItemTmpBuf);
     const Ark_Int8 indexTmpBufUnionSelector = thisDeserializer.readInt8();
-    Ark_Union_Number_Array_Number indexTmpBuf = {};
+    Ark_Union_I32_Array_I32 indexTmpBuf = {};
     indexTmpBuf.selector = indexTmpBufUnionSelector;
     if (indexTmpBufUnionSelector == 0) {
         indexTmpBuf.selector = 0;
-        indexTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        indexTmpBuf.value0 = thisDeserializer.readInt32();
     } else if (indexTmpBufUnionSelector == 1) {
         indexTmpBuf.selector = 1;
         const Ark_Int32 indexTmpBufBufULength = thisDeserializer.readInt32();
-        Array_Number indexTmpBufBufU = {};
+        Array_Int32 indexTmpBufBufU = {};
         thisDeserializer.resizeArray<std::decay<decltype(indexTmpBufBufU)>::type,
         std::decay<decltype(*indexTmpBufBufU.array)>::type>(&indexTmpBufBufU, indexTmpBufBufULength);
         for (int indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32();
         }
         indexTmpBuf.value1 = indexTmpBufBufU;
     } else {
         INTEROP_FATAL("One of the branches for indexTmpBuf has to be chosen through deserialisation.");
     }
-    Ark_Union_Number_Array_Number index = static_cast<Ark_Union_Number_Array_Number>(indexTmpBuf);
+    Ark_Union_I32_Array_I32 index = static_cast<Ark_Union_I32_Array_I32>(indexTmpBuf);
     _call(_resourceId, selectItem, index);
 }
 void deserializeAndCallSyncOnTextPickerChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -5751,7 +5769,7 @@ void deserializeAndCallSyncOnTextPickerChangeCallback(Ark_VMContext vmContext, K
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnTextPickerChangeCallback))));
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String selectItem, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnTextPickerChangeCallback))));
     const Ark_Int8 selectItemTmpBufUnionSelector = thisDeserializer.readInt8();
     Ark_Union_String_Array_String selectItemTmpBuf = {};
     selectItemTmpBuf.selector = selectItemTmpBufUnionSelector;
@@ -5773,25 +5791,25 @@ void deserializeAndCallSyncOnTextPickerChangeCallback(Ark_VMContext vmContext, K
     }
     Ark_Union_String_Array_String selectItem = static_cast<Ark_Union_String_Array_String>(selectItemTmpBuf);
     const Ark_Int8 indexTmpBufUnionSelector = thisDeserializer.readInt8();
-    Ark_Union_Number_Array_Number indexTmpBuf = {};
+    Ark_Union_I32_Array_I32 indexTmpBuf = {};
     indexTmpBuf.selector = indexTmpBufUnionSelector;
     if (indexTmpBufUnionSelector == 0) {
         indexTmpBuf.selector = 0;
-        indexTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        indexTmpBuf.value0 = thisDeserializer.readInt32();
     } else if (indexTmpBufUnionSelector == 1) {
         indexTmpBuf.selector = 1;
         const Ark_Int32 indexTmpBufBufULength = thisDeserializer.readInt32();
-        Array_Number indexTmpBufBufU = {};
+        Array_Int32 indexTmpBufBufU = {};
         thisDeserializer.resizeArray<std::decay<decltype(indexTmpBufBufU)>::type,
         std::decay<decltype(*indexTmpBufBufU.array)>::type>(&indexTmpBufBufU, indexTmpBufBufULength);
         for (int indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32();
         }
         indexTmpBuf.value1 = indexTmpBufBufU;
     } else {
         INTEROP_FATAL("One of the branches for indexTmpBuf has to be chosen through deserialisation.");
     }
-    Ark_Union_Number_Array_Number index = static_cast<Ark_Union_Number_Array_Number>(indexTmpBuf);
+    Ark_Union_I32_Array_I32 index = static_cast<Ark_Union_I32_Array_I32>(indexTmpBuf);
     callSyncMethod(vmContext, resourceId, selectItem, index);
 }
 void deserializeAndCallOnTextSelectionChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -6601,7 +6619,7 @@ void deserializeAndCallTextPickerEnterSelectedAreaCallback(KSerializerBuffer thi
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerEnterSelectedAreaCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerEnterSelectedAreaCallback))));
     thisDeserializer.readPointer();
     const Ark_Int8 valueTmpBufUnionSelector = thisDeserializer.readInt8();
     Ark_Union_String_Array_String valueTmpBuf = {};
@@ -6624,25 +6642,25 @@ void deserializeAndCallTextPickerEnterSelectedAreaCallback(KSerializerBuffer thi
     }
     Ark_Union_String_Array_String value = static_cast<Ark_Union_String_Array_String>(valueTmpBuf);
     const Ark_Int8 indexTmpBufUnionSelector = thisDeserializer.readInt8();
-    Ark_Union_Number_Array_Number indexTmpBuf = {};
+    Ark_Union_I32_Array_I32 indexTmpBuf = {};
     indexTmpBuf.selector = indexTmpBufUnionSelector;
     if (indexTmpBufUnionSelector == 0) {
         indexTmpBuf.selector = 0;
-        indexTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        indexTmpBuf.value0 = thisDeserializer.readInt32();
     } else if (indexTmpBufUnionSelector == 1) {
         indexTmpBuf.selector = 1;
         const Ark_Int32 indexTmpBufBufULength = thisDeserializer.readInt32();
-        Array_Number indexTmpBufBufU = {};
+        Array_Int32 indexTmpBufBufU = {};
         thisDeserializer.resizeArray<std::decay<decltype(indexTmpBufBufU)>::type,
         std::decay<decltype(*indexTmpBufBufU.array)>::type>(&indexTmpBufBufU, indexTmpBufBufULength);
         for (int indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32();
         }
         indexTmpBuf.value1 = indexTmpBufBufU;
     } else {
         INTEROP_FATAL("One of the branches for indexTmpBuf has to be chosen through deserialisation.");
     }
-    Ark_Union_Number_Array_Number index = static_cast<Ark_Union_Number_Array_Number>(indexTmpBuf);
+    Ark_Union_I32_Array_I32 index = static_cast<Ark_Union_I32_Array_I32>(indexTmpBuf);
     _call(_resourceId, value, index);
 }
 void deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -6650,7 +6668,7 @@ void deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(Ark_VMContext vmC
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerEnterSelectedAreaCallback))));
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerEnterSelectedAreaCallback))));
     const Ark_Int8 valueTmpBufUnionSelector = thisDeserializer.readInt8();
     Ark_Union_String_Array_String valueTmpBuf = {};
     valueTmpBuf.selector = valueTmpBufUnionSelector;
@@ -6672,32 +6690,32 @@ void deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(Ark_VMContext vmC
     }
     Ark_Union_String_Array_String value = static_cast<Ark_Union_String_Array_String>(valueTmpBuf);
     const Ark_Int8 indexTmpBufUnionSelector = thisDeserializer.readInt8();
-    Ark_Union_Number_Array_Number indexTmpBuf = {};
+    Ark_Union_I32_Array_I32 indexTmpBuf = {};
     indexTmpBuf.selector = indexTmpBufUnionSelector;
     if (indexTmpBufUnionSelector == 0) {
         indexTmpBuf.selector = 0;
-        indexTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        indexTmpBuf.value0 = thisDeserializer.readInt32();
     } else if (indexTmpBufUnionSelector == 1) {
         indexTmpBuf.selector = 1;
         const Ark_Int32 indexTmpBufBufULength = thisDeserializer.readInt32();
-        Array_Number indexTmpBufBufU = {};
+        Array_Int32 indexTmpBufBufU = {};
         thisDeserializer.resizeArray<std::decay<decltype(indexTmpBufBufU)>::type,
         std::decay<decltype(*indexTmpBufBufU.array)>::type>(&indexTmpBufBufU, indexTmpBufBufULength);
         for (int indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32();
         }
         indexTmpBuf.value1 = indexTmpBufBufU;
     } else {
         INTEROP_FATAL("One of the branches for indexTmpBuf has to be chosen through deserialisation.");
     }
-    Ark_Union_Number_Array_Number index = static_cast<Ark_Union_Number_Array_Number>(indexTmpBuf);
+    Ark_Union_I32_Array_I32 index = static_cast<Ark_Union_I32_Array_I32>(indexTmpBuf);
     callSyncMethod(vmContext, resourceId, value, index);
 }
 void deserializeAndCallTextPickerScrollStopCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerScrollStopCallback))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerScrollStopCallback))));
     thisDeserializer.readPointer();
     const Ark_Int8 valueTmpBufUnionSelector = thisDeserializer.readInt8();
     Ark_Union_String_Array_String valueTmpBuf = {};
@@ -6720,25 +6738,25 @@ void deserializeAndCallTextPickerScrollStopCallback(KSerializerBuffer thisArray,
     }
     Ark_Union_String_Array_String value = static_cast<Ark_Union_String_Array_String>(valueTmpBuf);
     const Ark_Int8 indexTmpBufUnionSelector = thisDeserializer.readInt8();
-    Ark_Union_Number_Array_Number indexTmpBuf = {};
+    Ark_Union_I32_Array_I32 indexTmpBuf = {};
     indexTmpBuf.selector = indexTmpBufUnionSelector;
     if (indexTmpBufUnionSelector == 0) {
         indexTmpBuf.selector = 0;
-        indexTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        indexTmpBuf.value0 = thisDeserializer.readInt32();
     } else if (indexTmpBufUnionSelector == 1) {
         indexTmpBuf.selector = 1;
         const Ark_Int32 indexTmpBufBufULength = thisDeserializer.readInt32();
-        Array_Number indexTmpBufBufU = {};
+        Array_Int32 indexTmpBufBufU = {};
         thisDeserializer.resizeArray<std::decay<decltype(indexTmpBufBufU)>::type,
         std::decay<decltype(*indexTmpBufBufU.array)>::type>(&indexTmpBufBufU, indexTmpBufBufULength);
         for (int indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32();
         }
         indexTmpBuf.value1 = indexTmpBufBufU;
     } else {
         INTEROP_FATAL("One of the branches for indexTmpBuf has to be chosen through deserialisation.");
     }
-    Ark_Union_Number_Array_Number index = static_cast<Ark_Union_Number_Array_Number>(indexTmpBuf);
+    Ark_Union_I32_Array_I32 index = static_cast<Ark_Union_I32_Array_I32>(indexTmpBuf);
     _call(_resourceId, value, index);
 }
 void deserializeAndCallSyncTextPickerScrollStopCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -6746,7 +6764,7 @@ void deserializeAndCallSyncTextPickerScrollStopCallback(Ark_VMContext vmContext,
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerScrollStopCallback))));
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_I32_Array_I32 index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerScrollStopCallback))));
     const Ark_Int8 valueTmpBufUnionSelector = thisDeserializer.readInt8();
     Ark_Union_String_Array_String valueTmpBuf = {};
     valueTmpBuf.selector = valueTmpBufUnionSelector;
@@ -6768,25 +6786,25 @@ void deserializeAndCallSyncTextPickerScrollStopCallback(Ark_VMContext vmContext,
     }
     Ark_Union_String_Array_String value = static_cast<Ark_Union_String_Array_String>(valueTmpBuf);
     const Ark_Int8 indexTmpBufUnionSelector = thisDeserializer.readInt8();
-    Ark_Union_Number_Array_Number indexTmpBuf = {};
+    Ark_Union_I32_Array_I32 indexTmpBuf = {};
     indexTmpBuf.selector = indexTmpBufUnionSelector;
     if (indexTmpBufUnionSelector == 0) {
         indexTmpBuf.selector = 0;
-        indexTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        indexTmpBuf.value0 = thisDeserializer.readInt32();
     } else if (indexTmpBufUnionSelector == 1) {
         indexTmpBuf.selector = 1;
         const Ark_Int32 indexTmpBufBufULength = thisDeserializer.readInt32();
-        Array_Number indexTmpBufBufU = {};
+        Array_Int32 indexTmpBufBufU = {};
         thisDeserializer.resizeArray<std::decay<decltype(indexTmpBufBufU)>::type,
         std::decay<decltype(*indexTmpBufBufU.array)>::type>(&indexTmpBufBufU, indexTmpBufBufULength);
         for (int indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            indexTmpBufBufU.array[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32();
         }
         indexTmpBuf.value1 = indexTmpBufBufU;
     } else {
         INTEROP_FATAL("One of the branches for indexTmpBuf has to be chosen through deserialisation.");
     }
-    Ark_Union_Number_Array_Number index = static_cast<Ark_Union_Number_Array_Number>(indexTmpBuf);
+    Ark_Union_I32_Array_I32 index = static_cast<Ark_Union_I32_Array_I32>(indexTmpBuf);
     callSyncMethod(vmContext, resourceId, value, index);
 }
 void deserializeAndCallTextTimerModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -6810,6 +6828,26 @@ void deserializeAndCallSyncTextTimerModifierBuilder(Ark_VMContext vmContext, KSe
     Ark_TextTimerConfiguration config = TextTimerConfiguration_serializer::read(thisDeserializer);
     Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     callSyncMethod(vmContext, resourceId, parentNode, config, continuationResult);
+}
+void deserializeAndCallTimerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 utc, const Ark_Int64 elapsedTime)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TimerCallback))));
+    thisDeserializer.readPointer();
+    Ark_Int64 utc = thisDeserializer.readInt64();
+    Ark_Int64 elapsedTime = thisDeserializer.readInt64();
+    _call(_resourceId, utc, elapsedTime);
+}
+void deserializeAndCallSyncTimerCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 utc, const Ark_Int64 elapsedTime)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TimerCallback))));
+    Ark_Int64 utc = thisDeserializer.readInt64();
+    Ark_Int64 elapsedTime = thisDeserializer.readInt64();
+    callSyncMethod(vmContext, resourceId, utc, elapsedTime);
 }
 void deserializeAndCallToggleModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -7035,7 +7073,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisArray, thisLength);
         case Kind_Callback_AccessibilityActionInterceptResult_Void: return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisArray, thisLength);
         case Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisArray, thisLength);
-        case Kind_Callback_Array_Number_Void: return deserializeAndCallCallback_Array_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Array_I32_Void: return deserializeAndCallCallback_Array_I32_Void(thisArray, thisLength);
         case Kind_Callback_Array_String_Void: return deserializeAndCallCallback_Array_String_Void(thisArray, thisLength);
         case Kind_Callback_Array_TextMenuItem_Void: return deserializeAndCallCallback_Array_TextMenuItem_Void(thisArray, thisLength);
         case Kind_Callback_Array_TouchTestInfo_TouchResult: return deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisArray, thisLength);
@@ -7084,6 +7122,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_I32_I32_Void: return deserializeAndCallCallback_I32_I32_Void(thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32(thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32_I32_I32(thisArray, thisLength);
+        case Kind_Callback_I64_Void: return deserializeAndCallCallback_I64_Void(thisArray, thisLength);
         case Kind_Callback_I32_Void: return deserializeAndCallCallback_I32_Void(thisArray, thisLength);
         case Kind_Callback_InsertValue_Boolean: return deserializeAndCallCallback_InsertValue_Boolean(thisArray, thisLength);
         case Kind_Callback_InsertValue_Void: return deserializeAndCallCallback_InsertValue_Void(thisArray, thisLength);
@@ -7191,7 +7230,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_T_Void_Arkui_Component_Units_ResourceStr: return deserializeAndCallCallback_T_Void_Arkui_Component_Units_ResourceStr(thisArray, thisLength);
         case Kind_Callback_T_Void_Array_Arkui_Component_Units_ResourceStr: return deserializeAndCallCallback_T_Void_Array_Arkui_Component_Units_ResourceStr(thisArray, thisLength);
         case Kind_Callback_T_Void_Array_Global_Resource_Resource: return deserializeAndCallCallback_T_Void_Array_Global_Resource_Resource(thisArray, thisLength);
-        case Kind_Callback_T_Void_Array_Number: return deserializeAndCallCallback_T_Void_Array_Number(thisArray, thisLength);
+        case Kind_Callback_T_Void_Array_I32: return deserializeAndCallCallback_T_Void_Array_I32(thisArray, thisLength);
         case Kind_Callback_T_Void_Array_String: return deserializeAndCallCallback_T_Void_Array_String(thisArray, thisLength);
         case Kind_Callback_T_Void_Boolean: return deserializeAndCallCallback_T_Void_Boolean(thisArray, thisLength);
         case Kind_Callback_T_Void_Date: return deserializeAndCallCallback_T_Void_Date(thisArray, thisLength);
@@ -7328,6 +7367,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisArray, thisLength);
         case Kind_TextPickerScrollStopCallback: return deserializeAndCallTextPickerScrollStopCallback(thisArray, thisLength);
         case Kind_TextTimerModifierBuilder: return deserializeAndCallTextTimerModifierBuilder(thisArray, thisLength);
+        case Kind_TimerCallback: return deserializeAndCallTimerCallback(thisArray, thisLength);
         case Kind_ToggleModifierBuilder: return deserializeAndCallToggleModifierBuilder(thisArray, thisLength);
         case Kind_TransitionFinishCallback: return deserializeAndCallTransitionFinishCallback(thisArray, thisLength);
         case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisArray, thisLength);
@@ -7356,7 +7396,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_AccessibilityActionInterceptResult_Void: return deserializeAndCallSyncCallback_AccessibilityActionInterceptResult_Void(vmContext, thisArray, thisLength);
         case Kind_ButtonTriggerClickCallback: return deserializeAndCallSyncButtonTriggerClickCallback(vmContext, thisArray, thisLength);
         case Kind_Callback_Area_Area_Void: return deserializeAndCallSyncCallback_Area_Area_Void(vmContext, thisArray, thisLength);
-        case Kind_Callback_Array_Number_Void: return deserializeAndCallSyncCallback_Array_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Array_I32_Void: return deserializeAndCallSyncCallback_Array_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Array_String_Void: return deserializeAndCallSyncCallback_Array_String_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Array_TextMenuItem_Void: return deserializeAndCallSyncCallback_Array_TextMenuItem_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Array_TouchTestInfo_TouchResult: return deserializeAndCallSyncCallback_Array_TouchTestInfo_TouchResult(vmContext, thisArray, thisLength);
@@ -7405,6 +7445,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_I32_I32_Void: return deserializeAndCallSyncCallback_I32_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32: return deserializeAndCallSyncCallback_I32_Tuple_I32_I32(vmContext, thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32_I32_I32: return deserializeAndCallSyncCallback_I32_Tuple_I32_I32_I32_I32(vmContext, thisArray, thisLength);
+        case Kind_Callback_I64_Void: return deserializeAndCallSyncCallback_I64_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_I32_Void: return deserializeAndCallSyncCallback_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_InsertValue_Boolean: return deserializeAndCallSyncCallback_InsertValue_Boolean(vmContext, thisArray, thisLength);
         case Kind_Callback_InsertValue_Void: return deserializeAndCallSyncCallback_InsertValue_Void(vmContext, thisArray, thisLength);
@@ -7512,7 +7553,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_T_Void_Arkui_Component_Units_ResourceStr: return deserializeAndCallSyncCallback_T_Void_Arkui_Component_Units_ResourceStr(vmContext, thisArray, thisLength);
         case Kind_Callback_T_Void_Array_Arkui_Component_Units_ResourceStr: return deserializeAndCallSyncCallback_T_Void_Array_Arkui_Component_Units_ResourceStr(vmContext, thisArray, thisLength);
         case Kind_Callback_T_Void_Array_Global_Resource_Resource: return deserializeAndCallSyncCallback_T_Void_Array_Global_Resource_Resource(vmContext, thisArray, thisLength);
-        case Kind_Callback_T_Void_Array_Number: return deserializeAndCallSyncCallback_T_Void_Array_Number(vmContext, thisArray, thisLength);
+        case Kind_Callback_T_Void_Array_I32: return deserializeAndCallSyncCallback_T_Void_Array_I32(vmContext, thisArray, thisLength);
         case Kind_Callback_T_Void_Array_String: return deserializeAndCallSyncCallback_T_Void_Array_String(vmContext, thisArray, thisLength);
         case Kind_Callback_T_Void_Boolean: return deserializeAndCallSyncCallback_T_Void_Boolean(vmContext, thisArray, thisLength);
         case Kind_Callback_T_Void_Date: return deserializeAndCallSyncCallback_T_Void_Date(vmContext, thisArray, thisLength);
@@ -7649,6 +7690,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(vmContext, thisArray, thisLength);
         case Kind_TextPickerScrollStopCallback: return deserializeAndCallSyncTextPickerScrollStopCallback(vmContext, thisArray, thisLength);
         case Kind_TextTimerModifierBuilder: return deserializeAndCallSyncTextTimerModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_TimerCallback: return deserializeAndCallSyncTimerCallback(vmContext, thisArray, thisLength);
         case Kind_ToggleModifierBuilder: return deserializeAndCallSyncToggleModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_TransitionFinishCallback: return deserializeAndCallSyncTransitionFinishCallback(vmContext, thisArray, thisLength);
         case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallSyncType_CommonMethod_onDragStart(vmContext, thisArray, thisLength);

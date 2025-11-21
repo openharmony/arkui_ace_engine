@@ -1,0 +1,216 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+import("../capi_common.gni")
+
+ace_unittest("capi_all_modifiers_test") {
+  type = "new"
+  module_output = "capi"
+  sources = [
+    # place here your UT source code
+    #"alphabet_indexer_modifier_test.cpp",
+    # "badge_modifier_test.cpp",
+    "base_span_modifier_test.cpp",
+    "blank_modifier_test.cpp",
+    "button_modifier_resources_test.cpp",
+    #"button_modifier_test.cpp",
+    #"calendar_picker_modifier_test.cpp",
+    "canvas_modifier_test.cpp",
+    "checkbox_modifier_test.cpp",
+    "checkboxgroup_modifier_test.cpp",
+    #"circle_modifier_test.cpp",
+    "column_modifier_test.cpp",
+    "column_split_modifier_test.cpp",
+    #"common_method_modifier_test.cpp",
+    "common_method_modifier_test10.cpp",
+    #"common_method_modifier_test11.cpp",
+    #"common_method_modifier_test12.cpp",
+    "common_method_modifier_test13.cpp",
+    "common_method_modifier_test14.cpp",
+    "common_method_modifier_test15.cpp",
+    "common_method_modifier_test16.cpp",
+    #"common_method_modifier_test17.cpp",
+    "common_method_modifier_test18.cpp",
+    "common_method_modifier_test19.cpp",
+    #"common_method_modifier_test2.cpp",
+    #"common_method_modifier_test3.cpp",
+    "common_method_modifier_test4.cpp",
+    #"common_method_modifier_test5.cpp",
+    #"common_method_modifier_test6.cpp",
+    "common_method_modifier_test7.cpp",
+    #"common_method_modifier_test8.cpp",
+    "common_method_modifier_test9.cpp",
+    # "common_modifier_test.cpp",
+    "common_shape_method_modifier_resources_test.cpp",
+    "common_shape_method_modifier_test.cpp",
+    #"counter_modifier_test.cpp",
+    "custom_layout_root_modifier_test.cpp",
+    #"data_panel_modifier_test.cpp",
+    "date_picker_modifier_test.cpp",
+    "divider_modifier_test.cpp",
+    "effect_component_modifier_test.cpp",
+    #"ellipse_modifier_test.cpp",
+    "flex_modifier_test.cpp",
+    "folder_stack_modifier_test.cpp",
+    "form_component_modifier_test.cpp",
+    "form_link_modifier_test.cpp",
+    #"gauge_modifier_test.cpp",
+    "grid_col_modifier_test.cpp",
+    #"grid_item_modifier_test.cpp",
+    #"grid_modifier_callbacks_test.cpp",
+    #"grid_modifier_test.cpp",
+    "grid_row_modifier_test.cpp",
+    #"hyperlink_modifier_test.cpp",
+    #"image_animator_modifier_test.cpp",
+    # "image_modifier_test.cpp",
+    "image_modifier_test2.cpp",
+    "image_span_modifier_test.cpp",
+    "indicator_component_modifier_test.cpp",
+    #"line_modifier_test.cpp",
+    #"list_item_group_modifier_test.cpp",
+    "list_item_modifier_test.cpp",
+    #"list_modifier_test.cpp",
+    "loading_progress_modifier_test.cpp",
+    #"marquee_modifier_test.cpp",
+    "media_cached_image_modifier_test.cpp",
+    "menu_item_group_modifier_test.cpp",
+    "menu_item_modifier_test.cpp",
+    "menu_modifier_test.cpp",
+    "nav_destination_modifier_test.cpp",
+    #"paste_button_modifier_test.cpp",
+    #"path_modifier_test.cpp",
+    #"pattern_lock_modifier_test.cpp",
+    "pattern_lock_modifier_test2.cpp",
+    "plugin_component_modifier_test.cpp",
+    #"polygon_modifier_test.cpp",
+    #"polyline_modifier_test.cpp",
+    #"progress_modifier_test.cpp",
+    "radio_modifier_test.cpp",
+    #"rating_modifier_test.cpp",
+    #"rect_modifier_test.cpp",
+    "refresh_modifier_test.cpp",
+    "relative_container_modifier_test.cpp",
+    "resource_converter_test.cpp",
+    "richeditor_modifier_callbacks_test.cpp",
+    #"richeditor_modifier_test.cpp",
+    #"richtext_modifier_test.cpp",
+    "row_modifier_test.cpp",
+    "row_split_modifier_test.cpp",
+    #"save_button_modifier_test.cpp",
+    "screen_modifier_test.cpp",
+    "scroll_bar_modifier_test.cpp",
+    #"scroll_modifier_test.cpp",
+    "scrollable_common_method_modifier_test.cpp",
+    "scrollable_common_method_modifier_test_2.cpp",
+    # "search_modifier_callbacks_test.cpp",
+    # "search_modifier_resources_test.cpp",
+    # "search_modifier_test.cpp",
+    # "search_modifier_test2.cpp",
+    #"security_component_method_modifier_test.cpp",
+    #"security_component_method_modifier_test_2.cpp",
+    #"select_modifier_test.cpp",
+    #"select_modifier_test_1.cpp",
+    #"shape_modifier_test.cpp",
+    "side_bar_container_modifier_test.cpp",
+    #"slider_modifier_test.cpp",
+    "stack_modifier_test.cpp",
+    "stepper_item_modifier_test.cpp",
+    "stepper_modifier_test.cpp",
+    "swiper_modifier_test.cpp",
+    "swiper_modifier_test2.cpp",
+    "symbol_glyph_modifier_test.cpp",
+    "symbol_span_modifier_test.cpp",
+    # "tab_content_modifier_test.cpp",
+    # "tabs_modifier_test.cpp",
+    # "tabs_modifier_test_options.cpp",
+    # "text_area_modifier_test.cpp",
+    # "text_clock_modifier_test.cpp",
+    # "text_input_modifier_test.cpp",
+    # "text_input_modifier_test2.cpp",
+    # "text_modifier_test.cpp",
+    # "text_modifier_test2.cpp",
+    #"text_picker_modifier_test.cpp",
+    #"text_timer_modifier_test.cpp",
+    "time_picker_modifier_test.cpp",
+    #"toggle_modifier_test.cpp",
+    "video_modifier_test.cpp",
+    #"water_flow_modifier_test.cpp",
+    "windowscene_modifier_test.cpp",
+  ]
+  sources += [
+    "generated/test_fixtures.cpp",
+    "generated/test_fixtures_enums.cpp",
+  ]
+  extra_deps = []
+  extra_deps += [
+    ":capi_deps",
+    "..:ace_core_interfaces_native_node_linux_unittest",
+    "../stubs:capi-ut-stubs",
+  ]
+}
+
+config("capi_config") {
+  include_dirs = [ "." ]
+  if (capi_asan) {
+    cflags_cc = [ "-fsanitize=address" ]
+    ldflags = [ "-fsanitize=address" ]
+  }
+  if (capi_theme_debug) {
+    defines = [ "CAPI_BACKTRACE" ]
+  }
+}
+
+source_set("capi_deps") {
+  testonly = true
+  public_configs = [ ":capi_config" ]
+  sources = [ "modifiers_test_utils.cpp" ]
+  configs += [ "../..:ace_unittest_config" ]
+  deps = [ "..:ace_core_interfaces_native_node_linux_unittest" ]
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+  if (capi_theme_debug) {
+    sources += [ "unwind_utils.cpp" ]
+    external_deps += [ "libunwind:libunwind" ]
+    deps += [
+      ":copy_libunwind",
+      ":copy_libunwind_unstripped",
+    ]
+  }
+}
+
+if (capi_theme_debug) {
+  copy("copy_libunwind") {
+    testonly = true
+    sources = [ root_out_dir + "/thirdparty/libunwind/libunwind.so" ]
+    outputs = [ root_out_dir + "/tests/unittest/ace_engine/ace_engine/capi/libunwind.so" ]
+    external_deps = [ "libunwind:libunwind" ]
+  }
+  copy("copy_libunwind_unstripped") {
+    testonly = true
+    sources = [ root_out_dir +
+                "/lib.unstripped/clang_x64/thirdparty/libunwind/libunwind.so" ]
+    outputs = [ root_out_dir + "/exe.unstripped/clang_x64/tests/unittest/ace_engine/ace_engine/capi/libunwind.so" ]
+    external_deps = [ "libunwind:libunwind" ]
+  }
+}
+
+group("capi_modifiers_unittest") {
+  testonly = true
+  deps = [
+    ":capi_all_modifiers_test",
+    "generated:capi_generated_modifiers_unittest",
+  ]
+}

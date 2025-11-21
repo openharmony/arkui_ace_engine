@@ -70,6 +70,11 @@ void FfiOHOSAceFrameworkSliderBlockColor(uint32_t color)
     SliderModel::GetInstance()->SetBlockColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkSliderResetBlockColor()
+{
+    SliderModel::GetInstance()->ResetBlockColor();
+}
+
 void FfiOHOSAceFrameworkSliderTrackColor(uint32_t color)
 {
     NG::Gradient gradient;
@@ -78,12 +83,22 @@ void FfiOHOSAceFrameworkSliderTrackColor(uint32_t color)
     SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, true);
 }
 
+void FfiOHOSAceFrameworkSliderResetTrackColor()
+{
+    SliderModel::GetInstance()->ResetTrackColor();
+}
+
 void FfiOHOSAceFrameworkSliderSelectedColor(uint32_t color)
 {
     NG::Gradient gradient;
     CreateSolidGradient(color, gradient);
     SliderModel::GetInstance()->SetSelectColor(Color(color));
     SliderModel::GetInstance()->SetSelectColor(gradient, true);
+}
+
+void FfiOHOSAceFrameworkSliderResetSelectedColor()
+{
+    SliderModel::GetInstance()->ResetSelectColor();
 }
 
 void FfiOHOSAceFrameworkSliderShowSteps(bool isShow)

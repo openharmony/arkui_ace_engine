@@ -116,6 +116,8 @@ public:
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) override;
     void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) override;
+    static void UpdateBindingWithScrollable(FrameNode* frameNode,
+        std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback);
     static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
     static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid);

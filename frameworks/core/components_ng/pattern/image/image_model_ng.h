@@ -152,7 +152,7 @@ public:
     static bool GetFitOriginalSize(FrameNode* frameNode);
     static uint32_t GetFillColor(FrameNode* frameNode);
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
-    static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
+    static void SetDrawableDescriptor(FrameNode* frameNode, void* newDrawableDescriptor);
     static void SetResource(FrameNode* frameNode, void* resource);
     static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
     static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);

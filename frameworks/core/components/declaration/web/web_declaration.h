@@ -59,6 +59,7 @@ struct WebEvent : Event {
     EventMarker adsBlockedEventId;
     EventMarker onLoadStartedEventId;
     EventMarker onLoadFinishedEventId;
+    EventMarker cameraCaptureStateChangedId;
 };
 
 struct WebMethod : Method {
@@ -458,6 +459,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.viewportFitChangedId;
+    }
+
+    void SetCameraCaptureStateChangedId(const EventMarker& cameraCaptureStateChangedId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.cameraCaptureStateChangedId = cameraCaptureStateChangedId;
+    }
+
+    const EventMarker& GetCameraCaptureStateChangedId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.cameraCaptureStateChangedId;
     }
 
     void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)

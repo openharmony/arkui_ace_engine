@@ -17,6 +17,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 
 namespace OHOS::Ace {
+PerfMonitor* PerfMonitor::pMonitor = nullptr;
 JankFrameReport& JankFrameReport::GetInstance()
 {
     static thread_local JankFrameReport instance;
@@ -76,6 +77,7 @@ void PerfMonitor::SetAppStartStatus() {}
 void PerfMonitor::SetPageName(const std::string& pageName) {}
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName) {}
+void JankFrameReport::RecordAnimateEnd() {}
 void PerfMonitor::NotifyAppJankStatsBegin() {}
 void PerfMonitor::NotifyAppJankStatsEnd() {}
 void PerfMonitor::ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,

@@ -20,6 +20,7 @@
 #endif
 #include "cj_lambda.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components/image/image_theme.h"
 
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
@@ -182,6 +183,21 @@ void FfiOHOSAceFrameworkImageSetSyncLoad(bool syncLoad)
 void FfiOHOSAceFrameworkImageSetImageFill(uint32_t color)
 {
     ImageModel::GetInstance()->SetImageFill(Color(color));
+}
+
+void FfiOHOSAceFrameworkImageResetImageFill()
+{
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    Color color = theme->GetFillColor();
+    ImageModel::GetInstance()->SetImageFill(color);
+    // Fix the svg collision bug with the foreground color placeholder 0x00000001.
+    ViewAbstractModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
 }
 
 void FfiOHOSAceFrameworkImageSetAutoResize(bool autoResize)

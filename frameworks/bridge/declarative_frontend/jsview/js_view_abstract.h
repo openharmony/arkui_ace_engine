@@ -178,6 +178,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsToolbar(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
+    static void JsColorPicker(const JSCallbackInfo& info);
     static void JsBackgroundImage(const JSCallbackInfo& info);
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);

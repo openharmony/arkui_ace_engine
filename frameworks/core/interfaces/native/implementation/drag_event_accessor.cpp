@@ -116,30 +116,21 @@ void SetDataImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(unifiedData);
     peer->dragInfo->SetData(unifiedData->unifiedData);
 }
-Ark_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
+Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
 {
-    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
-    CHECK_NULL_RETURN(peer, unifiedPeer);
-    CHECK_NULL_RETURN(peer->dragInfo, unifiedPeer);
+    Opt_unifiedDataChannel_UnifiedData arkUnifiedData =
+        Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>();
+    CHECK_NULL_RETURN(peer, arkUnifiedData);
+    CHECK_NULL_RETURN(peer->dragInfo, arkUnifiedData);
     auto data = peer->dragInfo->GetData();
-    CHECK_NULL_RETURN(data, unifiedPeer);
+    CHECK_NULL_RETURN(data, arkUnifiedData);
+    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
     unifiedPeer->unifiedData = data;
-    return unifiedPeer;
+    return Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>(unifiedPeer);
 }
-Ark_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
+Opt_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
 {
-    Ark_unifiedDataChannel_Summary arkValue{};
-#ifdef WRONG_GEN1
-    CHECK_NULL_RETURN(peer, arkValue);
-    auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, arkValue);
-    auto summary = info->GetSummary();
-    arkValue.summary = Converter::ArkValue<Map_String_Int64>(summary, Converter::FC);
-    for (const auto &item: summary) {
-        arkValue.totalSize += ArkValue<Ark_Int64>(item.second);
-    }
-#endif
-    return arkValue;
+    return Converter::ArkValue<Opt_unifiedDataChannel_Summary>();
 }
 void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)

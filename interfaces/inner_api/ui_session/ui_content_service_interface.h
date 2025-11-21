@@ -39,6 +39,7 @@ public:
         UI_CONTENT_CONNECT,
         REGISTER_CLICK_EVENT,
         REGISTER_SEARCH_EVENT,
+        REGISTER_TEXT_CHANGE_EVENT,
         REGISTER_ROUTER_CHANGE_EVENT,
         REGISTER_COMPONENT_EVENT,
         REGISTER_WEB_UNFOCUS_EVENT,
@@ -46,6 +47,7 @@ public:
         REGISTER_LIFE_CYCLE_EVENT,
         UNREGISTER_CLICK_EVENT,
         UNREGISTER_SEARCH_EVENT,
+        UNREGISTER_TEXT_CHANGE_EVENT,
         UNREGISTER_ROUTER_CHANGE_EVENT,
         UNREGISTER_COMPONENT_EVENT,
         UNREGISTER_WEB_UNFOCUS_EVENT,
@@ -99,6 +101,12 @@ public:
      * @return: result number
      */
     virtual int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback on search event occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterTextChangeEventCallback(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define register a callback on component event occur to execute interface
@@ -160,6 +168,12 @@ public:
      * @return: result number
      */
     virtual int32_t UnregisterSearchEventCallback() = 0;
+
+    /**
+     * @description: define unregister the search event occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterTextChangeEventCallback() = 0;
 
     /**
      * @description: define unregister the switch event occur callback last register interface
@@ -279,6 +293,7 @@ public:
         REPORT_SWITCH_EVENT,
         REPORT_COMPONENT_EVENT,
         REPORT_SEARCH_EVENT,
+        REPORT_TEXT_CHANGE_EVENT,
         REPORT_INSPECTOR_VALUE,
         REPORT_WEB_UNFOCUS_EVENT,
         REPORT_SCROLL_EVENT,
@@ -310,6 +325,11 @@ public:
      * @description: define reports the search event to the proxy interface
      */
     virtual void ReportSearchEvent(const std::string& data) = 0;
+
+    /**
+     * @description: define reports the text change event to the proxy interface
+     */
+    virtual void ReportTextChangeEvent(const std::string& data) = 0;
 
     /**
      * @description: define reports inspector value to the proxy interface

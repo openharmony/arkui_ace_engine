@@ -5103,13 +5103,13 @@ void TextPattern::DumpTextStyleInfo()
     CHECK_NULL_VOID(renderContext);
     dumpLog.AddDesc(
         std::string("FontColor: ")
-            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString())
+            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ToString())
             .append(" prop: ")
             .append(
-                textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString() : "Na")
+                textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ToString() : "Na")
             .append(" ForegroundColor: ")
             .append(
-            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na")
+            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ToString() : "Na")
             .append(" TextColorFlagByUser: ")
             .append(textLayoutProp->HasTextColorFlagByUser()
                 ? std::to_string(textLayoutProp->GetTextColorFlagByUserValue(false))

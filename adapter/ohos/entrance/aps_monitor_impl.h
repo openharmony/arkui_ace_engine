@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace {
 using SetSceneFunc = void (*)(std::string pkgName, std::string sceneName, uint32_t state);
+using ReSetClientFunc = void (*)();
 class ApsMonitorImpl final : public ApsMonitor {
 public:
     explicit ApsMonitorImpl(int32_t instanceId) : instanceId_(instanceId) {}
@@ -27,9 +28,11 @@ public:
 
 private:
     void LoadApsFuncOnce();
+    void ReSetApsClient() override;
     static const std::set<std::string> apsScenes;
     void* loadfilehandle_ = nullptr;
     SetSceneFunc setFunc_ = nullptr;
+    ReSetClientFunc resetFunc_ = nullptr;
     bool isloadapsfunc_ = false;
     int32_t instanceId_ = -1;
 };

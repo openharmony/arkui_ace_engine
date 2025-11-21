@@ -856,6 +856,7 @@ public:
     void AfterContentChange(RichEditorChangeValue& changeValue);
     void ReportAfterContentChangeEvent();
     void ReportTextChange();
+    void ReportEditorEvent(const std::string& eventType);
     void DeleteToMaxLength(std::optional<int32_t> length);
     void DeleteContent(int32_t length);
 

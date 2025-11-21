@@ -707,4 +707,35 @@ HWTEST_F(WebPatternTest, HandleMouseToTouchEvent, TestSize.Level1)
     EXPECT_TRUE(result);
 }
 
+/**
+ * @tc.name: OnClippedSelectionBoundsChanged
+ * @tc.desc: Test OnClippedSelectionBoundsChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, OnClippedSelectionBoundsChanged, TestSize.Level1)
+{
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->webSelectOverlay_ = nullptr;
+    webPattern->OnClippedSelectionBoundsChanged(1, 2, 3, 4);
+    webPattern->webSelectOverlay_ = AceType::MakeRefPtr<WebSelectOverlay>(webPattern);
+    ASSERT_NE(webPattern->webSelectOverlay_, nullptr);
+    webPattern->OnClippedSelectionBoundsChanged(1, 2, 3, 4);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Left(), 1);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Top(), 2);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Width(), 3);
+    EXPECT_EQ(webPattern->webSelectOverlay_->selectArea_.Height(), 4);
+}
+
 } // namespace OHOS::Ace::NG

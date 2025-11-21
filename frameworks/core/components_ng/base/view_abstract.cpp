@@ -636,6 +636,18 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true);
 }
 
+void ViewAbstract::BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->BindColorPicker(placeholder, strategy, interval);
+}
+
 void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -8027,7 +8039,7 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
-    if (value.empty() || keys.empty()) {
+    if (value.empty()) {
         eventHub->ClearSingleKeyboardShortcut();
         return;
     }

@@ -100,12 +100,10 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress001
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
 
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = -1;
     richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
 }
 
 /**
@@ -465,11 +463,9 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress005, TestSize.Le
     ASSERT_NE(richEditorPattern, nullptr);
 
     GestureEvent info;
-
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
     richEditorPattern->touchedFingerCount_ = 0;
     richEditorPattern->HandleLongPress(info);
-    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::LONG_PRESSED);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
 }
 
 /**

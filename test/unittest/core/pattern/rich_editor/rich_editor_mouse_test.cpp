@@ -84,7 +84,6 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton001, TestSize.Level0)
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
 
-    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
     richEditorPattern->leftMousePress_ = false;
     richEditorPattern->HandleMouseLeftButton(mouseInfo);
     EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::NONE);
@@ -182,6 +181,10 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton003, TestSize.Level0)
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
 
+    mouseInfo.action_ = MouseAction::NONE;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::NONE);
+
     mouseInfo.action_ = MouseAction::PRESS;
     richEditorPattern->mouseStatus_ = MouseStatus::NONE;
     mouseInfo.SetGlobalLocation(Offset(2, 5));
@@ -202,11 +205,6 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton003, TestSize.Level0)
     richEditorPattern->mouseStatus_ = MouseStatus::NONE;
     richEditorPattern->HandleMouseLeftButton(mouseInfo);
     EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::RELEASED);
-
-    mouseInfo.action_ = MouseAction::NONE;
-    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
-    richEditorPattern->HandleMouseLeftButton(mouseInfo);
-    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::NONE);
 }
 
 /**
@@ -382,7 +380,6 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus007, TestSize.Level0)
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->moveLength_ = 0;
-    richEditorPattern->isEditing_ = false;
     MouseInfo info;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 0;
@@ -742,9 +739,8 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent006, TestSize.Level0)
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->scrollBar_ = nullptr;
     richEditorPattern->HandleAISpanHoverEvent(info);
-    EXPECT_EQ(richEditorPattern->scrollBar_, nullptr);
+    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
 }
 
 /**
@@ -815,7 +811,6 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent009, TestSize.Level0)
     richEditorPattern->dataDetectorAdapter_->aiSpanRects_.push_back(NG::RectF { 0.0f, 0.0f, 100.0f, 200.0f });
     richEditorPattern->dataDetectorAdapter_->aiSpanRects_.push_back(NG::RectF { 100.0f, 200.0f, 300.0f, 400.0f });
     richEditorPattern->dataDetectorAdapter_->aiSpanRects_.push_back(NG::RectF { 200.0f, 300.0f, 400.0f, 500.0f });
-    richEditorPattern->currentMouseStyle_ = MouseFormat::HAND_POINTING;
     richEditorPattern->HandleAISpanHoverEvent(info);
     EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::HAND_POINTING);
 }
@@ -837,7 +832,6 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent010, TestSize.Level0)
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
     richEditorPattern->HandleAISpanHoverEvent(info);
     EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
 }

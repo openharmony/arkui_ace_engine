@@ -24,6 +24,7 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkBlankCreate(double minSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkBlankHeight(double height, int32_t unit);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_BLANK_FFI_H

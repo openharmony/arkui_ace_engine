@@ -1481,4 +1481,33 @@ HWTEST_F(ToggleTestNg, ToggleModelTest002, TestSize.Level1)
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
 }
+
+/**
+ * @tc.name: ToggleModelTestSetAndGetToggleState
+ * @tc.desc: Test ToggleModelNG::SetToggleState and ToggleModelNG::GetToggleState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTestSetAndGetToggleState, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Toggle node.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::CHECKBOX, false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. SetToggleState.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    ToggleModelNG::SetToggleState(node, true);
+
+    /**
+     * @tc.steps: step3. assert ToggleState.
+     */
+    auto isOn = ToggleModelNG::GetToggleState(node);
+    EXPECT_EQ(isOn, true);
+}
 } // namespace OHOS::Ace::NG

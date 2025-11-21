@@ -1654,6 +1654,15 @@ frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h @arkui_n
 frameworks/bridge/declarative_frontend/ng/page_router_manager.h @arkui_navigation
 frameworks/bridge/declarative_frontend/sharedata/ @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/state_mgmt/ @arkui_statemgmt
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/ifelse_native.d.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/lazy_foreach.d.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/full_update/fu_foreach.d.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_foreach.d.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat_impl.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat_virtual_scroll_impl.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat_virtual_scroll_2_impl.ts @arkuieco3
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/i_repeat.ts @arkuieco3
 frameworks/bridge/declarative_frontend/style_string/ @huawei_g_five
 frameworks/bridge/declarative_frontend/view_stack_processor.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/view_stack_processor.h @arkui_statemgmt
@@ -3191,10 +3200,6 @@ interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkui_framework_xnode
 
 [Arkoala]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkweb-committer-group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @ArkUI_Event
@@ -3221,9 +3226,6 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/drag_and_drop/ @ArkUI_Event
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.h @arkuilayout1
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.cpp @arkuilayout1
-frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/ @arkui-idlize
-frameworks/bridge/arkts_frontend/koala_projects/arkoala/interop/ @arkui-idlize
-frameworks/bridge/arkts_frontend/koala_projects/arkoala/arkui-ohos/src/component/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.cc @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkui_framework_resource
 
@@ -3489,7 +3491,6 @@ frameworks/core/interfaces/native/implementation/rating_modifier.cpp @arkuipopup
 frameworks/core/interfaces/native/implementation/rating_ops_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/toggle_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/toggle_ops_accessor.cpp @arkuipopupwindow_all
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.inspector.ts @arkui-idlize
 
 interfaces/ets/ani/observer/ @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.observer.ts @arkui_framework_resource
@@ -3708,7 +3709,8 @@ test/unittest/interfaces/ace_gesture/ @ArkUI_Event
 test/unittest/interfaces/form_render/ @form_framework
 
 [Generated source]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ @arkui-idlize
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
 frameworks/core/interfaces/native/utility/generated/ @arkui-idlize
 
@@ -3744,6 +3746,24 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/builder.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interopExtendableComponent.ets @arkui_statemgmt
+
+[RenderControl ArkTS1.2]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/conditionScope.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/forEach.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/lazyForEach.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/repeat.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/SyntaxNodeBase.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/DataChangeListener.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyForEachImpl.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/RepeatImpl.ets @arkuieco3
+frameworks/core/interfaces/native/implementation/condition_scope_modifier.cpp @arkuieco3
+frameworks/core/interfaces/native/implementation/for_each_ops_accessor.cpp @arkuieco3
+frameworks/core/interfaces/native/implementation/lazy_for_each_ops_accessor.cpp @arkuieco3
+frameworks/core/interfaces/native/ani/syntax_item_ani_modifier.h @arkuieco3
+frameworks/core/interfaces/native/ani/condition_scope_ani_modifier.h @arkuieco3
+frameworks/core/interfaces/native/ani/condition_scope_ani_modifier.cpp @arkuieco3
+frameworks/core/interfaces/native/ani/for_each_node_ani_modifier.h @arkuieco3
+frameworks/core/interfaces/native/ani/lazy_for_each_node_ani_modifier.h @arkuieco3
 
 [arkuieco3 ArkTS Static]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/hooks/CanvasOpsHandWritten.ets @arkuieco3

@@ -894,8 +894,12 @@ ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
     DragPreview* dragPreview = new DragPreview();
     CHECK_NULL_RETURN(dragPreview, nullptr);
     ani_object dragPreviewObj = {};
-    dragPreview->AniSerializer(env, dragPreviewObj);
+    auto ret = dragPreview->AniSerializer(env, dragPreviewObj);
     env->DestroyEscapeLocalScope(dragPreviewObj, &escapedObj);
+    if (!ret) {
+        delete dragPreview;
+        return nullptr;
+    }
     return dragPreviewObj;
 }
 
@@ -930,6 +934,10 @@ void ANIDragActionCancelDataLoading(
         return;
     }
     auto keyStr = AniUtils::ANIStringToStdString(env, key);
+    if (keyStr.empty()) {
+        AniUtils::AniThrow(env, "Invalid input parameter.", ERROR_CODE_PARAM_INVALID);
+        return;
+    }
     modifier->getDragControllerAniModifier()->aniDragActionCancelDataLoading(keyStr.c_str());
 }
 

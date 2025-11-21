@@ -182,8 +182,11 @@ private:
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
     void MeasurePickerItems(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    void HandleOffScreenItems(LayoutWrapper* layoutWrapper);
     void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index) const;
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
+    void SetPatternHeight(LayoutWrapper* layoutWrapper);
+    float GetPatternHeight(LayoutWrapper* layoutWrapper);
     void MeasureBelow(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
         float startPos, bool cachedLayout = false);
     void MeasureAbove(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
@@ -212,6 +215,7 @@ private:
     int32_t totalItemCount_ = 0;
     int32_t prevTotalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
+    int32_t middleIndexInVisibleWindow_ = 0;
 
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
@@ -223,6 +227,7 @@ private:
     float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
+    float currentOffsetFromMiddle_ = 0.0f;
 
     float pickerItemHeight_ = 0.0f;
     float pickerDefaultHeight_ = 0.0f;

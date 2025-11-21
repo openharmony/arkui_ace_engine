@@ -455,7 +455,12 @@ napi_value JsDrawableDescriptor::GetAnimationController(napi_env env, napi_callb
         DECLARE_NAPI_FUNCTION("pause", Pause),
         DECLARE_NAPI_FUNCTION("resume", Resume),
     };
-    NAPI_CALL(env, napi_define_properties(env, result, sizeof(des) / sizeof(des[0]), des));
+    status = napi_define_properties(env, result, sizeof(des) / sizeof(des[0]), des);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;

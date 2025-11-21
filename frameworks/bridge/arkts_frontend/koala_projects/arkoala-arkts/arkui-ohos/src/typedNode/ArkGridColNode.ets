@@ -16,6 +16,7 @@
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
 import { GridColAttribute, ArkGridColPeer, GridColColumnOption, GridColOptions } from '../framework';
+import { int32 } from '@koalaui/common';
 
 export class ArkGridColNode extends ArkBaseNode implements GridColAttribute {
 
@@ -41,20 +42,20 @@ export class ArkGridColNode extends ArkBaseNode implements GridColAttribute {
         return this.peer as ArkGridColPeer;
     }
 
-    span(value: number | GridColColumnOption | undefined): this {
-        const value_casted = value as (number | GridColColumnOption | undefined);
+    span(value: int32 | GridColColumnOption | undefined): this {
+        const value_casted = value as (int32 | GridColColumnOption | undefined);
         this.getPeer()?.setSpanAttribute(value_casted);
         return this;
     }
 
-    gridColOffset(value: number | GridColColumnOption | undefined): this {
-        const value_casted = value as (number | GridColColumnOption | undefined);
+    gridColOffset(value: int32 | GridColColumnOption | undefined): this {
+        const value_casted = value as (int32 | GridColColumnOption | undefined);
         this.getPeer()?.setGridColOffsetAttribute(value_casted);
         return this;
     }
 
-    order(value: number | GridColColumnOption | undefined): this {
-        const value_casted = value as (number | GridColColumnOption | undefined);
+    order(value: int32 | GridColColumnOption | undefined): this {
+        const value_casted = value as (int32 | GridColColumnOption | undefined);
         this.getPeer()?.setOrderAttribute(value_casted);
         return this;
     }

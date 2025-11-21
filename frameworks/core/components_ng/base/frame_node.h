@@ -112,6 +112,12 @@ private:
     class FrameProxy;
 
 public:
+    enum class RsNodeDeleteFlag : uint8_t {
+        UNKNOWN,    // Deletion status is undefined or not initialized
+        ALLOWED,    // Explicitly permits deletion of the node
+        PROHIBITED  // Explicitly forbids deletion of the node
+    };
+
     // create a new child element with new element tree.
     static RefPtr<FrameNode> CreateFrameNodeWithTree(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
@@ -344,7 +350,7 @@ public:
     template<typename T>
     RefPtr<T> GetAccessibilityProperty() const
     {
-        return DynamicCast<T>(accessibilityProperty_);
+        return DynamicCast<T>(const_cast<FrameNode*>(this)->GetOrCreateAccessibilityProperty());
     }
 
     template<typename T>
@@ -1235,11 +1241,13 @@ public:
         return changeInfoFlag_;
     }
 
-    void SetDeleteRsNode(bool isDelete) {
-        isDeleteRsNode_ = isDelete;
+    void SetDeleteRsNode(RsNodeDeleteFlag deleteFlag)
+    {
+        isDeleteRsNode_ = deleteFlag;
     }
 
-    bool GetIsDelete() const {
+    RsNodeDeleteFlag GetIsDelete() const
+    {
         return isDeleteRsNode_;
     }
 
@@ -1660,6 +1668,8 @@ private:
     void UpdateBackground();
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
+    RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
+    bool isAccessibilityPropertyInitialized_ = false;
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1760,7 +1770,7 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
-    bool isDeleteRsNode_ = false;
+    RsNodeDeleteFlag isDeleteRsNode_ = RsNodeDeleteFlag::UNKNOWN;
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
     bool isAncestorScrollable_ = false;

@@ -26,7 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Axis, ScrollSource, Color } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer, ScrollerInternal, ScrollAlign } from "./scroll"
-import { AttributeModifier, hookListAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookListAttributeModifier, AttributeUpdater, hookListChildrenMainSizeImpl } from "#handwritten"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -799,7 +799,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
             const value_casted = value as (ChildrenMainSize | undefined)
-            this.getPeer()?.setChildrenMainSizeAttribute(value_casted)
+            hookListChildrenMainSizeImpl(this, value_casted);
             return this
         }
         return this

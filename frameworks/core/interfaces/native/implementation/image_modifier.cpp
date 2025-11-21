@@ -25,12 +25,10 @@
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/drawing_lattice_peer.h"
-#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UNION_ONE = 1;
-constexpr int32_t UNION_TWO = 2;
 // similar as in the js_image.cpp
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
@@ -103,22 +101,25 @@ void SetImageOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            auto desc = Converter::Convert<DrawableDescriptor *>(value);
+            ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            // Note.
+            // This function should skip InitImage invocation if info's optional is empty.
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
     CHECK_NULL_VOID(imageAIOptions);
-    if (src->selector == UNION_TWO) {
-        auto drawable = src->value2;
-        CHECK_NULL_VOID(drawable);
-        ImageModelStatic::SetDrawableDescriptor(frameNode, drawable->data, drawable->type);
-        DrawableDescriptorPeer::Destroy(drawable);
-        return;
-    }
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    // Note.
-    // This function should skip InitImage invocation if info's optional is empty.
-    if (info) {
-        ImageModelStatic::SetSrc(frameNode, info);
-    } else {
-        ImageModelNG::ResetImageSrc(frameNode);
-    }
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
@@ -314,7 +315,7 @@ void SetPointLightImpl(Ark_NativePointer node,
 #endif
 }
 void SetEdgeAntialiasingImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -334,15 +335,15 @@ void SetOnCompleteImpl(Ark_NativePointer node,
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
         Ark_ImageCompleteEvent event;
-        event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
-        event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
-        event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
-        event.componentHeight = Converter::ArkValue<Ark_Number>(info.GetComponentHeight());
-        event.loadingStatus = Converter::ArkValue<Ark_Number>(info.GetLoadingStatus());
-        event.contentOffsetX = Converter::ArkValue<Ark_Number>(info.GetContentOffsetX());
-        event.contentOffsetY = Converter::ArkValue<Ark_Number>(info.GetContentOffsetY());
-        event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
-        event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
+        event.width = Converter::ArkValue<Ark_Int32>(info.GetWidth());
+        event.height = Converter::ArkValue<Ark_Int32>(info.GetHeight());
+        event.componentWidth = Converter::ArkValue<Ark_Int32>(info.GetComponentWidth());
+        event.componentHeight = Converter::ArkValue<Ark_Int32>(info.GetComponentHeight());
+        event.loadingStatus = Converter::ArkValue<Ark_Int32>(info.GetLoadingStatus());
+        event.contentOffsetX = Converter::ArkValue<Ark_Int32>(info.GetContentOffsetX());
+        event.contentOffsetY = Converter::ArkValue<Ark_Int32>(info.GetContentOffsetY());
+        event.contentWidth = Converter::ArkValue<Ark_Int32>(info.GetContentWidth());
+        event.contentHeight = Converter::ArkValue<Ark_Int32>(info.GetContentHeight());
         auto optEvent = Converter::ArkValue<Opt_ImageCompleteEvent>(event);
         callback.Invoke(optEvent);
     };

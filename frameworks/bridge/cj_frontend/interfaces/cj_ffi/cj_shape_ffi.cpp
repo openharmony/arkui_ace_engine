@@ -34,6 +34,7 @@ using VectorInt32Ptr = void*;
 const std::vector<LineCapStyle> LINE_CAP_STYLE_LIST = { LineCapStyle::BUTT, LineCapStyle::ROUND, LineCapStyle::SQUARE };
 const std::vector<LineJoinStyle> LINE_JOIN_STYLE_LIST = { LineJoinStyle::MITER, LineJoinStyle::ROUND,
     LineJoinStyle::BEVEL };
+const char* COLOR_STRATEGY_INVERT = "invert";
 } // namespace
 extern "C" {
 void FfiOHOSAceFrameworkShapeCreate()
@@ -102,6 +103,22 @@ CJ_EXPORT void FfiOHOSAceFrameworkShapeSetForegroundColor(uint32_t color)
 {
     ShapeModel::GetInstance()->SetFill(Color(color));
     ViewAbstractModel::GetInstance()->SetForegroundColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkShapeSetForegroundColorV2(uint32_t color)
+{
+    Color foregroundColor = Color(color);
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+    ShapeModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
+void FfiOHOSAceFrameworkShapeSetForegroundColorStrategy(char* strategy)
+{
+    if (strategy != nullptr && strcmp(strategy, COLOR_STRATEGY_INVERT) == 0) {
+        ForegroundColorStrategy cStrategy = ForegroundColorStrategy::INVERT;
+        ShapeModel::GetInstance()->SetFill(Color::FOREGROUND);
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(cStrategy);
+    }
 }
 
 void FfiOHOSAceFrameworkShapeSetStroke(uint32_t color)

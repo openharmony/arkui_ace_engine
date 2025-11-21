@@ -238,6 +238,7 @@ public:
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
+    using ScrollEventHandleFuncForAni = std::function<void(const ScrollEventInfo& info)>;
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using RouterPageHandleFuncForAni = std::function<void(AbilityContextInfo&, const RouterPageInfoNG&)>;
     using DrawCommandSendHandleFunc = std::function<void()>;
@@ -266,6 +267,7 @@ public:
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
+    void SetHandleScrollEventChangeFuncForAni(ScrollEventHandleFuncForAni func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
@@ -309,6 +311,7 @@ private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
+    ScrollEventHandleFuncForAni scrollEventHandleFuncForAni_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
     RouterPageHandleFuncForAni routerPageHandleFuncForAni_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
