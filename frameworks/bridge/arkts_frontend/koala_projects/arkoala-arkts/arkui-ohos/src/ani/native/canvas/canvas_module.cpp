@@ -162,7 +162,7 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
         return nullptr;
     }
     arkts::ani_signature::SignatureBuilder signatureBuilder {};
-    signatureBuilder.AddClass("escompat.Array").AddInt();
+    signatureBuilder.AddClass("escompat.ArrayBuffer").AddInt();
     std::string signatureStr = signatureBuilder.BuildSignatureDescriptor();
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", signatureStr.c_str(), &ctor)) {

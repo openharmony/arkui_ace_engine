@@ -764,7 +764,7 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& 
     renderingContext2DModel_->SetFillGradient(gradient);
 }
 
-void CanvasRendererPeerImpl::SetFillStyle(int32_t id)
+void CanvasRendererPeerImpl::SetFillStylePattern(int32_t id)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
@@ -795,7 +795,7 @@ void CanvasRendererPeerImpl::SetStrokeStyle(const std::shared_ptr<Ace::Gradient>
     CHECK_NULL_VOID(gradient);
     renderingContext2DModel_->SetStrokeGradient(gradient);
 }
-void CanvasRendererPeerImpl::SetStrokeStyle(int32_t id)
+void CanvasRendererPeerImpl::SetStrokeStylePattern(int32_t id)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
@@ -1084,7 +1084,8 @@ void CanvasRendererPeerImpl::ExtractInfoToImage(Ace::CanvasImage& image, const D
 }
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {
-    return (StringUtils::StringToDimension(str));
+    auto dimension = StringUtils::StringToDimension(str);
+    return GetDimensionValue(dimension);
 }
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const Dimension& dimension)
 {
