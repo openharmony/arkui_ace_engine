@@ -559,6 +559,7 @@ build_component_ng("pattern_ng") {
     "sheet/content_cover/sheet_content_cover_layout_algorithm.cpp",
     "sheet/content_cover/sheet_content_cover_object.cpp",
     "sheet/sheet_object.cpp",
+    "sheet/sheet_wrapper_accessibility_property.cpp",
     "sheet/side/sheet_presentation_side_layout_algorithm.cpp",
     "sheet/side/sheet_side_object.cpp",
     "side_bar/side_bar_container_layout_algorithm.cpp",
