@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
 import { Resource } from "global.resource"
 export class CommonShapeMethodModifier extends CommonMethodModifier implements CommonShapeMethod,AttributeModifier<CommonShapeMethod> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -59,6 +61,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkCommonShapeMethodPeer;
         if (this._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -262,6 +265,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
     }
     mergeModifier(modifier: CommonShapeMethodModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stroke_0_flag) {

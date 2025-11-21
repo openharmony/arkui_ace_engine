@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier, hookTextClockContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -29,6 +30,7 @@ import { Color, FontStyle, FontWeight } from "./component/enums"
 import { default as intl } from "@ohos.intl"
 export class TextClockModifier extends CommonMethodModifier implements TextClockAttribute,AttributeModifier<TextClockAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -61,6 +63,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<TextClockConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextClockPeer;
         if (this._format_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -264,6 +267,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     }
     mergeModifier(modifier: TextClockModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._format_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._format_0_flag) {

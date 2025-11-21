@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -35,6 +36,7 @@ import { PeerNode } from "./PeerNode"
 
 export class NavDestinationModifier extends CommonMethodModifier implements NavDestinationAttribute,AttributeModifier<NavDestinationAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -115,6 +117,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _enableStatusBar_0_0value?: boolean | undefined
     _enableStatusBar_0_1value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkNavDestinationPeer;
         if (this._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -678,6 +681,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     }
     mergeModifier(modifier: NavDestinationModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hideTitleBar_0_flag) {

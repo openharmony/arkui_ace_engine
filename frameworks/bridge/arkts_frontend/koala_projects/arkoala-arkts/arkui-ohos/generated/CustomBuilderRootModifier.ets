@@ -21,8 +21,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCustomBuilderRootPeer, CustomBuilderRoot } from "./component/idlize"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 export class CustomBuilderRootModifier implements CustomBuilderRoot,AttributeModifier<CustomBuilderRoot> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -33,9 +35,11 @@ export class CustomBuilderRootModifier implements CustomBuilderRoot,AttributeMod
     applyDisabledAttribute(instance: CustomBuilderRoot): void { }
     applySelectedAttribute(instance: CustomBuilderRoot): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkCustomBuilderRootPeer;
     }
     mergeModifier(modifier: CustomBuilderRootModifier): void {
+        this._state = modifier._state;
     }
     public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
         throw new Error("Not implemented")

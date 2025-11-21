@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RatingModifier extends CommonMethodModifier implements RatingAttribute,AttributeModifier<RatingAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -43,6 +45,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnRatingChangeCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRatingPeer;
         if (this._stars_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -120,6 +123,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     }
     mergeModifier(modifier: RatingModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stars_0_flag) {

@@ -23,6 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ContentModifier, AttributeModifier, hookRadioContentModifier, hookRadioAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -212,7 +213,9 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         return this
     }
     public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRadioAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRadioAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

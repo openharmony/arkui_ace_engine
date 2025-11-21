@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
 import { AttributeModifier, hookRefreshAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -268,7 +269,9 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         return this
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRefreshAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRefreshAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

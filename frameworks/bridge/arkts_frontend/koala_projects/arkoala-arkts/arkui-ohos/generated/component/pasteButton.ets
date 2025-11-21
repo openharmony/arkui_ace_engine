@@ -24,6 +24,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
 import { extractors, hookPasteButtonAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { BusinessError } from "@ohos.base"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -134,7 +135,9 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
         return this
     }
     public attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookPasteButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPasteButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

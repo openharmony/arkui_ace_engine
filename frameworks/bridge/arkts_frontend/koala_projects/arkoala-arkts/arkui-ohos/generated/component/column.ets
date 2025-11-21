@@ -24,6 +24,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { HorizontalAlign, FlexAlign } from "./enums"
 import { AttributeModifier, hookColumnAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -187,7 +188,9 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         return this
     }
     public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookColumnAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookColumnAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

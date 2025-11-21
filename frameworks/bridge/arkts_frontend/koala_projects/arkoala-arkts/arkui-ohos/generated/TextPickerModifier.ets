@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, hookTextPickerDivider } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -28,6 +29,7 @@ import { Resource } from "global.resource"
 import { CrownSensitivity } from "./component/enums"
 export class TextPickerModifier extends CommonMethodModifier implements TextPickerAttribute,AttributeModifier<TextPickerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -68,6 +70,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextPickerPeer;
         if (this._defaultPickerItemHeight_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -343,6 +346,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
     }
     mergeModifier(modifier: TextPickerModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._defaultPickerItemHeight_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._defaultPickerItemHeight_0_flag) {

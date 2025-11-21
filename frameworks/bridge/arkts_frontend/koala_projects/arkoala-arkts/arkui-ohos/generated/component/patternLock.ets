@@ -28,6 +28,7 @@ import { Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
 import { Color } from "./enums"
 import { AttributeModifier, hookPatternLockAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -605,7 +606,9 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPatternLockAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPatternLockAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

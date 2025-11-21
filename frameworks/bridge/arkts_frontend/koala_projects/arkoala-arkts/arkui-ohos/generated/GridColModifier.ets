@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class GridColModifier extends CommonMethodModifier implements GridColAttribute,AttributeModifier<GridColAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,6 +43,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
     _order_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _order_0_0value?: int32 | GridColColumnOption | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkGridColPeer;
         if (this._span_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -100,6 +103,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
     }
     mergeModifier(modifier: GridColModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._span_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._span_0_flag) {

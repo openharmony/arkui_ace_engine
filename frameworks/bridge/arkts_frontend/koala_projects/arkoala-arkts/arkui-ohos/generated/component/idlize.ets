@@ -33,6 +33,7 @@ import { VoidCallback, SizeOptions_serializer, Length, SizeOptions, Position_ser
 import { Resource } from "global.resource"
 import { CrownSensitivity, BarState, Color, BorderStyle, AnimationPropertyType } from "./enums"
 import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
 import { DataPanelConfiguration } from "./dataPanel"
@@ -5177,7 +5178,9 @@ export class ArkRootComponent extends ComponentBase implements Root {
         return (this.peer as ArkRootPeer)
     }
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
-        hookRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -5196,7 +5199,9 @@ export class ArkComponentRootComponent extends ComponentBase implements Componen
         return (this.peer as ArkComponentRootPeer)
     }
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
-        hookComponentRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => { 
+          hookComponentRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -5215,7 +5220,9 @@ export class ArkCustomBuilderRootComponent extends ComponentBase implements Cust
         return (this.peer as ArkCustomBuilderRootPeer)
     }
     public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
-        hookCustomBuilderRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+           hookCustomBuilderRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -5250,7 +5257,9 @@ export class ArkCustomLayoutRootComponent extends ComponentBase implements Custo
         return this
     }
     public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
-        hookCustomLayoutRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookCustomLayoutRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -30,6 +30,7 @@ import { Resource } from "global.resource"
 import { EdgeEffect, Color, PageFlipMode } from "./enums"
 import { default as curves } from "@ohos.curves"
 import { extractors, AttributeModifier, hookTabsAttributeModifier, AttributeUpdater, hookTabsApplyAttributesFinish } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { TabsExtender } from '#generated'
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -1191,7 +1192,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTabsAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTabsAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

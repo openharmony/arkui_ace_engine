@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -28,6 +29,7 @@ import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class MenuModifier extends CommonMethodModifier implements MenuAttribute,AttributeModifier<MenuAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -50,6 +52,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
     _subMenuExpandingMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _subMenuExpandingMode_0_0value?: SubMenuExpandingMode | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkMenuPeer;
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -163,6 +166,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
     }
     mergeModifier(modifier: MenuModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {

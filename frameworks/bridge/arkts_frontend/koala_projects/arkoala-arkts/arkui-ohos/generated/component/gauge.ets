@@ -29,6 +29,7 @@ import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
 import { ContentModifier, AttributeModifier, hookGaugeContentModifier, hookGaugeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -432,7 +433,9 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         return this
     }
     public attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGaugeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGaugeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

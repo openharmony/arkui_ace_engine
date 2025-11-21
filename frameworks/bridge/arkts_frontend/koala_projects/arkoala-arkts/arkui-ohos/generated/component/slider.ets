@@ -28,6 +28,7 @@ import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCo
 import { Color, CrownSensitivity, Axis } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookSliderContentModifier, extractors, hookSliderAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -873,7 +874,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         return this
     }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSliderAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSliderAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

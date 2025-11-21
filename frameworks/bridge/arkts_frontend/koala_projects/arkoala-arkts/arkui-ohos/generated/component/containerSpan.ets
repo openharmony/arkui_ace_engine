@@ -23,6 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { AttributeModifier, hookContainerSpanAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -106,7 +107,9 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
         return this
     }
     public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
-        hookContainerSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookContainerSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

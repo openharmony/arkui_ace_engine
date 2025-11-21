@@ -26,6 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkImagePeer, ImageAttribute, ArkImageComponent, ArkImageStyle } from "./image"
 import { AttributeModifier, extractors, hookMediaCachedImageAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { default as image } from "@ohos.multimedia.image"
 import { ResourceStr } from "./units"
@@ -117,7 +118,9 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
         return this
     }
     public attributeModifier(value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMediaCachedImageAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookMediaCachedImageAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

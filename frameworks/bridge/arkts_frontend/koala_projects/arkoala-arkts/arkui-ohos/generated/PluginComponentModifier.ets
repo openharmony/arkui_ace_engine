@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class PluginComponentModifier extends CommonMethodModifier implements PluginComponentAttribute,AttributeModifier<PluginComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,6 +42,7 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: PluginErrorCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkPluginComponentPeer;
         if (this._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -81,6 +84,7 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
     }
     mergeModifier(modifier: PluginComponentModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onComplete_0_flag) {

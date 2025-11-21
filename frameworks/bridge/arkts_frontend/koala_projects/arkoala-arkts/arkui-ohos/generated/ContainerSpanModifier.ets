@@ -22,8 +22,10 @@ import { PeerNode } from "./PeerNode"
 import { ArkContainerSpanPeer, ContainerSpanAttribute } from "./component/containerSpan"
 import { int32 } from "@koalaui/common"
 import { TextBackgroundStyle } from "./component/span"
+import { ModifierState } from "./CommonModifier"
 export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeModifier<ContainerSpanAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,6 +38,7 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
     _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkContainerSpanPeer;
         if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -57,6 +60,7 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
         }
     }
     mergeModifier(modifier: ContainerSpanModifier): void {
+        this._state = modifier._state;
         if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._textBackgroundStyle_0_flag) {

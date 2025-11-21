@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookFlexAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -104,7 +105,9 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
         return this
     }
     public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFlexAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFlexAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

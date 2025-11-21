@@ -27,6 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookMenuAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -286,7 +287,9 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMenuAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookMenuAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

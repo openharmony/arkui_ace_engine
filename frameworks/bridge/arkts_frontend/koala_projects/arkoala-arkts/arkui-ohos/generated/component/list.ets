@@ -27,6 +27,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Axis, ScrollSource, Color } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer, ScrollerInternal, ScrollAlign } from "./scroll"
 import { AttributeModifier, hookListAttributeModifier, AttributeUpdater, hookListChildrenMainSizeImpl } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -927,7 +928,9 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookListAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

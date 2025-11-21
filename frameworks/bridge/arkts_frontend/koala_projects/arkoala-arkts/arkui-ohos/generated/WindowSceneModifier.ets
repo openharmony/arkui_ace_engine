@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { Position } from "./component/units"
 export class WindowSceneModifier extends CommonMethodModifier implements WindowSceneAttribute,AttributeModifier<WindowSceneAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,6 +41,7 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
     _attractionEffect_0_0value?: Position | undefined
     _attractionEffect_0_1value?: number | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkWindowScenePeer;
         if (this._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -62,6 +65,7 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
     }
     mergeModifier(modifier: WindowSceneModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._attractionEffect_0_flag) {

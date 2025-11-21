@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -29,6 +30,7 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { Color } from "./component/enums"
 export class MenuItemModifier extends CommonMethodModifier implements MenuItemAttribute,AttributeModifier<MenuItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -53,6 +55,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
     _labelFontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _labelFontColor_0_0value?: ResourceColor | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkMenuItemPeer;
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -184,6 +187,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
     }
     mergeModifier(modifier: MenuItemModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._selected_0_flag) {

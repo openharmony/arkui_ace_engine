@@ -29,6 +29,7 @@ import { Resource } from "global.resource"
 import { Color, BarState, ScrollSource, EdgeEffect } from "./enums"
 import { ScrollState } from "./list"
 import { AttributeModifier, hookGridAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -1018,7 +1019,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGridAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

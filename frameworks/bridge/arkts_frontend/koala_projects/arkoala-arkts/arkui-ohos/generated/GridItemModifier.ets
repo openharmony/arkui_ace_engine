@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -25,6 +26,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 export class GridItemModifier extends CommonMethodModifier implements GridItemAttribute,AttributeModifier<GridItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -49,6 +51,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSelect_0_0value?: ((isSelected: boolean) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkGridItemPeer;
         if (this._rowStart_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -180,6 +183,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
     }
     mergeModifier(modifier: GridItemModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._rowStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._rowStart_0_flag) {

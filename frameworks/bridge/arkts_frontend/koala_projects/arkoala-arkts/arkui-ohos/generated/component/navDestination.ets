@@ -32,6 +32,7 @@ import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEd
 import { ResourceStr, Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier, hookNavDestinationAttributeModifier, AttributeUpdater, hookGetConfigInRouteMap } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CustomBuilder } from "./builder"
@@ -1265,7 +1266,9 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookNavDestinationAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookNavDestinationAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
