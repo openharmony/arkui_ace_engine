@@ -4083,13 +4083,9 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_removeChild(peer: KPointer, child: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNodeExtender_clearChildren(peer: KPointer): void
-    @ani.unsafe.Direct
     native static _FrameNodeExtender_getChild(peer: KPointer, index: number, expandMode: number): KPointer
-    @ani.unsafe.Direct
     native static _FrameNodeExtender_getFirstChild(peer: KPointer): KPointer
-    @ani.unsafe.Direct
     native static _FrameNodeExtender_getNextSibling(peer: KPointer): KPointer
-    @ani.unsafe.Direct
     native static _FrameNodeExtender_getPreviousSibling(peer: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getParent(peer: KPointer): KPointer
