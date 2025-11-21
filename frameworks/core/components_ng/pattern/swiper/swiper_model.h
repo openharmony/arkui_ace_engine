@@ -29,6 +29,7 @@
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
+#include "ui/animation/animation_option.h"
 
 namespace OHOS::Ace::Framework {
 class JSIndicatorController;
@@ -121,13 +122,6 @@ struct SwiperArrowParameters {
     RefPtr<ResourceObject> resourceArrowSizeValueObject;
     RefPtr<ResourceObject> resourceArrowColorValueObject;
     std::unordered_set<std::string> parametersByUser;
-};
-
-struct AnimationCallbackInfo {
-    std::optional<float> currentOffset;
-    std::optional<float> targetOffset;
-    std::optional<float> velocity;
-    bool isForceStop = false;
 };
 
 struct SwiperMarginOptions {

@@ -23,37 +23,13 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/event/ace_events.h"
+#include "ui/event/axis_event.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
 } // namespace OHOS::MMI
 
 namespace OHOS::Ace {
-struct UIInputEvent {
-    virtual ~UIInputEvent() = default;
-    TimeStamp time;
-    ConvertInfo convertInfo = { UIInputEventType::NONE, UIInputEventType::NONE };
-    UIInputEventType eventType = UIInputEventType::NONE;
-};
-
-struct PointerEvent : public UIInputEvent {
-    virtual ~PointerEvent() = default;
-    explicit PointerEvent(float x = {}, float y = {}, float screenX = {}, float screenY = {},
-        double globalDisplayX = {}, double globalDisplayY = {}, TimeStamp time = {})
-        : globalDisplayX(globalDisplayX), globalDisplayY(globalDisplayY), x(x), y(y), screenX(screenX), screenY(screenY)
-    {
-        this->time = time;
-    }
-    double globalDisplayX = {};
-    double globalDisplayY = {};
-    float x = {};
-    float y = {};
-    float screenX = {};
-    float screenY = {};
-    // ID of the node to which this event is being explicitly posted (not necessarily the original target)
-    int32_t postEventNodeId = {};
-    bool passThrough = {};
-};
 
 struct AxisEvent final : public PointerEvent {
     ~AxisEvent() = default;

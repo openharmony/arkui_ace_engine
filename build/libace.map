@@ -477,6 +477,7 @@
       OHOS::Ace::DataProviderManagerStandard::*;
       OHOS::Ace::ShadowTheme::*;
       OHOS::Ace::TouchLocationInfo::*;
+      OHOS::Ace::TouchEventInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
       OHOS::Ace::LifeCycleCheckable::*;
       OHOS::Ace::Kit::ViewStackProcessor::*;
@@ -505,6 +506,7 @@
       OHOS::Ace::Kit::AnimationUtils::*;
       OHOS::Ace::Kit::View::*;
       OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::Stack::*;
       OHOS::Ace::Kit::CustomNode::*;
       OHOS::Ace::Kit::Text::*;
       OHOS::Ace::Kit::Tabs::*;

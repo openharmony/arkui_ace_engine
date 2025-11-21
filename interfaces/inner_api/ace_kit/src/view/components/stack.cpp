@@ -13,23 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
+#include "ui/view/components/stack.h"
 
-#include <cstdint>
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "ui/base/referenced.h"
+#include "ui/view_stack/view_stack_processor.h"
+#include "view/frame_node_impl.h"
 
 namespace OHOS::Ace::Kit {
 
-struct LayoutConstraintInfo {
-    float minWidth;
-    float minHeight;
-    float maxWidth;
-    float maxHeight;
-    float percentReferWidth;
-    float percentReferHeight;
-    std::optional<float> parentIdealSizeWidth;
-    std::optional<float> parentIdealSizeHeight;
-};
+Stack::Stack()
+{
+    node_ = AceType::MakeRefPtr<FrameNodeImpl>(
+        NG::StackModelNG::CreateFrameNode(Ace::Kit::ViewStackProcessor::ClaimNodeId()));
+}
+
+Stack::~Stack() = default;
+
+RefPtr<Stack> Stack::Create()
+{
+    return Referenced::MakeRefPtr<Stack>();
+}
+
+void Stack::SetAlignment(Ace::Alignment align)
+{
+    NG::StackModelNG::SetAlignment(reinterpret_cast<AceNode*>(node_->GetHandle()), align);
+}
 
 } // namespace OHOS::Ace::Kit
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H

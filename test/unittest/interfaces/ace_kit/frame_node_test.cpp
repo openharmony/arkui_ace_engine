@@ -917,4 +917,36 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest120, TestSize.Level1)
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->destroyCallback_, nullptr);
 }
+
+/**
+ * @tc.name: FrameNodeTestTest121
+ * @tc.desc: test GetLayoutConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest121, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST121";
+    const int32_t id = 121;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
+    ASSERT_TRUE(frameNodeImpl);
+
+    LayoutConstraintInfo constraint { .maxWidth = 100.0f, .maxHeight = 100.0f };
+    frameNode->Measure(constraint);
+    auto* aceNode = frameNodeImpl->GetAceNodePtr();
+    ASSERT_TRUE(aceNode);
+    EXPECT_TRUE(aceNode->IsActive());
+
+    /**
+     * @tc.steps2: get layout constraint, validate result.
+     */
+    auto res = frameNodeImpl->GetLayoutConstraint();
+    EXPECT_TRUE(NearEqual(res.maxWidth, 100.0f));
+}
 } // namespace OHOS::Ace

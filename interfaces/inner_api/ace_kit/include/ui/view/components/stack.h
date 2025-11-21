@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_STACK_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_STACK_H
 
-#include <cstdint>
+#include "ui/base/macros.h"
+#include "ui/properties/alignment.h"
+#include "ui/view/view.h"
 
 namespace OHOS::Ace::Kit {
 
-struct LayoutConstraintInfo {
-    float minWidth;
-    float minHeight;
-    float maxWidth;
-    float maxHeight;
-    float percentReferWidth;
-    float percentReferHeight;
-    std::optional<float> parentIdealSizeWidth;
-    std::optional<float> parentIdealSizeHeight;
+class ACE_FORCE_EXPORT Stack : public View {
+public:
+    static RefPtr<Stack> Create();
+    ~Stack() override;
+    Stack();
+
+    void SetAlignment(Ace::Alignment align);
 };
 
 } // namespace OHOS::Ace::Kit
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_STACK_H
