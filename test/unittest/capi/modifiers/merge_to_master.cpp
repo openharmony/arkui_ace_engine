@@ -40,3 +40,5 @@ HWTEST_F(WaterFlowModifierTest, setCashedCountTest, TestSize.Level1)
 }
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS;
+using namespace OHOS::Ace;
