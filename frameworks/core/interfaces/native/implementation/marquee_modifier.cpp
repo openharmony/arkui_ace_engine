@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -86,7 +87,7 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
                 stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
             }
         }
-        MarqueeModelNG::SetScrollAmount(frameNode, stepOpt);
+        MarqueeModelStatic::SetScrollAmount(frameNode, stepOpt);
     }
     if (marqueeOptions.loop) {
         std::optional<int32_t> loopOpt;
