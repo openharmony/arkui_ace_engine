@@ -14,14 +14,14 @@
  */
 
 import { className, int32, KoalaCallsiteKey, KoalaCallsiteKeys, Observable, ObservableHandler, refEqual, uint32 } from '@koalaui/common'
-import { Dependency, ScopeToStates, StateToScopes } from './Dependency'
+import { Dependency, Dependent, ScopeToStates, StateToScopes } from './Dependency'
 import { Disposable, disposeContent, disposeContentBackward } from './Disposable'
 import { Changes, Journal } from './Journal'
 import { markableQueue } from '../common/MarkableQueue'
 import { RuntimeProfiler } from '../common/RuntimeProfiler'
 import { IncrementalNode } from '../tree/IncrementalNode'
 import { ReadonlyTreeNode } from '../tree/ReadonlyTreeNode'
-import { ReadableState as State, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
+import { ReadableState, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
 
 export const CONTEXT_ROOT_SCOPE = 'ohos.koala.context.root.scope'
 export const CONTEXT_ROOT_NODE = 'ohos.koala.context.root.node'
@@ -66,7 +66,7 @@ export interface StateManager extends StateContext {
 /**
  * Individual mutable state, wrapping a value of type `Value`.
  */
-export interface MutableState<Value> extends Disposable, State<Value> {
+export interface MutableState<Value> extends Disposable, ReadableState<Value> {
     /**
      * Current value of the state as a mutable value.
      * You should not change state value from a memo code.
@@ -80,7 +80,7 @@ export interface MutableState<Value> extends Disposable, State<Value> {
 /**
  * Individual mutable state, wrapping an array of elements with the specified type.
  */
-export interface ArrayState<Item> extends State<ReadonlyArray<Item>> {
+export interface ArrayState<Item> extends ReadableState<ReadonlyArray<Item>> {
     length: int32
     at(index: int32): Item
     get(index: int32): Item
@@ -99,7 +99,7 @@ export interface ArrayState<Item> extends State<ReadonlyArray<Item>> {
 /**
  * Individual computable state that provides recomputable value of type `Value`.
  */
-export interface ComputableState<Value> extends Disposable, State<Value> {
+export interface ComputableState<Value> extends Disposable, ReadableState<Value> {
     /**
      * If value will be recomputed on access.
      */
@@ -171,8 +171,8 @@ export interface InternalScope<Value> extends IncrementalScope<Value> {
     /** @returns internal value updated after the computation */
     recache(newValue?: Value): Value
     /** @returns internal state for parameter */
-    param<V>(index: int32, value: V): State<V>
-    paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
+    param<V>(index: int32, value: V): ReadableState<V>
+    paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): ReadableState<V>
 }
 
 /**
@@ -189,7 +189,7 @@ export interface ControlledScope {
 
 // IMPLEMENTATION DETAILS: DO NOT USE IT DIRECTLY
 
-interface ManagedState extends Disposable {
+interface ManagedState extends Disposable, Dependent {
     /**
      * `true` - global state is added to the manager and is valid until it is disposed,
      * `false` - local state is added to the current scope and is valid as long as this scope is valid.
@@ -199,9 +199,8 @@ interface ManagedState extends Disposable {
     updateStateSnapshot(changes?: Changes): void
 }
 
-interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
+interface ManagedScope extends Disposable, Dependent, Dependency, ReadonlyTreeNode {
     forceCompleteRerender(): void
-    hasDependencies(): boolean
     readonly id: KoalaCallsiteKey
     readonly disabledStateUpdates: boolean
     readonly node: IncrementalNode | undefined
@@ -232,7 +231,7 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
     getCascadeParent(): ManagedScope | undefined
 }
 
-export class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
+class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
     protected manager: StateManagerImpl | undefined = undefined
     public dependencies: StateToScopes | undefined = undefined
     protected snapshot: Value
@@ -278,23 +277,24 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
     get value(): Value {
         this.onAccess()
         const manager = this.manager
-        return manager === undefined || manager.frozen ? this.snapshot : this.current(manager.journal)
+        if (!manager || manager.frozen) { return this.snapshot }
+        if (manager.current?.nodeRef) { return this.snapshot }
+        return this.current(manager.journal)
     }
 
     set value(value: Value) {
-        let actualValue = value
         this.checkSetProhibited()
         const tracker = this.tracker
         if (tracker) {
-            actualValue = tracker.onUpdate(value)
+            value = tracker.onUpdate(value)
         }
         const manager = this.manager
         if (manager) {
-            manager.updateNeeded = true
-            manager.journal.addChange(this, actualValue)
+            manager.dirtyStates.add(this)
+            manager.journal.addChange(this, value)
             this.myUpdated = false
         } else {
-            this.applyStateSnapshot(actualValue)
+            this.applyStateSnapshot(value)
         }
     }
 
@@ -312,7 +312,7 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
             if (propertyName) {
                 this.trackedScopes.setModified(propertyName, true)
             }
-            manager.updateNeeded = true
+            manager.dirtyStates.add(this)
             this.myUpdated = false
         } else {
             this.applyStateSnapshot(this.snapshot)
@@ -337,6 +337,7 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
         let modifiedTrackedScopes: ReadonlySet<ScopeToStates> | undefined = undefined
         if (this.myUpdated) {
             this.myModified = false
+            this.manager?.dirtyStates.delete(this)
         }
         else {
             modifiedTrackedScopes = this.trackedScopes.getModifiedDependencies()
@@ -384,6 +385,10 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
         this.dependencies = this.dependencies?.clear()
         manager.removeCreatedState(this, this.name)
         this.trackedScopes.clear()
+    }
+
+    hasDependencies(): boolean {
+        return this.dependencies?.empty === false
     }
 
     toString(): string {
@@ -482,7 +487,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         super.checkSetProhibited()
         const manager = this.manager
         if (manager) {
-            manager.updateNeeded = true
+            manager.dirtyStates.add(this)
             this.myUpdated = false
             return manager.journal.getCachedArray<Item>(this, this.snapshot)
         } else {
@@ -492,7 +497,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
     }
 }
 
-class ParameterImpl<Value> implements MutableState<Value> {
+class ParameterImpl<Value> implements Dependent, MutableState<Value> {
     private manager: StateManagerImpl | undefined = undefined
     private dependencies: StateToScopes | undefined = undefined
     private name: string | undefined = undefined
@@ -552,6 +557,10 @@ class ParameterImpl<Value> implements MutableState<Value> {
         this.dependencies = this.dependencies?.clear()
     }
 
+    hasDependencies(): boolean {
+        return this.dependencies?.empty === false
+    }
+
     toString(): string {
         let str = 'Parameter'
         if (this.name !== undefined) {
@@ -572,9 +581,9 @@ export class StateManagerImpl implements StateManager {
     private readonly statesNamed: Map<string, Disposable> = new Map<string, Disposable>()
     private readonly statesCreated: Set<ManagedState> = new Set<ManagedState>()
     private readonly dirtyScopes: Set<ManagedScope> = new Set<ManagedScope>()
+    readonly dirtyStates: Set<ManagedState> = new Set<ManagedState>()
     current: ManagedScope | undefined = undefined
     external: Dependency | undefined = undefined
-    updateNeeded: boolean = false
     frozen: boolean = false
     private readonly callbacks = markableQueue()
     readonly journal: Journal = new Journal()
@@ -599,10 +608,10 @@ export class StateManagerImpl implements StateManager {
             disposeContent(this.statesCreated.keys())
             this.statesCreated.clear()
         }
+        this.dirtyStates.clear()
         this.dirtyScopes.clear()
         this.callbacks.clear()
         this.journal.clear()
-        this.updateNeeded = false
         this.frozen = false
     }
 
@@ -619,7 +628,7 @@ export class StateManagerImpl implements StateManager {
     }
 
     isUpdateNeeded(): boolean {
-        return this.updateNeeded
+        return this.dirtyStates.size > 0
     }
 
     updateSnapshot(): uint32 {
@@ -629,28 +638,20 @@ export class StateManagerImpl implements StateManager {
         RuntimeProfiler.instance?.updateSnapshotEnter()
         this.checkForStateComputing()
         // optimization: all states are valid and not modified
-        if (!this.updateNeeded) {
+        if (!this.isUpdateNeeded()) {
             return 0
         }
         let modified: uint32 = 0
-        // try to update snapshot for every state, except for parameter states
         const changes = this.journal.getChanges()
-        const created = this.statesCreated.size // amount of created states to update
-        if (created > 0) {
-            const it = this.statesCreated.keys()
-            while (true) {
-                const result = it.next()
-                if (result.done) {
-                    break
-                }
-                result.value?.updateStateSnapshot(changes)
-                if (result.value?.modified === true) {
-                    modified++
-                }
-            }
+        const it = this.dirtyStates.keys()
+        while (true) {
+            const result = it.next()
+            if (result.done) { break }
+            result.value?.updateStateSnapshot(changes)
+            if (result.value?.modified === true) { modified++ }
         }
         changes?.clear()
-        RuntimeProfiler.instance?.updateSnapshot(modified, created)
+        RuntimeProfiler.instance?.updateSnapshot(modified, this.statesCreated.size)
         // recompute dirty scopes only
         while (this.dirtyScopes.size > 0) {
             const scopes = Array.from<ManagedScope>(this.dirtyScopes)
@@ -663,7 +664,6 @@ export class StateManagerImpl implements StateManager {
             }
         }
         RuntimeProfiler.instance?.updateSnapshot(modified)
-        this.updateNeeded = modified > 0 // reset modified on next update
         RuntimeProfiler.instance?.updateSnapshotExit()
         return modified
     }
@@ -680,8 +680,10 @@ export class StateManagerImpl implements StateManager {
         scope.node = node
         scope.nodeRef = node
         scope.dependencies = new StateToScopes()
+        this.current = scope // to attach named states to this scope
         scope.setNamedState(CONTEXT_ROOT_SCOPE, new StateImpl<ScopeImpl<Node>>(this, scope, false))
         scope.setNamedState(CONTEXT_ROOT_NODE, new StateImpl<Node>(this, node, false))
+        this.current = undefined
         return scope
     }
 
@@ -871,6 +873,7 @@ export class StateManagerImpl implements StateManager {
             this.statesNamed.delete(name)
         }
         this.statesCreated.delete(state)
+        this.dirtyStates.delete(state)
     }
 
     getNamedState<T>(name: string): StateImpl<T> | undefined {
@@ -1009,10 +1012,6 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         instance.myCleanup = cleanup
         instance._reuseKey = reuseKey
         return instance
-    }
-
-    hasDependencies(): boolean {
-        return this.dependencies?.empty === false
     }
 
     get id(): KoalaCallsiteKey {
@@ -1242,11 +1241,11 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return this.myValue as Value
     }
 
-    param<V>(index: int32, value: V): State<V> {
+    param<V>(index: int32, value: V): ReadableState<V> {
         return this.paramEx(index, value, undefined, undefined, undefined)
     }
 
-    paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V> {
+    paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): ReadableState<V> {
         const manager = this.manager
         const params = this.params
         if (manager === undefined || params === undefined) {
@@ -1383,6 +1382,10 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         if (error) {
             throw error
         }
+    }
+
+    hasDependencies(): boolean {
+        return this.dependencies?.empty === false
     }
 
     toString(): string {
