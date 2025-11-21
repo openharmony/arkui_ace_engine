@@ -9340,6 +9340,40 @@ void WebDelegate::SetViewportScaleState()
     nweb_->SetViewportScaleState();
 }
 
+std::string WebDelegate::GetLastSelectionText() const
+{
+    return lastSelectionText_;
+}
+
+void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool isFromOverlay)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    if (lastSelectionText_ == selectionText && !isFromOverlay) {
+        return;
+    }
+    lastSelectionText_ = selectionText;
+    if (webPattern->IsShowHandle() && !isFromOverlay) {
+        return;
+    }
+    if (webPattern->IsTextSelectionEnable()) {
+        return;
+    }
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), selectionText]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnTextSelectionChange, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnTextSelectionChangeEvent(std::make_shared<TextSelectionChangedEvent>(selectionText));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebTextSelectionChanged");
+}
+
 void WebDelegate::OnDetectedBlankScreen(
     const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount)
 {

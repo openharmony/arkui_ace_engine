@@ -2188,6 +2188,14 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         WebRequestFocus();
     }
 
+    if (info.GetAction() == MouseAction::PRESS) {
+        isTextSelectionEnable_ = true;
+    }
+
+    if (info.GetAction() == MouseAction::RELEASE) {
+        isTextSelectionEnable_ = false;
+        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText(), true);
+    }
     // set touchup false when using mouse
     isTouchUpEvent_ = false;
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {

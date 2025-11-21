@@ -2328,6 +2328,19 @@ void WebModelNG::SetOnShowFileSelector(
     webEventHub->SetOnFileSelectorShowEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetOnTextSelectionChange(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnTextSelectionChangeEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetOnContextMenuShow(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2587,6 +2600,18 @@ void WebModelNG::SetOnBeforeUnload(
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnCommonDialogEvent(std::move(uiCallback), static_cast<DialogEventType>(dialogEventType));
+}
+
+void WebModelNG::SetOnTextSelectionChange(std::function<void(const BaseEventInfo *info)> &&jsCallback)
+{
+    auto func = std::move(jsCallback);
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnTextSelectionChangeEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback)

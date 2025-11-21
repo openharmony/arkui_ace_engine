@@ -185,6 +185,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnVerifyPinRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnCameraCaptureStateChanged, void);
     ACE_WEB_EVENT_PROPERTY(OnMicrophoneCaptureStateChanged, void);
+    ACE_WEB_EVENT_PROPERTY(OnTextSelectionChange, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;
