@@ -3336,6 +3336,10 @@ export class RenderNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_insertChildAfter(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(child), extractors.toRenderNodePtr(sibling))
         return retval
     }
+    static insertChild_serialize(peer: RenderNode, child: RenderNode): int32 {
+        const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_insertChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(child))
+        return retval
+    }
     static removeChild_serialize(peer: RenderNode, node: RenderNode): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_removeChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
     }
@@ -3574,6 +3578,11 @@ export class RenderNodeExtender {
         const child_casted = child as (RenderNode)
         const sibling_casted = sibling as (RenderNode)
         return RenderNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
+    }
+    public static insertChild(peer: RenderNode, child: RenderNode): int32 {
+        const peer_casted = peer as (RenderNode)
+        const child_casted = child as (RenderNode)
+        return RenderNodeExtender.insertChild_serialize(peer_casted, child_casted)
     }
     public static removeChild(peer: RenderNode, node: RenderNode): void {
         const peer_casted = peer as (RenderNode)

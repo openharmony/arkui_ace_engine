@@ -34392,6 +34392,10 @@ Ark_Int32 impl_RenderNodeExtender_insertChildAfter(Ark_NativePointer peer, Ark_N
         return GetAccessors()->getRenderNodeExtenderAccessor()->insertChildAfter(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(child), static_cast<Ark_RenderNode>(sibling));
 }
 KOALA_INTEROP_DIRECT_3(RenderNodeExtender_insertChildAfter, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+Ark_Int32 impl_RenderNodeExtender_insertChild(Ark_NativePointer peer, Ark_NativePointer child) {
+        return GetAccessors()->getRenderNodeExtenderAccessor()->insertChild(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(child));
+}
+KOALA_INTEROP_DIRECT_2(RenderNodeExtender_insertChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
 void impl_RenderNodeExtender_removeChild(Ark_NativePointer peer, Ark_NativePointer node) {
         GetAccessors()->getRenderNodeExtenderAccessor()->removeChild(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(node));
 }

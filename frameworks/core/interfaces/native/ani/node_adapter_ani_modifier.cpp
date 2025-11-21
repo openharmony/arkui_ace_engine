@@ -90,8 +90,7 @@ ani_boolean NodeAdapterAttachNodeAdapter(ani_long ptr, ani_long node)
     if (!frameNode || !adapter || frameNode->GetFirstChild()) {
         return false;
     }
-    NodeAdapter::GetNodeAdapterAPI()->attachHostNode(adapter->GetHandle(), ConvertToNodeHandle(frameNode));
-    return true;
+    return NodeAdapter::GetNodeAdapterAPI()->attachHostNode(adapter->GetHandle(), ConvertToNodeHandle(frameNode));
 }
 
 void NodeAdapterDispose(ani_long ptr)
