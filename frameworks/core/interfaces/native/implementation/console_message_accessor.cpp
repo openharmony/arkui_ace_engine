@@ -81,6 +81,12 @@ Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
     return Converter::ArkValue<Ark_MessageLevel>(
         static_cast<Converter::MessageLevel>(peer->webConsoleLog->GetLogLevel()));
 }
+Ark_ConsoleMessageSource GetSourceImpl(Ark_ConsoleMessage peer)
+{
+    CHECK_NULL_RETURN(peer && peer->webConsoleLog, {});
+    return Converter::ArkValue<Ark_ConsoleMessageSource>(
+        static_cast<Converter::ConsoleMessageSource>(peer->webConsoleLog->GetSource()));
+}
 } // ConsoleMessageAccessor
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()
 {
@@ -92,6 +98,7 @@ const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()
         ConsoleMessageAccessor::GetSourceIdImpl,
         ConsoleMessageAccessor::GetLineNumberImpl,
         ConsoleMessageAccessor::GetMessageLevelImpl,
+        ConsoleMessageAccessor::GetSourceImpl,
     };
     return &ConsoleMessageAccessorImpl;
 }

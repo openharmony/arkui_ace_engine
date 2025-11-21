@@ -12291,6 +12291,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_ConsoleMessageSource GetSourceImpl(Ark_ConsoleMessage peer)
+    {
+        return {};
+    }
     } // ConsoleMessageAccessor
     namespace ContentModifierHelperAccessor {
     void ContentModifierButtonImpl(Ark_NativePointer node,

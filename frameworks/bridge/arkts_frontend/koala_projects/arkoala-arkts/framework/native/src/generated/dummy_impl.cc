@@ -28210,6 +28210,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Ark_ConsoleMessageSource GetSourceImpl(Ark_ConsoleMessage peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getSource(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // ConsoleMessageAccessor
     namespace ContentModifierHelperAccessor {
     void ContentModifierButtonImpl(Ark_NativePointer node,

@@ -3762,6 +3762,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ConsoleMessage_getMessageLevel(ptr: KPointer): int32
     @ani.unsafe.Direct
+    native static _ConsoleMessage_getSource(ptr: KPointer): int32
+    @ani.unsafe.Direct
     native static _ContentModifierHelper_contentModifierButton(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ContentModifierHelper_resetContentModifierButton(node: KPointer): void
