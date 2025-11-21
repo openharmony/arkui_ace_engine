@@ -3899,7 +3899,7 @@ void callManagedCallback_StyledStringMarshallingValue_Void(Ark_Int32 resourceId,
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_Callback_StyledStringMarshallingValue_Void);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, value);
+    argsSerializer.writeObject(value);
     enqueueCallback(10, &callbackBuffer);
 }
 void callManagedCallback_StyledStringMarshallingValue_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_UserDataSpan value)
@@ -3909,7 +3909,7 @@ void callManagedCallback_StyledStringMarshallingValue_VoidSync(Ark_VMContext vmC
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_StyledStringMarshallingValue_Void);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, value);
+    argsSerializer.writeObject(value);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedCallback_SwipeActionState_Void(Ark_Int32 resourceId, Ark_SwipeActionState state)
@@ -7406,7 +7406,7 @@ void callManagedStyledStringMarshallCallback(Ark_Int32 resourceId, Ark_UserDataS
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_StyledStringMarshallCallback);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, marshallableVal);
+    argsSerializer.writeObject(marshallableVal);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
@@ -7419,7 +7419,7 @@ void callManagedStyledStringMarshallCallbackSync(Ark_VMContext vmContext, Ark_In
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_StyledStringMarshallCallback);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, marshallableVal);
+    argsSerializer.writeObject(marshallableVal);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));

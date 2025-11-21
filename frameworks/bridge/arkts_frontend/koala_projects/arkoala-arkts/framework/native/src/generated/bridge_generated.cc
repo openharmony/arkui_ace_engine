@@ -37827,14 +37827,6 @@ Ark_String impl_UrlStyle_getUrl(Ark_NativePointer thisPtr) {
         return GetAccessors()->getUrlStyleAccessor()->getUrl(self);
 }
 KOALA_INTEROP_1(UrlStyle_getUrl, KStringPtr, Ark_NativePointer)
-Ark_NativePointer impl_UserDataSpan_construct() {
-        return GetAccessors()->getUserDataSpanAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(UserDataSpan_construct, Ark_NativePointer)
-Ark_NativePointer impl_UserDataSpan_getFinalizer() {
-        return GetAccessors()->getUserDataSpanAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(UserDataSpan_getFinalizer, Ark_NativePointer)
 Ark_NativePointer impl_VideoController_construct() {
         return GetAccessors()->getVideoControllerAccessor()->construct();
 }

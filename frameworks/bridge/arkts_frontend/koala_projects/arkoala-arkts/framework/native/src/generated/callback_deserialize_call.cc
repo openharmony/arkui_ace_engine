@@ -3366,7 +3366,7 @@ void deserializeAndCallCallback_StyledStringMarshallingValue_Void(KSerializerBuf
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_UserDataSpan value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_StyledStringMarshallingValue_Void))));
     thisDeserializer.readPointer();
-    Ark_UserDataSpan value = static_cast<Ark_UserDataSpan>(UserDataSpan_serializer::read(thisDeserializer));
+    Ark_UserDataSpan value = static_cast<Ark_UserDataSpan>(thisDeserializer.readObject());
     _call(_resourceId, value);
 }
 void deserializeAndCallSyncCallback_StyledStringMarshallingValue_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -3375,7 +3375,7 @@ void deserializeAndCallSyncCallback_StyledStringMarshallingValue_Void(Ark_VMCont
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_UserDataSpan value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_StyledStringMarshallingValue_Void))));
-    Ark_UserDataSpan value = static_cast<Ark_UserDataSpan>(UserDataSpan_serializer::read(thisDeserializer));
+    Ark_UserDataSpan value = static_cast<Ark_UserDataSpan>(thisDeserializer.readObject());
     callSyncMethod(vmContext, resourceId, value);
 }
 void deserializeAndCallCallback_SwipeActionState_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -6443,7 +6443,7 @@ void deserializeAndCallStyledStringMarshallCallback(KSerializerBuffer thisArray,
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_StyledStringMarshallCallback))));
     thisDeserializer.readPointer();
-    Ark_UserDataSpan marshallableVal = static_cast<Ark_UserDataSpan>(UserDataSpan_serializer::read(thisDeserializer));
+    Ark_UserDataSpan marshallableVal = static_cast<Ark_UserDataSpan>(thisDeserializer.readObject());
     Callback_Buffer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Buffer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Buffer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Buffer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Buffer_Void))))};
     _call(_resourceId, marshallableVal, continuationResult);
 }
@@ -6453,7 +6453,7 @@ void deserializeAndCallSyncStyledStringMarshallCallback(Ark_VMContext vmContext,
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_StyledStringMarshallCallback))));
-    Ark_UserDataSpan marshallableVal = static_cast<Ark_UserDataSpan>(UserDataSpan_serializer::read(thisDeserializer));
+    Ark_UserDataSpan marshallableVal = static_cast<Ark_UserDataSpan>(thisDeserializer.readObject());
     Callback_Buffer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Buffer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Buffer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Buffer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Buffer_Void))))};
     callSyncMethod(vmContext, resourceId, marshallableVal, continuationResult);
 }
