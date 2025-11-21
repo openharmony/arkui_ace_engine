@@ -297,7 +297,7 @@ public:
     static void ParseBorderWidth(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void ParseBorderRadius(const JSRef<JSVal>& args);
-    static void SetCornerApplyType(const JSCallbackInfo& info);
+    static void SetRenderStrategy(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args);
     static void ParseDashGap(const JSRef<JSVal>& args);

@@ -76,6 +76,10 @@ export enum BorderStyle {
     SOLID = 0,
     Solid = 0
 }
+export enum RenderStrategy {
+    FAST = 0,
+    OFFSCREEN = 1
+}
 export enum LineJoinStyle {
     MITER = 0,
     Miter = 0,

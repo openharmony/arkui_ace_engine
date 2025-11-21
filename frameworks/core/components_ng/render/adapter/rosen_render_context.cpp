@@ -5918,10 +5918,10 @@ void RosenRenderContext::SetRenderFit(RenderFit renderFit)
     }
 }
 
-void RosenRenderContext::OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType)
+void RosenRenderContext::OnRenderStrategyUpdate(RenderStrategy renderStrategy)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(cornerApplyType));
+    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(renderStrategy));
 }
 
 void RosenRenderContext::ClearDrawCommands()

@@ -23,7 +23,7 @@ import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTest
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
-import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
+import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
 import { LengthMetrics, ColorMetrics} from "arkui.Graphics"
 import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
@@ -376,6 +376,9 @@ export class CommonMethodModifier implements CommonMethod {
     _backgroundBlurStyle_0_0value?: BlurStyle | undefined
     _backgroundBlurStyle_0_1value?: BackgroundBlurStyleOptions | undefined
     _backgroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
+    _borderRadius_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _borderRadius_1_0value?: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+    _borderRadius_1_1value?: RenderStrategy | undefined
     _backgroundEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundEffect_1_0value?: BackgroundEffectOptions | undefined
     _backgroundEffect_1_1value?: SystemAdaptiveOptions | undefined
@@ -1033,7 +1036,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._borderRadius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBorderRadiusAttribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderRadius0Attribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
                     this._borderRadius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1043,7 +1046,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._borderRadius_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBorderRadiusAttribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderRadius0Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
                 }
             }
         }
@@ -3474,6 +3477,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._foregroundBlurStyle_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setForegroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._borderRadius_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._borderRadius_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBorderRadius1Attribute((this._borderRadius_1_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (this._borderRadius_1_1value as RenderStrategy | undefined));
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBorderRadius1Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined));
                 }
             }
         }
@@ -6208,6 +6229,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._borderRadius_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._borderRadius_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.borderRadius(modifier._borderRadius_1_0value, modifier._borderRadius_1_1value);
+                    break;
+                }
+                default: {
+                    this.borderRadius((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined));
+                }
+            }
+        }
         if (modifier._onClick_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onClick_1_flag) {
@@ -8453,6 +8487,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._foregroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        if (((this._borderRadius_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._borderRadius_1_flag = AttributeUpdaterFlag.UPDATE
+            this._borderRadius_1_0value = value
+            this._borderRadius_1_1value = type
+        } else
+        {
+            this._borderRadius_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

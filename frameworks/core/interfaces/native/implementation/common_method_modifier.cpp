@@ -684,6 +684,13 @@ ChainWeightPair Convert(const Ark_ChainWeightOptions& src)
 }
 
 template<>
+RenderStrategy Convert(const Ark_RenderStrategy& src)
+{
+    auto renderStrategy = static_cast<int32_t>(src);
+    return static_cast<RenderStrategy>(renderStrategy);
+}
+
+template<>
 SetFocusData Convert(const Ark_FocusMovement& src)
 {
     return {
@@ -2597,7 +2604,7 @@ void SetBorderColorImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
 }
-void SetBorderRadiusImpl(Ark_NativePointer node,
+void SetBorderRadius0Impl(Ark_NativePointer node,
                          const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2620,6 +2627,28 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstract::SetBorderRadius(frameNode, Dimension(0));
+}
+void SetBorderRadius1Impl(Ark_NativePointer node, const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value,
+    const Opt_RenderStrategy* type)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
+    if (radiuses) {
+        // Implement Reset value
+        if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+            ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
+                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+        }
+        if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            ImageModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
+                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+        }
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
+    }
+    auto renderStrategy = type->value;
+    ViewAbstractModelStatic::SetRenderStrategy(
+        frameNode, Converter::OptConvert<RenderStrategy>(renderStrategy).value_or(RenderStrategy::FAST));
 }
 void SetBorderImageImpl(Ark_NativePointer node,
                         const Opt_BorderImageOption* value)
@@ -5916,7 +5945,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBorderStyleImpl,
         CommonMethodModifier::SetBorderWidthImpl,
         CommonMethodModifier::SetBorderColorImpl,
-        CommonMethodModifier::SetBorderRadiusImpl,
+        CommonMethodModifier::SetBorderRadius0Impl,
         CommonMethodModifier::SetBorderImageImpl,
         CommonMethodModifier::SetOutlineImpl,
         CommonMethodModifier::SetOutlineStyleImpl,
@@ -6051,6 +6080,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBackgroundBlurStyleImpl,
         CommonMethodModifier::SetBackgroundEffect1Impl,
         CommonMethodModifier::SetForegroundBlurStyleImpl,
+        CommonMethodModifier::SetBorderRadius1Impl,
         CommonMethodModifier::SetOnClick1Impl,
         CommonMethodModifier::SetFocusScopeIdImpl,
         CommonMethodModifier::SetFocusScopePriorityImpl,

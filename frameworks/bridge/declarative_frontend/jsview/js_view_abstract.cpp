@@ -5339,7 +5339,7 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->ResetResObj("borderRadius");
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -5350,21 +5350,16 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     ParseBorderRadius(jsVal);
 }
 
-void JSViewAbstract::SetCornerApplyType(const JSCallbackInfo& info)
+void JSViewAbstract::SetRenderStrategy(const JSCallbackInfo& info)
 {
     if (info.Length() < NUM2) {
         return;
     }
-    auto type = info[NUM1];
-    CornerApplyType cornerApplyType = CornerApplyType::FAST;
-    if (type->IsNumber()) {
-        int32_t typeNumber = type->ToNumber<int32_t>();
-        if (typeNumber >= static_cast<int32_t>(CornerApplyType::FAST) &&
-            typeNumber < static_cast<int32_t>(CornerApplyType::MAX)) {
-            cornerApplyType = static_cast<CornerApplyType>(typeNumber);
-        }
+    if (!info[NUM1]->IsNumber()) {
+        ViewAbstractModel::GetInstance()->SetRenderStrategy(RenderStrategy::FAST);
+        return;
     }
-    ViewAbstractModel::GetInstance()->SetCornerApplyType(cornerApplyType);
+    ViewAbstractModel::GetInstance()->SetRenderStrategy(static_cast<RenderStrategy>(info[NUM1]->ToNumber<int32_t>()));
 }
 
 NG::BorderRadiusProperty JSViewAbstract::GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,

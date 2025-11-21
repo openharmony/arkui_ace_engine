@@ -550,11 +550,23 @@ enum class BorderStyle {
     NONE,
 };
 
-enum class CornerApplyType {
+enum class RenderStrategy {
     FAST = 0,
     OFFSCREEN,
     MAX
 };
+
+namespace StringUtils {
+inline std::string ToString(const RenderStrategy& renderStrategy)
+{
+    static const LinearEnumMapNode<RenderStrategy, std::string> table[] = {
+        { RenderStrategy::FAST, "FAST" },
+        { RenderStrategy::OFFSCREEN, "OFFSCREEN" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), renderStrategy);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class BorderImageRepeat {
     SPACE,

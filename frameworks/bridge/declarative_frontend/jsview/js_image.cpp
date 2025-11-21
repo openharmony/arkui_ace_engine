@@ -752,7 +752,7 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
         ImageModel::GetInstance()->SetBackBorder();
         return;
     }
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];

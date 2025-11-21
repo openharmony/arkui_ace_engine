@@ -316,7 +316,7 @@ public:
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
     void SetRenderFit(RenderFit renderFit) override;
-    void OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType) override;
+    void OnRenderStrategyUpdate(RenderStrategy renderStrategy) override;
     PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;
