@@ -187,9 +187,9 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._DataPanelAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTrackShadowAttribute(value: DataPanelShadowOptions | undefined): void {
+    setTrackShadowAttribute(value: DataPanelShadowOptions | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined  && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             DataPanelShadowOptions_serializer.write(thisSerializer, valueTmpValue)
@@ -238,7 +238,7 @@ export interface DataPanelAttribute extends CommonMethod {
     strokeWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method strokeWidth")
     }
-    trackShadow(value: DataPanelShadowOptions | undefined): this {
+    trackShadow(value: DataPanelShadowOptions | null | undefined): this {
         throw new Error("Unimplemented method trackShadow")
     }
     contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
@@ -253,7 +253,7 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     valueColors_value?: Array<ResourceColor | LinearGradient> | undefined
     trackBackgroundColor_value?: ResourceColor | undefined
     strokeWidth_value?: Length | undefined
-    trackShadow_value?: DataPanelShadowOptions | undefined
+    trackShadow_value?: DataPanelShadowOptions | null | undefined
     contentModifier_value?: ContentModifier<DataPanelConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined
     setDataPanelOptions(options: DataPanelOptions): this {
@@ -271,7 +271,7 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     strokeWidth(value: Length | undefined): this {
         return this
     }
-    trackShadow(value: DataPanelShadowOptions | undefined): this {
+    trackShadow(value: DataPanelShadowOptions | null | undefined): this {
         return this
     }
     contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
@@ -330,9 +330,9 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
         }
         return this
     }
-    public trackShadow(value: DataPanelShadowOptions | undefined): this {
+    public trackShadow(value: DataPanelShadowOptions | null | undefined): this {
         if (this.checkPriority("trackShadow")) {
-            const value_casted = value as (DataPanelShadowOptions | undefined)
+            const value_casted = value as (DataPanelShadowOptions | null | undefined)
             this.getPeer()?.setTrackShadowAttribute(value_casted)
             return this
         }
