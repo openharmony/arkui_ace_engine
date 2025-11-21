@@ -50,6 +50,7 @@
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
@@ -684,40 +685,6 @@ SetFocusData Convert(const Ark_FocusMovement& src)
         .left = OptConvert<std::string>(src.left),
         .right = OptConvert<std::string>(src.right)
     };
-}
-
-template<>
-MenuPreviewAnimationOptions Convert(const Ark_AnimationNumberRange& options)
-{
-    auto scaleFrom = Convert<float>(options.value0);
-    auto scaleTo = Convert<float>(options.value1);
-    return {
-        .scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom,
-        .scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo
-    };
-}
-
-template<>
-NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options)
-{
-    NG::MenuParam menuParam;
-    auto scale = OptConvert<MenuPreviewAnimationOptions>(options.scale);
-    if (scale) {
-        menuParam.previewAnimationOptions = *scale;
-    }
-    menuParam.hasPreviewTransitionEffect = false;
-    auto previewTransition = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
-    if (previewTransition && *previewTransition) {
-        menuParam.hasPreviewTransitionEffect = true;
-        menuParam.previewTransition = *previewTransition;
-    }
-    auto hoverScale = OptConvert<MenuPreviewAnimationOptions>(options.hoverScale);
-    menuParam.isShowHoverImage = false;
-    if (hoverScale) {
-        menuParam.hoverImageAnimationOptions = *hoverScale;
-        menuParam.isShowHoverImage = true;
-    }
-    return menuParam;
 }
 
 template<>
