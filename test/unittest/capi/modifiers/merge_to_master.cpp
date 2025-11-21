@@ -38,7 +38,3 @@ HWTEST_F(WaterFlowModifierTest, setCashedCountTest, TestSize.Level1)
     auto checkval = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
     EXPECT_EQ(checkVal, CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE);
 }
-
-
-
-
