@@ -682,7 +682,7 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
     }
 
     ani_method ctor;
-    if (ANI_OK != aniEnv->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != aniEnv->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find method fail");
         return animatorObj;
     }
@@ -782,7 +782,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find method fail");
         return animatorObj;
     }
@@ -997,7 +997,7 @@ ani_status BindAnimator(ani_env *env)
 
     std::array methods = {
         ani_native_function{"create",
-            "C{std.core.Object}:@ohos.animator.AnimatorResult",
+            nullptr,
             reinterpret_cast<void *>(ANICreate)},
     };
 
@@ -1023,19 +1023,20 @@ ani_status BindAnimatorResult(ani_env *env)
         ani_native_function{"cancel", ":", reinterpret_cast<void *>(JSCancel)},
         ani_native_function{"pause", ":", reinterpret_cast<void *>(JSPause)},
         ani_native_function{"finish", ":", reinterpret_cast<void *>(JSFinish)},
-        ani_native_function{"setOnFinish", "C{std.core.Function0}:", reinterpret_cast<void *>(SetOnfinish)},
-        ani_native_function{"setOnCancel", "C{std.core.Function0}:", reinterpret_cast<void *>(SetOncancel)},
-        ani_native_function{"setOnRepeat", "C{std.core.Function0}:", reinterpret_cast<void *>(SetOnrepeat)},
-        ani_native_function{"setOnFrame", "C{std.core.Function1}:", reinterpret_cast<void *>(SetOnframe)},
+        ani_native_function{"setOnFinish", nullptr, reinterpret_cast<void *>(SetOnfinish)},
+        ani_native_function{"setOnCancel", nullptr, reinterpret_cast<void *>(SetOncancel)},
+        ani_native_function{"setOnRepeat", nullptr, reinterpret_cast<void *>(SetOnrepeat)},
+        ani_native_function{"setOnFrame", nullptr, reinterpret_cast<void *>(SetOnframe)},
         ani_native_function{"update", "C{@ohos.animator.AnimatorOptions}:", reinterpret_cast<void *>(ANIUpdate)},
         ani_native_function{"reset", "X{C{@ohos.animator.AnimatorOptions}C{@ohos.animator.SimpleAnimatorOptions}}:",
             reinterpret_cast<void *>(ANIReset)},
-        ani_native_function{"setExpectedFrameRateRange", "arkui.component.common.ExpectedFrameRateRange:",
+        ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
     };
 
-    std::array staticMethods = { ani_native_function { "nativeTransferStatic",
-        "C{std.interop.ESValue}:C{std.core.Object}", reinterpret_cast<void*>(AnimatorTransferStatic) } };
+    std::array staticMethods = {
+        ani_native_function{ "nativeTransferStatic", nullptr, reinterpret_cast<void*>(AnimatorTransferStatic)}
+    };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind native method fail");
@@ -1058,20 +1059,21 @@ ani_status BindSimpleAnimatorOptions(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", "dd:", reinterpret_cast<void*>(ANICreateSimpleAnimatorOptionsWithParam) },
-        ani_native_function { "duration", "i:@ohos.animator.SimpleAnimatorOptions",
-            reinterpret_cast<void*>(ANISetSimpleAnimatorDuration) },
-        ani_native_function { "easing", "C{std.core.String}:@ohos.animator.SimpleAnimatorOptions",
-            reinterpret_cast<void*>(ANISetSimpleAnimatorEasing) },
         ani_native_function {
-            "delay", "i:@ohos.animator.SimpleAnimatorOptions", reinterpret_cast<void*>(ANISetSimpleAnimatorDelay) },
-        ani_native_function { "fill", "arkui.component.enums.FillMode:@ohos.animator.SimpleAnimatorOptions",
-            reinterpret_cast<void*>(ANISetSimpleAnimatorFill) },
-        ani_native_function { "direction", "arkui.component.enums.PlayMode:@ohos.animator.SimpleAnimatorOptions",
-            reinterpret_cast<void*>(ANISetSimpleAnimatorDirection) },
-        ani_native_function { "iterations", "i:@ohos.animator.SimpleAnimatorOptions",
-            reinterpret_cast<void*>(ANISetSimpleAnimatorIterations) },
-    };
+            "<ctor>", "dd:", reinterpret_cast<void*>(ANICreateSimpleAnimatorOptionsWithParam) },
+        ani_native_function {
+            "duration", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDuration) },
+        ani_native_function {
+            "easing", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorEasing) },
+        ani_native_function {
+            "delay", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDelay) },
+        ani_native_function {
+            "fill", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorFill) },
+        ani_native_function {
+            "direction", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDirection) },
+        ani_native_function {
+            "iterations", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorIterations) },
+        };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind SimpleAnimatorOptions native method fail");

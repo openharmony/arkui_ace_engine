@@ -91,7 +91,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(response, &isUndefinedResponse);
     if (!isUndefinedResponse) {
         ani_double resultResponse;
-        if (ANI_OK == env->Object_CallMethodByName_Double(response, "toDouble", ":d", &resultResponse)) {
+        if (ANI_OK == env->Object_CallMethodByName_Double(response, "toDouble", nullptr, &resultResponse)) {
             double value = static_cast<double>(resultResponse);
             responseValue = static_cast<float>(value);
         }
@@ -101,7 +101,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     if (!isUndefinedDampingFraction) {
         ani_double resultDampingFraction;
         if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "toDouble",
-            ":d", &resultDampingFraction)) {
+            nullptr, &resultDampingFraction)) {
             double value = static_cast<double>(resultDampingFraction);
             dampingFractionValue = static_cast<float>(value);
         }
@@ -111,7 +111,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     if (!isUndefinedOverlapDuration) {
         ani_double resultOverlapDuration;
         if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "toDouble",
-            ":d", &resultOverlapDuration)) {
+            nullptr, &resultOverlapDuration)) {
             double value = static_cast<double>(resultOverlapDuration);
             overlapDurationValue = static_cast<float>(value);
         }
@@ -179,7 +179,7 @@ static ani_object CubicBezierCurve(ani_env *env,
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
     }
 
@@ -203,7 +203,7 @@ static ani_object SpringCurve(ani_env* env,
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
     }
 
@@ -240,7 +240,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(response, &isUndefinedResponse);
     if (!isUndefinedResponse) {
         ani_double resultResponse;
-        if (ANI_OK == env->Object_CallMethodByName_Double(response, "toDouble", ":d", &resultResponse)) {
+        if (ANI_OK == env->Object_CallMethodByName_Double(response, "toDouble", nullptr, &resultResponse)) {
             double value = static_cast<double>(resultResponse);
             responseValue = static_cast<float>(value);
         }
@@ -250,7 +250,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     if (!isUndefinedDampingFraction) {
         ani_double resultDampingFraction;
         if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "toDouble",
-            ":d", &resultDampingFraction)) {
+            nullptr, &resultDampingFraction)) {
             double value = static_cast<double>(resultDampingFraction);
             dampingFractionValue = static_cast<float>(value);
         }
@@ -260,7 +260,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     if (!isUndefinedOverlapDuration) {
         ani_double resultOverlapDuration;
         if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "toDouble",
-            ":d", &resultOverlapDuration)) {
+            nullptr, &resultOverlapDuration)) {
             double value = static_cast<double>(resultOverlapDuration);
             overlapDurationValue = static_cast<float>(value);
         }
@@ -287,7 +287,7 @@ static ani_object SpringResponsiveMotion(ani_env *env,
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
     }
     CurvesObj* springResponsiveMotion = new CurvesObj();
@@ -310,7 +310,7 @@ static ani_object SpringMotion(ani_env *env,
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
     }
 
@@ -345,7 +345,7 @@ static ani_object InitCurve(ani_env* env, ani_enum_item enumItem)
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         LOGW("InitCurve get ctor failed");
         return nullptr;
     }
@@ -369,7 +369,7 @@ static ani_object InterpolatingSpring(ani_env* env,
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         LOGW("InterpolatingSpring get ctor failed");
         return nullptr;
     }
@@ -406,7 +406,7 @@ static ani_object StepsCurve(ani_env* env, ani_int count, ani_boolean end)
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         LOGW("StepsCurve get ctor failed");
         return nullptr;
     }
@@ -457,7 +457,7 @@ static ani_object CustomCurve(ani_env* env, ani_object callbackObj)
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         LOGW("CustomCurve get ctor failed");
         return nullptr;
     }
@@ -505,22 +505,15 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     std::array methods = {
-        ani_native_function { "cubicBezierCurve", "dddd:@ohos.curves.ICurve",
-            reinterpret_cast<void*>(CubicBezierCurve) },
-        ani_native_function { "springMotion",
-            "C{std.core.Double}C{std.core.Double}C{std.core.Double}:@ohos.curves.ICurve",
-            reinterpret_cast<void*>(SpringMotion) },
-        ani_native_function {
-            "initCurve", "@ohos.curves.curves.Curve:@ohos.curves.ICurve", reinterpret_cast<void*>(InitCurve) },
-        ani_native_function {
-            "interpolatingSpring", "dddd:@ohos.curves.ICurve", reinterpret_cast<void*>(InterpolatingSpring) },
-        ani_native_function { "springCurve", "dddd:@ohos.curves.ICurve", reinterpret_cast<void*>(SpringCurve) },
-        ani_native_function { "responsiveSpringMotion",
-            "C{std.core.Double}C{std.core.Double}C{std.core.Double}:@ohos.curves.ICurve",
-            reinterpret_cast<void*>(SpringResponsiveMotion) },
-        ani_native_function { "stepsCurve", "iz:@ohos.curves.ICurve", reinterpret_cast<void*>(StepsCurve) },
-        ani_native_function {
-            "customCurve", "C{std.core.Function1}:@ohos.curves.ICurve", reinterpret_cast<void*>(CustomCurve) } };
+        ani_native_function {"cubicBezierCurve", nullptr, reinterpret_cast<void *>(CubicBezierCurve)},
+        ani_native_function {"springMotion", nullptr, reinterpret_cast<void *>(SpringMotion)},
+        ani_native_function {"initCurve", nullptr, reinterpret_cast<void*>(InitCurve)},
+        ani_native_function {"interpolatingSpring", nullptr, reinterpret_cast<void*>(InterpolatingSpring)},
+        ani_native_function {"springCurve", nullptr, reinterpret_cast<void*>(SpringCurve)},
+        ani_native_function {"responsiveSpringMotion", nullptr, reinterpret_cast<void*>(SpringResponsiveMotion)},
+        ani_native_function {"stepsCurve", nullptr, reinterpret_cast<void*>(StepsCurve)},
+        ani_native_function {"customCurve", nullptr, reinterpret_cast<void*>(CustomCurve)}
+    };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         return ANI_ERROR;
     }
@@ -530,7 +523,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     std::array methodsCurves = {
-        ani_native_function {"interpolate", "d:d", reinterpret_cast<void *>(Interpolate)},
+        ani_native_function {"interpolate", nullptr, reinterpret_cast<void *>(Interpolate)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(clsCurves, methodsCurves.data(), methodsCurves.size())) {
