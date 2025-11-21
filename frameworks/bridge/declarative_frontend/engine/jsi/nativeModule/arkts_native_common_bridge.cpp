@@ -10558,6 +10558,10 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
         } else if (ArkTSUtils::ParseJsLengthMetrics(vm, marginArg, margin, resObjMargin)) {
             hasValue = 1;
         }
+        if (GreatNotEqual(margin.Value(), FLT_MAX)) {
+            hasValue -= 1;
+            margin.Reset();
+        }
     }
     focusBoxResObjs.push_back(resObjMargin);
     hasValue = hasValue << 1;
@@ -10568,6 +10572,10 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
             hasValue += 1;
         } else if (ArkTSUtils::ParseJsLengthMetrics(vm, widthArg, width, resObjWidth) && GreatOrEqual(width.Value(), 0.0f)) {
             hasValue += 1;
+        }
+        if (GreatNotEqual(width.Value(), FLT_MAX)) {
+            hasValue -= 1;
+            width.Reset();
         }
     }
     focusBoxResObjs.push_back(resObjWidth);
@@ -10614,32 +10622,44 @@ ArkUINativeModuleValue CommonBridge::SetNextFocus(ArkUIRuntimeCallInfo* runtimeC
     auto right = runtimeCallInfo->GetCallArgRef(NUM_6);
     if (forward->IsString(vm)) {
         nextFocusArray[NUM_0] = forward->ToString(vm)->ToString(vm);
-        hasValue = 1;
+        if (!nextFocusArray[NUM_0].empty()) {
+            hasValue += 1;
+        }
     }
     hasValue = hasValue << 1;
     if (backward->IsString(vm)) {
         nextFocusArray[NUM_1] = backward->ToString(vm)->ToString(vm);
-        hasValue += 1;
+        if (!nextFocusArray[NUM_1].empty()) {
+            hasValue += 1;
+        }
     }
     hasValue = hasValue << 1;
     if (up->IsString(vm)) {
         nextFocusArray[NUM_2] = up->ToString(vm)->ToString(vm);
-        hasValue += 1;
+        if (!nextFocusArray[NUM_2].empty()) {
+            hasValue += 1;
+        }
     }
     hasValue = hasValue << 1;
     if (down->IsString(vm)) {
         nextFocusArray[NUM_3] = down->ToString(vm)->ToString(vm);
-        hasValue += 1;
+        if (!nextFocusArray[NUM_3].empty()) {
+            hasValue += 1;
+        }
     }
     hasValue = hasValue << 1;
     if (left->IsString(vm)) {
         nextFocusArray[NUM_4] = left->ToString(vm)->ToString(vm);
-        hasValue += 1;
+        if (!nextFocusArray[NUM_4].empty()) {
+            hasValue += 1;
+        }
     }
     hasValue = hasValue << 1;
     if (right->IsString(vm)) {
         nextFocusArray[NUM_5] = right->ToString(vm)->ToString(vm);
-        hasValue += 1;
+        if (!nextFocusArray[NUM_5].empty()) {
+            hasValue += 1;
+        }
     }
     GetArkUINodeModifiers()->getCommonModifier()->setNextFocus(nativeNode,
         nextFocusArray[NUM_0].c_str(), nextFocusArray[NUM_1].c_str(),
