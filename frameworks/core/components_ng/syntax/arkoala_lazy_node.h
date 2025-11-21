@@ -127,8 +127,8 @@ public:
     void DumpInfo() override;
 
 private:
-    bool IsInActiveRange(int32_t index, const ActiveRangeParam& param) const;
-    bool IsInCacheRange(int32_t index, const ActiveRangeParam& param) const;
+    bool IsInActiveRange(int32_t index, const ActiveRangeParam& param);
+    bool IsInCacheRange(int32_t index, const ActiveRangeParam& param);
     void UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger = true);
 
     void UpdateMoveFromTo(int32_t from, int32_t to);

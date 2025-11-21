@@ -19,7 +19,7 @@
 import { int32, hashCodeFromString } from '@koalaui/common'
 import { pointer } from '@koalaui/interop'
 import { memoEntry2, __context, NodeAttach, remember } from '@koalaui/runtime'
-import { SyntaxItemPeer, ForEachNodePeer } from '../base/SyntaxNodeBase'
+import { SyntaxItemPeer, ForEachNodePeer } from '../base/RepeatImpl'
 import { DynamicNode, OnMoveHandler, ItemDragEventHandler, ForEachOps } from '#generated'
 import { PeerNode } from '../PeerNode'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
