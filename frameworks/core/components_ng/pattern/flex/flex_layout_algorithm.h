@@ -82,7 +82,8 @@ private:
     void CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const;
     void PlaceChildren(
-        LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace, const OffsetF& paddingOffset);
+        LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace,
+        const OffsetF& paddingOffset);
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
@@ -123,6 +124,9 @@ private:
         const ExpandEdges& mainExpand, ExpandEdges& sae, bool isHorizontal, bool isExpandConstraintNeeded);
     bool CheckReCalcMainExpand(const FlexAlign& crossAlign);
 
+    bool IsRowDirection() {
+        return direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE;
+    }
     template<typename T>
     void PatternOperator(T pattern, FlexOperatorType operation, FlexMeasureResult& measureResult,
         FlexLayoutResult layoutResult, uintptr_t addr)

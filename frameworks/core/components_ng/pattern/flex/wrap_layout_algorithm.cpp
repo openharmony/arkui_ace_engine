@@ -249,8 +249,16 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutWholeColumnWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
         TraverseColumnContent(startPosition, spaceBetweenContentsOnCrossAxis);
     }
+    bool isContentOverflowWarning = ShouldDoOverflowWork();
+    OverflowCollector collector(false);
     for (const auto& child : children) {
         child->Layout();
+        if (isContentOverflowWarning) {
+            collector.AccumulateFromWrapper(child);
+        }
+    }
+    if (IsContentOverflow(layoutWrapper, collector)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_LAYOUT, "Content overflow in Flex container");
     }
     HandleContentOverflow(layoutWrapper);
     contentList_.clear();

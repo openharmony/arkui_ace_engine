@@ -48,6 +48,7 @@ public:
     void SetTotalChildFrameRect(const RectF &childrenRect)
     {
         totalChildFrameRect_ = childrenRect;
+        preComputedReady_ = true;
     }
 
     void SetContentRect(const RectF &rect)
@@ -59,8 +60,21 @@ public:
     void AdjustChildrenOffset(float offset, bool useParentAjust = false);
     void InitOffsetAfterLayout();
     bool IsVerticalOverflow() const;
+    bool IsHorizontalOverflow() const;
     void HandleContentOverflow();
-    void SetOverflowDiabledFlag(bool flag)
+    bool IsTotalChildFrameRectPrecomputed() const
+    {
+        return preComputedReady_;
+    }
+    void ResetTotalChildFrameRectPrecomputed()
+    {
+        preComputedReady_ = false;
+    }
+    bool IsOverflowDisabled() const
+    {
+        return overflowDisabled_;
+    }
+    void SetOverflowDisabledFlag(bool flag)
     {
         overflowDisabled_ = flag;
     }
@@ -103,6 +117,7 @@ private:
     bool overflowDisabled_ = false;
     bool preVerticalReverse_ = false;
     bool hasParentAdjust_ = false;
+    bool preComputedReady_ = false;
     WeakPtr<FrameNode> frameNode_;
 };
 } // namespace OHOS::Ace::NG
