@@ -92,6 +92,7 @@ generated_sources = [
   "implementation/dismiss_popup_action_accessor.cpp",
   "implementation/divider_modifier.cpp",
   "implementation/drag_event_accessor.cpp",
+  "implementation/drag_utils_accessor.cpp",
   "implementation/drawing_rendering_context_accessor.cpp",
   "implementation/effect_component_modifier.cpp",
   "implementation/ellipse_modifier.cpp",

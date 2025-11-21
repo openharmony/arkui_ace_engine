@@ -134,6 +134,35 @@ export class AlertDialog {
         return
     }
 }
+export class DragUtils {
+    static GetForegroundColorValue_serialize(resourceColor: ResourceColor): int64 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (resourceColor instanceof Color) {
+            thisSerializer.writeInt8((0).toByte())
+            const resourceColorForIdx0 = resourceColor as Color
+            thisSerializer.writeInt32(resourceColorForIdx0.getOrdinal())
+        } else if (resourceColor instanceof int32) {
+            thisSerializer.writeInt8((1).toByte())
+            const resourceColorForIdx1 = resourceColor as int32
+            thisSerializer.writeInt32(resourceColorForIdx1)
+        } else if (resourceColor instanceof string) {
+            thisSerializer.writeInt8((2).toByte())
+            const resourceColorForIdx2 = resourceColor as string
+            thisSerializer.writeString(resourceColorForIdx2)
+        } else if (resourceColor instanceof Resource) {
+            thisSerializer.writeInt8((3).toByte())
+            const resourceColorForIdx3 = resourceColor as Resource
+            Resource_serializer.write(thisSerializer, resourceColorForIdx3)
+        }
+        const retval  = ArkUIGeneratedNativeModule._DragUtils_GetForegroundColorValue(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    public static GetForegroundColorValue(resourceColor: ResourceColor): int64 {
+        const resourceColor_casted = resourceColor as (ResourceColor)
+        return DragUtils.GetForegroundColorValue_serialize(resourceColor_casted)
+    }
+}
 export class DialogExtender {
     static showTimePickerDialog_serialize(options: TimePickerDialogOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()

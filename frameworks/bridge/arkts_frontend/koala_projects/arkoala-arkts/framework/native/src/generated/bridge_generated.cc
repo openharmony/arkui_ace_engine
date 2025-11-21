@@ -28026,6 +28026,30 @@ KInteropReturnBuffer impl_BaseEvent_getGetModifierKeyState(Ark_NativePointer thi
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(BaseEvent_getGetModifierKeyState, KInteropReturnBuffer, Ark_NativePointer)
+Ark_Int32 impl_DragUtils_GetForegroundColorValue(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 resourceColorValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_ResourceColor resourceColorValueTempTmpBuf = {};
+        resourceColorValueTempTmpBuf.selector = resourceColorValueTempTmpBufUnionSelector;
+        if (resourceColorValueTempTmpBufUnionSelector == 0) {
+            resourceColorValueTempTmpBuf.selector = 0;
+            resourceColorValueTempTmpBuf.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
+        } else if (resourceColorValueTempTmpBufUnionSelector == 1) {
+            resourceColorValueTempTmpBuf.selector = 1;
+            resourceColorValueTempTmpBuf.value1 = thisDeserializer.readInt32();
+        } else if (resourceColorValueTempTmpBufUnionSelector == 2) {
+            resourceColorValueTempTmpBuf.selector = 2;
+            resourceColorValueTempTmpBuf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+        } else if (resourceColorValueTempTmpBufUnionSelector == 3) {
+            resourceColorValueTempTmpBuf.selector = 3;
+            resourceColorValueTempTmpBuf.value3 = Resource_serializer::read(thisDeserializer);
+        } else {
+            INTEROP_FATAL("One of the branches for resourceColorValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_ResourceColor resourceColorValueTemp = static_cast<Ark_ResourceColor>(resourceColorValueTempTmpBuf);;
+        return GetAccessors()->getDragUtilsAccessor()->GetForegroundColorValue(static_cast<Ark_ResourceColor*>(&resourceColorValueTemp));
+}
+KOALA_INTEROP_DIRECT_2(DragUtils_GetForegroundColorValue, Ark_Int32, KSerializerBuffer, int32_t)
 void impl_BaseEvent_setGetModifierKeyState(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

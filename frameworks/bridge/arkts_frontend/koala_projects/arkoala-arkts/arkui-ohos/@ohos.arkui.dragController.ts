@@ -14,11 +14,13 @@
  */
 
 import { DragEvent, DragPreviewOptions, ICurve, CustomBuilder, Callback, DragItemInfo } from 'arkui/framework'
+import { int64 } from '@koalaui/common'
 import { TouchPoint, ResourceColor } from 'arkui/framework'
 import { Curve } from 'arkui/framework'
 import { UnifiedData, PixelMap } from "#external";
 import { ArkUIAniModule } from "arkui.ani"
 import { KPointer } from '@koalaui/interop';
+import { DragUtils } from '#generated'
 export namespace dragController {
 
     export enum DragStatus {
@@ -72,7 +74,8 @@ export namespace dragController {
             this.registerCleaner(this.dragPreview)
         }
         public setForegroundColor(color: ResourceColor) {
-            ArkUIAniModule._DragController_setForegroundColor(color, this.dragPreview);
+            let colorValue : int64 = DragUtils.GetForegroundColorValue(color);
+            ArkUIAniModule._DragController_setForegroundColor(colorValue, this.dragPreview);
         }
         public animate(options: AnimationOptions, handler: () =>void) {
             ArkUIAniModule._DragController_animate(options, handler, this.dragPreview);

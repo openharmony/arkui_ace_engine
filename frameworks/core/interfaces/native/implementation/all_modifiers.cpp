@@ -243,6 +243,7 @@ const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAcce
 const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
+const GENERATED_ArkUIDragUtilsAccessor* GetDragUtilsAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
 const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
@@ -570,6 +571,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDismissDialogActionAccessor,
         GetDismissPopupActionAccessor,
         GetDragEventAccessor,
+        GetDragUtilsAccessor,
         GetDrawingRenderingContextAccessor,
         GetEnvironmentBackendAccessor,
         GetEventEmulatorAccessor,
