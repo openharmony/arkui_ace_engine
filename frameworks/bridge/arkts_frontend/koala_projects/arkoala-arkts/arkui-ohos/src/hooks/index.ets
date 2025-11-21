@@ -51,6 +51,7 @@ import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, C
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
+import { ErrorCallback } from "@ohos.base";
 import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { PathStackUtils } from "../base/ArkNavPathStack"
@@ -62,7 +63,7 @@ import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
 import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
-import { ArkVideoComponent, VideoOptions } from "#generated";
+import { ArkVideoComponent, ArkVideoPeer, VideoOptions } from "#generated";
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, ImageAnalyzerConfig } from "#generated";
 import { CanvasOpsHandWritten } from "./CanvasOpsHandWritten";
 import { VideoOpsHandWritten } from "./VideoOpsHandWritten";
@@ -554,7 +555,8 @@ export function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOp
   VideoOpsHandWritten.hookSetVideoOptionsImpl(component, value);
 }
 
-export function hookVideoAnalyzerConfig(component: ArkVideoComponent, config: ImageAnalyzerConfig | undefined): void {
+export function hookVideoAnalyzerConfig(
+  component: ArkVideoComponent | ArkVideoPeer, config: ImageAnalyzerConfig | undefined): void {
   VideoOpsHandWritten.hookSetVideoAnalyzerConfigImpl(component, config);
 }
 
@@ -627,4 +629,9 @@ export function hookListItemGroupChildrenMainSizeImpl(node: ArkListItemGroupComp
 export function hookJavaScriptProxy(
   component: ArkWebComponent, value: JavaScriptProxy | undefined): void {
   WebHandWritten.hookJavaScriptProxyImpl(component, value);
+}
+
+export function hookVideoOnError(
+  component: ArkVideoComponent | ArkVideoPeer, value: VoidCallback | ErrorCallback | undefined): void {
+    VideoOpsHandWritten.hookSetVideoOnErrorImpl(component, value);
 }
