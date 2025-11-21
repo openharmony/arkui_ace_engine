@@ -1902,6 +1902,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Dimension& src)
 {
     switch (src.selector) {
@@ -3651,6 +3666,7 @@ ASSIGN_OPT(Opt_PlaybackSpeed)
 ASSIGN_OPT(Opt_PlayMode)
 ASSIGN_OPT(Opt_pointer_PointerStyle)
 ASSIGN_OPT(Opt_PopupStateChangeParam)
+ASSIGN_OPT(Opt_PositionF64Inner)
 ASSIGN_OPT(Opt_PositionWithAffinity)
 ASSIGN_OPT(Opt_PreDragStatus)
 ASSIGN_OPT(Opt_PreparedInfo)
@@ -3723,6 +3739,7 @@ ASSIGN_OPT(Opt_SheetType)
 ASSIGN_OPT(Opt_SideBarContainerType)
 ASSIGN_OPT(Opt_SideBarPosition)
 ASSIGN_OPT(Opt_Size)
+ASSIGN_OPT(Opt_SizeF64Inner)
 ASSIGN_OPT(Opt_SizeResult)
 ASSIGN_OPT(Opt_SlideEffect)
 ASSIGN_OPT(Opt_SliderBlockType)
@@ -3810,6 +3827,7 @@ ASSIGN_OPT(Opt_TransitionEffect)
 ASSIGN_OPT(Opt_TransitionHierarchyStrategy)
 ASSIGN_OPT(Opt_TransitionType)
 ASSIGN_OPT(Opt_TranslateResult)
+ASSIGN_OPT(Opt_Tuple_Double_Double)
 ASSIGN_OPT(Opt_Tuple_F64_F64)
 ASSIGN_OPT(Opt_Tuple_I32_I32)
 ASSIGN_OPT(Opt_Tuple_I32_I32_I32_I32)
@@ -4692,6 +4710,7 @@ ASSIGN_OPT(Opt_Union_String_Resource)
 ASSIGN_OPT(Opt_Union_String_Resource_ComponentContent)
 ASSIGN_OPT(Opt_Union_String_Resource_LinearGradientOptions)
 ASSIGN_OPT(Opt_Union_String_Resource_PixelMap)
+ASSIGN_OPT(Opt_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner)
 ASSIGN_OPT(Opt_VerticalAlignParam)
 ASSIGN_OPT(Opt_ViewportRect)
 ASSIGN_OPT(Opt_VisibleAreaEventOptions)
