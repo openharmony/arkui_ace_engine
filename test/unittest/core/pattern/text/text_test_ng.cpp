@@ -150,24 +150,18 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     EXPECT_EQ(textModelNG.GetTextDetectConfig(frameNode), TEXT_DETECT_TYPES);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-
     textModelNG.SetOnDetectResultUpdate(frameNode, std::move(textDetectConfig.onResult));
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_NE(textPattern->dataDetectorAdapter_->onResult_, nullptr);
-
     FONT_FEATURES_LIST value;
     ASSERT_EQ(textModelNG.GetFontFeature(frameNode), value);
     ASSERT_EQ(textModelNG.GetLineBreakStrategy(frameNode), TEXT_LINE_BREAK_STRATEGY);
-
     textModelNG.SetCaretColor(frameNode, Color::BLACK);
     ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
-
     textModelNG.ResetCaretColor(frameNode);
     ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
-
     textModelNG.SetSelectedBackgroundColor(frameNode, Color::BLACK);
     ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
-
     textModelNG.ResetSelectedBackgroundColor(frameNode);
     ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
@@ -718,6 +712,7 @@ HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     SpanModelNG spanModelNG;
     spanModelNG.Create(u"h\n");
     spanModelNG.SetFontSize(FONT_SIZE_VALUE);
@@ -726,13 +721,16 @@ HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
     textPattern->spans_.emplace_back(spanNode->spanItem_);
     textPattern->childNodes_.push_back(spanNode);
     ASSERT_FALSE(textPattern->spans_.empty());
+
     auto firstSpanItem = textPattern->spans_.front();
     ASSERT_NE(firstSpanItem, nullptr);
+
     bool isTouchTrigger = false;
     firstSpanItem->position = 2;
     firstSpanItem->onTouch = [&isTouchTrigger](TouchEventInfo& info) { isTouchTrigger = true; };
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
+
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
@@ -854,6 +852,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     pattern->AttachToFrameNode(frameNode);
     pattern->selectOverlayProxy_ = nullptr;
     DirtySwapConfig config;
@@ -861,6 +860,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
+
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     auto ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);

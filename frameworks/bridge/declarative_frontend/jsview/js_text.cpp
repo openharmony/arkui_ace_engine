@@ -1080,28 +1080,6 @@ void JSText::SetSelectDetectEnable(const JSCallbackInfo& info)
     }
 }
 
-void JSText::SetSelectDetectConfig(const JSCallbackInfo& info)
-{
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        TextModel::GetInstance()->ResetSelectDetectConfig();
-        return;
-    }
-    CHECK_NULL_VOID(info[0]->IsObject());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getTypes = paramObject->GetProperty("types");
-    CHECK_NULL_VOID(getTypes->IsArray());
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
-    CHECK_NULL_VOID(array->IsArray());
-    std::vector<TextDataDetectType> typesList;
-    for (size_t i = 0; i < array->Length(); ++i) {
-        JSRef<JSVal> type = array->GetValueAt(i);
-        if (type->IsNumber()) {
-            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
-        }
-    }
-    TextModel::GetInstance()->SetSelectDetectConfig(typesList);
-}
-
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

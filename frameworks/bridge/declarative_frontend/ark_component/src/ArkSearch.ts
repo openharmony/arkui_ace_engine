@@ -32,23 +32,6 @@ class SearchSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class SearchSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
-  constructor(value: SelectDetectorConfig) {
-    super(value);
-  }
-  static identity = Symbol('searchSelectDetectorConfig');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().search.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().search.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-
 class SearchSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1043,10 +1026,6 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorEnableModifier.identity, SearchSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorConfigModifier.identity, SearchSelectDetectorConfigModifier, config);
     return this;
   }
   selectionMenuHidden(value: boolean): SearchAttribute {
