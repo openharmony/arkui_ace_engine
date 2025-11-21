@@ -18,17 +18,19 @@
 
 #include "base/memory/ace_type.h"
 #include "core/interfaces/native/utility/peer_utils.h"
+#include "core/components_ng/base/symbol_modifier.h"
 #include "arkoala_api_generated.h"
 
 struct MenuItemConfigurationPeer {
-    Ark_Boolean enabled{};
-    Ark_ContentModifier contentModifier{};
-    Ark_ResourceStr value{};
-    Opt_ResourceStr icon{};
-    Opt_SymbolGlyphModifier symbolIcon{};
-    Ark_Boolean selected{};
-    Ark_Int32 index{};
-    Ark_NativePointer node{};
+    bool enabled_;
+    std::string value_;
+    std::string icon_;
+    OHOS::Ace::RefPtr<OHOS::Ace::SymbolModifier> symbolModifier_;
+    int32_t index_;
+    bool selected_;
+    Ark_ContentModifier contentModifier_;
+    Ark_NativePointer node_;
+
 protected:
     MenuItemConfigurationPeer() {}
     ~MenuItemConfigurationPeer() {}
