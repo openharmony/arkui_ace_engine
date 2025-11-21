@@ -173,10 +173,8 @@ void WaterFlowModelStatic::SetColumnsGap(FrameNode* frameNode, const std::option
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value.value(), frameNode);
     } else {
-        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
-        CHECK_NULL_VOID(layout);
-        layout->ResetColumnsGap();
-        layout->OnColumnsGapUpdate(Dimension());
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            WaterFlowLayoutProperty, ColumnsGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -186,10 +184,7 @@ void WaterFlowModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value.value(), frameNode);
     } else {
-        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
-        CHECK_NULL_VOID(layout);
-        layout->ResetRowsGap();
-        layout->OnRowsGapUpdate(Dimension());
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(WaterFlowLayoutProperty, RowsGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
