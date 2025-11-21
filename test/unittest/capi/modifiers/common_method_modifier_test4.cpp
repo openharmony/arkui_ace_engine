@@ -23,29 +23,32 @@
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
-    const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
-    const auto ATTRIBUTE_INVERT_NAME = "invert";
-    const auto ATTRIBUTE_INVERT_DEFAULT_VALUE = "";
-    const auto ATTRIBUTE_HUE_ROTATE_NAME = "hueRotate";
-    const auto ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE = 0;
-    const auto ATTRIBUTE_USE_EFFECT_NAME = "useEffect";
-    const auto ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE = false;
-    const auto ATTRIBUTE_RENDER_GROUP_NAME = "renderGroup";
-    const auto ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE = true;
-    const auto ATTRIBUTE_FREEZE_NAME = "freeze";
-    const auto ATTRIBUTE_FREEZE_DEFAULT_VALUE = false;
-    const auto ATTRIBUTE_SPHERICAL_EFFECT_NAME = "sphericalEffect";
-    const auto ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE = 0.0;
-    const auto ATTRIBUTE_LIGHT_UP_EFFECT_NAME = "lightUpEffect";
-    const auto ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE = 0.0;
-    const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME = "pixelStretchEffect";
-    const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE =
-        "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}";
-    const auto ATTRIBUTE_ALIGN_RULES_NAME = "alignRules";
+const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
+const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_INVERT_NAME = "invert";
+const auto ATTRIBUTE_INVERT_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_HUE_ROTATE_NAME = "hueRotate";
+const auto ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE = 0;
+const auto ATTRIBUTE_USE_EFFECT_NAME = "useEffect";
+const auto ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_USE_EFFECT_TYPE_NAME = "useEffectType";
+const auto ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE = "EffectType.DEFAULT";
+const auto ATTRIBUTE_RENDER_GROUP_NAME = "renderGroup";
+const auto ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE = true;
+const auto ATTRIBUTE_FREEZE_NAME = "freeze";
+const auto ATTRIBUTE_FREEZE_DEFAULT_VALUE = false;
+const auto ATTRIBUTE_SPHERICAL_EFFECT_NAME = "sphericalEffect";
+const auto ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE = 0.0;
+const auto ATTRIBUTE_LIGHT_UP_EFFECT_NAME = "lightUpEffect";
+const auto ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE = 0.0;
+const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME = "pixelStretchEffect";
+const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE =
+    "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}";
+const auto ATTRIBUTE_ALIGN_RULES_NAME = "alignRules";
 const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_NAME = "left";
 const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_NAME = "right";
 const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME = "middle";
@@ -106,7 +109,21 @@ const auto ATTRIBUTE_ROTATE_I_CENTER_Z_NAME = "centerZ";
 const auto ATTRIBUTE_ROTATE_I_ANGLE_NAME = "angle";
 const auto ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_ARRAY_DEFAULT_SIZE = 0;
-}
+
+static const std::vector<std::tuple<Opt_Boolean, std::string>> testFixtureUseEffect = {
+    { ArkValue<Opt_Boolean>(true), "true"},
+    { ArkValue<Opt_Boolean>(false), "false"},
+    { ArkValue<Opt_Boolean>(), ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE },
+};
+static const std::vector<std::tuple<std::string, Opt_EffectType, std::string>> testFixtureEnumUseEffectType = {
+    { "ARK_EFFECT_TYPE_DEFAULT", ArkValue<Opt_EffectType>(ARK_EFFECT_TYPE_DEFAULT), "EffectType.DEFAULT" },
+    { "EMPTY_VALUE", ArkValue<Opt_EffectType>(), ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE },
+    { "ARK_EFFECT_TYPE_WINDOW_EFFECT", ArkValue<Opt_EffectType>(ARK_EFFECT_TYPE_WINDOW_EFFECT),
+        "EffectType.WINDOW_EFFECT" },
+    { "INVALID_VALUE", ArkValue<Opt_EffectType>(INVALID_ENUM_VAL<Ark_EffectType>),
+        ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE },
+};
+} // namespace
 struct PixelStretchEffect {
     float left = 0.0;
     float top = 0.0;
@@ -348,35 +365,54 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateInvalidValues, TestSize.Level1)
 }
 ////////////// UseEffect
 /*
- * @tc.name: setUseEffectDefaultValues
+ * @tc.name: setUseEffectTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setUseEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setUseEffectTestDefaultValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto resultValue = jsonValue->GetBool(ATTRIBUTE_USE_EFFECT_NAME, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
+    auto fullJson = GetJsonValue(node_);
+    auto resultValue = GetAttrValue<std::string>(fullJson,  ATTRIBUTE_USE_EFFECT_NAME);
     EXPECT_EQ(resultValue, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
+    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_TYPE_NAME);
+    EXPECT_EQ(resultValue, ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setUseEffectValidValues
+ * @tc.name: setUseEffect0Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setUseEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setUseEffect0Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setUseEffect0, nullptr);
-    using OneTestStep = std::tuple<Opt_Boolean, bool>;
-    const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Boolean>(true), true},
-        {Converter::ArkValue<Opt_Boolean>(false), false},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
+    for (auto &[inputValue, expectedValue]: testFixtureUseEffect) {
         modifier_->setUseEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
-        auto resultValue = fullJson->GetBool(ATTRIBUTE_USE_EFFECT_NAME, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setUseEffect1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setUseEffect1Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setUseEffect1, nullptr);
+    for (auto &[inputValue, expectedValue]: testFixtureUseEffect) {
+        modifier_->setUseEffect1(node_, &inputValue, nullptr);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+    for (auto &[message, inputValue, expectedValue] : testFixtureEnumUseEffectType) {
+        modifier_->setUseEffect1(node_, nullptr, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_TYPE_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
 ////////////// RenderGroup
