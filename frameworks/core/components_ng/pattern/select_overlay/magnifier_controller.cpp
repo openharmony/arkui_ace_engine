@@ -62,9 +62,11 @@ void MagnifierController::UpdateShowMagnifier(bool isShowMagnifier)
     }
 }
 
-bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset)
+bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
+    VectorF& zoomOffset)
 {
-    float left = globalOffset_.GetX() - magnifierNodeWidth_.ConvertToPx() / 2;
+    const float halfMenuWidth = magnifierNodeWidth_.ConvertToPx() / 2;
+    float left = globalOffset_.GetX() - halfMenuWidth;
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
     auto rootGeometryNode = rootUINode->GetGeometryNode();
@@ -72,20 +74,28 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
     auto rootFrameSize = rootGeometryNode->GetFrameSize();
     auto magnifierX =
         std::clamp(left, 0.f, static_cast<float>(rootFrameSize.Width() - magnifierNodeWidth_.ConvertToPx()));
+    auto zoomOffsetX = globalOffset_.GetX() - (magnifierX + halfMenuWidth);
+    if (LessNotEqual(zoomOffsetX, -halfMenuWidth) || GreatNotEqual(zoomOffsetX, halfMenuWidth)) {
+        TAG_LOGW(AceLogTag::ACE_SELECT_OVERLAY, "zoomOffsetX is invalid.");
+    }
+    zoomOffsetX = std::clamp(zoomOffsetX, -halfMenuWidth, halfMenuWidth);
     magnifierPaintOffset.SetX(magnifierX);
     magnifierOffset.x = MAGNIFIER_OFFSETX.ConvertToPx();
+    zoomOffset.x = zoomOffsetX;
     return true;
 }
 
-bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset)
+bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
+    VectorF& zoomOffset)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     float menuHeight = magnifierNodeHeight_.ConvertToPx();
+    float halfMenuHeight = menuHeight / 2;
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
-    auto magnifierY = globalOffset_.GetY() - menuHeight / 2;
+    auto magnifierY = globalOffset_.GetY() - halfMenuHeight;
     float offsetY_ = 0.f;
 
     if (hasKeyboard && globalOffset_.GetY() >= keyboardInsert.start) {
@@ -108,6 +118,13 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         std::clamp(magnifierPaintOffsetY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
     magnifierPaintOffset.SetY(magnifierPaintOffsetY);
     magnifierOffset.y = offsetY_;
+    if (LessNotEqual(globalOffset_.GetY(), halfMenuHeight)) {
+        zoomOffset.y = std::clamp(globalOffset_.GetY() - halfMenuHeight, -halfMenuHeight, 0.f);
+    } else if (GreatNotEqual(globalOffset_.GetY(), rootFrameSize.Height() - halfMenuHeight)) {
+        zoomOffset.y = std::clamp(globalOffset_.GetY() - rootFrameSize.Height() + halfMenuHeight, 0.f, halfMenuHeight);
+    } else {
+        zoomOffset.y = 0.f;
+    }
     return true;
 }
 
@@ -124,12 +141,13 @@ bool MagnifierController::UpdateMagnifierOffset()
     ViewAbstract::SetBackgroundColor(AceType::RawPtr(magnifierFrameNode_), colorMagnifier);
     OffsetF magnifierPaintOffset;
     VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
     if (!IsLocalOffsetInHostRange(host)) {
         UpdateShowMagnifier(false);
         return false;
     }
-    CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset), false);
-    CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset), false);
+    CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), false);
+    CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), false);
     auto geometryNode = magnifierFrameNode_->GetGeometryNode();
     if (magnifierPaintOffset == geometryNode->GetFrameOffset() && NearEqual(params_.offsetX_, magnifierOffset.x) &&
         NearEqual(params_.offsetY_, magnifierOffset.y)) {
@@ -145,6 +163,8 @@ bool MagnifierController::UpdateMagnifierOffset()
     params_.offsetY_ = magnifierOffset.y;
     params_.factor_ = MAGNIFIER_FACTOR;
     params_.changed_ = !params_.changed_;
+    params_.zoomOffsetX_ = zoomOffset.x;
+    params_.zoomOffsetY_ = zoomOffset.y;
     ViewAbstract::SetMagnifier(AceType::RawPtr(magnifierFrameNode_), params_);
     magnifierFrameNode_->ForceSyncGeometryNode();
     magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
