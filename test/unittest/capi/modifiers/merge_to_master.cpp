@@ -21,3 +21,12 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureEnumArkDragBehaviorValues) {
+        dragEvent_->SetDragBehavior(value);
+        EXPECT_EQ(expected, accessor_->getDragBehavior(peer_)) <<
+            "Input value is: " << input << ", method: getDragBehavior";
+    }
+}
