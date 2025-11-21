@@ -691,7 +691,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getNodePropertyValue(this, property_casted);
     }
     public getRenderNode(): RenderNode | null {
-        return this.renderNode_ ? this.renderNode_! : null;
+        return (this.renderNode_ && this.renderNode_?.peer?.ptr) ? this.renderNode_! : null;
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
         const node_casted = node as (FrameNode)
