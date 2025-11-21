@@ -166,7 +166,6 @@ const std::string ACTION_PARAM = "action";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
-constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
 
@@ -4504,8 +4503,7 @@ void UIContentImpl::SetFormViewScale(float width, float height, float formViewSc
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
-        ((formViewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : formViewScale);
+    float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE : formViewScale;
 
     auto density = SystemProperties::GetResolution() / viewScale;
     TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f, density: %{public}f.", viewScale, density);
