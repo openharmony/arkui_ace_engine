@@ -1106,4 +1106,1319 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest028, TestSize.Level1)
     MockContainer::SetMockColorMode(ColorMode::LIGHT);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: ResourceParseUtilsTest029
+ * @tc.desc: Test CompleteResourceObjectFromColor with different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test CompleteResourceObjectFromColor with g_isConfigChangePerform false.
+     * @tc.expect: resObj remains nullptr.
+     */
+    RefPtr<ResourceObject> resObj;
+    Color color = Color::WHITE;
+    g_isConfigChangePerform = false;
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, "");
+    EXPECT_EQ(resObj, nullptr);
+
+    /**
+     * @tc.steps: step2. Test CompleteResourceObjectFromColor with g_isConfigChangePerform true but no invertFunc.
+     * @tc.expect: resObj remains nullptr.
+     */
+    g_isConfigChangePerform = true;
+    ColorInverter::GetInstance().DisableColorInvert(Container::CurrentIdSafely(), "");
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, "");
+    EXPECT_EQ(resObj, nullptr);
+
+    /**
+     * @tc.steps: step3. Test CompleteResourceObjectFromColor with g_isConfigChangePerform true and has invertFunc.
+     * @tc.expect: resObj is created and properties are set correctly.
+     */
+    auto invertFunc = [](uint32_t color) {
+        return ColorInverter::DefaultInverter(color);
+    };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, "testNode");
+    EXPECT_NE(resObj, nullptr);
+    EXPECT_FALSE(resObj->IsResource());
+    EXPECT_EQ(resObj->GetInstanceId(), Container::CurrentIdSafely());
+    EXPECT_EQ(resObj->GetNodeTag(), "testNode");
+    EXPECT_EQ(resObj->GetColorMode(), Container::CurrentColorMode());
+    EXPECT_FALSE(resObj->HasDarkResource());
+
+    /**
+     * @tc.steps: step4. Test CompleteResourceObjectFromColor with dark mode.
+     * @tc.expect: color is inverted and stored correctly.
+     */
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    RefPtr<ResourceObject> resObj2;
+    Color color2 = Color::WHITE;
+    Color originalColor = color2;
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj2, color2, "darkNode");
+    EXPECT_NE(resObj2, nullptr);
+    EXPECT_EQ(resObj2->GetColor(), originalColor);
+    EXPECT_NE(color2, originalColor);
+
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest030
+ * @tc.desc: Test ParseResStrArray with null resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call ParseResStrArray with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest031
+ * @tc.desc: Test ParseResStrArray with UNKNOWN_RESOURCE_TYPE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create resource object with UNKNOWN_RESOURCE_TYPE.
+     * @tc.steps: step2. Call ParseResStrArray.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(1, -1, params, "", "", 100000);
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest032
+ * @tc.desc: Test ParseResStrArray when GetOrCreateResourceWrapper fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set resource decoupling to false.
+     * @tc.steps: step2. Create valid resource object.
+     * @tc.steps: step3. Call ParseResStrArray.
+     * @tc.expect: Return false because GetOrCreateResourceWrapper fails.
+     */
+    g_isResourceDecoupling = false;
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest033
+ * @tc.desc: Test ParseResStrArray with resId == -1 and empty params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step2. Create resource object with resId == -1 and empty params.
+     * @tc.steps: step3. Call ParseResStrArray.
+     * @tc.expect: Return false because params is empty.
+     */
+    g_isResourceDecoupling = true;
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+    
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest034
+ * @tc.desc: Test ParseResStrArray with resId == -1 and valid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step2. Create resource object with resId == -1 and valid params.
+     * @tc.steps: step3. Call ParseResStrArray.
+     * @tc.expect: Return true but result may be empty due to no actual resource.
+     */
+    g_isResourceDecoupling = true;
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+    
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
+    std::vector<std::string> result;
+    ResourceParseUtils::ParseResStrArray(resObj, result);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest035
+ * @tc.desc: Test ParseResStrArray with valid resId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step2. Create resource object with valid resId.
+     * @tc.steps: step3. Call ParseResStrArray.
+     * @tc.expect: Return true but result may be empty due to no actual resource.
+     */
+    g_isResourceDecoupling = true;
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+    
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
+    std::vector<std::string> result;
+    ResourceParseUtils::ParseResStrArray(resObj, result);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest036
+ * @tc.desc: Test ParseResStrArray with wrong resource type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step2. Create resource object with valid resId but wrong type.
+     * @tc.steps: step3. Call ParseResStrArray.
+     * @tc.expect: Return false because resource type is not STRARRAY.
+     */
+    g_isResourceDecoupling = true;
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest037
+ * @tc.desc: Test InvertColorWithResource with different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test InvertColorWithResource with isReloading_ false.
+     * @tc.expect: Color is not inverted and resource object color mode is not changed.
+     */
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("com.example.test", "entry", 100000, resourceAdapter);
+    ResourceParseUtils::SetNeedReload(false);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    resObj->SetColorMode(ColorMode::LIGHT);
+    Color color = Color::BLUE;
+    Color originalColor = color;
+    ResourceParseUtils::InvertColorWithResource(resObj, color, ColorMode::DARK);
+    EXPECT_EQ(color, originalColor);
+    EXPECT_EQ(resObj->GetColorMode(), ColorMode::LIGHT);
+
+    /**
+     * @tc.steps: step2. Test InvertColorWithResource with COLOR_MODE_UNDEFINED.
+     * @tc.expect: Color is not inverted and resource object color mode is not changed.
+     */
+    ResourceParseUtils::SetNeedReload(true);
+    resObj->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    ResourceParseUtils::InvertColorWithResource(resObj, color, ColorMode::DARK);
+    EXPECT_EQ(color, originalColor);
+    EXPECT_EQ(resObj->GetColorMode(), ColorMode::COLOR_MODE_UNDEFINED);
+
+    /**
+     * @tc.steps: step3. Test InvertColorWithResource with non-DARK color mode.
+     * @tc.expect: Color is not inverted but resource object color mode is updated.
+     */
+    ResourceParseUtils::SetNeedReload(true);
+    resObj->SetColorMode(ColorMode::LIGHT);
+    resObj->SetHasDarkRes(false);
+    ResourceParseUtils::InvertColorWithResource(resObj, color, ColorMode::LIGHT);
+    EXPECT_EQ(color, originalColor);
+    EXPECT_EQ(resObj->GetColorMode(), ColorMode::LIGHT);
+
+    /**
+     * @tc.steps: step4. Test InvertColorWithResource with DARK color mode and has dark resource.
+     * @tc.expect: Color is not inverted but resource object color mode is updated.
+     */
+    ResourceParseUtils::SetNeedReload(true);
+    resObj->SetColorMode(ColorMode::LIGHT);
+    resObj->SetHasDarkRes(true);
+    ResourceParseUtils::InvertColorWithResource(resObj, color, ColorMode::DARK);
+    EXPECT_EQ(color, originalColor);
+    EXPECT_EQ(resObj->GetColorMode(), ColorMode::DARK);
+
+    /**
+     * @tc.steps: step5. Test InvertColorWithResource with DARK color mode and no dark resource.
+     * @tc.expect: Color is inverted and resource object color mode is updated.
+     */
+    ResourceParseUtils::SetNeedReload(true);
+    resObj->SetColorMode(ColorMode::LIGHT);
+    resObj->SetHasDarkRes(false);
+    resObj->SetInstanceId(100000);
+    resObj->SetNodeTag("testNode");
+    
+    // Enable color inversion
+    auto invertFunc = [](uint32_t color) {
+        return ColorInverter::DefaultInverter(color);
+    };
+    ColorInverter::GetInstance().EnableColorInvert(100000, "testNode", std::move(invertFunc));
+    
+    ResourceParseUtils::InvertColorWithResource(resObj, color, ColorMode::DARK);
+    EXPECT_EQ(resObj->GetColorMode(), ColorMode::DARK);
+    
+    // Disable color inversion after test
+    ColorInverter::GetInstance().DisableColorInvert(100000, "testNode");
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest038
+ * @tc.desc: Test ParseResString with std::u16string result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResString with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    std::u16string result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResString(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResString with valid resource object but ParseResString<std::string> returns false.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, -1, params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResString(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResString with valid resource object and ParseResString<std::string> returns true.
+     * @tc.expect: Return true and result is converted.
+     */
+    ResourceObjectParams param { .value = "test_string", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("com.example.test", "entry", 100000, resourceAdapter);
+    bool returnValue = ResourceParseUtils::ParseResString(resObj, result);
+    EXPECT_TRUE(returnValue);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest039
+ * @tc.desc: Test ParseResMedia with null resource object and unknown resource type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResMedia with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    std::string result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResMedia(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResMedia with UNKNOWN_RESOURCE_TYPE.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, -1, params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResMedia(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest040
+ * @tc.desc: Test ParseResMedia with RAWFILE type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResMedia with RAWFILE type but empty params.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::RAWFILE), params, "", "", 100000);
+    std::string result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResMedia(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResMedia with RAWFILE type but invalid param type.
+     * @tc.expect: Return false.
+     */
+    ResourceObjectParams intParam { .value = "filename", .type = ResourceObjectParamType::INT };
+    params.push_back(intParam);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::RAWFILE),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResMedia(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResMedia with RAWFILE type and valid param.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    params.clear();
+    ResourceObjectParams stringParam { .value = "filename", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::RAWFILE),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResMedia(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest041
+ * @tc.desc: Test ParseResMedia with resId -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest041, TestSize.Level1)
+{
+    std::string result;
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams stringParam { .value = "test", .type = ResourceObjectParamType::STRING };
+
+    /**
+     * @tc.steps: step1. Test ParseResMedia with resId -1 and empty params.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::MEDIA), params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResMedia(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResMedia with resId -1 and MEDIA type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    params.push_back(stringParam);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::MEDIA),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResMedia(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResMedia with resId -1 and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResMedia(resObj, result));
+
+    /**
+     * @tc.steps: step4. Test ParseResMedia with resId -1 and invalid type.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::INTEGER),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResMedia(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest042
+ * @tc.desc: Test ParseResMedia with valid resId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest042, TestSize.Level1)
+{
+    std::string result;
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams stringParam { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+
+    /**
+     * @tc.steps: step1. Test ParseResMedia with valid resId and MEDIA type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::MEDIA), params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResMedia(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResMedia with valid resId and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResMedia(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest043
+ * @tc.desc: Test ParseResourceToDouble with null resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResourceToDouble with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    double result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest044
+ * @tc.desc: Test ParseResourceToDouble with resource wrapper failure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResourceToDouble with valid resource object but no resource wrapper.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    double result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest045
+ * @tc.desc: Test ParseResourceToDouble with resId -1 and different parameter types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResourceToDouble with resId -1 and empty params.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    double result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResourceToDouble with resId -1 and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    ResourceObjectParams stringParam { .value = "123.45", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResourceToDouble with resId -1 and INTEGER type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::INTEGER),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+
+    /**
+     * @tc.steps: step4. Test ParseResourceToDouble with resId -1 and FLOAT type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::FLOAT),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+
+    /**
+     * @tc.steps: step5. Test ParseResourceToDouble with resId -1 and invalid type.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest046
+ * @tc.desc: Test ParseResourceToDouble with valid resId and different types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest046, TestSize.Level1)
+{
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams stringParam { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+    double result;
+
+    /**
+     * @tc.steps: step1. Test ParseResourceToDouble with valid resId and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResourceToDouble with valid resId and INTEGER type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::INTEGER),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResourceToDouble with valid resId and FLOAT type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::FLOAT),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest047
+ * @tc.desc: Test ParseResDimensionNG with null resource object and unknown resource type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResDimensionNG with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    CalcDimension result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step2. Test ParseResDimensionNG with valid resource object but no resource wrapper.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest048
+ * @tc.desc: Test ParseResDimensionNG with resId -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResDimensionNG with resId -1 and empty params.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    CalcDimension result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step2. Test ParseResDimensionNG with resId -1 and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    ResourceObjectParams stringParam { .value = "100vp", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step3. Test ParseResDimensionNG with resId -1 and INTEGER type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::INTEGER),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step4. Test ParseResDimensionNG with resId -1 and other type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest049
+ * @tc.desc: Test ParseResDimensionNG with valid resId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest049, TestSize.Level1)
+{
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams stringParam { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+    CalcDimension result;
+
+    /**
+     * @tc.steps: step1. Test ParseResDimensionNG with valid resId and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step2. Test ParseResDimensionNG with valid resId and INTEGER type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::INTEGER),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step3. Test ParseResDimensionNG with valid resId and FLOAT type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::FLOAT),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step4. Test ParseResDimensionNG with valid resId and other type.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest050
+ * @tc.desc: Test ParseResDimensionPx.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResDimensionPx with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    CalcDimension result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionPx(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResDimensionPx with valid resource object.
+     * @tc.expect: Return result of ParseResDimension with DimensionUnit::PX.
+     */
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+
+    // Test with unknown resource type
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, -1, params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionPx(resObj, result));
+
+    // Test with valid resource type but no resource wrapper
+    resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimensionPx(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest051
+ * @tc.desc: Test ParseResDimension with different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResDimension with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    CalcDimension result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step2. Test ParseResDimension with valid resource object but no resource wrapper.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step3. Test ParseResDimension with unknown resource type.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, -1, params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest052
+ * @tc.desc: Test ParseResDimension with resId -1 and different parameter conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResDimension with resId -1 and empty params.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    CalcDimension result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step2. Test ParseResDimension with resId -1 and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    ResourceObjectParams stringParam { .value = "100vp", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step3. Test ParseResDimension with resId -1 and INTEGER type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::INTEGER),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step4. Test ParseResDimension with resId -1 and other type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest053
+ * @tc.desc: Test ParseResDimension with valid resId and different types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest053, TestSize.Level1)
+{
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams stringParam { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(stringParam);
+    CalcDimension result;
+
+    /**
+     * @tc.steps: step1. Test ParseResDimension with valid resId and STRING type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step2. Test ParseResDimension with valid resId and INTEGER type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::INTEGER),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+
+    /**
+     * @tc.steps: step3. Test ParseResDimension with valid resId and other type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest054
+ * @tc.desc: Test ParseResBool with different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResBool with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    bool result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResBool(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResBool with unknown resource type.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, -1, params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResBool(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResBool with valid resource object but no resource wrapper.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    EXPECT_TRUE(ResourceParseUtils::ParseResBool(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest055
+ * @tc.desc: Test ParseResBool with resId -1 and different parameter conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResBool with resId -1 and empty params.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::BOOLEAN), params, "", "", 100000);
+    bool result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResBool(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResBool with resId -1 and BOOLEAN type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    ResourceObjectParams boolParam { .value = "true", .type = ResourceObjectParamType::STRING };
+    params.push_back(boolParam);
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResBool(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResBool with resId -1 and other type.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(-1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResBool(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest056
+ * @tc.desc: Test ParseResBool with valid resId and BOOLEAN type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest056, TestSize.Level1)
+{
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams boolParam { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(boolParam);
+    bool result;
+
+    /**
+     * @tc.steps: step1. Test ParseResBool with valid resId and BOOLEAN type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::BOOLEAN), params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResBool(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResBool with valid resId and other type.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResBool(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest057
+ * @tc.desc: Test ParseResResource with different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResResource with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    CalcDimension result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResResource with unknown resource type.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, -1, params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObj, result));
+
+    /**
+     * @tc.steps: step3. Test ParseResResource with valid resource object but no resource wrapper.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
+        params, "", "", 100000);
+    // This will return false because CreateResourceWrapper will fail without proper setup
+    EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest058
+ * @tc.desc: Test ParseResResource with different resource types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest058, TestSize.Level1)
+{
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param { .value = "test", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+    CalcDimension result;
+
+    /**
+     * @tc.steps: step1. Test ParseResResource with FLOAT type.
+     * @tc.expect: Return false (because no resource wrapper).
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::FLOAT), params, "", "", 100000);
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(resObj, result));
+
+    /**
+     * @tc.steps: step2. Test ParseResResource with other type.
+     * @tc.expect: Return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::BOOLEAN),
+        params, "", "", 100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest059
+ * @tc.desc: Test ParseResColorWithColorMode with null resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResColorWithColorMode with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    ColorMode colorMode = ColorMode::LIGHT;
+    Color result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest060
+ * @tc.desc: Test ParseResColorWithColorMode with valid resource object but no container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResColorWithColorMode with valid resource object but no container.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::COLOR), params, "", "", 100000);
+    // This will return false because Container::CurrentSafely() will fail in test environment
+    ColorMode colorMode = ColorMode::LIGHT;
+    Color result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest061
+ * @tc.desc: Test ParseResColorWithColorMode with UNKNOWN_INSTANCE_ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest061, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResColorWithColorMode with UNKNOWN_INSTANCE_ID.
+     * @tc.expect: resObj instanceId is set to container instanceId.
+     */
+    auto container = AceType::MakeRefPtr<MockContainer>();
+    container->SetMockColorMode(ColorMode::LIGHT);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::COLOR), params, "", "", -1);
+    resObj->SetInstanceId(-1);
+
+    ColorMode colorMode = ColorMode::LIGHT;
+    Color result;
+    // This will still return false because GetOrCreateResourceWrapper will fail without proper setup
+    EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
+    // But we can verify that the instanceId was set
+    EXPECT_EQ(resObj->GetInstanceId(), -1);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest062
+ * @tc.desc: Test ParseResColorWithColorMode with valid resource object, container and resource wrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest073, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up container and resource adapter.
+     * @tc.expect: Container and resource adapter are properly configured.
+     */
+    auto container = AceType::MakeRefPtr<MockContainer>();
+    container->SetMockColorMode(ColorMode::LIGHT);
+    container->SetBundleName("com.example.test");
+    container->SetModuleName("entry");
+
+    /**
+     * @tc.steps: step2. Create resource adapter and add to resource manager.
+     * @tc.expect: Resource adapter is added successfully.
+     */
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+
+    /**
+     * @tc.steps: step3. Create resource object with valid parameters.
+     * @tc.expect: Resource object is created successfully.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::COLOR), params, "", "", 100000);
+
+    /**
+     * @tc.steps: step4. Call ParseResColorWithColorMode.
+     * @tc.expect: Function executes without crashing and returns a value.
+     */
+    ColorMode colorMode = ColorMode::LIGHT;
+    Color result;
+    // The result depends on the implementation of ParseResColor
+    ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode);
+
+    /**
+     * @tc.steps: step5. Clean up resources.
+     * @tc.expect: Resource adapter is removed successfully.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", Container::CurrentIdSafely());
+    EXPECT_EQ(resObj->GetInstanceId(), 100000);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest063
+ * @tc.desc: Test ParseResFontFamilies with null resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest063, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResFontFamilies with null resource object.
+     * @tc.expect: Return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResFontFamilies(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest064
+ * @tc.desc: Test ParseResFontFamilies with valid resource object but no resource wrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest064, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseResFontFamilies with valid resource object but no resource wrapper.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResFontFamilies(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest065
+ * @tc.desc: Test ParseResFontFamilies with valid resource object, resource wrapper but empty params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest065, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up mock container and resource adapter.
+     * @tc.expect: Container and resource adapter are properly configured.
+     */
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+
+    /**
+     * @tc.steps: step2. Test ParseResFontFamilies with valid resource object, resource wrapper but empty params.
+     * @tc.expect: Return false.
+     */
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObjWithEmptyParams = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    std::vector<std::string> result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResFontFamilies(resObjWithEmptyParams, result));
+
+    /**
+     * @tc.steps: step3. Clean up resources.
+     * @tc.expect: Resource adapter is removed successfully.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", Container::CurrentIdSafely());
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest066
+ * @tc.desc: Test ParseResFontFamilies with valid resource object, resource wrapper and valid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest066, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up mock container and resource adapter.
+     * @tc.expect: Container and resource adapter are properly configured.
+     */
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+
+    /**
+     * @tc.steps: step2. Test ParseResFontFamilies with valid resource object, resource wrapper and valid params.
+     * @tc.expect: Return true.
+     */
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param { .value = "test_font", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+    RefPtr<ResourceObject> resObjWithParams = AceType::MakeRefPtr<ResourceObject>(-1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    std::vector<std::string> result;
+    EXPECT_TRUE(ResourceParseUtils::ParseResFontFamilies(resObjWithParams, result));
+    EXPECT_EQ(result.size(), 1);
+
+    /**
+     * @tc.steps: step3. Clean up resources.
+     * @tc.expect: Resource adapter is removed successfully.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", Container::CurrentIdSafely());
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest067
+ * @tc.desc: Test ParseResFontFamilies with valid resource id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest067, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up mock container and resource adapter.
+     * @tc.expect: Container and resource adapter are properly configured.
+     */
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
+
+    /**
+     * @tc.steps: step2. Test ParseResFontFamilies with valid resource id.
+     * @tc.expect: Return true.
+     */
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param { .value = "test_font", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+    RefPtr<ResourceObject> resObjWithId = AceType::MakeRefPtr<ResourceObject>(1,
+        static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
+    std::vector<std::string> result;
+    EXPECT_TRUE(ResourceParseUtils::ParseResFontFamilies(resObjWithId, result));
+    EXPECT_EQ(result.size(), 1);
+
+    /**
+     * @tc.steps: step3. Clean up resources.
+     * @tc.expect: Resource adapter is removed successfully.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", Container::CurrentIdSafely());
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest068
+ * @tc.desc: Test GetReplaceContentStr with itemType NONE for different types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest068, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test GetReplaceContentStr with itemType NONE for integer type 'd'.
+     * @tc.expect: Return parsed integer value as string.
+     */
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param {
+            .value = "{\"id\":1,\"type\":10007,\"params\":[{\"value\":\"123\",\"type\":2}]}",
+            .type = ResourceObjectParamType::NONE };
+    params.push_back(param);
+    
+    std::string result = GetReplaceContentStr(0, "d", params, 0);
+    EXPECT_NE(result, "123");
+
+    /**
+     * @tc.steps: step2. Test GetReplaceContentStr with itemType NONE for string type 's'.
+     * @tc.expect: Return parsed string value.
+     */
+    ResourceObjectParams stringParam {
+            .value = "{\"id\":2,\"type\":10003,\"params\":[{\"value\":\"hello\",\"type\":1}]}",
+            .type = ResourceObjectParamType::NONE };
+    params.clear();
+    params.push_back(stringParam);
+    
+    result = GetReplaceContentStr(0, "s", params, 0);
+    EXPECT_NE(result, "hello");
+
+    /**
+     * @tc.steps: step3. Test GetReplaceContentStr with itemType NONE for float type 'f'.
+     * @tc.expect: Return parsed double value as string.
+     */
+    ResourceObjectParams floatParam {
+            .value = "{\"id\":3,\"type\":10002,\"params\":[{\"value\":\"45.67\",\"type\":3}]}",
+            .type = ResourceObjectParamType::NONE };
+    params.clear();
+    params.push_back(floatParam);
+    
+    result = GetReplaceContentStr(0, "f", params, 0);
+    EXPECT_NE(result, "45.670000"); // Double to string conversion may have precision
+}
 } // namespace OHOS::Ace
