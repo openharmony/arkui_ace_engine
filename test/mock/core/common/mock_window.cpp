@@ -22,6 +22,8 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 void Window::RequestFrame() {}
 
+void Window::SetForceVsyncRequests(bool forceVsyncRequests) {}
+
 void Window::SetRootRenderNode(const RefPtr<RenderNode>& root) {}
 
 void Window::SetVsyncCallback(AceVsyncCallback&& callback) {}

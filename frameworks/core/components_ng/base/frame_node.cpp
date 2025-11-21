@@ -894,6 +894,12 @@ void FrameNode::DumpExtensionHandlerInfo()
 
 void FrameNode::DumpCommonInfo()
 {
+    if (DumpLog::GetInstance().IsDumpAllNodes()) {
+        DumpLog::GetInstance().AddDesc("IsFrameDisappear: " + std::to_string(IsFrameDisappear()));
+        DumpLog::GetInstance().AddDesc("IsActive: " + std::to_string(isActive_));
+        DumpLog::GetInstance().AddDesc("AccessibilityVisible: " + std::to_string(accessibilityVisible_));
+        DumpLog::GetInstance().AddDesc("HasAccessibilityVirtualNode: " + std::to_string(hasAccessibilityVirtualNode_));
+    }
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect without transform: ").append(renderContext_->GetPaintRectWithoutTransform().ToString()));
