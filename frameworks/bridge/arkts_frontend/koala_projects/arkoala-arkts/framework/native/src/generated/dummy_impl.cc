@@ -38727,31 +38727,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
+    Opt_Int32 GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return {};
         }
         string out("getCaretOffset(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return {};
     }
-    Ark_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
-                                   const Ark_Number* offset)
+    Opt_Boolean SetCaretOffsetImpl(Ark_RichEditorBaseController peer,
+                                   Ark_Int32 offset)
     {
         if (!needGroupedLog(1))
         {
-            return 0;
+            return {};
         }
         string out("setCaretOffset(");
         WriteToString(&out, offset);
         out.append(") \n");
-        out.append("[return 0] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return 0;
+        return {};
     }
     void CloseSelectionMenuImpl(Ark_RichEditorBaseController peer)
     {
@@ -38763,7 +38763,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
+    Opt_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
     {
         if (!needGroupedLog(1))
         {
@@ -38805,17 +38805,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
+    Opt_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
     {
         if (!needGroupedLog(1))
         {
-            return 0;
+            return {};
         }
         string out("isEditing(");
         out.append(") \n");
-        out.append("[return 0] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return 0;
+        return {};
     }
     void StopEditingImpl(Ark_RichEditorBaseController peer)
     {
@@ -38827,19 +38827,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
+    Opt_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_LayoutManager>(300);
+            return {};
         }
         string out("getLayoutManager(");
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_LayoutManager>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_LayoutManager>(300);
+        return {};
     }
-    Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
+    Opt_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
     {
         if (!needGroupedLog(1))
         {
@@ -38899,73 +38899,73 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
-                               const Ark_ResourceStr* content,
-                               const Opt_RichEditorTextSpanOptions* options)
+    Opt_Int32 AddTextSpanImpl(Ark_RichEditorController peer,
+                              const Ark_ResourceStr* content,
+                              const Opt_RichEditorTextSpanOptions* options)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return {};
         }
         string out("addTextSpan(");
         WriteToString(&out, content);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return {};
     }
-    Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
-                                const Ark_Union_PixelMap_ResourceStr* value,
-                                const Opt_RichEditorImageSpanOptions* options)
+    Opt_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
+                               const Ark_Union_PixelMap_ResourceStr* value,
+                               const Opt_RichEditorImageSpanOptions* options)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return {};
         }
         string out("addImageSpan(");
         WriteToString(&out, value);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return {};
     }
-    Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
-                                  const CustomNodeBuilder* value,
-                                  const Opt_RichEditorBuilderSpanOptions* options)
+    Opt_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
+                                 const CustomNodeBuilder* value,
+                                 const Opt_RichEditorBuilderSpanOptions* options)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return {};
         }
         string out("addBuilderSpan(");
         WriteToString(&out, value);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return {};
     }
-    Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
-                                 const Ark_Resource* value,
-                                 const Opt_RichEditorSymbolSpanOptions* options)
+    Opt_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
+                                const Ark_Resource* value,
+                                const Opt_RichEditorSymbolSpanOptions* options)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return {};
         }
         string out("addSymbolSpan(");
         WriteToString(&out, value);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return {};
     }
     void UpdateSpanStyleImpl(Ark_RichEditorController peer,
                              const Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions* value)
@@ -39003,8 +39003,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(Ark_RichEditorController peer,
-                                                                                const Opt_RichEditorRange* value)
+    Opt_Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(Ark_RichEditorController peer,
+                                                                                    const Opt_RichEditorRange* value)
     {
         if (!needGroupedLog(1))
         {
@@ -39017,8 +39017,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
-                                                      const Opt_RichEditorRange* value)
+    Opt_Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
+                                                          const Opt_RichEditorRange* value)
     {
         if (!needGroupedLog(1))
         {
@@ -39031,7 +39031,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
+    Opt_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
     {
         if (!needGroupedLog(1))
         {
@@ -39043,8 +39043,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Array_RichEditorSpan FromStyledStringImpl(Ark_RichEditorController peer,
-                                              Ark_StyledString value)
+    Opt_Array_RichEditorSpan FromStyledStringImpl(Ark_RichEditorController peer,
+                                                  Ark_StyledString value)
     {
         if (!needGroupedLog(1))
         {
@@ -39057,19 +39057,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_StyledString ToStyledStringImpl(Ark_RichEditorController peer,
+    Opt_StyledString ToStyledStringImpl(Ark_RichEditorController peer,
                                         const Ark_RichEditorRange* value)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_StyledString>(300);
+            return {};
         }
         string out("toStyledString(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_StyledString>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_StyledString>(300);
+        return {};
     }
     } // RichEditorControllerAccessor
     namespace RichEditorStyledStringControllerAccessor {
@@ -39119,19 +39119,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
+    Opt_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_MutableStyledString>(300);
+            return {};
         }
         string out("getStyledString(");
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_MutableStyledString>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_MutableStyledString>(300);
+        return {};
     }
-    Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
+    Opt_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
     {
         if (!needGroupedLog(1))
         {
@@ -40719,17 +40719,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
+    Opt_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_MutableStyledString>(300);
+            return {};
         }
         string out("getStyledString(");
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_MutableStyledString>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_MutableStyledString>(300);
+        return {};
     }
     } // StyledStringControllerAccessor
     namespace SubmitEventAccessor {
@@ -41909,17 +41909,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
+    Opt_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_LayoutManager>(300);
+            return {};
         }
         string out("getLayoutManager(");
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_LayoutManager>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_LayoutManager>(300);
+        return {};
     }
     } // TextBaseControllerAccessor
     namespace TextClockControllerAccessor {
@@ -42220,17 +42220,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Boolean IsEditingImpl(Ark_TextEditControllerEx peer)
+    Opt_Boolean IsEditingImpl(Ark_TextEditControllerEx peer)
     {
         if (!needGroupedLog(1))
         {
-            return 0;
+            return {};
         }
         string out("isEditing(");
         out.append(") \n");
-        out.append("[return 0] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return 0;
+        return {};
     }
     void StopEditingImpl(Ark_TextEditControllerEx peer)
     {
@@ -42242,33 +42242,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
-                                   const Ark_Number* offset)
+    Opt_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
+                                   Ark_Int32 offset)
     {
         if (!needGroupedLog(1))
         {
-            return 0;
+            return {};
         }
         string out("setCaretOffset(");
         WriteToString(&out, offset);
         out.append(") \n");
-        out.append("[return 0] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return 0;
+        return {};
     }
-    Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
+    Opt_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return {};
         }
         string out("getCaretOffset(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return {};
     }
-    Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
+    Opt_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
     {
         if (!needGroupedLog(1))
         {
