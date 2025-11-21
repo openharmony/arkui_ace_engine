@@ -119,13 +119,13 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
         return false;
     }
 
-    FireChangeEvent();
     currentDelta_ = 0.0f;
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto pickerAlgorithm = DynamicCast<ContainerPickerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(pickerAlgorithm, false);
     GetLayoutProperties(pickerAlgorithm);
+    FireChangeEvent();
     PostIdleTask(GetHost());
     SetDefaultTextStyle(false);
     HandleTargetIndex();
@@ -286,9 +286,9 @@ void ContainerPickerPattern::FireChangeEvent()
 {
     auto currentMiddleItem =
         ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
-    auto newSelectedIndex_ = currentMiddleItem.first;
-    if (newSelectedIndex_ != selectedIndex_) {
-        selectedIndex_ = newSelectedIndex_;
+    auto newSelectedIndex = currentMiddleItem.first;
+    if (newSelectedIndex != selectedIndex_) {
+        selectedIndex_ = newSelectedIndex;
         auto pickerEventHub = GetEventHub<ContainerPickerEventHub>();
         CHECK_NULL_VOID(pickerEventHub);
         pickerEventHub->FireChangeEvent(selectedIndex_);
@@ -913,7 +913,11 @@ void ContainerPickerPattern::PlayTargetAnimation()
     if (!scrollProperty_) {
         CreateScrollProperty();
     }
-    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
+    int32_t targetIndex = targetIndex_.value_or(0);
+    if (targetIndex < 0 || targetIndex >= totalItemCount_) {
+        targetIndex = 0;
+    }
+    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex);
     CreateTargetAnimation(targetPos);
     targetIndex_.reset();
 }
@@ -1250,8 +1254,7 @@ void ContainerPickerPattern::PlayResetAnimation()
 void ContainerPickerPattern::ForceResetWithoutAnimation()
 {
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
-    float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
-    currentDelta_ = resetOffset;
+    currentDelta_ = CalculateResetOffset(currentOffsetFromMiddle);
     PickerMarkDirty();
 }
 

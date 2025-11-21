@@ -181,22 +181,18 @@ private:
     void MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
-    void MeasurePickerItems(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    void MeasurePickerItems(LayoutWrapper* layoutWrapper);
     void HandleOffScreenItems(LayoutWrapper* layoutWrapper);
     void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index) const;
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
     void SetPatternHeight(LayoutWrapper* layoutWrapper);
     float GetPatternHeight(LayoutWrapper* layoutWrapper);
-    void MeasureBelow(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
-        float startPos, bool cachedLayout = false);
-    void MeasureAbove(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
-        float endPos, bool cachedLayout = false);
-    bool MeasureBelowItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        int32_t& currentIndex, float startPos, float& endPos);
-    bool MeasureAboveItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        int32_t& currentIndex, float endPos, float& startPos);
-    bool NeedMeasureBelow(int32_t currentIndex, float currentStartPos, float endMainPos, bool cachedLayout) const;
-    bool NeedMeasureAbove(int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const;
+    void MeasureBelow(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos, bool cachedLayout = false);
+    void MeasureAbove(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos, bool cachedLayout = false);
+    bool MeasureBelowItem(LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos);
+    bool MeasureAboveItem(LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos);
+    bool NeedMeasureBelow(float currentStartPos, float endMainPos) const;
+    bool NeedMeasureAbove(float currentEndPos, float startMainPos) const;
     void AdjustOffsetOnBelow(float currentEndPos);
     void AdjustOffsetOnAbove(float currentStartPos);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;

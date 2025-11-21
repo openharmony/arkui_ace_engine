@@ -103,7 +103,7 @@ public:
             GetIndicatorBackgroundColor().value_or(defaultIndicatorBackgroundColor).ColorToString().c_str());
         pickerIndicatorStyle->Put("borderRadius", GetIndicatorBorderRadius().value_or(
             BorderRadiusProperty(defaultIndicatorBorderRadius)).ToString().c_str());
-        json->PutExtAttr("pickerIndicatorStyle", pickerIndicatorStyle, filter);
+        json->PutExtAttr("selectionIndicator", pickerIndicatorStyle, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, int32_t, PROPERTY_UPDATE_MEASURE);

@@ -870,8 +870,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasurePickerItemsWithItems, TestSi
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasurePickerItems(layoutWrapper, layoutConstraint);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasurePickerItems(layoutWrapper);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
@@ -912,8 +912,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasurePickerItemsWithExistingItemP
      */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasurePickerItems(layoutWrapper, layoutConstraint);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasurePickerItems(layoutWrapper);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
@@ -1001,8 +1001,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureBelow, TestSize.Level0)
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureBelow(layoutWrapper, layoutConstraint, 2, 185.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureBelow(layoutWrapper, 2, 185.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
@@ -1038,8 +1038,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureBelowWithCanOverScrollEnable
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureBelow(layoutWrapper, layoutConstraint, 2, 185.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureBelow(layoutWrapper, 2, 185.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
@@ -1073,8 +1073,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureAbove, TestSize.Level0)
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureAbove(layoutWrapper, layoutConstraint, 2, 315.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureAbove(layoutWrapper, 2, 315.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
@@ -1110,8 +1110,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureAboveWithCanOverScrollEnable
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
-
-    algorithm_->MeasureAbove(layoutWrapper, layoutConstraint, 2, 315.0f);
+    algorithm_->childLayoutConstraint_ = layoutConstraint;
+    algorithm_->MeasureAbove(layoutWrapper, 2, 315.0f);
     EXPECT_FALSE(algorithm_->itemPosition_.empty());
 }
 
@@ -1131,12 +1131,12 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, NeedMeasureBelow, TestSize.Level0)
      * @tc.steps: step2. Test different scenarios with varying end positions and canOverScroll settings
      * @tc.expected: step2. The return value should be correct based on whether items need to be measured below
      */
-    EXPECT_TRUE(algorithm_->NeedMeasureBelow(0, 100.0f, 500.0f, false));
-    EXPECT_FALSE(algorithm_->NeedMeasureBelow(0, 600.0f, 500.0f, false));
+    EXPECT_TRUE(algorithm_->NeedMeasureBelow(100.0f, 500.0f));
+    EXPECT_FALSE(algorithm_->NeedMeasureBelow(600.0f, 500.0f));
 
     // Test with canOverScroll
     algorithm_->canOverScroll_ = true;
-    EXPECT_FALSE(algorithm_->NeedMeasureBelow(0, 600.0f, 500.0f, false));
+    EXPECT_FALSE(algorithm_->NeedMeasureBelow(600.0f, 500.0f));
 }
 
 /**
@@ -1150,8 +1150,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, NeedMeasureAbove, TestSize.Level0)
      * @tc.steps: step1. Test different scenarios with varying start positions
      * @tc.expected: step1. The return value should be correct based on whether items need to be measured above
      */
-    EXPECT_TRUE(algorithm_->NeedMeasureAbove(0, 100.0f, 50.0f, false));
-    EXPECT_FALSE(algorithm_->NeedMeasureAbove(0, 30.0f, 50.0f, false));
+    EXPECT_TRUE(algorithm_->NeedMeasureAbove(100.0f, 50.0f));
+    EXPECT_FALSE(algorithm_->NeedMeasureAbove(30.0f, 50.0f));
 }
 
 /**
