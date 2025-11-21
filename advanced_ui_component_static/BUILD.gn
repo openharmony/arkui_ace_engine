@@ -32,6 +32,7 @@ group("advanced_ui_component_static") {
       "selectionmenu:selectionMenu",
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
+      "multinavigation:multiNavigation",
       "subheaderv2:subHeaderV2",
       "composetitlebar:composeTitleBar",
       "editabletitlebar:editableTitleBar",
