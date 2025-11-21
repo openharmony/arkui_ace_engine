@@ -236,6 +236,8 @@ public:
 
     void ProcessOffscreenNode(RefPtr<UINode> uiNode, bool remove);
 
+    void ReorganizeOffscreenNode();
+
     void ClearAllOffscreenNode()
     {
         for (auto& [key, node] : expiringItem_) {

@@ -377,7 +377,9 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
         child.second->SetJSViewActive(false, true);
-        return child.second->GetFrameChildByIndex(0, needBuild);
+        auto childNode = child.second->GetFrameChildByIndex(0, needBuild);
+        builder_->ProcessOffscreenNode(childNode, false);
+        return childNode;
     }
     if (isActive_) {
         child.second->SetJSViewActive(true, true);
@@ -517,6 +519,8 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
             children_.push_back(item.second);
         }
     }
+
+    builder_->ReorganizeOffscreenNode();
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
