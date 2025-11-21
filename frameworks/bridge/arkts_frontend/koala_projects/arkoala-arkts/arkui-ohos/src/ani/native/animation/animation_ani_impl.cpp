@@ -75,10 +75,7 @@ ani_object ArithmeticAdd(ani_env* env, ani_object obj, ani_object otherObj)
 {
     CHECK_NULL_RETURN(env, nullptr);
     ani_ref result;
-    ani_status status = env->Object_CallMethodByName_Ref(obj, "plus",
-        "arkui.component.common.AnimatableArithmetic:"
-        "arkui.component.common.AnimatableArithmetic",
-        &result, static_cast<ani_ref>(otherObj));
+    ani_status status = env->Object_CallMethodByName_Ref(obj, "plus", nullptr, &result, static_cast<ani_ref>(otherObj));
     if (status != ANI_OK) {
         HILOGW("AnimatableArithmetic call plus func fail, errorCode:%{public}d", status);
         return nullptr;
@@ -90,10 +87,8 @@ ani_object ArithmeticMinus(ani_env* env, ani_object obj, ani_object otherObj)
 {
     CHECK_NULL_RETURN(env, nullptr);
     ani_ref result;
-    ani_status status = env->Object_CallMethodByName_Ref(obj, "subtract",
-        "arkui.component.common.AnimatableArithmetic:"
-        "arkui.component.common.AnimatableArithmetic",
-        &result, static_cast<ani_ref>(otherObj));
+    ani_status status =
+        env->Object_CallMethodByName_Ref(obj, "subtract", nullptr, &result, static_cast<ani_ref>(otherObj));
     if (status != ANI_OK) {
         HILOGW("AnimatableArithmetic call subtract func fail, errorCode:%{public}d", status);
         return nullptr;
@@ -106,9 +101,7 @@ ani_object ArithmeticMultiply(ani_env* env, ani_object obj, float scale)
     CHECK_NULL_RETURN(env, nullptr);
     ani_ref result;
     ani_float aniScale = scale;
-    ani_status status = env->Object_CallMethodByName_Ref(obj, "multiply",
-        "d:arkui.component.common.AnimatableArithmetic", &result,
-        aniScale);
+    ani_status status = env->Object_CallMethodByName_Ref(obj, "multiply", nullptr, &result, aniScale);
     if (status != ANI_OK) {
         HILOGW("AnimatableArithmetic call multiply func fail, errorCode:%{public}d", status);
         return nullptr;
@@ -121,9 +114,7 @@ bool ArithmeticEqual(ani_env* env, ani_object obj, ani_object otherObj)
     CHECK_NULL_RETURN(env, false);
     ani_boolean result;
     ani_ref otherRef = static_cast<ani_ref>(otherObj);
-    ani_status status = env->Object_CallMethodByName_Boolean(obj, "equals",
-        "arkui.component.common.AnimatableArithmetic:z", &result,
-        otherRef);
+    ani_status status = env->Object_CallMethodByName_Boolean(obj, "equals", nullptr, &result, otherRef);
     if (status != ANI_OK) {
         HILOGW("AnimatableArithmetic call equals func fail, errorCode:%{public}d", status);
         return false;
