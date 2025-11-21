@@ -48,7 +48,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
     _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeWidth_0_0value?: Length | undefined
     _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _trackShadow_0_0value?: DataPanelShadowOptions | undefined
+    _trackShadow_0_0value?: DataPanelShadowOptions | null | undefined
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<DataPanelConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
@@ -131,7 +131,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             switch (this._trackShadow_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as DataPanelShadowOptions | undefined));
+                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as DataPanelShadowOptions | null | undefined));
                     this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -141,7 +141,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
                 default: {
                     this._trackShadow_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTrackShadowAttribute((undefined as DataPanelShadowOptions | undefined));
+                    peer.setTrackShadowAttribute((undefined as DataPanelShadowOptions | null | undefined));
                 }
             }
         }
@@ -228,7 +228,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                     break;
                 }
                 default: {
-                    this.trackShadow((undefined as DataPanelShadowOptions | undefined));
+                    this.trackShadow((undefined as DataPanelShadowOptions | null | undefined));
                 }
             }
         }
@@ -294,7 +294,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         }
         return this
     }
-    trackShadow(value: DataPanelShadowOptions | undefined): this {
+    trackShadow(value: DataPanelShadowOptions | null | undefined): this {
         if (((this._trackShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE
