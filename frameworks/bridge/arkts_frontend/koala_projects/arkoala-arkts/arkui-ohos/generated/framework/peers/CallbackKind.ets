@@ -195,6 +195,7 @@ export enum CallbackKind {
     Kind_Callback_UIExtensionProxy_Void = -1063506522,
     Kind_Callback_Union_CustomBuilder_DragItemInfo_Void = -620935067,
     Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void = -1322200028,
+    Kind_Callback_VisibilityChangeReason_Void = -2144679285,
     Kind_Callback_Void = -1867723152,
     Kind_Callback_WebKeyboardOptions_Void = -1376223390,
     Kind_CheckBoxModifierBuilder = 1317697111,

@@ -221,7 +221,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavDestinationAttribute_setHideBackButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnShownAttribute(value: (() => void) | undefined): void {
+    setOnShownAttribute(value: ((value0: VisibilityChangeReason) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -233,7 +233,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavDestinationAttribute_setOnShown(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnHiddenAttribute(value: (() => void) | undefined): void {
+    setOnHiddenAttribute(value: ((value0: VisibilityChangeReason) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -745,6 +745,12 @@ export enum NavDestinationActiveReason {
     OVERLAY = 4,
     APP_STATE = 5
 }
+
+export enum VisibilityChangeReason {
+    TRANSITION = 0,
+    CONTENT_COVER = 1,
+    APP_STATE = 2
+}
 export interface RouteMapConfig {
     name: string;
     pageSourceFile: string;
@@ -771,10 +777,10 @@ export interface NavDestinationAttribute extends CommonMethod {
     hideBackButton(value: boolean | undefined): this {
         throw new Error("Unimplemented method hideBackButton")
     }
-    onShown(value: (() => void) | undefined): this {
+    onShown(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         throw new Error("Unimplemented method onShown")
     }
-    onHidden(value: (() => void) | undefined): this {
+    onHidden(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         throw new Error("Unimplemented method onHidden")
     }
     onBackPressed(value: (() => boolean) | undefined): this {
@@ -865,8 +871,8 @@ export interface NavDestinationAttribute extends CommonMethod {
 export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavDestinationAttribute {
     hideTitleBar_value?: boolean | undefined
     hideBackButton_value?: boolean | undefined
-    onShown_value?: (() => void) | undefined
-    onHidden_value?: (() => void) | undefined
+    onShown_value?: ((value0: VisibilityChangeReason) => void) | undefined
+    onHidden_value?: ((value0: VisibilityChangeReason) => void) | undefined
     onBackPressed_value?: (() => boolean) | undefined
     onResult_value?: ((value0: Object | null | undefined) => void) | undefined
     mode_value?: NavDestinationMode | undefined
@@ -895,10 +901,10 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     hideBackButton(value: boolean | undefined): this {
         return this
     }
-    onShown(value: (() => void) | undefined): this {
+    onShown(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         return this
     }
-    onHidden(value: (() => void) | undefined): this {
+    onHidden(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         return this
     }
     onBackPressed(value: (() => boolean) | undefined): this {
@@ -1024,17 +1030,17 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    public onShown(value: (() => void) | undefined): this {
+    public onShown(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         if (this.checkPriority("onShown")) {
-            const value_casted = value as ((() => void) | undefined)
+            const value_casted = value as (((value0: VisibilityChangeReason) => void) | undefined)
             this.getPeer()?.setOnShownAttribute(value_casted)
             return this
         }
         return this
     }
-    public onHidden(value: (() => void) | undefined): this {
+    public onHidden(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         if (this.checkPriority("onHidden")) {
-            const value_casted = value as ((() => void) | undefined)
+            const value_casted = value as (((value0: VisibilityChangeReason) => void) | undefined)
             this.getPeer()?.setOnHiddenAttribute(value_casted)
             return this
         }

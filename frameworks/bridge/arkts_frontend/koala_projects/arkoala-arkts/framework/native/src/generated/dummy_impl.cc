@@ -9125,7 +9125,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnShownImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+                        const Opt_Callback_VisibilityChangeReason_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -9137,7 +9137,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnHiddenImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_Callback_VisibilityChangeReason_Void* value)
     {
         if (!needGroupedLog(1))
         {

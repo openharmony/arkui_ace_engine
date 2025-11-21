@@ -10429,26 +10429,26 @@ void impl_NavDestinationAttribute_setOnShown(Ark_NativePointer thisPtr, KSeriali
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Void valueValueTempTmpBuf = {};
+        Opt_Callback_VisibilityChangeReason_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_VisibilityChangeReason_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_VisibilityChangeReason_Void))))};
         }
-        Opt_Callback_Void valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getNavDestinationModifier()->setOnShown(self, static_cast<Opt_Callback_Void*>(&valueValueTemp));
+        Opt_Callback_VisibilityChangeReason_Void valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getNavDestinationModifier()->setOnShown(self, static_cast<Opt_Callback_VisibilityChangeReason_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setOnShown, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setOnHidden(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Void valueValueTempTmpBuf = {};
+        Opt_Callback_VisibilityChangeReason_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_VisibilityChangeReason_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_VisibilityChangeReason_Void))))};
         }
-        Opt_Callback_Void valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getNavDestinationModifier()->setOnHidden(self, static_cast<Opt_Callback_Void*>(&valueValueTemp));
+        Opt_Callback_VisibilityChangeReason_Void valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getNavDestinationModifier()->setOnHidden(self, static_cast<Opt_Callback_VisibilityChangeReason_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setOnHidden, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setOnBackPressed(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
