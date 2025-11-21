@@ -1693,4 +1693,12 @@ void WebClientImpl::OnCameraCaptureStateChanged(int originalState, int newState)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnCameraCaptureStateChanged(originalState, newState);
 }
+
+void WebClientImpl::OnMicrophoneCaptureStateChanged(int originalState, int newState)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnMicrophoneCaptureStateChanged(originalState, newState);
+}
 } // namespace OHOS::Ace

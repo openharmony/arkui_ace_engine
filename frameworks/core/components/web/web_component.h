@@ -1218,6 +1218,17 @@ public:
         return declaration_->GetCameraCaptureStateChangedId();
     }
 
+    void SetMicrophoneCaptureStateChangedId(const EventMarker& microphoneCaptureStateChangedId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetMicrophoneCaptureStateChangedId(microphoneCaptureStateChangedId);
+    }
+
+    const EventMarker& GetMicrophoneCaptureStateChangedId() const
+    {
+        return declaration_->GetMicrophoneCaptureStateChangedId();
+    }
+
     void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)
     {
         CHECK_NULL_VOID(declaration_);

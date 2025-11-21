@@ -2345,6 +2345,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onCameraCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnCameraCaptureStateChangedEvent()
                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetCameraCaptureStateChangedId(), oldContext);
+        onMicrophoneCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnMicrophoneCaptureStateChangedEvent()
+                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                           webCom->GetMicrophoneCaptureStateChangedId(), oldContext);
     }
     return true;
 }
@@ -9600,5 +9603,21 @@ void WebDelegate::UnregisterFreeMultiWindowListener()
     } else {
         TAG_LOGE(AceLogTag::ACE_WEB, "UnregisterSwitchFreeMultiWindowListener failed, webId: %{public}d", GetWebId());
     }
+}
+
+void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newState)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), originalState, newState]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onMicrophoneCaptureStateChangedV2 = delegate->onMicrophoneCaptureStateChangedV2_;
+            if (onMicrophoneCaptureStateChangedV2) {
+                onMicrophoneCaptureStateChangedV2(std::make_shared<MicrophoneCaptureStateEvent>(
+                    static_cast<int32_t>(originalState), static_cast<int32_t>(newState)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
 }
 } // namespace OHOS::Ace
