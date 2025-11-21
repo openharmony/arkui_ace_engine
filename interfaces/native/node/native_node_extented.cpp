@@ -1409,6 +1409,36 @@ uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounte
     return config->counterTextOverflowColor.value;
 }
 
+ArkUI_TextContentBaseController* OH_ArkUI_TextContentBaseController_Create()
+{
+    auto controller = new ArkUI_TextContentBaseController{};
+    return controller;
+}
+
+void OH_ArkUI_TextContentBaseController_Dispose(ArkUI_TextContentBaseController* controller)
+{
+    delete controller;
+    controller = nullptr;
+}
+
+void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseController* controller)
+{
+    CHECK_NULL_VOID(controller);
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    switch (controller->textFieldType) {
+        case NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE:
+            fullImpl->getNodeModifiers()->getTextInputModifier()
+                ->textInputDeleteBackward(controller->node->uiNodeHandle);
+            break;
+        case NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE:
+            fullImpl->getNodeModifiers()->getTextAreaModifier()
+                ->textAreaDeleteBackward(controller->node->uiNodeHandle);
+            break;
+        default:
+            return;
+    }
+}
+
 void OH_ArkUI_TextLayoutManager_Dispose(ArkUI_TextLayoutManager* layoutManager)
 {
     delete layoutManager;

@@ -3830,6 +3830,19 @@ typedef enum {
     NODE_TEXT_INPUT_SHOW_COUNTER = 7040,
 
     /**
+     * @brief Used to set or get the text content base controller.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n 
+     * .object: the text content base controller. The parameter type is {@link ArkUI_TextContentBaseController}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the text content base controller. The parameter type is {@link ArkUI_TextContentBaseController}.\n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE = 7041,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4325,6 +4338,19 @@ typedef enum {
      * @since 22
      */
     NODE_TEXT_AREA_CUSTOM_KEYBOARD = 8036,
+
+    /**
+     * @brief Used to set or get the text content base controller.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n 
+     * .object: the text content base controller. The parameter type is {@link ArkUI_TextContentBaseController}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the text content base controller. The parameter type is {@link ArkUI_TextContentBaseController}.\n
+     * 
+     * @since 23
+     */
+    NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE = 8037,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.

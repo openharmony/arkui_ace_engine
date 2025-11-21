@@ -36507,6 +36507,11 @@ Ark_String impl_TextContentControllerBase_getText(Ark_NativePointer thisPtr, KSe
         return GetAccessors()->getTextContentControllerBaseAccessor()->getText(self, static_cast<Opt_TextRange*>(&rangeValueTemp));
 }
 KOALA_INTEROP_3(TextContentControllerBase_getText, KStringPtr, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TextContentControllerBase_deleteBackward(Ark_NativePointer thisPtr) {
+        Ark_TextContentControllerBase self = reinterpret_cast<Ark_TextContentControllerBase>(thisPtr);
+        GetAccessors()->getTextContentControllerBaseAccessor()->deleteBackward(self);
+}
+KOALA_INTEROP_DIRECT_V1(TextContentControllerBase_deleteBackward, Ark_NativePointer)
 Ark_NativePointer impl_TextController_construct() {
         return GetAccessors()->getTextControllerAccessor()->construct();
 }

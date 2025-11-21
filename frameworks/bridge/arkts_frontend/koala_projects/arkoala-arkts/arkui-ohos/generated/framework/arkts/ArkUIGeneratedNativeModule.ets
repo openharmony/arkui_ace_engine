@@ -5783,6 +5783,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _TextContentControllerBase_getText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): string
     @ani.unsafe.Direct
+    native static _TextContentControllerBase_deleteBackward(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _TextController_construct(): KPointer
     @ani.unsafe.Direct
     native static _TextController_getFinalizer(): KPointer

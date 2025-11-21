@@ -28127,6 +28127,7 @@ typedef struct GENERATED_ArkUITextContentControllerBaseAccessor {
     void (*clearPreviewText)(Ark_TextContentControllerBase peer);
     Ark_String (*getText)(Ark_TextContentControllerBase peer,
                           const Opt_TextRange* range);
+    void (*deleteBackward)(Ark_TextContentControllerBase peer);
 } GENERATED_ArkUITextContentControllerBaseAccessor;
 
 typedef struct GENERATED_ArkUITextControllerAccessor {

@@ -42215,6 +42215,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("deleteBackward(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // TextContentControllerBaseAccessor
     namespace TextControllerAccessor {
     void DestroyPeerImpl(Ark_TextController peer)

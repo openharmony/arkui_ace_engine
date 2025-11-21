@@ -5145,6 +5145,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaCustomKeyboard)(ArkUINodeHandle node);
     void (*setTextAreaOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnWillAttachIME)(ArkUINodeHandle node);
+    void (*textAreaDeleteBackward)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -5391,6 +5392,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputOnSecurityStateChange)(ArkUINodeHandle node);
     void (*setTextInputOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnWillAttachIME)(ArkUINodeHandle node);
+    void (*textInputDeleteBackward)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

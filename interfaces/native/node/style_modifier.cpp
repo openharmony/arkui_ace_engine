@@ -18169,6 +18169,25 @@ const ArkUI_AttributeItem* GetLoadingProgressAttribute(ArkUI_NodeHandle node, in
     return getters[subTypeId](node);
 }
 
+int32_t TextContentBaseControllerAttribute(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item, ArkUI_NodeAttributeType textFieldType)
+{
+    if (item == nullptr || item->object == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto controller = reinterpret_cast<ArkUI_TextContentBaseController*>(item->object);
+    controller->node = node;
+    controller->textFieldType = textFieldType;
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t TextInputBaseControllerAttribute(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item) {
+    return TextContentBaseControllerAttribute(node, item, NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE);
+}
+
+int32_t TextAreaBaseControllerAttribute(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item) {
+    return TextContentBaseControllerAttribute(node, item, NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE);
+}
+
 int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
     static Setter* setters[] = { SetTextInputPlaceholder, SetTextInputText, SetCaretColor, SetCaretStyle,
@@ -18180,7 +18199,8 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetTextInputSelectionMenuHidden, SetBlurOnSubmit, SetInputCustomKeyboard, SetTextInputWordBreak,
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
         SetTextInputHalfLeading, SetTextInputKeyboardAppearance, SetTextInputEnableAutoFillAnimation,
-        SetTextInputLineHeight, SetSelectDetectorEnable, nullptr, SetTextInputShowCounter };
+        SetTextInputLineHeight, SetSelectDetectorEnable, nullptr, SetTextInputShowCounter,
+        TextInputBaseControllerAttribute };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -18238,7 +18258,7 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetLetterSpacing, SetEnablePreviewText, SetTextInputHalfLeading, SetTextInputKeyboardAppearance,
         SetTextAreaMaxLines, SetTextAreaLineSpacing, SetTextAreaMinLines, SetTextAreaMaxLinesWithScroll,
         SetTextAreaLineHeight, SetTextAreaBarState, SetSelectDetectorEnable, nullptr,
-        SetTextAreaScrollBarColor, SetTextAreaCustomKeyboard };
+        SetTextAreaScrollBarColor, SetTextAreaCustomKeyboard, TextAreaBaseControllerAttribute };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;

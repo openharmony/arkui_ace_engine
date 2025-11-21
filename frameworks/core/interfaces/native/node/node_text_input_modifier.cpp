@@ -2673,6 +2673,13 @@ void ResetTextInputOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+
+void TextInputDeleteBackward(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::DeleteBackward(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2908,7 +2915,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
         .getTextInputShowCounterOptions = GetTextInputShowCounterOptions,
         .setTextInputOnWillAttachIME = SetTextInputOnWillAttachIME,
-        .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME
+        .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME,
+        .textInputDeleteBackward = TextInputDeleteBackward,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
