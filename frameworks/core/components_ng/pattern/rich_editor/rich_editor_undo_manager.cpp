@@ -862,9 +862,8 @@ bool StringUndoManager::BeforeStringChange(const UndoRedoRecord& record, bool is
     auto deleteLength = rangeBefore.GetLength();
     CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
     auto insertStart = rangeAfter.start;
-    auto deleteEnd = rangeBefore.end;
-    IF_TRUE(deleteLength > 0, pattern->GetDeletedSpan(changeValue, deleteEnd, deleteLength,
-        RichEditorDeleteDirection::BACKWARD));
+    auto deleteStart = rangeBefore.start;
+    IF_TRUE(deleteLength > 0, pattern->GetDeletedSpan(changeValue, deleteStart, deleteLength));
     auto replaceStr = isUndo ? record.GetStringBefore() : record.GetStringAfter();
     IF_TRUE(!replaceStr.empty(), pattern->GetReplacedSpan(changeValue, insertStart, replaceStr, insertStart,
         std::nullopt, std::nullopt));
