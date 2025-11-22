@@ -32,6 +32,11 @@ public:
     NavPathInfo(const std::string& name, bool isEntry) : name_(name), isEntry_(isEntry) {}
     virtual ~NavPathInfo() = default;
 
+    virtual bool IsStatic()
+    {
+        return false;
+    }
+
     void SetName(const std::string& name)
     {
         name_ = name;

@@ -86,6 +86,8 @@ public:
     int32_t mode_ = 0;
     bool needDelete_ = false;
     std::function<void(int32_t errorCode, std::string errorMessage)> promise_;
+    bool isForceSet_ = false;
+    bool isFromSingleToNMoved_ = false;
 
     void InvokeOnPop(const PopInfo& popInfo);
 };
@@ -130,8 +132,24 @@ public:
         onPop_ = tsPathInfo->GetOnPop();
     }
 
+    void SetNavDestinationPopCallback(const std::function<void(Opt_Object)>&& popCallback)
+    {
+        navDestinationPopCallback_ = popCallback;
+    }
+
+    std::function<void(Opt_Object)> GetNavDestinationPopCallback() const
+    {
+        return navDestinationPopCallback_;
+    }
+
+    bool IsStatic() override
+    {
+        return true;
+    }
+
     ParamType param_;
     OnPopCallback onPop_;
+    std::function<void(Opt_Object)> navDestinationPopCallback_;
 };
 
 using PopResultType = ExternalData;
@@ -191,7 +209,8 @@ public:
     int PopToName(const std::string& name, const std::optional<bool>& animated, Ark_Object result);
     void PopToIndex(size_t index, const std::optional<bool>& animated);
     void PopToIndex(size_t index, const std::optional<bool>& animated, Ark_Object result);
-    void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
+    void PopToInternal(
+        std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, bool needFireOnResult = true);
     void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, Ark_Object result);
     int MoveToTop(const std::string& name, const std::optional<bool>& animated);
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
@@ -218,6 +237,18 @@ public:
     {
         onPopCallback_ = popCallback;
     }
+
+    std::vector<PathInfo> GetAllPathInfo()
+    {
+        return pathArray_;
+    }
+
+    void SetPathInfo(std::vector<PathInfo>& pathArray, bool animated = true);
+
+    void RegisterOnResultCallback(const std::function<void(Opt_Object)>&& onResultCallback)
+    {
+        onResultCallback_ = onResultCallback;
+    }
 protected:
     std::vector<PathInfo> pathArray_;
     enum IsReplace isReplace_ = NO_ANIM_NO_REPLACE;
@@ -232,6 +263,7 @@ protected:
     void InvokeOnStateChanged();
     std::vector<PathInfo>::iterator FindNameInternal(const std::string& name);
     const PathInfo* GetPathInfo(size_t index) const;
+    std::function<void(Opt_Object)> onResultCallback_;
 };
 
 // this repeats the functionality of JSNavigationStack, interacts with PathStack
@@ -324,6 +356,9 @@ public:
         nodes_.clear();
     }
     ParamType GetParamByIndex(int32_t index) const;
+    void RegisterOnResultCallback();
+
+    bool IsTopFromSingletonMoved() override;
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
@@ -347,6 +382,8 @@ private:
         const std::string& name, int32_t index, RefPtr<NG::UINode>& node);
     std::string ErrorToMessage(int32_t code);
     void FirePromise(PathInfo*, int32_t errorCode);
+    void ExecutePopCallbackInStack(Opt_Object param);
+    bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, Opt_Object param);
     void* staticStackPtr_ = nullptr;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
