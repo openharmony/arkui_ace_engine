@@ -32,14 +32,7 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements I
         this.key_ = key;
         this.get_ = get;
         this.set_ = set;
-
-        const initValue: T = this.get_();
-
-        // @Watch
-        // if initial value is object, register so that property changes trigger
-        // @Watch function exec
-        this.registerWatchForObservedObjectChanges(initValue);
-        // registerWatch  to source is done in the factory function
+        // as it register watch to source, no need to register watch itself.
     }
 
     // FIXME change to info()
