@@ -4127,6 +4127,25 @@ typedef struct Opt_ConfigurationConstant_ScreenDensity {
     Ark_Tag tag;
     Ark_ConfigurationConstant_ScreenDensity value;
 } Opt_ConfigurationConstant_ScreenDensity;
+typedef enum Ark_ConsoleMessageSource {
+    ARK_CONSOLE_MESSAGE_SOURCE_XML = 0,
+    ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT = 1,
+    ARK_CONSOLE_MESSAGE_SOURCE_NETWORK = 2,
+    ARK_CONSOLE_MESSAGE_SOURCE_CONSOLE_API = 3,
+    ARK_CONSOLE_MESSAGE_SOURCE_STORAGE = 4,
+    ARK_CONSOLE_MESSAGE_SOURCE_RENDERING = 5,
+    ARK_CONSOLE_MESSAGE_SOURCE_SECURITY = 6,
+    ARK_CONSOLE_MESSAGE_SOURCE_OTHER = 7,
+    ARK_CONSOLE_MESSAGE_SOURCE_DEPRECATION = 8,
+    ARK_CONSOLE_MESSAGE_SOURCE_WORKER = 9,
+    ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION = 10,
+    ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION = 11,
+    ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION = 12,
+} Ark_ConsoleMessageSource;
+typedef struct Opt_ConsoleMessageSource {
+    Ark_Tag tag;
+    Ark_ConsoleMessageSource value;
+} Opt_ConsoleMessageSource;
 typedef enum Ark_ContentClipMode {
     ARK_CONTENT_CLIP_MODE_CONTENT_ONLY = 0,
     ARK_CONTENT_CLIP_MODE_BOUNDARY = 1,
@@ -25866,6 +25885,7 @@ typedef struct GENERATED_ArkUIConsoleMessageAccessor {
     Ark_String (*getSourceId)(Ark_ConsoleMessage peer);
     Ark_Int32 (*getLineNumber)(Ark_ConsoleMessage peer);
     Ark_MessageLevel (*getMessageLevel)(Ark_ConsoleMessage peer);
+    Ark_ConsoleMessageSource (*getSource)(Ark_ConsoleMessage peer);
 } GENERATED_ArkUIConsoleMessageAccessor;
 
 typedef struct GENERATED_ArkUIContentModifierHelperAccessor {

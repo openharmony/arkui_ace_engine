@@ -131,6 +131,9 @@ export class ConsoleMessage implements MaterializedBase {
     public getMessageLevel(): MessageLevel {
         return this.getMessageLevel_serialize()
     }
+    public getSource(): ConsoleMessageSource {
+        return this.getSource_serialize()
+    }
     getMessage_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getMessage(this.peer!.ptr)
         return retval
@@ -146,6 +149,10 @@ export class ConsoleMessage implements MaterializedBase {
     getMessageLevel_serialize(): MessageLevel {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getMessageLevel(this.peer!.ptr)
         return MessageLevel.fromValue(retval)
+    }
+    getSource_serialize(): ConsoleMessageSource {
+        const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getSource(this.peer!.ptr)
+        return ConsoleMessageSource.fromValue(retval)
     }
 }
 export class ControllerHandlerInternal {
@@ -3240,6 +3247,21 @@ export enum ViewportFit {
     AUTO = 0,
     CONTAINS = 1,
     COVER = 2
+}
+export enum ConsoleMessageSource {
+    XML = 0,
+    JAVASCRIPT = 1,
+    NETWORK = 2,
+    CONSOLE_API = 3,
+    STORAGE = 4,
+    RENDERING = 5,
+    SECURITY = 6,
+    OTHER = 7,
+    DEPRECATION = 8,
+    WORKER = 9,
+    VIOLATION = 10,
+    INTERVENTION = 11,
+    RECOMMENDATION = 12
 }
 export interface Header {
     headerKey: string;

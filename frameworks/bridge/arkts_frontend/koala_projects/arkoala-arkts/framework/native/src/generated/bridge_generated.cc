@@ -28692,6 +28692,11 @@ Ark_Int32 impl_ConsoleMessage_getMessageLevel(Ark_NativePointer thisPtr) {
         return GetAccessors()->getConsoleMessageAccessor()->getMessageLevel(self);
 }
 KOALA_INTEROP_DIRECT_1(ConsoleMessage_getMessageLevel, Ark_Int32, Ark_NativePointer)
+Ark_Int32 impl_ConsoleMessage_getSource(Ark_NativePointer thisPtr) {
+        Ark_ConsoleMessage self = reinterpret_cast<Ark_ConsoleMessage>(thisPtr);
+        return GetAccessors()->getConsoleMessageAccessor()->getSource(self);
+}
+KOALA_INTEROP_DIRECT_1(ConsoleMessage_getSource, Ark_Int32, Ark_NativePointer)
 void impl_ContentModifierHelper_contentModifierButton(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Object contentModifierValueTemp = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;

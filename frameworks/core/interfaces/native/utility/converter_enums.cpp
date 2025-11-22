@@ -1574,6 +1574,27 @@ void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
 }
 
 template<>
+void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessageSource& src)
+{
+    switch (src) {
+        case ARK_CONSOLE_MESSAGE_SOURCE_XML: dst = ConsoleMessageSource::XML; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT: dst = ConsoleMessageSource::JAVASCRIPT; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_NETWORK: dst = ConsoleMessageSource::NETWORK; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_CONSOLE_API: dst = ConsoleMessageSource::CONSOLE_API; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_STORAGE: dst = ConsoleMessageSource::STORAGE; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_RENDERING: dst = ConsoleMessageSource::RENDERING; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_SECURITY: dst = ConsoleMessageSource::SECURITY; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_OTHER: dst = ConsoleMessageSource::OTHER; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_DEPRECATION: dst = ConsoleMessageSource::DEPRECATION; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_WORKER: dst = ConsoleMessageSource::WORKER; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION: dst = ConsoleMessageSource::VIOLATION; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION: dst = ConsoleMessageSource::INTERVENTION; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION: dst = ConsoleMessageSource::RECOMMENDATION; break;
+        default: LOGE("Unexpected enum value in Ark_ConsoleMessageSource: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src)
 {
     switch (src) {
