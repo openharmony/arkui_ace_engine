@@ -3004,6 +3004,30 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableImageAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnMicrophoneCaptureStateChangeAttribute(value: OnMicrophoneCaptureStateChangeCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnMicrophoneCaptureStateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnCameraCaptureStateChangeAttribute(value: OnCameraCaptureStateChangeCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnCameraCaptureStateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -3074,6 +3098,8 @@ export type OnRenderProcessNotRespondingCallback = (data: RenderProcessNotRespon
 export type OnRenderProcessRespondingCallback = () => void;
 export type OnViewportFitChangedCallback = (viewportFit: ViewportFit) => void;
 export type OnAdsBlockedCallback = (details: AdsBlockedDetails) => void;
+export type OnMicrophoneCaptureStateChangeCallback = (event: MicrophoneCaptureStateChangeInfo) => void;
+export type OnCameraCaptureStateChangeCallback = (event: CameraCaptureStateChangeInfo) => void;
 export interface AdsBlockedDetails {
     url: string;
     adsBlocked: Array<string>;
@@ -4038,6 +4064,12 @@ export interface WebAttribute extends CommonMethod {
     enableImageAnalyzer(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableImageAnalyzer")
     }
+    onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onMicrophoneCaptureStateChange")
+    }
+    onCameraCaptureStateChange(value: OnCameraCaptureStateChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onCameraCaptureStateChange")
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error("Unimplemented method registerNativeEmbedRule")
     }
@@ -4187,6 +4219,8 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     enableSelectedDataDetector_value?: boolean | undefined
     onTextSelectionChange_value?: TextSelectionChangeCallback | undefined
     enableImageAnalyzer_value?: boolean | undefined
+    onMicrophoneCaptureStateChange_value?: OnMicrophoneCaptureStateChangeCallback | undefined
+    onCameraCaptureStateChange_value?: OnCameraCaptureStateChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
     setWebOptions(value: WebOptions): this {
         return this
@@ -4605,6 +4639,12 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     enableImageAnalyzer(value: boolean | undefined): this {
         return this
     }
+    onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
+        return this
+    }
+    onCameraCaptureStateChange(value: OnCameraCaptureStateChangeCallback | undefined): this {
+        return this
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         return this
     }
@@ -4638,6 +4678,24 @@ export interface EmbedOptions {
 export enum GestureFocusMode {
     DEFAULT = 0,
     GESTURE_TAP_AND_LONG_PRESS = 1
+}
+export interface MicrophoneCaptureStateChangeInfo {
+    originalState: MicrophoneCaptureState;
+    newState: MicrophoneCaptureState;
+}
+export enum MicrophoneCaptureState {
+    NONE = 0,
+    PAUSED = 1,
+    ACTIVE = 2
+}
+export interface CameraCaptureStateChangeInfo {
+    originalState: CameraCaptureState;
+    newState: CameraCaptureState;
+}
+export enum CameraCaptureState {
+    NONE = 0,
+    PAUSED = 1,
+    ACTIVE = 2
 }
 
 export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
@@ -5758,6 +5816,22 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
+    public onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
+        if (this.checkPriority("onMicrophoneCaptureStateChange")) {
+            const value_casted = value as (OnMicrophoneCaptureStateChangeCallback | undefined)
+            this.getPeer()?.setOnMicrophoneCaptureStateChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onCameraCaptureStateChange(value: OnCameraCaptureStateChangeCallback | undefined): this {
+        if (this.checkPriority("onCameraCaptureStateChange")) {
+            const value_casted = value as (OnCameraCaptureStateChangeCallback | undefined)
+            this.getPeer()?.setOnCameraCaptureStateChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         if (this.checkPriority("registerNativeEmbedRule")) {
             const tag_casted = tag as (string | undefined)
@@ -5811,6 +5885,22 @@ export function WebImpl(
     })
 }
 
+export class CameraCaptureStateChangeInfo_serializer {
+    public static write(buffer: SerializerBase, value: CameraCaptureStateChangeInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOriginalState  = value.originalState
+        valueSerializer.writeInt32(valueHolderForOriginalState.valueOf())
+        const valueHolderForNewState  = value.newState
+        valueSerializer.writeInt32(valueHolderForNewState.valueOf())
+    }
+    public static read(buffer: DeserializerBase): CameraCaptureStateChangeInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const originalStateTmpResult : CameraCaptureState = CameraCaptureState.fromValue(valueDeserializer.readInt32())
+        const newStateTmpResult : CameraCaptureState = CameraCaptureState.fromValue(valueDeserializer.readInt32())
+        let value : CameraCaptureStateChangeInfo = ({originalState: originalStateTmpResult, newState: newStateTmpResult} as CameraCaptureStateChangeInfo)
+        return value
+    }
+}
 export class ClientAuthenticationHandler_serializer {
     public static write(buffer: SerializerBase, value: ClientAuthenticationHandler): void {
         let valueSerializer : SerializerBase = buffer
@@ -5930,6 +6020,22 @@ export class JsResult_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return JsResultInternal.fromPtr(ptr)
+    }
+}
+export class MicrophoneCaptureStateChangeInfo_serializer {
+    public static write(buffer: SerializerBase, value: MicrophoneCaptureStateChangeInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOriginalState  = value.originalState
+        valueSerializer.writeInt32(valueHolderForOriginalState.valueOf())
+        const valueHolderForNewState  = value.newState
+        valueSerializer.writeInt32(valueHolderForNewState.valueOf())
+    }
+    public static read(buffer: DeserializerBase): MicrophoneCaptureStateChangeInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const originalStateTmpResult : MicrophoneCaptureState = MicrophoneCaptureState.fromValue(valueDeserializer.readInt32())
+        const newStateTmpResult : MicrophoneCaptureState = MicrophoneCaptureState.fromValue(valueDeserializer.readInt32())
+        let value : MicrophoneCaptureStateChangeInfo = ({originalState: originalStateTmpResult, newState: newStateTmpResult} as MicrophoneCaptureStateChangeInfo)
+        return value
     }
 }
 export class NativeMediaPlayerConfig_serializer {

@@ -8313,6 +8313,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_Boolean* value)
     {
     }
+    void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
+                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value)
+    {
+    }
+    void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
+                                           const Opt_OnCameraCaptureStateChangeCallback* value)
+    {
+    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)
@@ -10781,6 +10789,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
             WebAttributeModifier::SetOnTextSelectionChangeImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
+            WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
+            WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };
