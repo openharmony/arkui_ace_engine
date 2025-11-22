@@ -1524,7 +1524,7 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
     FingerInfo fingerInfo;
     fingerInfos.emplace_back(fingerInfo);
     baseGestureEvent->SetFingerList(fingerInfos);
-    std::list<RefPtr<NGGestureRecognizer>> activeRecognizers;
+    std::list<WeakPtr<NGGestureRecognizer>> activeRecognizers;
     RefPtr<NGGestureRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
     clickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
     clickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
@@ -1588,7 +1588,7 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone002, TestSize.Level1)
     FingerInfo fingerInfo;
     fingerInfos.emplace_back(fingerInfo);
     baseGestureEvent->SetFingerList(fingerInfos);
-    std::list<RefPtr<NGGestureRecognizer>> activeRecognizers;
+    std::list<WeakPtr<NGGestureRecognizer>> activeRecognizers;
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
@@ -1695,7 +1695,7 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone003, TestSize.Level1)
     FingerInfo fingerInfo;
     fingerInfos.emplace_back(fingerInfo);
     baseGestureEvent->SetFingerList(fingerInfos);
-    std::list<RefPtr<NGGestureRecognizer>> activeRecognizers;
+    std::list<WeakPtr<NGGestureRecognizer>> activeRecognizers;
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);

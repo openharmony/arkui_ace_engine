@@ -343,7 +343,7 @@ HWTEST_F(GestureEventHubTestNg, GestureRecognizerJudgeFunc001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
-                    const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult(); };
+                    const std::list<WeakPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult(); };
 
     guestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
     EXPECT_NE(guestureEventHub->GetOnGestureRecognizerJudgeBegin(), nullptr);
@@ -940,7 +940,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest035, TestSize.Level1)
     eventHub->AttachHost(frameNode);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     auto touchTestDoneFunc = [](const std::shared_ptr<BaseGestureEvent>& event,
-                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) {};
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) {};
     gestureEventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
     EXPECT_TRUE(gestureEventHub->GetOnTouchTestDoneCallback());
 }

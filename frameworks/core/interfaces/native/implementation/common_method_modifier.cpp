@@ -5882,7 +5882,7 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
     auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*optValue), node = weakNode](
             const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
-            const std::list<RefPtr<NG::NGGestureRecognizer>>& others
+            const std::list<WeakPtr<NG::NGGestureRecognizer>>& others
         ) -> GestureJudgeResult {
         GestureJudgeResult defVal = GestureJudgeResult::CONTINUE;
         CHECK_NULL_RETURN(info && current, defVal);
@@ -5892,7 +5892,14 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto arkGestEvent = CreateArkBaseGestureEvent(info, gestureInfo->GetRecognizerType());
         CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto arkValCurrent = CreateArkGestureRecognizer(current);
-        auto arkValOthers = CreateArkGestureRecognizerArray(others);
+        std::list<RefPtr<NG::NGGestureRecognizer>> othersRecognizer;
+        for (const auto& item : others) {
+            if (item.Invalid()) {
+                continue;
+            }
+            othersRecognizer.emplace_back(item.Upgrade());
+        }
+        auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(othersRecognizer, Converter::FC);
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
         return resultOpt.value_or(defVal);

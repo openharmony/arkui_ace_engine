@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "ui/base/referenced.h"
 #include "core/components_ng/base/observer_handler.h"
 
 using namespace testing;
@@ -561,7 +562,7 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest008,
     auto recognizerTest = AceType::MakeRefPtr<LongPressRecognizer>(DURATION, FINGER_NUMBER);
     RefPtr<NGGestureRecognizer> targetPtr1 = nullptr;
     RefPtr<NGGestureRecognizer> targetPtr2 = nullptr;
-    std::list<RefPtr<NGGestureRecognizer>> responseLinkResult;
+    std::list<WeakPtr<NGGestureRecognizer>> responseLinkResult;
     responseLinkResult.push_back(targetPtr1);
     responseLinkResult.push_back(targetPtr2);
     recognizerTest->SetResponseLinkRecognizers(responseLinkResult);

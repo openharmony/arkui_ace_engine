@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "ui/base/referenced.h"
 
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
@@ -611,7 +612,12 @@ void NGGestureRecognizer::SetResponseLinkRecognizers(const ResponseLinkResult& r
 bool NGGestureRecognizer::IsInResponseLinkRecognizers()
 {
     return std::any_of(responseLinkRecognizer_.begin(), responseLinkRecognizer_.end(),
-        [recognizer = Claim(this)](const RefPtr<NGGestureRecognizer>& item) { return item == recognizer; });
+        [recognizer = Claim(this)](const WeakPtr<NGGestureRecognizer>& item) {
+            if (item.Invalid()) {
+                return false;
+            }
+            return item.Upgrade() == recognizer;
+        });
 }
 
 bool NGGestureRecognizer::AboutToAddCurrentFingers(const TouchEvent& event)

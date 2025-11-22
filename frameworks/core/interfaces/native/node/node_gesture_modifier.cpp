@@ -816,7 +816,7 @@ void setGestureInterrupterToNodeWithUserData(
     auto onGestureRecognizerJudgeBegin =
         [weak = AceType::WeakClaim(frameNode), userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
-            const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+            const std::list<WeakPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
         auto node = weak.Upgrade();
         CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
@@ -831,21 +831,20 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
         interruptInfo.customUserData = userData;
-        interruptInfo.userData = gestureInfo->GetUserData();
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
         interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
-        auto count = static_cast<int32_t>(others.size());
-        ArkUIGestureRecognizer** othersRecognizer = nullptr;
-        if (count > 0) {
-            othersRecognizer = new ArkUIGestureRecognizer* [count];
-        }
-        int32_t index = 0;
+        std::vector<ArkUIGestureRecognizer*> othersRecognizers;
         for (const auto& item : others) {
-            othersRecognizer[index] = NodeModifier::CreateGestureRecognizer(item);
-            index++;
+            if (item.Invalid()) {
+                continue;
+            }
+            auto recognizer = NodeModifier::CreateGestureRecognizer(item.Upgrade());
+            if (recognizer) {
+                othersRecognizers.push_back(recognizer);
+            }
         }
-        interruptInfo.responseLinkRecognizer = othersRecognizer;
-        interruptInfo.count = count;
+        interruptInfo.responseLinkRecognizer = othersRecognizers.empty() ? nullptr : othersRecognizers.data();
+        interruptInfo.count = static_cast<int32_t>(othersRecognizers.size());
         ArkUI_UIInputEvent inputEvent { ConvertInputEventTypeToArkuiUIInputEventType(info->GetRawInputEventType()),
             C_TOUCH_EVENT_ID, &rawInputEvent };
         inputEvent.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
@@ -854,7 +853,6 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.gestureEvent = &arkUIGestureEvent;
         auto touchRecognizers = CreateTouchRecognizers(AceType::RawPtr(node), info, interruptInfo);
         auto result = interrupter(&interruptInfo);
-        delete[] othersRecognizer;
         DestroyTouchRecognizers(touchRecognizers, interruptInfo);
         return static_cast<GestureJudgeResult>(result);
     };

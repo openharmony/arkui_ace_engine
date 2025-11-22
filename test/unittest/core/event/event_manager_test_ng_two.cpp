@@ -51,9 +51,9 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest001, TestSize.Level
     int32_t doneId = 0;
     int32_t doneInnerId = 0;
     auto touchTestDoneFunc = [&doneId](const std::shared_ptr<BaseGestureEvent>& event,
-                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
     auto touchTestDoneForInnerFunc = [&doneInnerId](const std::shared_ptr<BaseGestureEvent>& event,
-                                         const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
+                                         const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
     eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
     eventHub->SetOnTouchTestDoneCallbackForInner(std::move(touchTestDoneForInnerFunc));
     eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
@@ -86,7 +86,7 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest002, TestSize.Level
     ASSERT_NE(eventHub, nullptr);
     int32_t doneId = 0;
     auto touchTestDoneFunc = [&doneId](const std::shared_ptr<BaseGestureEvent>& event,
-                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
     eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
     eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
     eventManager->ExecuteTouchTestDoneCallback(touchEvent, responseLinkRecognizers);
@@ -117,7 +117,7 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest003, TestSize.Level
     ASSERT_NE(eventHub, nullptr);
     int32_t doneInnerId = 0;
     auto touchTestDoneForInnerFunc = [&doneInnerId](const std::shared_ptr<BaseGestureEvent>& event,
-                                         const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
+                                         const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
     eventHub->SetOnTouchTestDoneCallbackForInner(std::move(touchTestDoneForInnerFunc));
     eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
     eventManager->ExecuteTouchTestDoneCallback(touchEvent, responseLinkRecognizers);
@@ -174,9 +174,9 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest005, TestSize.Level
     int32_t doneId = 0;
     int32_t doneInnerId = 0;
     auto touchTestDoneFunc = [&doneId](const std::shared_ptr<BaseGestureEvent>& event,
-                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
     auto touchTestDoneForInnerFunc = [&doneInnerId](const std::shared_ptr<BaseGestureEvent>& event,
-                                         const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
+                                         const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
     eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
     eventHub->SetOnTouchTestDoneCallbackForInner(std::move(touchTestDoneForInnerFunc));
     eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
@@ -207,7 +207,7 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest006, TestSize.Level
     ASSERT_NE(eventHub, nullptr);
     int32_t doneId = 0;
     auto touchTestDoneFunc = [&doneId](const std::shared_ptr<BaseGestureEvent>& event,
-                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneId++; };
     eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
     eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
     eventManager->ExecuteTouchTestDoneCallback(axisEvent, responseLinkRecognizers);
@@ -236,7 +236,7 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest007, TestSize.Level
     ASSERT_NE(eventHub, nullptr);
     int32_t doneInnerId = 0;
     auto touchTestDoneForInnerFunc = [&doneInnerId](const std::shared_ptr<BaseGestureEvent>& event,
-                                         const std::list<RefPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
+                                         const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) { doneInnerId++; };
     eventHub->SetOnTouchTestDoneCallbackForInner(std::move(touchTestDoneForInnerFunc));
     eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
     eventManager->ExecuteTouchTestDoneCallback(axisEvent, responseLinkRecognizers);

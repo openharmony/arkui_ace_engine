@@ -569,7 +569,7 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest005, TestSize.Level1)
     panRecognizer->SetMouseDistance(1.0f);
     RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<NG::TargetComponent>();
     auto judgeFunc1 = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
-                     const std::list<RefPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
+                     const std::list<WeakPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
         return GestureJudgeResult::REJECT;
     };
     auto judgeFunc2 = [](const RefPtr<GestureInfo>& gestureInfo,

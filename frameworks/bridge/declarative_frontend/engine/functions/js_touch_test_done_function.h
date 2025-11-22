@@ -40,7 +40,7 @@ public:
     }
 
     bool Execute(
-        const std::shared_ptr<BaseGestureEvent>& info, const std::list<RefPtr<NG::NGGestureRecognizer>>& others);
+        const std::shared_ptr<BaseGestureEvent>& info, const std::list<WeakPtr<NG::NGGestureRecognizer>>& others);
 
 private:
     JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo);
