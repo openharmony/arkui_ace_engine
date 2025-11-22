@@ -15,6 +15,9 @@
 
 #include "js_drawable_descriptor.h"
 
+#ifdef OHOS_PLATFORM
+#include <dlfcn.h>
+#endif
 #include <memory>
 
 #ifndef PREVIEW
@@ -40,6 +43,22 @@ constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+#ifdef OHOS_PLATFORM
+constexpr char DRAWBLE_GET_DRAWBLE_TYPE[] = "OHOS_ACE_DrawableDescriptor_GetDrawableType";
+constexpr char DRAWBLE_GET_PIXEL_MAP[] = "OHOS_ACE_DrawableDescriptor_GetPixelMap";
+constexpr char LAYER_GET_FOREGROUND[] = "OHOS_ACE_LayeredDrawableDescriptor_GetForeground";
+constexpr char LAYER_GET_BACKGROUND[] = "OHOS_ACE_LayeredDrawableDescriptor_GetBackground";
+constexpr char LAYER_GET_MASK[] = "OHOS_ACE_LayeredDrawableDescriptor_GetMask";
+constexpr char PIXEL_MAP_GET_PIXEL_MAP[] = "OHOS_ACE_PixelMapDrawableDescriptor_GetPixelMap";
+constexpr char LIBACE_MODULE[] = "libace_compatible.z.so";
+
+using DrawableGetDrawableTypeFunc = size_t (*)(void*);
+using DrawableGetPixelMapFunc = void (*)(void*, void*);
+using LayeredGetForegroundFunc = void (*)(void*, void*);
+using LayeredGetBackgroundFunc = void (*)(void*, void*);
+using LayeredGetMaskFunc = void (*)(void*, void*);
+using PixelMapGetPixelMapFunc = void (*)(void*, void*);
+#endif
 constexpr int32_t PARAMS_NUM_ONE = 1;
 constexpr int32_t PARAMS_NUM_TWO = 2;
 constexpr int32_t PARAMS_NUM_THREE = 3;
@@ -47,6 +66,7 @@ constexpr int32_t FOREGROUND_INDEX = 0;
 constexpr int32_t BACKGROUND_INDEX = 1;
 constexpr int32_t MASK_INDEX = 2;
 constexpr uint32_t ANIMATED_TYPE = 2;
+constexpr int32_t MAX_ARG_NUM = 10;
 
 struct LoadAsyncContext {
     napi_env env;
@@ -162,6 +182,259 @@ napi_value JsDrawableDescriptor::ToNapi(
     }
 
     return result;
+}
+
+size_t JsDrawableDescriptor::DrawableGetDrawableTypeC(void* drawable)
+{
+    size_t drawableType = 0;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    if (handle == nullptr) {
+        return 0;
+    }
+    auto entry = reinterpret_cast<DrawableGetDrawableTypeFunc>(dlsym(handle, DRAWBLE_GET_DRAWBLE_TYPE));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return 0;
+    }
+    drawableType = entry(drawable);
+    dlclose(handle);
+#endif
+    return drawableType;
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::DrawableGetPixelMapC(void* drawable)
+{
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    if (handle == nullptr) {
+        return nullptr;
+    }
+    auto entry = reinterpret_cast<DrawableGetPixelMapFunc>(dlsym(handle, DRAWBLE_GET_PIXEL_MAP));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+    entry(drawable, &pixelMap);
+    dlclose(handle);
+#endif
+    return pixelMap;
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetForegroundC(void* drawable)
+{
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    CHECK_NULL_RETURN(handle, nullptr);
+    auto entry = reinterpret_cast<LayeredGetForegroundFunc>(dlsym(handle, LAYER_GET_FOREGROUND));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+    entry(drawable, &pixelMap);
+    dlclose(handle);
+#endif
+    return pixelMap;
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetBackgroundC(void* drawable)
+{
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    CHECK_NULL_RETURN(handle, nullptr);
+    auto entry = reinterpret_cast<LayeredGetBackgroundFunc>(dlsym(handle, LAYER_GET_BACKGROUND));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+    entry(drawable, &pixelMap);
+    dlclose(handle);
+#endif
+    return pixelMap;
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetMaskC(void* drawable)
+{
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    CHECK_NULL_RETURN(handle, nullptr);
+    auto entry = reinterpret_cast<LayeredGetMaskFunc>(dlsym(handle, LAYER_GET_MASK));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+    entry(drawable, &pixelMap);
+    dlclose(handle);
+#endif
+    return pixelMap;
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::PixelMapGetPixelMapC(void* drawable)
+{
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    if (handle == nullptr) {
+        return nullptr;
+    }
+    auto entry = reinterpret_cast<PixelMapGetPixelMapFunc>(dlsym(handle, PIXEL_MAP_GET_PIXEL_MAP));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+    entry(drawable, &pixelMap);
+    dlclose(handle);
+#endif
+    return pixelMap;
+}
+
+napi_value JsDrawableDescriptor::CreatDrawable(napi_env env, void* native)
+{
+    if (native == nullptr) {
+        return nullptr;
+    }
+    napi_value cons = nullptr;
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
+    auto* drawable = new DrawableDescriptor;
+    CHECK_NULL_RETURN(drawable, nullptr);
+    auto napi_status = napi_wrap(env, cons, drawable, Destructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        delete drawable;
+        return nullptr;
+    }
+    auto pixelMap = DrawableGetPixelMapC(native);
+    drawable->SetPixelMap(pixelMap);
+    auto baseDes = GetBaseDrawableDescriptor(env);
+    NAPI_CALL(env, napi_define_properties(env, cons, baseDes.size(), baseDes.data()));
+    return cons;
+}
+
+napi_value JsDrawableDescriptor::CreatLayeredDrawable(napi_env env, void* native)
+{
+    if (native == nullptr) {
+        return nullptr;
+    }
+    napi_value cons = nullptr;
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
+    auto* layerDrawable = new LayeredDrawableDescriptor;
+    CHECK_NULL_RETURN(layerDrawable, nullptr);
+    auto napi_status = napi_wrap(env, cons, layerDrawable, Destructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        delete layerDrawable;
+        return nullptr;
+    }
+
+    auto pixelForeground = LayeredGetForegroundC(native);
+    auto pixelBackground = LayeredGetBackgroundC(native);
+    auto pixelMask = LayeredGetMaskC(native);
+    layerDrawable->SetForeground(pixelForeground);
+    layerDrawable->SetBackground(pixelBackground);
+    layerDrawable->SetMask(pixelMask);
+    auto layeredDes = GetLayeredDrawableDescriptor(env);
+    NAPI_CALL(env, napi_define_properties(env, cons, layeredDes.size(), layeredDes.data()));
+    return cons;
+}
+
+napi_value JsDrawableDescriptor::CreatAnimatedDrawable(napi_env env, void* native)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    if (native == nullptr) {
+        return nullptr;
+    }
+    napi_value cons = nullptr;
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
+
+    auto napi_status = napi_wrap(env, cons, native, NewDestructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    IncreaseRefCountDrawableC(native);
+    napi_escape_handle(env, scope, cons, &cons);
+    napi_close_escapable_handle_scope(env, scope);
+
+    auto animatedDes = GetAnimatedDrawableDescriptor(env);
+    NAPI_CALL(env, napi_define_properties(env, cons, animatedDes.size(), animatedDes.data()));
+    return cons;
+}
+
+napi_value JsDrawableDescriptor::CreatPixelMapDrawable(napi_env env, void* native)
+{
+    if (native == nullptr) {
+        return nullptr;
+    }
+    napi_value cons = nullptr;
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
+    auto* pixelmapDrawable = new DrawableDescriptor;
+    CHECK_NULL_RETURN(pixelmapDrawable, nullptr);
+    auto napi_status = napi_wrap(env, cons, pixelmapDrawable, Destructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        delete pixelmapDrawable;
+        return nullptr;
+    }
+    auto pixelMap = PixelMapGetPixelMapC(native);
+    pixelmapDrawable->SetPixelMap(pixelMap);
+    auto pixelDes = GetPixelMapDrawableDescriptor(env);
+    NAPI_CALL(env, napi_define_properties(env, cons, pixelDes.size(), pixelDes.data()));
+    return cons;
+}
+
+napi_value JsDrawableDescriptor::CreateDrawableDescriptorTransfer(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    auto napi_status = napi_get_cb_info(env, info, &argc, argv, NULL, NULL);
+    if (napi_status != napi_ok) {
+        return nullptr;
+    }
+    if (argc != 1) {
+        return nullptr;
+    }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[0], &valueType);
+    if (valueType != napi_number) {
+        return nullptr;
+    }
+    int64_t addr = 0;
+    napi_get_value_int64(env, argv[0], &addr);
+    auto* drawable = reinterpret_cast<void*>(addr);
+    auto drawableType = DrawableGetDrawableTypeC(drawable);
+    auto type = DrawableDescriptor::DrawableType(drawableType);
+    napi_value cons = nullptr;
+    switch (type) {
+        case DrawableDescriptor::DrawableType::BASE: {
+            cons = CreatDrawable(env, drawable);
+            break;
+        }
+        case DrawableDescriptor::DrawableType::LAYERED: {
+            cons = CreatLayeredDrawable(env, drawable);
+            break;
+        }
+        case DrawableDescriptor::DrawableType::ANIMATED: {
+            cons = CreatAnimatedDrawable(env, drawable);
+            break;
+        }
+        case DrawableDescriptor::DrawableType::PIXELMAP: {
+            cons = CreatPixelMapDrawable(env, drawable);
+            break;
+        }
+        default:
+            break;
+    }
+    return cons;
 }
 
 napi_value JsDrawableDescriptor::GetForeground(napi_env env, napi_callback_info info)
@@ -830,18 +1103,61 @@ napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback
     return thisVar;
 }
 
+std::vector<napi_property_descriptor> JsDrawableDescriptor::GetBaseDrawableDescriptor(napi_env env)
+{
+    napi_value typeName = CreateString(env, std::string(DRAWABLE_DESCRIPTOR_NAME));
+    return {
+        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
+        DECLARE_NAPI_FUNCTION("load", Load),
+        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_PROPERTY("typeName", typeName)
+    };
+}
+
+std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPixelMapDrawableDescriptor(napi_env env)
+{
+    napi_value typeName = CreateString(env, std::string(PIXELMAP_DRAWABLE_DESCRIPTOR_NAME));
+    return {
+        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
+        DECLARE_NAPI_FUNCTION("load", Load),
+        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_PROPERTY("typeName", typeName)
+    };
+}
+
+std::vector<napi_property_descriptor> JsDrawableDescriptor::GetLayeredDrawableDescriptor(napi_env env)
+{
+    napi_value typeName = CreateString(env, std::string(LAYERED_DRAWABLE_DESCRIPTOR_NAME));
+    return {
+        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
+        DECLARE_NAPI_FUNCTION("load", Load),
+        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("getForeground", GetForeground),
+        DECLARE_NAPI_FUNCTION("getBackground", GetBackground),
+        DECLARE_NAPI_FUNCTION("getMask", GetMask),
+        DECLARE_NAPI_STATIC_FUNCTION("getMaskClipPath", GetMaskClipPath),
+        DECLARE_NAPI_PROPERTY("typeName", typeName)
+    };
+}
+
+std::vector<napi_property_descriptor> JsDrawableDescriptor::GetAnimatedDrawableDescriptor(napi_env env)
+{
+    napi_value typeName = CreateString(env, std::string(ANIMATED_DRAWABLE_DESCRIPTOR_NAME));
+    return {
+        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
+        DECLARE_NAPI_FUNCTION("load", Load),
+        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("getAnimationController", GetAnimationController),
+        DECLARE_NAPI_PROPERTY("typeName", typeName)
+    };
+}
+
 napi_value JsDrawableDescriptor::InitDrawable(napi_env env)
 {
     napi_value cons = nullptr;
-    napi_value typeName = CreateString(env, std::string(DRAWABLE_DESCRIPTOR_NAME));
-    napi_property_descriptor baseDes[] = { 
-        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
-        DECLARE_NAPI_FUNCTION("load", Load), 
-        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
-        DECLARE_NAPI_PROPERTY("typeName", typeName) 
-    };
+    auto baseDes = GetBaseDrawableDescriptor(env);
     NAPI_CALL(env, napi_define_class(env, DRAWABLE_DESCRIPTOR_NAME, NAPI_AUTO_LENGTH, DrawableConstructor, nullptr,
-                       sizeof(baseDes) / sizeof(napi_property_descriptor), baseDes, &cons));
+                       baseDes.size(), baseDes.data(), &cons));
     NAPI_CALL(env, napi_create_reference(env, cons, 1, &baseConstructor_));
     return cons;
 }
@@ -849,15 +1165,9 @@ napi_value JsDrawableDescriptor::InitDrawable(napi_env env)
 napi_value JsDrawableDescriptor::InitPixelMapDrawable(napi_env env)
 {
     napi_value cons = nullptr;
-    napi_value typeName = CreateString(env, std::string(PIXELMAP_DRAWABLE_DESCRIPTOR_NAME));
-    napi_property_descriptor pixelDes[] = { 
-        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
-        DECLARE_NAPI_FUNCTION("load", Load), 
-        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
-        DECLARE_NAPI_PROPERTY("typeName", typeName) 
-    };
+    auto pixelDes = GetPixelMapDrawableDescriptor(env);
     NAPI_CALL(env, napi_define_class(env, PIXELMAP_DRAWABLE_DESCRIPTOR_NAME, NAPI_AUTO_LENGTH, PixelMapConstructor,
-                       nullptr, sizeof(pixelDes) / sizeof(napi_property_descriptor), pixelDes, &cons));
+                       nullptr, pixelDes.size(), pixelDes.data(), &cons));
     NAPI_CALL(env, napi_create_reference(env, cons, 1, &pixelMapConstructor_));
     return cons;
 }
@@ -865,19 +1175,9 @@ napi_value JsDrawableDescriptor::InitPixelMapDrawable(napi_env env)
 napi_value JsDrawableDescriptor::InitLayeredDrawable(napi_env env)
 {
     napi_value cons = nullptr;
-    napi_value typeName = CreateString(env, std::string(LAYERED_DRAWABLE_DESCRIPTOR_NAME));
-    napi_property_descriptor layeredDes[] = { 
-        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
-        DECLARE_NAPI_FUNCTION("load", Load), 
-        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
-        DECLARE_NAPI_FUNCTION("getForeground", GetForeground), 
-        DECLARE_NAPI_FUNCTION("getBackground", GetBackground),
-        DECLARE_NAPI_FUNCTION("getMask", GetMask), 
-        DECLARE_NAPI_STATIC_FUNCTION("getMaskClipPath", GetMaskClipPath),
-        DECLARE_NAPI_PROPERTY("typeName", typeName) 
-    };
+    auto layeredDes = GetLayeredDrawableDescriptor(env);
     NAPI_CALL(env, napi_define_class(env, LAYERED_DRAWABLE_DESCRIPTOR_NAME, NAPI_AUTO_LENGTH, LayeredConstructor,
-                       nullptr, sizeof(layeredDes) / sizeof(napi_property_descriptor), layeredDes, &cons));
+                       nullptr, layeredDes.size(), layeredDes.data(), &cons));
     NAPI_CALL(env, napi_create_reference(env, cons, 1, &layeredConstructor_));
     return cons;
 }
@@ -885,16 +1185,9 @@ napi_value JsDrawableDescriptor::InitLayeredDrawable(napi_env env)
 napi_value JsDrawableDescriptor::InitAnimatedDrawable(napi_env env)
 {
     napi_value cons = nullptr;
-    napi_value typeName = CreateString(env, std::string(ANIMATED_DRAWABLE_DESCRIPTOR_NAME));
-    napi_property_descriptor animatedDes[] = { 
-        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
-        DECLARE_NAPI_FUNCTION("load", Load), 
-        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
-        DECLARE_NAPI_FUNCTION("getAnimationController", GetAnimationController),
-        DECLARE_NAPI_PROPERTY("typeName", typeName) 
-    };
+    auto animatedDes = GetAnimatedDrawableDescriptor(env);
     NAPI_CALL(env, napi_define_class(env, ANIMATED_DRAWABLE_DESCRIPTOR_NAME, NAPI_AUTO_LENGTH, AnimatedConstructor,
-                       nullptr, sizeof(animatedDes) / sizeof(napi_property_descriptor), animatedDes, &cons));
+                       nullptr, animatedDes.size(), animatedDes.data(), &cons));
     NAPI_CALL(env, napi_create_reference(env, cons, 1, &animatedConstructor_));
     return cons;
 }
@@ -909,6 +1202,11 @@ napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
     NAPI_CALL(env, napi_set_named_property(env, exports, LAYERED_DRAWABLE_DESCRIPTOR_NAME, cons));
     cons = InitAnimatedDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, ANIMATED_DRAWABLE_DESCRIPTOR_NAME, cons));
+
+    napi_property_descriptor createTransferDesc[] = { DECLARE_NAPI_FUNCTION(
+        "__createTransfer__", CreateDrawableDescriptorTransfer) };
+    NAPI_CALL(env, napi_define_properties(
+        env, exports, sizeof(createTransferDesc) / sizeof(createTransferDesc[0]), createTransferDesc));
     return exports;
 }
 } // namespace Napi
