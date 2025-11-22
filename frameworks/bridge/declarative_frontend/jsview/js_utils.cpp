@@ -137,6 +137,12 @@ const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
     return filterPtr;
 }
 
+const UiMaterial* CreateUiMaterialFromNapiValue(JSRef<JSVal> obj)
+{
+    auto uiMaterialPtr = static_cast<UiMaterial*>(UnwrapNapiValue(obj));
+    return uiMaterialPtr;
+}
+
 const Rosen::Blender* CreateRSBlenderFromNapiValue(JSRef<JSVal> obj)
 {
     auto blenderPtr = static_cast<Rosen::Blender*>(UnwrapNapiValue(obj));

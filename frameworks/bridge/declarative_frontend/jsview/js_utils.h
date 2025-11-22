@@ -41,6 +41,10 @@ class Filter;
 class Blender;
 }
 
+namespace OHOS::Ace {
+class UiMaterial;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::Framework {
 class ScopeRAII {
 public:
@@ -69,6 +73,7 @@ napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap);
 const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj);
 const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj);
 const Rosen::Blender* CreateRSBlenderFromNapiValue(JSRef<JSVal> obj);
+const UiMaterial* CreateUiMaterialFromNapiValue(JSRef<JSVal> obj);
 std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args);
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
 bool IsDisableEventVersion();

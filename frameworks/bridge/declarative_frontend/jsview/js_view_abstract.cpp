@@ -9728,6 +9728,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("backgroundFilter", &JSViewAbstract::JsBackgroundFilter);
     JSClass<JSViewAbstract>::StaticMethod("foregroundFilter", &JSViewAbstract::JsForegroundFilter);
     JSClass<JSViewAbstract>::StaticMethod("compositingFilter", &JSViewAbstract::JsCompositingFilter);
+    JSClass<JSViewAbstract>::StaticMethod("systemMaterial", &JSViewAbstract::JsSystemMaterial);
 
     JSClass<JSViewAbstract>::StaticMethod("setPixelRoundMode", &JSViewAbstract::SetPixelRoundMode);
     JSClass<JSViewAbstract>::StaticMethod("getPixelRoundMode", &JSViewAbstract::GetPixelRoundMode);
@@ -12712,6 +12713,16 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     }
     auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
+}
+
+void JSViewAbstract::JsSystemMaterial(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetSystemMaterial(nullptr);
+        return;
+    }
+    auto material = CreateUiMaterialFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetSystemMaterial(material);
 }
 
 void JSViewAbstract::ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam)

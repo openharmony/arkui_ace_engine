@@ -353,6 +353,7 @@ public:
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
     static void JsSetFreeze(const JSCallbackInfo& info);
+    static void JsSystemMaterial(const JSCallbackInfo& info);
     static void ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
     // outer border

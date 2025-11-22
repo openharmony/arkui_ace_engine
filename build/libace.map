@@ -530,6 +530,8 @@
       OHOS::Ace::V2::COMMON_VIEW_ETS_TAG*;
       OHOS::Ace::NG::ScaleProperty::*;
       OHOS::Ace::NG::ConvertToPx*;
+      OHOS::Ace::UiMaterialTheme::*;
+      OHOS::Ace::MaterialUtils::*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";

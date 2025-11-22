@@ -41,6 +41,7 @@ build_component("common") {
     "properties/shadow_config.cpp",
     "properties/text_style.cpp",
     "properties/text_style_parser.cpp",
+    "properties/ui_material.cpp",
 
     # layout
     "layout/grid_column_info.cpp",
