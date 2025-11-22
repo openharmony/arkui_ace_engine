@@ -385,7 +385,10 @@ Opt_NavPathInfo Pop0Impl(Ark_NavPathStack peer,
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
-    auto info = navStack->NavigationContext::PathStack::Pop(isAnimated);
+    NavigationContext::PathInfo info;
+    if (!navStack->NavigationContext::PathStack::Pop(isAnimated, info)) {
+        return invalidVal;
+    }
     auto arkInfo = Converter::ArkValue<Ark_NavPathInfo>(info);
     CHECK_NULL_RETURN(arkInfo, invalidVal);
     Opt_NavPathInfo retVal = {
@@ -405,7 +408,10 @@ Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
-    auto info = navStack->NavigationContext::PathStack::Pop(isAnimated, *result);
+    NavigationContext::PathInfo info;
+    if (!navStack->NavigationContext::PathStack::Pop(isAnimated, *result, info)) {
+        return invalidVal;
+    }
     auto arkInfo = Converter::ArkValue<Ark_NavPathInfo>(info);
     CHECK_NULL_RETURN(arkInfo, invalidVal);
     Opt_NavPathInfo retVal = {
