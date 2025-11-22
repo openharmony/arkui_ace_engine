@@ -2723,6 +2723,11 @@ struct ArkUICommonModifier {
     void (*resetObscured)(ArkUINodeHandle node);
     void (*setResponseRegionList)(ArkUINodeHandle node, const ArkUI_Int32* tools,
         const ArkUI_Float32* values, ArkUI_CharPtr* calcValues, const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*setResponseRegionListWithToolType)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length, const ArkUI_Int32* tools, ArkUI_Int32 toolsLength);
+    ArkUI_Int32 (*getResponseRegionListSize)(ArkUINodeHandle node);
+    void (*getResponseRegionList)(
+        ArkUINodeHandle node, ArkUI_Int32* tools, ArkUI_Float32* values, ArkUI_Int32 length);
     void (*resetResponseRegionList)(ArkUINodeHandle node);
     void (*setResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);

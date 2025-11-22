@@ -2869,6 +2869,79 @@ void ResetResponseRegion(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetResponseRegion(node->uiNodeHandle);
 }
 
+int32_t SetResponseRegionList(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+
+    int32_t length = item->size / NUM_5 + (item->size % NUM_5 == NUM_0 ? NUM_0 : NUM_1);
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+
+    std::vector<int32_t> toolArray;
+    std::vector<float> valuesArray;
+    std::vector<int32_t> unitsArray;
+
+    for (int i = 0; i < item->size; i++) {
+        if (i % NUM_5 == NUM_0) {
+            toolArray.push_back(item->value[i].i32);
+        } else {
+            int remainder = i % NUM_5;
+            valuesArray.push_back(remainder > 2 ? (item->value[i].f32) / HUNDRED : item->value[i].f32);
+            // unit 1 3
+            unitsArray.push_back(remainder > 2 ? NUM_3 : unit);
+        }
+    }
+    // supplement default values
+    for (int i = item->size; i < length * NUM_5; i++) {
+        int remainder = i % NUM_5;
+        valuesArray.push_back(remainder > 2 ? ONE_F : ZERO_F);
+        // unit 1 3
+        unitsArray.push_back(remainder > 2 ? NUM_3 : unit);
+    }
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setResponseRegionListWithToolType(
+        node->uiNodeHandle, valuesArray.data(), unitsArray.data(), valuesArray.size(), toolArray.data(), length);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetResponseRegionList(ArkUI_NodeHandle node)
+{
+    auto regionSize =
+        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getResponseRegionListSize(node->uiNodeHandle);
+    if (regionSize <= 0) {
+        g_numberValues[NUM_0].i32 = ArkUI_ResponseRegionSupportedTool::ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_ALL;
+        g_numberValues[NUM_1].f32 = ZERO_F;
+        g_numberValues[NUM_2].f32 = ZERO_F;
+        g_numberValues[NUM_3].f32 = HUNDRED;
+        g_numberValues[NUM_4].f32 = HUNDRED;
+        g_attributeItem.size = NUM_5;
+        return &g_attributeItem;
+    }
+    int32_t toolType[regionSize];
+    float valueArray[regionSize * NUM_4];
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getResponseRegionList(
+        node->uiNodeHandle, toolType, valueArray, regionSize);
+
+    for (int i = 0; i < regionSize; i++) {
+        g_numberValues[i * NUM_5 + NUM_0].i32 = static_cast<ArkUI_ResponseRegionSupportedTool>(toolType[i]);
+        g_numberValues[i * NUM_5 + NUM_1].f32 = valueArray[i * NUM_4 + NUM_0];
+        g_numberValues[i * NUM_5 + NUM_2].f32 = valueArray[i * NUM_4 + NUM_1];
+        g_numberValues[i * NUM_5 + NUM_3].f32 = valueArray[i * NUM_4 + NUM_2] * HUNDRED;
+        g_numberValues[i * NUM_5 + NUM_4].f32 = valueArray[i * NUM_4 + NUM_3] * HUNDRED;
+    }
+
+    g_attributeItem.size = regionSize * NUM_5;
+    return &g_attributeItem;
+}
+
+void ResetResponseRegionList(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetResponseRegionList(node->uiNodeHandle);
+}
+
 int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->string == nullptr && item->object == nullptr) {
@@ -17687,6 +17760,13 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetPositionEdges,
         SetAllowForceDark,
         SetPixelRound,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        SetResponseRegionList,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -17808,6 +17888,13 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetPositionEdges,
         GetAllowForceDark,
         GetPixelRound,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        GetResponseRegionList,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -17933,6 +18020,13 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetPositionEdges,
         ResetAllowForceDark,
         ResetPixelRound,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        ResetResponseRegionList,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
