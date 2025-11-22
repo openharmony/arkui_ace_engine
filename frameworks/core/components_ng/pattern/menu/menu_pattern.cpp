@@ -1301,14 +1301,11 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
     }
 }
 
-bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, PipelineContext* pipelineContext)
 {
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
@@ -1323,17 +1320,17 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     CHECK_NULL_VOID(renderContext);
     auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(scroll);
-
+    auto pipelineContext = host->GetContextWithCheck();
     if (resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
         Shadow shadow;
-        if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+        if (GetShadowFromTheme(ShadowStyle::None, shadow, pipelineContext)) {
             renderContext->UpdateBackShadow(shadow);
         }
     } else {
         Shadow shadow;
-        auto shadowStyle = GetMenuDefaultShadowStyle();
-        if (GetShadowFromTheme(shadowStyle, shadow)) {
+        auto shadowStyle = GetMenuDefaultShadowStyle(pipelineContext);
+        if (GetShadowFromTheme(shadowStyle, shadow, pipelineContext)) {
             renderContext->UpdateBackShadow(shadow);
         }
     }
@@ -1362,8 +1359,8 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         renderContext->UpdateBackgroundColor(bgColor);
     }
     Shadow shadow;
-    auto defaultShadowStyle = GetMenuDefaultShadowStyle();
-    if (GetShadowFromTheme(defaultShadowStyle, shadow)) {
+    auto defaultShadowStyle = GetMenuDefaultShadowStyle(pipeline);
+    if (GetShadowFromTheme(defaultShadowStyle, shadow, pipeline)) {
         renderContext->UpdateBackShadow(shadow);
     }
     // make menu round rect
@@ -2370,7 +2367,7 @@ void InnerMenuPattern::ApplyDesktopMenuTheme()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow)) {
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow, host->GetContextWithCheck())) {
         host->GetRenderContext()->UpdateBackShadow(shadow);
     }
 }
@@ -2380,7 +2377,7 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+    if (GetShadowFromTheme(ShadowStyle::None, shadow, host->GetContextWithCheck())) {
         host->GetRenderContext()->UpdateBackShadow(shadow);
     }
 }
