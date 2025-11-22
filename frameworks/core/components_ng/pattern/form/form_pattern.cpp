@@ -94,7 +94,6 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
 constexpr char NO_FORM_DUMP[] = "-noform";
 constexpr char PID_FLAG[] = "pidflag";
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
-constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 constexpr char COLUMN_ROLE[] = "column";
 
 // Relationship between form styles and resource text content
@@ -871,8 +870,7 @@ float FormPattern::CalculateViewScale(float width, float height, float layoutWid
     float widthScale = NearEqual(layoutWidth, width) ? DEFAULT_VIEW_SCALE : layoutWidth / width;
     float heightScale = NearEqual(layoutHeight, height) ?  DEFAULT_VIEW_SCALE : layoutHeight / height;
     float viewScale = (widthScale >= heightScale) ? widthScale : heightScale;
-    viewScale = (viewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
-        ((viewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : viewScale);
+    viewScale = (viewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE : viewScale;
     return viewScale;
 }
 

@@ -2109,18 +2109,18 @@ HWTEST_F(FormPatternTest, FormPatternTest_059, TestSize.Level0)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    float width = 0;
-    float height = 0;
+    float width = 0.1;
+    float height = 0.1;
     float layoutWidth = 0;
     float layoutHeight = 0;
     float viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
     EXPECT_EQ(viewScale, DEFAULT_VIEW_SCALE);
-    width = 100;
-    height = 100;
-    layoutWidth = 130;
-    layoutHeight = 130;
+    width = 90;
+    height = 90;
+    layoutWidth = 140;
+    layoutHeight = 140;
     viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
-    EXPECT_EQ(viewScale, MAX_FORM_VIEW_SCALE);
+    EXPECT_NE(viewScale, MAX_FORM_VIEW_SCALE);
 }
 
 /**
