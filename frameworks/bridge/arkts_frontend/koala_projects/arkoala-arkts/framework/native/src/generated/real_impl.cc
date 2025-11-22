@@ -3921,11 +3921,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnShownImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+                        const const Opt_Callback_VisibilityChangeReason_Void* value)
     {
     }
     void SetOnHiddenImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const const Opt_Callback_VisibilityChangeReason_Void* value)
     {
     }
     void SetOnBackPressedImpl(Ark_NativePointer node,

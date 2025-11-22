@@ -74,7 +74,7 @@ void SetHideBackButtonImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetHideBackButton(frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
 }
 void SetOnShownImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_Callback_VisibilityChangeReason_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -84,12 +84,13 @@ void SetOnShownImpl(Ark_NativePointer node,
         return;
     }
     auto onShownEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) {
-        arkCallback.InvokeSync();
+        auto shownReason = static_cast<Ark_VisibilityChangeReason>(reason);
+        arkCallback.InvokeSync(shownReason);
     };
     NavDestinationModelStatic::SetOnShown(frameNode, std::move(onShownEvent));
 }
 void SetOnHiddenImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_Callback_VisibilityChangeReason_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -98,7 +99,10 @@ void SetOnHiddenImpl(Ark_NativePointer node,
         NavDestinationModelStatic::SetOnHidden(frameNode, nullptr);
         return;
     }
-    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) { arkCallback.InvokeSync(); };
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) {
+        auto hiddenReason = static_cast<Ark_VisibilityChangeReason>(reason);
+        arkCallback.InvokeSync(hiddenReason);
+    };
     NavDestinationModelStatic::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
 void SetOnBackPressedImpl(Ark_NativePointer node,

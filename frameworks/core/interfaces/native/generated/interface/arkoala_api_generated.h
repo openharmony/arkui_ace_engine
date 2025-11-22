@@ -6915,6 +6915,15 @@ typedef struct Opt_Visibility {
     Ark_Tag tag;
     Ark_Visibility value;
 } Opt_Visibility;
+typedef enum Ark_VisibilityChangeReason {
+    ARK_VISIBILITY_CHANGE_REASON_TRANSITION = 0,
+    ARK_VISIBILITY_CHANGE_REASON_CONTENT_COVER = 1,
+    ARK_VISIBILITY_CHANGE_REASON_APP_STATE = 2,
+} Ark_VisibilityChangeReason;
+typedef struct Opt_VisibilityChangeReason {
+    Ark_Tag tag;
+    Ark_VisibilityChangeReason value;
+} Opt_VisibilityChangeReason;
 typedef enum Ark_WaterFlowLayoutMode {
     ARK_WATER_FLOW_LAYOUT_MODE_ALWAYS_TOP_DOWN = 0,
     ARK_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW = 1,
@@ -15952,6 +15961,16 @@ typedef struct Opt_Union_BorderStyle_EdgeStyles {
     Ark_Tag tag;
     Ark_Union_BorderStyle_EdgeStyles value;
 } Opt_Union_BorderStyle_EdgeStyles;
+typedef struct Callback_VisibilityChangeReason_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0);
+} Callback_VisibilityChangeReason_Void;
+typedef struct Opt_Callback_VisibilityChangeReason_Void {
+    Ark_Tag tag;
+    Callback_VisibilityChangeReason_Void value;
+} Opt_Callback_VisibilityChangeReason_Void;
 typedef struct Ark_Union_Color_I32_String_Resource {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -23012,9 +23031,9 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setHideBackButton)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setOnShown)(Ark_NativePointer node,
-                       const Opt_Callback_Void* value);
+                       const Opt_Callback_VisibilityChangeReason_Void* value);
     void (*setOnHidden)(Ark_NativePointer node,
-                        const Opt_Callback_Void* value);
+                        const Opt_Callback_VisibilityChangeReason_Void* value);
     void (*setOnBackPressed)(Ark_NativePointer node,
                              const Opt_Callback_Boolean* value);
     void (*setOnResult)(Ark_NativePointer node,
