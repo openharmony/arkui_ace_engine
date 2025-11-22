@@ -34,11 +34,13 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
     get(): T {
         if (this.sourceProvider_) {
             const value = this.sourceProvider_!.get();
-            uiUtils.builtinContainersAddRefLength(value);
             return value;
         }
-        const value = this.backing_!.get(this.shouldAddRef());
-        uiUtils.builtinContainersAddRefLength(value);
+        const shouldAddRef = this.shouldAddRef()
+        const value = this.backing_!.get(shouldAddRef);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefLength(value);
+        }
         return value;
     }
 

@@ -42,9 +42,12 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     }
 
     get(): T {
-        const value = this.localValue.get(this.shouldAddRef());
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.localValue.get(shouldAddRef);
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
-        uiUtils.builtinContainersAddRefAnyKey(value);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefAnyKey(value);
+        }
         return value;
     }
 
