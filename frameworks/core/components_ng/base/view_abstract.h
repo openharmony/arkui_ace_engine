@@ -68,6 +68,7 @@ class BasicShape;
 class SpanString;
 class CalcDimensionRect;
 class ResponseRegion;
+class UiMaterial;
 }
 
 namespace OHOS::Ace::NG {
@@ -265,6 +266,7 @@ public:
     static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
+    static void SetSystemMaterial(const UiMaterial* material);
 
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
@@ -1076,6 +1078,7 @@ public:
     static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
+    static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
 

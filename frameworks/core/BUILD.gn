@@ -894,6 +894,7 @@ template("ace_core_ng_source_set") {
       "components/common/properties/shadow_config.cpp",
       "components/common/properties/text_style.cpp",
       "components/common/properties/text_style_parser.cpp",
+      "components/common/properties/ui_material.cpp",
 
       # layout
       "components/common/layout/grid_column_info.cpp",
@@ -931,6 +932,7 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_manager_impl.cpp",
       "components/theme/theme_manager_multi_thread.cpp",
       "components/theme/theme_utils.cpp",
+      "components/theme/ui_material_theme.cpp",
       "components/video/resource/player.cpp",
 
       # v2 inspector
