@@ -56,9 +56,12 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     }
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provide ${this.getTraceInfo()}`);
-        const value = this.backing_.get(this.shouldAddRef());
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.backing_.get(shouldAddRef);
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
-        uiUtils.builtinContainersAddRefAnyKey(value);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefAnyKey(value);
+        }
         return value;
     }
     public set(newValue: T): void {

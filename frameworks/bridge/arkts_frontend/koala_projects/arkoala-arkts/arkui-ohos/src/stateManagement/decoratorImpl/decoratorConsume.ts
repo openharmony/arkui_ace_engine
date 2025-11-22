@@ -43,7 +43,9 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${this.getTraceInfo()}`);
         const value = this.sourceProvide_!.get();
-        uiUtils.builtinContainersAddRefAnyKey(value);
+        if (this.shouldAddRef()) {
+            uiUtils.builtinContainersAddRefAnyKey(value);
+        }
         return value;
     }
 
