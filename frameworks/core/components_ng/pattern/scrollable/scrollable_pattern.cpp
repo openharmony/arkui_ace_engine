@@ -996,7 +996,7 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         scrollBar_->StopFlingAnimation();
     }
     if (scrollBarProxy_) {
-        scrollBarProxy_->StopScrollBarAnimator();
+        scrollBarProxy_->StopScrollBarAnimator(false);
     }
     if (isBackToTopRunning_) {
         if (animator_ && !animator_->IsStopped()) {
@@ -1762,6 +1762,7 @@ void ScrollablePattern::AnimateTo(
 {
     StopScrollableAndAnimate();
     if (NearEqual(position, GetTotalOffset())) {
+        scrollAbort_ = false;
         return;
     }
     finalPosition_ = position;

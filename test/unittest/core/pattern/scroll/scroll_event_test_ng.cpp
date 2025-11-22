@@ -1894,6 +1894,41 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop003, TestSize.Level1)
 }
 
 /**
+* @tc.name: OnScrollStartStop004
+* @tc.desc: Test OnScrollStart and OnScrollStart in AnimateTo
+* @tc.type: FUNC
+*/
+HWTEST_F(ScrollEventTestNg, OnScrollStartStop004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Initialize variables and callback
+    * @tc.expected: Variables initialized successfully.
+    */
+    ScrollModelNG model = CreateScroll();
+    int32_t isScrollStartCalled = 0;
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() { isScrollStartCalled++; };
+    model.SetOnScrollStart(std::move(scrollStart));
+    int32_t isScrollStopCalled = 0;
+    OnScrollStopEvent scrollStop = [&isScrollStopCalled]() {
+        isScrollStopCalled++;
+    };
+    model.SetOnScrollStop(std::move(scrollStop));
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+    * @tc.steps: step2. Trigger AnimateTo 2 times.
+    * @tc.expected: isScrollStopCalled and isScrollStopCalled should be true.
+    */
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 500, nullptr, true);
+    AnimateTo(Dimension(0), 500, nullptr, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 1);
+}
+
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: Test OnColorConfigurationUpdate
  * @tc.type: FUNC
