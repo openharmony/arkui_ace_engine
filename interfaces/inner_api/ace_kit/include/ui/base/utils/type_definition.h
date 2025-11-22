@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_UTILS_TYPE_DEFINITION_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_UTILS_TYPE_DEFINITION_H
 
-#include <cstdint>
+#include <chrono>
 
-namespace OHOS::Ace::Kit {
+#ifndef ACE_NON_VIRTUAL
+#ifdef ACE_UNITTEST
+#define ACE_NON_VIRTUAL virtual // support gmock in unitest
+#else
+#define ACE_NON_VIRTUAL
+#endif
+#endif
 
-struct LayoutConstraintInfo {
-    float minWidth;
-    float minHeight;
-    float maxWidth;
-    float maxHeight;
-    float percentReferWidth;
-    float percentReferHeight;
-    std::optional<float> parentIdealSizeWidth;
-    std::optional<float> parentIdealSizeHeight;
-};
+namespace OHOS::Ace {
 
-} // namespace OHOS::Ace::Kit
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_INFO_H
+// nano seconds.
+using TimeStamp = std::chrono::high_resolution_clock::time_point;
+
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_UTILS_TYPE_DEFINITION_H

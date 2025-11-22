@@ -20,7 +20,7 @@
 #include "ui/base/macros.h"
 #include "ui/base/utils/utils.h"
 
-#include "core/event/ace_events.h"
+#include "ui/event/ace_events.h"
 
 namespace OHOS::Ace {
 
