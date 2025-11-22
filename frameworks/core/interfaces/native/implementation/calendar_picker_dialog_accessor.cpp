@@ -206,8 +206,18 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ShowCalendarDialog(
-        dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    executor->PostTask(
+        [dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ShowCalendarDialog(
+                dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
