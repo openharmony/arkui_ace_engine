@@ -1378,6 +1378,16 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
     record.addText = options.value;
     RichEditorChangeValue changeValue(reason);
     bool isUndoRedo = options.optionSource == OptionSource::UNDO_REDO;
+    // When the text color is not specified, it inherits the color of the URL.
+    auto needUpdateUrlColor = options.urlAddress.has_value() && !options.urlAddress.value().empty() 
+        && options.useThemeFontColor;
+    if (needUpdateUrlColor && options.style.has_value()) {
+        auto urlSpanColor = GetUrlSpanColor();
+        options.style.value().SetTextColor(urlSpanColor);
+        if (options.useThemeDecorationColor) {
+            options.style.value().SetTextDecorationColor(urlSpanColor);
+        }
+    }
     CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
     ClearRedoOperationRecords();
     record.afterCaretPosition = record.beforeCaretPosition + static_cast<int32_t>(options.value.length());
@@ -11611,6 +11621,9 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
         SetTextStyleToRet(retInfo, *textStyle);
     } else {
         SetThemeTextStyleToRet(retInfo);
+        if (urlAddress.has_value()) {
+            retInfo.SetFontColor(GetUrlSpanColor().ColorToString());
+        }
     }
     IF_TRUE(urlAddress.has_value(), retInfo.SetUrlAddress(urlAddress.value()));
     retInfo.SetSpanIndex(spanIndex);
