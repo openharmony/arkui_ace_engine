@@ -40,6 +40,10 @@ group("advanced_ui_component_static") {
       "toolbarv2:toolBarV2",
       "chip:chip",
       "chipgroup:chipGroup",
+      "selecttitlebar:selectTitleBar",
+      "progressbutton:progressButton",
+      "progressbuttonV2:progressButtonV2",
+      "tabtitlebar:tabTitleBar",
     ]
   }
 }

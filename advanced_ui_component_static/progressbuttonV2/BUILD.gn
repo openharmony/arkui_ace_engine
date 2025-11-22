@@ -14,34 +14,34 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 
-generate_static_abc("swipe_refresher_ets_abc") {
+generate_static_abc("progress_button_v2_ets_abc") {
   base_url = "./"
-  files = [ "./@ohos.arkui.advanced.SwipeRefresher.ets" ]
+  files = [ "./@ohos.arkui.advanced.ProgressButtonV2.ets" ]
   ui_enable = "True"
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/swipe_refresher_ets_abc.abc"
-  dst_file = target_out_dir + "/swipe_refresher_ets_abc/modules_static.abc"
-  out_puts = [ target_out_dir + "/swipe_refresher_ets_abc/modules_static.abc" ]
+  device_dst_file = "/system/framework/progress_button_v2_ets_abc.abc"
+  dst_file = target_out_dir + "/progress_button_v2_ets_abc/modules_static.abc"
+  out_puts = [ target_out_dir + "/progress_button_v2_ets_abc/modules_static.abc" ]
 }
 
-ohos_copy("copy_swipe_refresher_ets_abc") {
+ohos_copy("copy_progress_button_v2_ets_abc") {
   sources = [
-    target_out_dir + "/swipe_refresher_ets_abc/modules_static.abc"
+    target_out_dir + "/progress_button_v2_ets_abc/modules_static.abc"
   ]
   outputs = [
-    target_out_dir + "/swipe_refresher_ets_abc.abc"
+    target_out_dir + "/progress_button_v2_ets_abc.abc"
   ]
-  deps = [ ":swipe_refresher_ets_abc" ]
+  deps = [ ":progress_button_v2_ets_abc" ]
 }
 
-ohos_prebuilt_etc("swipe_refresher_ets_abc_etc") {
-  source = "$target_out_dir/swipe_refresher_ets_abc.abc"
+ohos_prebuilt_etc("progress_button_v2_ets_abc_etc") {
+  source = "$target_out_dir/progress_button_v2_ets_abc.abc"
   module_install_dir = "framework"
   subsystem_name = "arkui"
   part_name = "ace_engine"
-  deps = [ ":copy_swipe_refresher_ets_abc" ]
+  deps = [ ":copy_progress_button_v2_ets_abc" ]
 }
 
-group("swipeRefresher"){
-    deps = [":swipe_refresher_ets_abc_etc"]
+group("progressButtonV2"){
+    deps = [":progress_button_v2_ets_abc_etc"]
 }
