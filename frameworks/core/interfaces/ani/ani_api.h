@@ -173,7 +173,7 @@ struct ArkUINavigationInfo {
 };
 
 struct ArkUINavDestinationInfo {
-    ani_double uniqueId;
+    ani_int uniqueId;
     ani_int index;
     std::string name;
     std::string navDestinationId;

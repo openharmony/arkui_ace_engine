@@ -6420,7 +6420,7 @@ void callManagedOnSubmitCallbackSync(Ark_VMContext vmContext, Ark_Int32 resource
     SubmitEvent_serializer::write(argsSerializer, event);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnSwiperAnimationEndCallback(Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationEndCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6428,22 +6428,22 @@ void callManagedOnSwiperAnimationEndCallback(Ark_Int32 resourceId, Ark_Number in
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnSwiperAnimationEndCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnSwiperAnimationEndCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationEndCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnSwiperAnimationEndCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnSwiperAnimationStartCallback(Ark_Int32 resourceId, Ark_Number index, Ark_Number targetIndex, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationStartCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_SwiperAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6451,24 +6451,24 @@ void callManagedOnSwiperAnimationStartCallback(Ark_Int32 resourceId, Ark_Number 
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnSwiperAnimationStartCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    argsSerializer.writeNumber(targetIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnSwiperAnimationStartCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_Number targetIndex, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationStartCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_SwiperAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnSwiperAnimationStartCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    argsSerializer.writeNumber(targetIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnSwiperGestureSwipeCallback(Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperGestureSwipeCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6476,18 +6476,18 @@ void callManagedOnSwiperGestureSwipeCallback(Ark_Int32 resourceId, Ark_Number in
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnSwiperGestureSwipeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnSwiperGestureSwipeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperGestureSwipeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnSwiperGestureSwipeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
