@@ -342,8 +342,8 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
         if (!this[storeProp]) {
           // first init env value
           stateMgmtConsole.debug(`Env get first register EnvValue key ${envKey} varName ${varName} in ${this.debugInfo__()}`);
-          this.__registerUpdateInstanceForEnvFunc__Internal(this.__updateInstanceIdForEnvValue__Internal.bind(this));
-          return EnvV2.registerEnv(envKey, this, varName);
+          this.__registerUpdateInstanceForEnvFunc__Internal(this.__updateForEnvValue__Internal.bind(this));
+          this[storeProp] = EnvV2.registerEnv(envKey, this, varName);
         }
         return this[storeProp];
       },
