@@ -19,6 +19,7 @@
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSNode;
+class SurfaceCaptureCallback;
 }
 
 #endif // MOCK_RS_INTERFACES_H
