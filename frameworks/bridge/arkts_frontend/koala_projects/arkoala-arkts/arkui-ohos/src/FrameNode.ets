@@ -594,15 +594,16 @@ export class FrameNode implements MaterializedBase {
     }
     adoptChild(child: FrameNode): void{
     if (child === undefined || child === null) {
-        return;
+        const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
+        throw new BusinessError(100025, error);
     }
-    if (!this.checkValid(this) || !this.isModifiable()) {
+    if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
-    if (!child.checkValid(this) || !child.isModifiable()) {
-        const error = Error('The child node is not modifiable.');
-        throw new BusinessError(100021, error);
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+        const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
     let result = FrameNodeExtender.adoptChild(this, child_casted);
@@ -614,15 +615,16 @@ export class FrameNode implements MaterializedBase {
   }
     removeAdoptedChild(child: FrameNode): void {
     if (child === undefined || child === null) {
-      return;
+        const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
+        throw new BusinessError(100025, error);
     }
-    if (!this.checkValid(this) || !this.isModifiable()) {
+    if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
-    if (!child.checkValid(this) || !child.isModifiable()) {
-        const error = Error('The child node is not modifiable.');
-        throw new BusinessError(100021, error);
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+        const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
     let result = FrameNodeExtender.removeAdoptedChild(this, child_casted);
