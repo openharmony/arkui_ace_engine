@@ -80,6 +80,23 @@ private:
     static thread_local napi_ref layeredConstructor_;
     static thread_local napi_ref animatedConstructor_;
     static thread_local napi_ref pixelMapConstructor_;
+
+    static std::vector<napi_property_descriptor> GetBaseDrawableDescriptor(napi_env env);
+    static std::vector<napi_property_descriptor> GetLayeredDrawableDescriptor(napi_env env);
+    static std::vector<napi_property_descriptor> GetAnimatedDrawableDescriptor(napi_env env);
+    static std::vector<napi_property_descriptor> GetPixelMapDrawableDescriptor(napi_env env);
+
+    static napi_value CreateDrawableDescriptorTransfer(napi_env env, napi_callback_info info);
+    static size_t DrawableGetDrawableTypeC(void* drawable);
+    static std::shared_ptr<OHOS::Media::PixelMap> DrawableGetPixelMapC(void* drawable);
+    static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetForegroundC(void* drawable);
+    static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetBackgroundC(void* drawable);
+    static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetMaskC(void* drawable);
+    static std::shared_ptr<OHOS::Media::PixelMap> PixelMapGetPixelMapC(void* drawable);
+    static napi_value CreatDrawable(napi_env env, void* native);
+    static napi_value CreatLayeredDrawable(napi_env env, void* native);
+    static napi_value CreatAnimatedDrawable(napi_env env, void* native);
+    static napi_value CreatPixelMapDrawable(napi_env env, void* native);
 };
 } // namespace Napi
 } // namespace Ace

@@ -36,10 +36,26 @@ namespace {
 constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
 constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
 constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
+constexpr char ANIMATED_CONSTRUCTOR[] = "C{escompat.Array}C{@ohos.arkui.drawableDescriptor.AnimationOptions}:";
+constexpr char ANIMATED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.AnimatedDrawableDescriptor";
 constexpr char LAYERED_CONSTRUCTOR[] =
     "C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos."
     "arkui.drawableDescriptor.DrawableDescriptor}:";
 constexpr char LAYERED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.LayeredDrawableDescriptor";
+
+constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
+constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+
+constexpr size_t MAX_TYPENAME_LEN = 255;
+
+enum class DrawableType {
+    BASE,
+    LAYERED,
+    ANIMATED,
+    PIXELMAP,
+};
 
 ani_object CreatePixelMapDrawableByPixelMap(ani_env* env, const RefPtr<PixelMap>& pixelMap)
 {
@@ -57,6 +73,59 @@ ani_object CreatePixelMapDrawableByPixelMap(ani_env* env, const RefPtr<PixelMap>
     ani_method ctor {};
     env->Class_FindMethod(cls, "<ctor>", PIXEL_MAP_CONSTRUCTOR, &ctor);
     env->Object_New(cls, ctor, &obj, pixelAni);
+    return obj;
+}
+
+ani_ref CreateDouble(ani_env* env, ani_int value)
+{
+    ani_class cls;
+    env->FindClass("std.core.Double", &cls);
+    ani_method ctor;
+    env->Class_FindMethod(cls, "<ctor>", "d:", &ctor);
+    ani_object rs;
+    env->Object_New(cls, ctor, &rs, static_cast<ani_double>(value));
+    return rs;
+}
+
+ani_object CreateAnimatedDrawableByPixelMapList(ani_env* env,
+    const std::vector<std::shared_ptr<Media::PixelMap>>& pixelMapList, int32_t duration, int32_t iterations)
+{
+    ani_object optionsAni {};
+    static const char* className = "@ohos.arkui.drawableDescriptor.AnimationOptionsImpl";
+
+    if (pixelMapList.empty()) {
+        return nullptr;
+    }
+    ani_class cls;
+    env->FindClass(className, &cls);
+    ani_method ctor;
+    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
+
+    auto durationAni = CreateDouble(env, duration);
+    auto iterationsAni = CreateDouble(env, iterations);
+
+    env->Object_New(cls, ctor, &optionsAni);
+
+    env->Object_SetPropertyByName_Ref(optionsAni, "duration", durationAni);
+    env->Object_SetPropertyByName_Ref(optionsAni, "iterations", iterationsAni);
+
+    ani_array pixelMapsAni;
+    auto refPixelMap = PixelMap::Create(pixelMapList[0]);
+
+    auto init = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, refPixelMap->GetPixelMapSharedPtr());
+    env->Array_New(pixelMapList.size(), init, &pixelMapsAni);
+
+    for (size_t index = 1; index < pixelMapList.size(); index++) {
+        auto refPixel = PixelMap::Create(pixelMapList[index]);
+        auto pixelAni = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, refPixel->GetPixelMapSharedPtr());
+        env->Array_Set(pixelMapsAni, index, pixelAni);
+    }
+
+    env->FindClass(ANIMATED_DRAWABLE, &cls);
+
+    ani_object obj {};
+    env->Class_FindMethod(cls, "<ctor>", ANIMATED_CONSTRUCTOR, &ctor);
+    env->Object_New(cls, ctor, &obj, pixelMapsAni, optionsAni);
     return obj;
 }
 
@@ -285,17 +354,34 @@ ani_string DrawableMaskClipPath(ani_env* env)
     return aniString;
 }
 
-ani_object NativeTransferStatic(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object input)
+DrawableType GetDrawableType(ani_env* env, ani_string typeName)
 {
-    void* unwrapResult = nullptr;
-    if (!arkts_esvalue_unwrap(env, input, &unwrapResult) || unwrapResult == nullptr) {
-        return nullptr;
+    char typeNameValue[MAX_TYPENAME_LEN] = {};
+    ani_size typeNameLen = 0;
+    env->String_GetUTF8(typeName, typeNameValue, sizeof(typeNameValue), &typeNameLen);
+    std::string typeNameStr(typeNameValue, typeNameLen);
+
+    auto drawableType = DrawableType::BASE;
+
+    if (typeNameStr == DRAWABLE_DESCRIPTOR_NAME) {
+        drawableType = DrawableType::BASE;
+    } else if (typeNameStr == LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
+        drawableType = DrawableType::LAYERED;
+    } else if (typeNameStr == ANIMATED_DRAWABLE_DESCRIPTOR_NAME) {
+        drawableType = DrawableType::ANIMATED;
+    } else if (typeNameStr == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+        drawableType = DrawableType::PIXELMAP;
     }
+    return drawableType;
+}
+
+ani_object CreateDrawableByNapiType(ani_env* env, DrawableType drawableType, void* unwrapResult)
+{
+    ani_object retValue = nullptr;
     auto napiDrawable = reinterpret_cast<Napi::DrawableDescriptor*>(unwrapResult);
 
-    ani_object retValue = nullptr;
-    switch (napiDrawable->GetDrawableType()) {
-        case Napi::DrawableDescriptor::DrawableType::LAYERED: {
+    switch (drawableType) {
+        case DrawableType::LAYERED: {
             auto layered = static_cast<Napi::LayeredDrawableDescriptor*>(napiDrawable);
             if (layered == nullptr) {
                 return nullptr;
@@ -312,7 +398,7 @@ ani_object NativeTransferStatic(ani_env* env, [[maybe_unused]] ani_class aniClas
             retValue = CreateLayeredDrawableByPixelMap(env, ptrForeground, ptrBackground, ptrMask);
             break;
         }
-        case Napi::DrawableDescriptor::DrawableType::PIXELMAP: {
+        case DrawableType::PIXELMAP: {
             auto pixelMap = static_cast<Napi::DrawableDescriptor*>(napiDrawable);
             if (pixelMap == nullptr || pixelMap->GetPixelMap() == nullptr) {
                 return nullptr;
@@ -322,6 +408,35 @@ ani_object NativeTransferStatic(ani_env* env, [[maybe_unused]] ani_class aniClas
         }
         default:
             break;
+    }
+    return retValue;
+}
+
+ani_object NativeTransferStatic(
+    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object input, ani_string typeName)
+{
+    auto drawableType = GetDrawableType(env, typeName);
+
+    void* unwrapResult = nullptr;
+    if (!arkts_esvalue_unwrap(env, input, &unwrapResult) || unwrapResult == nullptr) {
+        return nullptr;
+    }
+    ani_object retValue = nullptr;
+    if (drawableType == DrawableType::ANIMATED) {
+        auto animated = reinterpret_cast<AnimatedDrawableDescriptor*>(unwrapResult);
+        if (animated == nullptr) {
+            return nullptr;
+        }
+        const auto& refList = animated->GetPixelMapList();
+        std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+        pixelMapList.reserve(refList.size());
+        for (const auto& refPtr : refList) {
+            pixelMapList.push_back(refPtr ? refPtr->GetPixelMapSharedPtr() : nullptr);
+        }
+        retValue = CreateAnimatedDrawableByPixelMapList(
+            env, pixelMapList, animated->GetTotalDuration(), animated->GetIterations());
+    } else {
+        retValue = CreateDrawableByNapiType(env, drawableType, unwrapResult);
     }
     return retValue;
 }
