@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "ui_material_napi.h"
+#include "interfaces/napi/kits/ui_material/ui_material_napi.h"
 
-#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
+#include "ui/properties/ui_material.h"
 
 namespace OHOS::Ace::Napi {
 
@@ -75,7 +75,7 @@ napi_value UiMaterialNapi::GetNamedProperty(napi_env env, napi_value object, con
 
 int32_t UiMaterialNapi::GetCInt32(napi_value value, napi_env env)
 {
-    int32_t num;
+    int32_t num = 0;
     napi_get_value_int32(env, value, &num);
     return num;
 }

@@ -12721,7 +12721,7 @@ void JSViewAbstract::JsSystemMaterial(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetSystemMaterial(nullptr);
         return;
     }
-    auto material = CreateUiMaterialFromNapiValue(info[0]);
+    const auto* material = CreateUiMaterialFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetSystemMaterial(material);
 }
 

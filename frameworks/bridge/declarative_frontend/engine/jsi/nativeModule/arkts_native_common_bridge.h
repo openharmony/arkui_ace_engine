@@ -499,6 +499,8 @@ public:
     static ArkUINativeModuleValue SetFreeze(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFreeze(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AllowForceDark(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

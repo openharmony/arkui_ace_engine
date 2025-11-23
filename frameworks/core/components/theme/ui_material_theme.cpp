@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ui_material_theme.h"
+#include "core/components/theme/ui_material_theme.h"
 
 #include "core/components/theme/shadow_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr Color MATERIAL_SEMI_TRANSPARENT_COLOR_LIGHT(0xF2F1F3F5);
 constexpr Color MATERIAL_SEMI_TRANSPARENT_COLOR_DARK(0xF2303131);
+constexpr float MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA { 0.1f };
 constexpr Dimension MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH(1.0f, DimensionUnit::VP);
 constexpr ShadowStyle MATERIAL_SEMI_TRANSPARENT_SHADOW_STYLE { ShadowStyle::OuterDefaultSM };
 } // namespace
@@ -52,6 +53,7 @@ bool UiMaterialTheme::ParseUiMaterialParam(
         CHECK_NULL_RETURN(shadowTheme, false);
         auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
         auto color = themeConstants->GetColor(resId);
+        color = color.ChangeOpacity(MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA);
         result.borderColor.SetColor(color);
         result.borderWidth.SetBorderWidth(MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH);
         result.backgroundColor =

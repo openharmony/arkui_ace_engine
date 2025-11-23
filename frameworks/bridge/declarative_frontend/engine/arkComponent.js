@@ -3649,6 +3649,20 @@ class FreezeModifier extends ModifierWithKey {
   }
 }
 FreezeModifier.identity = Symbol('freeze');
+class SystemMaterialModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetSystemMaterial(node);
+    }
+    else {
+      getUINativeModule().common.setSystemMaterial(node, this.value);
+    }
+  }
+}
+SystemMaterialModifier.identity = Symbol('systemMaterial');
 class OnVisibleAreaChangeModifier extends ModifierWithKey {
   constructor(value) {
       super(value);
@@ -5436,6 +5450,10 @@ class ArkComponent {
   }
   freeze(value) {
     modifierWithKey(this._modifiersWithKeys, FreezeModifier.identity, FreezeModifier, value);
+    return this;
+  }
+  systemMaterial(material) {
+    modifierWithKey(this._modifiersWithKeys, SystemMaterialModifier.identity, SystemMaterialModifier, material);
     return this;
   }
 }
@@ -13105,6 +13123,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode) {
+    throw new Error('Method not implemented.');
+  }
+  systemMaterial(material) {
     throw new Error('Method not implemented.');
   }
   attributeModifier(modifier) {

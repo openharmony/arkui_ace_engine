@@ -18,8 +18,8 @@
 
 #include <optional>
 
-#include "interfaces/inner_api/ace_kit/include/ui/properties/color.h"
-#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
+#include "ui/properties/color.h"
+#include "ui/properties/ui_material.h"
 
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/property/border_property.h"

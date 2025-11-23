@@ -9421,6 +9421,21 @@ void ResetCompositingFilter(ArkUINodeHandle node)
     ViewAbstractModelNG::SetCompositingFilter(frameNode, nullptr);
 }
 
+void SetSystemMaterial(ArkUINodeHandle node, void* material)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* castMaterial = reinterpret_cast<UiMaterial*>(material);
+    ViewAbstract::SetSystemMaterial(frameNode, castMaterial);
+}
+
+void ResetSystemMaterial(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSystemMaterial(frameNode, nullptr);
+}
+
 void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10642,6 +10657,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAllowForceDark = ResetAllowForceDark,
         .getAllowForceDark = GetAllowForceDark,
         .getPixelRound = GetPixelRound,
+        .setSystemMaterial = SetSystemMaterial,
+        .resetSystemMaterial = ResetSystemMaterial,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

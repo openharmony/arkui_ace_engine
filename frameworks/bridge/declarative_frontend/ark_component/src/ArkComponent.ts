@@ -4055,6 +4055,21 @@ class OnChildTouchTestModifier extends ModifierWithKey<ChildTouchTestCallback> {
   }
 }
 
+class SystemMaterialModifier extends ModifierWithKey<SystemUiMaterial | undefined> {
+  constructor(value: SystemUiMaterial | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemMaterial');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSystemMaterial(node);
+    }
+    else {
+      getUINativeModule().common.setSystemMaterial(node, this.value);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -5910,6 +5925,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   clipShape(value: CircleShape | EllipseShape | PathShape | RectShape): this {
     modifierWithKey(this._modifiersWithKeys, ClipShapeModifier.identity, ClipShapeModifier, value);
+    return this;
+  }
+  systemMaterial(material: SystemUiMaterial | undefined) {
+    modifierWithKey(this._modifiersWithKeys, SystemMaterialModifier.identity, SystemMaterialModifier, material);
     return this;
   }
 }
