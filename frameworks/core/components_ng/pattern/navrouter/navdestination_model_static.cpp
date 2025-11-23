@@ -712,4 +712,13 @@ void NavDestinationModelStatic::SetPreferredOrientation(FrameNode* frameNode, co
     CHECK_NULL_VOID(node);
     node->SetOrientation(ori);
 }
+
+void NavDestinationModelStatic::SetOnNewParam(
+    FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& onNewParamCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNewParamStatic(std::move(onNewParamCallback));
+}
 } // namespace OHOS::Ace::NG

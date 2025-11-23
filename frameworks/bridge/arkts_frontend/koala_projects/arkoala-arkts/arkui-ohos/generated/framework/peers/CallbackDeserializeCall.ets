@@ -288,6 +288,13 @@ export function deserializeAndCallCallback_Buffer_Void(thisDeserializer: Deseria
     let value : ArrayBuffer = (thisDeserializer.readBuffer() as ArrayBuffer)
     _call(value)
 }
+export function deserializeAndCallCallback_BusinessError_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((code: int32, message: string) => void))
+    let code : int32 = thisDeserializer.readInt32()
+    let message : string = (thisDeserializer.readString() as string)
+    _call(code, message)
+}
 export function deserializeAndCallCallback_ClickEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ClickEvent) => void))
@@ -3443,6 +3450,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Boolean_HoverEvent_Void: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Boolean_Void: return deserializeAndCallCallback_Boolean_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Buffer_Void: return deserializeAndCallCallback_Buffer_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_BusinessError_Void: return deserializeAndCallCallback_BusinessError_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_ClickEvent_Void: return deserializeAndCallCallback_ClickEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_ComputedBarAttribute_Void: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_CopyEvent_Void: return deserializeAndCallCallback_CopyEvent_Void(thisDeserializer);

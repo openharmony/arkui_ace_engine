@@ -201,6 +201,18 @@ public:
         }
     }
 
+    void SetOnNewParamStatic(const std::function<void(const RefPtr<NavPathInfo>&)>&& onNewParamCallbackStatic)
+    {
+        onNewParamCallbackStatic_ = onNewParamCallbackStatic;
+    }
+
+    void FireOnNewParamStatic(const RefPtr<NavPathInfo>& info)
+    {
+        if (onNewParamCallbackStatic_) {
+            onNewParamCallbackStatic_(info);
+        }
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -222,6 +234,7 @@ private:
     std::function<void(int32_t)> onInactive_;
     std::function<void(int32_t)> onActive_;
     NavDestinationOnNewParamCallback onNewParamCallback_;
+    std::function<void(const RefPtr<NavPathInfo>&)> onNewParamCallbackStatic_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::unordered_map<int32_t, OnStateChangeEvent> onHiddenChange_;
     std::string name_;

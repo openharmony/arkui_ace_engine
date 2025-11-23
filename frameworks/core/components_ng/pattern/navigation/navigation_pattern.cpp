@@ -4538,7 +4538,12 @@ void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)
     CHECK_NULL_VOID(navPathInfo);
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnNewParam(navPathInfo->GetParamObj());
+    bool isStatic = navPathInfo->IsStatic();
+    if (isStatic) {
+        eventHub->FireOnNewParamStatic(navPathInfo);
+    } else {
+        eventHub->FireOnNewParam(navPathInfo->GetParamObj());
+    }
 }
 
 void NavigationPattern::GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes)

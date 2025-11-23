@@ -3284,7 +3284,7 @@ export class RouterExtender {
         thisSerializer.release()
         return retval
     }
-    static push1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    static push1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         PageRouterOptions_serializer.write(thisSerializer, options)
         if (finishCallback !== undefined) {
@@ -3319,7 +3319,7 @@ export class RouterExtender {
         thisSerializer.release()
         return retval
     }
-    static replace1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    static replace1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         PageRouterOptions_serializer.write(thisSerializer, options)
         if (finishCallback !== undefined) {
@@ -3436,7 +3436,7 @@ export class RouterExtender {
         thisSerializer.release()
         return retval
     }
-    static pushNamedRoute1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    static pushNamedRoute1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         PageRouterOptions_serializer.write(thisSerializer, options)
         if (finishCallback !== undefined) {
@@ -3471,7 +3471,7 @@ export class RouterExtender {
         thisSerializer.release()
         return retval
     }
-    static replaceNamedRoute1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    static replaceNamedRoute1_serialize(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         PageRouterOptions_serializer.write(thisSerializer, options)
         if (finishCallback !== undefined) {
@@ -3497,11 +3497,11 @@ export class RouterExtender {
         const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
         return RouterExtender.push0_serialize(jsView_casted, options_casted, finishCallback_casted)
     }
-    public static push(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    public static push(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const jsView_casted = jsView as (KPointer)
         const options_casted = options as (PageRouterOptions)
         const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
-        const callback__casted = callback_ as (AsyncCallback<void> | undefined)
+        const callback__casted = callback_ as (((code: int32, message: string) => void) | undefined)
         RouterExtender.push1_serialize(jsView_casted, options_casted, finishCallback_casted, callback__casted)
         return
     }
@@ -3511,11 +3511,11 @@ export class RouterExtender {
         const enterFinishCallback_casted = enterFinishCallback as (RouterFinishCallback | undefined)
         return RouterExtender.replace0_serialize(jsView_casted, options_casted, enterFinishCallback_casted)
     }
-    public static replace(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    public static replace(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const jsView_casted = jsView as (KPointer)
         const options_casted = options as (PageRouterOptions)
         const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
-        const callback__casted = callback_ as (AsyncCallback<void> | undefined)
+        const callback__casted = callback_ as (((code: int32, message: string) => void) | undefined)
         RouterExtender.replace1_serialize(jsView_casted, options_casted, finishCallback_casted, callback__casted)
         return
     }
@@ -3573,11 +3573,11 @@ export class RouterExtender {
         const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
         return RouterExtender.pushNamedRoute0_serialize(jsView_casted, options_casted, finishCallback_casted)
     }
-    public static pushNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    public static pushNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const jsView_casted = jsView as (KPointer)
         const options_casted = options as (PageRouterOptions)
         const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
-        const callback__casted = callback_ as (AsyncCallback<void> | undefined)
+        const callback__casted = callback_ as (((code: int32, message: string) => void) | undefined)
         RouterExtender.pushNamedRoute1_serialize(jsView_casted, options_casted, finishCallback_casted, callback__casted)
         return
     }
@@ -3587,11 +3587,11 @@ export class RouterExtender {
         const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
         return RouterExtender.replaceNamedRoute0_serialize(jsView_casted, options_casted, finishCallback_casted)
     }
-    public static replaceNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: AsyncCallback<void>): void {
+    public static replaceNamedRoute(jsView: KPointer, options: PageRouterOptions, finishCallback?: RouterFinishCallback, callback_?: ((code: int32, message: string) => void)): void {
         const jsView_casted = jsView as (KPointer)
         const options_casted = options as (PageRouterOptions)
         const finishCallback_casted = finishCallback as (RouterFinishCallback | undefined)
-        const callback__casted = callback_ as (AsyncCallback<void> | undefined)
+        const callback__casted = callback_ as (((code: int32, message: string) => void) | undefined)
         RouterExtender.replaceNamedRoute1_serialize(jsView_casted, options_casted, finishCallback_casted, callback__casted)
         return
     }

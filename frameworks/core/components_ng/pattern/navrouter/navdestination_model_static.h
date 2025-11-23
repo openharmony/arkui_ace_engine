@@ -75,6 +75,8 @@ public:
     static void SetEnableNavigationIndicator(FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
     static void SetHideItemText(FrameNode* frameNode, bool isHideItemText);
     static void SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori);
+    static void SetOnNewParam(
+        FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& onNewParamCallback);
 };
 } // namespace OHOS::Ace::NG
 

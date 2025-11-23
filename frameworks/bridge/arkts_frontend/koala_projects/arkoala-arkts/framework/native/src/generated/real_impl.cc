@@ -16322,7 +16322,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void Push1Impl(Ark_NativePointer jsView,
                    const Ark_PageRouterOptions* options,
                    const Opt_RouterFinishCallback* finishCallback,
-                   const Opt_AsyncCallback_Void* callback_)
+                   const Opt_Callback_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -16338,7 +16338,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void Replace1Impl(Ark_NativePointer jsView,
                       const Ark_PageRouterOptions* options,
                       const Opt_RouterFinishCallback* finishCallback,
-                      const Opt_AsyncCallback_Void* callback_)
+                      const Opt_Callback_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -16397,7 +16397,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PushNamedRoute1Impl(Ark_NativePointer jsView,
                              const Ark_PageRouterOptions* options,
                              const Opt_RouterFinishCallback* finishCallback,
-                             const Opt_AsyncCallback_Void* callback_)
+                             const Opt_Callback_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -16413,7 +16413,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
                                 const Ark_PageRouterOptions* options,
                                 const Opt_RouterFinishCallback* finishCallback,
-                                const Opt_AsyncCallback_Void* callback_)
+                                const Opt_Callback_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);

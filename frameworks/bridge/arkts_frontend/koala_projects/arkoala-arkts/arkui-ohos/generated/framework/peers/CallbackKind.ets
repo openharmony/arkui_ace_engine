@@ -18,6 +18,7 @@ export enum CallbackKind {
     Kind_Callback_Boolean_HoverEvent_Void = -916602978,
     Kind_Callback_Boolean_Void = 313269291,
     Kind_Callback_Buffer_Void = 908731311,
+    Kind_Callback_BusinessError_Void = 551347953,
     Kind_Callback_ClickEvent_Void = 1097178637,
     Kind_Callback_ComputedBarAttribute_Void = -1270343661,
     Kind_Callback_CopyEvent_Void = -120437466,
