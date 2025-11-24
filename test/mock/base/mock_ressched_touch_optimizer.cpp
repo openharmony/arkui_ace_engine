@@ -17,6 +17,15 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 
 namespace OHOS::Ace {
+
+namespace {
+    // Reset info enum for RVS point reset
+    enum RVS_RESET_INFO : int32_t {
+        RVS_RESET_ALL = 0,     // Reset all data
+        RVS_RESET_CUR_ID = 1,  // Reset current ID data only
+    };
+}
+
 ResSchedTouchOptimizer::ResSchedTouchOptimizer()
 {
 }
@@ -115,5 +124,6 @@ void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
     vsyncFlushed_ = false;
     isTpFlushFrameDisplayPeriod_ = false;
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
 }
 } // namespace OHOS::Ace

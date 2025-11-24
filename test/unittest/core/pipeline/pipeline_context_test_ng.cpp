@@ -2707,7 +2707,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
      */
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
-    
+    context_->touchOptimizer_->rvsSignalEnable_ = true;
     // 测试FlushVsync中touchOptimizer_存在的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     
