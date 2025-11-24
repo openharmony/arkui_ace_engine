@@ -44,6 +44,8 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
+import { hookCustomPropertyImpl } from '#handwritten';
+import { CustomProperty } from '#generated';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
 
@@ -577,7 +579,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
+        hookCustomPropertyImpl(this, name, value);
         return this
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {

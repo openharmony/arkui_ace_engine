@@ -14,6 +14,7 @@ import { default as window } from "@ohos.window";
 import { default as uiObserver } from "@ohos.arkui.observer";
 import { UIContext } from "@ohos.arkui.UIContext";
 import { AbilityInfo, WindowSize } from "bundleManager.AbilityInfo";
+import { ArkBaseNode } from '../typedNode/ArkBaseNode';
 import {
   ApplicationInfo,
   ModuleMetadata,
@@ -229,9 +230,9 @@ export class ElementIdToCustomProperties {
     static _elementIdToCustomProperties = new Map<number, Map<string, CustomProperty>>();
     static _commonMethodModifierMap = new Map<CommonMethodModifier, Map<string, CustomProperty>>();
 }
-export function hookCustomPropertyImpl(component: ArkCommonMethodComponent | ArkCommonMethodPeer, name: string, value: CustomProperty, modifier?: CommonMethodModifier | undefined): void {
+export function hookCustomPropertyImpl(component: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode, name: string, value: CustomProperty, modifier?: CommonMethodModifier | undefined): void {
     let commonMethodModifier: CommonMethodModifier;
-    if (component instanceof ArkCommonMethodComponent) {
+    if (component instanceof ArkCommonMethodComponent || component instanceof ArkBaseNode) {
         const nodeId = component.getPeer().getId();
         if (!ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
             ElementIdToCustomProperties._elementIdToCustomProperties.set(nodeId, new Map<string, CustomProperty>());
