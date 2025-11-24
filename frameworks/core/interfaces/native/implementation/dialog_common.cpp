@@ -38,6 +38,27 @@ void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAc
 } // namespace GeneratedModifier
 namespace Converter {
 template<>
+void AssignCast(std::optional<PopupLinearGradientProperties>& dst, const Ark_PopupBorderLinearGradient& src)
+{
+    PopupLinearGradientProperties popupBorderLinearGradient;
+    popupBorderLinearGradient.popupDirection = OHOS::Ace::GradientDirection::BOTTOM;
+    auto directionOpt = Converter::OptConvert<GradientDirection>(src.direction);
+    if (directionOpt) {
+        popupBorderLinearGradient.popupDirection = static_cast<OHOS::Ace::GradientDirection>(directionOpt.value());
+    }
+    for (int32_t i = 0; i < src.colors.length; i++) {
+        PopupGradientColor gradientColor;
+        auto color = OptConvert<Color>(src.colors.array[i].value0);
+        if (color) {
+            gradientColor.gradientColor = color.value();
+        }
+        gradientColor.gradientNumber = Convert<double>(src.colors.array[i].value1);
+        popupBorderLinearGradient.gradientColors.push_back(gradientColor);
+    }
+    dst = popupBorderLinearGradient;
+}
+
+template<>
 MenuPreviewAnimationOptions Convert(const Ark_AnimationNumberRange& options)
 {
     auto scaleFrom = Convert<float>(options.value0);
@@ -68,7 +89,9 @@ NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options)
         menuParam.hoverImageAnimationOptions = *hoverScale;
         menuParam.isShowHoverImage = true;
     }
+    auto hoverScaleInterruption = OptConvert<bool>(options.hoverScaleInterruption);
+    menuParam.hoverScaleInterruption = hoverScaleInterruption.value_or(false);
     return menuParam;
 }
-}
+} // namespace Converter
 } // namespace OHOS::Ace::NG

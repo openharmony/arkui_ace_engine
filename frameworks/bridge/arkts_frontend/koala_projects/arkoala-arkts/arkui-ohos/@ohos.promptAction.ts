@@ -145,6 +145,10 @@ declare namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: int32;
         immersiveMode?: ImmersiveMode;
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
     }
 
     export interface ActionMenuSuccessResponse {

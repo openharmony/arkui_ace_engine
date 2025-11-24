@@ -37,6 +37,15 @@ void MenuModelStatic::SetExpandingMode(FrameNode* frameNode, const std::optional
     }
 }
 
+void MenuModelStatic::SetExpandSymbol(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->SetExpandSymbol(expandSymbol);
+}
+
 void MenuModelStatic::SetItemDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider,
     const std::optional<DividerMode>& mode)
 {

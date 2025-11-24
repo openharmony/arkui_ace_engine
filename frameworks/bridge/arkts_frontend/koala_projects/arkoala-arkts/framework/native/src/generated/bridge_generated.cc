@@ -10278,6 +10278,19 @@ void impl_MenuAttribute_setSubMenuExpandingMode(Ark_NativePointer thisPtr, KSeri
         GetNodeModifiers()->getMenuModifier()->setSubMenuExpandingMode(self, static_cast<Opt_SubMenuExpandingMode*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(MenuAttribute_setSubMenuExpandingMode, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_MenuAttribute_setSubMenuExpandSymbol(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SymbolGlyphModifier valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = static_cast<Ark_SymbolGlyphModifier>(SymbolGlyphModifier_serializer::read(thisDeserializer));
+        }
+        Opt_SymbolGlyphModifier valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getMenuModifier()->setSubMenuExpandSymbol(self, static_cast<Opt_SymbolGlyphModifier*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MenuAttribute_setSubMenuExpandSymbol, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_MenuItem_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getMenuItemModifier()->construct(id, flags);
 }
@@ -28968,6 +28981,11 @@ KInteropReturnBuffer impl_CustomDialogController_getExternalOptions(Ark_NativePo
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(CustomDialogController_getExternalOptions, KInteropReturnBuffer, Ark_NativePointer)
+Ark_Int32 impl_CustomDialogController_getState(Ark_NativePointer thisPtr) {
+        Ark_CustomDialogController self = reinterpret_cast<Ark_CustomDialogController>(thisPtr);
+        return GetAccessors()->getCustomDialogControllerAccessor()->getState(self);
+}
+KOALA_INTEROP_DIRECT_1(CustomDialogController_getState, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_CustomDialogControllerExtender_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_CustomDialogControllerOptionsExtender valueValueTemp = CustomDialogControllerOptionsExtender_serializer::read(thisDeserializer);;
@@ -29001,6 +29019,11 @@ KInteropReturnBuffer impl_CustomDialogControllerExtender_getExternalOptions(Ark_
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(CustomDialogControllerExtender_getExternalOptions, KInteropReturnBuffer, Ark_NativePointer)
+Ark_Int32 impl_CustomDialogControllerExtender_getState(Ark_NativePointer thisPtr) {
+        Ark_CustomDialogControllerExtender self = reinterpret_cast<Ark_CustomDialogControllerExtender>(thisPtr);
+        return GetAccessors()->getCustomDialogControllerExtenderAccessor()->getState(self);
+}
+KOALA_INTEROP_DIRECT_1(CustomDialogControllerExtender_getState, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_CustomSpan_construct() {
         return GetAccessors()->getCustomSpanAccessor()->construct();
 }

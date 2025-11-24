@@ -92,6 +92,7 @@ constexpr double CONTRAST_MIN = 0.0;
 constexpr double SATURATE_MIN = 0.0;
 constexpr double LIGHTUPEFFECT_MIN = 0.0;
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr uint32_t MENU_OUTLINE_COLOR = 0x19FFFFFF;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int NUM_3 = 3;
 constexpr int NUM_5 = 5;
@@ -467,6 +468,28 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
         popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
+    auto avoidTargetOpt = OptConvert<AvoidanceMode>(src.avoidTarget);
+    if (avoidTargetOpt.has_value()) {
+        popupParam->SetAvoidTarget(avoidTargetOpt.value());
+    }
+    auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
+    Validator::ValidateNonNegative(outlineWidthOpt);
+    if (outlineWidthOpt.has_value()) {
+        popupParam->SetOutlineWidth(outlineWidthOpt.value());
+    }
+    auto borderWidthOpt = Converter::OptConvert<CalcDimension>(src.borderWidth);
+    Validator::ValidateNonNegative(borderWidthOpt);
+    if (borderWidthOpt.has_value()) {
+        popupParam->SetInnerBorderWidth(borderWidthOpt.value());
+    }
+    auto outlineLinearGradientOpt = Converter::OptConvert<PopupLinearGradientProperties>(src.outlineLinearGradient);
+    if (outlineLinearGradientOpt.has_value()) {
+        popupParam->SetOutlineLinearGradient(outlineLinearGradientOpt.value());
+    }
+    auto borderLinearGradientOpt = Converter::OptConvert<PopupLinearGradientProperties>(src.borderLinearGradient);
+    if (borderLinearGradientOpt.has_value()) {
+        popupParam->SetInnerBorderLinearGradient(borderLinearGradientOpt.value());
+    }
 };
 
 auto g_bindMenuOptionsParamCallbacks = [](
@@ -483,7 +506,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (onDisappearValue) {
         auto onDisappear = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
@@ -499,9 +522,41 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (aboutToDisAppearValue) {
         auto aboutToDisappear = [arkCallback = CallbackHelper(aboutToDisAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.aboutToDisappear = std::move(aboutToDisappear);
+    }
+    auto onDidAppearValue = OptConvert<VoidCallback>(menuOptions.onDidAppear);
+    if (onDidAppearValue) {
+        auto onDidAppear = [arkCallback = CallbackHelper(onDidAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.InvokeSync();
+        };
+        menuParam.onDidAppear = std::move(onDidAppear);
+    }
+    auto onDidDisappearValue = OptConvert<VoidCallback>(menuOptions.onDidDisappear);
+    if (onDidDisappearValue) {
+        auto onDidDisappear = [arkCallback = CallbackHelper(onDidDisappearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.InvokeSync();
+        };
+        menuParam.onDidDisappear = std::move(onDidDisappear);
+    }
+    auto onWillAppearValue = OptConvert<VoidCallback>(menuOptions.onWillAppear);
+    if (onWillAppearValue) {
+        auto onWillAppear = [arkCallback = CallbackHelper(onWillAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.InvokeSync();
+        };
+        menuParam.onWillAppear = std::move(onWillAppear);
+    }
+    auto onWillDisappearValue = OptConvert<VoidCallback>(menuOptions.onWillDisappear);
+    if (onWillDisappearValue) {
+        auto onWillDisappear = [arkCallback = CallbackHelper(onWillDisappearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.InvokeSync();
+        };
+        menuParam.onWillDisappear = std::move(onWillDisappear);
     }
 };
 
@@ -522,6 +577,16 @@ auto g_parseLayoutRegionMargin = [](const auto& menuOptions, MenuParam& menuPara
     layoutRegionMargin->start = layoutRegionMargin->left;
     layoutRegionMargin->end = layoutRegionMargin->right;
     menuParam.layoutRegionMargin = layoutRegionMargin;
+};
+
+auto g_setMenuOutlineWidthMultiValued = [](auto& dimen, const auto& dimenOpt) {
+    CHECK_EQUAL_VOID(dimenOpt.has_value(), false);
+    auto dimenValue = dimenOpt.value();
+    CHECK_EQUAL_VOID(dimenValue.IsNonNegative(), false);
+    if (dimenValue.Unit() == DimensionUnit::PERCENT) {
+        dimenValue.Reset();
+    }
+    dimen = dimenValue;
 };
 
 auto g_bindMenuOptionsParam = [](
@@ -565,8 +630,76 @@ auto g_bindMenuOptionsParam = [](
     g_parseLayoutRegionMargin(menuOptions, menuParam);
     menuParam.hapticFeedbackMode =
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
-    menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
-    menuParam.outlineWidth = OptConvert<BorderWidthProperty>(menuOptions.outlineWidth);
+    Converter::VisitUnion(menuOptions.mask,
+        [&menuParam](const Ark_Boolean& mask) {
+            menuParam.maskEnable = OptConvert<bool>(mask);
+        },
+        [&menuParam](const Ark_MenuMaskType& mask) {
+            menuParam.maskEnable = true;
+            if (!menuParam.maskType.has_value()) {
+                menuParam.maskType.emplace();
+            }
+            menuParam.maskType.value().maskColor = OptConvert<Color>(mask.color);
+            menuParam.maskType.value().maskBackGroundBlurStyle = OptConvert<BlurStyle>(mask.backgroundBlurStyle);
+        },
+        []() {});
+    menuParam.modalMode = OptConvert<ModalMode>(menuOptions.modalMode);
+    auto anchorPositionOpt =
+        OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.anchorPosition);
+    if (anchorPositionOpt.has_value()) {
+        auto dx = anchorPositionOpt.value().first;
+        auto dy = anchorPositionOpt.value().second;
+        if (dx && dy) {
+            menuParam.anchorPosition = { dx.value().ConvertToPx(), dy.value().ConvertToPx() };
+        }
+        if (menuParam.anchorPosition.has_value()) {
+            if (LessNotEqual(menuParam.anchorPosition->GetX(), 0.0f) &&
+                LessNotEqual(menuParam.anchorPosition->GetY(), 0.0f)) {
+                menuParam.placement = Placement::BOTTOM_LEFT;
+                menuParam.anchorPosition.reset();
+            }
+        }
+    }
+    menuParam.previewScaleMode = OptConvert<PreviewScaleMode>(menuOptions.previewScaleMode);
+    menuParam.availableLayoutAreaMode = OptConvert<AvailableLayoutAreaMode>(menuOptions.availableLayoutArea);
+    BorderColorProperty outlineColor;
+    auto outlineColorOpt = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
+    if (outlineColorOpt.has_value()) {
+        outlineColor = outlineColorOpt.value();
+        if (outlineColor.multiValued) {
+            Color defaultColor = Color::TRANSPARENT;
+            outlineColor.leftColor = outlineColor.leftColor.value_or(defaultColor);
+            outlineColor.rightColor = outlineColor.rightColor.value_or(defaultColor);
+            outlineColor.topColor = outlineColor.topColor.value_or(defaultColor);
+            outlineColor.bottomColor = outlineColor.bottomColor.value_or(defaultColor);
+        }
+    } else {
+        auto defaultColor = Color(MENU_OUTLINE_COLOR);
+        outlineColor.SetColor(defaultColor);
+    }
+    menuParam.outlineColor = outlineColor;
+    BorderWidthProperty outlineWidth;
+    Dimension defaultOutlineWidth = Dimension { -1 };
+    auto outlineWidthOpt = OptConvert<BorderWidthProperty>(menuOptions.outlineWidth);
+    if (outlineWidthOpt.has_value()) {
+        auto outlineWidthValue = outlineWidthOpt.value();
+        if (outlineWidthValue.multiValued) {
+            g_setMenuOutlineWidthMultiValued(outlineWidth.leftDimen, outlineWidthValue.leftDimen);
+            g_setMenuOutlineWidthMultiValued(outlineWidth.rightDimen, outlineWidthValue.rightDimen);
+            g_setMenuOutlineWidthMultiValued(outlineWidth.topDimen, outlineWidthValue.topDimen);
+            g_setMenuOutlineWidthMultiValued(outlineWidth.bottomDimen, outlineWidthValue.bottomDimen);
+        } else {
+            auto borderWidth = outlineWidthValue.topDimen.value_or(defaultOutlineWidth);
+            if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
+                outlineWidth.SetBorderWidth(defaultOutlineWidth);
+            } else {
+                outlineWidth.SetBorderWidth(borderWidth);
+            }
+        }
+    } else {
+        outlineWidth.SetBorderWidth(defaultOutlineWidth);
+    }
+    menuParam.outlineWidth = outlineWidth;
     menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
     menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
 };
@@ -589,6 +722,7 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
         menuParam.previewTransition = optParam->previewTransition;
         menuParam.hoverImageAnimationOptions = optParam->hoverImageAnimationOptions;
         menuParam.isShowHoverImage = optParam->isShowHoverImage;
+        menuParam.hoverScaleInterruption = optParam->hoverScaleInterruption;
     }
 };
 

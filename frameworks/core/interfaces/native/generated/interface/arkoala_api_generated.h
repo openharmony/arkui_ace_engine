@@ -2223,6 +2223,8 @@ typedef struct Ark_PolylineOptions Ark_PolylineOptions;
 typedef struct Opt_PolylineOptions Opt_PolylineOptions;
 typedef struct Ark_PopInfo Ark_PopInfo;
 typedef struct Opt_PopInfo Opt_PopInfo;
+typedef struct Ark_PopupBorderLinearGradient Ark_PopupBorderLinearGradient;
+typedef struct Opt_PopupBorderLinearGradient Opt_PopupBorderLinearGradient;
 typedef struct Ark_PopupButton Ark_PopupButton;
 typedef struct Opt_PopupButton Opt_PopupButton;
 typedef struct Ark_PositionLengthMetricsInner Ark_PositionLengthMetricsInner;
@@ -2716,6 +2718,8 @@ typedef struct Ark_MenuItemGroupOptions Ark_MenuItemGroupOptions;
 typedef struct Opt_MenuItemGroupOptions Opt_MenuItemGroupOptions;
 typedef struct Ark_MenuItemOptions Ark_MenuItemOptions;
 typedef struct Opt_MenuItemOptions Opt_MenuItemOptions;
+typedef struct Ark_MenuMaskType Ark_MenuMaskType;
+typedef struct Opt_MenuMaskType Opt_MenuMaskType;
 typedef struct Ark_NativeXComponentParameters Ark_NativeXComponentParameters;
 typedef struct Opt_NativeXComponentParameters Opt_NativeXComponentParameters;
 typedef struct Ark_NavDestinationCommonTitle Ark_NavDestinationCommonTitle;
@@ -2861,6 +2865,8 @@ typedef struct Ark_UnderlineColor Ark_UnderlineColor;
 typedef struct Opt_UnderlineColor Opt_UnderlineColor;
 typedef struct Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions;
 typedef struct Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions;
+typedef struct Ark_Union_Boolean_MenuMaskType Ark_Union_Boolean_MenuMaskType;
+typedef struct Opt_Union_Boolean_MenuMaskType Opt_Union_Boolean_MenuMaskType;
 typedef struct Ark_Union_Boolean_PopupMaskType Ark_Union_Boolean_PopupMaskType;
 typedef struct Opt_Union_Boolean_PopupMaskType Opt_Union_Boolean_PopupMaskType;
 typedef struct Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext;
@@ -3673,6 +3679,13 @@ typedef struct Opt_AutoCapitalizationMode {
     Ark_Tag tag;
     Ark_AutoCapitalizationMode value;
 } Opt_AutoCapitalizationMode;
+typedef enum Ark_AvailableLayoutArea {
+    ARK_AVAILABLE_LAYOUT_AREA_SAFE_AREA = 0,
+} Ark_AvailableLayoutArea;
+typedef struct Opt_AvailableLayoutArea {
+    Ark_Tag tag;
+    Ark_AvailableLayoutArea value;
+} Opt_AvailableLayoutArea;
 typedef enum Ark_AvoidanceMode {
     ARK_AVOIDANCE_MODE_COVER_TARGET = 0,
     ARK_AVOIDANCE_MODE_AVOID_AROUND_TARGET = 1,
@@ -5399,6 +5412,15 @@ typedef struct Opt_MixedMode {
     Ark_Tag tag;
     Ark_MixedMode value;
 } Opt_MixedMode;
+typedef enum Ark_ModalMode {
+    ARK_MODAL_MODE_AUTO = 0,
+    ARK_MODAL_MODE_NONE = 1,
+    ARK_MODAL_MODE_TARGET_WINDOW = 2,
+} Ark_ModalMode;
+typedef struct Opt_ModalMode {
+    Ark_Tag tag;
+    Ark_ModalMode value;
+} Opt_ModalMode;
 typedef enum Ark_ModalTransition {
     ARK_MODAL_TRANSITION_DEFAULT = 0,
     ARK_MODAL_TRANSITION_NONE = 1,
@@ -5820,6 +5842,15 @@ typedef struct Opt_PreDragStatus {
     Ark_Tag tag;
     Ark_PreDragStatus value;
 } Opt_PreDragStatus;
+typedef enum Ark_PreviewScaleMode {
+    ARK_PREVIEW_SCALE_MODE_AUTO = 0,
+    ARK_PREVIEW_SCALE_MODE_CONSTANT = 1,
+    ARK_PREVIEW_SCALE_MODE_MAINTAIN = 2,
+} Ark_PreviewScaleMode;
+typedef struct Opt_PreviewScaleMode {
+    Ark_Tag tag;
+    Ark_PreviewScaleMode value;
+} Opt_PreviewScaleMode;
 typedef enum Ark_ProgressStatus {
     ARK_PROGRESS_STATUS_LOADING = 0,
     ARK_PROGRESS_STATUS_PROGRESSING = 1,
@@ -5850,6 +5881,18 @@ typedef struct Opt_ProgressType {
     Ark_Tag tag;
     Ark_ProgressType value;
 } Opt_ProgressType;
+typedef enum Ark_promptAction_CommonState {
+    ARK_PROMPT_ACTION_COMMON_STATE_UNINITIALIZED = 0,
+    ARK_PROMPT_ACTION_COMMON_STATE_INITIALIZED = 1,
+    ARK_PROMPT_ACTION_COMMON_STATE_APPEARING = 2,
+    ARK_PROMPT_ACTION_COMMON_STATE_APPEARED = 3,
+    ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARING = 4,
+    ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARED = 5,
+} Ark_promptAction_CommonState;
+typedef struct Opt_promptAction_CommonState {
+    Ark_Tag tag;
+    Ark_promptAction_CommonState value;
+} Opt_promptAction_CommonState;
 typedef enum Ark_ProtectedResourceType {
     ARK_PROTECTED_RESOURCE_TYPE_MIDI_SYSEX,
     ARK_PROTECTED_RESOURCE_TYPE_VIDEO_CAPTURE,
@@ -15105,6 +15148,15 @@ typedef struct Opt_PopInfo {
     Ark_Tag tag;
     Ark_PopInfo value;
 } Opt_PopInfo;
+typedef struct Ark_PopupBorderLinearGradient {
+    /* kind: Interface */
+    Opt_GradientDirection direction;
+    Array_Tuple_ResourceColor_F64 colors;
+} Ark_PopupBorderLinearGradient;
+typedef struct Opt_PopupBorderLinearGradient {
+    Ark_Tag tag;
+    Ark_PopupBorderLinearGradient value;
+} Opt_PopupBorderLinearGradient;
 typedef struct Ark_PopupButton {
     /* kind: Interface */
     Ark_String value;
@@ -17289,6 +17341,7 @@ typedef struct Ark_ContextMenuAnimationOptions {
     Opt_AnimationNumberRange scale;
     Opt_TransitionEffect transition;
     Opt_AnimationNumberRange hoverScale;
+    Opt_Boolean hoverScaleInterruption;
 } Ark_ContextMenuAnimationOptions;
 typedef struct Opt_ContextMenuAnimationOptions {
     Ark_Tag tag;
@@ -17716,6 +17769,15 @@ typedef struct Opt_MenuItemOptions {
     Ark_Tag tag;
     Ark_MenuItemOptions value;
 } Opt_MenuItemOptions;
+typedef struct Ark_MenuMaskType {
+    /* kind: Interface */
+    Opt_ResourceColor color;
+    Opt_BlurStyle backgroundBlurStyle;
+} Ark_MenuMaskType;
+typedef struct Opt_MenuMaskType {
+    Ark_Tag tag;
+    Ark_MenuMaskType value;
+} Opt_MenuMaskType;
 typedef struct Ark_NativeXComponentParameters {
     /* kind: Interface */
     Ark_XComponentType type;
@@ -18393,6 +18455,18 @@ typedef struct Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions {
     Ark_Tag tag;
     Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions value;
 } Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions;
+typedef struct Ark_Union_Boolean_MenuMaskType {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Boolean value0;
+        Ark_MenuMaskType value1;
+    };
+} Ark_Union_Boolean_MenuMaskType;
+typedef struct Opt_Union_Boolean_MenuMaskType {
+    Ark_Tag tag;
+    Ark_Union_Boolean_MenuMaskType value;
+} Opt_Union_Boolean_MenuMaskType;
 typedef struct Ark_Union_Boolean_PopupMaskType {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -20351,9 +20425,18 @@ typedef struct Ark_ContextMenuOptions {
     Opt_BackgroundEffectOptions backgroundEffect;
     Opt_TransitionEffect transition;
     Opt_Boolean enableHoverMode;
+    Opt_HapticFeedbackMode hapticFeedbackMode;
     Opt_Union_ResourceColor_EdgeColors outlineColor;
     Opt_Union_Dimension_EdgeOutlineWidths outlineWidth;
-    Opt_HapticFeedbackMode hapticFeedbackMode;
+    Opt_Union_Boolean_MenuMaskType mask;
+    Opt_ModalMode modalMode;
+    Opt_VoidCallback onDidAppear;
+    Opt_VoidCallback onDidDisappear;
+    Opt_VoidCallback onWillAppear;
+    Opt_VoidCallback onWillDisappear;
+    Opt_PreviewScaleMode previewScaleMode;
+    Opt_AvailableLayoutArea availableLayoutArea;
+    Opt_Position anchorPosition;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -20475,6 +20558,11 @@ typedef struct Ark_CustomPopupOptions {
     Opt_Boolean enableHoverMode;
     Opt_Boolean followTransformOfTarget;
     Opt_KeyboardAvoidMode keyboardAvoidMode;
+    Opt_AvoidanceMode avoidTarget;
+    Opt_Dimension outlineWidth;
+    Opt_Dimension borderWidth;
+    Opt_PopupBorderLinearGradient outlineLinearGradient;
+    Opt_PopupBorderLinearGradient borderLinearGradient;
 } Ark_CustomPopupOptions;
 typedef struct Opt_CustomPopupOptions {
     Ark_Tag tag;
@@ -20586,9 +20674,18 @@ typedef struct Ark_MenuOptions {
     Opt_BackgroundEffectOptions backgroundEffect;
     Opt_TransitionEffect transition;
     Opt_Boolean enableHoverMode;
+    Opt_HapticFeedbackMode hapticFeedbackMode;
     Opt_Union_ResourceColor_EdgeColors outlineColor;
     Opt_Union_Dimension_EdgeOutlineWidths outlineWidth;
-    Opt_HapticFeedbackMode hapticFeedbackMode;
+    Opt_Union_Boolean_MenuMaskType mask;
+    Opt_ModalMode modalMode;
+    Opt_VoidCallback onDidAppear;
+    Opt_VoidCallback onDidDisappear;
+    Opt_VoidCallback onWillAppear;
+    Opt_VoidCallback onWillDisappear;
+    Opt_PreviewScaleMode previewScaleMode;
+    Opt_AvailableLayoutArea availableLayoutArea;
+    Opt_Position anchorPosition;
     Opt_ResourceStr title;
     Opt_Boolean showInSubWindow;
 } Ark_MenuOptions;
@@ -20744,6 +20841,11 @@ typedef struct Ark_PopupCommonOptions {
     Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
     Opt_Boolean enableHoverMode;
     Opt_Boolean followTransformOfTarget;
+    Opt_AvoidanceMode avoidTarget;
+    Opt_Dimension outlineWidth;
+    Opt_Dimension borderWidth;
+    Opt_PopupBorderLinearGradient outlineLinearGradient;
+    Opt_PopupBorderLinearGradient borderLinearGradient;
 } Ark_PopupCommonOptions;
 typedef struct Opt_PopupCommonOptions {
     Ark_Tag tag;
@@ -21238,6 +21340,11 @@ typedef struct Ark_PopupOptions {
     Opt_Boolean enableHoverMode;
     Opt_Boolean followTransformOfTarget;
     Opt_KeyboardAvoidMode keyboardAvoidMode;
+    Opt_AvoidanceMode avoidTarget;
+    Opt_Dimension outlineWidth;
+    Opt_Dimension borderWidth;
+    Opt_PopupBorderLinearGradient outlineLinearGradient;
+    Opt_PopupBorderLinearGradient borderLinearGradient;
 } Ark_PopupOptions;
 typedef struct Opt_PopupOptions {
     Ark_Tag tag;
@@ -23052,6 +23159,8 @@ typedef struct GENERATED_ArkUIMenuModifier {
                                     const Opt_DividerStyleOptions* value);
     void (*setSubMenuExpandingMode)(Ark_NativePointer node,
                                     const Opt_SubMenuExpandingMode* value);
+    void (*setSubMenuExpandSymbol)(Ark_NativePointer node,
+                                   const Opt_SymbolGlyphModifier* value);
 } GENERATED_ArkUIMenuModifier;
 
 typedef struct GENERATED_ArkUIMenuItemModifier {
@@ -26007,6 +26116,7 @@ typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
     void (*open)(Ark_CustomDialogController peer);
     void (*close)(Ark_CustomDialogController peer);
     Ark_CustomDialogControllerExternalOptions (*getExternalOptions)(Ark_CustomDialogController peer);
+    Ark_promptAction_CommonState (*getState)(Ark_CustomDialogController peer);
 } GENERATED_ArkUICustomDialogControllerAccessor;
 
 typedef struct GENERATED_ArkUICustomDialogControllerExtenderAccessor {
@@ -26018,6 +26128,7 @@ typedef struct GENERATED_ArkUICustomDialogControllerExtenderAccessor {
     void (*setOwnerView)(Ark_CustomDialogControllerExtender peer,
                          Ark_NativePointer content);
     Ark_CustomDialogControllerExternalOptionsExtender (*getExternalOptions)(Ark_CustomDialogControllerExtender peer);
+    Ark_promptAction_CommonState (*getState)(Ark_CustomDialogControllerExtender peer);
 } GENERATED_ArkUICustomDialogControllerExtenderAccessor;
 
 typedef struct GENERATED_ArkUICustomSpanAccessor {

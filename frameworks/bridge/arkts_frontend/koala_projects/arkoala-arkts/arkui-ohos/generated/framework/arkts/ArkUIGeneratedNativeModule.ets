@@ -1243,6 +1243,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _MenuAttribute_setSubMenuExpandingMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _MenuAttribute_setSubMenuExpandSymbol(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _MenuItem_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _MenuItemInterface_setMenuItemOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3844,6 +3846,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _CustomDialogController_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
+    native static _CustomDialogController_getState(ptr: KPointer): int32
+    @ani.unsafe.Direct
     native static _CustomDialogControllerExtender_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _CustomDialogControllerExtender_getFinalizer(): KPointer
@@ -3855,6 +3859,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogControllerExtender_setOwnerView(ptr: KPointer, content: KPointer): void
     @ani.unsafe.Quick
     native static _CustomDialogControllerExtender_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _CustomDialogControllerExtender_getState(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _CustomSpan_construct(): KPointer
     @ani.unsafe.Direct

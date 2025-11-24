@@ -217,8 +217,8 @@ void CustomDialogControllerPeerImpl::SetBuilder(
             auto builderFunc = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            CustomDialogControllerModelStatic::SetOpenDialog(
-                controller->dialogProperties_, controller->dialogs_, weakPeer, std::move(builderFunc));
+            CustomDialogControllerModelStatic::SetOpenDialog(controller->dialogProperties_, controller->dialogs_,
+                weakPeer, std::move(builderFunc), controller->hasBind_);
         }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
     };
 }
@@ -241,8 +241,8 @@ void CustomDialogControllerPeerImpl::SetBuilderExtender(
             auto builderFunc = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            CustomDialogControllerModelStatic::SetOpenDialog(
-                controller->dialogProperties_, controller->dialogs_, weakPeer, std::move(builderFunc));
+            CustomDialogControllerModelStatic::SetOpenDialog(controller->dialogProperties_, controller->dialogs_,
+                weakPeer, std::move(builderFunc), controller->hasBind_);
         }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
     };
 }
@@ -616,6 +616,11 @@ void CustomDialogControllerPeerImpl::CloseDialog()
 {
     ContainerScope scope(instanceId_);
     CustomDialogControllerModelStatic::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
+}
+
+PromptActionCommonState CustomDialogControllerPeerImpl::GetState()
+{
+    return CustomDialogControllerModelStatic::GetState(dialogs_, hasBind_);
 }
 
 RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const
