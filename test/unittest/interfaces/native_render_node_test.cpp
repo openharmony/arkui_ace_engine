@@ -1593,4 +1593,20 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest009, TestSize.Level1)
     result = OH_ArkUI_NodeUtils_MoveTo(customNode, parentNode, -1);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NODE_IS_ADOPTED);
 }
+
+/**
+ * @tc.name: NativeRenderNodeAdopterTest010
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest010, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    ArkUI_RenderNodeHandle renderNode;
+    auto result = OH_ArkUI_RenderNodeUtils_GetRenderNode(rootCustomNode, &renderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
+}
 } // namespace OHOS::Ace
