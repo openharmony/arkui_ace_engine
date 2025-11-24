@@ -574,12 +574,12 @@ export class FrameNode implements MaterializedBase {
         let errorMessage: string = 'The FrameNode cannot be set whether to support cross-language common attribute setting.';
         const error = Error(errorMessage);
         if (!this.isModifiable()) {
-            throw new BusinessError(100021, error);
+            throw new BusinessError(100022, error);
         }
         let setting: boolean = options.attributeSetting ? options.attributeSetting! : false;
         let isSupport = FrameNodeExtender.setCrossLanguageOptions(this, setting);
         if (!isSupport) {
-            throw new BusinessError(100021, error);
+            throw new BusinessError(100022, error);
         }
     }
     public getCrossLanguageOptions(): CrossLanguageOptions {
