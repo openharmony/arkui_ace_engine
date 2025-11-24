@@ -24,7 +24,7 @@ import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hook
 import { ModifierStateManager } from '../CommonModifier';
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
+import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -3767,6 +3767,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAlignSelf(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setLayoutGravityAttribute(value: LocalizedAlignment | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as LocalizedAlignment)
+            thisSerializer.writeInt32(valueTmpValue.getOrdinal())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setLayoutGravity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDisplayPriorityAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3803,12 +3815,20 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAlignAttribute(value: Alignment | undefined): void {
+    setAlignAttribute(value: Alignment | LocalizedAlignment | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as Alignment)
-            thisSerializer.writeInt32(valueTmpValue.valueOf())
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Alignment) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Alignment
+                thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
+            } else if (valueTmpValue instanceof LocalizedAlignment) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as LocalizedAlignment
+                thisSerializer.writeInt32(valueTmpValueForIdx1.getOrdinal())
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7488,6 +7508,9 @@ export interface CommonMethod {
     alignSelf(value: ItemAlign | undefined): this {
         throw new Error("Unimplemented method alignSelf")
     }
+    layoutGravity(value: LocalizedAlignment | undefined): this {
+        throw new Error("Unimplemented method layoutGravity")
+    }
     displayPriority(value: number | undefined): this {
         throw new Error("Unimplemented method displayPriority")
     }
@@ -7497,7 +7520,7 @@ export interface CommonMethod {
     direction(value: Direction | undefined): this {
         throw new Error("Unimplemented method direction")
     }
-    align(value: Alignment | undefined): this {
+    align(value: Alignment | LocalizedAlignment | undefined): this {
         throw new Error("Unimplemented method align")
     }
     position(value: Position | Edges | LocalizedEdges | undefined): this {
@@ -7937,10 +7960,11 @@ export class ArkCommonMethodStyle implements CommonMethod {
     flexShrink_value?: number | undefined
     flexBasis_value?: number | string | undefined
     alignSelf_value?: ItemAlign | undefined
+    layoutGravity_value?: LocalizedAlignment | undefined
     displayPriority_value?: number | undefined
     zIndex_value?: int32 | undefined
     direction_value?: Direction | undefined
-    align_value?: Alignment | undefined
+    align_value?: Alignment | LocalizedAlignment | undefined
     position_value?: Position | Edges | LocalizedEdges | undefined
     markAnchor_value?: Position | LocalizedPosition | undefined
     offset_value?: Position | Edges | LocalizedEdges | undefined
@@ -8288,6 +8312,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     alignSelf(value: ItemAlign | undefined): this {
         return this
     }
+    layoutGravity(value: LocalizedAlignment | undefined): this {
+        return this
+    }
     displayPriority(value: number | undefined): this {
         return this
     }
@@ -8297,7 +8324,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     direction(value: Direction | undefined): this {
         return this
     }
-    align(value: Alignment | undefined): this {
+    align(value: Alignment | LocalizedAlignment | undefined): this {
         return this
     }
     position(value: Position | Edges | LocalizedEdges | undefined): this {
@@ -9762,6 +9789,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public layoutGravity(value: LocalizedAlignment | undefined): this {
+        if (this.checkPriority("layoutGravity")) {
+            const value_casted = value as (LocalizedAlignment | undefined)
+            this.getPeer()?.setLayoutGravityAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public displayPriority(value: number | undefined): this {
         if (this.checkPriority("displayPriority")) {
             const value_casted = value as (number | undefined)
@@ -9786,9 +9821,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public align(value: Alignment | undefined): this {
+    public align(value: Alignment | LocalizedAlignment | undefined): this {
         if (this.checkPriority("align")) {
-            const value_casted = value as (Alignment | undefined)
+            const value_casted = value as (Alignment | LocalizedAlignment | undefined)
             this.getPeer()?.setAlignAttribute(value_casted)
             return this
         }

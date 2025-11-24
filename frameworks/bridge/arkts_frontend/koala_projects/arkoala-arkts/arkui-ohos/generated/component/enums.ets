@@ -248,6 +248,17 @@ export enum Alignment {
     BOTTOM_END = 8,
     BottomEnd = 8
 }
+export enum LocalizedAlignment {
+    TOP_START = "'top_start'",
+    TOP = "'top'",
+    TOP_END = "'top_end'",
+    START = "'start'",
+    CENTER = "'center'",
+    END = "'end'",
+    BOTTOM_START = "'bottom_start'",
+    BOTTOM = "'bottom'",
+    BOTTOM_END = "'bottom_end'"
+}
 export enum TransitionType {
     ALL = 0,
     All = 0,

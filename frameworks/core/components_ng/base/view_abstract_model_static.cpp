@@ -1045,6 +1045,12 @@ void ViewAbstractModelStatic::SetAlignSelf(FrameNode* frameNode, FlexAlign value
     ViewAbstract::SetAlignSelf(frameNode, value);
 }
 
+void ViewAbstractModelStatic::SetLayoutGravity(FrameNode* frameNode, Alignment value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutGravity(frameNode, value);
+}
+
 void ViewAbstractModelStatic::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
 {
     CHECK_NULL_VOID(frameNode);

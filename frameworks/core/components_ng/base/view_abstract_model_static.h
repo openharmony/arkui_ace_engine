@@ -278,6 +278,7 @@ public:
     static void ResetAspectRatio(FrameNode* frameNode);
     static void SetLayoutWeight(FrameNode* frameNode, float value);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
+    static void SetLayoutGravity(FrameNode* frameNode, Alignment value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void SetBorderStyle(FrameNode *frameNode, const BorderStyleProperty& value);
     static void SetBorderWidth(FrameNode *frameNode, const BorderWidthProperty& value);
