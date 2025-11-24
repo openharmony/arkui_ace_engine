@@ -4041,6 +4041,7 @@ let ListItemGroupArea;
 
 let DragResult;
 (function (DragResult) {
+  DragResult[DragResult.UNKNOWN = -1] = 'UNKNOWN';
   DragResult[DragResult.DRAG_SUCCESSFUL = 0] = 'DRAG_SUCCESSFUL';
   DragResult[DragResult.DRAG_FAILED = 1] = 'DRAG_FAILED';
   DragResult[DragResult.DRAG_CANCELED = 2] = 'DRAG_CANCELED';
