@@ -3148,7 +3148,7 @@ void SetNextFocusImpl(Ark_NativePointer node,
     }
     if (setFocusData->forward.has_value() && setFocusData->forward.value().c_str() != NULL
         && setFocusData->forward.value().c_str()[0] != 0) {
-        ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, setFocusData->forward.value());            
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, setFocusData->forward.value());
     }
     if (setFocusData->backward.has_value() && setFocusData->backward.value().c_str() != NULL
         && setFocusData->backward.value().c_str()[0] != 0) {
