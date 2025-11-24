@@ -649,12 +649,19 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalHandleFocusMoveSearchResul
     finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode1, aceResult, info);
     ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL);
 
-    // aceResult FIND_FAIL, finalNode nullptr
+    // aceResult FIND_FAIL_LOST_NODE, finalNode nullptr
     std::shared_ptr<FocusRulesCheckNode> targetNode2;
     aceResult = AceFocusMoveResult::FIND_FAIL_LOST_NODE;
     strategy.updateElementInfoResult_ = false;
-    finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode1, aceResult, info);
+    finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode2, aceResult, info);
     ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
+
+    // aceResult FIND_FAIL, finalNode nullptr
+    std::shared_ptr<FocusRulesCheckNode> targetNode3;
+    aceResult = AceFocusMoveResult::FIND_FAIL_IN_ROOT_TYPE;
+    strategy.updateElementInfoResult_ = false;
+    finalResult = strategy.HandleFocusMoveSearchResult(param, targetNode3, aceResult, info);
+    ASSERT_EQ(finalResult, FocusMoveResultType::SEARCH_FAIL);
 }
 
 /**
