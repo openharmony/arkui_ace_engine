@@ -33134,11 +33134,20 @@ Ark_NativePointer impl_OffscreenCanvas_getFinalizer() {
         return GetAccessors()->getOffscreenCanvasAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(OffscreenCanvas_getFinalizer, Ark_NativePointer)
-Ark_NativePointer impl_OffscreenCanvas_transferToImageBitmap(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_OffscreenCanvas_transferToImageBitmap(Ark_NativePointer thisPtr) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
-        return GetAccessors()->getOffscreenCanvasAccessor()->transferToImageBitmap(self);
+        const auto &retValue = GetAccessors()->getOffscreenCanvasAccessor()->transferToImageBitmap(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            ImageBitmap_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(OffscreenCanvas_transferToImageBitmap, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(OffscreenCanvas_transferToImageBitmap, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_OffscreenCanvas_getContext2d(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -33215,11 +33224,20 @@ Ark_String impl_OffscreenCanvasRenderingContext2D_toDataURL(Ark_NativePointer th
         return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->toDataURL(self, static_cast<Opt_String*>(&typeValueTemp), static_cast<Opt_Number*>(&qualityValueTemp));
 }
 KOALA_INTEROP_3(OffscreenCanvasRenderingContext2D_toDataURL, KStringPtr, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_transferToImageBitmap(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_OffscreenCanvasRenderingContext2D_transferToImageBitmap(Ark_NativePointer thisPtr) {
         Ark_OffscreenCanvasRenderingContext2D self = reinterpret_cast<Ark_OffscreenCanvasRenderingContext2D>(thisPtr);
-        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->transferToImageBitmap(self);
+        const auto &retValue = GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->transferToImageBitmap(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            ImageBitmap_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(OffscreenCanvasRenderingContext2D_transferToImageBitmap, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(OffscreenCanvasRenderingContext2D_transferToImageBitmap, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_PanGestureEvent_construct() {
         return GetAccessors()->getPanGestureEventAccessor()->construct();
 }

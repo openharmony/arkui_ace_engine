@@ -1668,6 +1668,26 @@ HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setStrokeStyleNumberTest, TestSiz
 }
 
 /**
+ * @tc.name: setStrokeStyleColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setStrokeStyle, nullptr);
+    for (const auto& [actual, expected] : STYLE_COLOR_TEST_PLAN) {
+        Ace::Color target;
+        bool targetFlag = false;
+        EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _))
+            .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
+        auto style = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_Color>(actual);
+        accessor_->setStrokeStyle(peer_, &style);
+        EXPECT_EQ(target, expected);
+        EXPECT_TRUE(targetFlag);
+    }
+}
+
+/**
  * @tc.name: setStrokeStyleGradientTest
  * @tc.desc:
  * @tc.type: FUNC

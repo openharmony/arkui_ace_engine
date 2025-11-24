@@ -51,11 +51,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvas peer)
+Opt_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvas peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
-    return peer->TransferToImageBitmap(bitmap);
+    auto invalid = Converter::ArkValue<Opt_ImageBitmap>();
+    CHECK_NULL_RETURN(peer, invalid);
+    auto bitmap = peer->TransferToImageBitmap();
+    CHECK_NULL_RETURN(bitmap, invalid);
+    return Converter::ArkValue<Opt_ImageBitmap>(bitmap);
 }
 Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
                                                        const Opt_RenderingContextSettings* options)

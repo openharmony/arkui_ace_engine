@@ -4948,8 +4948,8 @@ export class ArkUIGeneratedNativeModule {
     native static _OffscreenCanvas_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _OffscreenCanvas_transferToImageBitmap(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _OffscreenCanvas_transferToImageBitmap(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getContext2d(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -4966,8 +4966,8 @@ export class ArkUIGeneratedNativeModule {
     native static _OffscreenCanvasRenderingContext2D_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _OffscreenCanvasRenderingContext2D_toDataURL(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): string
-    @ani.unsafe.Direct
-    native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _PanGestureEvent_construct(): KPointer
     @ani.unsafe.Direct

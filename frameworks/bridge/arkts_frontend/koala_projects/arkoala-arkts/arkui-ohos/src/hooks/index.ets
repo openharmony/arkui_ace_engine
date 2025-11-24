@@ -403,17 +403,9 @@ export function convertDimensionStrToNumber(value: string): number {
     }
     let numericValue : number = 0
     let unitPart : string = ''
-    if (match.length > 1) {
+    if (match.length > 1 && match[1] !== undefined) {
         numericValue = Number.parseFloat(match[1] as string);
-    }
-    if (match.length > 2) {
-        unitPart = match[2] as string;
-    }
-    if (unitPart === 'px' || !unitPart) {
-        return numericValue;
-    }
-    if (unitPart === 'vp') {
-        return numericValue * getSystemDensity();
+        return numericValue
     }
     return 0;
 }
