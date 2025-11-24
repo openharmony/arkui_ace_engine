@@ -2495,7 +2495,7 @@ void SetBorderImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
-        ViewAbstract::SetBorderWidth(frameNode, BorderWidthProperty {});
+        ViewAbstract::SetBorderWidth(frameNode, Dimension(-1));
         ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
         ViewAbstract::SetBorderRadius(frameNode, BorderRadiusProperty {});
         ViewAbstract::SetDashGap(frameNode, Dimension(-1));
@@ -2572,7 +2572,7 @@ void SetBorderWidthImpl(Ark_NativePointer node,
         FixBorderWidthProperty(width.value(), true, true, true);
         ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
     } else {
-        ViewAbstract::SetBorderWidth(frameNode, BorderWidthProperty {});
+        ViewAbstract::SetBorderWidth(frameNode, Dimension(-1));
     }
 }
 void SetBorderColorImpl(Ark_NativePointer node,
