@@ -1686,19 +1686,19 @@ class FrameNode extends Disposable {
     }
     adoptChild(child) {
         if (child === undefined || child === null) {
-            return;
+            throw { message: "The parameter 'child' is invalid: the child node is undefined or null.", code: 100025 };
         }
         if (this.isDisposed()) {
             throw { message: 'The current node has been disposed.', code: 100026 };
         }
-        if (!this.checkValid() || !this.isModifiable()) {
+        if (!this.isModifiable()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        if (!child.checkValid() || !child.isModifiable()) {
-            throw { message: 'The child node is not modifiable.', code: 100021 };
+        if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+            throw { message: "The parameter 'child' is invalid: the child node is not modifiable.", code: 100025 };
         }
         if (child.isDisposed()) {
-            throw { message: 'The child node has been disposed.', code: 100026 };
+            throw { message: "The parameter 'child' is invalid: the child node has been disposed.", code: 100025 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = getUINativeModule().frameNode.adoptChild(this.getNodePtr(), child.getNodePtr());
@@ -1710,19 +1710,19 @@ class FrameNode extends Disposable {
     }
     removeAdoptedChild(child) {
         if (child === undefined || child === null) {
-            return;
+            throw { message: "The parameter 'child' is invalid: the child node is undefined or null.", code: 100025 };
         }
         if (this.isDisposed()) {
             throw { message: 'The current node has been disposed.', code: 100026 };
         }
-        if (!this.checkValid() || !this.isModifiable()) {
+        if (!this.isModifiable()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        if (!child.checkValid() || !child.isModifiable()) {
-            throw { message: 'The child node is not modifiable.', code: 100021 };
+        if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+            throw { message: "The parameter 'child' is invalid: the child node is not modifiable.", code: 100025 };
         }
         if (child.isDisposed()) {
-            throw { message: 'The child node has been disposed.', code: 100026 };
+            throw { message: "The parameter 'child' is invalid: the child node has been disposed.", code: 100025 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = getUINativeModule().frameNode.removeAdoptedChild(this.getNodePtr(), child.getNodePtr());
@@ -3051,12 +3051,12 @@ class RenderNode extends Disposable {
         if (this.childrenList.findIndex(element => element === node) !== -1) {
             return;
         }
-        this.childrenList.push(node);
-        node.parentRenderNode = new WeakRef(this);
         let result = getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
             throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
         }
+        this.childrenList.push(node);
+        node.parentRenderNode = new WeakRef(this);
         getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
     }
     insertChildAfter(child, sibling) {
@@ -3067,23 +3067,24 @@ class RenderNode extends Disposable {
         if (indexOfNode !== -1) {
             return;
         }
-        child.parentRenderNode = new WeakRef(this);
         let indexOfSibling = this.childrenList.findIndex(element => element === sibling);
         if (indexOfSibling === -1) {
             sibling === null;
         }
         let result = 0;
+        let childrenListStartPosition = 0;
         if (sibling === undefined || sibling === null) {
-            this.childrenList.splice(0, 0, child);
             result = getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, null);
         }
         else {
-            this.childrenList.splice(indexOfSibling + 1, 0, child);
+            childrenListStartPosition = indexOfSibling + 1;
             result = getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
         }
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
             throw { message: "The parameter 'child' is invalid: the node has already been adopted.", code: 100025 };
         }
+        this.childrenList.splice(childrenListStartPosition, 0, child);
+        child.parentRenderNode = new WeakRef(this);
         getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
     }
     removeChild(node) {

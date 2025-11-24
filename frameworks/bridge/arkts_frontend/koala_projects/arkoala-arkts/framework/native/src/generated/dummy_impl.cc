@@ -30889,13 +30889,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Float64 MoveToImpl(Ark_FrameNode peer,
-                           Ark_FrameNode targetParent,
-                           const Ark_Number* index)
+    Ark_Int32 MoveToImpl(Ark_FrameNode peer,
+                         Ark_FrameNode targetParent,
+                         const Ark_Number* index)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("moveTo(");
         WriteToString(&out, peer);
@@ -30904,9 +30904,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, index);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     {
