@@ -400,6 +400,56 @@ HWTEST_F(TextTestNgThree, BuildTextRaceParagraph001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BeforeCreateLayoutWrapper001
+ * @tc.desc: Test TextPattern BeforeCreateLayoutWrapper when paragraph is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgThree, BeforeCreateLayoutWrapper001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    auto ret =
+        rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, u"", contentConstraint, AceType::RawPtr(frameNode));
+    EXPECT_TRUE(ret);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper002
+ * @tc.desc: Test TextPattern BeforeCreateLayoutWrapper when frameNode child is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgThree, BeforeCreateLayoutWrapper002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+
+    auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
  * @tc.name: BeforeCreateLayoutWrapper003
  * @tc.desc: Test TextPattern BeforeCreateLayoutWrapper when paragraph is nullptr.
  * @tc.type: FUNC
@@ -427,6 +477,52 @@ HWTEST_F(TextTestNgThree, BeforeCreateLayoutWrapper003, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper004
+ * @tc.desc: Test TextPattern BeforeCreateLayoutWrapper when frameNode child is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgThree, BeforeCreateLayoutWrapper004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto patternChild = AceType::MakeRefPtr<TextPattern>();
+    auto frameNodeChild = FrameNode::CreateFrameNode("Test", 1, patternChild);
+    ASSERT_NE(frameNodeChild, nullptr);
+
+    frameNode->AddChild(frameNodeChild);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+
+    auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
+ * @tc.name: DumpInfo001
+ * @tc.desc: Test TextPattern DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgThree, DumpInfo001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->selectOverlayProxy_ = nullptr;
+    pattern->DumpInfo();
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
 }
 
 /**

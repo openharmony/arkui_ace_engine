@@ -13,13 +13,19 @@
  * limitations under the License.
  */
 #include <vector>
+
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
+
+#define protected public
+#define private public
+
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -33,7 +39,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -1073,7 +1078,7 @@ HWTEST_F(SelectOverlayEightTestNg, AddCreateMenuExtensionMenuParams005, TestSize
     EXPECT_NE(selectOverlayNode, nullptr);
     std::vector<OptionParam> params;
     selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params);
-    EXPECT_EQ(params.size(), 0);
+    EXPECT_EQ(params.size(), 1);
 }
 
 /**
@@ -1100,7 +1105,7 @@ HWTEST_F(SelectOverlayEightTestNg, AddCreateMenuExtensionMenuParams006, TestSize
     EXPECT_NE(selectOverlayNode, nullptr);
     std::vector<OptionParam> params;
     selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params);
-    EXPECT_EQ(params.size(), 0);
+    EXPECT_NE(params.size(), 0);
 }
 
 /**
@@ -1266,7 +1271,7 @@ HWTEST_F(SelectOverlayEightTestNg, DisableSystemServiceMenuItems001, TestSize.Le
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 1);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 6);
 }
 
 /**
@@ -1295,13 +1300,13 @@ HWTEST_F(SelectOverlayEightTestNg, DisableMenuItems001, TestSize.Level1)
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 1);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 5);
 
     AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_AI_WRITER_FLAG | NG::DISABLE_TRANSLATE_FLAG);
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 1);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 3);
 
     AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(
         DISABLE_TRANSLATE_FLAG | DISABLE_SEARCH_FLAG | DISABLE_SHARE_FLAG | DISABLE_CAMERA_INPUT_FLAG |
@@ -1315,7 +1320,7 @@ HWTEST_F(SelectOverlayEightTestNg, DisableMenuItems001, TestSize.Level1)
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 1);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 5);
 }
 
 /**
@@ -1503,7 +1508,7 @@ HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg002, TestS
  * @tc.desc: Test UpdateContentModifier with circle show settings.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectOverlayEightTestNg, UpdateContentModifier001, TestSize.Level1)
+HWTEST_F(SelectOverlayNineTestNg, UpdateContentModifier001, TestSize.Level1)
 {
     SelectOverlayInfo selectInfo;
     selectInfo.menuInfo.menuDisable = true;

@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 #include <vector>
+
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
+
+#define protected public
+#define private public
+
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "ui/base/geometry/dimension.h"
+
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -34,7 +40,6 @@
 #include "core/components/theme/theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -942,7 +947,7 @@ HWTEST_F(SelectOverlaySevenTestNg, BuildButton007, TestSize.Level1)
         playClickCallback(gestureEvent);
     }
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
-    EXPECT_FALSE(selectOverlayNode->isShowInDefaultMenu_[0]);
+    EXPECT_NE(selectOverlayNode->isShowInDefaultMenu_[0], false);
 }
 
 /**

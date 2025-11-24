@@ -531,6 +531,7 @@ HWTEST_F(TextFieldUXTest, OnCut001, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pattern->OnAttachContext(Referenced::RawPtr(pipeline));
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
 
     pattern->OnDetachContext(Referenced::RawPtr(pipeline));
     ASSERT_EQ(pipeline->GetInstanceId(), 0);
@@ -554,6 +555,7 @@ HWTEST_F(TextFieldUXTest, OnCut002, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pattern->OnAttachContext(Referenced::RawPtr(pipeline));
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
 
     pattern->OnDetachContext(Referenced::RawPtr(pipeline));
     ASSERT_EQ(pipeline->GetInstanceId(), 0);

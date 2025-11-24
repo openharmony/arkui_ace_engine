@@ -286,6 +286,23 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc086, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPatternFunc087
+ * @tc.desc: test SetKeyboardAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc087, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = pattern->GetHost()->GetContext();
+    pipeline->safeAreaManager_ = nullptr;
+    pattern->SetKeyboardAreaChange(true);
+    EXPECT_EQ(pipeline->safeAreaManager_, nullptr);
+}
+
+/**
  * @tc.name: TextPatternFunc088
  * @tc.desc: test SetKeyboardAreaChange.
  * @tc.type: FUNC
