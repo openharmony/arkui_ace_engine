@@ -269,7 +269,7 @@ public:
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetRenderFit(RenderFit renderFit) = 0;
-    virtual void SetCornerApplyType(CornerApplyType cornerApplyType) = 0;
+    virtual void SetRenderStrategy(RenderStrategy renderStrategy) = 0;
 
     // flex props
     virtual void SetFlexBasis(const Dimension& value) = 0;

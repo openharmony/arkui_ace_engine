@@ -2824,14 +2824,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetBorderRadiusImpl(Ark_NativePointer node,
+    void SetBorderRadius0Impl(Ark_NativePointer node,
                              const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setBorderRadius(");
+        string out("setBorderRadius0(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -4483,6 +4483,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, sysOptions);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBorderRadius1Impl(Ark_NativePointer node,
+                              const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value,
+                              const Opt_RenderStrategy* type)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBorderRadius1(");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, type);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -21657,7 +21672,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBorderStyleImpl,
             CommonMethodModifier::SetBorderWidthImpl,
             CommonMethodModifier::SetBorderColorImpl,
-            CommonMethodModifier::SetBorderRadiusImpl,
+            CommonMethodModifier::SetBorderRadius0Impl,
             CommonMethodModifier::SetBorderImageImpl,
             CommonMethodModifier::SetOutlineImpl,
             CommonMethodModifier::SetOutlineStyleImpl,
@@ -21793,6 +21808,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBackgroundBlurStyleImpl,
             CommonMethodModifier::SetBackgroundEffect1Impl,
             CommonMethodModifier::SetForegroundBlurStyleImpl,
+            CommonMethodModifier::SetBorderRadius1Impl,
             CommonMethodModifier::SetOnClick1Impl,
             CommonMethodModifier::SetFocusScopeIdImpl,
             CommonMethodModifier::SetFocusScopePriorityImpl,

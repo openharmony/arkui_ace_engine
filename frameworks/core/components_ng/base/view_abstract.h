@@ -378,8 +378,10 @@ public:
     static void SetRenderGroup(bool isRenderGroup);
     // renderFit, i.e. gravity
     static void SetRenderFit(RenderFit renderFit);
-    // cornerApplyType
-    static void SetCornerApplyType(CornerApplyType cornerApplyType);
+    // renderStrategy
+    static void SetRenderStrategy(RenderStrategy renderStrategy);
+    static void SetRenderStrategy(FrameNode* frameNode, RenderStrategy renderStrategy);
+    static bool IsRenderStrategyValid(RenderStrategy renderStrategy);
 
     // transform
     static void SetScale(const NG::VectorF &value);

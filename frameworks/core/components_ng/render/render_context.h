@@ -740,8 +740,8 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    // cornerApplyType
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CornerApplyType, CornerApplyType);
+    // renderStrategy
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderStrategy, RenderStrategy);
 
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
@@ -803,7 +803,7 @@ public:
 
     virtual void SetRenderFit(RenderFit renderFit) {}
 
-    virtual void OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType) {}
+    virtual void OnRenderStrategyUpdate(RenderStrategy renderStrategy) {}
 
     virtual OffsetF GetBaseTransalteInXY() const
     {

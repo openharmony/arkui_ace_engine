@@ -2444,7 +2444,7 @@ void impl_CommonMethod_setBorderColor(Ark_NativePointer thisPtr, KSerializerBuff
         GetNodeModifiers()->getCommonMethodModifier()->setBorderColor(self, static_cast<Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setBorderColor, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setBorderRadius(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CommonMethod_setBorderRadius0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -2484,9 +2484,9 @@ void impl_CommonMethod_setBorderRadius(Ark_NativePointer thisPtr, KSerializerBuf
             valueValueTempTmpBuf.value = static_cast<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(valueValueTempTmpBuf_);
         }
         Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setBorderRadius(self, static_cast<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses*>(&valueValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setBorderRadius0(self, static_cast<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setBorderRadius, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setBorderRadius0, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBorderImage(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -4729,6 +4729,56 @@ void impl_CommonMethod_setForegroundBlurStyle(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getCommonMethodModifier()->setForegroundBlurStyle(self, static_cast<Opt_BlurStyle*>(&styleValueTemp), static_cast<Opt_ForegroundBlurStyleOptions*>(&optionsValueTemp), static_cast<Opt_SystemAdaptiveOptions*>(&sysOptionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setForegroundBlurStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setBorderRadius1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                const Ark_Int8 valueValueTempTmpBuf_BufUUnionSelector = thisDeserializer.readInt8();
+                Ark_Length valueValueTempTmpBuf_BufU = {};
+                valueValueTempTmpBuf_BufU.selector = valueValueTempTmpBuf_BufUUnionSelector;
+                if (valueValueTempTmpBuf_BufUUnionSelector == 0) {
+                    valueValueTempTmpBuf_BufU.selector = 0;
+                    valueValueTempTmpBuf_BufU.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+                } else if (valueValueTempTmpBuf_BufUUnionSelector == 1) {
+                    valueValueTempTmpBuf_BufU.selector = 1;
+                    valueValueTempTmpBuf_BufU.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                } else if (valueValueTempTmpBuf_BufUUnionSelector == 2) {
+                    valueValueTempTmpBuf_BufU.selector = 2;
+                    valueValueTempTmpBuf_BufU.value2 = Resource_serializer::read(thisDeserializer);
+                } else {
+                    INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_BufU has to be chosen through deserialisation.");
+                }
+                valueValueTempTmpBuf_.value0 = static_cast<Ark_Length>(valueValueTempTmpBuf_BufU);
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = BorderRadiuses_serializer::read(thisDeserializer);
+            } else if (valueValueTempTmpBuf_UnionSelector == 2) {
+                valueValueTempTmpBuf_.selector = 2;
+                valueValueTempTmpBuf_.value2 = LocalizedBorderRadiuses_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(valueValueTempTmpBuf_);
+        }
+        Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses valueValueTemp = valueValueTempTmpBuf;;
+        const auto typeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_RenderStrategy typeValueTempTmpBuf = {};
+        typeValueTempTmpBuf.tag = typeValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((typeValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            typeValueTempTmpBuf.value = static_cast<Ark_RenderStrategy>(thisDeserializer.readInt32());
+        }
+        Opt_RenderStrategy typeValueTemp = typeValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setBorderRadius1(self, static_cast<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses*>(&valueValueTemp), static_cast<Opt_RenderStrategy*>(&typeValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setBorderRadius1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setOnClick1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

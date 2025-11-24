@@ -24,7 +24,7 @@ import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hook
 import { ModifierStateManager } from '../CommonModifier';
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
+import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -2855,7 +2855,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBorderColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBorderRadiusAttribute(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): void {
+    setBorderRadius0Attribute(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2888,7 +2888,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBorderRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBorderRadius0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBorderImageAttribute(value: BorderImageOption | undefined): void {
@@ -4883,6 +4883,49 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setForegroundBlurStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBorderRadius1Attribute(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Length) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Length
+                if (valueTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
+                }
+            } else if (valueTmpValue instanceof BorderRadiuses) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as BorderRadiuses
+                BorderRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof LocalizedBorderRadiuses) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as LocalizedBorderRadiuses
+                LocalizedBorderRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue  = (type as RenderStrategy)
+            thisSerializer.writeInt32(typeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBorderRadius1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnClick1Attribute(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): void {
@@ -7679,6 +7722,9 @@ export interface CommonMethod {
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         throw new Error("Unimplemented method foregroundBlurStyle")
     }
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        throw new Error("Unimplemented method borderRadius")
+    }
     onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         throw new Error("Unimplemented method onClick")
     }
@@ -8476,6 +8522,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        return this
+    }
     onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         return this
     }
@@ -9191,7 +9240,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
         if (this.checkPriority("borderRadius")) {
             const value_casted = value as (Length | BorderRadiuses | LocalizedBorderRadiuses | undefined)
-            this.getPeer()?.setBorderRadiusAttribute(value_casted)
+            this.getPeer()?.setBorderRadius0Attribute(value_casted)
             return this
         }
         return this
@@ -10365,6 +10414,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const options_casted = options as (ForegroundBlurStyleOptions | undefined)
             const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
             this.getPeer()?.setForegroundBlurStyleAttribute(style_casted, options_casted, sysOptions_casted)
+            return this
+        }
+        return this
+    }
+    public borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        if (this.checkPriority("borderRadius")) {
+            const value_casted = value as (Length | BorderRadiuses | LocalizedBorderRadiuses | undefined)
+            const type_casted = type as (RenderStrategy | undefined)
+            this.getPeer()?.setBorderRadius1Attribute(value_casted, type_casted)
             return this
         }
         return this

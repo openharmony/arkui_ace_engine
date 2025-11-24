@@ -5920,6 +5920,14 @@ typedef struct Opt_RenderProcessNotRespondingReason {
     Ark_Tag tag;
     Ark_RenderProcessNotRespondingReason value;
 } Opt_RenderProcessNotRespondingReason;
+typedef enum Ark_RenderStrategy {
+    ARK_RENDER_STRATEGY_FAST = 0,
+    ARK_RENDER_STRATEGY_OFFSCREEN = 1,
+} Ark_RenderStrategy;
+typedef struct Opt_RenderStrategy {
+    Ark_Tag tag;
+    Ark_RenderStrategy value;
+} Opt_RenderStrategy;
 typedef enum Ark_RepeatMode {
     ARK_REPEAT_MODE_REPEAT = 0,
     ARK_REPEAT_MODE_STRETCH = 1,
@@ -21919,7 +21927,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                            const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
     void (*setBorderColor)(Ark_NativePointer node,
                            const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
-    void (*setBorderRadius)(Ark_NativePointer node,
+    void (*setBorderRadius0)(Ark_NativePointer node,
                             const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
     void (*setBorderImage)(Ark_NativePointer node,
                            const Opt_BorderImageOption* value);
@@ -22201,6 +22209,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                    const Opt_BlurStyle* style,
                                    const Opt_ForegroundBlurStyleOptions* options,
                                    const Opt_SystemAdaptiveOptions* sysOptions);
+    void (*setBorderRadius1)(Ark_NativePointer node,
+                             const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value,
+                             const Opt_RenderStrategy* type);
     void (*setOnClick1)(Ark_NativePointer node,
                         const Opt_Callback_ClickEvent_Void* event,
                         const Opt_Float64* distanceThreshold);

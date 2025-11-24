@@ -6045,12 +6045,25 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 
-void ViewAbstract::SetCornerApplyType(CornerApplyType cornerApplyType)
+void ViewAbstract::SetRenderStrategy(RenderStrategy renderStrategy)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(CornerApplyType, cornerApplyType);
+    renderStrategy = IsRenderStrategyValid(renderStrategy) ? renderStrategy : RenderStrategy::FAST;
+    ACE_UPDATE_RENDER_CONTEXT(RenderStrategy, renderStrategy);
+}
+
+void ViewAbstract::SetRenderStrategy(FrameNode* frameNode, RenderStrategy renderStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    renderStrategy = IsRenderStrategyValid(renderStrategy) ? renderStrategy : RenderStrategy::FAST;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderStrategy, renderStrategy, frameNode);
+}
+
+bool ViewAbstract::IsRenderStrategyValid(RenderStrategy renderStrategy)
+{
+    return renderStrategy >= RenderStrategy::FAST && renderStrategy < RenderStrategy::MAX;
 }
 
 void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)

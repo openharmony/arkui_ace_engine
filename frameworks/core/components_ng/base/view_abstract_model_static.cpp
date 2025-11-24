@@ -1060,6 +1060,12 @@ void ViewAbstractModelStatic::SetBorderRadius(FrameNode *frameNode, const Border
     ViewAbstract::SetBorderRadius(frameNode, value);
 }
 
+void ViewAbstractModelStatic::SetRenderStrategy(FrameNode* frameNode, const RenderStrategy& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderStrategy(frameNode, type);
+}
+
 void ViewAbstractModelStatic::SetBorderImage(
     FrameNode* frameNode, const RefPtr<BorderImage>& borderImage, uint8_t bitset)
 {
