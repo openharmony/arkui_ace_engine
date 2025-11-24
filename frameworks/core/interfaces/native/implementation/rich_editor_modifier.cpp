@@ -503,6 +503,15 @@ void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto richEditorTheme = pipelineContext->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    auto selectedBackgroundColor = richEditorTheme->GetSelectedBackgroundColor();
+    if (!convValue) {
+        RichEditorModelStatic::SetSelectedBackgroundColor(frameNode, selectedBackgroundColor);
+        return;
+    }
     RichEditorModelStatic::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void SetOnEditingChangeImpl(Ark_NativePointer node,
