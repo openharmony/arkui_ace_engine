@@ -18,7 +18,6 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
-#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -183,14 +182,8 @@ void SetImageMatrixImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto peerOpt = Converter::GetOptPtr(value);
-    std::optional<Matrix4> matrix;
-    if (peerOpt.has_value()) {
-        auto* peer = peerOpt.value();
-        CHECK_NULL_VOID(peer);
-        matrix = peer->matrix;
-    }
-    ImageModelStatic::SetImageMatrix(frameNode, matrix);
+    auto matrixOpt = Converter::OptConvertPtr<Matrix4>(value);
+    ImageModelStatic::SetImageMatrix(frameNode, matrixOpt);
 }
 void SetObjectRepeatImpl(Ark_NativePointer node,
                          const Opt_ImageRepeat* value)
