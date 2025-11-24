@@ -4346,7 +4346,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
-    SetDragNodeNeedClean();
+    SetDragNodeNeedClean(true);
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     // There is overlay under the root node or it is in atomicservice
@@ -4400,7 +4400,12 @@ bool OverlayManager::RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay)
         auto topOrderNode = GetTopOrderNode();
         auto topFocusableNode = GetTopFocusableNode();
         PopLevelOrder(overlay->GetId());
-        rootNode->RemoveChild(overlay);
+        auto gatherNode = gatherNodeWeak_.Upgrade();
+        if (overlay == gatherNode) {
+            SetDragNodeNeedClean(false);
+        } else {
+            rootNode->RemoveChild(overlay);
+        }
         FocusNextOrderNode(topFocusableNode);
         SendAccessibilityEventToNextOrderNode(topOrderNode);
     }
@@ -8861,13 +8866,13 @@ void OverlayManager::CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWr
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
 }
 
-void OverlayManager::SetDragNodeNeedClean()
+void OverlayManager::SetDragNodeNeedClean(bool needClean)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetIsDragNodeNeedClean(true);
+    dragDropManager->SetIsDragNodeNeedClean(needClean);
 }
 
 BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const

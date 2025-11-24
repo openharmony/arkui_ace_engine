@@ -67,6 +67,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -999,6 +1000,38 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest004, TestSize.Level1)
     EXPECT_FALSE(overlayManager->RemoveOverlay(false));
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->RemoveNonKeyboardOverlay(popupNode));
+}
+
+/**
+ * @tc.name: RemoveOverlayTest005
+ * @tc.desc: Test OverlayManager::RemoveNonKeyboardOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, RemoveOverlayTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gather node.
+     */
+    auto gatherNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    ASSERT_NE(gatherNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create overlayManager and set gather node.
+     * @tc.expected: overlayManager is not null.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(gatherNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->gatherNodeWeak_ = gatherNode;
+
+    /**
+     * @tc.steps: step3. call RemoveNonKeyboardOverlay when child is gather node.
+     * @tc.expected: return true
+     */
+    EXPECT_TRUE(overlayManager->RemoveNonKeyboardOverlay(gatherNode));
 }
 
 /**
