@@ -247,6 +247,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->UpdateTimeText();
     pattern->textClockController_ = nullptr;
     pattern->InitUpdateTimeTextCallBack();
+    EXPECT_EQ(pattern->textClockController_, nullptr);
     EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(FORMAT_DATA));
 }
 
@@ -1058,6 +1059,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest002, TestSize.Level1)
     pattern->UpdateTimeText();
     pattern->textClockController_ = nullptr;
     pattern->InitUpdateTimeTextCallBack();
+    EXPECT_EQ(pattern->textClockController_, nullptr);
     EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(FORMAT_DATA));
 }
 

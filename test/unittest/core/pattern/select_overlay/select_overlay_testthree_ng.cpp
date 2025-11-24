@@ -14,14 +14,20 @@
  */
 
 #include <memory>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
 #include "base/memory/ace_type.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/property/property.h"
+
+#define private public
+#define protected public
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
