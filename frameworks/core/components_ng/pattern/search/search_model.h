@@ -128,9 +128,7 @@ public:
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func);
     virtual void SetUserMargin() {};
     virtual void SetSelectDetectEnable(bool value) = 0;
-    virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
     virtual void ResetSelectDetectEnable() = 0;
-    virtual void ResetSelectDetectConfig() = 0;
 
 private:
     static std::unique_ptr<SearchModel> instance_;

@@ -215,12 +215,18 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest006, TestSize.Level1)
  */
 HWTEST_F(FrameNodeTest, FrameNodeTestTest007, TestSize.Level1)
 {
+    /**
+     * @tc.steps1: Initialize child frameNode.
+     */
     constexpr char tag[] = "TEST7";
     const int32_t id = 7;
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
 
+    /**
+     * @tc.steps2: Initialize parent frameNode and check init status.
+     */
     const std::string parentTag = "TEST7_PARENT";
     const int32_t parentId = 8;
     auto mockPatternParent = AceType::MakeRefPtr<MockAceKitPattern>();
@@ -228,6 +234,9 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest007, TestSize.Level1)
     EXPECT_NE(frameNodeParent, nullptr);
     EXPECT_EQ(frameNode->GetParentHandle(), nullptr);
 
+   /**
+     * @tc.steps3: AddChild and check parent frameNode.
+     */
     frameNodeParent->AddChild(frameNode);
     EXPECT_NE(frameNode->GetParentHandle(), nullptr);
 }

@@ -16,7 +16,7 @@
  * @file
  * @kit ArkUI
  */
-import { memo_stable } from '@koalaui.runtime.annotations';
+import { memo_stable } from '@koalaui/runtime/annotations';
 import { Resource } from 'global.resource';
 import { CircleShape, EllipseShape, PathShape, RectShape } from '@ohos.arkui.shape';
 import { LengthMetrics } from 'arkui.Graphics';
@@ -75,8 +75,8 @@ import {
     TransitionType,
 } from 'arkui.component.enums';
 import { CustomBuilder } from 'arkui.component.builder';
-import { PeerNode } from 'arkui.PeerNode';
-import { ComponentBase } from 'arkui.ComponentBase';
+import { PeerNode } from 'arkui/PeerNode';
+import { ComponentBase } from 'arkui/ComponentBase';
 import {
     LayoutPolicy,
     CrownEvent,
@@ -164,13 +164,15 @@ import {
     ForegroundBlurStyleOptions,
     AttributeModifier,
     UIGestureEvent,
+    LayoutSafeAreaType,
+    LayoutSafeAreaEdge,
 } from 'arkui.component.common';
 import uiEffect from '@ohos.graphics.uiEffect';
 import image from '@ohos.multimedia.image';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import drawing from '@ohos.graphics.drawing';
 
-type KPointer = LockGrantedCallback;
+type KPointer = long;
 type int32 = int;
 
 type PixelMap = image.PixelMap;
@@ -327,7 +329,7 @@ export interface CommonMethod {
         dropOptions?: DropOptions
     ): this;
     onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this;
-    allowDrop(value: Array<UniformDataType> | Array<string> | undefined): this;
+    allowDrop(value: Array<UniformDataType> | undefined): this;
     draggable(value: boolean | undefined): this;
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this;
     onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this;
@@ -584,7 +586,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public onDrop0Attribute(value: ((event: DragEvent, extraParams?: string) => void) | undefined): void;
     public onDrop1Attribute(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): void;
     public onDragEndAttribute(value: ((event: DragEvent, extraParams?: string) => void) | undefined): void;
-    public allowDropAttribute(value: Array<UniformDataType> | Array<string> | undefined): void;
+    public allowDropAttribute(value: Array<UniformDataType> | undefined): void;
     public draggableAttribute(value: boolean | undefined): void;
     public dragPreview0Attribute(value: CustomBuilder | DragItemInfo | string | undefined): void;
     public dragPreview1Attribute(
@@ -668,6 +670,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public accessibilityFocusDrawLevelAttribute(value: FocusDrawLevel | undefined): void;
     public customPropertyAttribute(name: string | undefined, value: Object | undefined): void;
     public expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void;
+    public ignoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void;
     public backgroundAttribute(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): void;
     public backgroundImage0Attribute(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat): void;
     public backgroundImage1Attribute(src: ResourceStr | PixelMap | undefined, options?: BackgroundImageOptions): void;
@@ -888,7 +891,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
         dropOptions?: DropOptions
     ): this;
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this;
-    public allowDrop(value: Array<UniformDataType> | Array<string> | undefined): this;
+    public allowDrop(value: Array<UniformDataType> | undefined): this;
     public draggable(value: boolean | undefined): this;
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this;
     public onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this;
@@ -943,6 +946,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this;
     public customProperty(name: string | undefined, value: Object | undefined): this;
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this;
+    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this;
     public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this;
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this;
     public backgroundBlurStyle(
@@ -1110,7 +1114,7 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
     public onDragLeave_value?: ((event: DragEvent, extraParams?: string) => void) | undefined;
     public onDrop_value?: ((event: DragEvent, extraParams?: string) => void) | undefined;
     public onDragEnd_value?: ((event: DragEvent, extraParams?: string) => void) | undefined;
-    public allowDrop_value?: Array<UniformDataType> | Array<string> | undefined;
+    public allowDrop_value?: Array<UniformDataType> | undefined;
     public draggable_value?: boolean | undefined;
     public dragPreview_value?: CustomBuilder | DragItemInfo | string | undefined;
     public onPreDrag_value?: ((parameter: PreDragStatus) => void) | undefined;
@@ -1281,7 +1285,7 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
         dropOptions?: DropOptions
     ): this;
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this;
-    public allowDrop(value: Array<UniformDataType> | Array<string> | undefined): this;
+    public allowDrop(value: Array<UniformDataType> | undefined): this;
     public draggable(value: boolean | undefined): this;
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this;
     public onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this;

@@ -306,6 +306,11 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
     switch (type) {
         case ARKUI_NATIVE_NODE:
             if (strcmp(structName, "ArkUI_NativeNodeAPI_1") == 0) {
+                auto impl = OHOS::Ace::NodeModel::GetFullImpl();
+                if (impl && impl->getMultiThreadManagerAPI() &&
+                    impl->getMultiThreadManagerAPI()->debugThreadSafeNodeEnabled()) {
+                    return &multiThreadNodeImpl_1;
+                }
                 return &nodeImpl_1;
             }
             break;

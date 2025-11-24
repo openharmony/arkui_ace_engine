@@ -18,7 +18,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "base/geometry/ng/size_t.h"
 #include "arkoala_api_generated.h"
 
@@ -31,7 +30,7 @@ public:
     void SetOptions(const std::optional<CanvasUnit>& unit);
     void SetInvalidate();
     SizeF GetSize();
-    std::shared_ptr<drawing_CanvasPeer> GetCanvas() const;
+    drawing_CanvasPeer* GetCanvas() const;
     void SetRSCanvasCallback(RefPtr<AceType>& canvasPattern);
 
     void SetCanvasPattern(const RefPtr<AceType>& canvas)
@@ -62,7 +61,7 @@ protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
-    std::shared_ptr<drawing_CanvasPeer> rsCanvas_;
+    drawing_CanvasPeer *rsCanvas_;
     NG::OptionalSizeF size_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };

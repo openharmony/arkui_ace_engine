@@ -160,7 +160,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         }
 
         std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismissFunc = nullptr;
-        JSViewAbstract::ParseDialogCallback(constructorArg, onWillDismissFunc);
+        JSViewAbstract::ParseDialogCallback(info, constructorArg, onWillDismissFunc);
         instance->dialogProperties_.onWillDismiss = onWillDismissFunc;
 
         JSViewAbstract::ParseAppearDialogCallback(info, instance->dialogProperties_);

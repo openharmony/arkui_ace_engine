@@ -87,6 +87,16 @@ public:
         isUIExt_ = isUIExt;
     }
 
+    void SetDumpAllNodes(bool isDumpAllNodes)
+    {
+        isDumpAllNodes_ = isDumpAllNodes;
+    }
+
+    bool IsDumpAllNodes() const
+    {
+        return isDumpAllNodes_;
+    }
+
     const std::unique_ptr<std::ostream>& GetDumpFile() const
     {
         return ostream_;
@@ -169,6 +179,7 @@ private:
     std::unique_ptr<std::ostream> ostream_ { nullptr };
     std::string result_;
     bool isUIExt_ = false;
+    bool isDumpAllNodes_ = false;
     int32_t depth_ = -1;
     ACE_DISALLOW_MOVE(DumpLog);
 };

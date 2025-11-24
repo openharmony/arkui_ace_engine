@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
@@ -361,6 +361,9 @@ export class CommonMethodModifier implements CommonMethod {
     _expandSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
     _expandSafeArea_0_1value?: Array<SafeAreaEdge> | undefined
+    _ignoreLayoutSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
+    _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
     _background_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _background_0_0value?: CustomBuilder | undefined
     _background_0_1value?: BackgroundOptions | undefined
@@ -3351,6 +3354,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (this._ignoreLayoutSafeArea_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._ignoreLayoutSafeArea_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIgnoreLayoutSafeAreaAttribute((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                }
+            }
+        }
         if (this._background_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._background_0_flag) {
@@ -6117,6 +6138,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._ignoreLayoutSafeArea_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._ignoreLayoutSafeArea_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.ignoreLayoutSafeArea(modifier._ignoreLayoutSafeArea_0_0value, modifier._ignoreLayoutSafeArea_0_1value);
+                    break;
+                }
+                default: {
+                    this.ignoreLayoutSafeArea((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                }
+            }
+        }
         if (modifier._background_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._background_0_flag) {
@@ -8095,6 +8129,17 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    accessibilityText(value: Resource | string | undefined): this {
+        if (value instanceof Resource) {
+            const value_casted = value as (Resource | undefined)
+            this.accessibilityText(value_casted)
+            return this
+        } else {
+            const value_casted = value as (string | undefined)
+            this.accessibilityText(value_casted)
+            return this
+        }
+    }
     accessibilityRole(value: AccessibilityRoleType | undefined): this {
         if (((this._accessibilityRole_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -8160,6 +8205,17 @@ export class CommonMethodModifier implements CommonMethod {
             this._accessibilityDescription_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
+    }
+    accessibilityDescription(value: Resource | string | undefined): this {
+        if (value instanceof Resource) {
+            const value_casted = value as (Resource | undefined)
+            this.accessibilityDescription(value_casted)
+            return this
+        } else {
+            const value_casted = value as (string | undefined)
+            this.accessibilityDescription(value_casted)
+            return this
+        }
     }
     accessibilityLevel(value: string | undefined): this {
         if (((this._accessibilityLevel_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._accessibilityLevel_0_0value) !== (value)))
@@ -8346,6 +8402,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._expandSafeArea_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        if (((this._ignoreLayoutSafeArea_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.UPDATE
+            this._ignoreLayoutSafeArea_0_0value = types
+            this._ignoreLayoutSafeArea_0_1value = edges
+        } else
+        {
+            this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

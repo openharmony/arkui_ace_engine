@@ -232,6 +232,21 @@ Color Color::ColorFromString(const std::string& str)
 
 std::string Color::ToString() const
 {
+    if (IsPlaceholder()) {
+        // Provide readable placeholder tag for debugging/logging.
+        std::ostringstream oss;
+        oss << ColorToString() << "|PH:";
+        switch (placeholder_) {
+            case ColorPlaceholder::SURFACE: oss << "Surface"; break;
+            case ColorPlaceholder::SURFACE_CONTRAST: oss << "Surface_Contrast"; break;
+            case ColorPlaceholder::TEXT_CONTRAST: oss << "Text_Contrast"; break;
+            case ColorPlaceholder::ACCENT: oss << "Accent"; break;
+            case ColorPlaceholder::FOREGROUND: oss << "Foreground"; break;
+            case ColorPlaceholder::NONE: oss << "None"; break;
+            default: oss << "Unknown"; break;
+        }
+        return oss.str();
+    }
     return ColorToString();
 }
 
@@ -333,6 +348,13 @@ Color Color::ChangeAlpha(uint8_t alpha) const
 
 Color Color::operator+(const Color& color) const
 {
+    // Placeholder pass-through semantics: prefer concrete color if one side is placeholder.
+    if (IsPlaceholder()) {
+        return *this;
+    }
+    if (color.IsPlaceholder()) {
+        return color;
+    }
     // convert first color from ARGB to linear
     double firstLinearRed = 0.0;
     double firstLinearGreen = 0.0;
@@ -352,6 +374,12 @@ Color Color::operator+(const Color& color) const
 
 Color Color::operator-(const Color& color) const
 {
+    if (IsPlaceholder()) {
+        return *this;
+    }
+    if (color.IsPlaceholder()) {
+        return *this;
+    }
     // convert first color from ARGB to linear
     double firstLinearRed = 0.0;
     double firstLinearGreen = 0.0;
@@ -371,6 +399,10 @@ Color Color::operator-(const Color& color) const
 
 Color Color::operator*(double value) const
 {
+    if (IsPlaceholder()) {
+        // Scaling placeholder meaningless; return unchanged.
+        return *this;
+    }
     // convert color from ARGB to linear
     double linearRed = 0.0;
     double linearGreen = 0.0;
@@ -383,6 +415,9 @@ Color Color::operator*(double value) const
 
 Color Color::operator/(double value) const
 {
+    if (IsPlaceholder()) {
+        return *this;
+    }
     if (NearZero(value)) {
         return *this;
     }
@@ -589,6 +624,31 @@ bool Color::MatchColorSpecialString(const std::string& colorStr, Color& color)
         return true;
     }
 
+    ColorPlaceholder placeholder;
+    if (MatchPlaceholderString(colorStr, placeholder)) {
+        color = Color(placeholder);
+        return true;
+    }
+    return false;
+}
+
+bool Color::MatchPlaceholderString(const std::string& colorStr, ColorPlaceholder& placeholder)
+{
+    static const LinearMapNode<ColorPlaceholder> placeholderTable[] = {
+        { "ACCENT", ColorPlaceholder::ACCENT },
+        { "FOREGROUND", ColorPlaceholder::FOREGROUND },
+        { "NONE", ColorPlaceholder::NONE },
+        { "SURFACE", ColorPlaceholder::SURFACE },
+        { "SURFACE_CONTRAST", ColorPlaceholder::SURFACE_CONTRAST },
+        { "TEXT_CONTRAST", ColorPlaceholder::TEXT_CONTRAST },
+    };
+
+    int64_t placeholderIndex =
+        BinarySearchFindIndex(placeholderTable, ArraySize(placeholderTable), colorStr.c_str());
+    if (placeholderIndex != -1) {
+        placeholder = placeholderTable[placeholderIndex].value;
+        return true;
+    }
     return false;
 }
 

@@ -30,6 +30,7 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./component/textCommon"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./component/textInput"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
+import { ColorMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
 export class SearchModifier extends CommonMethodModifier implements SearchAttribute,AttributeModifier<SearchAttribute> {
     _instanceId: number = -1;
@@ -130,6 +131,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    _dividerColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dividerColor_0_0value?: ColorMetrics | undefined
     _searchButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _searchButton_0_0value?: string | undefined
     _searchButton_0_1value?: SearchButtonOptions | undefined
@@ -934,6 +937,24 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (this._dividerColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dividerColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDividerColorAttribute((this._dividerColor_0_0value as ColorMetrics | undefined));
+                    this._dividerColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dividerColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dividerColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDividerColorAttribute((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
         if (this._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._searchButton_0_flag) {
@@ -1563,6 +1584,19 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (modifier._dividerColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dividerColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dividerColor(modifier._dividerColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.dividerColor((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
         if (modifier._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._searchButton_0_flag) {
@@ -2084,6 +2118,17 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         } else
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    dividerColor(value: ColorMetrics | undefined): this {
+        if (((this._dividerColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._dividerColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dividerColor_0_0value = value
+        } else
+        {
+            this._dividerColor_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

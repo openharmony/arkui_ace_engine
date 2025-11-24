@@ -74,6 +74,9 @@ import { ArkTextPickerComponent, ArkTextPickerPeer, DividerOptions } from "#gene
 import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
 import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
+import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from '#generated';
+import { ListHandWritten } from "./ListHandWritten"
+import { ArkWebComponent, JavaScriptProxy } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 
 export function hookId(component: object, value?: string) {}
@@ -159,11 +162,12 @@ export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommo
   }
 }
 
-export function hookDragEventStartDataLoading(event: DragEventInternal, options: unifiedDataChannel.GetDataParams) : string {
+export function hookDragEventStartDataLoading(event: DragEventInternal, options: unifiedDataChannel.GetDataParams) :
+  string | undefined {
   return ArkUIAniModule._DragEvent_Start_Data_Loading(event.peer!.ptr, options)
 }
 
-export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataChannel.Summary {
+export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataChannel.Summary | undefined {
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 
@@ -610,6 +614,14 @@ export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkText
 
   const value_casted = value as (DividerOptions | null | undefined)
   peer.setDividerAttribute(value_casted)
+}
+
+export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListChildrenMainSizeImpl(node, value)
+}
+
+export function hookListItemGroupChildrenMainSizeImpl(node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListItemGroupChildrenMainSizeImpl(node, value)
 }
 
 export function hookJavaScriptProxy(

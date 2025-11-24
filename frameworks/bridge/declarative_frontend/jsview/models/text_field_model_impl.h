@@ -58,9 +58,7 @@ public:
     void SetTextColor(const Color& value) override;
     void ResetTextColor() override {};
     void SetSelectDetectEnable(bool value) override;
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void ResetSelectDetectEnable() override;
-    void ResetSelectDetectConfig() override;
     void SetFontStyle(FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>&& func) override;

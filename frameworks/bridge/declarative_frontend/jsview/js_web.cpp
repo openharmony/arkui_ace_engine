@@ -620,6 +620,7 @@ public:
         JSClass<JSWebConsoleLog>::CustomMethod("getMessage", &JSWebConsoleLog::GetLog);
         JSClass<JSWebConsoleLog>::CustomMethod("getMessageLevel", &JSWebConsoleLog::GetLogLevel);
         JSClass<JSWebConsoleLog>::CustomMethod("getSourceId", &JSWebConsoleLog::GetSourceId);
+        JSClass<JSWebConsoleLog>::CustomMethod("getSource", &JSWebConsoleLog::GetSource);
         JSClass<JSWebConsoleLog>::Bind(globalObj, &JSWebConsoleLog::Constructor, &JSWebConsoleLog::Destructor);
     }
 
@@ -653,6 +654,13 @@ public:
     void GetSourceId(const JSCallbackInfo& args)
     {
         auto code = JSVal(ToJSValue(message_->GetSourceId()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetSource(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(message_->GetSource()));
         auto descriptionRef = JSRef<JSVal>::Make(code);
         args.SetReturnValue(descriptionRef);
     }
@@ -2335,6 +2343,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
+    JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChanged", &JSWeb::OnCameraCaptureStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
@@ -2390,6 +2399,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
     JSClass<JSWeb>::StaticMethod("onDetectedBlankScreen", &JSWeb::OnDetectedBlankScreen);
     JSClass<JSWeb>::StaticMethod("blankScreenDetectionConfig", &JSWeb::BlankScreenDetectionConfig);
+    JSClass<JSWeb>::StaticMethod("enableImageAnalyzer", &JSWeb::EnableImageAnalyzer);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
@@ -5556,6 +5566,38 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetAudioStateChangedId(std::move(uiCallback));
 }
 
+JSRef<JSVal> CameraCaptureStateToJSValue(const CameraCaptureStateEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("originalState", eventInfo.GetOriginalCameraCaptureState());
+    obj->SetProperty("newState", eventInfo.GetNewCameraCaptureState());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnCameraCaptureStateChanged(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CameraCaptureStateEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), CameraCaptureStateToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<CameraCaptureStateEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetCameraCaptureStateChangedId(jsCallback);
+}
+
 void JSWeb::MediaOptions(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
@@ -7050,6 +7092,16 @@ void JSWeb::BlankScreenDetectionConfig(const JSCallbackInfo& args)
     }
     WebModel::GetInstance()->SetBlankScreenDetectionConfig(
         enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold);
+}
+
+void JSWeb::EnableImageAnalyzer(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableImageAnalyzer(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableImageAnalyzer(isEnabled);
 }
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)

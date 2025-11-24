@@ -14,7 +14,7 @@
  */
 
 export interface ExpectedFrameRateRange {
-  min: number,
-  max: number,
-  expected: number,
+  min: int,
+  max: int,
+  expected: int,
 }

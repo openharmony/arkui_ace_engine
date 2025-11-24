@@ -99,7 +99,7 @@ void MultiThreadBuildManager::SetIsThreadSafeNodeScope(bool isThreadSafeNodeScop
 
 bool MultiThreadBuildManager::IsThreadSafeNodeScope()
 {
-    return isThreadSafeNodeScope_ || SystemProperties::GetDebugThreadSafeNodeEnabled();
+    return isThreadSafeNodeScope_;
 }
 
 bool MultiThreadBuildManager::IsParallelScope()

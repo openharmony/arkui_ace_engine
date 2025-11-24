@@ -24,12 +24,12 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/text_clock_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
-#include "frameworks/core/components/text_clock/text_clock_theme.h"
 
 namespace OHOS::Ace {
 
@@ -91,8 +91,11 @@ void JSTextClock::Create(const JSCallbackInfo& info)
 {
     auto controller = TextClockModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
+        SetFontDefault();
+        JSTextClockTheme::ApplyTheme();
         return;
     }
+    JSTextClockTheme::ApplyTheme();
     JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
     if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->ToNumber<int32_t>())) {
@@ -140,6 +143,12 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
+void JSTextClock::SetFontDefault()
+{
+    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
+    TextClockModel::GetInstance()->InitFontDefault(textTheme->GetTextStyle());
+}
+
 void JSTextClock::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -151,10 +160,17 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
                                                                : ParseJsColor(info[0], textColor);
     if (SystemProperties::ConfigChangePerform()) {
         TextClockModel::GetInstance()->CreateWithTextColorResourceObj(resObj);
-    }
-    if (!colorParsed) {
-        TextClockModel::GetInstance()->ResetTextColor();
-        return;
+        if (!colorParsed) {
+            TextClockModel::GetInstance()->ResetTextColor();
+            return;
+        }
+    } else {
+        if (!colorParsed) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            textColor = theme->GetTextStyle().GetTextColor();
+        }
     }
     TextClockModel::GetInstance()->SetTextColor(textColor);
 }
@@ -166,7 +182,7 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextClockTheme>();
+    auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
 
     CalcDimension fontSize;
@@ -177,7 +193,7 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
         TextClockModel::GetInstance()->CreateWithFontSizeResourceObj(resObj);
     }
      auto getDefaultFontSize = [&]() {
-        return theme->GetTextStyleClock().GetFontSize();
+        return theme->GetTextStyle().GetFontSize();
     };
 
     if (!parseSuccess || fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
@@ -192,12 +208,12 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    RefPtr<TextClockTheme> textTheme = GetTheme<TextClockTheme>();
+    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     const auto& fontWeight = info[0];
     RefPtr<ResourceObject> weightResObj;
     if (fontWeight->IsUndefined()) {
-        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyleClock().GetFontWeight());
+        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
         return;
     }
 
@@ -213,7 +229,7 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
         }
         TextClockModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
     } else {
-        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyleClock().GetFontWeight());
+        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
     }
 }
 

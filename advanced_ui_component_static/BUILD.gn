@@ -21,6 +21,7 @@ group("advanced_ui_component_static") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [
+      "gridobjectsortcomponent:gridObjectSortComponent",
       "counter:counter",
       "composeListItem:composeListItem",
       "foldsplitcontainer:foldSplitContainer",
@@ -35,6 +36,8 @@ group("advanced_ui_component_static") {
       "editabletitlebar:editableTitleBar",
       "subheader:subHeader",
       "toolbarv2:toolBarV2",
+      "chip:chip",
+      "chipgroup:chipGroup",
     ]
   }
 }

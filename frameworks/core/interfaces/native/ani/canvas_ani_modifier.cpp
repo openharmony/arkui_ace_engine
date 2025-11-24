@@ -225,9 +225,7 @@ void* GetDrawingCanvas(ArkUIDrawingRenderingContext peer)
 {
     auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
-    auto drawingCanvasPeer = peerImpl->GetCanvas();
-    CHECK_NULL_RETURN(drawingCanvasPeer, nullptr);
-    return reinterpret_cast<void*>(drawingCanvasPeer->GetCanvas());
+    return peerImpl->GetCanvas();
 }
 
 ani_int GetCanvasId(ArkUICanvasRenderingContext peer)

@@ -600,8 +600,10 @@ void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragrap
             ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s]",
                 Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
         }
+        Color c { animatableTextColor_->Get().GetValue() };
+        c.SetPlaceholder(animatableTextColor_->Get().GetPlaceholder());
         auto length = paragraph->GetParagraphText().length();
-        paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
+        paragraph->UpdateColor(0, length, c);
     }
 }
 
@@ -698,8 +700,10 @@ void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
 void TextContentModifier::ModifyTextColorInTextStyle(Color& textColor)
 {
     if (textColor_.has_value() && animatableTextColor_) {
+        const auto ph = textColor.GetPlaceholder();
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
         textColor = Color(animatableTextColor_->Get().GetValue());
+        textColor.SetPlaceholder(ph);
     }
 }
 
@@ -716,6 +720,7 @@ std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<L
     std::vector<Color> colors;
     for (auto color : colorList) {
         colors.emplace_back(Color(color.GetValue()));
+        colors.back().SetPlaceholder(color.GetPlaceholder());
     }
     return colors;
 }

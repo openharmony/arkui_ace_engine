@@ -63,6 +63,11 @@ public:
         }
     }
 
+    static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+    {
+        ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutPolicy, isWidth);
+    }
+
     static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
     {
         if (height.Unit() == DimensionUnit::CALC) {
@@ -294,6 +299,7 @@ public:
     static void SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value);
     static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
     static void SetAlignRules(FrameNode* frameNode,
         const std::optional<std::map<AlignDirection, AlignRule>>& alignRules);
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
@@ -365,7 +371,8 @@ public:
     };
 
 private:
-    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
+    static bool CheckMenuIsShow(
+        const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode,  bool isBuildFuncNull);
     static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
     static void CreateCustomMenuWithPreview(FrameNode* targetNode,

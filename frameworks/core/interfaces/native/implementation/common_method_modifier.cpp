@@ -70,6 +70,7 @@
 #include "core/interfaces/native/implementation/text_field_modifier.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
+#include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
 #include "dismiss_popup_action_peer.h"
@@ -1303,6 +1304,12 @@ BiasOpt Convert(const Ark_Bias& src)
 }
 
 template<>
+LayoutCalPolicy Convert(const Ark_LayoutPolicy& src)
+{
+    return src ? src->layoutPolicy :LayoutCalPolicy::NO_MATCH;
+}
+
+template<>
 void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
 {
     switch (src) {
@@ -2032,7 +2039,9 @@ void SetWidthImpl(Ark_NativePointer node,
             SetWidthInternal(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
-            LOGE("WidthImpl: Ark_LayoutPolicy processint is not implemented yet!");
+            auto result = Converter::OptConvert<LayoutCalPolicy>(src);
+            ViewAbstractModelStatic::UpdateLayoutPolicyProperty(
+                frameNode, result.value_or(LayoutCalPolicy::NO_MATCH), true);
         },
         [frameNode]() {
             SetWidthInternal(frameNode, std::nullopt);
@@ -2070,7 +2079,9 @@ void SetHeightImpl(Ark_NativePointer node,
             SetHeightInternal(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
-            LOGE("HeightImpl: Ark_LayoutPolicy processint is not implemented yet!");
+            auto result = Converter::OptConvert<LayoutCalPolicy>(src);
+            ViewAbstractModelStatic::UpdateLayoutPolicyProperty(
+                frameNode, result.value_or(LayoutCalPolicy::NO_MATCH), false);
         },
         [frameNode]() {
             SetHeightInternal(frameNode, std::nullopt);
@@ -4876,6 +4887,46 @@ void SetExpandSafeAreaImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
+void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
+                                    const Opt_Array_LayoutSafeAreaType* types,
+                                    const Opt_Array_LayoutSafeAreaEdge* edges)
+{
+    constexpr int32_t LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+    constexpr int32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(types);
+    CHECK_NULL_VOID(edges);
+    NG::IgnoreLayoutSafeAreaOpts opts {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    if (types->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto typeRawArray = Converter::Convert<std::vector<uint32_t>>(types->value);
+        uint32_t layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
+        for (auto typeValue : typeRawArray) {
+            if (typeValue > LAYOUT_SAFE_AREA_TYPE_LIMIT) {
+                layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+            layoutSafeAreaType |= NG::IgnoreLayoutSafeAreaOpts::TypeToMask(typeValue);
+        }
+        opts.type = layoutSafeAreaType;
+    }
+    if (edges->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(edges->value);
+        uint32_t layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+        for (auto edgeValue : edgeRawArray) {
+            if (edgeValue > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+                layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            layoutSafeAreaEdge |= NG::IgnoreLayoutSafeAreaOpts::EdgeToMask(edgeValue);
+        }
+        opts.rawEdges = layoutSafeAreaEdge;
+    }
+    ViewAbstractModelStatic::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
+}
 void SetBackgroundImpl(Ark_NativePointer node,
                        const Opt_CustomNodeBuilder* builder,
                        const Opt_BackgroundOptions* options)
@@ -5429,7 +5480,9 @@ void BindMenuBase(Ark_NativePointer node,
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
                 }, node);
         },
-        []() {});
+        [frameNode, node, menuParam]() {
+            ViewAbstractModelStatic::BindMenu(frameNode, {}, nullptr, menuParam);
+        });
 }
 void SetBindMenu0Impl(Ark_NativePointer node,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
@@ -5467,6 +5520,7 @@ void BindContextMenuBase(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(content);
     menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isShowInSubWindow = true;
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     std::function<void(MenuParam, std::function<void()> &&)> contentBuilder;
     if (!optValue) {
@@ -5530,6 +5584,7 @@ void SetBindContextMenu0Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
     menuParam.isShow = false;
+    menuParam.setShow = false;
     BindContextMenuBase(node, content, responseType, options, menuParam);
 }
 void SetBindContextMenu1Impl(Ark_NativePointer node,
@@ -5540,6 +5595,7 @@ void SetBindContextMenu1Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.isShow = Converter::OptConvertPtr<bool>(isShown).value_or(menuParam.isShow);
+    menuParam.setShow = true;
     auto type = Converter::ArkValue<Opt_ResponseType>(ARK_RESPONSE_TYPE_LONG_PRESS);
     BindContextMenuBase(node, content, &type, options, menuParam);
 }
@@ -6031,6 +6087,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
+        CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,
         CommonMethodModifier::SetBackgroundImage0Impl,
         CommonMethodModifier::SetBackgroundImage1Impl,

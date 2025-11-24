@@ -875,48 +875,6 @@ void TextModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
     pattern->ResetSelectDetectEnable();
 }
 
-void TextModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectDetectConfig(types);
-}
-
-void TextModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectDetectConfig(types);
-}
-
-std::vector<TextDataDetectType> TextModelNG::GetSelectDetectConfig(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, std::vector<TextDataDetectType>());
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
-    return pattern->GetSelectDetectConfig();
-}
-
-void TextModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetSelectDetectConfig();
-}
-
-void TextModelNG::ResetSelectDetectConfig()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetSelectDetectConfig();
-}
-
 void TextModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();

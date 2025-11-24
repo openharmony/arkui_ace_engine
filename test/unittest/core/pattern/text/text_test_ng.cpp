@@ -98,31 +98,24 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
     textModelNG.SetFontWeight(FontWeight::LIGHTER);
     textStyle.SetFontWeight(FontWeight::W100);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W100);
-
     textModelNG.SetFontWeight(FontWeight::REGULAR);
     textStyle.SetFontWeight(FontWeight::W400);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
-
     textModelNG.SetFontWeight(FontWeight::NORMAL);
     textStyle.SetFontWeight(FontWeight::W400);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
-
     textModelNG.SetFontWeight(FontWeight::MEDIUM);
     textStyle.SetFontWeight(FontWeight::W500);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W500);
-
     textModelNG.SetFontWeight(FontWeight::BOLD);
     textStyle.SetFontWeight(FontWeight::W700);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W700);
-
     textModelNG.SetFontWeight(FontWeight::BOLDER);
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
-
     textModelNG.SetFontWeight(FontWeight::W900);
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
-
     textModelNG.SetOnClick(onClickFunc, std::numeric_limits<double>::infinity());
     textModelNG.SetRemoteMessage(onRemoteMessage);
     textModelNG.SetCopyOption(copyOption);
@@ -719,6 +712,7 @@ HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     SpanModelNG spanModelNG;
     spanModelNG.Create(u"h\n");
     spanModelNG.SetFontSize(FONT_SIZE_VALUE);
@@ -727,13 +721,16 @@ HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
     textPattern->spans_.emplace_back(spanNode->spanItem_);
     textPattern->childNodes_.push_back(spanNode);
     ASSERT_FALSE(textPattern->spans_.empty());
+
     auto firstSpanItem = textPattern->spans_.front();
     ASSERT_NE(firstSpanItem, nullptr);
+
     bool isTouchTrigger = false;
     firstSpanItem->position = 2;
     firstSpanItem->onTouch = [&isTouchTrigger](TouchEventInfo& info) { isTouchTrigger = true; };
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
+
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
@@ -855,6 +852,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     pattern->AttachToFrameNode(frameNode);
     pattern->selectOverlayProxy_ = nullptr;
     DirtySwapConfig config;
@@ -862,6 +860,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
+
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     auto ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);

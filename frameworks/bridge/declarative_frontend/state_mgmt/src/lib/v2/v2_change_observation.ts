@@ -67,6 +67,7 @@ class ObserveV2 {
   public static readonly SYMBOL_MAKE_OBSERVED = Symbol('___make_observed__');
 
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
+  public static readonly ENV_PREFIX = '__env_'; // ENV_PREFIX + attrName => backing store attribute name
   public static readonly OB_PREFIX_LEN = 5;
   public static readonly NO_REUSE = -1; // mark no reuse on-going
   // used by array Handler to create dependency on artificial 'length'

@@ -16,6 +16,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
@@ -483,12 +484,17 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockTimeZoneOffset(ArkUIRuntimeC
     Local<JSValueRef> hourWestVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
     float hourWest = NAN;
     if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->Int32Value(vm))) {
         hourWest = GetHoursWest(hourWestVal->ToNumber(vm)->Value());
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (themeColors.has_value()) {
+        nodeModifiers->getTextClockModifier()->setFontColor(
+            nativeNode, themeColors->FontSecondary().GetValue());
+    }
     nodeModifiers->getTextClockModifier()->setTextClockTimeZoneOffset(nativeNode, hourWest);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -501,6 +507,13 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallI
     Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
+    if (themeColors.has_value()) {
+        auto nodeModifiers = GetArkUINodeModifiers();
+        CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+        nodeModifiers->getTextClockModifier()->setFontColor(
+            nativeNode, themeColors->FontSecondary().GetValue());
+    }
 
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));

@@ -232,6 +232,7 @@ public:
     void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetCameraCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) override;
     void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnInterceptKeyboardAttach(
@@ -257,6 +258,7 @@ public:
     void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
         const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold) override;
+    void SetEnableImageAnalyzer(bool isEnabled) override;
     void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetForceEnableZoom(bool isEnabled) override;
@@ -373,6 +375,7 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetBlankScreenDetectionConfig(
         FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);
+    static void SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled);
     static void SetOnContextMenuShow(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnSafeBrowsingCheckResult(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResult);
@@ -409,6 +412,8 @@ public:
     static void SetOnSafeBrowsingCheckFinish(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinish);
     static void SetBackToTop(FrameNode* frameNode, bool isBackToTop);
+    static void SetCameraCaptureStateChangedId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

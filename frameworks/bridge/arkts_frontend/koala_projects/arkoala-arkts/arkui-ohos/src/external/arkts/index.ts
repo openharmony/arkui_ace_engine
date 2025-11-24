@@ -46,3 +46,5 @@ export type UnifiedData = unifiedDataChannel.UnifiedData
 export type Summary = unifiedDataChannel.Summary
 export type DataSyncOptions = unifiedDataChannel.GetDataParams
 export type UniformDataType = uniformTypeDescriptor.UniformDataType
+export type UIAbilityContext = common.UIAbilityContext
+export type ExtensionContext = common.ExtensionContext

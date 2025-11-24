@@ -72,6 +72,7 @@ using RSPathDirection = Testing::TestingPathDirection;
 using RSPathEffect = Testing::TestingPathEffect;
 using RSFilter = Testing::TestingFilter;
 using RSColor = Testing::TestingColor;
+using RSColorPlaceholder = Testing::TestingColorPlaceholder;
 using RSMaskFilter = Testing::TestingMaskFilter;
 using RSImageFilter = Testing::TestingImageFilter;
 using RSBlurType = Testing::BlurType;

@@ -178,6 +178,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsToolbar(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
+    static void JsColorPicker(const JSCallbackInfo& info);
     static void JsBackgroundImage(const JSCallbackInfo& info);
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
@@ -668,7 +669,7 @@ public:
      */
     static void JSBind(BindingTarget globalObj);
     static void JsNotifyDragStartRequest(const JSCallbackInfo& info);
-    static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
+    static void ParseDialogCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
         std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static void ParseAppearDialogCallback(const JSCallbackInfo& info, DialogProperties& dialogProperties);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);

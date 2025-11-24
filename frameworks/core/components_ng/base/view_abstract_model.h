@@ -106,6 +106,10 @@ public:
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;
+    // Bind dynamic color picker placeholder to current component. Placeholder NONE clears binding.
+    // strategy chooses sampling algorithm; interval hints sampling period in ms (0 = backend default).
+    virtual void SetColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy = ColorPickStrategy::NONE,
+        uint32_t interval = 0) {}
     virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageWithResourceObj(
         const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;

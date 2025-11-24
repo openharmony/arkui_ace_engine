@@ -16,6 +16,7 @@
 #include "cj_badge_ffi.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -112,7 +113,13 @@ void FfiOHOSAceFrameworkBadgeCreateV2(int32_t count, CJBadgeStyleV2 style, int32
     BadgeParameters badgeParameters = CreateBaseV2(style, position);
     badgeParameters.badgeCount = count;
     badgeParameters.badgeMaxCount = maxCount;
-    BadgeModel::GetInstance()->Create(badgeParameters);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        auto frameNode = BadgeModel::GetInstance()->CreateBadgeFrameNode();
+        BadgeModel::GetInstance()->SetIsDefault(false, false);
+        BadgeModel::GetInstance()->CreateByFrameNode(frameNode, badgeParameters);
+    } else {
+        BadgeModel::GetInstance()->Create(badgeParameters);
+    }
 }
 
 void FfiOHOSAceFrameworkBadgeCreateText(const char* value, CJBadgeStyle style, int32_t position)
@@ -126,6 +133,12 @@ void FfiOHOSAceFrameworkBadgeCreateTextV2(const char* value, CJBadgeStyleV2 styl
 {
     BadgeParameters badgeParameters = CreateBaseV2(style, position);
     badgeParameters.badgeValue = value;
-    BadgeModel::GetInstance()->Create(badgeParameters);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        auto frameNode = BadgeModel::GetInstance()->CreateBadgeFrameNode();
+        BadgeModel::GetInstance()->SetIsDefault(false, false);
+        BadgeModel::GetInstance()->CreateByFrameNode(frameNode, badgeParameters);
+    } else {
+        BadgeModel::GetInstance()->Create(badgeParameters);
+    }
 }
 }

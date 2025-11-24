@@ -156,6 +156,11 @@ public:
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
+    std::string ToString() const;
+    static int32_t Count()
+    {
+        return count_.load();
+    }
 
     virtual void OnChildUpdateDone() {};
 
@@ -302,7 +307,7 @@ public:
         RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
-    virtual void DumpTree(int32_t depth, bool hasJson = false);
+    virtual void DumpTree(int32_t depth, bool hasJson = false, const std::string& desc = "");
     void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
@@ -1325,6 +1330,8 @@ private:
     
     bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
+    void DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc);
+    void DumpMoreBasicInfo();
 
     std::list<RefPtr<UINode>> children_;
     std::list<RefPtr<FrameNode>> adoptedChildren_;
@@ -1398,6 +1405,7 @@ private:
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
+    static std::atomic_int32_t count_;
 
     bool isStaticNode_ = false;
     bool uiNodeGcEnable_ = false;

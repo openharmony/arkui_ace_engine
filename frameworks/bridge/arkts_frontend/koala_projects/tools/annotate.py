@@ -128,7 +128,7 @@ def collect_overriden(text, class_name):
             elif line == '}':
                 break
     if not find_class:
-        print('[ERROR] Find no {class_name} in customComponents.ets')
+        print(f"[ERROR] Find no {class_name} in customComponents.ets")
         raise Exception(f"Find no {class_name} in customComponents.ets")
     return retVal
 

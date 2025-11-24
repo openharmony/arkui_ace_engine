@@ -839,23 +839,6 @@ HWTEST_F(DragEventTestNg, DragEventTestNg008, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragEventTestNg009
- * @tc.desc: Invoke GetPreviewPixelMap.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
-{
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
-
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
-}
-
-/**
  * @tc.name: DragEventExecutePreDragActionTest001
  * @tc.desc: Create DragEventActuator and test ExecutePreDragAction function.
  * @tc.type: FUNC
@@ -917,6 +900,23 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest001, TestSize.Level1)
     EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
     EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+}
+
+/**
+ * @tc.name: DragEventTestNg009
+ * @tc.desc: Invoke GetPreviewPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
+{
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
 }
 
 /**
@@ -1049,19 +1049,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     EXPECT_EQ(badgeNumber.value(), 1);
 
     /**
-     * @tc.steps: step7. Set the NumberBadge to a special value -1.
-     * @tc.expected: badgeNumber is 1.
-     */
-    previewOptions.isNumber = true;
-    previewOptions.badgeNumber = -1;
-    frameNode->SetDragPreviewOptions(previewOptions);
-    dragPreviewOptions = frameNode->GetDragPreviewOption();
-    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
-    EXPECT_EQ(badgeNumber.has_value(), true);
-    EXPECT_EQ(badgeNumber.value(), 1);
-
-    /**
-     * @tc.steps: step8. Set the NumberBadge to a special value 100.
+     * @tc.steps: step7. Set the NumberBadge to a special value 100.
      * @tc.expected: badgeNumber is the set value.
      */
     previewOptions.isNumber = true;
@@ -1071,6 +1059,18 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
     EXPECT_EQ(badgeNumber.has_value(), true);
     EXPECT_EQ(badgeNumber.value(), NUMBER_BADGE_SIZE_100);
+
+    /**
+     * @tc.steps: step8. Set the NumberBadge to a special value -1.
+     * @tc.expected: badgeNumber is 1.
+     */
+    previewOptions.isNumber = true;
+    previewOptions.badgeNumber = -1;
+    frameNode->SetDragPreviewOptions(previewOptions);
+    dragPreviewOptions = frameNode->GetDragPreviewOption();
+    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), true);
+    EXPECT_EQ(badgeNumber.value(), 1);
 }
 
 /**

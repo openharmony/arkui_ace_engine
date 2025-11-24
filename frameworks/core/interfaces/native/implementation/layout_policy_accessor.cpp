@@ -16,15 +16,17 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include  "core/interfaces/native/implementation/layout_policy_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutPolicyAccessor {
 void DestroyPeerImpl(Ark_LayoutPolicy peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_LayoutPolicy ConstructImpl()
 {
-    return {};
+    return PeerUtils::CreatePeer<LayoutPolicyPeer>(OHOS::Ace::LayoutCalPolicy::NO_MATCH);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +34,15 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_LayoutPolicy GetMatchParentImpl()
 {
-    return {};
+    return PeerUtils::CreatePeer<LayoutPolicyPeer>(OHOS::Ace::LayoutCalPolicy::MATCH_PARENT);
+}
+Ark_LayoutPolicy GetWrapContentImpl()
+{
+    return PeerUtils::CreatePeer<LayoutPolicyPeer>(OHOS::Ace::LayoutCalPolicy::WRAP_CONTENT);
+}
+Ark_LayoutPolicy GetFixAtIdealSizeImpl()
+{
+    return PeerUtils::CreatePeer<LayoutPolicyPeer>(OHOS::Ace::LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
 }
 } // LayoutPolicyAccessor
 const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
@@ -42,8 +52,9 @@ const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
         LayoutPolicyAccessor::ConstructImpl,
         LayoutPolicyAccessor::GetFinalizerImpl,
         LayoutPolicyAccessor::GetMatchParentImpl,
+        LayoutPolicyAccessor::GetWrapContentImpl,
+        LayoutPolicyAccessor::GetFixAtIdealSizeImpl,
     };
     return &LayoutPolicyAccessorImpl;
 }
-
 }

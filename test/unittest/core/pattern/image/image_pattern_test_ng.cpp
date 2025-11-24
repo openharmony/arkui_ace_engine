@@ -2582,8 +2582,8 @@ HWTEST_F(ImagePatternTestNg, GetContentTransitionParam003, TestSize.Level0)
      * @tc.steps: step2. call GetContentTransitionParam.
      */
     EXPECT_EQ(ImageModelNG::GetContentTransition(AceType::RawPtr(frameNode)), ContentTransitionType::OPACITY);
-    EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::OPACITY);
-    EXPECT_EQ(imagePattern->contentMod_->GetContentTransitionParam(), ContentTransitionType::OPACITY);
+    EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::IDENTITY);
+    EXPECT_EQ(imagePattern->contentMod_->GetContentTransitionParam(), ContentTransitionType::IDENTITY);
 }
 
 /**

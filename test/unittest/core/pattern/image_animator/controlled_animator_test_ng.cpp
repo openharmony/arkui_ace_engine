@@ -191,6 +191,31 @@ HWTEST_F(ControlledAnimatorTestNg, PostPlayTask004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostPlayTask005
+ * @tc.desc: test PostPlayTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ControlledAnimatorTestNg, PostPlayTask005, TestSize.Level1)
+{
+    auto controlledAnimator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(controlledAnimator, nullptr);
+
+    int32_t idx = 2;
+    int32_t iteration = 0;
+    int32_t idxOffset = 1;
+    int32_t elapsedTime = 1;
+    controlledAnimator->iteration_ = 1;
+    controlledAnimator->needFireRepeatEvent_ = false;
+
+    std::function<void(int32_t)> func = [](int32_t num) {};
+    controlledAnimator->AddListener(func);
+    std::vector<PictureInfo> frames { { 0.5f, 100 }, { 0.5f, 200 } };
+    controlledAnimator->AddInterpolator(frames);
+    controlledAnimator->PostPlayTask(idx, iteration, idxOffset, elapsedTime);
+    EXPECT_EQ(controlledAnimator->runningIdx_, 2);
+}
+
+/**
  * @tc.name: Forward001
  * @tc.desc: test Forward.
  * @tc.type: FUNC

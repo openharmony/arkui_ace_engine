@@ -246,6 +246,14 @@ std::string ConsoleLogOhos::GetSourceId()
     return "";
 }
 
+int ConsoleLogOhos::GetSource()
+{
+    if (message_) {
+        return message_->Source();
+    }
+    return -1;
+}
+
 void ResultOhos::Confirm()
 {
     if (result_) {
@@ -2334,6 +2342,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                           webCom->GetOnLoadFinishedEventId(), oldContext);
         onSafeBrowsingCheckFinishV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckFinishEvent()
                                                       : nullptr;
+        onCameraCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnCameraCaptureStateChangedEvent()
+                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                           webCom->GetCameraCaptureStateChangedId(), oldContext);
     }
     return true;
 }
@@ -6979,6 +6990,13 @@ void WebDelegate::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, 
     webPattern->UpdateClippedSelectionBounds(x, y, w, h);
 }
 
+void WebDelegate::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnClippedSelectionBoundsChanged(x, y, width, height);
+}
+
 bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
@@ -8734,6 +8752,22 @@ void WebDelegate::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
         TaskExecutor::TaskType::JS, "ArkUIWebViewportFitChanged");
 }
 
+void WebDelegate::OnCameraCaptureStateChanged(int originalState, int newState)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), originalState, newState]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onCameraCaptureStateChangedV2 = delegate->onCameraCaptureStateChangedV2_;
+            if (onCameraCaptureStateChangedV2) {
+                onCameraCaptureStateChangedV2(std::make_shared<CameraCaptureStateEvent>(
+                    static_cast<int32_t>(originalState), static_cast<int32_t>(newState)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebCameraStateChanged");
+}
+
 void WebDelegate::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
     bool changed = false;
@@ -9336,6 +9370,25 @@ void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vecto
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateBlankScreenDetectionConfig");
+}
+
+void WebDelegate::UpdateEnableImageAnalyzer(bool enable)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto preference = delegate->nweb_->GetPreference();
+                if (preference) {
+                    preference->PutImageAnalyzerEnabled(enable);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateEnableImageAnalyzer");
 }
 
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)

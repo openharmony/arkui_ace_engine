@@ -1,6 +1,7 @@
 import { ArkBaseNode } from "./ArkBaseNode";
 import { TextTimerOptions, ArkTextTimerComponent, TextTimerAttribute, ResourceColor, ShadowOptions, FontStyle,
-    FontWeight, ResourceStr, Length, TextTimerConfiguration } from "../framework";
+    FontWeight, ResourceStr, Length, TextTimerConfiguration, TimerCallback } from "../framework";
+import { int32 } from "@koalaui/common"
 import { ContentModifier } from "#handwritten"
 
 export class ArkTextTimerNode extends ArkBaseNode implements TextTimerAttribute {
@@ -35,7 +36,7 @@ export class ArkTextTimerNode extends ArkBaseNode implements TextTimerAttribute 
         this.markDirty()
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         this.component.fontWeight(value)
         this.markDirty()
         return this
@@ -45,7 +46,7 @@ export class ArkTextTimerNode extends ArkBaseNode implements TextTimerAttribute 
         this.markDirty()
         return this
     }
-    public onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
+    public onTimer(value: TimerCallback | undefined): this {
         this.component.onTimer(value)
         this.markDirty()
         return this

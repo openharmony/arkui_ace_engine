@@ -244,6 +244,9 @@ void SwiperEventHub::NotifySwiperObserver(const RefPtr<FrameNode>& hostNode, int
     CHECK_NULL_VOID(hostNode);
     auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    if (!swiperPattern->IsPureSwiper()) {
+        return;
+    }
     SwiperContentInfo info;
     info.id = hostNode->GetInspectorId().value_or("");
     info.uniqueId = hostNode->GetId();

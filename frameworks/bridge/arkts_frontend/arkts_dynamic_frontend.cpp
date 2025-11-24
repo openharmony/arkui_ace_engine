@@ -50,7 +50,7 @@ const AppInfo KOALA_APP_INFO = {
     "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
     "C{arkui.component.customComponent.EntryPoint}:C{arkui.ArkUIEntry.Application}",
     "start",
-    ":l",
+    "z:l",
     "enter",
     "iil:z",
     "emitEvent",
@@ -242,7 +242,7 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
         return UIContentErrorCode::INVALID_URL);
 
     ani_long result;
-    ANI_CALL(env, Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result),
+    ANI_CALL(env, Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, ANI_FALSE),
         return UIContentErrorCode::INVALID_URL);
 
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);

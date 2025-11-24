@@ -132,6 +132,9 @@ const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
 const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
+const std::string FIELD_TEXT_CHANGE_EVENT = "textChange";
+const std::string FIELD_BLUR_EVENT = "blur";
+const std::string FIELD_FOCUS_EVENT = "focus";
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
 const std::string PREVIEW_STYLE_NORMAL = "normal";
@@ -1171,6 +1174,7 @@ void TextFieldPattern::HandleFocusEvent()
     RequestKeyboardByFocusSwitch();
     ResetFirstClickAfterGetFocus();
     SetFocusStyle();
+    ReportTextChangeEvent(FIELD_FOCUS_EVENT);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
@@ -1619,6 +1623,7 @@ void TextFieldPattern::HandleBlurEvent()
         RestoreDefaultMouseState();
     }
     ReportEvent();
+    ReportTextChangeEvent(FIELD_BLUR_EVENT);
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
     ClearFocusStyle();
@@ -3204,30 +3209,9 @@ bool TextFieldPattern::PrepareAIMenuOptions(
     auto detectorAdapter = GetSelectDetectorAdapter();
     int selectedAiEntityNum = 0;
     auto spanIter = detectorAdapter->aiSpanMap_.begin();
-    std::unordered_map<TextDataDetectType, bool> typeMap;
-    // Default. All Detect Types
-    for (auto& mapItr : TEXT_DETECT_MAP) {
-        typeMap[mapItr.first] = true;
-    }
-    // First. Use DataDetectorConfig
-    if (selectDetectEnabled_) {
-        if (selectDetectEnabledIsUserSet_) {
-            for (auto& mapItr : TEXT_DETECT_MAP) {
-                typeMap[mapItr.first] = true;
-            }
-        }
-        if (selectDetectConfigIsUserSet_ && !selectDataDetectorTypes_.empty()) {
-            typeMap.clear();
-            for (auto typeItr : selectDataDetectorTypes_) {
-                typeMap[typeItr] = true;
-            }
-        }
-    } else {
-        typeMap.clear();
-    }
     aiMenuOptions.clear();
     for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
-        if (typeMap.find(spanIter->second.type) == typeMap.end()) {
+        if (TEXT_DETECT_MAP.find(spanIter->second.type) == TEXT_DETECT_MAP.end()) {
             continue;
         }
         selectedAiEntityNum++;
@@ -3842,6 +3826,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     AddTextFireOnChange();
+    ReportTextChangeEvent(FIELD_TEXT_CHANGE_EVENT);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -4286,33 +4271,6 @@ void TextFieldPattern::ResetSelectDetectEnable()
 {
     selectDetectEnabledIsUserSet_ = false;
     selectDetectEnabled_ = true;
-}
-
-void TextFieldPattern::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
-{
-    if (types.empty()) {
-        types = TEXT_DETECT_ALL_TYPES_VECTOR;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(GetSelectDetectorAdapter());
-    selectDetectorAdapter_->frameNode_ = host;
-    selectDetectConfigIsUserSet_ = true;
-    if (types == selectDataDetectorTypes_) {
-        return;
-    }
-    selectDataDetectorTypes_ = types;
-}
-
-std::vector<TextDataDetectType> TextFieldPattern::GetSelectDetectConfig()
-{
-    return selectDataDetectorTypes_;
-}
-
-void TextFieldPattern::ResetSelectDetectConfig()
-{
-    selectDetectConfigIsUserSet_ = false;
-    selectDataDetectorTypes_.clear();
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
@@ -10308,6 +10266,15 @@ void TextFieldPattern::ReportEvent()
         data->Put("inputType", static_cast<int16_t>(GetKeyboard()));
         data->Put("text", GetTextValue().data());
         data->Put("position", host->GetGeometryNode()->GetFrameRect().ToString().data());
+        auto rectObj = JsonUtil::Create();
+        auto hostGeometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(hostGeometryNode);
+        auto hostFrameRect = hostGeometryNode->GetFrameRect();
+        rectObj->Put("x", hostFrameRect.GetX());
+        rectObj->Put("y", hostFrameRect.GetY());
+        rectObj->Put("width", hostFrameRect.Width());
+        rectObj->Put("height", hostFrameRect.Height());
+        data->Put("rect", rectObj);
         // report all use textfield component unfocus event,more than just the search box
         UiSessionManager::GetInstance()->ReportSearchEvent(data->ToString());
     }
@@ -10320,6 +10287,31 @@ void TextFieldPattern::ReportEvent()
         SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextField reportComponentChangeEvent %{public}zu",
             host->GetId(), textString.length());
     }
+#endif
+}
+
+void TextFieldPattern::ReportTextChangeEvent(const std::string& eventType)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(UiSessionManager::GetInstance()->GetTextChangeEventRegistered());
+    auto data = JsonUtil::Create();
+    data->Put("event", eventType.data());
+    data->Put("id", host->GetId());
+    data->Put("$type", host->GetTag().data());
+    data->Put("inputType", static_cast<int16_t>(GetKeyboard()));
+    data->Put("text", GetTextValue().data());
+    auto rectObj = JsonUtil::Create();
+    auto hostGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(hostGeometryNode);
+    auto hostFrameRect = hostGeometryNode->GetFrameRect();
+    rectObj->Put("x", hostFrameRect.GetX());
+    rectObj->Put("y", hostFrameRect.GetY());
+    rectObj->Put("width", hostFrameRect.Width());
+    rectObj->Put("height", hostFrameRect.Height());
+    data->Put("rect", rectObj);
+    UiSessionManager::GetInstance()->ReportTextChangeEvent(data->ToString());
 #endif
 }
 

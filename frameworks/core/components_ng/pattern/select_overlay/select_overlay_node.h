@@ -110,6 +110,16 @@ public:
     void UpdateToolBarFromMainWindow(bool menuItemChanged, bool noAnimation = false);
     static int32_t ConvertToIntMenuId(const std::string& menuId);
     static std::string ConvertToStrMenuId(int32_t menuId);
+    void GetDefaultButtonAndMenuWidth(float& maxWidth);
+    float GetMaxDefaultButtonAndMenuWidth() const
+    {
+        return maxDefaultButtonAndMenuWidth_;
+    }
+
+    int32_t GetScopeId() const
+    {
+        return scopeId_;
+    }
 
 private:
     void CreateToolBar();
@@ -162,7 +172,6 @@ private:
     std::function<void()> CreateExtensionMenuOptionCallback(int32_t id, const OnMenuItemCallback& onCreateCallback,
         const std::function<void()>& systemEvent, const MenuOptionsParam& item);
     void CreatExtensionMenu(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& caller);
-    void GetDefaultButtonAndMenuWidth(float& maxWidth);
 
     void MoreAnimation(bool noAnimation);
     void BackAnimation(bool noAnimation);
@@ -205,6 +214,7 @@ private:
     void SetSelectMenuInnerSize();
     void ShowAskCelia(
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    std::optional<float> GetParentWidth();
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
@@ -255,6 +265,8 @@ private:
 
     bool isMoreOrBackSymbolIcon_ = false;
     bool isCustomMenuAppear_ = false;
+    float maxDefaultButtonAndMenuWidth_ = 0.0f;
+    int32_t scopeId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

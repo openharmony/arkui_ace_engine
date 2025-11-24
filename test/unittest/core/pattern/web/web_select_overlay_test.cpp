@@ -637,9 +637,17 @@ public:
     {
         return edgeHeight;
     };
-
+    void SetDragging(bool dragging)
+    {
+        isDragging = dragging;
+    }
+    bool IsDragging() override
+    {
+        return isDragging;
+    };
 private:
     float edgeHeight = 10.0;
+    bool isDragging = false;
 };
 
 class NWebTouchHandleStateBeginDummy : public OHOS::NWeb::NWebTouchHandleState {
@@ -681,9 +689,17 @@ public:
     {
         return edgeHeight;
     };
-
+    void SetDragging(bool dragging)
+    {
+        isDragging = dragging;
+    }
+    bool IsDragging() override
+    {
+        return isDragging;
+    };
 private:
     float edgeHeight = 10.0;
+    bool isDragging = false;
 };
 
 class WebSelectOverlayTest : public testing::Test {
@@ -2698,6 +2714,72 @@ HWTEST_F(WebSelectOverlayTest, IsSelectHandleReverse003, TestSize.Level1)
     overlay.startSelectionHandle_ = startSelectionHandle;
     overlay.endSelectionHandle_ = endSelectionHandle;
     overlay.IsSelectHandleReverse();
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), false);
+#endif
+}
+
+/**
+ * @tc.name: IsSelectHandleReverse004
+ * @tc.desc: IsSelectHandleReverse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsSelectHandleReverse004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginDummy>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
+    startSelectionHandle->SetDragging(true);
+    endSelectionHandle->SetDragging(false);
+    overlay.startSelectionHandle_ = startSelectionHandle;
+    overlay.endSelectionHandle_ = endSelectionHandle;
+    overlay.selectOverlayDragging_ = true;
+    overlay.isCurrentStartHandleDragging_ = true;
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), false);
+    overlay.isCurrentStartHandleDragging_ = false;
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), true);
+#endif
+}
+
+/**
+ * @tc.name: IsSelectHandleReverse005
+ * @tc.desc: IsSelectHandleReverse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsSelectHandleReverse005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginDummy>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
+    startSelectionHandle->SetDragging(false);
+    endSelectionHandle->SetDragging(true);
+    overlay.startSelectionHandle_ = startSelectionHandle;
+    overlay.endSelectionHandle_ = endSelectionHandle;
+    overlay.selectOverlayDragging_ = true;
+    overlay.isCurrentStartHandleDragging_ = true;
+    EXPECT_EQ(overlay.IsSelectHandleReverse(), true);
+    overlay.isCurrentStartHandleDragging_ = false;
     EXPECT_EQ(overlay.IsSelectHandleReverse(), false);
 #endif
 }

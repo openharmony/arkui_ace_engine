@@ -15,8 +15,12 @@
 
 import { FrameNode, FrameNodeUtils } from 'arkui/FrameNode';
 import { ArkUIGeneratedNativeModule } from '#components';
+import { ArkUINativeModule } from '#components'
+import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { int32, int64 } from '@koalaui/common';
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
+    registerNativeModuleLibraryName, wrapSystemCallback,
     runtimeType, Finalizable, SerializerBase, DeserializerBase } from '@koalaui/interop';
 import { _animateTo } from 'arkui/base/ArkAnimation';
 import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
@@ -73,7 +77,7 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
     DialogExtender, IUIContext } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
-import { IUIContext } from "arkui/component/idlize"
+import { IUIContext, SystemOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 
 export class ContextRecord {
@@ -245,7 +249,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     }
 
     // @ts-ignore
-    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let pixmap = componentSnapshot.get(id, options);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -271,7 +275,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
 
     // @ts-ignore
     public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
-                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
@@ -286,13 +290,13 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         return pixmap;
     }
 
-    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap {
+    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let pixmap = componentSnapshot.getSync(id, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
-    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let pixmap = componentSnapshot.getWithUniqueId(uniqueId, options);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -307,7 +311,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     }
 
     public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
-        checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let node = content.getFrameNode();
         if (node === undefined || node === null) {
@@ -374,7 +378,7 @@ export class DragControllerImpl extends DragController {
 
     // @ts-ignore
     public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
-        Promise<dragController.DragEventParam> {
+        Promise<dragController.DragEventParam> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let promise = new Promise<dragController.DragEventParam>((resolve, reject) => { });
         if (typeof custom === "function") {
@@ -1298,6 +1302,8 @@ export class UIContextImpl extends UIContext {
     buffer: KBuffer = new KBuffer(this.bufferSize)
     position: int64 = 0
     deserializer: DeserializerBase = new DeserializerBase(this.buffer.buffer, this.bufferSize)
+    static windowFreeInstanceId: int32 = -1
+    static initFlag_ = false
 
     constructor(instanceId: int32) {
         super()
@@ -1466,7 +1472,35 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = IUIContext.dispatchKeyEvent(node, event);
         ArkUIAniModule._Common_Restore_InstanceId();
-        return true;
+        return result;
+    }
+
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        if (!UIContextImpl.initFlag_) {
+            UIContextImpl.initFlag_ = true;
+            wrapSystemCallback(1, (buff : KSerializerBuffer, len : int32) => {
+                deserializeAndCallCallback(new DeserializerBase(buff, len))
+                return 0
+            })
+        }
+        if (UIContextImpl.windowFreeInstanceId > 0) {
+            return UIContextUtil.getOrCreateUIContextById(UIContextImpl.windowFreeInstanceId)
+        }
+        const instanceId = ArkUIAniModule._CreateWindowFreeContainer(context)
+        if (instanceId < 0) {
+            return undefined
+        }
+        UIContextImpl.windowFreeInstanceId = instanceId;
+        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
+        return uiContext
+    }
+
+    static destroyUIContextWithoutWindow() {
+        if (UIContextImpl.windowFreeInstanceId > 0) {
+            ArkUIAniModule._DestroyWindowFreeContainer(UIContextImpl.windowFreeInstanceId)
+            UIContextUtil.removeUIContext(UIContextImpl.windowFreeInstanceId)
+            UIContextImpl.windowFreeInstanceId = -1
+        }
     }
 
     public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
@@ -1568,10 +1602,7 @@ export class UIContextImpl extends UIContext {
     }
     public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
                                               delayTime: number): void {
-        const onFrameCallback_casted = onFrameCallback as (((index: number) => void))
-        const onIdleCallback_casted = onIdleCallback as (((index: number) => void))
-        const delayTime_casted = delayTime as (number)
-        this.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
+        SystemOps.setFrameCallback(onFrameCallback, onIdleCallback, delayTime);
         return
     }
       public getWindowName(): string | undefined {
@@ -1606,16 +1637,6 @@ export class UIContextImpl extends UIContext {
 
     public getId() : int32 {
         return this.instanceId_;
-    }
-    private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
-                                                         onIdleCallback: ((index: number) => void),
-                                                         delayTime: number): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onFrameCallback)
-        thisSerializer.holdAndWriteCallback(onIdleCallback)
-        // ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
-        //                                                        thisSerializer.length(), delayTime)
-        thisSerializer.release()
     }
     runScopedTask(callback: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)

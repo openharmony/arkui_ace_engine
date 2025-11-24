@@ -23,6 +23,8 @@ import { SizeOptions } from 'arkui/framework';
 import { AnimateParam } from 'arkui/framework';
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from '@ohos/animator';
 import { Context, PointerStyle, PixelMap } from '#external';
+import { UIAbilityContext, ExtensionContext } from "#external"
+import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
@@ -230,7 +232,7 @@ export class ComponentSnapshot {
         throw Error("get with callback not implemented in ComponentSnapshot!")
     }
     //@ts-ignore
-    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("get with promise not implemented in ComponentSnapshot!")
     }
     //@ts-ignore
@@ -241,13 +243,13 @@ export class ComponentSnapshot {
     }
     //@ts-ignore
     public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
-                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("createFromBuilder with promise not implemented in ComponentSnapshot!")
     }
-    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap {
+    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap | null {
         throw Error("getSync not implemented in ComponentSnapshot!")
     }
-    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getWithUniqueId not implemented in ComponentSnapshot!")
     }
 
@@ -255,7 +257,8 @@ export class ComponentSnapshot {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 }
@@ -268,7 +271,7 @@ export class DragController {
     }
     //@ts-ignore
     public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
-        Promise<dragController.DragEventParam> {
+        Promise<dragController.DragEventParam> | null {
         throw Error("executeDrag with promise not implemented in DragController!")
     }
     public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
@@ -683,6 +686,12 @@ export class UIContext {
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
     }
+    static createUIContextWithoutWindow(context: UIAbilityContext | ExtensionContext) : UIContext | undefined {
+        return UIContextImpl.createUIContextWithoutWindow(context)
+    }
+    static destroyUIContextWithoutWindow() {
+        UIContextImpl.destroyUIContextWithoutWindow()
+    }
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
@@ -754,6 +763,30 @@ export class UIObserver {
     public off(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback?: ((param: object) => void)): void {
         if (this.observerImpl) {
             this.observerImpl!.off(type, options, callback);
+        }
+    }
+
+    public onScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(options, callback);
+        }
+    }
+
+    public offScrollEvent(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(options, callback);
+        }
+    }
+
+    public onScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onScrollEvent(callback);
+        }
+    }
+
+    public offScrollEvent(callback: Callback<uiObserver.ScrollEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offScrollEvent(callback);
         }
     }
 

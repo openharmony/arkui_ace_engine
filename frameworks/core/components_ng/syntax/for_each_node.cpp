@@ -178,6 +178,9 @@ void ForEachNode::FlushUpdateAndMarkDirty()
 {
     if (ids_ == tempIds_ && !isThisRepeatNode_) {
         tempIds_.clear();
+        TAG_LOGI(AceLogTag::ACE_FOREACH, "ForEachNode skip mark dirty. Id[%{public}d], Ids.size[%{public}zu]",
+            GetId(), ids_.size());
+        ACE_SCOPED_TRACE("ForEachNode skip mark dirty. Id[%d], Ids.size[%zu]", GetId(), ids_.size());
         return;
     }
     tempIds_.clear();

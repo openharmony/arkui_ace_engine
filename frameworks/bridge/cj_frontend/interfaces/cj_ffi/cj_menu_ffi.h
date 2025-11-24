@@ -48,6 +48,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkMenuSetFontColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkMenuSetWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkMenuSetRadiusByLength(double size, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkMenuSetRadiusByBorderRadiuses(CBorderRadiuses radius);
+CJ_EXPORT void FfiOHOSAceFrameworkMenuResetRadius();
 CJ_EXPORT void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool hasValue);
 CJ_EXPORT void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, bool hasValue);
 CJ_EXPORT void FfiOHOSAceFrameworkMenuSetExpandingMode(int32_t mode);

@@ -84,6 +84,7 @@ public:
     virtual std::string GetLog() = 0;
     virtual int GetLogLevel() = 0;
     virtual std::string GetSourceId() = 0;
+    virtual int GetSource() = 0;
 };
 
 class WebConsoleMessageParam : public WebConsoleLog {
@@ -113,11 +114,17 @@ public:
         return messageLevel_;
     }
 
+    int GetSource() override
+    {
+        return source_;
+    }
+
 private:
     std::string message_;
     std::string sourceId_;
     int lineNumber_;
     int messageLevel_;
+    int source_ = 0;
 };
 
 class WebFileSelectorParam : public AceType {
@@ -2317,6 +2324,28 @@ public:
 private:
     std::string url_;
     std::vector<std::string> adsBlocked_;
+};
+
+class ACE_EXPORT CameraCaptureStateEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(CameraCaptureStateEvent, BaseEventInfo);
+
+public:
+    CameraCaptureStateEvent(int32_t originalState, int32_t newState) :
+        BaseEventInfo("CameraCaptureState"), originalState_(originalState), newState_(newState) {}
+    ~CameraCaptureStateEvent() = default;
+
+    int32_t GetOriginalCameraCaptureState() const
+    {
+        return originalState_;
+    }
+
+    int32_t GetNewCameraCaptureState() const
+    {
+        return newState_;
+    }
+private:
+    int32_t originalState_ = 0;
+    int32_t newState_ = 0;
 };
 
 } // namespace OHOS::Ace

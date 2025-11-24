@@ -55,6 +55,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkButtonCreateWithLabel(const char* label);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonCreateWithLabelAndOptions(const char* label, ButtonOptions buttonOptions);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontSize(double fontSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkButtonResetFontSize();
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontStyle(int32_t fontStyle);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontFamily(const char* fontFamily);

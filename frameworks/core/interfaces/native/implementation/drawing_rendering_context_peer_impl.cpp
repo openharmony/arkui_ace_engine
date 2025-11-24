@@ -42,7 +42,7 @@ SizeF DrawingRenderingContextPeerImpl::GetSize()
     auto height = size_.Height().value_or(0.0);
     return SizeF(width, height);
 }
-std::shared_ptr<drawing_CanvasPeer> DrawingRenderingContextPeerImpl::GetCanvas() const
+drawing_CanvasPeer* DrawingRenderingContextPeerImpl::GetCanvas() const
 {
     return rsCanvas_;
 }
@@ -60,7 +60,7 @@ void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(RefPtr<AceType>& canva
         width /= density;
         context->size_.SetHeight(height);
         context->size_.SetWidth(width);
-        context->rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas);
+        context->rsCanvas_ = reinterpret_cast<drawing_CanvasPeer*>(canvas);
     };
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     if (customPaintPattern) {

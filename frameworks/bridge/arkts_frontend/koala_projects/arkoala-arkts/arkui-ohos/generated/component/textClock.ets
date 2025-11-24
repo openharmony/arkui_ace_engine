@@ -117,7 +117,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextClockAttribute_setFormat(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDateChangeAttribute(value: ((value: number) => void) | undefined): void {
+    setOnDateChangeAttribute(value: ((value: int64) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -193,15 +193,15 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextClockAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -287,12 +287,12 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
     }
 }
 export interface TextClockConfiguration extends CommonConfiguration<TextClockConfiguration> {
-    timeZoneOffset: number;
+    timeZoneOffset: double;
     started: boolean;
-    timeValue: number;
+    timeValue: int64;
 }
 export interface TextClockOptions {
-    timeZoneOffset?: number;
+    timeZoneOffset?: double;
     controller?: TextClockController;
 }
 export interface TextClockAttribute extends CommonMethod {
@@ -302,7 +302,7 @@ export interface TextClockAttribute extends CommonMethod {
     format(value: ResourceStr | undefined): this {
         throw new Error("Unimplemented method format")
     }
-    onDateChange(value: ((value: number) => void) | undefined): this {
+    onDateChange(value: ((value: int64) => void) | undefined): this {
         throw new Error("Unimplemented method onDateChange")
     }
     fontColor(value: ResourceColor | undefined): this {
@@ -314,7 +314,7 @@ export interface TextClockAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -338,11 +338,11 @@ export interface TextClockAttribute extends CommonMethod {
 }
 export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClockAttribute {
     format_value?: ResourceStr | undefined
-    onDateChange_value?: ((value: number) => void) | undefined
+    onDateChange_value?: ((value: int64) => void) | undefined
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     fontFamily_value?: ResourceStr | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
     fontFeature_value?: string | undefined
@@ -355,7 +355,7 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
     format(value: ResourceStr | undefined): this {
         return this
     }
-    onDateChange(value: ((value: number) => void) | undefined): this {
+    onDateChange(value: ((value: int64) => void) | undefined): this {
         return this
     }
     fontColor(value: ResourceColor | undefined): this {
@@ -367,7 +367,7 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -414,9 +414,9 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public onDateChange(value: ((value: number) => void) | undefined): this {
+    public onDateChange(value: ((value: int64) => void) | undefined): this {
         if (this.checkPriority("onDateChange")) {
-            const value_casted = value as (((value: number) => void) | undefined)
+            const value_casted = value as (((value: int64) => void) | undefined)
             this.getPeer()?.setOnDateChangeAttribute(value_casted)
             return this
         }
@@ -446,9 +446,9 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -531,19 +531,19 @@ export class TextClockConfiguration_serializer {
         const valueHolderForContentModifier  = value.contentModifier
         valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
         const valueHolderForTimeZoneOffset  = value.timeZoneOffset
-        valueSerializer.writeNumber(valueHolderForTimeZoneOffset)
+        valueSerializer.writeFloat64(valueHolderForTimeZoneOffset)
         const valueHolderForStarted  = value.started
         valueSerializer.writeBoolean(valueHolderForStarted)
         const valueHolderForTimeValue  = value.timeValue
-        valueSerializer.writeNumber(valueHolderForTimeValue)
+        valueSerializer.writeInt64(valueHolderForTimeValue)
     }
     public static read(buffer: DeserializerBase): TextClockConfiguration {
         let valueDeserializer : DeserializerBase = buffer
         const enabledTmpResult : boolean = valueDeserializer.readBoolean()
         const contentModifierTmpResult : ContentModifier<TextClockConfiguration> = (valueDeserializer.readObject() as ContentModifier<TextClockConfiguration>)
-        const timeZoneOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const timeZoneOffsetTmpResult : double = valueDeserializer.readFloat64()
         const startedTmpResult : boolean = valueDeserializer.readBoolean()
-        const timeValueTmpResult : number = (valueDeserializer.readNumber() as number)
+        const timeValueTmpResult : int64 = valueDeserializer.readInt64()
         let value : TextClockConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, timeZoneOffset: timeZoneOffsetTmpResult, started: startedTmpResult, timeValue: timeValueTmpResult} as TextClockConfiguration)
         return value
     }
@@ -566,7 +566,7 @@ export class TextClockOptions_serializer {
         if (valueHolderForTimeZoneOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTimeZoneOffsetTmpValue  = valueHolderForTimeZoneOffset!
-            valueSerializer.writeNumber(valueHolderForTimeZoneOffsetTmpValue)
+            valueSerializer.writeFloat64(valueHolderForTimeZoneOffsetTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -582,11 +582,11 @@ export class TextClockOptions_serializer {
     public static read(buffer: DeserializerBase): TextClockOptions {
         let valueDeserializer : DeserializerBase = buffer
         const timeZoneOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let timeZoneOffsetTmpBuf : number | undefined = undefined
+        let timeZoneOffsetTmpBuf : double | undefined = undefined
         if ((timeZoneOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            timeZoneOffsetTmpBuf = (valueDeserializer.readNumber() as number)
+            timeZoneOffsetTmpBuf = valueDeserializer.readFloat64()
         }
-        const timeZoneOffsetTmpResult : number | undefined = timeZoneOffsetTmpBuf
+        const timeZoneOffsetTmpResult : double | undefined = timeZoneOffsetTmpBuf
         const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controllerTmpBuf : TextClockController | undefined = undefined
         if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

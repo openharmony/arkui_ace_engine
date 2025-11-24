@@ -1945,8 +1945,13 @@ void UIExtensionPattern::DumpInfo()
     params.push_back(std::to_string(getpid()));
     std::vector<std::string> dumpInfo;
     sessionWrapper_->NotifyUieDump(params, dumpInfo);
-    for (std::string info : dumpInfo) {
-        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+    for (std::string& info : dumpInfo) {
+        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: "));
+        std::vector<std::string> lines;
+        StringUtils::SplitStr(info, "\n", lines, false);
+        for (auto& line : lines) {
+            DumpLog::GetInstance().AddDesc(line);
+        }
     }
 }
 

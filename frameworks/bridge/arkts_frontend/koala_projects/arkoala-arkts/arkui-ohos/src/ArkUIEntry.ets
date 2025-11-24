@@ -355,12 +355,14 @@ export class Application {
         if (!this.manager) {
             InteropNativeModule._NativeLog('Invalid manager')
         }
-        let uiContextRouter = this.uiContext!.getRouter();
-        let rootState = uiContextRouter.getStateRoot();
-        let preState = uiContextRouter.getPreState();
+        let rootState: ComputableState<IncrementalNode> | undefined = undefined;
+        let preState: ComputableState<IncrementalNode> | undefined = undefined;
         if (this.plugin) {
             rootState = this.rootState as ComputableState<IncrementalNode> | undefined;
-            preState = undefined;
+        } else {
+            let uiContextRouter = this.uiContext!.getRouter();
+            rootState = uiContextRouter.getStateRoot();
+            preState = uiContextRouter.getPreState();
         }
         ObserveSingleton.instance.updateDirty();
         this.uiContext!.flushCallback()

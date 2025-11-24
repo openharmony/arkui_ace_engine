@@ -100,6 +100,8 @@ public:
 
     std::string GetSourceId() override;
 
+    int GetSource() override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message_;
 };
@@ -1102,6 +1104,7 @@ public:
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
     void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
     void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
+    void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
@@ -1367,6 +1370,7 @@ public:
     int GetSelectEndIndex() const;
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
+    void OnCameraCaptureStateChanged(int originalState, int newState);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
@@ -1491,6 +1495,7 @@ public:
     void OnDetectedBlankScreen(const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount);
     void UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold);
+    void UpdateEnableImageAnalyzer(bool enable);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
     void SetImeShow(bool visible);
@@ -1677,6 +1682,7 @@ private:
     EventCallbackV2 onLoadStartedV2_;
     EventCallbackV2 onLoadFinishedV2_;
     EventCallbackV2 onSafeBrowsingCheckFinishV2_;
+    EventCallbackV2 onCameraCaptureStateChangedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;

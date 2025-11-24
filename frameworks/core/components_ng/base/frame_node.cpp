@@ -500,7 +500,6 @@ FrameNode::FrameNode(
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode);
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
-    accessibilityProperty_ = pattern->CreateAccessibilityProperty();
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
@@ -740,7 +739,6 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRem
 void FrameNode::InitializePatternAndContext()
 {
     pattern_->AttachToFrameNode(WeakClaim(this));
-    accessibilityProperty_->SetHost(WeakClaim(this));
     renderContext_->SetRequestFrame([weak = WeakClaim(this)](bool isOffScreenNode) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -762,6 +760,17 @@ void FrameNode::InitializePatternAndContext()
     if (pattern_->GetFocusPattern().GetFocusType() != FocusType::DISABLE) {
         GetOrCreateFocusHub();
     }
+}
+
+RefPtr<AccessibilityProperty>& FrameNode::GetOrCreateAccessibilityProperty()
+{
+    if (isAccessibilityPropertyInitialized_) {
+        return accessibilityProperty_;
+    }
+    accessibilityProperty_ = pattern_->CreateAccessibilityProperty();
+    accessibilityProperty_->SetHost(WeakClaim(this));
+    isAccessibilityPropertyInitialized_ = true;
+    return accessibilityProperty_;
 }
 
 PipelineContext* FrameNode::GetOffMainTreeNodeContext()
@@ -885,6 +894,12 @@ void FrameNode::DumpExtensionHandlerInfo()
 
 void FrameNode::DumpCommonInfo()
 {
+    if (DumpLog::GetInstance().IsDumpAllNodes()) {
+        DumpLog::GetInstance().AddDesc("IsFrameDisappear: " + std::to_string(IsFrameDisappear()));
+        DumpLog::GetInstance().AddDesc("IsActive: " + std::to_string(isActive_));
+        DumpLog::GetInstance().AddDesc("AccessibilityVisible: " + std::to_string(accessibilityVisible_));
+        DumpLog::GetInstance().AddDesc("HasAccessibilityVirtualNode: " + std::to_string(hasAccessibilityVirtualNode_));
+    }
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect without transform: ").append(renderContext_->GetPaintRectWithoutTransform().ToString()));
@@ -1463,7 +1478,9 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
     if (renderContext_) {
         renderContext_->FromJson(json);
     }
-    accessibilityProperty_->FromJson(json);
+    if (accessibilityProperty_) {
+        accessibilityProperty_->FromJson(json);
+    }
     layoutProperty_->FromJson(json);
     paintProperty_->FromJson(json);
     pattern_->FromJson(json);
@@ -2724,7 +2741,7 @@ void FrameNode::RebuildRenderContextTree()
     }
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
-    if (isDeleteRsNode_) {
+    if (isDeleteRsNode_ == RsNodeDeleteFlag::ALLOWED) {
         auto parentFrameNode = GetParentFrameNode();
         if (parentFrameNode) {
             parentFrameNode->MarkNeedSyncRenderTree();
@@ -6492,7 +6509,7 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto renderContext = GetRenderContext();
-        if (!isDeleteRsNode_ && renderContext) {
+        if (isDeleteRsNode_ != RsNodeDeleteFlag::ALLOWED && renderContext) {
             renderContext->SetRSUIContext(context);
         }
     }

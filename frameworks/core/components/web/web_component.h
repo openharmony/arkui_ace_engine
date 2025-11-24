@@ -1207,6 +1207,17 @@ public:
         return declaration_->GetViewportFitChangedId();
     }
 
+    void SetCameraCaptureStateChangedId(const EventMarker& cameraCaptureStateChangedId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetCameraCaptureStateChangedId(cameraCaptureStateChangedId);
+    }
+
+    const EventMarker& GetCameraCaptureStateChangedId() const
+    {
+        return declaration_->GetCameraCaptureStateChangedId();
+    }
+
     void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)
     {
         CHECK_NULL_VOID(declaration_);

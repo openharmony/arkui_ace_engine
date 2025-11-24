@@ -844,9 +844,9 @@ std::u16string Convert(const Ark_String& src)
 template<>
 std::string Convert(const Ark_String& src)
 {
-    if (src.chars == nullptr) return "";
+    if (src.chars == nullptr || src.length == 0) return "";
     const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
-    if (data[0] == UTF16_BOM) {
+    if (src.length >= sizeof(data[0]) && data[0] == UTF16_BOM) {
         // Handle utf16 strings
         ++data;
         return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
@@ -1490,6 +1490,22 @@ std::map<std::string, std::string> Convert(const Map_String_String& src)
         m[keys[i]] = values[i];
     }
     return m;
+}
+
+template<>
+std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src)
+{
+    std::pair<Color, Dimension> gradientColor;
+    // color
+    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
+    if (colorOpt) {
+        gradientColor.first = colorOpt.value();
+    }
+    // stop value
+    float value = Converter::Convert<float>(src.value1);
+    value = std::clamp(value, 0.0f, 1.0f);
+    gradientColor.second = Dimension(value, DimensionUnit::VP);
+    return gradientColor;
 }
 
 template<>
@@ -2476,6 +2492,19 @@ FingerInfo Convert(const Ark_FingerInfo& src)
 }
 
 template<>
+EventLocationInfo Convert(const Ark_EventLocationInfo& src)
+{
+    EventLocationInfo dst;
+    dst.localLocation_.SetX(Converter::Convert<double>(src.x));
+    dst.localLocation_.SetY(Converter::Convert<double>(src.y));
+    dst.windowLocation_.SetX(Converter::Convert<double>(src.windowX));
+    dst.windowLocation_.SetY(Converter::Convert<double>(src.windowY));
+    dst.globalDisplayLocation_.SetX(Converter::Convert<double>(src.displayX));
+    dst.globalDisplayLocation_.SetY(Converter::Convert<double>(src.displayY));
+    return dst;
+}
+
+template<>
 PaddingProperty Convert(const Ark_Padding& src)
 {
     PaddingProperty padding;
@@ -3007,7 +3036,7 @@ PickerValueType Convert(const Array_ResourceStr& src)
 }
 
 template<>
-PickerSelectedType Convert(const Ark_Number& src)
+PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
     if (selected < 0) {
@@ -3017,7 +3046,7 @@ PickerSelectedType Convert(const Ark_Number& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_Number& src)
+PickerSelectedType Convert(const Array_Int32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3447,8 +3476,8 @@ template<>
 NavigationOptions Convert(const Ark_NavigationOptions& src)
 {
     return {
-        .animated = Converter::OptConvert<bool>(src.animated).value_or(true),
-        .launchMode = Converter::OptConvert<LaunchMode>(src.launchMode).value_or(LaunchMode::STANDARD)
+        .launchMode = Converter::OptConvert<LaunchMode>(src.launchMode).value_or(LaunchMode::STANDARD),
+        .animated = Converter::OptConvert<bool>(src.animated).value_or(true)
     };
 }
 

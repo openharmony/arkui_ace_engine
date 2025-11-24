@@ -1030,6 +1030,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetKeyBoardShortCut));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyBoardShortCut"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetKeyBoardShortCut));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyBoardShortCutAll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetKeyBoardShortCutAll));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClipWithEdge"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClipWithEdge));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClipWithEdge"),
@@ -1602,10 +1604,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectDetectorEnable));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectDetectorEnable));
-    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectDetectorConfig));
-    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectDetectorConfig));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontFeature));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
@@ -1693,10 +1691,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSelectDetectorEnable));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSelectDetectorEnable));
-    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSelectDetectorConfig));
-    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSelectDetectorConfig));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchInitialize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchInitialize));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchInitialize"),
@@ -2313,10 +2307,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectDetectorEnable));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectDetectorEnable));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectDetectorConfig));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectDetectorConfig));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetStyle));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStyle"),
@@ -2696,10 +2686,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectDetectorEnable));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectDetectorEnable));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectDetectorConfig));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectDetectorConfig));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCaretColor));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretColor"),
@@ -3141,6 +3127,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillDisappear));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillDisappear"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillDisappear));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindToScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBindToScrollable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBindToScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetBindToScrollable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindToNestedScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBindToNestedScrollable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBindToNestedScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetBindToNestedScrollable));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnActive"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnActive));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnActive"),
@@ -7136,6 +7130,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetJavaScriptProxy));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetJavaScriptProxy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetJavaScriptProxy));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableImageAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableImageAnalyzer));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableImageAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableImageAnalyzer));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForceEnableZoom"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetForceEnableZoom));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForceEnableZoom"),
@@ -7144,6 +7142,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetBackToTop));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackToTop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetBackToTop));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCameraCaptureStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnCameraCaptureStateChanged));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCameraCaptureStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnCameraCaptureStateChanged));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

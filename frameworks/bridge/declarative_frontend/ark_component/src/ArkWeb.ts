@@ -1524,6 +1524,21 @@ class WebJavaScriptProxyModifier extends ModifierWithKey<JavaScriptProxy> {
     }
   }
 }
+
+class WebEnableImageAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableImageAnalyzerModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableImageAnalyzer(node);
+    } else {
+      getUINativeModule().web.setEnableImageAnalyzer(node, this.value);
+    }
+  }
+}
+
 class WebForceEnableZoomModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1548,6 +1563,20 @@ class WebBackToTopModifier extends ModifierWithKey<boolean> {
       getUINativeModule().web.resetBackToTop(node);
     } else {
       getUINativeModule().web.setBackToTop(node, this.value);
+    }
+  }
+}
+
+class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey<(OnCameraCaptureStateChangeCallback) => void> {
+  constructor(value: (OnCameraCaptureStateChangeCallback) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnCameraCaptureStateChangedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnCameraCaptureStateChanged(node);
+    } else {
+      getUINativeModule().web.setOnCameraCaptureStateChanged(node, this.value);
     }
   }
 }
@@ -2076,6 +2105,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
   }
+  enableImageAnalyzer(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableImageAnalyzerModifier.identity, WebEnableImageAnalyzerModifier, enabled);
+    return this;
+  }
   forceEnableZoom(forceEnableZoom: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, forceEnableZoom);
     return this;
@@ -2086,6 +2119,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   backToTop(backToTop: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
+    return this;
+  }
+  onCameraCaptureStateChanged(callback: OnCameraCaptureStateChangeCallback): this{
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangedModifier.identity, WebOnCameraCaptureStateChangedModifier, callback);
     return this;
   }
 }

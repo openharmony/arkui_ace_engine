@@ -547,6 +547,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setExpandSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setIgnoreLayoutSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setBackground(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setBackgroundImage0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1784,6 +1786,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SearchAttribute_setOnWillChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SearchAttribute_setKeyboardAppearance(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SearchAttribute_setDividerColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SearchAttribute_setSearchButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3383,6 +3387,8 @@ export class ArkUIGeneratedNativeModule {
     native static _BaseGestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _BaseGestureEvent_getFingerInfos(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaselineOffsetStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -3933,10 +3939,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _DragEvent_setData(ptr: KPointer, unifiedData: KPointer): void
-    @ani.unsafe.Direct
-    native static _DragEvent_getData(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _DragEvent_getSummary(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _DragEvent_getData(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _DragEvent_getSummary(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _DragEvent_setResult(ptr: KPointer, dragResult: KInt): void
     @ani.unsafe.Direct
@@ -4217,6 +4223,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _GestureEvent_getFingerInfos(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureEvent_getOffsetX(ptr: KPointer): double
     @ani.unsafe.Direct
@@ -4257,6 +4265,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _GestureEvent_setVelocity(ptr: KPointer, velocity: KDouble): void
+    @ani.unsafe.Quick
+    native static _GestureEvent_getTapLocation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
@@ -4572,6 +4582,10 @@ export class ArkUIGeneratedNativeModule {
     native static _LayoutPolicy_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _LayoutPolicy_getMatchParent(): KPointer
+    @ani.unsafe.Direct
+    native static _LayoutPolicy_getWrapContent(): KPointer
+    @ani.unsafe.Direct
+    native static _LayoutPolicy_getFixAtIdealSize(): KPointer
     @ani.unsafe.Direct
     native static _LazyBuild_ApplyLazyBuilder(): void
     @ani.unsafe.Direct
@@ -5290,6 +5304,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): int32
     @ani.unsafe.Direct
+    native static _RenderNodeExtender_insertChild(peer: KPointer, child: KPointer): int32
+    @ani.unsafe.Direct
     native static _RenderNodeExtender_removeChild(peer: KPointer, node: KPointer): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_clearChildren(peer: KPointer): void
@@ -5710,6 +5726,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TapGestureEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _TapGestureEvent_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _TapGestureEvent_getTapLocation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TapRecognizer_construct(): KPointer
     @ani.unsafe.Direct

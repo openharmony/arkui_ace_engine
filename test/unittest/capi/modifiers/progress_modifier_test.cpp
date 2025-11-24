@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "generated/type_helpers.h"
@@ -79,6 +80,31 @@ namespace  {
     const auto ATTRIBUTE_ENABLE_SMOOTH_EFFECT_DEFAULT_VALUE = "true";
     const auto RES_NAME_ID = "RES_NAME_ID";
     const auto RES_NAME_NEG_ID = "RES_NAME_NEG_ID";
+
+    Ark_CapsuleStyleOptions getEmptyCapsuleStyleOptions()
+    {
+        Ark_CapsuleStyleOptions capsuleStyle;
+        capsuleStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+        capsuleStyle.borderColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
+        capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        capsuleStyle.content = Converter::ArkValue<Opt_String>(Ark_Empty());
+        capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
+        capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
+        capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+        capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
+        return capsuleStyle;
+    }
+
+    Ark_ProgressOptions getCapsuleProgressOptions()
+    {
+        Ark_ProgressOptions progressOptions;
+        const auto value = 5;
+        const auto total = 20;
+        progressOptions.value = Converter::ArkValue<Ark_Number>(value);
+        progressOptions.total = Converter::ArkValue<Opt_Number>(total);
+        progressOptions.type = Converter::ArkValue<Opt_ProgressType>(ARK_PROGRESS_TYPE_CAPSULE);
+        return progressOptions;
+    }
 } // namespace
 
 class ProgressModifierTest : public ModifierTestBase<GENERATED_ArkUIProgressModifier,
@@ -291,12 +317,11 @@ HWTEST_F(ProgressModifierTest, setLinearStyleDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleValidValues, TestSize.Level1)
 {
-    Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions options;
     Ark_LinearStyleOptions linearStyle;
     linearStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(true);
-    linearStyle.strokeRadius = Converter::ArkValue<Opt_Union_String_F64_Resource>(Ark_Empty());
+    linearStyle.strokeRadius = Converter::ArkValue<Opt_Union_String_Number_Resource>(Ark_Empty());
     linearStyle.strokeWidth = Converter::ArkValue<Opt_Length>("3px");
-    options =
+    auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_LinearStyleOptions>(linearStyle);
     modifier_->setStyle(node_, &options);
@@ -317,11 +342,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleValidValues, TestSize.Leve
  */
 HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleStrokeRadiusValidValues, TestSize.Level1)
 {
-    Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions options;
     Ark_LinearStyleOptions linearStyle;
     linearStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     linearStyle.strokeWidth = Converter::ArkValue<Opt_Length>("50px");
-    options =
+    auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_LinearStyleOptions>(linearStyle);
     auto checkValue =
@@ -332,21 +356,21 @@ HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleStrokeRadiusValidValues, T
             auto result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_RADIUS_NAME);
             EXPECT_EQ(result, expectedStr);
         };
-    auto value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(12.34);
+    auto value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(12.34);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "12.34vp");
 
-    value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_String>("1.00");
+    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_String>("1.00");
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "1.00vp");
 
     auto strokeRes = CreateResource(RES_NAME_ID, ResourceType::FLOAT);
-    value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_Resource>(strokeRes);
+    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "22.55px");
 
     strokeRes = CreateResource(RES_NAME_NEG_ID, ResourceType::FLOAT);
-    value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_Resource>(strokeRes);
+    value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "25.00px");
 }
@@ -378,13 +402,12 @@ HWTEST_F(ProgressModifierTest, setRingStyleDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, DISABLED_setRingStyleValidValues, TestSize.Level1)
 {
-    Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions options;
     Ark_RingStyleOptions ringStyle;
     ringStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(true);
     ringStyle.shadow = Converter::ArkValue<Opt_Boolean>(true);
     ringStyle.strokeWidth = Converter::ArkValue<Opt_Length>("5px");
     ringStyle.status = Converter::ArkValue<Opt_ProgressStatus>(ARK_PROGRESS_STATUS_LOADING);
-    options =
+    auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_RingStyleOptions>(ringStyle);
     modifier_->setStyle(node_, &options);
@@ -442,23 +465,16 @@ HWTEST_F(ProgressModifierTest, setCapsuleStyleDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Level1)
 {
-    Ark_ProgressOptions progressOptions;
-    progressOptions.value = Converter::ArkValue<Ark_Number>(5);
-    progressOptions.total = Converter::ArkValue<Opt_Number>(20);
-    progressOptions.type = Converter::ArkValue<Opt_ProgressType>(ARK_PROGRESS_TYPE_CAPSULE);
+    Ark_ProgressOptions progressOptions = getCapsuleProgressOptions();
     modifier_->setProgressOptions(node_, &progressOptions);
 
-    Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions options;
-    Ark_CapsuleStyleOptions capsuleStyle;
+    Ark_CapsuleStyleOptions capsuleStyle = getEmptyCapsuleStyleOptions();
     capsuleStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(true);
     capsuleStyle.borderColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#12131415");
     capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>("7px");
-    capsuleStyle.content = Converter::ArkValue<Opt_String>("content");
     capsuleStyle.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#23456134");
     capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(true);
-    capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
-    capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
-    options =
+    auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_CapsuleStyleOptions>(capsuleStyle);
     modifier_->setStyle(node_, &options);
@@ -472,14 +488,32 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Lev
     EXPECT_EQ(result, "7.00px");
     result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
     EXPECT_EQ(result, "true");
-#ifdef WRONG_GEN
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_CONTENT_NAME);
-    EXPECT_EQ(result, "content");
-#endif
     result = GetAttrValue<std::string>(strResult, ATTRIBUTE_FONT_COLOR_NAME);
     EXPECT_EQ(result, "#23456134");
     result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_NAME);
     EXPECT_EQ(result, "true");
+}
+
+/*
+ * @tc.name: setCapsuleStyleValidContentValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTest, setCapsuleStyleValidContentValues, TestSize.Level1)
+{
+    Ark_ProgressOptions progressOptions = getCapsuleProgressOptions();
+    modifier_->setProgressOptions(node_, &progressOptions);
+
+    Ark_CapsuleStyleOptions capsuleStyle = getEmptyCapsuleStyleOptions();
+    capsuleStyle.content = Converter::ArkValue<Opt_String>("content");
+    auto options =
+        Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
+            Ark_CapsuleStyleOptions>(capsuleStyle);
+    modifier_->setStyle(node_, &options);
+
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CAPSULE_STYLE_NAME);
+    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_CONTENT_NAME);
+    EXPECT_EQ(result, "content");
 }
 
 /*
@@ -489,20 +523,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Lev
  */
 HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidFontValues, TestSize.Level1)
 {
-    Ark_ProgressOptions progressOptions;
-    progressOptions.value = Converter::ArkValue<Ark_Number>(5);
-    progressOptions.total = Converter::ArkValue<Opt_Number>(20);
-    progressOptions.type = Converter::ArkValue<Opt_ProgressType>(ARK_PROGRESS_TYPE_CAPSULE);
+    Ark_ProgressOptions progressOptions = getCapsuleProgressOptions();
     modifier_->setProgressOptions(node_, &progressOptions);
 
-    Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions options;
-    Ark_CapsuleStyleOptions capsuleStyle;
-    capsuleStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    capsuleStyle.borderColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
-    capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>(Ark_Empty());
-    capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
-    capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
+    Ark_CapsuleStyleOptions capsuleStyle = getEmptyCapsuleStyleOptions();
     Ark_Font font;
     Ark_Union_String_Resource family = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(
         Converter::ArkValue<Ark_String>("Family"));
@@ -511,7 +535,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidFontValues, TestSize
     font.style = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC);
     font.weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD);
     capsuleStyle.font = Converter::ArkValue<Opt_Font>(font);
-    options =
+    auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_CapsuleStyleOptions>(capsuleStyle);
     modifier_->setStyle(node_, &options);
@@ -557,13 +581,12 @@ HWTEST_F(ProgressModifierTest, setProgressStyleDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, DISABLED_setProgressStyleValidValues, TestSize.Level1)
 {
-    Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions options;
     Ark_ProgressStyleOptions progressStyle;
     progressStyle.enableSmoothEffect = Converter::ArkValue<Opt_Boolean>(false);
     progressStyle.scaleWidth = Converter::ArkValue<Opt_Length>("15px");
     progressStyle.strokeWidth = Converter::ArkValue<Opt_Length>("25px");
     progressStyle.scaleCount = Converter::ArkValue<Opt_Number>(5);
-    options =
+    auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_ProgressStyleOptions>(progressStyle);
     modifier_->setStyle(node_, &options);
@@ -588,20 +611,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setProgressStyleValidValues, TestSize.Le
 */
 HWTEST_F(ProgressModifierTest, setCapsuleStyleValidBorderRadiusValues, TestSize.Level1)
 {
-    Ark_ProgressOptions progressOptions;
-    progressOptions.value = Converter::ArkValue<Ark_Number>(5);
-    progressOptions.total = Converter::ArkValue<Opt_Number>();
-    progressOptions.type = Converter::ArkValue<Opt_ProgressType>(ARK_PROGRESS_TYPE_CAPSULE);
+    Ark_ProgressOptions progressOptions = getCapsuleProgressOptions();
     modifier_->setProgressOptions(node_, &progressOptions);
 
-    Ark_CapsuleStyleOptions capsuleStyle;
-    capsuleStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>();
-    capsuleStyle.borderColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
-    capsuleStyle.borderWidth = Converter::ArkValue<Opt_Length>();
-    capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
-    capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>();
-    capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
-
+    Ark_CapsuleStyleOptions capsuleStyle = getEmptyCapsuleStyleOptions();
     capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Dimension(11, DimensionUnit::VP));
     auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,

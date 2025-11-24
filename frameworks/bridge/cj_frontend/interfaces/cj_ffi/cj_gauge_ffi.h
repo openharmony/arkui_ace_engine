@@ -42,6 +42,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetValue(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetStartAngle(double startAngle);
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetEndAngle(double endAngle);
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetColors(VectorUInt32Ptr colors, VectorFloat32Ptr weights);
+CJ_EXPORT void FfiOHOSAceFrameworkGaugeResetColors();
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetColorsV2(VectorUInt32Ptr colors, VectorFloat32Ptr weights);
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(
     VecLinearGradientHandle linearGradients, VectorUInt32Ptr weight);

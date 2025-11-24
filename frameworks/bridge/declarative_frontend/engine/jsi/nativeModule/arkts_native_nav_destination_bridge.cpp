@@ -22,6 +22,8 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
+#include "bridge/declarative_frontend/jsview/js_navdestination_scrollable_processor.h"
+
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -922,6 +924,89 @@ ArkUINativeModuleValue NavDestinationBridge::ResetOnWillDisappear(ArkUIRuntimeCa
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getNavDestinationModifier()->resetNavDestinationOnWillDisappear(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetBindToScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    using namespace OHOS::Ace::Framework;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)> bindFunc =
+        [vm, &info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        if (info.Length() < 2 || !info[1]->IsArray()) {
+            jsProcessor->UnbindScrollable();
+        } else {
+            jsProcessor->BindToScrollable(info[1]);
+        }
+    };
+    nodeModifiers->getNavDestinationModifier()->setBindToScrollable(
+        nativeNode, reinterpret_cast<void*>(&bindFunc));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetBindToScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    using namespace OHOS::Ace::Framework;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getNavDestinationModifier()->resetBindToScrollable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetBindToNestedScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    using namespace OHOS::Ace::Framework;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)> bindFunc =
+        [vm, &info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        if (info.Length() < 2 || !info[1]->IsArray()) {
+            jsProcessor->UnbindNestedScrollable();
+        } else {
+            jsProcessor->BindToNestedScrollable(info[1]);
+        }
+    };
+    nodeModifiers->getNavDestinationModifier()->setBindToNestedScrollable(
+        nativeNode, reinterpret_cast<void*>(&bindFunc));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetBindToNestedScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getNavDestinationModifier()->resetBindToNestedScrollable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

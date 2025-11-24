@@ -104,13 +104,18 @@ void TextClockPatternTestNG::SetUpTestSuite()
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_TEXT);
-    auto textTheme = TextClockTheme::Builder().Build(themeConstants);
-    EXPECT_CALL(*themeManager, GetTheme(TextClockTheme::TypeId())).WillRepeatedly(Return(textTheme));
+    auto textTheme = TextTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(TextTheme::TypeId())).WillRepeatedly(Return(textTheme));
+    textTheme->selectedColor_ = Color::FromString("#007DFF");
+    textTheme->dragBackgroundColor_ = Color::WHITE;
+    textTheme->draggable_ = false;
+    textTheme->linearSplitChildMinSize_ = 20.0f;
+    textTheme->isShowHandle_ = false;
     TextStyle textStyle;
     textStyle.SetTextColor(Color::FromString("#ff182431"));
     textStyle.SetFontSize(Dimension(14.f));
     textStyle.SetFontWeight(FontWeight::W800);
-    textTheme->textStyleClock_ = textStyle;
+    textTheme->textStyle_ = textStyle;
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
@@ -216,7 +221,7 @@ HWTEST_F(TextClockPatternTestNG, UpdateTimeText001, TestSize.Level1)
 
     auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
     ASSERT_NE(themeManager, nullptr);
-    auto textTheme = themeManager->GetTheme<TextClockTheme>();
+    auto textTheme = themeManager->GetTheme<TextTheme>();
     ASSERT_NE(textTheme, nullptr);
 
     auto onChange = [](const std::string& szStr) { LOGD("szStr change: %s", szStr.c_str()); };
@@ -228,7 +233,7 @@ HWTEST_F(TextClockPatternTestNG, UpdateTimeText001, TestSize.Level1)
         model.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
         model.SetFontWeight(FONT_WEIGHT_VALUE);
         model.SetFontFamily(FONT_FAMILY_VALUE);
-        model.InitFontDefault(textTheme->GetTextStyleClock());
+        model.InitFontDefault(textTheme->GetTextStyle());
         model.SetDateTimeOptions(ZeroPrefixType::AUTO);
         model.SetTextShadow({ Shadow() });
         model.SetOnDateChange(onChange);
@@ -257,7 +262,7 @@ HWTEST_F(TextClockPatternTestNG, RequestUpdateForNextSecond001, TestSize.Level1)
      */
     auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
     ASSERT_NE(themeManager, nullptr);
-    auto textTheme = themeManager->GetTheme<TextClockTheme>();
+    auto textTheme = themeManager->GetTheme<TextTheme>();
     ASSERT_NE(textTheme, nullptr);
 
     auto onChange = [](const std::string& szStr) { LOGD("szStr change: %s", szStr.c_str()); };
@@ -269,7 +274,7 @@ HWTEST_F(TextClockPatternTestNG, RequestUpdateForNextSecond001, TestSize.Level1)
         model.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
         model.SetFontWeight(FONT_WEIGHT_VALUE);
         model.SetFontFamily(FONT_FAMILY_VALUE);
-        model.InitFontDefault(textTheme->GetTextStyleClock());
+        model.InitFontDefault(textTheme->GetTextStyle());
         model.SetDateTimeOptions(ZeroPrefixType::AUTO);
         model.SetTextShadow({ Shadow() });
         model.SetOnDateChange(onChange);
@@ -921,7 +926,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnColorConfigurationUpdate001, TestSiz
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto textTheme = AceType::MakeRefPtr<TextClockTheme>();
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
 
     TestProperty testProperty;
@@ -949,9 +954,9 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnColorConfigurationUpdate001, TestSiz
     auto pipeline = host->GetContextWithCheck();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetIsSystemColorChange(true);
-    auto theme = pipeline->GetTheme<TextClockTheme>();
+    auto theme = pipeline->GetTheme<TextTheme>();
     ASSERT_NE(theme, nullptr);
-    Color testColor = theme->GetTextStyleClock().GetTextColor();
+    Color testColor = theme->GetTextStyle().GetTextColor();
     pattern->OnColorConfigurationUpdate();
     EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
 

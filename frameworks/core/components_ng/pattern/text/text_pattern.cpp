@@ -1364,52 +1364,6 @@ RefPtr<RenderContext> TextPattern::GetRenderContext()
     return frameNode->GetRenderContext();
 }
 
-void TextPattern::UseSelectDetectConfigFollow(std::unordered_map<TextDataDetectType, bool>& optionTypes)
-{
-    CHECK_NULL_VOID(GetDataDetectorAdapter());
-    auto dataDetectorAdapter = GetDataDetectorAdapter();
-    if (textDetectEnable_) {
-        std::set<std::string> newTypesSet;
-        std::istringstream iss(dataDetectorAdapter->textDetectTypes_);
-        std::string type;
-        while (std::getline(iss, type, ',')) {
-            newTypesSet.insert(type);
-        }
-        for (auto& typeStr : newTypesSet) {
-            if (TEXT_DETECT_MAP_REVERSE.find(typeStr) == TEXT_DETECT_MAP_REVERSE.end()) {
-                continue;
-            }
-            optionTypes[TEXT_DETECT_MAP_REVERSE.at(typeStr)] = true;
-        }
-        if (dataDetectorAdapter->hasUrlType_) {
-            optionTypes[TextDataDetectType::URL] = true;
-        }
-    } else {
-        for (auto& mapItr : TEXT_DETECT_MAP) {
-            optionTypes[mapItr.first] = true;
-        }
-    }
-}
-
-void TextPattern::UseSelectDetectConfigUserSet(std::unordered_map<TextDataDetectType, bool>& optionTypes)
-{
-    if (selectDetectEnabled_) {
-        if (selectDetectEnabledIsUserSet_) {
-            for (auto& mapItr : TEXT_DETECT_MAP) {
-                optionTypes[mapItr.first] = true;
-            }
-        }
-        if (selectDetectConfigIsUserSet_ && !selectDataDetectorTypes_.empty()) {
-            optionTypes.clear();
-            for (auto typeItr : selectDataDetectorTypes_) {
-                optionTypes[typeItr] = true;
-            }
-        }
-    } else {
-        optionTypes.clear();
-    }
-}
-
 // ret: whether show aiMenuOption
 bool TextPattern::PrepareAIMenuOptions(
         std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions)
@@ -1424,16 +1378,9 @@ bool TextPattern::PrepareAIMenuOptions(
     auto dataDetectorAdapter = GetDataDetectorAdapter();
     int selectedAiEntityNum = 0;
     auto spanIter = detectorAdapter->aiSpanMap_.begin();
-    std::unordered_map<TextDataDetectType, bool> typeMap;
-    // Use User Set Select Detect Config
-    if (selectDetectEnabledIsUserSet_ || selectDetectConfigIsUserSet_) {
-        UseSelectDetectConfigUserSet(typeMap);
-    } else { // Follow DataDetectorConfig
-        UseSelectDetectConfigFollow(typeMap);
-    }
     aiMenuOptions.clear();
     for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
-        if (typeMap.find(spanIter->second.type) == typeMap.end()) {
+        if (TEXT_DETECT_MAP.find(spanIter->second.type) == TEXT_DETECT_MAP.end()) {
             continue;
         }
         selectedAiEntityNum++;
@@ -5103,13 +5050,13 @@ void TextPattern::DumpTextStyleInfo()
     CHECK_NULL_VOID(renderContext);
     dumpLog.AddDesc(
         std::string("FontColor: ")
-            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString())
+            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ToString())
             .append(" prop: ")
             .append(
-                textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString() : "Na")
+                textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ToString() : "Na")
             .append(" ForegroundColor: ")
             .append(
-            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na")
+            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ToString() : "Na")
             .append(" TextColorFlagByUser: ")
             .append(textLayoutProp->HasTextColorFlagByUser()
                 ? std::to_string(textLayoutProp->GetTextColorFlagByUserValue(false))
@@ -5794,33 +5741,6 @@ void TextPattern::ResetSelectDetectEnable()
 {
     selectDetectEnabledIsUserSet_ = false;
     selectDetectEnabled_ = true;
-}
-
-void TextPattern::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
-{
-    if (types.empty()) {
-        types = TEXT_DETECT_ALL_TYPES_VECTOR;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(GetSelectDetectorAdapter());
-    selectDetectorAdapter_->frameNode_ = host;
-    selectDetectConfigIsUserSet_ = true;
-    if (types == selectDataDetectorTypes_) {
-        return;
-    }
-    selectDataDetectorTypes_ = types;
-}
-
-std::vector<TextDataDetectType> TextPattern::GetSelectDetectConfig()
-{
-    return selectDataDetectorTypes_;
-}
-
-void TextPattern::ResetSelectDetectConfig()
-{
-    selectDetectConfigIsUserSet_ = false;
-    selectDataDetectorTypes_.clear();
 }
 
 void TextPattern::SelectAIDetect()

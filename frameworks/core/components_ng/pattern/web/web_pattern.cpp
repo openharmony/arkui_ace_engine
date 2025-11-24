@@ -4244,6 +4244,7 @@ void WebPattern::OnModifyDone()
                 GetBlankScreenDetectionConfig().value().detectionMethods,
                 GetBlankScreenDetectionConfig().value().contentfulNodesCountThreshold);
         }
+        delegate_->UpdateEnableImageAnalyzer(GetEnableImageAnalyzerValue(true));
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
@@ -5022,6 +5023,13 @@ void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, i
     }
 }
 
+void WebPattern::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    if (webSelectOverlay_) {
+        webSelectOverlay_->OnClippedSelectionBoundsChanged(x, y, width, height);
+    }
+}
+
 void WebPattern::SelectCancel() const
 {
     if (isReceivedArkDrag_) {
@@ -5083,6 +5091,16 @@ void WebPattern::OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionCo
     if (delegate_) {
         delegate_->UpdateBlankScreenDetectionConfig(
             config.enable, config.detectionTiming, config.detectionMethods, config.contentfulNodesCountThreshold);
+    }
+}
+
+void WebPattern::OnEnableImageAnalyzerUpdate(bool isEnabled)
+{
+    if (delegate_) {
+        delegate_->UpdateEnableImageAnalyzer(isEnabled);
+    }
+    if (!isEnabled) {
+        DestroyAnalyzerOverlay();
     }
 }
 

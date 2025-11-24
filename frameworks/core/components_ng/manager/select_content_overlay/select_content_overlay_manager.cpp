@@ -1404,6 +1404,7 @@ void SelectContentOverlayManager::MountMenuNodeToSubWindow(
         CHECK_NULL_VOID(selectOverlayPattern);
         selectOverlayPattern->SetContainerId(containerId_);
         selectOverlayPattern->SetIsMenuShowInSubWindow(true);
+        selectOverlayPattern->OnMountToSubWindow();
     }
 }
 

@@ -286,15 +286,15 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._PatternLockAttribute_setPathColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setPathStrokeWidthAttribute(value: number | string | undefined): void {
+    setPathStrokeWidthAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -306,7 +306,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._PatternLockAttribute_setPathStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPatternCompleteAttribute(value: ((input: Array<number>) => void) | undefined): void {
+    setOnPatternCompleteAttribute(value: ((input: Array<int32>) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -330,7 +330,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._PatternLockAttribute_setAutoReset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDotConnectAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnDotConnectAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -400,16 +400,16 @@ export interface PatternLockAttribute extends CommonMethod {
     pathColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method pathColor")
     }
-    pathStrokeWidth(value: number | string | undefined): this {
+    pathStrokeWidth(value: double | string | undefined): this {
         throw new Error("Unimplemented method pathStrokeWidth")
     }
-    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    onPatternComplete(value: ((input: Array<int32>) => void) | undefined): this {
         throw new Error("Unimplemented method onPatternComplete")
     }
     autoReset(value: boolean | undefined): this {
         throw new Error("Unimplemented method autoReset")
     }
-    onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onDotConnect")
     }
     activateCircleStyle(value: CircleStyleOptions | undefined): this {
@@ -430,10 +430,10 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     selectedColor_value?: ResourceColor | undefined
     activeColor_value?: ResourceColor | undefined
     pathColor_value?: ResourceColor | undefined
-    pathStrokeWidth_value?: number | string | undefined
-    onPatternComplete_value?: ((input: Array<number>) => void) | undefined
+    pathStrokeWidth_value?: double | string | undefined
+    onPatternComplete_value?: ((input: Array<int32>) => void) | undefined
     autoReset_value?: boolean | undefined
-    onDotConnect_value?: ((value0: number) => void) | undefined
+    onDotConnect_value?: ((value0: int32) => void) | undefined
     activateCircleStyle_value?: CircleStyleOptions | undefined
     skipUnselectedPoint_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -461,16 +461,16 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     pathColor(value: ResourceColor | undefined): this {
         return this
     }
-    pathStrokeWidth(value: number | string | undefined): this {
+    pathStrokeWidth(value: double | string | undefined): this {
         return this
     }
-    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    onPatternComplete(value: ((input: Array<int32>) => void) | undefined): this {
         return this
     }
     autoReset(value: boolean | undefined): this {
         return this
     }
-    onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: int32) => void) | undefined): this {
         return this
     }
     activateCircleStyle(value: CircleStyleOptions | undefined): this {
@@ -556,17 +556,17 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public pathStrokeWidth(value: number | string | undefined): this {
+    public pathStrokeWidth(value: double | string | undefined): this {
         if (this.checkPriority("pathStrokeWidth")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setPathStrokeWidthAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    public onPatternComplete(value: ((input: Array<int32>) => void) | undefined): this {
         if (this.checkPriority("onPatternComplete")) {
-            const value_casted = value as (((input: Array<number>) => void) | undefined)
+            const value_casted = value as (((input: Array<int32>) => void) | undefined)
             this.getPeer()?.setOnPatternCompleteAttribute(value_casted)
             return this
         }
@@ -580,9 +580,9 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public onDotConnect(value: ((value0: number) => void) | undefined): this {
+    public onDotConnect(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onDotConnect")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnDotConnectAttribute(value_casted)
             return this
         }

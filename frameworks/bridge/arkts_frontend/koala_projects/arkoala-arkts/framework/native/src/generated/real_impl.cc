@@ -2200,6 +2200,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_Array_SafeAreaEdge* edges)
     {
     }
+    void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
+                                     const Opt_Array_LayoutSafeAreaType* types,
+                                     const Opt_Array_LayoutSafeAreaEdge* edges)
+    {
+    }
     void SetBackgroundImpl(Ark_NativePointer node,
                            const Opt_CustomNodeBuilder* builder,
                            const Opt_BackgroundOptions* options)
@@ -2891,19 +2896,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // GaugeInterfaceModifier
     namespace GaugeAttributeModifier {
     void SetValueImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Float64* value)
     {
     }
     void SetStartAngleImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Float64* value)
     {
     }
     void SetEndAngleImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
     }
     void SetColorsImpl(Ark_NativePointer node,
-                       const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
+                       const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64* value)
     {
     }
     void SetStrokeWidthImpl(Ark_NativePointer node,
@@ -3266,7 +3271,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetEdgeAntialiasingImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
     }
     void SetOnCompleteImpl(Ark_NativePointer node,
@@ -3328,7 +3333,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetDurationImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetReverseImpl(Ark_NativePointer node,
@@ -3344,7 +3349,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetIterationsImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Int32* value)
     {
     }
     void SetMonitorInvisibleAreaImpl(Ark_NativePointer node,
@@ -4277,11 +4282,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetPathStrokeWidthImpl(Ark_NativePointer node,
-                                const Opt_Union_Number_String* value)
+                                const Opt_Union_F64_String* value)
     {
     }
     void SetOnPatternCompleteImpl(Ark_NativePointer node,
-                                  const Opt_Callback_Array_Number_Void* value)
+                                  const Opt_Callback_Array_I32_Void* value)
     {
     }
     void SetAutoResetImpl(Ark_NativePointer node,
@@ -4289,7 +4294,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnDotConnectImpl(Ark_NativePointer node,
-                             const Opt_Callback_Number_Void* value)
+                             const Opt_Callback_I32_Void* value)
     {
     }
     void SetActivateCircleStyleImpl(Ark_NativePointer node,
@@ -4416,7 +4421,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetContentOpacityImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_Resource* value)
+                               const Opt_Union_F64_Resource* value)
     {
     }
     } // QRCodeAttributeModifier
@@ -5239,6 +5244,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                    const Opt_KeyboardAppearance* value)
+    {
+    }
+    void SetDividerColorImpl(Ark_NativePointer node,
+                         const Opt_ColorMetrics* value)
     {
     }
     void SetSearchButtonImpl(Ark_NativePointer node,
@@ -6810,7 +6819,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnDateChangeImpl(Ark_NativePointer node,
-                             const Opt_Callback_Number_Void* value)
+                             const Opt_Callback_I64_Void* value)
     {
     }
     void SetFontColorImpl(Ark_NativePointer node,
@@ -6826,7 +6835,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -7167,7 +7176,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // TextPickerInterfaceModifier
     namespace TextPickerAttributeModifier {
     void SetDefaultPickerItemHeightImpl(Ark_NativePointer node,
-                                        const Opt_Union_Number_String* value)
+                                        const Opt_Union_F64_String* value)
     {
     }
     void SetCanLoopImpl(Ark_NativePointer node,
@@ -7207,7 +7216,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetSelectedIndexImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_Array_Number* value)
+                              const Opt_Union_I32_Array_I32* value)
     {
     }
     void SetDividerImpl(Ark_NativePointer node,
@@ -7258,7 +7267,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_ResourceStr* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -7266,7 +7275,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnTimerImpl(Ark_NativePointer node,
-                        const Opt_Callback_Number_Number_Void* value)
+                        const Opt_TimerCallback* value)
     {
     }
     void SetTextShadowImpl(Ark_NativePointer node,
@@ -8561,6 +8570,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
+            CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
             CommonMethodModifier::SetBackgroundImpl,
             CommonMethodModifier::SetBackgroundImage0Impl,
             CommonMethodModifier::SetBackgroundImage1Impl,
@@ -9683,6 +9693,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetStopBackPressImpl,
             SearchAttributeModifier::SetOnWillChangeImpl,
             SearchAttributeModifier::SetKeyboardAppearanceImpl,
+            SearchAttributeModifier::SetDividerColorImpl,
             SearchAttributeModifier::SetSearchButtonImpl,
             SearchAttributeModifier::SetInputFilterImpl,
             SearchAttributeModifier::SetCustomKeyboardImpl,
@@ -11262,6 +11273,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Array_FingerInfo* fingerList)
     {
     }
+    Array_FingerInfo GetFingerInfosImpl(Ark_BaseGestureEvent peer)
+    {
+        return {};
+    }
     } // BaseGestureEventAccessor
     namespace BaselineOffsetStyleAccessor {
     void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
@@ -12793,11 +12808,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      Ark_unifiedDataChannel_UnifiedData unifiedData)
     {
     }
-    Ark_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
+    Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
+    Opt_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
     {
         return {};
     }
@@ -13497,6 +13512,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Array_FingerInfo* fingerList)
     {
     }
+    Array_FingerInfo GetFingerInfosImpl(Ark_GestureEvent peer)
+    {
+        return {};
+    }
     Ark_Float64 GetOffsetXImpl(Ark_GestureEvent peer)
     {
         return {};
@@ -13576,6 +13595,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetVelocityImpl(Ark_GestureEvent peer,
                          Ark_Float64 velocity)
     {
+    }
+    Opt_EventLocationInfo GetTapLocationImpl(Ark_GestureEvent peer)
+    {
+        return {};
     }
     } // GestureEventAccessor
     namespace GestureGroupAccessor {
@@ -14304,6 +14327,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     Ark_LayoutPolicy GetMatchParentImpl()
+    {
+        return {};
+    }
+    Ark_LayoutPolicy GetWrapContentImpl()
+    {
+        return {};
+    }
+    Ark_LayoutPolicy GetFixAtIdealSizeImpl()
     {
         return {};
     }
@@ -16725,7 +16756,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_ScrollPageOptions* value)
     {
     }
-    Ark_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+    Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
                                        Ark_Scroller peer)
     {
         return {};
@@ -17424,6 +17455,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
+    Opt_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
+    {
+        return {};
+    }
     } // TapGestureEventAccessor
     namespace TapRecognizerAccessor {
     void DestroyPeerImpl(Ark_TapRecognizer peer)
@@ -17965,7 +18000,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
+    Opt_Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
     {
         return {};
     }
@@ -18978,6 +19013,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseGestureEventAccessor::GetFinalizerImpl,
             BaseGestureEventAccessor::GetFingerListImpl,
             BaseGestureEventAccessor::SetFingerListImpl,
+            BaseGestureEventAccessor::GetFingerInfosImpl,
         };
         return &BaseGestureEventAccessorImpl;
     }
@@ -19896,6 +19932,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureEventAccessor::SetRepeatImpl,
             GestureEventAccessor::GetFingerListImpl,
             GestureEventAccessor::SetFingerListImpl,
+            GestureEventAccessor::GetFingerInfosImpl,
             GestureEventAccessor::GetOffsetXImpl,
             GestureEventAccessor::SetOffsetXImpl,
             GestureEventAccessor::GetOffsetYImpl,
@@ -19916,6 +19953,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureEventAccessor::SetVelocityYImpl,
             GestureEventAccessor::GetVelocityImpl,
             GestureEventAccessor::SetVelocityImpl,
+            GestureEventAccessor::GetTapLocationImpl,
         };
         return &GestureEventAccessorImpl;
     }
@@ -20274,6 +20312,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LayoutPolicyAccessor::ConstructImpl,
             LayoutPolicyAccessor::GetFinalizerImpl,
             LayoutPolicyAccessor::GetMatchParentImpl,
+            LayoutPolicyAccessor::GetWrapContentImpl,
+            LayoutPolicyAccessor::GetFixAtIdealSizeImpl,
         };
         return &LayoutPolicyAccessorImpl;
     }
@@ -21652,6 +21692,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TapGestureEventAccessor::DestroyPeerImpl,
             TapGestureEventAccessor::ConstructImpl,
             TapGestureEventAccessor::GetFinalizerImpl,
+            TapGestureEventAccessor::GetTapLocationImpl,
         };
         return &TapGestureEventAccessorImpl;
     }

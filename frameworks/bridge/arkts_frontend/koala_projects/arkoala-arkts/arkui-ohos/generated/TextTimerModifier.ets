@@ -20,7 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier, hookTextTimerContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkTextTimerPeer, TextTimerConfiguration, TextTimerAttribute } from "./component/textTimer"
+import { ArkTextTimerPeer, TimerCallback, TextTimerConfiguration, TextTimerAttribute } from "./component/textTimer"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
 import { ResourceColor, Length, ResourceStr } from "./component/units"
@@ -46,11 +46,11 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | ResourceStr | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: ResourceStr | undefined
     _onTimer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTimer_0_0value?: ((utc: number,elapsedTime: number) => void) | undefined
+    _onTimer_0_0value?: TimerCallback | undefined
     _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -134,7 +134,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | ResourceStr | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -144,7 +144,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | ResourceStr | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -170,7 +170,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             switch (this._onTimer_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTimerAttribute((this._onTimer_0_0value as ((utc: number,elapsedTime: number) => void) | undefined));
+                    peer.setOnTimerAttribute((this._onTimer_0_0value as TimerCallback | undefined));
                     this._onTimer_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -180,7 +180,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
                 }
                 default: {
                     this._onTimer_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTimerAttribute((undefined as ((utc: number,elapsedTime: number) => void) | undefined));
+                    peer.setOnTimerAttribute((undefined as TimerCallback | undefined));
                 }
             }
         }
@@ -284,7 +284,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | ResourceStr | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -310,7 +310,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
                     break;
                 }
                 default: {
-                    this.onTimer((undefined as ((utc: number,elapsedTime: number) => void) | undefined));
+                    this.onTimer((undefined as TimerCallback | undefined));
                 }
             }
         }
@@ -385,7 +385,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         }
         return this
     }
-    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -407,7 +407,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         }
         return this
     }
-    onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
+    onTimer(value: TimerCallback | undefined): this {
         if (((this._onTimer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onTimer_0_flag = AttributeUpdaterFlag.UPDATE

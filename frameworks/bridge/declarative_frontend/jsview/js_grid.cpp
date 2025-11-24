@@ -328,19 +328,42 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        // null/undefined keep last grid height
-        return;
-    }
-    JSViewAbstract::JsHeight(info);
 
+    ViewAbstractModel::GetInstance()->ResetResObj("height");
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    RefPtr<ResourceObject> valueResObj;
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined()) {
+        GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
         return;
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
+
+    if (!ParseJsDimensionVpNG(jsValue, value, valueResObj)) {
+        // JsHeight return false, check if set LayoutPolicy before return.
+        if (jsValue->IsObject()) {
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+            JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+            if (layoutPolicy->IsString()) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+                return;
+            }
+        }
+        GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
+        return;
+    }
+
+    GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
+    if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value.Value(), 0.0)
+                                                 : (LessNotEqual(value.Value(), 0.0) && !valueResObj)) {
         value.SetValue(0.0);
     }
+
+    if (SystemProperties::ConfigChangePerform() && valueResObj) {
+        ViewAbstractModel::GetInstance()->SetHeight(valueResObj);
+    }
+
     GridModel::GetInstance()->SetGridHeight(value);
 }
 

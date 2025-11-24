@@ -39,6 +39,7 @@
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/thread/background_task_executor.h"
@@ -178,6 +179,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -203,6 +205,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -223,6 +226,7 @@ PipelineContext::PipelineContext()
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -3605,11 +3609,54 @@ void PipelineContext::DumpData(
     }
 }
 
+namespace {
+struct RootComp {
+    bool operator()(const RefPtr<UINode>& a1, const RefPtr<UINode>& a2) const
+    {
+        return a1->GetId() == a2->GetId() ? AceType::RawPtr(a1) < AceType::RawPtr(a2) : a1->GetId() < a2->GetId();
+    }
+};
+RefPtr<UINode> GetRoot(const RefPtr<UINode>& uiNode)
+{
+    if (const auto& parent = uiNode->GetParent()) {
+        if (parent->GetChildIndex(uiNode) == -1) {
+            LOGW("parent [%{public}d %{public}s] do not contain child [%{public}d %{public}s]",
+                parent->GetId(), parent->GetTag().c_str(), uiNode->GetId(), uiNode->GetTag().c_str());
+            return uiNode;
+        }
+        return GetRoot(parent);
+    }
+    return uiNode;
+}
+std::set<RefPtr<UINode>, RootComp> GetAllRoots()
+{
+    std::set<RefPtr<UINode>, RootComp> roots;
+    ElementRegister::GetInstance()->IterateElements([&roots](auto id, auto& element) {
+        if (const auto& uiNode = AceType::DynamicCast<UINode>(element)) {
+            roots.emplace(GetRoot(uiNode));
+        }
+        return false;
+    });
+    return roots;
+}
+}
+
 void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
 {
     if (params.size() > 1 && params[1] == "-lastpage") {
         auto lastPage = stageManager_->GetLastPage();
         DumpData(lastPage, params, hasJson);
+    } else if (params.size() > 1 && params[1] == "-all") {
+        auto isAll = DumpLog::GetInstance().IsDumpAllNodes();
+        DumpLog::GetInstance().SetDumpAllNodes(true);
+        for (auto& uiNode : GetAllRoots()) {
+            if (auto frameNode = AceType::DynamicCast<FrameNode>(uiNode)) {
+                DumpData(frameNode, params, hasJson);
+            } else {
+                uiNode->DumpTree(GetDepthFromParams(params), hasJson);
+            }
+        }
+        DumpLog::GetInstance().SetDumpAllNodes(isAll);
     } else {
         DumpData(rootNode_, params, hasJson);
     }
@@ -3640,6 +3687,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
     DumpLog::GetInstance().Print(1, "finishCount:" + GetUnexecutedFinishCount());
+    DumpLog::GetInstance().Print(1, "UINodeCount:" + std::to_string(UINode::Count()));
     if (params[0] == "-element") {
         DumpElement(params, hasJson);
     } else if (params[0] == "-navigation") {
@@ -3717,7 +3765,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             }
         });
     } else if (params[0] == "-default") {
-        rootNode_->DumpTree(depth);
+        if (params.size() > 1 && params[1] == "-all") {
+            auto isAll = DumpLog::GetInstance().IsDumpAllNodes();
+            DumpLog::GetInstance().SetDumpAllNodes(true);
+            for (auto& uiNode : GetAllRoots()) {
+                uiNode->DumpTree(depth);
+            }
+            DumpLog::GetInstance().SetDumpAllNodes(isAll);
+        } else {
+            rootNode_->DumpTree(depth);
+        }
         DumpLog::GetInstance().OutPutDefault();
     } else if (params[0] == "-overlay") {
         if (overlayManager_) {
@@ -7048,6 +7105,11 @@ void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
 const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
 {
     return touchOptimizer_;
+}
+
+const std::unique_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
+{
+    return clickOptimizer_;
 }
 
 const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const

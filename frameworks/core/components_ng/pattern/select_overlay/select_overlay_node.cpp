@@ -87,7 +87,6 @@ constexpr Dimension MAX_DIAMETER = 3.5_vp;
 constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
-constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 constexpr Dimension EXTENSION_MENU_DEFAULT_WIDTH = 224.0_vp;
 constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
@@ -1592,6 +1591,7 @@ SelectOverlayNode::SelectOverlayNode(const RefPtr<Pattern>& pattern)
     stateFuncs_[FrameNodeStatus::VISIBLETOGONE] = &SelectOverlayNode::DispatchVisibleToGoneState;
     stateFuncs_[FrameNodeStatus::GONE] = &SelectOverlayNode::DispatchGoneState;
     stateFuncs_[FrameNodeStatus::GONETOVISIBLE] = &SelectOverlayNode::DispatchGoneToVisibleState;
+    scopeId_ = Container::CurrentIdSafelyWithCheck();
 }
 
 void SelectOverlayNode::DispatchVisibleState(FrameNodeType type, FrameNodeTrigger trigger)
@@ -2468,6 +2468,7 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& 
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     selectMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     selectMenu_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 
@@ -2498,7 +2499,8 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& 
 
     selectMenu_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    styleOption.blurStyle = menuTheme ?
+        static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
     styleOption.colorMode = ConvertColorMode(colorMode);
     selectMenu_->GetRenderContext()->UpdateBackBlurStyle(styleOption);
 
@@ -2550,11 +2552,17 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
-    auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
+    auto selectOverlayMaxWidth = textOverlayTheme->GetMaxOverlayMenuWidth().ConvertToPx();
+    auto gap = textOverlayTheme->GetOverlayMenuHorizontalGap().ConvertToPx() * 2;
     auto container = Container::Current();
     if (container && container->IsUIExtensionWindow()) {
         auto curWindowRect = pipeline->GetCurrentWindowRect();
-        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width());
+        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width() - gap);
+    } else {
+        auto parentWidth = GetParentWidth();
+        if (parentWidth.has_value()) {
+            selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, parentWidth.value() - gap);
+        }
     }
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
@@ -2564,6 +2572,28 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
 
     maxWidth =
         selectOverlayMaxWidth - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() - backButtonWidth;
+}
+
+std::optional<float> SelectOverlayNode::GetParentWidth()
+{
+    RefPtr<FrameNode> rootNode;
+    auto parent = GetParent();
+    if (parent) {
+        rootNode = DynamicCast<FrameNode>(parent);
+        CHECK_NULL_RETURN(rootNode, std::nullopt);
+    } else {
+        auto pipeline = GetContext();
+        CHECK_NULL_RETURN(pipeline, std::nullopt);
+        auto overlayManager = pipeline->GetSelectOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, std::nullopt);
+        auto newOverlayManager = overlayManager->GetSelectContentOverlayManager();
+        CHECK_NULL_RETURN(newOverlayManager, std::nullopt);
+        rootNode = newOverlayManager->GetSelectOverlayRoot();
+        CHECK_NULL_RETURN(rootNode, std::nullopt);
+    }
+    auto renderContext = rootNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, std::nullopt);
+    return renderContext->GetPaintRectWithoutTransform().Width();
 }
 
 bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocatedSize)
@@ -3085,6 +3115,7 @@ void SelectOverlayNode::UpdateMenuOptions(const std::shared_ptr<SelectOverlayInf
 {
     float maxWidth = 0.0f;
     GetDefaultButtonAndMenuWidth(maxWidth);
+    maxDefaultButtonAndMenuWidth_ = maxWidth;
     if (info->onCreateCallback.onCreateMenuCallback || info->onCreateCallback.onPrepareMenuCallback) {
         AddMenuItemByCreateMenuCallback(info, maxWidth);
         return;
@@ -3553,6 +3584,7 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
     auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     auto colorMode = pipelineContext->GetColorMode();
     if (caller) {
         colorMode = caller->GetLocalColorMode();
@@ -3563,7 +3595,8 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
         renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     }
     BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    styleOption.blurStyle = menuTheme ?
+        static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
     styleOption.colorMode = ConvertColorMode(colorMode);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdateBackBlurStyle(styleOption);

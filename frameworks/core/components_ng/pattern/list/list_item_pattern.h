@@ -267,6 +267,8 @@ public:
         return true;
     }
 
+    void SetDeleteArea();
+
 protected:
     void OnModifyDone() override;
     virtual void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);

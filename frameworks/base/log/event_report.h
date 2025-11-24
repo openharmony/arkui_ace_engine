@@ -196,6 +196,7 @@ enum class GeneralInteractionErrorType {
     INJECT_DOWN_EVENT_ERROR,
     FOCUS_VIEW_STACK_EMPTY_ERROR,
     FOCUS_VIEW_STACK_TOP_UNFOCUSABLE_ERROR,
+    OVERLAY_ERROR,
 };
 
 struct GeneralInteractionErrorInfo {

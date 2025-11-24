@@ -93,6 +93,24 @@ void UiReportProxy::ReportSearchEvent(const std::string& data)
     }
 }
 
+void UiReportProxy::ReportTextChangeEvent(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportTextChangeEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportTextChangeEvent write data failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_TEXT_CHANGE_EVENT, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportTextChangeEvent send request failed");
+    }
+}
+
 void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart)
 {
     MessageParcel messageData;

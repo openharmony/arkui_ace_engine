@@ -164,23 +164,6 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TextAreaSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
-  constructor(value: SelectDetectorConfig) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textAreaSelectDetectorConfig');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().textArea.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textArea.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-
 class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('textAreaFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -1525,10 +1508,6 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
     return this;
   }
   type(value: TextAreaType): TextAreaAttribute {

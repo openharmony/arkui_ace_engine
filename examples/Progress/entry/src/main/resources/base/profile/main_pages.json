@@ -1,0 +1,17 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/CalendarPicker",
+    "pages/DatePicker",
+    "pages/Image",
+    "pages/Menu",
+    "pages/Scroll",
+    "pages/DatePickerDialog",
+    "pages/TimePicker",
+    "pages/TimePickerDialog",
+    "pages/Badge",
+    "pages/Progress",
+    "pages/DataPanel",
+    "pages/TextPicker"
+  ]
+}

@@ -165,6 +165,11 @@ namespace OHOS::Ace::NG::Converter {
         dst = static_cast<Ark_Float64>(src);
     }
 
+    inline void AssignArkValue(Ark_Int64& dst, const int32_t& src)
+    {
+        dst = static_cast<Ark_Int64>(src);
+    }
+
     inline void AssignArkValue(Ark_String& dst, const std::string_view& src, ConvContext *ctx)
     {
         if (ctx) {
@@ -411,6 +416,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NativeEmbedParamStatus& dst, const NativeEmbedParamStatus& src);
     void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src);
     void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& dst, const RefPtr<UnifiedData>& src);
+    void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src);
 
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,

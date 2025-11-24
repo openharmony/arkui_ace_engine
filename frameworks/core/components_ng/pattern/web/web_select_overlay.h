@@ -202,6 +202,9 @@ public:
     void InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
     bool QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember &member);
+    void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
+    void UpdateSelectAreaInfo();
+    void UpdateSelectArea();
 private:
     void UpdateSelectMenuOptions();
     void UpdateIsSelectAll();
@@ -230,6 +233,7 @@ private:
     bool canShowAIMenu_ = false;
     TextDataDetectType aiMenuType_ = TextDataDetectType::INVALID;
     std::string aiMenucontent_;
+    RectF selectArea_ = RectF(0, 0, 0, 0);
 };
 } // namespace OHOS::Ace::NG
 

@@ -84,6 +84,8 @@ void CanvasRenderingContext2DModelNG::PutImageData(const Ace::ImageData& imageDa
 
 void CanvasRenderingContext2DModelNG::CloseImageBitmap(const std::string& src) {}
 
+void CanvasRenderingContext2DModelNG::AddRoundRect(const Rect& rect, const std::vector<double>& radii) {}
+
 std::unique_ptr<Ace::ImageData> CanvasRenderingContext2DModelNG::GetImageData(const ImageSize& imageSize)
 {
     return nullptr;

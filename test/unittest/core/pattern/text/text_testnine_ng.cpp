@@ -102,6 +102,7 @@ HWTEST_F(TextTestNineNg, HandleOnTranslate001, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);
@@ -129,7 +130,9 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);
 
@@ -158,7 +161,9 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);
 
@@ -218,6 +223,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction002, TestSize.Level1)
     textModelNG.Create("TextValue");
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);

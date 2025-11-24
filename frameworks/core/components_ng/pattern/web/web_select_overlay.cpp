@@ -200,6 +200,13 @@ void WebSelectOverlay::SetEditMenuOptions(SelectOverlayInfo& selectInfo)
 
 bool WebSelectOverlay::IsSelectHandleReverse()
 {
+    if (selectOverlayDragging_) {
+        if (startSelectionHandle_->IsDragging()) {
+            return !isCurrentStartHandleDragging_;
+        } else if (endSelectionHandle_->IsDragging()) {
+            return isCurrentStartHandleDragging_;
+        }
+    }
     if (startSelectionHandle_->GetTouchHandleType() ==
         OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE &&
         endSelectionHandle_->GetTouchHandleType() ==
@@ -1597,5 +1604,25 @@ bool WebSelectOverlay::QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember& me
                                GreatNotEqual(member.downPaint.Bottom(), member.bottomArea);
     member.fixWrongNewAvoid = !upHandleIsNotShow || !downHandleIsNotShow;
     return !member.fixWrongNewAvoid;
+}
+
+void WebSelectOverlay::UpdateSelectAreaInfo()
+{
+    webSelectInfo_.selectArea = ComputeSelectAreaRect(selectArea_);
+    UpdateSelectArea();
+}
+
+void WebSelectOverlay::UpdateSelectArea()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AREA);
+}
+
+void WebSelectOverlay::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    RectF rect(x, y, width, height);
+    selectArea_ = rect;
+    UpdateSelectAreaInfo();
 }
 } // namespace OHOS::Ace::NG

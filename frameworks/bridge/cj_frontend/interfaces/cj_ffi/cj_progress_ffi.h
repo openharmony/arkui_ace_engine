@@ -85,6 +85,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkProgressSetCapsuleStyle(CapsuleStyle capsuleSt
 CJ_EXPORT void FfiOHOSAceFrameworkProgressSetScaleRingStyle(ScaleRingStyle scaleRingStyle);
 CJ_EXPORT void FfiOHOSAceFrameworkProgressSetRingStyle(RingStyle ringStyle);
 CJ_EXPORT void FfiOHOSAceFrameworkProgressSetEclipseStyle(bool enableSmoothEffect);
+CJ_EXPORT void FfiOHOSAceFrameworkProgressResetColor(int32_t type);
+CJ_EXPORT void FfiOHOSAceFrameworkProgressResetBackgroundColor(int32_t type);
 CJ_EXPORT void FfiOHOSAceFrameworkProgressSetGradientColor(
     std::vector<uint32_t> color, std::vector<double> number, std::vector<int32_t> unitType);
 }

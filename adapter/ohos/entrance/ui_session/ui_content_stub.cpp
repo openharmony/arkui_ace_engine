@@ -63,6 +63,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterSearchEventCallbackInner(data, reply, option);
             break;
         }
+        case REGISTER_TEXT_CHANGE_EVENT: {
+            RegisterTextChangeEventCallbackInner(data, reply, option);
+            break;
+        }
         case REGISTER_ROUTER_CHANGE_EVENT: {
             RegisterRouterChangeEventCallbackInner(data, reply, option);
             break;
@@ -93,6 +97,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case UNREGISTER_SEARCH_EVENT: {
             UnregisterSearchEventCallbackInner(data, reply, option);
+            break;
+        }
+        case UNREGISTER_TEXT_CHANGE_EVENT: {
+            UnregisterTextChangeEventCallbackInner(data, reply, option);
             break;
         }
         case UNREGISTER_ROUTER_CHANGE_EVENT: {
@@ -216,6 +224,13 @@ int32_t UiContentStub::RegisterSearchEventCallbackInner(
     return NO_ERROR;
 }
 
+int32_t UiContentStub::RegisterTextChangeEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(RegisterTextChangeEventCallback(nullptr));
+    return NO_ERROR;
+}
+
 int32_t UiContentStub::RegisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
@@ -280,6 +295,14 @@ int32_t UiContentStub::UnregisterSearchEventCallbackInner(
     reply.WriteInt32(UnregisterSearchEventCallback());
     return NO_ERROR;
 }
+
+int32_t UiContentStub::UnregisterTextChangeEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(UnregisterTextChangeEventCallback());
+    return NO_ERROR;
+}
+
 
 int32_t UiContentStub::UnregisterRouterChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)

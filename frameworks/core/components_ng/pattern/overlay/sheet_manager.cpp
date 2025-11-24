@@ -50,7 +50,7 @@ RefPtr<OverlayManager> FindTargetNodeOverlay(RefPtr<UINode>& parent,
     auto pattern = node->GetPattern<SystemWindowScene>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->CreateOverlayManager(isShow, targetNode);
-    auto overlay = pattern->GetOverlayManager();
+    auto overlay = pattern->GetOverlayManager(targetNode);
     CHECK_NULL_RETURN(overlay, nullptr);
     targetNode->SetRootNodeId(node->GetId());
     targetNode->SetRootNodeType(RootNodeType::WINDOW_SCENE_ETS_TAG);
@@ -82,7 +82,7 @@ int32_t GetOverlayAndTargetNode(int32_t targetId, const SheetStyle& sheetStyle, 
     auto destructor =
         [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
             rootNodeType = targetNode->GetRootNodeType(), showInPage = sheetStyle.showInPage.value_or(false),
-            instanceId = sheetStyle.instanceId.value_or(Container::CurrentId()), sheetContentNodeId]() {
+            instanceId = sheetStyle.instanceId.value_or(Container::CurrentId()), sheetContentNodeId, targetNode]() {
             ContainerScope scope(instanceId);
             SheetManager::GetInstance().CleanBindSheetMap(instanceId, sheetContentNodeId);
             auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -90,10 +90,11 @@ int32_t GetOverlayAndTargetNode(int32_t targetId, const SheetStyle& sheetStyle, 
             auto overlayManager = pipelineContext->GetOverlayManager();
             if (showInPage) {
                 TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-                overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
+                overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType, targetNode);
             }
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteModal(id);
+            SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType, targetNode);
         };
     targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
     return ERROR_CODE_NO_ERROR;
@@ -188,7 +189,8 @@ int32_t SheetManager::CloseBindSheetByUIContext(
     return ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND;
 }
 
-void SheetManager::DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType)
+void SheetManager::DeleteOverlayForWindowScene(
+    int32_t rootNodeId, RootNodeType rootNodeType, const RefPtr<FrameNode>& targetNode)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     if (rootNodeType == RootNodeType::WINDOW_SCENE_ETS_TAG) {
@@ -196,7 +198,8 @@ void SheetManager::DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType 
         CHECK_NULL_VOID(windowSceneNode);
         auto pattern = windowSceneNode->GetPattern<SystemWindowScene>();
         CHECK_NULL_VOID(pattern);
-        pattern->DeleteOverlayManager();
+        pattern->DeleteOverlayManager(targetNode);
+        targetNode->SetRootNodeId(0);
     }
 #endif
 }
@@ -206,7 +209,7 @@ RefPtr<OverlayManager> SheetManager::FindPageNodeOverlay(
 {
     CHECK_NULL_RETURN(targetNode, nullptr);
     if (targetNode->GetRootNodeId() > 0 && !isStartByUIContext) {
-        return SheetManager::GetOverlayFromPage(targetNode->GetRootNodeId(), targetNode->GetRootNodeType());
+        return SheetManager::GetOverlayFromPage(targetNode->GetRootNodeId(), targetNode->GetRootNodeType(), targetNode);
     }
     auto isNav = false;
     RefPtr<OverlayManager> overlay;
@@ -252,7 +255,8 @@ RefPtr<OverlayManager> SheetManager::FindPageNodeOverlay(
     return overlay;
 }
 
-RefPtr<OverlayManager> SheetManager::GetOverlayFromPage(int32_t rootNodeId, RootNodeType rootNodeType)
+RefPtr<OverlayManager> SheetManager::GetOverlayFromPage(
+    int32_t rootNodeId, RootNodeType rootNodeType, const RefPtr<FrameNode>& targetNode)
 {
     if (rootNodeId <= 0) {
         return nullptr;
@@ -279,7 +283,7 @@ RefPtr<OverlayManager> SheetManager::GetOverlayFromPage(int32_t rootNodeId, Root
         CHECK_NULL_RETURN(node, nullptr);
         auto pattern = node->GetPattern<SystemWindowScene>();
         CHECK_NULL_RETURN(pattern, nullptr);
-        return pattern->GetOverlayManager();
+        return pattern->GetOverlayManager(targetNode);
     }
 #endif
     return nullptr;
@@ -338,18 +342,18 @@ void SheetManager::RegisterDestroyCallback(const RefPtr<FrameNode>& targetNode, 
 {
     auto destructor = [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
         rootNodeType = targetNode->GetRootNodeType(),
-        showInPage = sheetStyle.showInPage.value_or(false), containerId]() {
+        showInPage = sheetStyle.showInPage.value_or(false), containerId, targetNode]() {
         ContainerScope scope(containerId);
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         if (showInPage) {
             TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-            overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
+            overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType, targetNode);
         }
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
-        SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType);
+        SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType, targetNode);
         SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(id));
     };
     targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);

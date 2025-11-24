@@ -804,7 +804,11 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern002, TestSize.Level1)
     MneuModelInstance.SetFontColor(Color::RED);
     MneuModelInstance.SetFontWeight(FontWeight::BOLD);
 
-    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroupNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(menuItemGroupNode, nullptr);
+    auto menuItemGroupPattern = menuItemGroupNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemGroupPattern, nullptr);
     RefPtr<NG::UINode> footerNode;
     footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     menuItemGroupPattern->footerIndex_ = 0;

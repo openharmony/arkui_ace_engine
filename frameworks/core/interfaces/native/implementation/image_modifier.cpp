@@ -315,7 +315,7 @@ void SetPointLightImpl(Ark_NativePointer node,
 #endif
 }
 void SetEdgeAntialiasingImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -335,15 +335,15 @@ void SetOnCompleteImpl(Ark_NativePointer node,
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
         Ark_ImageCompleteEvent event;
-        event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
-        event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
-        event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
-        event.componentHeight = Converter::ArkValue<Ark_Number>(info.GetComponentHeight());
-        event.loadingStatus = Converter::ArkValue<Ark_Number>(info.GetLoadingStatus());
-        event.contentOffsetX = Converter::ArkValue<Ark_Number>(info.GetContentOffsetX());
-        event.contentOffsetY = Converter::ArkValue<Ark_Number>(info.GetContentOffsetY());
-        event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
-        event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
+        event.width = Converter::ArkValue<Ark_Int32>(info.GetWidth());
+        event.height = Converter::ArkValue<Ark_Int32>(info.GetHeight());
+        event.componentWidth = Converter::ArkValue<Ark_Int32>(info.GetComponentWidth());
+        event.componentHeight = Converter::ArkValue<Ark_Int32>(info.GetComponentHeight());
+        event.loadingStatus = Converter::ArkValue<Ark_Int32>(info.GetLoadingStatus());
+        event.contentOffsetX = Converter::ArkValue<Ark_Int32>(info.GetContentOffsetX());
+        event.contentOffsetY = Converter::ArkValue<Ark_Int32>(info.GetContentOffsetY());
+        event.contentWidth = Converter::ArkValue<Ark_Int32>(info.GetContentWidth());
+        event.contentHeight = Converter::ArkValue<Ark_Int32>(info.GetContentHeight());
         auto optEvent = Converter::ArkValue<Opt_ImageCompleteEvent>(event);
         callback.Invoke(optEvent);
     };

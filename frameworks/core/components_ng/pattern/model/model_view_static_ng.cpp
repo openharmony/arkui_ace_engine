@@ -17,13 +17,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/model/model_paint_property.h"
 #include "core/components_ng/base/view_abstract.h"
-#ifdef ARKUI_CAPI_UNITTEST
-#include "test/unittest/capi/stubs/mock_shader_input_buffer.h"
-#include "test/unittest/capi/stubs/mock_custom_render_descriptor.h"
-#include "test/unittest/capi/stubs/mock_model_pattern.h"
-#else
 #include "core/components_ng/pattern/model/model_pattern.h"
-#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::Ace::NG {
 
