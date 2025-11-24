@@ -37,4 +37,68 @@ int32_t ListItemGroupAccessibilityProperty::GetEndIndex() const
     auto itemPosition = listItemGroupPattern->GetItemPosition();
     return itemPosition.empty() ? -1 : itemPosition.rbegin()->first;
 }
+
+bool ListItemGroupAccessibilityProperty::GetAccessibilityInnerVisibleRect(RectF& rect)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto listItemGroupPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(listItemGroupPattern, false);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, false);
+    auto listItemGroupRect = context->GetPaintRectWithoutTransform();
+    rect = RectF(0, 0, listItemGroupRect.Width(), listItemGroupRect.Height());
+    bool result = false;
+    float viewTop = 0.0f;
+    float viewBottom = listItemGroupRect.Height();
+
+    auto headerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemGroupPattern->GetHeaderNode());
+    if (headerFrameNode) {
+        auto headerContext = headerFrameNode->GetRenderContext();
+        if (headerContext) {
+            auto headerRect = headerContext->GetPaintRectWithTransform();
+            viewTop = headerRect.Bottom();
+            result = true;
+        }
+    }
+
+    auto footerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemGroupPattern->GetFooterNode());
+    if (footerFrameNode) {
+        auto footerContext = footerFrameNode->GetRenderContext();
+        if (footerContext) {
+            auto footerRect = footerContext->GetPaintRectWithTransform();
+            viewBottom = footerRect.Top();
+            result = true;
+        }
+    }
+
+    if  (result) {
+        rect.SetTop(viewTop);
+        rect.SetHeight(viewBottom - viewTop);
+    }
+
+    return result;
+}
+
+ScrollableStatus ListItemGroupAccessibilityProperty::GetScrollableStatus() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, ScrollableStatus::NOT_SUPPORT);
+    auto listItemGroupPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(listItemGroupPattern, ScrollableStatus::NOT_SUPPORT);
+    bool isDisplayStart = listItemGroupPattern->IsDisplayStart();
+    bool isDisplayEnd = listItemGroupPattern->IsDisplayEnd();
+    if (isDisplayStart && isDisplayEnd) {
+        return ScrollableStatus::AT_BOTH_TOP_BOTTOM;
+    } else if (isDisplayStart) {
+        return ScrollableStatus::AT_TOP;
+    } else if (isDisplayEnd) {
+        return ScrollableStatus::AT_BOTTOM;
+    } else {
+        return ScrollableStatus::AT_NEITHER_TOP_BOTTOM;
+    }
+
+    return ScrollableStatus::NOT_SUPPORT;
+}
+
 } // namespace OHOS::Ace::NG

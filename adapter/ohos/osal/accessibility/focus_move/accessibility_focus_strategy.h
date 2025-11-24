@@ -101,6 +101,21 @@ public:
     {
         return false;
     }
+
+    virtual bool IsHeaderFooterInScroll()
+    {
+        return false;
+    }
+
+    virtual bool IsBackward()
+    {
+        return false;
+    }
+
+    virtual bool IsForward()
+    {
+        return false;
+    }
 };
 
 class AccessibilityFocusStrategy {
@@ -163,6 +178,16 @@ private:
 
     AceFocusMoveResult FindPrevReadableNodeToHigherLevel(
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult IsFindNextReadableNode(
+        const std::shared_ptr<FocusRulesCheckNode>& current,
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    AceFocusMoveResult IsFindPrevReadableNode(
+        const std::shared_ptr<FocusRulesCheckNode>& current,
+        const std::shared_ptr<FocusRulesCheckNode>& parent,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
     virtual bool IsForceSupportScrollType(

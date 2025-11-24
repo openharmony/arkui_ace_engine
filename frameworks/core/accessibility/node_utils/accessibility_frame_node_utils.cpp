@@ -156,6 +156,103 @@ bool FindFrameNodeByCondition(const std::list<RefPtr<NG::UINode>>& children,
     }
     return false;
 }
+
+RefPtr<NG::FrameNode> GetParentFrameNodeWithVirtualNode(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto parent = node->GetParentFrameNode();
+    if (!parent && node->IsAccessibilityVirtualNode()) {
+        auto weakNode = AceType::DynamicCast<NG::FrameNode>(node->GetVirtualNodeParent());
+        parent = weakNode.Upgrade();
+    }
+    return parent;
+}
+
+NG::RectF ApplyFrameNodeTranformToRect(const NG::RectF& rect, const RefPtr<NG::FrameNode>& parent)
+{
+    NG::RectF newRect = rect;
+    if (!parent) {
+        return newRect;
+    }
+
+    auto parentRenderContext = parent->GetRenderContext();
+    if (!parentRenderContext) {
+        return newRect;
+    }
+
+    auto parentScale = parentRenderContext->GetTransformScale();
+    auto offset = rect.GetOffset();
+    if (parentScale) {
+        newRect.SetWidth(rect.Width() * parentScale.value().x);
+        newRect.SetHeight(rect.Height() * parentScale.value().y);
+        offset = NG::OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+    }
+    offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
+    newRect.SetOffset(offset);
+    return newRect;
+}
+
+bool GetTransformRectRelativeToParent(
+    const RefPtr<NG::FrameNode>& currentNode,
+    const RefPtr<NG::FrameNode>& parentNode,
+    NG::RectF& rect)
+{
+    bool find = false;
+    CHECK_NULL_RETURN(currentNode, find);
+    CHECK_NULL_RETURN(parentNode, find);
+    auto context = currentNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, find);
+
+    rect = context->GetPaintRectWithTransform();
+    auto parent = currentNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (parent->IsWindowBoundary()) {
+            break;
+        }
+        if (parent->GetAccessibilityId() == parentNode->GetAccessibilityId()) {
+            find = true;
+            break;
+        }
+        rect = ApplyFrameNodeTranformToRect(rect, parent);
+
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return find;
+}
+
+void IsCoveredByBrother(const RefPtr<NG::FrameNode>& frameNode, bool& nodeAccessibilityVisible)
+{
+    CHECK_EQUAL_VOID(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled(), false);
+    CHECK_EQUAL_VOID(nodeAccessibilityVisible, false);
+    auto parentFrameNode = frameNode;
+    do {
+        parentFrameNode = GetParentFrameNodeWithVirtualNode(frameNode);
+        CHECK_NULL_BREAK(parentFrameNode);
+
+        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_BREAK(accessibilityProperty);
+
+        NG::RectF parentRect;
+        auto find = accessibilityProperty->GetAccessibilityInnerVisibleRect(parentRect);
+        if (!find) {
+            continue;
+        }
+
+        NG::RectF currentRect;
+        auto transResult = GetTransformRectRelativeToParent(frameNode, parentFrameNode, currentRect);
+        if (!transResult) {
+            break;
+        }
+
+        if (GreatNotEqual(currentRect.Top(),  parentRect.Bottom()) ||
+            LessNotEqual(currentRect.Bottom(),  parentRect.Top()) ||
+            NearEqual(parentRect.Top(), parentRect.Bottom())) {
+            nodeAccessibilityVisible = false;
+            break;
+        }
+    } while (parentFrameNode);
+}
+
 } // namespace
 
 void AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(const RefPtr<NG::UINode>& uiNode)
@@ -203,6 +300,7 @@ void AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(const RefPtr<
             isAllAncestorAccessibilityVisible, clipVisible);
     }
 
+    IsCoveredByBrother(frameNode, nodeAccessibilityVisible);
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
         frameNode->SetAccessibilityVisible(nodeAccessibilityVisible);
     }

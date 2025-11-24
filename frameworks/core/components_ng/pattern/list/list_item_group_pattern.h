@@ -146,6 +146,11 @@ public:
             }
         }
         header_ = header;
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(GetHeaderNode());
+        CHECK_NULL_VOID(frameNode);
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetIsHeaderOrFooter(true);
     }
 
     void AddFooter(const RefPtr<NG::UINode>& footer)
@@ -176,6 +181,11 @@ public:
             }
         }
         footer_ = footer;
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(GetFooterNode());
+        CHECK_NULL_VOID(frameNode);
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetIsHeaderOrFooter(true);
     }
 
     void RemoveHeader()

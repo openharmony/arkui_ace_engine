@@ -1398,4 +1398,15 @@ bool AccessibilityProperty::IsAccessibilityModal() const
     return overlayProperty_->isModal;
 }
 
+void AccessibilityProperty::SetIsHeaderOrFooter(bool isFlag)
+{
+    isHeaderOrFooter_ = isFlag;
+    if (isHeaderOrFooter_.value_or(false)) {
+        SetAccessibilityHoverPriority(true);
+    }
+}
+bool AccessibilityProperty::IsHeaderOrFooter() const
+{
+    return isHeaderOrFooter_.value_or(false);
+}
 } // namespace OHOS::Ace::NG
