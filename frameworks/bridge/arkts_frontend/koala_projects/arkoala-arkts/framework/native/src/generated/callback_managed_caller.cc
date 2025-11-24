@@ -1700,6 +1700,28 @@ void callManagedCallback_KeyEvent_VoidSync(Ark_VMContext vmContext, Ark_Int32 re
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCallback_Long_Void(Ark_Int32 resourceId, Ark_Int64 value)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_Long_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt64(value);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_Long_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int64 value)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_Long_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt64(value);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCallback_Map_String_RecordData_Void(Ark_Int32 resourceId, Map_String_Opt_Object value0)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8148,6 +8170,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_ItemDragInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Void);
         case Kind_Callback_KeyEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_Boolean);
         case Kind_Callback_KeyEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_Void);
+        case Kind_Callback_Long_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Long_Void);
         case Kind_Callback_Map_String_RecordData_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Map_String_RecordData_Void);
         case Kind_Callback_MarqueeState_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MarqueeState_Void);
         case Kind_Callback_MouseEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MouseEvent_Void);
@@ -8459,6 +8482,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_ItemDragInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_VoidSync);
         case Kind_Callback_KeyEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_BooleanSync);
         case Kind_Callback_KeyEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_KeyEvent_VoidSync);
+        case Kind_Callback_Long_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Long_VoidSync);
         case Kind_Callback_Map_String_RecordData_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Map_String_RecordData_VoidSync);
         case Kind_Callback_MarqueeState_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MarqueeState_VoidSync);
         case Kind_Callback_MouseEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_MouseEvent_VoidSync);

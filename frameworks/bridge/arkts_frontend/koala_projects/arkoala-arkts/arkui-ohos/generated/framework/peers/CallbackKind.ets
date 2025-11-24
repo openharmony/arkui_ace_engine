@@ -70,6 +70,7 @@ export enum CallbackKind {
     Kind_Callback_ItemDragInfo_Void = 137353252,
     Kind_Callback_KeyEvent_Boolean = -2061548092,
     Kind_Callback_KeyEvent_Void = 707696468,
+    Kind_Callback_Long_Void = 2051851845,
     Kind_Callback_Map_String_RecordData_Void = -1389599429,
     Kind_Callback_MarqueeState_Void = -716263454,
     Kind_Callback_MouseEvent_Void = -1382640094,

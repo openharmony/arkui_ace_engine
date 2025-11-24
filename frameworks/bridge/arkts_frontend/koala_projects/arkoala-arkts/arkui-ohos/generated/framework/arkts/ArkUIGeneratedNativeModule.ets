@@ -5583,7 +5583,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SystemOps_resourceManagerReset(): void
     @ani.unsafe.Direct
-    native static _SystemOps_setFrameCallback(thisArray: KSerializerBuffer, thisLength: int32, delayTime: number): void
+    native static _SystemOps_setFrameCallback(thisArray: KSerializerBuffer, thisLength: int32, delayTime: KLong): void
     @ani.unsafe.Quick
     native static _SystemOps_colorMetricsResourceColor(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Quick

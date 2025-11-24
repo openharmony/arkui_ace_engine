@@ -1231,6 +1231,8 @@ typedef struct Callback_KeyEvent_Boolean Callback_KeyEvent_Boolean;
 typedef struct Opt_Callback_KeyEvent_Boolean Opt_Callback_KeyEvent_Boolean;
 typedef struct Callback_KeyEvent_Void Callback_KeyEvent_Void;
 typedef struct Opt_Callback_KeyEvent_Void Opt_Callback_KeyEvent_Void;
+typedef struct Callback_Long_Void Callback_Long_Void;
+typedef struct Opt_Callback_Long_Void Opt_Callback_Long_Void;
 typedef struct Callback_Map_String_RecordData_Void Callback_Map_String_RecordData_Void;
 typedef struct Opt_Callback_Map_String_RecordData_Void Opt_Callback_Map_String_RecordData_Void;
 typedef struct Callback_MarqueeState_Void Callback_MarqueeState_Void;
@@ -10325,6 +10327,16 @@ typedef struct Opt_Callback_KeyEvent_Void {
     Ark_Tag tag;
     Callback_KeyEvent_Void value;
 } Opt_Callback_KeyEvent_Void;
+typedef struct Callback_Long_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int64 value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 value);
+} Callback_Long_Void;
+typedef struct Opt_Callback_Long_Void {
+    Ark_Tag tag;
+    Callback_Long_Void value;
+} Opt_Callback_Long_Void;
 typedef struct Callback_Map_String_RecordData_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -27358,9 +27370,9 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
                                const Ark_String* moduleName,
                                const Array_String* params);
     void (*resourceManagerReset)();
-    void (*setFrameCallback)(const Callback_Number_Void* onFrameCallback,
-                             const Callback_Number_Void* onIdleCallback,
-                             const Ark_Number* delayTime);
+    void (*setFrameCallback)(const Callback_Long_Void* onFrameCallback,
+                             const Callback_Long_Void* onIdleCallback,
+                             Ark_Int64 delayTime);
     Array_Number (*colorMetricsResourceColor)(const Ark_Resource* color);
     Array_Number (*blendColorByColorMetrics)(const Ark_Number* color,
                                              const Ark_Number* overlayColor);

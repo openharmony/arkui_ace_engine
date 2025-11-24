@@ -1576,10 +1576,7 @@ export class UIContextImpl extends UIContext {
     }
     public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
                                               delayTime: long): void {
-        const onFrameCallback_casted = onFrameCallback as object as (((index: number) => void))
-        const onIdleCallback_casted = onIdleCallback as object as (((index: number) => void))
-        const delayTime_casted = delayTime as (number)
-        SystemOps.setFrameCallback(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted);
+        SystemOps.setFrameCallback(onFrameCallback, onIdleCallback, delayTime);
         return
     }
       public getWindowName(): string | undefined {
