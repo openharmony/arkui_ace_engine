@@ -24,6 +24,9 @@
 namespace OHOS::Ace::NG {
 class NavigationStack;
 class NavDestinationPattern;
+
+class NavPathInfoScope {};
+
 class NavPathInfo : public virtual AceType {
     DECLARE_ACE_TYPE(NavPathInfo, AceType);
 public:
@@ -71,8 +74,10 @@ public:
         isEntry_ = info->GetIsEntry();
     }
 
-    virtual void OpenScope() {}
-    virtual void CloseScope() {}
+    virtual std::shared_ptr<NavPathInfoScope> Scope()
+    {
+        return std::make_shared<NavPathInfoScope>();
+    }
 
 protected:
     std::string name_;
