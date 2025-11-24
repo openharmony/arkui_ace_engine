@@ -83,6 +83,7 @@ public:
 
     void OpenDialog();
     void CloseDialog();
+    PromptActionCommonState GetState();
 
     void SetInstanceId(int32_t id)
     {
@@ -105,6 +106,7 @@ private:
     std::vector<WeakPtr<AceType>> dialogs_;
     std::function<void()> builder_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+    bool hasBind_ = false;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

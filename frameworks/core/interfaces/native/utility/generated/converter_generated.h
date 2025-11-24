@@ -1964,6 +1964,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Boolean_MenuMaskType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Boolean_PopupMaskType& src)
 {
     switch (src.selector) {
@@ -3358,6 +3373,7 @@ ASSIGN_OPT(Opt_ArrowPosition)
 ASSIGN_OPT(Opt_AttributeUpdaterFlag)
 ASSIGN_OPT(Opt_AudioSessionType)
 ASSIGN_OPT(Opt_AutoCapitalizationMode)
+ASSIGN_OPT(Opt_AvailableLayoutArea)
 ASSIGN_OPT(Opt_AvoidanceMode)
 ASSIGN_OPT(Opt_Axis)
 ASSIGN_OPT(Opt_AxisAction)
@@ -3594,6 +3610,7 @@ ASSIGN_OPT(Opt_MenuPreviewMode)
 ASSIGN_OPT(Opt_MenuType)
 ASSIGN_OPT(Opt_MessageLevel)
 ASSIGN_OPT(Opt_MixedMode)
+ASSIGN_OPT(Opt_ModalMode)
 ASSIGN_OPT(Opt_ModalTransition)
 ASSIGN_OPT(Opt_ModelType)
 ASSIGN_OPT(Opt_ModifierKey)
@@ -3672,11 +3689,13 @@ ASSIGN_OPT(Opt_PositionF64Inner)
 ASSIGN_OPT(Opt_PositionWithAffinity)
 ASSIGN_OPT(Opt_PreDragStatus)
 ASSIGN_OPT(Opt_PreparedInfo)
+ASSIGN_OPT(Opt_PreviewScaleMode)
 ASSIGN_OPT(Opt_ProgressConfiguration)
 ASSIGN_OPT(Opt_ProgressMask)
 ASSIGN_OPT(Opt_ProgressStatus)
 ASSIGN_OPT(Opt_ProgressStyle)
 ASSIGN_OPT(Opt_ProgressType)
+ASSIGN_OPT(Opt_promptAction_CommonState)
 ASSIGN_OPT(Opt_ProtectedResourceType)
 ASSIGN_OPT(Opt_PulseSymbolEffect)
 ASSIGN_OPT(Opt_RadioIndicatorType)
@@ -4549,6 +4568,7 @@ ASSIGN_OPT(Opt_PluginErrorData)
 ASSIGN_OPT(Opt_PolygonOptions)
 ASSIGN_OPT(Opt_PolylineOptions)
 ASSIGN_OPT(Opt_PopInfo)
+ASSIGN_OPT(Opt_PopupBorderLinearGradient)
 ASSIGN_OPT(Opt_PopupButton)
 ASSIGN_OPT(Opt_PosterOptions)
 ASSIGN_OPT(Opt_PostMessageOptions)
@@ -4788,6 +4808,7 @@ ASSIGN_OPT(Opt_MenuElement)
 ASSIGN_OPT(Opt_MenuItemConfiguration)
 ASSIGN_OPT(Opt_MenuItemGroupOptions)
 ASSIGN_OPT(Opt_MenuItemOptions)
+ASSIGN_OPT(Opt_MenuMaskType)
 ASSIGN_OPT(Opt_NativeXComponentParameters)
 ASSIGN_OPT(Opt_NavDestinationCommonTitle)
 ASSIGN_OPT(Opt_NavDestinationContext)
@@ -4853,6 +4874,7 @@ ASSIGN_OPT(Opt_Tuple_Length_Length)
 ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_F64)
 ASSIGN_OPT(Opt_UnderlineColor)
 ASSIGN_OPT(Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions)
+ASSIGN_OPT(Opt_Union_Boolean_MenuMaskType)
 ASSIGN_OPT(Opt_Union_Boolean_PopupMaskType)
 ASSIGN_OPT(Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext)
 ASSIGN_OPT(Opt_Union_Dimension_Array_Dimension)

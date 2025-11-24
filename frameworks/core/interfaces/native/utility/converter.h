@@ -726,6 +726,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedType& src);
     template<> void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<AvailableLayoutAreaMode>& dst, const Ark_AvailableLayoutArea& src);
+    template<> void AssignCast(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
@@ -824,6 +826,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src);
     template<> void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessageSource& src);
     template<> void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src);
+    template<> void AssignCast(std::optional<ModalMode>& dst, const Ark_ModalMode& src);
     template<> void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src);
     template<> void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
@@ -845,6 +848,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
+    template<> void AssignCast(std::optional<PopupLinearGradientProperties>& dst, const Ark_PopupBorderLinearGradient& src);
+    template<> void AssignCast(std::optional<PreviewScaleMode>& dst, const Ark_PreviewScaleMode& src);
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src);
     template<> void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src);

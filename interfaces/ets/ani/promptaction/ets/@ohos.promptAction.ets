@@ -149,6 +149,10 @@ export default namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
     }
 
     export interface ActionMenuSuccessResponse {
@@ -252,6 +256,7 @@ export default namespace promptAction {
 
         native createPtr(): long;
         native close(): void;
+        native getState(): CommonState;
     }
 
     export type DialogOptionsCornerRadius = Dimension | BorderRadiuses;

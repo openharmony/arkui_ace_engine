@@ -8958,6 +8958,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetSubMenuExpandSymbolImpl(Ark_NativePointer node,
+                                    const Opt_SymbolGlyphModifier* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSubMenuExpandSymbol(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // MenuAttributeModifier
     namespace MenuItemModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -22424,6 +22436,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MenuAttributeModifier::SetMenuItemDividerImpl,
             MenuAttributeModifier::SetMenuItemGroupDividerImpl,
             MenuAttributeModifier::SetSubMenuExpandingModeImpl,
+            MenuAttributeModifier::SetSubMenuExpandSymbolImpl,
         };
         return &ArkUIMenuModifierImpl;
     }
@@ -28796,6 +28809,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Ark_promptAction_CommonState GetStateImpl(Ark_CustomDialogController peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getState(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // CustomDialogControllerAccessor
     namespace CustomDialogControllerExtenderAccessor {
     void DestroyPeerImpl(Ark_CustomDialogControllerExtender peer)
@@ -28872,6 +28897,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return {};
         }
         string out("getExternalOptions(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_promptAction_CommonState GetStateImpl(Ark_CustomDialogControllerExtender peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getState(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -46072,6 +46109,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
             CustomDialogControllerAccessor::GetExternalOptionsImpl,
+            CustomDialogControllerAccessor::GetStateImpl,
         };
         return &CustomDialogControllerAccessorImpl;
     }
@@ -46089,6 +46127,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerExtenderAccessor::CloseImpl,
             CustomDialogControllerExtenderAccessor::SetOwnerViewImpl,
             CustomDialogControllerExtenderAccessor::GetExternalOptionsImpl,
+            CustomDialogControllerExtenderAccessor::GetStateImpl,
         };
         return &CustomDialogControllerExtenderAccessorImpl;
     }

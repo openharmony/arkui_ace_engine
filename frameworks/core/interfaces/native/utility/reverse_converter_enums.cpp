@@ -560,6 +560,19 @@ void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHa
             break;
     }
 }
+void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src){
+    switch (src) {
+        case PromptActionCommonState::UNINITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_UNINITIALIZED; break;
+        case PromptActionCommonState::INITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_INITIALIZED; break;
+        case PromptActionCommonState::APPEARING: dst = ARK_PROMPT_ACTION_COMMON_STATE_APPEARING; break;
+        case PromptActionCommonState::APPEARED: dst = ARK_PROMPT_ACTION_COMMON_STATE_APPEARED; break;
+        case PromptActionCommonState::DISAPPEARING: dst = ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARING; break;
+        case PromptActionCommonState::DISAPPEARED: dst = ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARED; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_promptAction_CommonState>;
+            LOGE("Unexpected enum value in PromptActionCommonState: %{public}d", src);
+    }
+}
 
 void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
 {

@@ -39,6 +39,23 @@ void PromptActionDialogController::Close()
     overlayManager->CloseDialog(dialogNode);
 }
 
+PromptActionCommonState PromptActionDialogController::GetState()
+{
+    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
+    if (node_.Invalid()) {
+        if (hasBind_) {
+            return PromptActionCommonState::DISAPPEARED;
+        }
+        return state;
+    }
+    auto dialogNode = node_.Upgrade();
+    CHECK_NULL_RETURN(dialogNode, state);
+    auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
+    CHECK_NULL_RETURN(pattern, state);
+    state = pattern->GetState();
+    return state;
+}
+
 ani_long ANICreateDialogController(ani_env* env, ani_object object)
 {
     static const char *className = "@ohos.promptAction.promptAction.DialogController";
@@ -65,6 +82,31 @@ void ANICloseDialog(ani_env* env, ani_object object)
     dialogController->Close();
 }
 
+ani_enum_item ANIDialogControllerGetState(ani_env* env, ani_object object)
+{
+    ani_enum_item enumItem = nullptr;
+    ani_enum enumType;
+    ani_status status = env->FindEnum("@ohos.promptAction.promptAction.CommonState", &enumType);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonState FindEnum fail. status: %{public}d", status);
+        return enumItem;
+    }
+    ani_long nativePtr;
+    status = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
+    if (status != ANI_OK) {
+        return enumItem;
+    }
+    auto dialogController = reinterpret_cast<PromptActionDialogController*>(nativePtr);
+    CHECK_NULL_RETURN(dialogController, enumItem);
+    auto state = dialogController->GetState();
+    status = env->Enum_GetEnumItemByIndex(enumType, static_cast<ani_size>(state), &enumItem);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Get EnumItem fail. status: %{public}d", status);
+        return enumItem;
+    }
+    return enumItem;
+}
+
 void ANICleanDialogController(ani_env* env, ani_object object)
 {
     ani_long ptr;
@@ -88,6 +130,7 @@ ani_status BindDialogController(ani_env* env)
     std::array methods = {
         ani_native_function {"createPtr", nullptr, reinterpret_cast<void *>(ANICreateDialogController)},
         ani_native_function {"close", nullptr, reinterpret_cast<void *>(ANICloseDialog)},
+        ani_native_function {"getState", nullptr, reinterpret_cast<void *>(ANIDialogControllerGetState)},
     };
     status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
     if (status != ANI_OK) {

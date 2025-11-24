@@ -73,6 +73,19 @@ void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->SetIsShowFromUser(isShow);
 }
+
+NG::OffsetF UpdateMenuPostion(
+    const NG::OffsetF& menuPosition, const MenuParam& menuParam, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, menuPosition);
+    if (menuParam.anchorPosition.has_value()) {
+        NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
+
+        return { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() + targetNodePosition.GetX(),
+            menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() + targetNodePosition.GetY() };
+    }
+    return menuPosition;
+}
 } // namespace
 
 void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
@@ -96,7 +109,8 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
-            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
+            NG::ViewAbstract::BindMenuWithItems(
+                std::move(params), targetNode, UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam);
         };
     } else if (buildFunc) {
         showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
@@ -114,8 +128,8 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
             std::function<void()> previewBuildFunc;
-            NG::ViewAbstract::BindMenuWithCustomNode(
-                std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+            NG::ViewAbstract::BindMenuWithCustomNode(std::move(builderFunc), targetNode,
+                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam, std::move(previewBuildFunc));
         };
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
@@ -223,12 +237,14 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
         auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
         CHECK_NULL_VOID(menuTheme);
         StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
+        NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
         if (!params.empty()) {
-            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
+            NG::ViewAbstract::BindMenuWithItems(
+                std::move(params), targetNode, UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam);
         } else if (buildFunc) {
             std::function<void()> previewBuildFunc;
-            NG::ViewAbstract::BindMenuWithCustomNode(
-                std::move(buildFunc), targetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
+            NG::ViewAbstract::BindMenuWithCustomNode(std::move(buildFunc), targetNode,
+                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam, std::move(previewBuildFunc));
         }
     }
     if (isBuildFuncNull) {
@@ -292,8 +308,9 @@ void ViewAbstractModelStatic::CreateCustomMenuWithPreview(FrameNode* targetNode,
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-    NG::ViewAbstract::BindMenuWithCustomNode(
-        std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
+    NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
+    NG::ViewAbstract::BindMenuWithCustomNode(std::move(buildFunc), refTargetNode,
+        UpdateMenuPostion(menuPosition, menuParam, refTargetNode), menuParam, std::move(previewBuildFunc));
 }
 
 void ViewAbstractModelStatic::BindContextMenuSingle(FrameNode* targetNode,
@@ -410,8 +427,9 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
                             auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
                             CHECK_NULL_VOID(menuTheme);
                             StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-                            NG::ViewAbstract::BindMenuWithCustomNode(
-                                std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+                            NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
+                                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam,
+                                std::move(previewBuildFunc));
                         }
                     },
                     TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
@@ -450,8 +468,9 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
                         auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
                         CHECK_NULL_VOID(menuTheme);
                         StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-                        NG::ViewAbstract::BindMenuWithCustomNode(
-                            std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+                        NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
+                            UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam,
+                            std::move(previewBuildFunc));
                     },
                     TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
             };

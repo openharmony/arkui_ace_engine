@@ -47,6 +47,7 @@ import { SliderConfiguration } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
+import { default as promptAction, LevelMode, ImmersiveMode } from "@ohos.promptAction"
 import { Size_serializer, Frame_serializer, LengthMetrics_serializer, ColorMetrics_serializer, Vector2_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer } from "./../Graphics"
 import { LayoutConstraint_serializer } from "./../FrameNode"
 import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
@@ -79,7 +80,6 @@ import { default as curves } from "@ohos.curves"
 import { Scroller, Scroller_serializer } from "./scroll"
 import { ComponentContentBase } from "arkui.ComponentContent"
 import { CustomDialogController } from "./customDialogController"
-import { LevelMode, ImmersiveMode } from "@ohos.promptAction"
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from "./particle"
 import { RootModifier } from "./../RootModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -1288,6 +1288,9 @@ export class CustomDialogControllerExtender implements MaterializedBase {
     public getExternalOptions(): CustomDialogControllerExternalOptionsExtender {
         return this.getExternalOptions_serialize()
     }
+    public getState(): promptAction.CommonState {
+        return this.getState_serialize()
+    }
     open_serialize(): void {
         ArkUIGeneratedNativeModule._CustomDialogControllerExtender_open(this.peer!.ptr)
     }
@@ -1302,6 +1305,10 @@ export class CustomDialogControllerExtender implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : CustomDialogControllerExternalOptionsExtender = CustomDialogControllerExternalOptionsExtender_serializer.read(retvalDeserializer)
         return returnResult
+    }
+    getState_serialize(): promptAction.CommonState {
+        const retval  = ArkUIGeneratedNativeModule._CustomDialogControllerExtender_getState(this.peer!.ptr)
+        return promptAction.CommonState.fromValue(retval)
     }
 }
 export class EventEmulator {

@@ -692,6 +692,10 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     dialogProps.dialogLevelUniqueId = -1;
     GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
+    GetFunctionParam(env, object, "onDidAppear", dialogProps.onDidAppear);
+    GetFunctionParam(env, object, "onDidDisappear", dialogProps.onDidDisappear);
+    GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
+    GetFunctionParam(env, object, "onWillDisappear", dialogProps.onWillDisappear);
     return true;
 }
 

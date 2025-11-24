@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -173,6 +174,18 @@ void SetSubMenuExpandingModeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvertPtr<SubMenuExpandingMode>(value));
 }
+void SetSubMenuExpandSymbolImpl(Ark_NativePointer node, const Opt_SymbolGlyphModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto expandSymbol = Converter::OptConvert<Ark_SymbolGlyphModifier>(*value);
+    if (expandSymbol && *expandSymbol) {
+        MenuModelStatic::SetExpandSymbol(frameNode, (*expandSymbol)->symbolApply);
+        PeerUtils::DestroyPeer(*expandSymbol);
+    } else {
+        MenuModelStatic::SetExpandSymbol(frameNode, nullptr);
+    }
+}
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()
 {
@@ -185,6 +198,7 @@ const GENERATED_ArkUIMenuModifier* GetMenuModifier()
         MenuAttributeModifier::SetMenuItemDividerImpl,
         MenuAttributeModifier::SetMenuItemGroupDividerImpl,
         MenuAttributeModifier::SetSubMenuExpandingModeImpl,
+        MenuAttributeModifier::SetSubMenuExpandSymbolImpl,
     };
     return &ArkUIMenuModifierImpl;
 }

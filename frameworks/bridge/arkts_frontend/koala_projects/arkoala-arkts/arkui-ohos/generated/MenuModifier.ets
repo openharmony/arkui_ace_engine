@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkMenuPeer, SubMenuExpandingMode, MenuAttribute } from "./component/menu"
@@ -27,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions } from "./component/units"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
+import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 export class MenuModifier extends CommonMethodModifier implements MenuAttribute,AttributeModifier<MenuAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -51,6 +52,8 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
     _menuItemGroupDivider_0_0value?: DividerStyleOptions | undefined
     _subMenuExpandingMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _subMenuExpandingMode_0_0value?: SubMenuExpandingMode | undefined
+    _subMenuExpandSymbol_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _subMenuExpandSymbol_0_0value?: SymbolGlyphModifier | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -163,6 +166,24 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
                 }
             }
         }
+        if (this._subMenuExpandSymbol_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._subMenuExpandSymbol_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSubMenuExpandSymbolAttribute((this._subMenuExpandSymbol_0_0value as SymbolGlyphModifier | undefined));
+                    this._subMenuExpandSymbol_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._subMenuExpandSymbol_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._subMenuExpandSymbol_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSubMenuExpandSymbolAttribute((undefined as SymbolGlyphModifier | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: MenuModifier): void {
         super.mergeModifier(modifier)
@@ -245,6 +266,19 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
                 }
             }
         }
+        if (modifier._subMenuExpandSymbol_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._subMenuExpandSymbol_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.subMenuExpandSymbol(modifier._subMenuExpandSymbol_0_0value);
+                    break;
+                }
+                default: {
+                    this.subMenuExpandSymbol((undefined as SymbolGlyphModifier | undefined));
+                }
+            }
+        }
     }
     font(value: Font | undefined): this {
         if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -309,6 +343,17 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         } else
         {
             this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    subMenuExpandSymbol(value: SymbolGlyphModifier | undefined): this {
+        if (((this._subMenuExpandSymbol_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._subMenuExpandSymbol_0_flag = AttributeUpdaterFlag.UPDATE
+            this._subMenuExpandSymbol_0_0value = value
+        } else
+        {
+            this._subMenuExpandSymbol_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
