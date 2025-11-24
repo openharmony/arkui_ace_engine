@@ -32,7 +32,7 @@ HWTEST_F(GridRowLayoutPolicyTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Le
     ASSERT_NE(layoutProperty, nullptr);
     GridRowLayoutAlgorithm algorithm;
     
-    LayoutConstraintF layoutConstraint = {.parentIdealSize = {300, 350}};
+    LayoutConstraintF layoutConstraint = {.parentIdealSize = {300, 350}, .minSize = {0, 0}, .maxSize = {50, 50}};
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     auto selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
         LayoutCalPolicy::MATCH_PARENT, LayoutCalPolicy::MATCH_PARENT);
@@ -44,7 +44,10 @@ HWTEST_F(GridRowLayoutPolicyTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Le
 
     selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
         LayoutCalPolicy::WRAP_CONTENT, LayoutCalPolicy::WRAP_CONTENT);
-    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, std::nullopt));
+    /**
+     * @tc.expected:  selfSize.height == 50
+     */
+    EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, 50));
     
     selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
         LayoutCalPolicy::FIX_AT_IDEAL_SIZE, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);

@@ -527,13 +527,19 @@ OptionalSizeF GridRowLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* l
     auto matchParentSize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
         widthLayoutPolicy, heightLayoutPolicy, Axis::HORIZONTAL).ConvertToSizeT();
     realSize.UpdateSizeWithCheck(matchParentSize);
-    if (heightLayoutPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+    if (heightLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT) {
+        SizeF wrapContentSize(0.0f, childHeight);
+        wrapContentSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize, true);
+        realSize.SetHeight(wrapContentSize.Height());
         return realSize;
     }
-    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint({std::nullopt, childHeight},
-        layoutProperty->GetCalcLayoutConstraint(),
-        layoutProperty->GetLayoutConstraint()->percentReference);
-    realSize.SetHeight(fixIdealSize.Height());
+    if (heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint({std::nullopt, childHeight},
+            layoutProperty->GetCalcLayoutConstraint(),
+            layoutProperty->GetLayoutConstraint()->percentReference);
+        realSize.SetHeight(fixIdealSize.Height());
+        return realSize;
+    }
     return realSize;
 }
 
