@@ -15,10 +15,16 @@
 
 #include <gtest/gtest.h>
 
+// declarations
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "point_light_test.h"
+#include "select_modifier_test.h"
+#include "slider_modifier_test.h"
+#include "swiper_modifier_test.h"
+#include "image_common_methods_test.h"
 
 using namespace testing;
 using namespace testing::ext;
