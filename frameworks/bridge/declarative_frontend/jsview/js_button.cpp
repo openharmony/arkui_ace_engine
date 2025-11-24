@@ -700,7 +700,7 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
         return;
     }
     JsRadius(info[0]);
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
 }
 
 void JSButton::JsRadius(const JSRef<JSVal>& jsValue)

@@ -1296,40 +1296,4 @@ HWTEST_F(TextTestNgFour, TextContentModifierB008, TestSize.Level1)
     EXPECT_EQ(isAllowTextRace, false);
 }
 
-/**
- * @tc.name: TextContentModifierB009
- * @tc.desc: test text_content_modifier.cpp DetermineTextRace
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNgFour, TextContentModifierB009, TestSize.Level1)
-{
-    /**
-        * @tc.steps: step1. create textPaintMethod and textContentModifier
-        */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textPaintMethod = textPattern->CreateNodePaintMethod();
-    ASSERT_NE(textPaintMethod, nullptr);
-    auto textContentModifier = textPattern->GetContentModifier();
-    ASSERT_NE(textContentModifier, nullptr);
-
-    /**
-        * @tc.steps: step2. call DetermineTextRace and expect no error.
-        */
-    textContentModifier->marqueeSet_ = false;
-    textContentModifier->DetermineTextRace();
-    textContentModifier->marqueeOption_.start = true;
-    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
-    textContentModifier->marqueeState_ = MarqueeState::RUNNING;
-    textContentModifier->marqueeFocused_ = false;
-    textContentModifier->marqueeHovered_ = false;
-    textContentModifier->DetermineTextRace();
-    textContentModifier->marqueeHovered_ = true;
-    textContentModifier->marqueeState_ = MarqueeState::IDLE;
-    textContentModifier->DetermineTextRace();
-    EXPECT_EQ(textContentModifier->marqueeFocused_, false);
-}
-
 } // namespace OHOS::Ace::NG

@@ -648,12 +648,30 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
 }
 Array_NavPathInfo GetPathStackImpl(Ark_NavPathStack peer)
 {
-    return {};
+    Array_NavPathInfo invalid = {
+        .length = 0
+    };
+    CHECK_NULL_RETURN(peer, invalid);
+    auto pathStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(pathStack, invalid);
+    auto pathArray = pathStack->NavigationContext::PathStack::GetAllPathInfo();
+    Array_NavPathInfo result = Converter::ArkValue<Array_NavPathInfo>(pathArray, Converter::FC);
+    return result;
 }
 void SetPathStackImpl(Ark_NavPathStack peer,
                       const Array_NavPathInfo* pathStack,
                       const Opt_Boolean* animated)
 {
+    CHECK_NULL_VOID(peer && pathStack);
+    auto navPathStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(navPathStack);
+    std::vector<NavigationContext::PathInfo> pathArray;
+    for (int32_t i = 0; i < pathStack->length; i++) {
+        NavigationContext::PathInfo info = Converter::Convert<NavigationContext::PathInfo>(pathStack->array[i]);
+        pathArray.push_back(info);
+    }
+    bool convertAnimate = Converter::OptConvertPtr<bool>(animated).value_or(true);
+    navPathStack->SetPathInfo(pathArray, convertAnimate);
 }
 } // NavPathStackAccessor
 const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()

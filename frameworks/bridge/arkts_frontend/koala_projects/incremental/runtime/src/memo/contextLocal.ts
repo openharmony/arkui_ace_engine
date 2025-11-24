@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { __context, __id } from "../internals"
+import { __context, __id } from '../internals'
 import { ReadableState as State } from 'arkui.incremental.runtime.state';
 import { StateContext, InternalScope } from '../states/State';
 
@@ -51,7 +51,7 @@ export function contextLocalScope<Value>(
     value: Value,
     /** @memo */
     content: () => void
-) {
+): void {
     const scope = __context().scope<void>(__id(), 1);
     (scope as InternalScope<void>).paramEx<Value>(0, value, undefined, name, true); // can be found by name
     if (scope.unchanged) {

@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookEllipseAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -93,7 +94,9 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookEllipseAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookEllipseAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

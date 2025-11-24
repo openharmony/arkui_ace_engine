@@ -25,6 +25,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "ui/view/components/tabs/tabs_constants.h"
+#include "ui/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -331,13 +332,6 @@ enum class TextFieldOverflowX {
     NO_CONTENT,
 };
 
-enum class TextDirection {
-    LTR,
-    RTL,
-    INHERIT,
-    AUTO,
-};
-
 enum class TextDecoration {
     NONE,
     UNDERLINE,
@@ -550,11 +544,23 @@ enum class BorderStyle {
     NONE,
 };
 
-enum class CornerApplyType {
+enum class RenderStrategy {
     FAST = 0,
     OFFSCREEN,
     MAX
 };
+
+namespace StringUtils {
+inline std::string ToString(const RenderStrategy& renderStrategy)
+{
+    static const LinearEnumMapNode<RenderStrategy, std::string> table[] = {
+        { RenderStrategy::FAST, "FAST" },
+        { RenderStrategy::OFFSCREEN, "OFFSCREEN" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), renderStrategy);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class BorderImageRepeat {
     SPACE,
@@ -963,22 +969,6 @@ enum class TabBarStyle {
 enum class GestureJudgeResult {
     CONTINUE = 0,
     REJECT = 1,
-};
-
-enum class GestureTypeName {
-    UNKNOWN = -1,
-    TAP_GESTURE = 0,
-    LONG_PRESS_GESTURE = 1,
-    PAN_GESTURE = 2,
-    PINCH_GESTURE = 3,
-    SWIPE_GESTURE = 4,
-    ROTATION_GESTURE = 5,
-    DRAG = 6,
-    CLICK = 7,
-    BOXSELECT = 8,
-    WEBSCROLL = 9,
-    TEXTFIELD_BOXSELECT = 10,
-    CONTEXT_MENU_HOVER = 11,
 };
 
 enum class ModifierKey {

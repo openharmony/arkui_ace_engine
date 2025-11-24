@@ -27,6 +27,7 @@ namespace {
     const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    const std::u16string URL_ADDRESS_1 = u"https://www.baidu.com";
     int32_t testNumber1 = 1;
     int32_t testNumber2 = 2;
 } // namespace
@@ -271,6 +272,57 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
     options.value = u"hello\n";
     auto index3 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index3, 1);
+}
+
+/**
+ * @tc.name: AddTextSpan002
+ * @tc.desc: test add text span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.useThemeFontColor = false;
+    auto index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 1);
+
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = false;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 2);
+
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 3);
+
+    options.urlAddress = std::nullopt;
+    options.useThemeFontColor = false;
+    options.style = TEXT_STYLE_1;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 4);
+
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 5);
+
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = false;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 6);
+
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 7);
 }
 
 /**

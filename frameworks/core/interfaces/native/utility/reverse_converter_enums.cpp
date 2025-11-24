@@ -422,6 +422,26 @@ void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
     }
 }
 
+void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src)
+{
+    switch (src) {
+        case ConsoleMessageSource::XML: dst = ARK_CONSOLE_MESSAGE_SOURCE_XML; break;
+        case ConsoleMessageSource::JAVASCRIPT: dst = ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT; break;
+        case ConsoleMessageSource::NETWORK: dst = ARK_CONSOLE_MESSAGE_SOURCE_NETWORK; break;
+        case ConsoleMessageSource::CONSOLE_API: dst = ARK_CONSOLE_MESSAGE_SOURCE_CONSOLE_API; break;
+        case ConsoleMessageSource::STORAGE: dst = ARK_CONSOLE_MESSAGE_SOURCE_STORAGE; break;
+        case ConsoleMessageSource::RENDERING: dst = ARK_CONSOLE_MESSAGE_SOURCE_RENDERING; break;
+        case ConsoleMessageSource::SECURITY: dst = ARK_CONSOLE_MESSAGE_SOURCE_SECURITY; break;
+        case ConsoleMessageSource::OTHER: dst = ARK_CONSOLE_MESSAGE_SOURCE_OTHER; break;
+        case ConsoleMessageSource::DEPRECATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_DEPRECATION; break;
+        case ConsoleMessageSource::WORKER: dst = ARK_CONSOLE_MESSAGE_SOURCE_WORKER; break;
+        case ConsoleMessageSource::VIOLATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION; break;
+        case ConsoleMessageSource::INTERVENTION: dst = ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION; break;
+        case ConsoleMessageSource::RECOMMENDATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION; break;
+        default: LOGE("Unexpected enum value in ConsoleMessageSource: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
 {
     switch (src) {

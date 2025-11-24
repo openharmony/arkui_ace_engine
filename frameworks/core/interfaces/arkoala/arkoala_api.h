@@ -2723,6 +2723,11 @@ struct ArkUICommonModifier {
     void (*resetObscured)(ArkUINodeHandle node);
     void (*setResponseRegionList)(ArkUINodeHandle node, const ArkUI_Int32* tools,
         const ArkUI_Float32* values, ArkUI_CharPtr* calcValues, const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*setResponseRegionListWithToolType)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length, const ArkUI_Int32* tools, ArkUI_Int32 toolsLength);
+    ArkUI_Int32 (*getResponseRegionListSize)(ArkUINodeHandle node);
+    void (*getResponseRegionList)(
+        ArkUINodeHandle node, ArkUI_Int32* tools, ArkUI_Float32* values, ArkUI_Int32 length);
     void (*resetResponseRegionList)(ArkUINodeHandle node);
     void (*setResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
@@ -5145,6 +5150,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaCustomKeyboard)(ArkUINodeHandle node);
     void (*setTextAreaOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnWillAttachIME)(ArkUINodeHandle node);
+    void (*textAreaDeleteBackward)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -5391,6 +5397,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputOnSecurityStateChange)(ArkUINodeHandle node);
     void (*setTextInputOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnWillAttachIME)(ArkUINodeHandle node);
+    void (*textInputDeleteBackward)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -5624,6 +5631,8 @@ struct ArkUIWebModifier {
     void (*resetBackToTop)(ArkUINodeHandle node);
     void (*setOnCameraCaptureStateChanged)(ArkUINodeHandle node, void* callback);
     void (*resetOnCameraCaptureStateChanged)(ArkUINodeHandle node);
+    void (*setOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node, void* callback);
+    void (*resetOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

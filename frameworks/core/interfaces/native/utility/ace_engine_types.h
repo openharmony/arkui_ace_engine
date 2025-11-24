@@ -94,6 +94,22 @@ enum class MessageLevel {
     LOG = 5
 };
 
+enum class ConsoleMessageSource {
+    XML = 0,
+    JAVASCRIPT = 1,
+    NETWORK = 2,
+    CONSOLE_API = 3,
+    STORAGE = 4,
+    RENDERING = 5,
+    SECURITY = 6,
+    OTHER = 7,
+    DEPRECATION = 8,
+    WORKER = 9,
+    VIOLATION = 10,
+    INTERVENTION = 11,
+    RECOMMENDATION = 12
+};
+
 enum class RenderExitReason {
     ABNORMAL_TERMINATION = 0,
     WAS_KILLED = 1,

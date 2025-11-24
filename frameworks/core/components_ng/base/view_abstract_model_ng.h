@@ -312,6 +312,11 @@ public:
         ViewAbstract::SetCompositingFilter(compositingFilter);
     }
 
+    void SetSystemMaterial(const UiMaterial* material) override
+    {
+        ViewAbstract::SetSystemMaterial(material);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -931,9 +936,9 @@ public:
         ViewAbstract::SetRenderFit(renderFit);
     }
 
-    void SetCornerApplyType(CornerApplyType cornerApplyType) override
+    void SetRenderStrategy(RenderStrategy renderStrategy) override
     {
-        ViewAbstract::SetCornerApplyType(cornerApplyType);
+        ViewAbstract::SetRenderStrategy(renderStrategy);
     }
 
     void SetFlexBasis(const Dimension& value) override

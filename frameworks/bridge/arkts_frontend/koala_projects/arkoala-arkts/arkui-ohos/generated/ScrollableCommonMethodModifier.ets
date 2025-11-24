@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { Resource } from "global.resource"
 import { RectShape } from "@ohos.arkui.shape"
 export class ScrollableCommonMethodModifier extends CommonMethodModifier implements ScrollableCommonMethod,AttributeModifier<ScrollableCommonMethod> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -71,6 +73,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkScrollableCommonMethodPeer;
         if (this._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -364,6 +367,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
     }
     mergeModifier(modifier: ScrollableCommonMethodModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._scrollBar_0_flag) {

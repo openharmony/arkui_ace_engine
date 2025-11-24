@@ -2824,14 +2824,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetBorderRadiusImpl(Ark_NativePointer node,
+    void SetBorderRadius0Impl(Ark_NativePointer node,
                              const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setBorderRadius(");
+        string out("setBorderRadius0(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -4483,6 +4483,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, sysOptions);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBorderRadius1Impl(Ark_NativePointer node,
+                              const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value,
+                              const Opt_RenderStrategy* type)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBorderRadius1(");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, type);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -9140,7 +9155,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnShownImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+                        const Opt_Callback_VisibilityChangeReason_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -9152,7 +9167,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnHiddenImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_Callback_VisibilityChangeReason_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -21657,7 +21672,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBorderStyleImpl,
             CommonMethodModifier::SetBorderWidthImpl,
             CommonMethodModifier::SetBorderColorImpl,
-            CommonMethodModifier::SetBorderRadiusImpl,
+            CommonMethodModifier::SetBorderRadius0Impl,
             CommonMethodModifier::SetBorderImageImpl,
             CommonMethodModifier::SetOutlineImpl,
             CommonMethodModifier::SetOutlineStyleImpl,
@@ -21793,6 +21808,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBackgroundBlurStyleImpl,
             CommonMethodModifier::SetBackgroundEffect1Impl,
             CommonMethodModifier::SetForegroundBlurStyleImpl,
+            CommonMethodModifier::SetBorderRadius1Impl,
             CommonMethodModifier::SetOnClick1Impl,
             CommonMethodModifier::SetFocusScopeIdImpl,
             CommonMethodModifier::SetFocusScopePriorityImpl,
@@ -28221,6 +28237,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return {};
         }
         string out("getMessageLevel(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_ConsoleMessageSource GetSourceImpl(Ark_ConsoleMessage peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getSource(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -42215,6 +42243,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("deleteBackward(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // TextContentControllerBaseAccessor
     namespace TextControllerAccessor {
     void DestroyPeerImpl(Ark_TextController peer)
@@ -43973,42 +44011,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // UrlStyleAccessor
-    namespace UserDataSpanAccessor {
-    void DestroyPeerImpl(Ark_UserDataSpan peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_UserDataSpan ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_UserDataSpan>(100);
-        }
-        string out("new UserDataSpan(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_UserDataSpan>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_UserDataSpan>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    } // UserDataSpanAccessor
     namespace VideoControllerAccessor {
     void DestroyPeerImpl(Ark_VideoController peer)
     {
@@ -48718,19 +48720,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct UrlStylePeer {
         virtual ~UrlStylePeer() = default;
     };
-    const GENERATED_ArkUIUserDataSpanAccessor* GetUserDataSpanAccessor()
-    {
-        static const GENERATED_ArkUIUserDataSpanAccessor UserDataSpanAccessorImpl {
-            UserDataSpanAccessor::DestroyPeerImpl,
-            UserDataSpanAccessor::ConstructImpl,
-            UserDataSpanAccessor::GetFinalizerImpl,
-        };
-        return &UserDataSpanAccessorImpl;
-    }
-
-    struct UserDataSpanPeer {
-        virtual ~UserDataSpanPeer() = default;
-    };
     const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
     {
         static const GENERATED_ArkUIVideoControllerAccessor VideoControllerAccessorImpl {
@@ -49137,7 +49126,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUIContextAtomicServiceBarAccessor,
             GetUIExtensionProxyAccessor,
             GetUrlStyleAccessor,
-            GetUserDataSpanAccessor,
             GetVideoControllerAccessor,
             GetWaterFlowSectionsAccessor,
             GetWebContextMenuParamAccessor,

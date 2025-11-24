@@ -22,11 +22,13 @@ import { LengthMetrics } from "arkui.Graphics"
 import { LazyGridLayoutAttribute, ArkLazyVGridLayoutPeer, LazyVGridLayoutAttribute } from "./component/lazyGridLayout"
 import { LazyGridLayoutModifier } from "./LazyGridLayoutModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { int32 } from "@koalaui/common"
 export class LazyVGridLayoutModifier extends CommonMethodModifier implements LazyVGridLayoutAttribute,AttributeModifier<LazyVGridLayoutAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -43,6 +45,7 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
     _columnsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _columnsGap_0_0value?: LengthMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkLazyVGridLayoutPeer;
         if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -102,6 +105,7 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
     }
     mergeModifier(modifier: LazyVGridLayoutModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._columnsTemplate_0_flag) {

@@ -109,4 +109,221 @@ HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest003, TestSize.Lev
     manager->AddResource("key", resObj, func);
     EXPECT_EQ(manager->resKeyArray_.size(), 1);
 }
+
+/**
+ * @tc.name: PatternResourceManagerTest004
+ * @tc.desc: Test ParsePropertyValue with STRING type when ParseResString returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains UNKNOWN
+     */
+    std::vector<ResourceObjectParams> params;
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step1. Test ParsePropertyValue with UNKNOWN type.
+     * @tc.expect: Value is set correctly
+     */
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::UNKNOWN);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest005
+ * @tc.desc: Test ParsePropertyValue with STRING type when ParseResString returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains STRING
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step1. Test ParsePropertyValue with MEDIA type.
+     * @tc.expect: Value is set correctly
+     */
+    valueBase->SetValueType(ValueType::STRING);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::MEDIA);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest006
+ * @tc.desc: Test ParsePropertyValue with U16STRING type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains U16STRING
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step2. Test ParsePropertyValue with U16STRING type.
+     * @tc.expect: Value is set correctly
+     */
+    valueBase->SetValueType(ValueType::U16STRING);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::U16STRING);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest007
+ * @tc.desc: Test ParsePropertyValue with COLOR type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains COLOR
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step3. Test ParsePropertyValue with COLOR type.
+     * @tc.expect: Value is set correctly
+     */
+    valueBase->SetValueType(ValueType::COLOR);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::COLOR);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest008
+ * @tc.desc: Test ParsePropertyValue with DOUBLE type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains DOUBLE
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step4. Test ParsePropertyValue with DOUBLE type.
+     * @tc.expect: Value is set correctly
+     */
+    valueBase->SetValueType(ValueType::DOUBLE);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::DOUBLE);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest009
+ * @tc.desc: Test ParsePropertyValue with CALDIMENSION type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains CALDIMENSION
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step5. Test ParsePropertyValue with CALDIMENSION type.
+     * @tc.expect: Value is set correctly
+     */
+    valueBase->SetValueType(ValueType::CALDIMENSION);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::CALDIMENSION);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest010
+ * @tc.desc: Test ParsePropertyValue with FLOAT type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains FLOAT
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step6. Test ParsePropertyValue with FLOAT type.
+     * @tc.expect: Value is set correctly
+     */
+
+    valueBase->SetValueType(ValueType::FLOAT);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::FLOAT);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest011
+ * @tc.desc: Test ParsePropertyValue with VECTOR_STRING type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains VECTOR_STRING
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step2. Test ParsePropertyValue with VECTOR_STRING type.
+     * @tc.expect: Value is set correctly
+     */
+    valueBase->SetValueType(ValueType::VECTOR_STRING);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::VECTOR_STRING);
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest012
+ * @tc.desc: Test ParsePropertyValue with unknown type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ResourceObject and PropertyValueBase.
+     * @tc.expect: Value is set correctly and ValueType remains UNKNOWN
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+
+    /**
+     * @tc.steps: step2. Test ParsePropertyValue with unknown type.
+     * @tc.expect: Value type remains unchanged
+     */
+    valueBase->SetValueType(ValueType::UNKNOWN);
+    manager->ParsePropertyValue(resObj, valueBase);
+    EXPECT_EQ(valueBase->GetValueType(), ValueType::UNKNOWN);
+}
 } // namespace OHOS::Ace

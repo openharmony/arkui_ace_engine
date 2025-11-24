@@ -27,6 +27,7 @@ import { ResourceColor, Length, ResourceStr, Font, Font_serializer } from "./uni
 import { Color, FontWeight, FontStyle, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookButtonContentModifier, hookButtonAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -601,7 +602,9 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         return this
     }
     public attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

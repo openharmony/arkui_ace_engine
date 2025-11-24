@@ -33,6 +33,7 @@
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
+#include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "converter.h"
 #include "validators.h"
@@ -603,7 +604,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             CreateStylePeer<CustomSpanPeer, OHOS::Ace::NG::CustomSpanImpl>(dst, src);
             break;
         case Ace::SpanType::ExtSpan: {
-            LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
+            auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(src);
+            CHECK_NULL_VOID(userDataSpanHolder);
+            dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_UserDataSpan>(userDataSpanHolder->span_);
             break;
         }
         default: LOGE("Unexpected enum value in SpanType: %{public}d", src->GetSpanType());

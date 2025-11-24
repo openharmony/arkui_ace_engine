@@ -27,6 +27,7 @@ import { ShapePoint } from "./line"
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookPolylineAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -155,7 +156,9 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPolylineAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPolylineAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

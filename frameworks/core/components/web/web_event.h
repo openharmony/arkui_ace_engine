@@ -2348,6 +2348,27 @@ private:
     int32_t newState_ = 0;
 };
 
+class ACE_EXPORT MicrophoneCaptureStateEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(MicrophoneCaptureStateEvent, BaseEventInfo);
+
+public:
+    explicit MicrophoneCaptureStateEvent(int32_t originalState, int32_t newState) :
+        BaseEventInfo("MicrophoneCaptureState"), originalState_(originalState), newState_(newState) {}
+    ~MicrophoneCaptureStateEvent() = default;
+
+    int32_t GetOriginalMicrophoneCaptureState() const
+    {
+        return originalState_;
+    }
+
+    int32_t GetNewMicrophoneCaptureState() const
+    {
+        return newState_;
+    }
+private:
+    int32_t originalState_ = 0;
+    int32_t newState_ = 0;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

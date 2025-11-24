@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SecurityComponentMethodModifier } from "./SecurityComponentMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { ClickEvent } from "./component/common"
 import { BusinessError } from "@ohos.base"
 export class PasteButtonModifier extends SecurityComponentMethodModifier implements PasteButtonAttribute,AttributeModifier<PasteButtonAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,6 +41,7 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
     _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_0_0value?: PasteButtonCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkPasteButtonPeer;
         if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -62,6 +65,7 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
     }
     mergeModifier(modifier: PasteButtonModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onClick_0_flag) {

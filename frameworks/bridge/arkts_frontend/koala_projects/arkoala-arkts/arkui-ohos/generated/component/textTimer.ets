@@ -28,6 +28,7 @@ import { ResourceColor, Length, ResourceStr } from "./units"
 import { Color, FontStyle, FontWeight } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookTextTimerContentModifier, hookTextTimerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -447,7 +448,9 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextTimerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextTimerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -1088,30 +1088,6 @@ export class UrlStyle implements MaterializedBase {
         return retval
     }
 }
-export class UserDataSpanInternal {
-    public static fromPtr(ptr: KPointer): UserDataSpan {
-        return new UserDataSpan(ptr)
-    }
-}
-export class UserDataSpan implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, UserDataSpan.getFinalizer())
-    }
-    constructor() {
-        this(UserDataSpan.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._UserDataSpan_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._UserDataSpan_getFinalizer()
-    }
-}
 export type StyledStringMarshallingValue = UserDataSpan;
 export type StyledStringMarshallCallback = (marshallableVal: UserDataSpan) => ArrayBuffer;
 export type StyledStringUnmarshallCallback = (buf: ArrayBuffer) => UserDataSpan;
@@ -1205,6 +1181,8 @@ export interface CustomSpanDrawInfo {
 export interface CustomSpanMeasureInfo {
     fontSize: double;
 }
+export abstract class UserDataSpan {
+}
 export class GestureStyle_serializer {
     public static write(buffer: SerializerBase, value: GestureStyle): void {
         let valueSerializer : SerializerBase = buffer
@@ -1269,17 +1247,6 @@ export class UrlStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return UrlStyleInternal.fromPtr(ptr)
-    }
-}
-export class UserDataSpan_serializer {
-    public static write(buffer: SerializerBase, value: UserDataSpan): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): UserDataSpan {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return UserDataSpanInternal.fromPtr(ptr)
     }
 }
 export class BaselineOffsetStyle_serializer {
@@ -2263,7 +2230,7 @@ export class StyleOptions_serializer {
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
             valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11  = valueHolderForStyledValue as UserDataSpan
-            UserDataSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx11)
+            valueSerializer.holdAndWriteObject(valueHolderForStyledValueForIdx11)
         } else if (valueHolderForStyledValue instanceof BackgroundColorStyle) {
             valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12  = valueHolderForStyledValue as BackgroundColorStyle
@@ -2310,7 +2277,7 @@ export class StyleOptions_serializer {
         } else if (styledValueTmpBufUnionSelector == (10).toChar()) {
             styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
         } else if (styledValueTmpBufUnionSelector == (11).toChar()) {
-            styledValueTmpBuf = (UserDataSpan_serializer.read(valueDeserializer) as UserDataSpan)
+            styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toChar()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
         } else {
@@ -2378,7 +2345,7 @@ export class SpanStyle_serializer {
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
             valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11  = valueHolderForStyledValue as UserDataSpan
-            UserDataSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx11)
+            valueSerializer.holdAndWriteObject(valueHolderForStyledValueForIdx11)
         } else if (valueHolderForStyledValue instanceof BackgroundColorStyle) {
             valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12  = valueHolderForStyledValue as BackgroundColorStyle
@@ -2415,7 +2382,7 @@ export class SpanStyle_serializer {
         } else if (styledValueTmpBufUnionSelector == (10).toChar()) {
             styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
         } else if (styledValueTmpBufUnionSelector == (11).toChar()) {
-            styledValueTmpBuf = (UserDataSpan_serializer.read(valueDeserializer) as UserDataSpan)
+            styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toChar()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
         } else {

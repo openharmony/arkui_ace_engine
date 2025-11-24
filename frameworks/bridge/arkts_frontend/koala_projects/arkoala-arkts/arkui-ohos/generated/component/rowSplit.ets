@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRowSplitAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -106,7 +107,9 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
         return this
     }
     public attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRowSplitAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRowSplitAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

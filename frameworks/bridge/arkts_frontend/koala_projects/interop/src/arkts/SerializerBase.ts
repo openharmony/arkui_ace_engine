@@ -256,12 +256,16 @@ export class SerializerBase implements Disposable {
         this.writePointer(callSync)
         return resourceId
     }
+    private static createErrorFromStringData(errStr: string[]): Error {
+        let code: int32 = errStr.length > 0 ? Number(errStr.splice(0, 1).at(0)).toInt() : 0;
+        return new Error(code, errStr.join(';'));
+    }
     final holdAndWriteCallbackForPromiseVoid(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<void>, ResourceId] {
         let resourceId: ResourceId = 0
         const promise = new Promise<void>((resolve: (value: PromiseLike<void>) => void, reject: (err: Error) => void) => {
             const callback = (err?: string[] | undefined) => {
-                if (err !== undefined)
-                    reject(new Error(err!.join(';')))
+                if (err)
+                    reject(SerializerBase.createErrorFromStringData(err))
                 else
                     resolve(Promise.resolve())
             }
@@ -273,8 +277,8 @@ export class SerializerBase implements Disposable {
         let resourceId: ResourceId = 0
         const promise = new Promise<T>((resolve: (value: T | PromiseLike<T>) => void, reject: (err: Error) => void) => {
             const callback = (value?: T | undefined, err?: string[] | undefined) => {
-                if (err !== undefined)
-                    reject(new Error(err!.join(';')))
+                if (err)
+                    reject(SerializerBase.createErrorFromStringData(err))
                 else
                     resolve(value!)
             }

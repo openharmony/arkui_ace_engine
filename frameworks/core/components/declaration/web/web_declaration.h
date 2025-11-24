@@ -60,6 +60,7 @@ struct WebEvent : Event {
     EventMarker onLoadStartedEventId;
     EventMarker onLoadFinishedEventId;
     EventMarker cameraCaptureStateChangedId;
+    EventMarker microphoneCaptureStateChangedId;
 };
 
 struct WebMethod : Method {
@@ -471,6 +472,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.cameraCaptureStateChangedId;
+    }
+
+    void SetMicrophoneCaptureStateChangedId(const EventMarker& microphoneCaptureStateChangedId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.microphoneCaptureStateChangedId = microphoneCaptureStateChangedId;
+    }
+
+    const EventMarker& GetMicrophoneCaptureStateChangedId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.microphoneCaptureStateChangedId;
     }
 
     void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)

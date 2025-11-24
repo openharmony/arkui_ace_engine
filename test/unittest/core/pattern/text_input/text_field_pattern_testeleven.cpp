@@ -117,45 +117,6 @@ HWTEST_F(TextFieldPatternTesteleven, SetAccessibilityUnitAction002, TestSize.Lev
 }
 
 /**
- * @tc.name: OnDragNodeDetachFromMainTree001
- * @tc.desc: Test OnDragNodeDetachFromMainTree when host is null
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTesteleven, OnDragNodeDetachFromMainTree001, TestSize.Level1)
-{
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    // Mock GetHost to return nullptr
-    EXPECT_EQ(textFieldPattern->GetTheme(), nullptr);
-
-    textFieldPattern->OnDragNodeDetachFromMainTree();
-    // No exception should be thrown and function should return normally
-}
-
-/**
- * @tc.name: OnDragNodeDetachFromMainTree002
- * @tc.desc: Test OnDragNodeDetachFromMainTree when dragStatus is not NONE
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTesteleven, OnDragNodeDetachFromMainTree002, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    // Set dragStatus to DRAGGING (not NONE)
-    textFieldPattern->dragStatus_ = DragStatus::DRAGGING;
-
-    textFieldPattern->OnDragNodeDetachFromMainTree();
-    
-    // Verify that ProcessOverlay was not called
-    // This is indirectly verified by checking that no changes occurred that would result from ProcessOverlay
-    EXPECT_EQ(textFieldPattern->dragStatus_, DragStatus::DRAGGING);
-}
-
-/**
  * @tc.name: OnDragNodeDetachFromMainTree003
  * @tc.desc: Test OnDragNodeDetachFromMainTree when dragStatus is NONE
  * @tc.type: FUNC
@@ -220,6 +181,21 @@ HWTEST_F(TextFieldPatternTesteleven, ReprocessAllRelatedToLPX, TestSize.Level1)
     textFieldPattern->lpxInfo_.lastLogicScale  = 1.5f;
     textFieldPattern->BeforeCreateLayoutWrapper();
     EXPECT_FALSE(textFieldPattern->lpxInfo_.initTextRectWithLPX);
+}
+
+/**
+ * @tc.name: TextInputAreaDeleteBackwardModel001
+ * @tc.desc: test DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, TextInputAreaDeleteBackwardModel001, TestSize.Level1)
+{
+    CreateTextField("挖矿时间到!⛏️", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    pattern_->textFieldController_->DeleteBackward();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "挖矿时间到!");
 }
 
 } // namespace OHOS::Ace::NG

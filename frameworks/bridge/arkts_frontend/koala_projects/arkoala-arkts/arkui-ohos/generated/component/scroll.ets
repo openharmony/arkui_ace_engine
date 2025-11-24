@@ -29,6 +29,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ScrollState, ScrollSnapAlign } from "./list"
 import { AttributeModifier, extractors, hookScrollAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -839,7 +840,9 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScrollAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookScrollAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

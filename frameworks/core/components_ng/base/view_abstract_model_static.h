@@ -282,6 +282,7 @@ public:
     static void SetBorderWidth(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetBorderColor(FrameNode *frameNode, const BorderColorProperty& value);
     static void SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value);
+    static void SetRenderStrategy(FrameNode* frameNode, const RenderStrategy& type);
     static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& boderImage, uint8_t bitset);
     static void SetBorderImageSource(FrameNode* frameNode, const std::string& imageSrc, const std::string& bundleName,
         const std::string& moduleName);
@@ -369,6 +370,7 @@ public:
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };
+    static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
 
 private:
     static bool CheckMenuIsShow(

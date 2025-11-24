@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookScrollBarAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -123,7 +124,9 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScrollBarAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookScrollBarAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

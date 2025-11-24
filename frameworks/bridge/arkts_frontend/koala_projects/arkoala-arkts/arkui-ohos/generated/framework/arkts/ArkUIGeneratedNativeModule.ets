@@ -291,7 +291,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setBorderColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setBorderRadius(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CommonMethod_setBorderRadius0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setBorderImage(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -562,6 +562,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setBackgroundEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setForegroundBlurStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CommonMethod_setBorderRadius1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setOnClick1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3764,6 +3766,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ConsoleMessage_getMessageLevel(ptr: KPointer): int32
     @ani.unsafe.Direct
+    native static _ConsoleMessage_getSource(ptr: KPointer): int32
+    @ani.unsafe.Direct
     native static _ContentModifierHelper_contentModifierButton(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ContentModifierHelper_resetContentModifierButton(node: KPointer): void
@@ -4738,8 +4742,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MenuItemConfiguration_getContentModifier(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MenuItemConfiguration_setContentModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _MenuItemConfiguration_getValue(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getValue(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MenuItemConfiguration_setValue(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -5783,6 +5787,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _TextContentControllerBase_getText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): string
     @ani.unsafe.Direct
+    native static _TextContentControllerBase_deleteBackward(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _TextController_construct(): KPointer
     @ani.unsafe.Direct
     native static _TextController_getFinalizer(): KPointer
@@ -6036,10 +6042,6 @@ export class ArkUIGeneratedNativeModule {
     native static _UrlStyle_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _UrlStyle_getUrl(ptr: KPointer): string
-    @ani.unsafe.Direct
-    native static _UserDataSpan_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _UserDataSpan_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _VideoController_construct(): KPointer
     @ani.unsafe.Direct

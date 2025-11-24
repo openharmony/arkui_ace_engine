@@ -23,6 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { AttributeModifier, hookGridItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -293,7 +294,9 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGridItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

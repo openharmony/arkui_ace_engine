@@ -2566,6 +2566,13 @@ void ResetTextAreaOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+
+void TextAreaDeleteBackward(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::DeleteBackward(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2765,7 +2772,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaCustomKeyboardOption = GetTextAreaCustomKeyboardOption,
         .resetTextAreaCustomKeyboard = ResetTextAreaCustomKeyboard,
         .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
-        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME
+        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME,
+        .textAreaDeleteBackward = TextAreaDeleteBackward,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

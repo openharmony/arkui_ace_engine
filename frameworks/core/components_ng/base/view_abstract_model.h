@@ -41,9 +41,9 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
-#include "core/components_ng/property/layout_policy_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -186,6 +186,7 @@ public:
     virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
     virtual void SetBlender(const OHOS::Rosen::Blender* blender) {};
+    virtual void SetSystemMaterial(const UiMaterial* material) {};
 
     // outerBorder
     virtual void SetOuterBorderRadius(const Dimension& value) = 0;
@@ -268,7 +269,7 @@ public:
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetRenderFit(RenderFit renderFit) = 0;
-    virtual void SetCornerApplyType(CornerApplyType cornerApplyType) = 0;
+    virtual void SetRenderStrategy(RenderStrategy renderStrategy) = 0;
 
     // flex props
     virtual void SetFlexBasis(const Dimension& value) = 0;

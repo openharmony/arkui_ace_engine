@@ -26,6 +26,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookToolBarItemAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { ToolBarItemModifier } from "./../ToolBarItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkToolBarItemPeer extends PeerNode {
@@ -94,7 +95,9 @@ export class ArkToolBarItemComponent extends ComponentBase implements ToolBarIte
         return this
     }
     public attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
-        hookToolBarItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookToolBarItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

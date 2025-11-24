@@ -10753,4 +10753,92 @@ HWTEST_F(NativeNodeTest, NativeNodeTimePickerStringToColorTest, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: NativeNodeTest_NODE_RESPONSE_REGION_LIST_001
+ * @tc.desc: Test NODE_RESPONSE_REGION_LIST function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_NODE_RESPONSE_REGION_LIST_001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    int32_t tool = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = 100.0f;
+    float height = 50.0f;
+    float size = 100.0f;
+    ArkUI_NumberValue value[] = { { .f32 = size } };
+    ArkUI_AttributeItem sizeItem = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+
+    ArkUI_NumberValue value2[] = { { .i32 = tool }, { .f32 = x }, { .f32 = y }, { .f32 = width }, { .f32 = height } };
+    ArkUI_AttributeItem regionListItem = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue) };
+
+    nodeAPI->setAttribute(rootNode, NODE_WIDTH, &sizeItem);
+    auto widthVal = nodeAPI->getAttribute(rootNode, NODE_WIDTH);
+    EXPECT_EQ(widthVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_HEIGHT, &sizeItem);
+    auto heightVal = nodeAPI->getAttribute(rootNode, NODE_HEIGHT);
+    EXPECT_EQ(heightVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_RESPONSE_REGION_LIST, &regionListItem);
+    auto regionListVal = nodeAPI->getAttribute(rootNode, NODE_RESPONSE_REGION_LIST);
+    EXPECT_EQ(regionListVal->value[0].i32, tool);
+    EXPECT_FLOAT_EQ(regionListVal->value[1].f32, x);
+    EXPECT_FLOAT_EQ(regionListVal->value[2].f32, y);
+    EXPECT_FLOAT_EQ(regionListVal->value[3].f32, width);
+    EXPECT_FLOAT_EQ(regionListVal->value[4].f32, height);
+    EXPECT_EQ(regionListVal->size, 5);
+}
+
+/**
+ * @tc.name: NativeNodeTest_NODE_RESPONSE_REGION_LIST_002
+ * @tc.desc: Test NODE_RESPONSE_REGION_LIST function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_NODE_RESPONSE_REGION_LIST_002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    int32_t tool = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = 100.0f;
+    float height = 100.0f;
+    float size = 100.0f;
+    ArkUI_NumberValue value[] = { { .f32 = size } };
+    ArkUI_AttributeItem sizeItem = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+
+    ArkUI_NumberValue value2[] = { { .i32 = tool }, { .f32 = x }, { .f32 = y } };
+    ArkUI_AttributeItem regionListItem = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue) };
+
+    nodeAPI->setAttribute(rootNode, NODE_WIDTH, &sizeItem);
+    auto widthVal = nodeAPI->getAttribute(rootNode, NODE_WIDTH);
+    EXPECT_EQ(widthVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_HEIGHT, &sizeItem);
+    auto heightVal = nodeAPI->getAttribute(rootNode, NODE_HEIGHT);
+    EXPECT_EQ(heightVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_RESPONSE_REGION_LIST, &regionListItem);
+    auto regionListVal = nodeAPI->getAttribute(rootNode, NODE_RESPONSE_REGION_LIST);
+    EXPECT_EQ(regionListVal->value[0].i32, tool);
+    EXPECT_FLOAT_EQ(regionListVal->value[1].f32, x);
+    EXPECT_FLOAT_EQ(regionListVal->value[2].f32, y);
+    EXPECT_FLOAT_EQ(regionListVal->value[3].f32, width);
+    EXPECT_FLOAT_EQ(regionListVal->value[4].f32, height);
+    EXPECT_EQ(regionListVal->size, 5);
+}
 } // namespace OHOS::Ace

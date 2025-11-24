@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { int64, refEqual } from "@koalaui/common"
-import { getAnimationTimer } from "./GlobalTimer"
-import { TimeAnimation, constAnimation } from "./TimeAnimation"
-import { Disposable } from "../states/Disposable"
-import { GlobalStateManager } from "../states/GlobalStateManager"
-import { ComputableState, MutableState } from "../states/State"
+import { int64, refEqual } from '@koalaui/common'
+import { getAnimationTimer } from './GlobalTimer'
+import { TimeAnimation, constAnimation } from './TimeAnimation'
+import { Disposable } from '../states/Disposable'
+import { GlobalStateManager } from '../states/GlobalStateManager'
+import { ComputableState, MutableState } from '../states/State'
 import { ReadableState as State, StateContext } from 'arkui.incremental.runtime.state';
 
 
@@ -120,7 +120,7 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
     private valueState: ComputableState<Value>
     private myAnimation: TimeAnimation<Value>
 
-    dispose() {
+    dispose(): void {
         this.runningState.dispose()
         this.pausedState.dispose()
         this.valueState.dispose()
@@ -146,7 +146,7 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
         return this.pausedState.value
     }
 
-    setPaused(paused: boolean) {
+    setPaused(paused: boolean): void {
         this.pausedState.value = paused
     }
 
@@ -168,7 +168,7 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
             this.timeProvider = (): int64 => {
                 const timer = getAnimationTimer(manager)
                 if (timer) return timer.value
-                console.log("global animation timer is not specified yet")
+                console.log('global animation timer is not specified yet')
                 return 0
             }
         }

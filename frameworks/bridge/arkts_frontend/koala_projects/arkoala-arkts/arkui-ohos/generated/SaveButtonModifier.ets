@@ -27,8 +27,10 @@ import { ClickEvent } from "./component/common"
 import { BusinessError } from "@ohos.base"
 import { Resource } from "global.resource"
 import { Dimension, SizeOptions, BorderRadiuses } from "./component/units"
+import { ModifierState } from './CommonModifier'
 export class SaveButtonModifier extends SecurityComponentMethodModifier implements SaveButtonAttribute,AttributeModifier<SaveButtonAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -51,6 +53,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
     _stateEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stateEffect_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSaveButtonPeer;
         if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -164,6 +167,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
     }
     mergeModifier(modifier: SaveButtonModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onClick_0_flag) {

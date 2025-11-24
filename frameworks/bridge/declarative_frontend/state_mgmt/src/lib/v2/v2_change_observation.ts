@@ -1419,6 +1419,7 @@ class ObserveV2 {
 
   // Runs a task and processes all resulting updates immediately
   public applySync<T>(task: () => T): T {
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
     if (ComputedV2.runningCount) {
       const message = 'The function is not allowed to be called in @Computed';
       stateMgmtConsole.applicationError(message);
@@ -1471,6 +1472,7 @@ class ObserveV2 {
 
   // Immediately processes all updates
   public flushUpdates(): void {
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
     if (ComputedV2.runningCount) {
       const message = 'The function is not allowed to be called in @Computed';
       stateMgmtConsole.applicationError(message);
@@ -1490,6 +1492,7 @@ class ObserveV2 {
 
   // Update all UINodes that currently need update
   public flushUIUpdates(): void {
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
     if (ComputedV2.runningCount) {
       const message = 'The function is not allowed to be called in @Computed';
       stateMgmtConsole.applicationError(message);

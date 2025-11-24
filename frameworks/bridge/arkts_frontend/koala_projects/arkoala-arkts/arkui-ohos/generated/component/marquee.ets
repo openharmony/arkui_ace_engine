@@ -27,6 +27,7 @@ import { ResourceColor, Length } from "./units"
 import { Color, FontWeight, MarqueeUpdateStrategy } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookMarqueeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -385,7 +386,9 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         return this
     }
     public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMarqueeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookMarqueeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

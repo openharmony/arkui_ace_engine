@@ -147,10 +147,10 @@ import {
     @Param imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE } as SizeOptions;
     @Param imageBorderColor?: ColorMetrics = undefined;
     @Param imageBorderWidth?: LengthMetrics = undefined;
-    @Param title?: ResourceStr | null = null;
-    @Param content?: ResourceStr | null = null;
+    @Param title?: ResourceStr | undefined = undefined;
+    @Param content?: ResourceStr | undefined = undefined;
     @Event onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
-    @Param checkTips?: ResourceStr | null = null;
+    @Param checkTips?: ResourceStr | undefined = undefined;
     @Param checked?: boolean = false;
     @Local checkedInner?: boolean = false;
   
@@ -334,7 +334,7 @@ import {
     textPart(): void {
       Scroll(this.contentScroller) {
         Column() {
-          if (this.title !== null) {
+          if (this.title !== undefined) {
             Row() {
               Text(this.title as ResourceStr)
                 .fontSize(`${TITLE_S}fp`)
@@ -348,7 +348,7 @@ import {
             }
             .padding({ bottom: $r('sys.float.padding_level8') } as Padding)
           }
-          if (this.content !== null) {
+          if (this.content !== undefined) {
             Row() {
               Text(this.content as ResourceStr)
                 .focusable(true)
@@ -395,9 +395,9 @@ import {
     doNothingBuilder() {
     };
   
-    @Param title?: ResourceStr | null = null;
-    @Param content?: ResourceStr | null = null;
-    @Param checkTips?: ResourceStr | null = null;
+    @Param title?: ResourceStr | undefined = undefined;
+    @Param content?: ResourceStr | undefined = undefined;
+    @Param checkTips?: ResourceStr | undefined = undefined;
     @Param minContentHeight: number = 0;
     @Event $minContentHeight?: (val: number) => void = undefined;
     @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
@@ -1052,9 +1052,7 @@ import {
         primaryTitle: this.primaryTitle,
         secondaryTitle: this.secondaryTitle,
         contentBuilder: () => {
-          if (typeof this.contentBuilder === 'function') {
             this.contentBuilder();
-          }
         },
         contentAreaPadding: this.contentAreaPadding,
         buttons: this.buttons,

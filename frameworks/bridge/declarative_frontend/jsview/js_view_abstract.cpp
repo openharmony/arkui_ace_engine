@@ -5339,7 +5339,7 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->ResetResObj("borderRadius");
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -5350,21 +5350,16 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     ParseBorderRadius(jsVal);
 }
 
-void JSViewAbstract::SetCornerApplyType(const JSCallbackInfo& info)
+void JSViewAbstract::SetRenderStrategy(const JSCallbackInfo& info)
 {
     if (info.Length() < NUM2) {
         return;
     }
-    auto type = info[NUM1];
-    CornerApplyType cornerApplyType = CornerApplyType::FAST;
-    if (type->IsNumber()) {
-        int32_t typeNumber = type->ToNumber<int32_t>();
-        if (typeNumber >= static_cast<int32_t>(CornerApplyType::FAST) &&
-            typeNumber < static_cast<int32_t>(CornerApplyType::MAX)) {
-            cornerApplyType = static_cast<CornerApplyType>(typeNumber);
-        }
+    if (!info[NUM1]->IsNumber()) {
+        ViewAbstractModel::GetInstance()->SetRenderStrategy(RenderStrategy::FAST);
+        return;
     }
-    ViewAbstractModel::GetInstance()->SetCornerApplyType(cornerApplyType);
+    ViewAbstractModel::GetInstance()->SetRenderStrategy(static_cast<RenderStrategy>(info[NUM1]->ToNumber<int32_t>()));
 }
 
 NG::BorderRadiusProperty JSViewAbstract::GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
@@ -9728,6 +9723,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("backgroundFilter", &JSViewAbstract::JsBackgroundFilter);
     JSClass<JSViewAbstract>::StaticMethod("foregroundFilter", &JSViewAbstract::JsForegroundFilter);
     JSClass<JSViewAbstract>::StaticMethod("compositingFilter", &JSViewAbstract::JsCompositingFilter);
+    JSClass<JSViewAbstract>::StaticMethod("systemMaterial", &JSViewAbstract::JsSystemMaterial);
 
     JSClass<JSViewAbstract>::StaticMethod("setPixelRoundMode", &JSViewAbstract::SetPixelRoundMode);
     JSClass<JSViewAbstract>::StaticMethod("getPixelRoundMode", &JSViewAbstract::GetPixelRoundMode);
@@ -12712,6 +12708,16 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     }
     auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
+}
+
+void JSViewAbstract::JsSystemMaterial(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetSystemMaterial(nullptr);
+        return;
+    }
+    auto material = CreateUiMaterialFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetSystemMaterial(material);
 }
 
 void JSViewAbstract::ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam)

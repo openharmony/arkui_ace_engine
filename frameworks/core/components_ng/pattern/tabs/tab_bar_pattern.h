@@ -610,6 +610,11 @@ public:
         tabBarItemIds_[position] = tabBarItemId;
     }
 
+    int32_t GetTabBarItemSize()
+    {
+        return tabBarItemIds_.size();
+    }
+
     bool IsNewTabBar(int32_t tabBarItemId) const
     {
         return std::find(tabBarItemIds_.begin(), tabBarItemIds_.end(), tabBarItemId) == tabBarItemIds_.end();

@@ -2208,6 +2208,8 @@ struct CJUIWebModifier {
     void (*resetBackToTop)(ArkUINodeHandle node);
     void (*setOnCameraCaptureStateChanged)(ArkUINodeHandle node, void* callback);
     void (*resetOnCameraCaptureStateChanged)(ArkUINodeHandle node);
+    void (*setOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node, void* callback);
+    void (*resetOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

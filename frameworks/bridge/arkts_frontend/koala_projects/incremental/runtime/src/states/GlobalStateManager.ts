@@ -45,7 +45,7 @@ export class GlobalStateManager {
      * Drops the current instance to recreate a global state manager.
      * @internal
      */
-    static reset() {
+    static reset(): void {
         GlobalStateManager.current?.reset()
     }
 
@@ -101,8 +101,10 @@ export function callScheduledCallbacks(manager: StateManager = GlobalStateManage
  * (before the next recomposition and after the current one).
  * @param callback - a function to perform between recompositions
  */
-export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance) {
-    if (callback) manager.scheduleCallback(callback)
+export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance): void {
+    if (callback) {
+        manager.scheduleCallback(callback)
+    }
 }
 
 /**

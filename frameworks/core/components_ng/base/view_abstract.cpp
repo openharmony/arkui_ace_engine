@@ -38,7 +38,9 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/theme/ui_material_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -5589,6 +5591,58 @@ void ViewAbstract::SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen:
     target->UpdateCompositingFilter(compositingFilter);
 }
 
+void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetSystemMaterial(frameNode, material);
+}
+
+void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
+        auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
+        auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+        auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pipeline = frameNode->GetContextWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+            if (!materialTheme) {
+                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
+                return;
+            }
+            auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
+            if (!params) {
+                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
+                return;
+            }
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
+        };
+        if (SystemProperties::ConfigChangePerform()) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            updateFunc(nullptr);
+            if (materialType != MaterialType::NONE) {
+                RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+                pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+            } else {
+                pattern->RemoveResObj("viewAbstract.uiMaterial");
+            }
+            return;
+        }
+        updateFunc(nullptr);
+    }
+}
+
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5991,12 +6045,25 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 
-void ViewAbstract::SetCornerApplyType(CornerApplyType cornerApplyType)
+void ViewAbstract::SetRenderStrategy(RenderStrategy renderStrategy)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(CornerApplyType, cornerApplyType);
+    renderStrategy = IsRenderStrategyValid(renderStrategy) ? renderStrategy : RenderStrategy::FAST;
+    ACE_UPDATE_RENDER_CONTEXT(RenderStrategy, renderStrategy);
+}
+
+void ViewAbstract::SetRenderStrategy(FrameNode* frameNode, RenderStrategy renderStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    renderStrategy = IsRenderStrategyValid(renderStrategy) ? renderStrategy : RenderStrategy::FAST;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderStrategy, renderStrategy, frameNode);
+}
+
+bool ViewAbstract::IsRenderStrategyValid(RenderStrategy renderStrategy)
+{
+    return renderStrategy >= RenderStrategy::FAST && renderStrategy < RenderStrategy::MAX;
 }
 
 void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
+import { int32 } from '@koalaui/common'
 
 export type UID = int32
 
@@ -42,12 +42,12 @@ export class UniqueSet<U extends Unique> {
      */
     has(element: U): boolean {
         const latest = this.latest
-        if (latest && latest.uid == element.uid) return true
+        if (latest && latest.uid === element.uid) { return true }
 
         const array = this.array
         if (array) {
             const index = find(array, element.uid)
-            if (found(array, element.uid, index)) return true
+            if (found(array, element.uid, index)) { return true }
         }
         return false
     }
@@ -55,9 +55,9 @@ export class UniqueSet<U extends Unique> {
     /**
      * Adds the given element if it is not already present.
      */
-    add(element: U) {
+    add(element: U): void {
         const latest = this.latest
-        if (latest && latest.uid == element.uid) return
+        if (latest && latest.uid === element.uid) { return }
 
         let array = this.array
         if (array) {
@@ -77,7 +77,7 @@ export class UniqueSet<U extends Unique> {
     /**
      * Removes the given element if it is present.
      */
-    delete(element: U) {
+    delete(element: U): void {
         const array = this.array
         if (array) {
             const index = find(array, element.uid)
@@ -86,7 +86,7 @@ export class UniqueSet<U extends Unique> {
             }
         }
         const latest = this.latest
-        if (latest && latest.uid == element.uid) {
+        if (latest && latest.uid === element.uid) {
             this.latest = undefined
         }
     }
@@ -94,7 +94,7 @@ export class UniqueSet<U extends Unique> {
     /**
      * Removes all elements for which the given predicate returns true.
      */
-    deleteIf(predicate: (element: U) => boolean) {
+    deleteIf(predicate: (element: U) => boolean): void {
         const latest = this.latest
         const array = this.array
         if (array) {
@@ -116,7 +116,7 @@ export class UniqueSet<U extends Unique> {
     /**
      * Performs the given action for each element.
      */
-    forEach(action: (element: U) => void) {
+    forEach(action: (element: U) => void): void {
         const array = this.array
         if (array) {
             let index = array.length
@@ -125,14 +125,14 @@ export class UniqueSet<U extends Unique> {
             }
         } else {
             const latest = this.latest
-            if (latest) action(latest)
+            if (latest) { action(latest) }
         }
     }
 
     /**
      * Removes all of the elements.
      */
-    clear() {
+    clear(): void {
         this.array = undefined
         this.latest = undefined
     }
@@ -159,12 +159,12 @@ export class UniqueMap<U extends Unique, V> {
      */
     has(key: U): boolean {
         const latest = this.latest
-        if (latest && latest.uid == key.uid) return true
+        if (latest && latest.uid === key.uid) { return true }
 
         const array = this.array
         if (array) {
             const index = find(array, key.uid)
-            if (found(array, key.uid, index)) return true
+            if (found(array, key.uid, index)) { return true }
         }
         return false
     }
@@ -174,13 +174,13 @@ export class UniqueMap<U extends Unique, V> {
      */
     get(key: U): V | undefined {
         const latest = this.latest
-        if (latest && latest.uid == key.uid) return latest.value
+        if (latest && latest.uid === key.uid) { return latest.value }
 
         const array = this.array
         if (array) {
             const index = find(array, key.uid)
             const entry = found(array, key.uid, index)
-            if (entry) return entry.value
+            if (entry) { return entry.value }
         }
         return undefined
     }
@@ -189,9 +189,9 @@ export class UniqueMap<U extends Unique, V> {
      * Associates the specified value with the given key.
      * If a mapping for the given key exists, the old value is replaced by the specified value.
      */
-    set(key: U, value: V) {
+    set(key: U, value: V): void {
         const latest = this.latest
-        if (latest && latest.uid == key.uid) {
+        if (latest && latest.uid === key.uid) {
             latest.value = value
         } else {
             let array = this.array
@@ -221,7 +221,7 @@ export class UniqueMap<U extends Unique, V> {
     /**
      * Removes a mapping for the given key if it is present.
      */
-    delete(key: U) {
+    delete(key: U): void {
         const array = this.array
         if (array) {
             const index = find(array, key.uid)
@@ -230,7 +230,7 @@ export class UniqueMap<U extends Unique, V> {
             }
         }
         const latest: Entry<U, V> | undefined = this.latest
-        if (latest && latest.uid == key.uid) {
+        if (latest && latest.uid === key.uid) {
             this.latest = undefined
         }
     }
@@ -238,7 +238,7 @@ export class UniqueMap<U extends Unique, V> {
     /**
      * Removes all mappings for which the given predicate returns true.
      */
-    deleteIf(predicate: (key: U, value: V) => boolean) {
+    deleteIf(predicate: (key: U, value: V) => boolean): void {
         const latest = this.latest
         const array = this.array
         if (array) {
@@ -260,7 +260,7 @@ export class UniqueMap<U extends Unique, V> {
     /**
      * Performs the given action for each mapping.
      */
-    forEach(action: (key: U, value: V) => void) {
+    forEach(action: (key: U, value: V) => void): void {
         const array = this.array
         if (array) {
             let index = array.length
@@ -270,14 +270,14 @@ export class UniqueMap<U extends Unique, V> {
             }
         } else {
             const latest = this.latest
-            if (latest) action(latest!.key, latest!.value)
+            if (latest) { action(latest!.key, latest!.value) }
         }
     }
 
     /**
      * Removes all of the mappings.
      */
-    clear() {
+    clear(): void {
         this.array = undefined
         this.latest = undefined
     }
@@ -298,7 +298,7 @@ class Entry<U extends Unique, V> implements Unique {
 function found<U extends Unique>(array: Array<U>, uid: UID, index: int): U | undefined {
     if (index < array.length) {
         const element = array[index]
-        if (element.uid == uid) return element
+        if (element.uid === uid) { return element }
     }
     return undefined
 }
@@ -308,8 +308,8 @@ function find<U extends Unique>(array: Array<U>, uid: UID): int {
     let right = array.length
     while (left < right) {
         const center = ((left + right) >>> 1) as int32
-        if (array[center].uid < uid) left = center + 1
-        else right = center
+        if (array[center].uid < uid) { left = center + 1 }
+        else { right = center }
     }
     return left
 }

@@ -21,9 +21,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
-import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
+import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
 import { LengthMetrics, ColorMetrics} from "arkui.Graphics"
 import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
@@ -38,6 +39,7 @@ import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
 export class CommonMethodModifier implements CommonMethod {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -379,6 +381,9 @@ export class CommonMethodModifier implements CommonMethod {
     _backgroundBlurStyle_0_0value?: BlurStyle | undefined
     _backgroundBlurStyle_0_1value?: BackgroundBlurStyleOptions | undefined
     _backgroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
+    _borderRadius_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _borderRadius_1_0value?: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+    _borderRadius_1_1value?: RenderStrategy | undefined
     _backgroundEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundEffect_1_0value?: BackgroundEffectOptions | undefined
     _backgroundEffect_1_1value?: SystemAdaptiveOptions | undefined
@@ -491,6 +496,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
     _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
         if (this._width_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -1036,7 +1042,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._borderRadius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBorderRadiusAttribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderRadius0Attribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
                     this._borderRadius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1046,7 +1052,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._borderRadius_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBorderRadiusAttribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderRadius0Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
                 }
             }
         }
@@ -3498,6 +3504,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (this._borderRadius_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._borderRadius_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBorderRadius1Attribute((this._borderRadius_1_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (this._borderRadius_1_1value as RenderStrategy | undefined));
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBorderRadius1Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined));
+                }
+            }
+        }
         if (this._onClick_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onClick_1_flag) {
@@ -4058,6 +4082,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
+        this._state = modifier._state;
         if (modifier._width_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._width_0_flag) {
@@ -6239,6 +6264,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.foregroundBlurStyle((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._borderRadius_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._borderRadius_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.borderRadius(modifier._borderRadius_1_0value, modifier._borderRadius_1_1value);
+                    break;
+                }
+                default: {
+                    this.borderRadius((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined));
                 }
             }
         }
@@ -8499,6 +8537,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._foregroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        if (((this._borderRadius_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._borderRadius_1_flag = AttributeUpdaterFlag.UPDATE
+            this._borderRadius_1_0value = value
+            this._borderRadius_1_1value = type
+        } else
+        {
+            this._borderRadius_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

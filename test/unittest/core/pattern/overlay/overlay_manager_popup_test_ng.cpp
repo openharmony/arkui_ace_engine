@@ -1835,6 +1835,44 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest035, TestSize.Level1)
     EXPECT_TRUE(overlayManager->popupMap_.empty());
 }
 /**
+ * @tc.name: PopupTest036
+ * @tc.desc: Test IsAccessibilityModal function of BubbleAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+    auto accessibilityProperty = popupNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. get modal attribute from accessibilityProperty.
+     * @tc.expected: modal is true.
+     */
+    auto isModal = accessibilityProperty->IsAccessibilityModal();
+    EXPECT_TRUE(isModal);
+
+    /**
+     * @tc.steps: step3. set IsModal false to BubbleLayoutProperty, then get modal attribute from accessibilityProperty.
+     * @tc.expected: modal is false.
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateIsModal(false);
+    isModal = accessibilityProperty->IsAccessibilityModal();
+    EXPECT_FALSE(isModal);
+}
+
+/**
  * @tc.name: ToastTest001
  * @tc.desc: Test OverlayManager::ShowToast.
  * @tc.type: FUNC

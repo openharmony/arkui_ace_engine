@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookGridColAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -207,7 +208,9 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridColAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookGridColAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

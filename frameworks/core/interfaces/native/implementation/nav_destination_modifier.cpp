@@ -74,7 +74,7 @@ void SetHideBackButtonImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetHideBackButton(frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
 }
 void SetOnShownImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_Callback_VisibilityChangeReason_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -84,12 +84,13 @@ void SetOnShownImpl(Ark_NativePointer node,
         return;
     }
     auto onShownEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) {
-        arkCallback.InvokeSync();
+        auto shownReason = static_cast<Ark_VisibilityChangeReason>(reason);
+        arkCallback.InvokeSync(shownReason);
     };
     NavDestinationModelStatic::SetOnShown(frameNode, std::move(onShownEvent));
 }
 void SetOnHiddenImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_Callback_VisibilityChangeReason_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -98,7 +99,10 @@ void SetOnHiddenImpl(Ark_NativePointer node,
         NavDestinationModelStatic::SetOnHidden(frameNode, nullptr);
         return;
     }
-    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) { arkCallback.InvokeSync(); };
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) {
+        auto hiddenReason = static_cast<Ark_VisibilityChangeReason>(reason);
+        arkCallback.InvokeSync(hiddenReason);
+    };
     NavDestinationModelStatic::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
 void SetOnBackPressedImpl(Ark_NativePointer node,
@@ -121,6 +125,19 @@ void SetOnResultImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto callback = [helper = CallbackHelper(value->value)](const RefPtr<NG::NavPathInfo>& info) {
+        auto pathInfo = AceType::DynamicCast<NavigationContext::JSNavPathInfoStatic>(info);
+        CHECK_NULL_VOID(pathInfo);
+        auto onResultCallback = [helper](Opt_Object param) {
+            helper.InvokeSync(param);
+        };
+        pathInfo->SetNavDestinationPopCallback(std::move(onResultCallback));
+    };
+    NavDestinationModelStatic::SetOnPop(frameNode, std::move(callback));
 }
 void SetModeImpl(Ark_NativePointer node,
                  const Opt_NavDestinationMode* value)
@@ -358,6 +375,20 @@ void SetCustomTransitionImpl(Ark_NativePointer node,
 void SetOnNewParamImpl(Ark_NativePointer node,
                        const Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto callback = [func = CallbackHelper(value->value)](const RefPtr<NavPathInfo>& pathInfo) {
+        auto pathInfoStatic = AceType::DynamicCast<NavigationContext::JSNavPathInfoStatic>(pathInfo);
+        CHECK_NULL_VOID(pathInfoStatic);
+        auto param = pathInfoStatic->GetParam();
+        CHECK_NULL_VOID(param);
+        func.InvokeSync(param->data_);
+    };
+    NavDestinationModelStatic::SetOnNewParam(frameNode, std::move(callback));
 }
 void SetPreferredOrientationImpl(Ark_NativePointer node,
                                  const Opt_window_Orientation* value)

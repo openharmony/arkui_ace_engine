@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRemoteWindowAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -96,7 +97,9 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRemoteWindowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRemoteWindowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

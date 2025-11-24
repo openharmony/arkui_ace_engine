@@ -17,17 +17,20 @@ import("//build/ohos.gni")
 generate_static_abc("split_layout_ets_abc") {
   base_url = "./"
   files = [ "./@ohos.arkui.advanced.SplitLayout.ets" ]
-
-  #ui_enable = "True"
+  ui_enable = "True"
   is_boot_abc = "True"
   device_dst_file = "/system/framework/split_layout_ets_abc.abc"
-  dst_file = target_out_dir + "/split_layout_ets_abc"
+  dst_file = target_out_dir + "/split_layout_ets_abc/modules_static.abc"
   out_puts = [ target_out_dir + "/split_layout_ets_abc/modules_static.abc" ]
 }
 
 ohos_copy("copy_split_layout_ets_abc") {
-  sources = [ target_out_dir + "/split_layout_ets_abc/modules_static.abc" ]
-  outputs = [ target_out_dir + "/split_layout_ets_abc.abc" ]
+  sources = [
+    target_out_dir + "/split_layout_ets_abc/modules_static.abc"
+  ]
+  outputs = [
+    target_out_dir + "/split_layout_ets_abc.abc"
+  ]
   deps = [ ":split_layout_ets_abc" ]
 }
 
@@ -39,6 +42,6 @@ ohos_prebuilt_etc("split_layout_ets_abc_etc") {
   deps = [ ":copy_split_layout_ets_abc" ]
 }
 
-group("splitLayout") {
-  deps = [ ":split_layout_ets_abc_etc" ]
+group("splitLayout"){
+    deps = [":split_layout_ets_abc_etc"]
 }

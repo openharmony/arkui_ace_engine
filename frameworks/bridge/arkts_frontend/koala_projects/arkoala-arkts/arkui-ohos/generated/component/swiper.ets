@@ -30,6 +30,7 @@ import { PeerNode } from "./../PeerNode"
 import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { default as curves } from "@ohos.curves"
 import { extractors, AttributeModifier, hookSwiperAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -1340,7 +1341,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSwiperAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSwiperAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

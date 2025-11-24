@@ -26,6 +26,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
 import { extractors, hookSaveButtonAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { BusinessError } from "@ohos.base"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -362,7 +363,9 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         return this
     }
     public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookSaveButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSaveButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

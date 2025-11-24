@@ -1687,7 +1687,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
     {
     }
-    void SetBorderRadiusImpl(Ark_NativePointer node,
+    void SetBorderRadius0Impl(Ark_NativePointer node,
                              const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
     {
     }
@@ -2239,6 +2239,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_BlurStyle* style,
                                     const Opt_ForegroundBlurStyleOptions* options,
                                     const Opt_SystemAdaptiveOptions* sysOptions)
+    {
+    }
+    void SetBorderRadius1Impl(Ark_NativePointer node,
+                              const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value,
+                              const Opt_RenderStrategy* type)
     {
     }
     void SetOnClick1Impl(Ark_NativePointer node,
@@ -3921,11 +3926,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnShownImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+                        const const Opt_Callback_VisibilityChangeReason_Void* value)
     {
     }
     void SetOnHiddenImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const const Opt_Callback_VisibilityChangeReason_Void* value)
     {
     }
     void SetOnBackPressedImpl(Ark_NativePointer node,
@@ -8442,7 +8447,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBorderStyleImpl,
             CommonMethodModifier::SetBorderWidthImpl,
             CommonMethodModifier::SetBorderColorImpl,
-            CommonMethodModifier::SetBorderRadiusImpl,
+            CommonMethodModifier::SetBorderRadius0Impl,
             CommonMethodModifier::SetBorderImageImpl,
             CommonMethodModifier::SetOutlineImpl,
             CommonMethodModifier::SetOutlineStyleImpl,
@@ -8578,6 +8583,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBackgroundBlurStyleImpl,
             CommonMethodModifier::SetBackgroundEffect1Impl,
             CommonMethodModifier::SetForegroundBlurStyleImpl,
+            CommonMethodModifier::SetBorderRadius1Impl,
             CommonMethodModifier::SetOnClick1Impl,
             CommonMethodModifier::SetFocusScopeIdImpl,
             CommonMethodModifier::SetFocusScopePriorityImpl,
@@ -12294,6 +12300,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_MessageLevel GetMessageLevelImpl(Ark_ConsoleMessage peer)
+    {
+        return {};
+    }
+    Ark_ConsoleMessageSource GetSourceImpl(Ark_ConsoleMessage peer)
     {
         return {};
     }
@@ -17614,6 +17624,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
+    {
+    }
     } // TextContentControllerBaseAccessor
     namespace TextControllerAccessor {
     void DestroyPeerImpl(Ark_TextController peer)
@@ -18270,23 +18283,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // UrlStyleAccessor
-    namespace UserDataSpanAccessor {
-    void DestroyPeerImpl(Ark_UserDataSpan peer)
-    {
-        auto peerImpl = reinterpret_cast<UserDataSpanPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_UserDataSpan ConstructImpl()
-    {
-        return {};
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    } // UserDataSpanAccessor
     namespace VideoControllerAccessor {
     void DestroyPeerImpl(Ark_VideoController peer)
     {
@@ -21775,6 +21771,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextContentControllerBaseAccessor::GetSelectionImpl,
             TextContentControllerBaseAccessor::ClearPreviewTextImpl,
             TextContentControllerBaseAccessor::GetTextImpl,
+            TextContentControllerBaseAccessor::DeleteBackwardImpl,
         };
         return &TextContentControllerBaseAccessorImpl;
     }
@@ -22079,19 +22076,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct UrlStylePeer {
         virtual ~UrlStylePeer() = default;
-    };
-    const GENERATED_ArkUIUserDataSpanAccessor* GetUserDataSpanAccessor()
-    {
-        static const GENERATED_ArkUIUserDataSpanAccessor UserDataSpanAccessorImpl {
-            UserDataSpanAccessor::DestroyPeerImpl,
-            UserDataSpanAccessor::ConstructImpl,
-            UserDataSpanAccessor::GetFinalizerImpl,
-        };
-        return &UserDataSpanAccessorImpl;
-    }
-
-    struct UserDataSpanPeer {
-        virtual ~UserDataSpanPeer() = default;
     };
     const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
     {
@@ -22499,7 +22483,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUIContextAtomicServiceBarAccessor,
             GetUIExtensionProxyAccessor,
             GetUrlStyleAccessor,
-            GetUserDataSpanAccessor,
             GetVideoControllerAccessor,
             GetWaterFlowSectionsAccessor,
             GetWebContextMenuParamAccessor,

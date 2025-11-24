@@ -381,6 +381,7 @@ public:
     static Color GetTextAreaScrollBarColor(FrameNode* frameNode);
     static void ResetTextAreaScrollBarColor(FrameNode* frameNode);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
+    static void DeleteBackward(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

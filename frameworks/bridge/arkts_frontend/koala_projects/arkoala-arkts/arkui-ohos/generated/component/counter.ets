@@ -24,6 +24,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { AttributeModifier, hookCounterAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -188,7 +189,9 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCounterAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookCounterAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

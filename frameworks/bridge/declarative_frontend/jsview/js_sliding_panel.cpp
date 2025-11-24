@@ -167,7 +167,7 @@ void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args, BorderRadius& bo
 
 void JSSlidingPanel::JsPanelBorderRadius(const JSCallbackInfo& info)
 {
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
     BorderRadius borderRadius;
     ParsePanelRadius(info[0], borderRadius);
 

@@ -125,7 +125,16 @@ public:
         groupProperty->propEffectOption = effectOption;
     }
 
-    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    void OnUseEffectUpdate(bool useEffect) override
+    {
+        propUseEffect_ = useEffect;
+    }
+
+    void OnUseEffectTypeUpdate(EffectType effectType) override
+    {
+        propUseEffectType_ = effectType;
+    }
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propMotionBlur = motionBlurOption;

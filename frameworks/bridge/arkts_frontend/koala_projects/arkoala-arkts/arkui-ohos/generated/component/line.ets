@@ -26,6 +26,7 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonSha
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookLineAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -208,7 +209,9 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         return this
     }
     public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookLineAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookLineAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

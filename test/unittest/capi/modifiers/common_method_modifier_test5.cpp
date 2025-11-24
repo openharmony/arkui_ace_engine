@@ -40,8 +40,8 @@ namespace {
     };
     void AssignArkValue(Ark_FractionStop& dst, const FractionStop& fractionStopValue)
     {
-        dst.value0 = Converter::ArkValue<Ark_Number>(fractionStopValue.first);
-        dst.value1 = Converter::ArkValue<Ark_Number>(fractionStopValue.second);
+        dst.value0 = Converter::ArkValue<Ark_Float64>(fractionStopValue.first);
+        dst.value1 = Converter::ArkValue<Ark_Float64>(fractionStopValue.second);
     }
 }
 
@@ -121,8 +121,8 @@ HWTEST_F(CommonMethodModifierTest5, DISABLED_setLinearGradientBlurTestInvalidVal
  */
 HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestDefaultValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSystemBarEffect, nullptr);
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
+    ASSERT_TRUE(modifier_->setSystemBarEffect);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE);
 }
 
@@ -133,12 +133,12 @@ HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestDefaultValues, TestSiz
  */
 HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSystemBarEffect, nullptr);
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
+    ASSERT_TRUE(modifier_->setSystemBarEffect);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE);
 
     modifier_->setSystemBarEffect(node_);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_TRUE_VALUE);
 }
 

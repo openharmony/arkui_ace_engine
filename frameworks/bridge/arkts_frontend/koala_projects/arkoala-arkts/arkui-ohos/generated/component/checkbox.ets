@@ -27,6 +27,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color, CheckBoxShape } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, AttributeModifier, hookCheckBoxContentModifier, hookCheckboxAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -320,7 +321,9 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
         return this
     }
     public attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCheckboxAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookCheckboxAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

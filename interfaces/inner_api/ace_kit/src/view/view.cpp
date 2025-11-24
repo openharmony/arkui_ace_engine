@@ -52,8 +52,44 @@ void View::SetHeight(const CalcDimension& height)
     }
 }
 
+void View::SetTranslate(const NG::TranslateOptions& options)
+{
+    NG::ViewAbstract::SetTranslate(reinterpret_cast<AceNode*>(node_->GetHandle()), options);
+}
+
+void View::SetOnTouch(TouchEventFunc&& touchEventFunc)
+{
+    NG::ViewAbstract::SetOnTouch(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(touchEventFunc));
+}
+
+void View::SetOnClick(GestureEventFunc&& clickEventFunc)
+{
+    NG::ViewAbstract::SetOnClick(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(clickEventFunc));
+}
+
+void View::SetBorderRadius(const Dimension& radius)
+{
+    NG::ViewAbstract::SetBorderRadius(reinterpret_cast<AceNode*>(node_->GetHandle()), radius);
+}
+
+void View::SetBackgroundColor(const Color& color)
+{
+    NG::ViewAbstract::SetBackgroundColor(reinterpret_cast<AceNode*>(node_->GetHandle()), color);
+}
+
+void View::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
+{
+    NG::ViewAbstract::SetBackgroundFilter(reinterpret_cast<AceNode*>(node_->GetHandle()), backgroundFilter);
+}
+
 void View::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara)
 {
     NG::ViewAbstract::SetLinearGradientBlur(reinterpret_cast<AceNode*>(node_->GetHandle()), blurPara);
 }
+
+void View::SetOpacity(double opacity)
+{
+    NG::ViewAbstract::SetOpacity(reinterpret_cast<AceNode*>(node_->GetHandle()), opacity);
+}
+
 } // namespace OHOS::Ace::Kit

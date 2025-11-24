@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey, int32 } from "@koalaui/common"
-import { __context, __id } from "../internals"
-import { memoEntry1, memoEntry2 } from "./entry"
+import { KoalaCallsiteKey, int32 } from '@koalaui/common'
+import { __context, __id } from '../internals'
+import { memoEntry1, memoEntry2 } from './entry'
 
 /**
  * Sequentially repeats the {@link action}.

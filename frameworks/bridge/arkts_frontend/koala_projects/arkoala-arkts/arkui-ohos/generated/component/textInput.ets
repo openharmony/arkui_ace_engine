@@ -32,6 +32,7 @@ import { Color, TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, Tex
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
 import { AttributeModifier, hookTextInputAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -2426,7 +2427,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextInputAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextInputAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

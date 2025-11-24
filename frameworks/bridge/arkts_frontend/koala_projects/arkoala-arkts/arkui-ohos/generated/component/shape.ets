@@ -28,6 +28,7 @@ import { ResourceColor, Length } from "./units"
 import { Color, LineCapStyle, LineJoinStyle } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, extractors, hookShapeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -567,7 +568,9 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookShapeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookShapeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

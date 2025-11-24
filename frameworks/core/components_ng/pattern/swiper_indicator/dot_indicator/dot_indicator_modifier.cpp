@@ -983,6 +983,11 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     optionHead.SetCurve(curve);
     optionHead.SetDuration(animationDuration_);
 
+    auto headSpringCurve = DynamicCast<InterpolatingSpring>(curve);
+    if (headSpringCurve && Negative(headSpringCurve->GetVelocity())) {
+        headSpringCurve->UpdateVelocity(0.0f);
+    }
+
     AnimationOption optionTail = CreateTailOption(longPointCenterX, gestureState, isNormal);
     AnimationOption optionLeft = optionTail;
     AnimationOption optionRight = optionHead;

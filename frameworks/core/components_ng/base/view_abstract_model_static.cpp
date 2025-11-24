@@ -1060,6 +1060,12 @@ void ViewAbstractModelStatic::SetBorderRadius(FrameNode *frameNode, const Border
     ViewAbstract::SetBorderRadius(frameNode, value);
 }
 
+void ViewAbstractModelStatic::SetRenderStrategy(FrameNode* frameNode, const RenderStrategy& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderStrategy(frameNode, type);
+}
+
 void ViewAbstractModelStatic::SetBorderImage(
     FrameNode* frameNode, const RefPtr<BorderImage>& borderImage, uint8_t bitset)
 {
@@ -1529,9 +1535,19 @@ void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::op
 void ViewAbstractModelStatic::SetUseEffect(
     FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt)
 {
-    auto useEffect = useEffectOpt.value_or(false);
-    auto effectType = effectTypeOpt.value_or(EffectType::DEFAULT);
-    ViewAbstract::SetUseEffect(frameNode, useEffect, effectType);
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    if (useEffectOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, *useEffectOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    }
+    if (effectTypeOpt) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffectType, *effectTypeOpt, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffectType, frameNode);
+    }
 }
 
 void ViewAbstractModelStatic::SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt)
@@ -1733,6 +1749,11 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
 void ViewAbstractModelStatic::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
+}
+
+void ViewAbstractModelStatic::SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect, frameNode);
 }
 
 int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)

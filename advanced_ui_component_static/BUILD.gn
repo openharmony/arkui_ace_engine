@@ -21,6 +21,7 @@ group("advanced_ui_component_static") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [
+      "treeview:treeView",
       "gridobjectsortcomponent:gridObjectSortComponent",
       "counter:counter",
       "composeListItem:composeListItem",
@@ -31,6 +32,7 @@ group("advanced_ui_component_static") {
       "selectionmenu:selectionMenu",
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
+      "multinavigation:multiNavigation",
       "subheaderv2:subHeaderV2",
       "composetitlebar:composeTitleBar",
       "editabletitlebar:editableTitleBar",
@@ -38,6 +40,10 @@ group("advanced_ui_component_static") {
       "toolbarv2:toolBarV2",
       "chip:chip",
       "chipgroup:chipGroup",
+      "selecttitlebar:selectTitleBar",
+      "progressbutton:progressButton",
+      "progressbuttonV2:progressButtonV2",
+      "tabtitlebar:tabTitleBar",
     ]
   }
 }

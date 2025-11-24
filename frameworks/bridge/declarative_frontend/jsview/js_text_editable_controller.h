@@ -54,6 +54,7 @@ public:
     void SetPlaceholderStyledString(const JSCallbackInfo& info);
     RefPtr<SpanString> GetPlaceholderStyledString() const;
     void ClearPlaceholderStyledString();
+    void DeleteBackward();
 
 private:
     WeakPtr<TextFieldControllerBase> controllerWeak_;

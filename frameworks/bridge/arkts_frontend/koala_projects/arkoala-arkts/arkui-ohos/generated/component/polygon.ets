@@ -27,6 +27,7 @@ import { ShapePoint } from "./line"
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookPolygonAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -155,7 +156,9 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPolygonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPolygonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

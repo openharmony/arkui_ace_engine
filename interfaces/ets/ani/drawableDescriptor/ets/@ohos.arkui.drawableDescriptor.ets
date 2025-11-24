@@ -53,7 +53,12 @@ export class DrawableDescriptor {
       return new Object();
     }
     let inputVal = ESValue.wrap(input) as ESValue;
-    return DrawableDescriptorInner.nativeTransferStatic(inputVal);
+    let typeNameProperty = inputVal.getProperty("typeName");
+    if (!typeNameProperty.isString()) {
+      return new Object();
+    }
+    let typeName = typeNameProperty.toString();
+    return DrawableDescriptorInner.nativeTransferStatic(inputVal, typeName);
   }
 
   static transferDynamic(input: Object): Any {
@@ -188,6 +193,6 @@ class DrawableDescriptorInner {
   native static createBackground(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static createMask(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static getMaskClipPath(): string;
-  native static nativeTransferStatic(input: ESValue): DrawableDescriptor;
+  native static nativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor;
   native static destructDrawable(ptr: long): void;
 }

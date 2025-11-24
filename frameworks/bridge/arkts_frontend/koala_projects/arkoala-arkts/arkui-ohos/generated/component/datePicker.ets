@@ -25,6 +25,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CrownSensitivity, Color } from "./enums"
 import { AttributeModifier, hookDatePickerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -361,7 +362,9 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookDatePickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookDatePickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

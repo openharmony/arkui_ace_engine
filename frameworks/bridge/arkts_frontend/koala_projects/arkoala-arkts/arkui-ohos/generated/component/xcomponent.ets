@@ -26,6 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { AttributeModifier, hookXComponentAttributeModifier, AttributeUpdater, hookSetXComponentOptions, hookXComponentStartImageAnalyzer } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -435,7 +436,9 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookXComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookXComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

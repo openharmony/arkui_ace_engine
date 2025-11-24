@@ -154,6 +154,7 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         propBackBlendMode.has_value() ? static_cast<uint16_t>(propBackBlendMode.value()) : 0, filter);
     json->PutExtAttr("dynamicDimming", propDynamicDimDegree.has_value() ?
         static_cast<float_t>(propDynamicDimDegree.value()) : 1.0f, filter);
+    json->PutExtAttr("systemBarEffect", propSystemBarEffect.value_or(false) ? "true" : "false", filter);
     auto jsonBgBrightness = JsonUtil::Create(true);
     jsonBgBrightness->Put(
         "dynamicLightUpRate", propDynamicLightUpRate.has_value() ? propDynamicLightUpRate.value() : 0.0);

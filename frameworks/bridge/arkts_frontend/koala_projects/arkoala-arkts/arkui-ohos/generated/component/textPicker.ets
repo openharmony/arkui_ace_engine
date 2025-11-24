@@ -28,6 +28,7 @@ import { Dimension, ResourceStr, ResourceColor, Offset, Font_serializer, Font, O
 import { Resource } from "global.resource"
 import { CrownSensitivity, Color, TextOverflow } from "./enums"
 import { AttributeModifier, hookTextPickerDivider, extractors, hookTextPickerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -619,7 +620,9 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextPickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextPickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

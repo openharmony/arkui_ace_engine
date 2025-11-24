@@ -2756,4 +2756,11 @@ void TextFieldModelNG::ResetTextAreaScrollBarColor(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, frameNode);
 }
 
+void TextFieldModelNG::DeleteBackward(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->HandleOnDelete(true);
+}
+
 } // namespace OHOS::Ace::NG

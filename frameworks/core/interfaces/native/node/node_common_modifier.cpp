@@ -104,6 +104,7 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr float DEFAULT_PERCENTAGE = 1.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
@@ -5069,6 +5070,35 @@ void SetResponseRegionList(ArkUINodeHandle node, const ArkUI_Int32* tools, const
     ViewAbstract::SetResponseRegionList(frameNode, regionMap);
 }
 
+void SetResponseRegionListWithToolType(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
+    ArkUI_Int32 length, const ArkUI_Int32* tools, ArkUI_Int32 toolsLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+
+    for (int32_t i = 0; i < toolsLength; i++) {
+        auto toolType = NG::ResponseRegionSupportedTool::ALL;
+        if (tools[i] >= 0 && tools[i] <= 3) {
+            toolType = static_cast<NG::ResponseRegionSupportedTool>(tools[i]);
+        }
+
+        CalcDimension xDimen =
+            CalcDimension(values[i * NUM_4 + NUM_0], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_0]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * NUM_4 + NUM_1], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_1]));
+        CalcDimension widthDimen =
+            CalcDimension(LessOrEqual(values[i * NUM_4 + NUM_2], 0.0) ? DEFAULT_PERCENTAGE : values[i * NUM_4 + NUM_2],
+                static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]));
+        CalcDimension heightDimen =
+            CalcDimension(LessOrEqual(values[i * NUM_4 + NUM_3], 0.0) ? DEFAULT_PERCENTAGE : values[i * NUM_4 + NUM_3],
+                static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]));
+        CalcDimensionRect dimensionRect(widthDimen, heightDimen, xDimen, yDimen);
+        regionMap[toolType].emplace_back(dimensionRect);
+    }
+    ViewAbstract::SetResponseRegionList(frameNode, regionMap);
+}
+
 void ResetResponseRegionList(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5082,6 +5112,42 @@ void ResetResponseRegionList(ArkUINodeHandle node)
     CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
     regionMap[toolType].emplace_back(dimenRect);
     ViewAbstract::SetResponseRegionList(frameNode, regionMap);
+}
+
+ArkUI_Int32 GetResponseRegionListSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap =
+        ViewAbstract::GetResponseRegionList(frameNode);
+    int32_t regionSize = 0;
+    for (auto& region : regionMap) {
+        regionSize += static_cast<int32_t>(region.second.size());
+    }
+    return regionSize;
+}
+
+void GetResponseRegionList(
+    ArkUINodeHandle node, ArkUI_Int32* tools, ArkUI_Float32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap =
+        ViewAbstract::GetResponseRegionList(frameNode);
+    int32_t index = 0;
+    for (auto& region : regionMap) {
+        for (auto& rect : region.second) {
+            if (index >= length) {
+                break;
+            }
+            tools[index] = static_cast<int32_t>(region.first);
+            values[index * NUM_4 + NUM_0] = rect.GetX().Value();
+            values[index * NUM_4 + NUM_1] = rect.GetY().Value();
+            values[index * NUM_4 + NUM_2] = rect.GetWidth().Value();
+            values[index * NUM_4 + NUM_3] = rect.GetHeight().Value();
+            index++;
+        }
+    }
 }
 
 void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
@@ -10270,6 +10336,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .setObscured = SetObscured,
         .resetObscured = ResetObscured,
         .setResponseRegionList = SetResponseRegionList,
+        .setResponseRegionListWithToolType = SetResponseRegionListWithToolType,
+        .getResponseRegionListSize = GetResponseRegionListSize,
+        .getResponseRegionList = GetResponseRegionList,
         .resetResponseRegionList = ResetResponseRegionList,
         .setResponseRegion = SetResponseRegion,
         .resetResponseRegion = ResetResponseRegion,

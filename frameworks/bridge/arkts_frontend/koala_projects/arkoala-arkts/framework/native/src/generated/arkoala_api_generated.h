@@ -846,9 +846,6 @@ typedef struct Opt_Union_TextInputStyle_TextContentStyle Opt_Union_TextInputStyl
 typedef struct UrlStylePeer UrlStylePeer;
 typedef struct UrlStylePeer* Ark_UrlStyle;
 typedef struct Opt_UrlStyle Opt_UrlStyle;
-typedef struct UserDataSpanPeer UserDataSpanPeer;
-typedef struct UserDataSpanPeer* Ark_UserDataSpan;
-typedef struct Opt_UserDataSpan Opt_UserDataSpan;
 typedef struct Ark_Vec4 Ark_Vec4;
 typedef struct Opt_Vec4 Opt_Vec4;
 typedef struct Ark_Vector2 Ark_Vector2;
@@ -3406,6 +3403,8 @@ typedef Ark_Object Ark_ComponentContent;
 typedef Opt_Object Opt_ComponentContent;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
+typedef Ark_Object Ark_UserDataSpan;
+typedef Opt_Object Opt_UserDataSpan;
 typedef enum Ark_AccessibilityAction {
     ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION = 0,
     ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK = 1,
@@ -4136,6 +4135,25 @@ typedef struct Opt_ConfigurationConstant_ScreenDensity {
     Ark_Tag tag;
     Ark_ConfigurationConstant_ScreenDensity value;
 } Opt_ConfigurationConstant_ScreenDensity;
+typedef enum Ark_ConsoleMessageSource {
+    ARK_CONSOLE_MESSAGE_SOURCE_XML = 0,
+    ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT = 1,
+    ARK_CONSOLE_MESSAGE_SOURCE_NETWORK = 2,
+    ARK_CONSOLE_MESSAGE_SOURCE_CONSOLE_API = 3,
+    ARK_CONSOLE_MESSAGE_SOURCE_STORAGE = 4,
+    ARK_CONSOLE_MESSAGE_SOURCE_RENDERING = 5,
+    ARK_CONSOLE_MESSAGE_SOURCE_SECURITY = 6,
+    ARK_CONSOLE_MESSAGE_SOURCE_OTHER = 7,
+    ARK_CONSOLE_MESSAGE_SOURCE_DEPRECATION = 8,
+    ARK_CONSOLE_MESSAGE_SOURCE_WORKER = 9,
+    ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION = 10,
+    ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION = 11,
+    ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION = 12,
+} Ark_ConsoleMessageSource;
+typedef struct Opt_ConsoleMessageSource {
+    Ark_Tag tag;
+    Ark_ConsoleMessageSource value;
+} Opt_ConsoleMessageSource;
 typedef enum Ark_ContentClipMode {
     ARK_CONTENT_CLIP_MODE_CONTENT_ONLY = 0,
     ARK_CONTENT_CLIP_MODE_BOUNDARY = 1,
@@ -5910,6 +5928,14 @@ typedef struct Opt_RenderProcessNotRespondingReason {
     Ark_Tag tag;
     Ark_RenderProcessNotRespondingReason value;
 } Opt_RenderProcessNotRespondingReason;
+typedef enum Ark_RenderStrategy {
+    ARK_RENDER_STRATEGY_FAST = 0,
+    ARK_RENDER_STRATEGY_OFFSCREEN = 1,
+} Ark_RenderStrategy;
+typedef struct Opt_RenderStrategy {
+    Ark_Tag tag;
+    Ark_RenderStrategy value;
+} Opt_RenderStrategy;
 typedef enum Ark_RepeatMode {
     ARK_REPEAT_MODE_REPEAT = 0,
     ARK_REPEAT_MODE_STRETCH = 1,
@@ -6924,6 +6950,15 @@ typedef struct Opt_Visibility {
     Ark_Tag tag;
     Ark_Visibility value;
 } Opt_Visibility;
+typedef enum Ark_VisibilityChangeReason {
+    ARK_VISIBILITY_CHANGE_REASON_TRANSITION = 0,
+    ARK_VISIBILITY_CHANGE_REASON_CONTENT_COVER = 1,
+    ARK_VISIBILITY_CHANGE_REASON_APP_STATE = 2,
+} Ark_VisibilityChangeReason;
+typedef struct Opt_VisibilityChangeReason {
+    Ark_Tag tag;
+    Ark_VisibilityChangeReason value;
+} Opt_VisibilityChangeReason;
 typedef enum Ark_WaterFlowLayoutMode {
     ARK_WATER_FLOW_LAYOUT_MODE_ALWAYS_TOP_DOWN = 0,
     ARK_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW = 1,
@@ -8716,10 +8751,6 @@ typedef struct Opt_UrlStyle {
     Ark_Tag tag;
     Ark_UrlStyle value;
 } Opt_UrlStyle;
-typedef struct Opt_UserDataSpan {
-    Ark_Tag tag;
-    Ark_UserDataSpan value;
-} Opt_UserDataSpan;
 typedef struct Ark_Vec4 {
     /* kind: Interface */
     Ark_Float64 x;
@@ -15956,6 +15987,16 @@ typedef struct Opt_Union_BorderStyle_EdgeStyles {
     Ark_Tag tag;
     Ark_Union_BorderStyle_EdgeStyles value;
 } Opt_Union_BorderStyle_EdgeStyles;
+typedef struct Callback_VisibilityChangeReason_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_VisibilityChangeReason value0);
+} Callback_VisibilityChangeReason_Void;
+typedef struct Opt_Callback_VisibilityChangeReason_Void {
+    Ark_Tag tag;
+    Callback_VisibilityChangeReason_Void value;
+} Opt_Callback_VisibilityChangeReason_Void;
 typedef struct Ark_Union_Color_I32_String_Resource {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -21885,7 +21926,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                            const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
     void (*setBorderColor)(Ark_NativePointer node,
                            const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
-    void (*setBorderRadius)(Ark_NativePointer node,
+    void (*setBorderRadius0)(Ark_NativePointer node,
                             const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
     void (*setBorderImage)(Ark_NativePointer node,
                            const Opt_BorderImageOption* value);
@@ -22167,6 +22208,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                    const Opt_BlurStyle* style,
                                    const Opt_ForegroundBlurStyleOptions* options,
                                    const Opt_SystemAdaptiveOptions* sysOptions);
+    void (*setBorderRadius1)(Ark_NativePointer node,
+                             const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value,
+                             const Opt_RenderStrategy* type);
     void (*setOnClick1)(Ark_NativePointer node,
                         const Opt_Callback_ClickEvent_Void* event,
                         const Opt_Float64* distanceThreshold);
@@ -23016,9 +23060,9 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setHideBackButton)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setOnShown)(Ark_NativePointer node,
-                       const Opt_Callback_Void* value);
+                       const Opt_Callback_VisibilityChangeReason_Void* value);
     void (*setOnHidden)(Ark_NativePointer node,
-                        const Opt_Callback_Void* value);
+                        const Opt_Callback_VisibilityChangeReason_Void* value);
     void (*setOnBackPressed)(Ark_NativePointer node,
                              const Opt_Callback_Boolean* value);
     void (*setOnResult)(Ark_NativePointer node,
@@ -25852,6 +25896,7 @@ typedef struct GENERATED_ArkUIConsoleMessageAccessor {
     Ark_String (*getSourceId)(Ark_ConsoleMessage peer);
     Ark_Int32 (*getLineNumber)(Ark_ConsoleMessage peer);
     Ark_MessageLevel (*getMessageLevel)(Ark_ConsoleMessage peer);
+    Ark_ConsoleMessageSource (*getSource)(Ark_ConsoleMessage peer);
 } GENERATED_ArkUIConsoleMessageAccessor;
 
 typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
@@ -28131,6 +28176,7 @@ typedef struct GENERATED_ArkUITextContentControllerBaseAccessor {
     void (*clearPreviewText)(Ark_TextContentControllerBase peer);
     Ark_String (*getText)(Ark_TextContentControllerBase peer,
                           const Opt_TextRange* range);
+    void (*deleteBackward)(Ark_TextContentControllerBase peer);
 } GENERATED_ArkUITextContentControllerBaseAccessor;
 
 typedef struct GENERATED_ArkUITextControllerAccessor {
@@ -28377,12 +28423,6 @@ typedef struct GENERATED_ArkUIUrlStyleAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getUrl)(Ark_UrlStyle peer);
 } GENERATED_ArkUIUrlStyleAccessor;
-
-typedef struct GENERATED_ArkUIUserDataSpanAccessor {
-    void (*destroyPeer)(Ark_UserDataSpan peer);
-    Ark_UserDataSpan (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-} GENERATED_ArkUIUserDataSpanAccessor;
 
 typedef struct GENERATED_ArkUIVideoControllerAccessor {
     void (*destroyPeer)(Ark_VideoController peer);
@@ -28876,7 +28916,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUIContextGetInfoAccessor* (*getUIContextGetInfoAccessor)();
     const GENERATED_ArkUIUIExtensionProxyAccessor* (*getUIExtensionProxyAccessor)();
     const GENERATED_ArkUIUrlStyleAccessor* (*getUrlStyleAccessor)();
-    const GENERATED_ArkUIUserDataSpanAccessor* (*getUserDataSpanAccessor)();
     const GENERATED_ArkUIVideoControllerAccessor* (*getVideoControllerAccessor)();
     const GENERATED_ArkUIWaterFlowSectionsAccessor* (*getWaterFlowSectionsAccessor)();
     const GENERATED_ArkUIWebContextMenuParamAccessor* (*getWebContextMenuParamAccessor)();

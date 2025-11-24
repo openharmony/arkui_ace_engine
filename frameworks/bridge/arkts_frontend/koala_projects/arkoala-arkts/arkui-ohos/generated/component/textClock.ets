@@ -29,6 +29,7 @@ import { ResourceStr, ResourceColor, Length } from "./units"
 import { Resource } from "global.resource"
 import { Color, FontStyle, FontWeight } from "./enums"
 import { ContentModifier, AttributeModifier, hookTextClockContentModifier, hookTextClockAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as intl } from "@ohos.intl"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -493,7 +494,9 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextClockAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextClockAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -24,6 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookRichTextAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -147,7 +148,9 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         return this
     }
     public attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRichTextAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookRichTextAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

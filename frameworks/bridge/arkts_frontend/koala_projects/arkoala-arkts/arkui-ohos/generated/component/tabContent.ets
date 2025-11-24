@@ -19,6 +19,7 @@
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { extractors, AttributeModifier, hookTabContentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -317,7 +318,9 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTabContentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTabContentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

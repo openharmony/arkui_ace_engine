@@ -50,6 +50,7 @@
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
@@ -684,6 +685,13 @@ ChainWeightPair Convert(const Ark_ChainWeightOptions& src)
 }
 
 template<>
+RenderStrategy Convert(const Ark_RenderStrategy& src)
+{
+    auto renderStrategy = static_cast<int32_t>(src);
+    return static_cast<RenderStrategy>(renderStrategy);
+}
+
+template<>
 SetFocusData Convert(const Ark_FocusMovement& src)
 {
     return {
@@ -694,40 +702,6 @@ SetFocusData Convert(const Ark_FocusMovement& src)
         .left = OptConvert<std::string>(src.left),
         .right = OptConvert<std::string>(src.right)
     };
-}
-
-template<>
-MenuPreviewAnimationOptions Convert(const Ark_AnimationNumberRange& options)
-{
-    auto scaleFrom = Convert<float>(options.value0);
-    auto scaleTo = Convert<float>(options.value1);
-    return {
-        .scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom,
-        .scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo
-    };
-}
-
-template<>
-NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options)
-{
-    NG::MenuParam menuParam;
-    auto scale = OptConvert<MenuPreviewAnimationOptions>(options.scale);
-    if (scale) {
-        menuParam.previewAnimationOptions = *scale;
-    }
-    menuParam.hasPreviewTransitionEffect = false;
-    auto previewTransition = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
-    if (previewTransition && *previewTransition) {
-        menuParam.hasPreviewTransitionEffect = true;
-        menuParam.previewTransition = *previewTransition;
-    }
-    auto hoverScale = OptConvert<MenuPreviewAnimationOptions>(options.hoverScale);
-    menuParam.isShowHoverImage = false;
-    if (hoverScale) {
-        menuParam.hoverImageAnimationOptions = *hoverScale;
-        menuParam.isShowHoverImage = true;
-    }
-    return menuParam;
 }
 
 template<>
@@ -2597,7 +2571,7 @@ void SetBorderColorImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
 }
-void SetBorderRadiusImpl(Ark_NativePointer node,
+void SetBorderRadius0Impl(Ark_NativePointer node,
                          const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2620,6 +2594,28 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstract::SetBorderRadius(frameNode, Dimension(0));
+}
+void SetBorderRadius1Impl(Ark_NativePointer node, const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value,
+    const Opt_RenderStrategy* type)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
+    if (radiuses) {
+        // Implement Reset value
+        if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+            ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
+                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+        }
+        if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            ImageModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
+                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+        }
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
+    }
+    auto renderStrategy = type->value;
+    ViewAbstractModelStatic::SetRenderStrategy(
+        frameNode, Converter::OptConvert<RenderStrategy>(renderStrategy).value_or(RenderStrategy::FAST));
 }
 void SetBorderImageImpl(Ark_NativePointer node,
                         const Opt_BorderImageOption* value)
@@ -3142,7 +3138,10 @@ void SetFocusableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto focusable = pattern->GetFocusPattern().GetFocusable();
+        ViewAbstract::SetFocusable(frameNode, focusable);
         return;
     }
     ViewAbstract::SetFocusable(frameNode, *convValue);
@@ -5144,7 +5143,7 @@ void SetSystemBarEffectImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("The `ViewAbstract::SetSystemBarEffect(frameNode, enable)` function must take two parameters");
+    ViewAbstractModelStatic::SetSystemBarEffect(frameNode, true);
 }
 void SetUseEffect1Impl(Ark_NativePointer node,
                        const Opt_Boolean* useEffect,
@@ -5152,6 +5151,9 @@ void SetUseEffect1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvertPtr<bool>(useEffect);
+    auto effectTypeOpt = Converter::OptConvertPtr<EffectType>(effectType);
+    ViewAbstractModelStatic::SetUseEffect(frameNode, valueOpt, effectTypeOpt);
 }
 void SetBackdropBlurImpl(Ark_NativePointer node,
                          const Opt_Float64* radius,
@@ -5753,10 +5755,24 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(event);
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvertPtr<std::vector<double>>(ratios);
     if (!rawRatioVec) {
         std::vector<double> ratioList;
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList);
         return;
     }
     size_t size = rawRatioVec->size();
@@ -5772,19 +5788,6 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
         }
         ratioVec.push_back(ratio);
     }
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioVec);
-        return;
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaChange =
-        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
-            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
-            PipelineContext::SetCallBackNode(node);
-            arkCallback.InvokeSync(isExpanding, currentRatio);
-        };
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
@@ -5795,8 +5798,31 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     CHECK_NULL_VOID(event);
+    auto expectedUpdateInterval =
+        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, nullptr, ratioList, expectedUpdateInterval);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvert<std::vector<float>>(options->value.ratios);
-    if (!rawRatioVec.has_value()) {
+    if (!rawRatioVec.has_value() || rawRatioVec->empty()) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval);
         return;
     }
     std::vector<float> floatArray = rawRatioVec.value();
@@ -5812,18 +5838,6 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
             ratio = VISIBLE_RATIO_MAX;
         }
         ratioVec.push_back(ratio);
-    }
-    auto expectedUpdateInterval =
-        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
-    if (expectedUpdateInterval < 0) {
-        expectedUpdateInterval = DEFAULT_DURATION;
-    }
-    std::function<void(bool, double)> onVisibleAreaChange = nullptr;
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, nullptr, ratioVec, expectedUpdateInterval);
-        return;
     }
     ViewAbstract::SetOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
@@ -5959,7 +5973,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBorderStyleImpl,
         CommonMethodModifier::SetBorderWidthImpl,
         CommonMethodModifier::SetBorderColorImpl,
-        CommonMethodModifier::SetBorderRadiusImpl,
+        CommonMethodModifier::SetBorderRadius0Impl,
         CommonMethodModifier::SetBorderImageImpl,
         CommonMethodModifier::SetOutlineImpl,
         CommonMethodModifier::SetOutlineStyleImpl,
@@ -6095,6 +6109,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBackgroundBlurStyleImpl,
         CommonMethodModifier::SetBackgroundEffect1Impl,
         CommonMethodModifier::SetForegroundBlurStyleImpl,
+        CommonMethodModifier::SetBorderRadius1Impl,
         CommonMethodModifier::SetOnClick1Impl,
         CommonMethodModifier::SetFocusScopeIdImpl,
         CommonMethodModifier::SetFocusScopePriorityImpl,

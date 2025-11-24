@@ -297,7 +297,7 @@ public:
     static void ParseBorderWidth(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void ParseBorderRadius(const JSRef<JSVal>& args);
-    static void SetCornerApplyType(const JSCallbackInfo& info);
+    static void SetRenderStrategy(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args);
     static void ParseDashGap(const JSRef<JSVal>& args);
@@ -353,6 +353,7 @@ public:
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
     static void JsSetFreeze(const JSCallbackInfo& info);
+    static void JsSystemMaterial(const JSCallbackInfo& info);
     static void ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
     // outer border

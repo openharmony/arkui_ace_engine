@@ -2747,4 +2747,21 @@ HWTEST_F(WaterFlowTestNg, ItemFillPolicyTest003, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 4), 0);
     EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
 }
+
+/**
+ * @tc.name: WaterFlowResetItemFillPolicy
+ * @tc.desc: Test ResetItemFillPolicy in WaterFlowTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowResetItemFillPolicy, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    CreateDone();
+    FlushUITasks();
+    EXPECT_EQ(model.GetItemFillPolicy(AceType::RawPtr(frameNode_)), 2);
+    model.ResetItemFillPolicy(AceType::RawPtr(frameNode_));
+    FlushUITasks();
+    EXPECT_EQ(model.GetItemFillPolicy(AceType::RawPtr(frameNode_)), -1);
+}
 } // namespace OHOS::Ace::NG
