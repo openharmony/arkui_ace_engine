@@ -2022,6 +2022,8 @@ RectF FrameNode::GetRectWithRender()
 void FrameNode::TriggerOnSizeChangeCallback()
 {
     if (!IsActive()) {
+        CHECK_NULL_VOID(eventHub_);
+        eventHub_->SetCompensateOnSizeChangeEvent(true);
         return;
     }
     if (eventHub_ && (eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
@@ -2378,6 +2380,10 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         pattern_->OnActive();
         isActive_ = true;
         activeChanged = true;
+        if (eventHub_ && eventHub_->IsCompensateOnSizeChangeEvent()) {
+            TriggerOnSizeChangeCallback();
+            eventHub_->SetCompensateOnSizeChangeEvent(false);
+        }
     }
     if (!active && isActive_) {
         pattern_->OnInActive();
