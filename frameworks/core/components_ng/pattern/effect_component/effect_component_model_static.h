@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT EffectComponentModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetAlwaysSnapshot(FrameNode* frameNode, bool boolOpt);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_EFFECT_COMPONENT_EFFECT_COMPONENT_STATIC_H

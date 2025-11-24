@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
@@ -29,7 +29,6 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { EffectComponentModifier } from "./../EffectComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
 export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: EffectComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -45,18 +44,37 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     setEffectComponentOptionsAttribute(): void {
         ArkUIGeneratedNativeModule._EffectComponentInterface_setEffectComponentOptions(this.peer.ptr)
     }
+    setAlwaysSnapshotAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._EffectComponentAttribute_setAlwaysSnapshot(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface EffectComponentAttribute extends CommonMethod {
     setEffectComponentOptions(): this {
         throw new Error("Unimplemented method setEffectComponentOptions")
+    }
+    alwaysSnapshot(value: boolean | undefined): this {
+        throw new Error("Unimplemented method alwaysSnapshot")
     }
     attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
+    alwaysSnapshot_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined
     setEffectComponentOptions(): this {
+        return this
+    }
+    alwaysSnapshot(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -74,23 +92,25 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
     public setEffectComponentOptions(): this {
         if (this.checkPriority("setEffectComponentOptions")) {
             this.getPeer()?.setEffectComponentOptionsAttribute()
-            this.applyOptionsFinish('EffectComponentAttribute');
             return this
         }
         return this
     }
+    public alwaysSnapshot(value: boolean | undefined): this {
+        if (this.checkPriority("alwaysSnapshot")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setAlwaysSnapshotAttribute(value_casted)
+            return this
+        }
+        return this
+     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-         ModifierStateManager.INSTANCE.scope(() => {
-           hookEffectComponentAttributeModifier(this, value);  
-        })
+        hookEffectComponentAttributeModifier(this, value);
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
-    }
-    public applyOptionsFinish(traceName: string): void {
-        super.applyOptionsFinish(traceName)
     }
 }
 
