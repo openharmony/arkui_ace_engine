@@ -1114,6 +1114,7 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     recoverable(value: boolean | undefined): this;
     bindToScrollable(scrollers: Array<Scroller>): this;
     bindToNestedScrollable(scrollInfos: Array<NestedScrollInfo>): this;
+    backButtonIcon(value: any, text?: ResourceStr): this;
 }
 declare class ArkStepperComponent extends ArkComponent implements StepperAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1167,7 +1168,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute;
     minContentWidth(value: Dimension): NavigationAttribute;
     mode(value: number): NavigationAttribute;
-    backButtonIcon(value: any): NavigationAttribute;
+    backButtonIcon(value: any, text?: ResourceStr): NavigationAttribute;
     hideNavBar(value: boolean): NavigationAttribute;
     title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
         options?: NavigationTitleOptions): NavigationAttribute;

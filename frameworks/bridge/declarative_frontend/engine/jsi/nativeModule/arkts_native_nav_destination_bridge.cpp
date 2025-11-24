@@ -300,6 +300,17 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
     } else {
         NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
     }
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackButtonText(nativeNode);
+    // add accessibilityText
+    RefPtr<ResourceObject> textResourceObj;
+    std::string textString;
+    Local<JSValueRef> jsText = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (!ArkTSUtils::ParseJsString(vm, jsText, textString, textResourceObj)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getNavDestinationModifier()
+        ->setNavDestinationBackButtonText(nativeNode, textString.c_str(),
+                                          AceType::RawPtr(textResourceObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -342,6 +353,7 @@ ArkUINativeModuleValue NavDestinationBridge::ResetBackButtonIcon(ArkUIRuntimeCal
     RefPtr<PixelMap> pixMap = nullptr;
     std::string src;
     NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackButtonText(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

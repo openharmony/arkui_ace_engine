@@ -51,7 +51,12 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, ModeModifier.identity, ModeModifier, value);
     return this;
   }
-  backButtonIcon(value: any): NavigationAttribute {
+  backButtonIcon(value: any, text?: ResourceStr): NavigationAttribute {
+    let configuration: ArkNavBackButton = new ArkNavBackButton();
+    configuration.icon = value;
+    if (!isNull(text)) {
+      configuration.text = text;
+    }
     modifierWithKey(this._modifiersWithKeys, BackButtonIconModifier.identity, BackButtonIconModifier, value);
     return this;
   }
@@ -328,8 +333,8 @@ class OnNavBarStateChangeModifier extends ModifierWithKey<((isVisible: boolean) 
   }
 }
 
-class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
-  constructor(value: boolean | object) {
+class BackButtonIconModifier extends ModifierWithKey<ArkNavBackButton> {
+  constructor(value: ArkNavBackButton) {
     super(value);
   }
   static identity: Symbol = Symbol('backButtonIcon');
@@ -337,7 +342,7 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
     if (reset) {
       getUINativeModule().navigation.resetBackButtonIcon(node);
     } else {
-      getUINativeModule().navigation.setBackButtonIcon(node, this.value);
+      getUINativeModule().navigation.setBackButtonIcon(node, this.value.icon, this.value.text);
     }
   }
 

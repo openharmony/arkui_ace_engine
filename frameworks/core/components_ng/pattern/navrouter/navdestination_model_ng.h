@@ -163,6 +163,9 @@ public:
     static void SetBeforeCreateLayoutWrapperCallBack(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
     static void SetTitleAnimationElapsedTime(FrameNode* frameNode, int32_t elapsedTime);
+    static void SetBackButtonTextResource(FrameNode *frameNode, const std::string& text,
+        const RefPtr<ResourceObject>& resourceObject);
+    static void ResetBackButtonText(FrameNode* frameNode);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

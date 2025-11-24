@@ -4935,6 +4935,8 @@ struct ArkUINavDestinationModifier {
     void (*resetBindToScrollable)(ArkUINodeHandle node);
     void (*setBindToNestedScrollable)(ArkUINodeHandle node, void* callback);
     void (*resetBindToNestedScrollable)(ArkUINodeHandle node);
+    void (*setNavDestinationBackButtonText)(ArkUINodeHandle node, ArkUI_CharPtr text, ArkUI_VoidPtr resource);
+    void (*resetNavDestinationBackButtonText)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {
@@ -6036,6 +6038,8 @@ struct ArkUINavigationModifier {
     void (*resetIsCustomTitleBarSize)(ArkUINodeHandle node);
     void (*setBeforeCreateLayoutWrapperCallBack)(ArkUINodeHandle node,
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
+    void (*setNavBackButtonText)(ArkUINodeHandle node, ArkUI_CharPtr text, ArkUI_VoidPtr textResource);
+    void (*resetNavBackButtonText)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {

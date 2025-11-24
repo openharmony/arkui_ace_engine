@@ -836,6 +836,16 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     } else {
         NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
     }
+    // add accessibilityText
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavBackButtonText(nativeNode);
+    RefPtr<ResourceObject> textResourceObj;
+    std::string textString;
+    Local<JSValueRef> jsText = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (!ArkTSUtils::ParseJsString(vm, jsText, textString, textResourceObj)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavBackButtonText(nativeNode, textString.c_str(),
+        AceType::RawPtr(textResourceObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -855,6 +865,7 @@ ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInf
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     std::string src;
     NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavBackButtonText(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
