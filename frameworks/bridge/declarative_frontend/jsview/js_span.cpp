@@ -219,13 +219,12 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
     }
     RefPtr<ResourceObject> resObj;
     std::vector<std::string> fontFamilies;
+    UnregisterSpanResource("fontFamily");
     if (!ParseJsFontFamilies(info[0], fontFamilies, resObj)) {
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<std::vector<std::string>>("fontFamily", resObj, fontFamilies);
-    } else {
-        UnregisterSpanResource("fontFamily");
     }
     SpanModel::GetInstance()->SetFontFamily(fontFamilies);
 }

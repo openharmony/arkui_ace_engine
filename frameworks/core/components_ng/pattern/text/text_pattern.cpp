@@ -5036,8 +5036,10 @@ void TextPattern::DumpInfo()
         dumpLog.AddDesc(std::string("Content: ").append(
             UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "))));
     }
-    dumpLog.AddDesc(std::string("isSpanStringMode: ").append(std::to_string(isSpanStringMode_)));
-    dumpLog.AddDesc(std::string("externalParagraph: ").append(std::to_string(externalParagraph_.has_value())));
+    dumpLog.AddDesc(
+        std::string("isSpanStringMode: ")
+            .append(std::to_string(isSpanStringMode_))
+            .append(std::string(" externalParagraph: ").append(std::to_string(externalParagraph_.has_value()))));
     DumpTextStyleInfo();
     if (contentMod_) {
         contentMod_->ContentModifierDump();
@@ -5101,6 +5103,9 @@ void TextPattern::DumpTextStyleInfo()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>(GetThemeScopeId());
     dumpLog.AddDesc(
         std::string("FontColor: ")
             .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString())
@@ -5113,7 +5118,11 @@ void TextPattern::DumpTextStyleInfo()
             .append(" TextColorFlagByUser: ")
             .append(textLayoutProp->HasTextColorFlagByUser()
                 ? std::to_string(textLayoutProp->GetTextColorFlagByUserValue(false))
-                : "Na"));
+                : "Na")
+            .append(" TextThemeColor: ")
+            .append(textTheme ? textTheme->GetTextStyle().GetTextColor().ToString() : "Na")
+            .append(" ConfigChangePerform: ")
+            .append(std::to_string(SystemProperties::ConfigChangePerform())));
     if (renderContext->HasForegroundColorStrategy()) {
         auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
         DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
@@ -5313,6 +5322,24 @@ void TextPattern::DumpTextStyleInfo5()
                 .append(textLayoutProp->HasTextDecorationColor()
                             ? textLayoutProp->GetTextDecorationColorValue(Color::BLACK).ColorToString()
                             : "Na"));
+    }
+    DumpInfoRes();
+}
+
+void TextPattern::DumpInfoRes()
+{
+    CHECK_NULL_VOID(resourceMgr_);
+    auto& dumpLog = DumpLog::GetInstance();
+    const std::vector<std::string>& keys = resourceMgr_->GetResKeyArray();
+    if (!keys.empty()) {
+        std::string keyInfo = "ResourceKeys: ";
+        for (size_t i = 0; i < keys.size(); ++i) {
+            keyInfo.append(keys[i]);
+            if (i < keys.size() - 1) {
+                keyInfo.append(", ");
+            }
+        }
+        dumpLog.AddDesc(keyInfo);
     }
 }
 

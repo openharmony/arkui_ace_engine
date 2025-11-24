@@ -208,6 +208,8 @@ void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
         }
         if (resObj) {
             pattern->RegisterResource<Color>("placeholderColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("placeholderColor");
         }
     }
     TextFieldModelNG::SetPlaceholderColor(frameNode, result);
@@ -460,6 +462,8 @@ void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* color
         CHECK_NULL_VOID(pattern);
         if (resObj) {
             pattern->RegisterResource<Color>("caretColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("caretColor");
         }
     }
     TextFieldModelNG::SetCaretColor(frameNode, result);
@@ -507,6 +511,8 @@ void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRaw
         }
         if (resObj) {
             pattern->RegisterResource<Color>("fontColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("fontColor");
         }
     }
     TextFieldModelNG::SetTextColor(frameNode, result);
@@ -729,13 +735,15 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resR
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
-    }
-    TextFieldModelNG::SetBackgroundColor(frameNode, result);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->RegisterResource<Color>("backgroundColor", resObj, result);
+        if (resObj) {
+            pattern->RegisterResource<Color>("backgroundColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("backgroundColor");
+        }
     }
+    TextFieldModelNG::SetBackgroundColor(frameNode, result);
 }
 
 void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color,

@@ -36,7 +36,6 @@ public:
     void ResetCaretColor() override;
     void SetSearchIconSize(const Dimension& value) override;
     void SetSearchIconColor(const Color& color) override;
-    void ResetSearchIconColor() override;
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override;
@@ -47,9 +46,7 @@ public:
     void SetCancelImageIcon(NG::IconOptions& iconOptions) override;
     void SetRightIconSrcPath(const std::string& src) override;
     void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle) override;
-    void SetCancelIconSize(const Dimension& value) override;
     void SetCancelIconColor(const Color& color) override;
-    void ResetCancelIconColor() override;
     void SetSearchButtonFontSize(const Dimension& value) override;
     void SetSearchButtonFontColor(const Color& color) override;
     void ResetSearchButtonFontColor() override;
@@ -146,7 +143,6 @@ public:
         FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
-    static void SetSearchIconColor(FrameNode* frameNode, const Color& color);
     static void SetSearchImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
@@ -166,8 +162,6 @@ public:
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetRightIconSrcPath(FrameNode* frameNode, const std::string& src);
-    static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
-    static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
     static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);

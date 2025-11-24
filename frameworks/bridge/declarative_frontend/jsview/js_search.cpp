@@ -536,10 +536,8 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
         ParseJsColor(iconColorProp, iconColor, colorObject)) {
-        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
         cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, bundleName, moduleName);
     } else {
-        SearchModel::GetInstance()->ResetCancelIconColor();
         cancelIconOptions = NG::IconOptions(iconSize, iconSrc, bundleName, moduleName);
     }
     if (SystemProperties::ConfigChangePerform() && colorObject) {
@@ -607,10 +605,8 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     NG::IconOptions searchIconOptions;
     auto colorProp = param->GetProperty("color");
     if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal, colorObject)) {
-        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
         searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
     } else {
-        SearchModel::GetInstance()->ResetSearchIconColor();
         searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
     }
     if (SystemProperties::ConfigChangePerform() && colorObject) {

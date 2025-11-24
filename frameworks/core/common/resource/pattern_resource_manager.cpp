@@ -121,4 +121,9 @@ void PatternResourceManager::ParsePropertyValue(
         valueBase->SetValue(value);
     }
 }
+
+const std::vector<std::string>& PatternResourceManager::GetResKeyArray()
+{
+    return resKeyArray_;
+}
 }

@@ -34,8 +34,6 @@ public:
     void SetCaretColor(const Color& color) override {}
     void ResetCaretColor() override {}
     void SetSearchIconSize(const Dimension& value) override {}
-    void SetSearchIconColor(const Color& color) override {}
-    void ResetSearchIconColor() override {}
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override {}
     void SetRightIconSrcPath(const std::string& src) override {}
@@ -46,9 +44,6 @@ public:
     void SetCancelDefaultIcon() override{}
     void SetCancelImageIcon(NG::IconOptions& iconOptions) override{}
     void SetCancelButtonStyle(OHOS::Ace::CancelButtonStyle cancelButtonStyle) override {}
-    void SetCancelIconSize(const Dimension& value) override {}
-    void SetCancelIconColor(const Color& color) override {}
-    void ResetCancelIconColor() override {}
     void SetSearchButtonFontSize(const Dimension& value) override {}
     void SetSearchButtonFontColor(const Color& color) override {}
     void ResetSearchButtonFontColor() override {}
