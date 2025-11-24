@@ -62,7 +62,7 @@ void SetOnFolderStateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement reset value
+        FolderStackModelNGStatic::SetOnFolderStateChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](const FolderEventInfo& folderEventInfo) {
@@ -79,7 +79,7 @@ void SetOnHoverStatusChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement reset value
+        FolderStackModelNGStatic::SetOnHoverStatusChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](const FolderEventInfo& folderEventInfo) {
