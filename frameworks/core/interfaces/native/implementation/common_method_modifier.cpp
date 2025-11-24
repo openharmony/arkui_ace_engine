@@ -4141,7 +4141,7 @@ void SetOnPreDragImpl(Ark_NativePointer node,
         return;
     }
     auto onPreDrag = [callback = CallbackHelper(*optValue)](const PreDragStatus info) {
-        callback.Invoke(Converter::ArkValue<Ark_PreDragStatus>(info));
+        callback.InvokeSync(Converter::ArkValue<Ark_PreDragStatus>(info));
     };
     ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }
