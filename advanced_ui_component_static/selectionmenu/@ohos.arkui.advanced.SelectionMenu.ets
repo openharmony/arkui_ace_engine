@@ -173,15 +173,20 @@ struct SelectionMenuComponent {
   aboutToAppear() {
     if (this.controller) {
       let richEditorSelection = this.controller!.getSelection()
-      let start = richEditorSelection.selection[0]
-      let end = richEditorSelection.selection[1]
-      if (start !== end) {
-        this.cutAndCopyEnable = true
-      }
-      if (start === 0 && this.controller!.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
-        this.visibilityValue = Visibility.None
-      } else {
-        this.visibilityValue = Visibility.Visible
+      if (richEditorSelection !== undefined) {
+        let start = richEditorSelection.selection[0]
+        let end = richEditorSelection.selection[1]
+        if (start !== end) {
+          this.cutAndCopyEnable = true
+        }
+        let spans = this.controller!.getSpans({ start: end + 1, end: end + 1 })
+        if (spans === undefined) {
+          this.visibilityValue = Visibility.None
+        } else if (start === 0 && spans.length === 0) {
+          this.visibilityValue = Visibility.None
+        } else {
+          this.visibilityValue = Visibility.Visible
+        }
       }
     } else if (this.expandedMenuOptions && this.expandedMenuOptions!.length > 0) {
       this.showExpandedMenuOptions = true
@@ -271,8 +276,11 @@ struct SelectionMenuComponent {
     let start = richEditorSelection.selection[0]
     let end = richEditorSelection.selection[1]
     if (start === end && this.controller) {
-      start = this.controller!.getCaretOffset()
-      end = this.controller!.getCaretOffset()
+      let offset = this.controller!.getCaretOffset()
+      if (offset !== undefined) {
+        start = offset!
+        end = offset!
+      }
     }
     let moveOffset = 0
     let sysBoard = pasteboard.getSystemPasteboard()
@@ -382,12 +390,18 @@ struct SelectionMenuComponent {
       return
     }
     let richEditorSelection = this.controller!.getSelection()
+    if (richEditorSelection === undefined) {
+      return
+    }
     let start = richEditorSelection.selection[0]
     let end = richEditorSelection.selection[1]
     if (start !== end) {
       this.cutAndCopyEnable = true
     }
-    if (start === 0 && this.controller!.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
+    let spans = this.controller!.getSpans({ start: end + 1, end: end + 1 })
+    if (spans === undefined) {
+      this.visibilityValue = Visibility.None
+    } else if (start === 0 && spans.length === 0) {
       this.visibilityValue = Visibility.None
     } else {
       this.visibilityValue = Visibility.Visible
@@ -493,14 +507,17 @@ struct SelectionMenuComponent {
                     return
                   }
                   let richEditorSelection = this.controller!.getSelection()
-                  if (this.onCut) {
-                    this.onCut!({ content: richEditorSelection } as EditorEventInfo)
-                  } else {
-                    this.pushDataToPasteboard(richEditorSelection);
-                    this.controller!.deleteSpans({
-                      start: richEditorSelection.selection[0],
-                      end: richEditorSelection.selection[1]
-                    })
+                  if (richEditorSelection !== undefined) {
+                    let selectionResult: RichEditorSelection = richEditorSelection!
+                    if (this.onCut) {
+                      this.onCut!({ content: selectionResult } as EditorEventInfo)
+                    } else {
+                      this.pushDataToPasteboard(selectionResult);
+                      this.controller!.deleteSpans({
+                        start: richEditorSelection.selection[0],
+                        end: richEditorSelection.selection[1]
+                      })
+                    }
                   }
                 })
               MenuItem({
@@ -518,11 +535,14 @@ struct SelectionMenuComponent {
                     return
                   }
                   let richEditorSelection = this.controller!.getSelection()
-                  if (this.onCopy) {
-                    this.onCopy!({ content: richEditorSelection } as EditorEventInfo)
-                  } else {
-                    this.pushDataToPasteboard(richEditorSelection);
-                    this.controller!.closeSelectionMenu()
+                  if (richEditorSelection !== undefined) {
+                    let selectionResult: RichEditorSelection = richEditorSelection!
+                    if (this.onCopy) {
+                      this.onCopy!({ content: selectionResult } as EditorEventInfo)
+                    } else {
+                      this.pushDataToPasteboard(selectionResult);
+                      this.controller!.closeSelectionMenu()
+                    }
                   }
                 })
               MenuItem({
@@ -540,11 +560,14 @@ struct SelectionMenuComponent {
                     return
                   }
                   let richEditorSelection = this.controller!.getSelection()
-                  if (this.onPaste) {
-                    this.onPaste!({ content: richEditorSelection } as EditorEventInfo)
-                  } else {
-                    this.popDataFromPasteboard(richEditorSelection)
-                    this.controller!.closeSelectionMenu()
+                  if (richEditorSelection !== undefined) {
+                    let selectionResult: RichEditorSelection = richEditorSelection!
+                    if (this.onPaste) {
+                      this.onPaste!({ content: selectionResult } as EditorEventInfo)
+                    } else {
+                      this.popDataFromPasteboard(selectionResult)
+                      this.controller!.closeSelectionMenu()
+                    }
                   }
                 })
               MenuItem({
@@ -563,7 +586,10 @@ struct SelectionMenuComponent {
                   }
                   if (this.onSelectAll) {
                     let richEditorSelection = this.controller!.getSelection()
-                    this.onSelectAll!({ content: richEditorSelection } as EditorEventInfo)
+                    if (richEditorSelection !== undefined) {
+                      let selectionResult: RichEditorSelection = richEditorSelection!
+                      this.onSelectAll!({ content: selectionResult } as EditorEventInfo)
+                    }
                   } else {
                     this.controller!.setSelection(-1, -1)
                     this.visibilityValue = Visibility.None

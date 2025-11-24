@@ -27639,21 +27639,21 @@ typedef struct GENERATED_ArkUIRichEditorBaseControllerAccessor {
     void (*destroyPeer)(Ark_RichEditorBaseController peer);
     Ark_RichEditorBaseController (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Int32 (*getCaretOffset)(Ark_RichEditorBaseController peer);
-    Ark_Boolean (*setCaretOffset)(Ark_RichEditorBaseController peer,
-                                  const Ark_Int32* offset);
+    Opt_Int32 (*getCaretOffset)(Ark_RichEditorBaseController peer);
+    Opt_Boolean (*setCaretOffset)(Ark_RichEditorBaseController peer,
+                                  Ark_Int32 offset);
     void (*closeSelectionMenu)(Ark_RichEditorBaseController peer);
-    Ark_RichEditorTextStyle (*getTypingStyle)(Ark_RichEditorBaseController peer);
+    Opt_RichEditorTextStyle (*getTypingStyle)(Ark_RichEditorBaseController peer);
     void (*setTypingStyle)(Ark_RichEditorBaseController peer,
                            const Ark_RichEditorTextStyle* value);
     void (*setSelection)(Ark_RichEditorBaseController peer,
                          const Ark_Int32* selectionStart,
                          const Ark_Int32* selectionEnd,
                          const Opt_SelectionOptions* options);
-    Ark_Boolean (*isEditing)(Ark_RichEditorBaseController peer);
+    Opt_Boolean (*isEditing)(Ark_RichEditorBaseController peer);
     void (*stopEditing)(Ark_RichEditorBaseController peer);
-    Ark_LayoutManager (*getLayoutManager)(Ark_RichEditorBaseController peer);
-    Ark_PreviewText (*getPreviewText)(Ark_RichEditorBaseController peer);
+    Opt_LayoutManager (*getLayoutManager)(Ark_RichEditorBaseController peer);
+    Opt_PreviewText (*getPreviewText)(Ark_RichEditorBaseController peer);
     Opt_RectResult (*getCaretRect)(Ark_RichEditorBaseController peer);
 } GENERATED_ArkUIRichEditorBaseControllerAccessor;
 
@@ -27661,32 +27661,32 @@ typedef struct GENERATED_ArkUIRichEditorControllerAccessor {
     void (*destroyPeer)(Ark_RichEditorController peer);
     Ark_RichEditorController (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Int32 (*addTextSpan)(Ark_RichEditorController peer,
-                              const Ark_ResourceStr* content,
-                              const Opt_RichEditorTextSpanOptions* options);
-    Ark_Int32 (*addImageSpan)(Ark_RichEditorController peer,
-                               const Ark_Union_PixelMap_ResourceStr* value,
-                               const Opt_RichEditorImageSpanOptions* options);
-    Ark_Int32 (*addBuilderSpan)(Ark_RichEditorController peer,
-                                 const CustomNodeBuilder* value,
-                                 const Opt_RichEditorBuilderSpanOptions* options);
-    Ark_Int32 (*addSymbolSpan)(Ark_RichEditorController peer,
-                                const Ark_Resource* value,
-                                const Opt_RichEditorSymbolSpanOptions* options);
+    Opt_Int32 (*addTextSpan)(Ark_RichEditorController peer,
+                             const Ark_ResourceStr* content,
+                             const Opt_RichEditorTextSpanOptions* options);
+    Opt_Int32 (*addImageSpan)(Ark_RichEditorController peer,
+                              const Ark_Union_PixelMap_ResourceStr* value,
+                              const Opt_RichEditorImageSpanOptions* options);
+    Opt_Int32 (*addBuilderSpan)(Ark_RichEditorController peer,
+                                const CustomNodeBuilder* value,
+                                const Opt_RichEditorBuilderSpanOptions* options);
+    Opt_Int32 (*addSymbolSpan)(Ark_RichEditorController peer,
+                               const Ark_Resource* value,
+                               const Opt_RichEditorSymbolSpanOptions* options);
     void (*updateSpanStyle)(Ark_RichEditorController peer,
                             const Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions* value);
     void (*updateParagraphStyle)(Ark_RichEditorController peer,
                                  const Ark_RichEditorParagraphStyleOptions* value);
     void (*deleteSpans)(Ark_RichEditorController peer,
                         const Opt_RichEditorRange* value);
-    Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult (*getSpans)(Ark_RichEditorController peer,
-                                                                               const Opt_RichEditorRange* value);
-    Array_RichEditorParagraphResult (*getParagraphs)(Ark_RichEditorController peer,
-                                                     const Opt_RichEditorRange* value);
-    Ark_RichEditorSelection (*getSelection)(Ark_RichEditorController peer);
-    Array_RichEditorSpan (*fromStyledString)(Ark_RichEditorController peer,
-                                             Ark_StyledString value);
-    Ark_StyledString (*toStyledString)(Ark_RichEditorController peer,
+    Opt_Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult (*getSpans)(Ark_RichEditorController peer,
+                                                                                   const Opt_RichEditorRange* value);
+    Opt_Array_RichEditorParagraphResult (*getParagraphs)(Ark_RichEditorController peer,
+                                                         const Opt_RichEditorRange* value);
+    Opt_RichEditorSelection (*getSelection)(Ark_RichEditorController peer);
+    Opt_Array_RichEditorSpan (*fromStyledString)(Ark_RichEditorController peer,
+                                                 Ark_StyledString value);
+    Opt_StyledString (*toStyledString)(Ark_RichEditorController peer,
                                        const Ark_RichEditorRange* value);
 } GENERATED_ArkUIRichEditorControllerAccessor;
 
@@ -27696,8 +27696,8 @@ typedef struct GENERATED_ArkUIRichEditorStyledStringControllerAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*setStyledString)(Ark_RichEditorStyledStringController peer,
                             Ark_StyledString styledString);
-    Ark_MutableStyledString (*getStyledString)(Ark_RichEditorStyledStringController peer);
-    Ark_RichEditorRange (*getSelection)(Ark_RichEditorStyledStringController peer);
+    Opt_MutableStyledString (*getStyledString)(Ark_RichEditorStyledStringController peer);
+    Opt_RichEditorRange (*getSelection)(Ark_RichEditorStyledStringController peer);
     void (*onContentChanged)(Ark_RichEditorStyledStringController peer,
                              const Ark_StyledStringChangedListener* listener);
 } GENERATED_ArkUIRichEditorStyledStringControllerAccessor;
@@ -27973,7 +27973,7 @@ typedef struct GENERATED_ArkUIStyledStringControllerAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*setStyledString)(Ark_StyledStringController peer,
                             Ark_StyledString styledString);
-    Ark_MutableStyledString (*getStyledString)(Ark_StyledStringController peer);
+    Opt_MutableStyledString (*getStyledString)(Ark_StyledStringController peer);
 } GENERATED_ArkUIStyledStringControllerAccessor;
 
 typedef struct GENERATED_ArkUISubmitEventAccessor {
@@ -28150,7 +28150,7 @@ typedef struct GENERATED_ArkUITextBaseControllerAccessor {
                          const Ark_Number* selectionEnd,
                          const Opt_SelectionOptions* options);
     void (*closeSelectionMenu)(Ark_TextBaseController peer);
-    Ark_LayoutManager (*getLayoutManager)(Ark_TextBaseController peer);
+    Opt_LayoutManager (*getLayoutManager)(Ark_TextBaseController peer);
 } GENERATED_ArkUITextBaseControllerAccessor;
 
 typedef struct GENERATED_ArkUITextClockControllerAccessor {
@@ -28194,12 +28194,12 @@ typedef struct GENERATED_ArkUITextEditControllerExAccessor {
     void (*destroyPeer)(Ark_TextEditControllerEx peer);
     Ark_TextEditControllerEx (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Boolean (*isEditing)(Ark_TextEditControllerEx peer);
+    Opt_Boolean (*isEditing)(Ark_TextEditControllerEx peer);
     void (*stopEditing)(Ark_TextEditControllerEx peer);
-    Ark_Boolean (*setCaretOffset)(Ark_TextEditControllerEx peer,
+    Opt_Boolean (*setCaretOffset)(Ark_TextEditControllerEx peer,
                                   const Ark_Number* offset);
-    Ark_Number (*getCaretOffset)(Ark_TextEditControllerEx peer);
-    Ark_PreviewText (*getPreviewText)(Ark_TextEditControllerEx peer);
+    Opt_Number (*getCaretOffset)(Ark_TextEditControllerEx peer);
+    Opt_PreviewText (*getPreviewText)(Ark_TextEditControllerEx peer);
 } GENERATED_ArkUITextEditControllerExAccessor;
 
 typedef struct GENERATED_ArkUITextFieldOpsAccessor {
