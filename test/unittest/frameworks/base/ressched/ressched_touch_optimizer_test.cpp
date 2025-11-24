@@ -785,14 +785,14 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
  * @tc.desc: test rvsSignalEnable_
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
+HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect003, TestSize.Level1)
 {
     TouchEvent touchEvent;
-    touchEvent1.id = 1;
-    touchEvent1.type = TouchType::MOVE;
-    touchEvent1.x = 100;
-    touchEvent1.y = 200;
-    touchEvent1.sourceTool = SourceTool::FINGER;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    touchEvent.sourceTool = SourceTool::FINGER;
     
     TouchEvent resamplePoint;
     resamplePoint.id = 1;
