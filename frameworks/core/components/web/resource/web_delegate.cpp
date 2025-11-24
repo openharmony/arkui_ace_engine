@@ -8266,17 +8266,20 @@ void WebDelegate::JavaScriptOnDocumentStart()
     }
 }
 
-void WebDelegate::SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+void WebDelegate::SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptRegexItems& scriptRegexItems,
+    const ScriptItemType& type, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     if (type == ScriptItemType::DOCUMENT_START) {
         onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onDocumentStartScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
         onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     } else if (type == ScriptItemType::DOCUMENT_END) {
         onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onDocumentEndScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
         onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     } else if (type == ScriptItemType::DOCUMENT_HEAD_READY) {
         onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onHeadReadyScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
         onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     }
 }
@@ -8284,10 +8287,17 @@ void WebDelegate::SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, cons
 void WebDelegate::JavaScriptOnDocumentStartByOrder()
 {
     CHECK_NULL_VOID(nweb_);
-    if (onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
-        nweb_->JavaScriptOnDocumentStartByOrder(onDocumentStartScriptItems_.value(),
-            onDocumentStartScriptItemsByOrder_.value());
+    if (onDocumentStartScriptItems_.has_value() && onDocumentStartScriptRegexItems_.has_value() &&
+        onDocumentStartScriptItemsByOrder_.has_value()) {
+        if (onDocumentStartScriptRegexItems_->empty()) {
+            nweb_->JavaScriptOnDocumentStartByOrder(onDocumentStartScriptItems_.value(),
+                onDocumentStartScriptItemsByOrder_.value());
+        } else {
+            nweb_->JavaScriptOnDocumentStartByOrderV2(onDocumentStartScriptItems_.value(),
+                onDocumentStartScriptRegexItems_.value(), onDocumentStartScriptItemsByOrder_.value());
+        }
         onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptRegexItems_ = std::nullopt;
         onDocumentStartScriptItemsByOrder_ = std::nullopt;
     }
 }
@@ -8295,10 +8305,17 @@ void WebDelegate::JavaScriptOnDocumentStartByOrder()
 void WebDelegate::JavaScriptOnDocumentEndByOrder()
 {
     CHECK_NULL_VOID(nweb_);
-    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
-        nweb_->JavaScriptOnDocumentEndByOrder(onDocumentEndScriptItems_.value(),
-            onDocumentEndScriptItemsByOrder_.value());
+    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptRegexItems_.has_value() &&
+        onDocumentEndScriptItemsByOrder_.has_value()) {
+        if (onDocumentEndScriptRegexItems_->empty()) {
+            nweb_->JavaScriptOnDocumentEndByOrder(onDocumentEndScriptItems_.value(),
+                onDocumentEndScriptItemsByOrder_.value());
+        } else {
+            nweb_->JavaScriptOnDocumentEndByOrderV2(onDocumentEndScriptItems_.value(),
+                onDocumentEndScriptRegexItems_.value(), onDocumentEndScriptItemsByOrder_.value());
+        }
         onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptRegexItems_ = std::nullopt;
         onDocumentEndScriptItemsByOrder_ = std::nullopt;
     }
 }
@@ -8306,10 +8323,17 @@ void WebDelegate::JavaScriptOnDocumentEndByOrder()
 void WebDelegate::JavaScriptOnHeadReadyByOrder()
 {
     CHECK_NULL_VOID(nweb_);
-    if (onHeadReadyScriptItems_.has_value() && onHeadReadyScriptItemsByOrder_.has_value()) {
-        nweb_->JavaScriptOnHeadReadyByOrder(onHeadReadyScriptItems_.value(),
-            onHeadReadyScriptItemsByOrder_.value());
+    if (onHeadReadyScriptItems_.has_value() && onHeadReadyScriptRegexItems_.has_value() &&
+        onHeadReadyScriptItemsByOrder_.has_value()) {
+        if (onHeadReadyScriptRegexItems_->empty()) {
+            nweb_->JavaScriptOnHeadReadyByOrder(onHeadReadyScriptItems_.value(),
+                onHeadReadyScriptItemsByOrder_.value());
+        } else {
+            nweb_->JavaScriptOnHeadReadyByOrderV2(onHeadReadyScriptItems_.value(),
+                onHeadReadyScriptRegexItems_.value(), onHeadReadyScriptItemsByOrder_.value());
+        }
         onHeadReadyScriptItems_ = std::nullopt;
+        onHeadReadyScriptRegexItems_ = std::nullopt;
         onHeadReadyScriptItemsByOrder_ = std::nullopt;
     }
 }

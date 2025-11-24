@@ -1197,6 +1197,7 @@ void WebDelegate::JavaScriptOnDocumentEnd() {}
 
 void WebDelegate::SetJavaScriptItemsByOrder(
     const ScriptItems& scriptItems,
+    const ScriptRegexItems& scriptRegexItems,
     const ScriptItemType& type,
     const ScriptItemsByOrder& scriptItemsByOrder) {}
 void WebDelegate::JavaScriptOnDocumentStartByOrder() {}

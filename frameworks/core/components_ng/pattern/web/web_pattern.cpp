@@ -7578,9 +7578,10 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 }
 
 void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     if (delegate_) {
         UpdateJavaScriptOnDocumentStartByOrder();
@@ -7589,9 +7590,10 @@ void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems
 }
 
 void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
@@ -7601,9 +7603,10 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
 }
 
 void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onHeadReadyScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     if (delegate_) {
         UpdateJavaScriptOnHeadReadyByOrder();
@@ -7632,30 +7635,39 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
 
 void WebPattern::UpdateJavaScriptOnDocumentStartByOrder()
 {
-    if (delegate_ && onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
-        delegate_->SetJavaScriptItemsByOrder(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START,
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && onDocumentStartScriptRegexItems_.has_value() &&
+        onDocumentStartScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentStartScriptItems_.value(),
+            onDocumentStartScriptRegexItems_.value(), ScriptItemType::DOCUMENT_START,
             onDocumentStartScriptItemsByOrder_.value());
         onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptRegexItems_ = std::nullopt;
         onDocumentStartScriptItemsByOrder_ = std::nullopt;
     }
 }
 
 void WebPattern::UpdateJavaScriptOnDocumentEndByOrder()
 {
-    if (delegate_ && onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
-        delegate_->SetJavaScriptItemsByOrder(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END,
+    if (delegate_ && onDocumentEndScriptItems_.has_value() && onDocumentEndScriptRegexItems_.has_value() &&
+        onDocumentEndScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentEndScriptItems_.value(),
+            onDocumentEndScriptRegexItems_.value(), ScriptItemType::DOCUMENT_END,
             onDocumentEndScriptItemsByOrder_.value());
         onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptRegexItems_ = std::nullopt;
         onDocumentEndScriptItemsByOrder_ = std::nullopt;
     }
 }
 
 void WebPattern::UpdateJavaScriptOnHeadReadyByOrder()
 {
-    if (delegate_ && onHeadReadyScriptItems_.has_value() && onHeadReadyScriptItemsByOrder_.has_value()) {
-        delegate_->SetJavaScriptItemsByOrder(onHeadReadyScriptItems_.value(), ScriptItemType::DOCUMENT_HEAD_READY,
+    if (delegate_ && onHeadReadyScriptItems_.has_value() && onHeadReadyScriptRegexItems_.has_value() &&
+        onHeadReadyScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onHeadReadyScriptItems_.value(),
+            onHeadReadyScriptRegexItems_.value(), ScriptItemType::DOCUMENT_HEAD_READY,
             onHeadReadyScriptItemsByOrder_.value());
         onHeadReadyScriptItems_ = std::nullopt;
+        onHeadReadyScriptRegexItems_ = std::nullopt;
         onHeadReadyScriptItemsByOrder_ = std::nullopt;
     }
 }

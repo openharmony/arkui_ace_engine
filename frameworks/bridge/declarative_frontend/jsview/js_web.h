@@ -239,7 +239,7 @@ protected:
 
 private:
     static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
-        ScriptItemsByOrder& scriptItemsByOrder);
+        ScriptRegexItems& scriptRegexItems, ScriptItemsByOrder& scriptItemsByOrder);
     static void GetDoubleVectorFromJSArray(const JSRef<JSArray>& jsArray, std::vector<double>& params);
     static void GetBlankScreenDetectionMethodVectorFromJSArray(
         const JSRef<JSArray>& jsArray, std::vector<int32_t>& params);

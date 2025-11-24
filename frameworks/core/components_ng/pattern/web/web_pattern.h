@@ -710,13 +710,13 @@ public:
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
     void UpdateJavaScriptOnDocumentStartByOrder();
     void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder);
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     void UpdateJavaScriptOnDocumentEndByOrder();
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder);
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     void UpdateJavaScriptOnHeadReadyByOrder();
     void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder);
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
@@ -1450,6 +1450,9 @@ private:
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     std::optional<ScriptItems> onHeadReadyScriptItems_;
+    std::optional<ScriptRegexItems> onDocumentStartScriptRegexItems_;
+    std::optional<ScriptRegexItems> onDocumentEndScriptRegexItems_;
+    std::optional<ScriptRegexItems> onHeadReadyScriptRegexItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;

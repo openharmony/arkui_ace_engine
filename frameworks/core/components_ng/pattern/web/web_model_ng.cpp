@@ -1251,27 +1251,27 @@ void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 }
 
 void WebModelNG::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelNG::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelNG::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-    const ScriptItemsByOrder& scriptItemsByOrder)
+    const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)

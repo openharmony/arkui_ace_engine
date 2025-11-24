@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
+using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string, std::string>>>;
 using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
 class ACE_FORCE_EXPORT WebModel {
 public:
@@ -181,11 +182,11 @@ public:
     virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
     virtual void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) {};
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) {};
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
-        const ScriptItemsByOrder& scriptItemsByOrder) {};
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void SetCopyOptionMode(CopyOptions mode) {};

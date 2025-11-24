@@ -416,12 +416,13 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentStartByOrder005, TestSi
 
     webPattern->delegate_ = nullptr;
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::map<std::string, std::vector<std::pair<std::string, std::string>>> scriptRegexItems;
     std::vector<std::string> scriptItemsByOrder;
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
-    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
     EXPECT_TRUE(webPattern->onDocumentStartScriptItemsByOrder_.has_value());
 #endif
 }
@@ -477,22 +478,29 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnDocumentStartByOrder005, 
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::map<std::string, std::vector<std::pair<std::string, std::string>>> scriptRegexItems;
     std::vector<std::string> scriptItemsByOrder;
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentStartScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     webPattern->onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     EXPECT_FALSE(webPattern->onDocumentStartScriptItems_.has_value());
+    EXPECT_FALSE(webPattern->onDocumentStartScriptRegexItems_.has_value());
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     webPattern->delegate_ = nullptr;
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     webPattern->onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentStartScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     webPattern->onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     EXPECT_TRUE(webPattern->onDocumentStartScriptItems_.has_value());
+    EXPECT_TRUE(webPattern->onDocumentStartScriptRegexItems_.has_value());
 #endif
 }
 
@@ -517,22 +525,30 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnDocumentEndByOrder005, Te
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::map<std::string, std::vector<std::pair<std::string, std::string>>> scriptRegexItems;
     std::vector<std::string> scriptItemsByOrder;
+
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentEndScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     webPattern->onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     EXPECT_FALSE(webPattern->onDocumentEndScriptItems_.has_value());
+    EXPECT_FALSE(webPattern->onDocumentEndScriptRegexItems_.has_value());
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     webPattern->delegate_ = nullptr;
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     webPattern->onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentEndScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     webPattern->onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     EXPECT_TRUE(webPattern->onDocumentEndScriptItems_.has_value());
+    EXPECT_TRUE(webPattern->onDocumentEndScriptRegexItems_.has_value());
 #endif
 }
 
@@ -556,12 +572,13 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnHeadReadyByOrder001, TestSize.L
 
     webPattern->delegate_ = nullptr;
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::map<std::string, std::vector<std::pair<std::string, std::string>>> scriptRegexItems;
     std::vector<std::string> scriptItemsByOrder;
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
-    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
     EXPECT_TRUE(webPattern->onHeadReadyScriptItemsByOrder_.has_value());
 #endif
 }
@@ -587,22 +604,27 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnHeadReadyByOrder001, Test
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::map<std::string, std::vector<std::pair<std::string, std::string>>> scriptRegexItems;
     std::vector<std::string> scriptItemsByOrder;
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onHeadReadyScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     webPattern->onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     webPattern->UpdateJavaScriptOnHeadReadyByOrder();
     EXPECT_FALSE(webPattern->onHeadReadyScriptItems_.has_value());
+    EXPECT_FALSE(webPattern->onHeadReadyScriptRegexItems_.has_value());
     webPattern->UpdateJavaScriptOnHeadReadyByOrder();
     webPattern->delegate_ = nullptr;
     webPattern->UpdateJavaScriptOnHeadReadyByOrder();
     webPattern->onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onHeadReadyScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     webPattern->onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     webPattern->UpdateJavaScriptOnHeadReadyByOrder();
     EXPECT_TRUE(webPattern->onHeadReadyScriptItems_.has_value());
+    EXPECT_TRUE(webPattern->onHeadReadyScriptRegexItems_.has_value());
 #endif
 }
 
