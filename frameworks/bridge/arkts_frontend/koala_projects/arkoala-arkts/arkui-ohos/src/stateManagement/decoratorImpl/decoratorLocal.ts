@@ -26,8 +26,11 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implement
     }
 
     get(): T {
-        const value = this.backing_.get(this.shouldAddRef());
-        uiUtils.builtinContainersAddRefLength(value);
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.backing_.get(shouldAddRef);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefLength(value);
+        }
         return value;
     }
 

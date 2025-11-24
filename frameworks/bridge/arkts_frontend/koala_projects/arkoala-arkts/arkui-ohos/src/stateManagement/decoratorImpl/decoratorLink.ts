@@ -68,7 +68,6 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
 
     public get(): T {
         const value = this.sourceGet_();
-        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 
