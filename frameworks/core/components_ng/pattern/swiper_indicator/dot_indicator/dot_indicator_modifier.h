@@ -117,6 +117,7 @@ public:
         std::optional<float> longPointLeftCenterX;
         std::optional<float> longPointRightCenterX;
         std::optional<OffsetF> indicatorMargin;
+        bool needForceCalc = false;
     };
 
     std::tuple<float, float, float, float> CalCBoundsRect();
