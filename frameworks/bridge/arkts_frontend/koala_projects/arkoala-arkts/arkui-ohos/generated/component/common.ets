@@ -20425,6 +20425,22 @@ export class SheetOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEnableFloatingDragBar  = value.enableFloatingDragBar
+        if (valueHolderForEnableFloatingDragBar !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableFloatingDragBarTmpValue  = valueHolderForEnableFloatingDragBar!
+            valueSerializer.writeBoolean(valueHolderForEnableFloatingDragBarTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForModalTransition  = value.modalTransition
+        if (valueHolderForModalTransition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModalTransitionTmpValue  = (valueHolderForModalTransition as ModalTransition)
+            valueSerializer.writeInt32(valueHolderForModalTransitionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForMaskColor  = value.maskColor
         if (valueHolderForMaskColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
