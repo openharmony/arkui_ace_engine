@@ -427,7 +427,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtConsole.debug(`updateInstanceIdForEnvValue ${this.debugInfo__()} begin`);
     let needUpdated: boolean = false;
     // loop the [varName, key][]
-    this.getEnvPropertyNameToKey()
+    this.__getEnvPropertyNameToKey__Internal()
       .forEach(([varName, envKey]) => {
         const updatedInstanceEnvValue = newInstanceId ?
           EnvV2.registerEnv(envKey as keyof EnvTypeMap, this, varName, newInstanceId) :
@@ -457,7 +457,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.__hasEnvValue__;
   }
 
-  public getEnvPropertyNameToKey(): [string, keyof EnvTypeMap][] {
+  public __getEnvPropertyNameToKey__Internal(): [string, keyof EnvTypeMap][] {
     // there is no env in current view
     const meta = this[EnvV2.ENV_DECO_META] as EnvMeta | undefined;
     if (!meta || !(typeof meta === 'object')) {
