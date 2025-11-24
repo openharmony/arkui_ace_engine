@@ -4623,6 +4623,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsClipToFrame));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isAttached"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsAttached));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isOnMainTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsOnMainTree));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorInfo"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetInspectorInfo));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMeasuredSize"),
