@@ -145,12 +145,28 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
 }
 
 /**
+ * @tc.name: setImageMatrixTestDefualtValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest2, setImageMatrixTestDefualtValue, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(property, nullptr);
+    auto result = property->GetImageMatrix();
+    ASSERT_FALSE(result);
+}
+
+/**
  * @tc.name: setImageMatrixTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest2, setImageMatrixTest, TestSize.Level1)
 {
+    ASSERT_TRUE(modifier_->setImageMatrix);
     Matrix4 matrix4transit = Matrix4::CreateScale(11.0, 7.0, 1.0);
     auto matrix4transitPeer = reinterpret_cast<Ark_matrix4_Matrix4Transit>(&matrix4transit);
     auto optValue = Converter::ArkValue<Opt_matrix4_Matrix4Transit>(matrix4transitPeer);
