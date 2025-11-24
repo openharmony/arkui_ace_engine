@@ -28,8 +28,11 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase imple
 
     get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ParamOnce ${this.getTraceInfo()}`);
-        const value = this.backing_.get(this.shouldAddRef());
-        uiUtils.builtinContainersAddRefLength(value);
+        const shouldAddRef = this.shouldAddRef();
+        const value = this.backing_.get(shouldAddRef);
+        if (shouldAddRef) {
+            uiUtils.builtinContainersAddRefLength(value);
+        }
         return value;
     }
 

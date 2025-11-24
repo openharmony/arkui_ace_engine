@@ -17,7 +17,7 @@ import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdTy
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
-import { ObserveWrappedBase } from './observeWrappedBase';
+import { ObserveWrappedKeyedMeta } from './observeWrappedBase';
 import { UIUtils } from '../utils';
 import { uiUtils } from './uiUtilsImpl';
 final class CONSTANT {
@@ -25,7 +25,7 @@ final class CONSTANT {
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
+export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedKeyedMeta, ISubscribedWatches {
     public store_: Array<T>;
     @JSONStringifyIgnore
     private meta_: IMutableKeyedStateMeta;
@@ -1062,5 +1062,14 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.map<U>(callbackfn);
+    }
+
+    public override addRefAnyKey(): void {
+        this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
+    }
+
+    public override addRefLength(): void {
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
     }
 }
