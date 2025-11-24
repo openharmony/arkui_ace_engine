@@ -1564,6 +1564,9 @@ private:
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
 
+    OHNativeWindow* pipNativeWindow_ = nullptr;
+    std::mutex pipNativeWindowMutex_;
+
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
