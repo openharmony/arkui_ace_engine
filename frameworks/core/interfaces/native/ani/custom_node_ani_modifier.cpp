@@ -93,6 +93,7 @@ void QueryNavigationInfo(ani_long node, ArkUINavigationInfo& info)
 
     info.navigationId = result->navigationId;
     info.navPathStack = reinterpret_cast<ani_ref>(ptr);
+    info.uniqueId = static_cast<ani_int>(result->uniqueId);
     return;
 }
 

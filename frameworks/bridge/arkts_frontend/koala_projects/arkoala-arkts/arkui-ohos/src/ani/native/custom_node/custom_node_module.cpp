@@ -247,6 +247,10 @@ ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     env->Class_CallStaticMethodByName_Ref(interCls, "fromPtr",
         "C{std.core.Object}:arkui.component.navigation.NavPathStack", &pathStack, info.navPathStack);
     env->Object_SetPropertyByName_Ref(res, "pathStack", static_cast<ani_object>(pathStack));
+
+    // set uniqueId
+    ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
+    env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
     return res;
 }
 

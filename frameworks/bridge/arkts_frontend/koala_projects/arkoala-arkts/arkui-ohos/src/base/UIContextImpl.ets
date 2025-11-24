@@ -57,7 +57,7 @@ import { KeyProcessingMode } from "arkui/component/focus"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
-import { UIContextAtomicServiceBar } from "arkui/component/idlize"
+import { UIContextAtomicServiceBar, UIContextGetInfo } from "arkui/component/idlize"
 import { GlobalScope } from "#generated"
 import { default as mediaquery } from '@ohos/mediaquery'
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework'
@@ -71,6 +71,7 @@ import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
     SystemOps, DialogExtender } from '../framework';
+import { default as uiObserver } from '@ohos/arkui/observer';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 import { IUIContext } from "arkui/component/idlize"
@@ -1480,6 +1481,12 @@ export class UIContextImpl extends UIContext {
             routerPageInfo: routerPageInfo
         }
         return pageInfo;
+    }
+    public getNavigationInfoByUniqueId(id: int): uiObserver.NavigationInfo | undefined {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        let navigationInfo = UIContextGetInfo.getNavigationInfoByUniqueId(id);
+        ArkUIAniModule._Common_Restore_InstanceId()
+        return navigationInfo;
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);

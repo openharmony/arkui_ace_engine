@@ -123,11 +123,13 @@ import hilog from '@ohos.hilog'
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
     }
 
     export class NavigationInfoImpl implements NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
         static transferStatic(input: Any): Object {
             let dynamicValue = ESValue.wrap(input);
             let staticValue = new NavigationInfoImpl();
@@ -141,6 +143,10 @@ import hilog from '@ohos.hilog'
             let navPathStack = dynamicValue.getProperty("pathStack");
             if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
                 // pathStack needs analysis to static NavPathStack
+            }
+            let uniqueId = dynamicValue.getProperty("uniqueId");
+            if (uniqueId.isNumber()) {
+                staticValue.uniqueId = uniqueId.toNumber() as int;
             }
             return staticValue;
         }
@@ -156,6 +162,11 @@ import hilog from '@ohos.hilog'
             }
             dynamicValue.setProperty('navigationId', ESValue.wrap(staticValue.navigationId));
             dynamicValue.setProperty('pathStack', ESValue.wrap(staticValue.pathStack));
+            if (staticValue.uniqueId === null || staticValue.uniqueId === undefined) {
+                dynamicValue.setProperty('uniqueId', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
             return dynamicValue as Any;
         }
     }

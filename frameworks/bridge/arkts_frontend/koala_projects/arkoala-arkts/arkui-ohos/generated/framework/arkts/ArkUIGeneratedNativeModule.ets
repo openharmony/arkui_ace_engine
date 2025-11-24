@@ -5916,6 +5916,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
     @ani.unsafe.Direct
+    native static _UIContextGetInfo_getNavigationInfoByUniqueId(id: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
     native static _UIExtensionProxy_construct(): KPointer
     @ani.unsafe.Direct
     native static _UIExtensionProxy_getFinalizer(): KPointer
