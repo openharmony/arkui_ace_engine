@@ -1216,10 +1216,13 @@ HWTEST_F(TextFieldPatternTestEight, HandleLeftMouseReleaseEvent001, TestSize.Lev
     MouseInfo info;
     pattern_->blockPress_ = false;
     pattern_->showKeyBoardOnFocus_ = true;
-    pattern_->showKeyBoardOnFocus_ = true;
     auto host = pattern_->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    // get textfield focus
     auto focusHub = host->GetOrCreateFocusHub();
     focusHub->currentFocus_ = true;
+
     pattern_->customKeyboard_ = nullptr;
     pattern_->customKeyboardBuilder_ = nullptr;
     auto client = AceType::MakeRefPtr<MockTextInputClient>();
@@ -1227,6 +1230,8 @@ HWTEST_F(TextFieldPatternTestEight, HandleLeftMouseReleaseEvent001, TestSize.Lev
     pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
     pattern_->imeShown_ = true;
     pattern_->HandleLeftMouseReleaseEvent(info);
+
+    // call mouse release requestkeyboard
     EXPECT_TRUE(pattern_->RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::MOUSE_RELEASE));
 }
 
