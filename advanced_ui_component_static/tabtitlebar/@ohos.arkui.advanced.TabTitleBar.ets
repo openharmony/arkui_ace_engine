@@ -542,7 +542,7 @@ struct TabContentItem {
 
   private completeCallback: ImageOnCompleteCallback | undefined = (info?: ImageCompleteEvent) => {
     let onImageCompleteValue: number =
-      this.getUIContext().px2vp(info?.componentWidth as number) + TabContentItem.paddingLeft + TabContentItem.paddingRight;
+      this.getUIContext().px2vp(info?.componentWidth as int) + TabContentItem.paddingLeft + TabContentItem.paddingRight;
     this.onImageComplete?.(onImageCompleteValue);
   }
 
@@ -551,7 +551,7 @@ struct TabContentItem {
       return;
     }
     let onImageComplete: number =
-      this.getUIContext().px2vp(event.componentWidth as number) + TabContentItem.paddingLeft + TabContentItem.paddingRight
+      this.getUIContext().px2vp(event.componentWidth as int) + TabContentItem.paddingLeft + TabContentItem.paddingRight
     this.onImageComplete?.(onImageComplete);
   }
 
