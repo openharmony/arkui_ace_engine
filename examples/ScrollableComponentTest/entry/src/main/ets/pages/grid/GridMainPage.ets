@@ -56,6 +56,7 @@ struct WaterFlowMainPage {
     new TextList(22, 'ScrollableGrid', 'pages/grid/CAPI/ScrollableGrid'),
     new TextList(24, 'GridTest', 'pages/grid/CAPI/GridTest'),
     new TextList(23, 'LayoutConstraints', 'pages/grid/LayoutConstraints/LayoutConstraints_MainPage'),
+    new TextList(24, 'GridSwiperDragSort', 'pages/grid/GridSwiperDragSort'),
   ]
   @State fontSize: Resource | undefined = undefined
 
