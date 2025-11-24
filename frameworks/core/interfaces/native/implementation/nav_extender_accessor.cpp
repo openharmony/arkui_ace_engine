@@ -141,7 +141,10 @@ Ark_String PopImpl(Ark_NavPathStack pathStack,
     auto navStack = pathStack->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto isAnimated = Converter::Convert<bool>(animated);
-    auto info = navStack->NavigationContext::PathStack::Pop(isAnimated);
+    NavigationContext::PathInfo info;
+    if (!navStack->NavigationContext::PathStack::Pop(isAnimated, info)) {
+        return invalidVal;
+    }
     return Converter::ArkValue<Ark_String>(info.navDestinationId_.value_or(""), Converter::FC);
 }
 void SetOnPopCallbackImpl(Ark_NavPathStack pathStack,

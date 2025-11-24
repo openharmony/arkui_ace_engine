@@ -272,13 +272,13 @@ void PathStack::SetAnimated(bool value)
     animated_ = value;
 }
 
-PathInfo PathStack::Pop(bool animated)
+bool PathStack::Pop(bool animated, PathInfo& info)
 {
     if (pathArray_.empty()) {
-        return PathInfo();
+        return false;
     }
     PathInfo currentPathInfo = pathArray_.back();
-    PathInfo pathInfo = pathArray_.back();
+    PathInfo pathInfo = currentPathInfo;
     pathArray_.pop_back();
     popArray_.push_back(pathInfo);
     isReplace_ = NO_ANIM_NO_REPLACE;
@@ -291,13 +291,14 @@ PathInfo PathStack::Pop(bool animated)
         onResultCallback_(param);
     }
     InvokeOnStateChanged();
-    return pathInfo;
+    info = pathInfo;
+    return true;
 }
 
-PathInfo PathStack::Pop(bool animated, Ark_Object result)
+bool PathStack::Pop(bool animated, Ark_Object result, PathInfo& info)
 {
     if (pathArray_.empty()) {
-        return PathInfo();
+        return false;
     }
     PathInfo currentPathInfo = pathArray_.back();
     PathInfo pathInfo = pathArray_.back();
@@ -323,7 +324,8 @@ PathInfo PathStack::Pop(bool animated, Ark_Object result)
     }
     
     InvokeOnStateChanged();
-    return pathInfo;
+    info = pathInfo;
+    return true;
 }
 
 void PathStack::PopTo(const std::string& name, const std::optional<bool>& animated)
@@ -655,7 +657,8 @@ bool NavigationStack::IsEmpty()
 
 void NavigationStack::Pop()
 {
-    PathStack::Pop(true);
+    PathInfo info;
+    PathStack::Pop(true, info);
 }
 
 void NavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo)
