@@ -1253,6 +1253,7 @@ void Scrollable::StartScrollSnapAnimation(
     endPos_ = currentPos_ + scrollSnapDelta;
     finalPosition_ = endPos_;
     snapAnimationFromScrollBar_ = fromScrollBar;
+    snapAnimationSource_ = source;
     ACE_SCOPED_TRACE("Scroll snap animation start, start:%f, end:%f, vel:%f, id:%d", currentPos_, endPos_,
         scrollSnapVelocity, nodeId_);
     AnimationOption option;
@@ -1318,7 +1319,7 @@ void Scrollable::ProcessListSnapMotion(double position)
     }
     currentPos_ = position;
     if (canOverScroll_ && state_ == AnimationState::SNAP) {
-        if (source != SCROLL_FROM_BAR_FLING) {
+        if (!snapAnimationFromScrollBar_) {
             scrollPause_ = true;
             skipRestartSpring_ = true;
             MarkNeedFlushAnimationStartTime();
@@ -1631,7 +1632,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
             nodeId_, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
     }
     // UpdateScrollPosition return false, means reach to scroll limit.
-    source = snapAnimationFromScrollBar_ && state_ == AnimationState::SNAP ? SCROLL_FROM_BAR_FLING : source;
+    source = snapAnimationSource_ == SCROLL_FROM_BAR && state_ == AnimationState::SNAP ? SCROLL_FROM_BAR_FLING : source;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
     if (!moved_) {
         ResetContinueDragCount();
@@ -1649,7 +1650,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
         ACE_SCOPED_TRACE("scrollPause set true to stop ProcessScrollMotion, canOverScroll:%u, needScrollSnapChange:%u, "
                          "nodeId:%d, tag:%s",
             canOverScroll_, needScrollSnapChange_, nodeId_, nodeTag_.c_str());
-        if (source != SCROLL_FROM_BAR_FLING) {
+        if (!snapAnimationFromScrollBar_) {
             scrollPause_ = true;
             skipRestartSpring_ = true;
             MarkNeedFlushAnimationStartTime();

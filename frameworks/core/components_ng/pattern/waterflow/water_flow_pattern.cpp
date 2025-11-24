@@ -74,6 +74,10 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     delta = -FireOnWillScroll(-delta);
     delta = -FireObserverOnWillScroll(-delta);
+    if (source == SCROLL_FROM_BAR && InstanceOf<WaterFlowLayoutInfo>(layoutInfo_) &&
+        GreatOrEqual(layoutInfo_->CurrentPos() + delta, layoutInfo_->TopFinalPos())) {
+        delta = -layoutInfo_->CurrentPos() + layoutInfo_->TopFinalPos();
+    }
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();

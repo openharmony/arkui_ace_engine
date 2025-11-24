@@ -26,6 +26,9 @@ constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 constexpr int32_t OGN_FIGNERID = -1;
+constexpr uint32_t MILLIS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
+constexpr uint64_t MIN_VSYNC_DIFF_TIME = 1000 * 1000; // min is 1ms
+constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 #ifdef ARKUI_WEARABLE
 constexpr char SCROLL_BAR_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
 #endif
@@ -696,6 +699,7 @@ void ScrollBar::StopFlingAnimation()
 {
     if (frictionController_ && frictionController_->IsRunning()) {
         frictionController_->Stop();
+        scrollBarFlingVelocity_ = .0f;
     }
 }
 
@@ -712,6 +716,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     }
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     isDriving_ = true;
+    dragEndReachEdge_ = false;
 }
 
 void ScrollBar::HandleDragUpdate(const GestureEvent& info)
@@ -727,16 +732,25 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
         }
     }
     if (scrollPositionCallback_) {
+        isTouchScreen_ = info.GetInputEventType() == InputEventType::TOUCH_SCREEN;
+        auto mainDelta = info.GetMainDelta();
+        bool canOverScroll =
+            isTouchScreen_ && canOverScrollWithDelta_ && canOverScrollWithDelta_(IsReverse() ? -mainDelta : mainDelta);
         // The offset of the mouse wheel and gesture is opposite.
-        auto offset = info.GetInputEventType() == InputEventType::AXIS ?
-                      info.GetMainDelta() : CalcPatternOffset(info.GetMainDelta());
+        auto offset = (info.GetInputEventType() == InputEventType::AXIS || canOverScroll)
+                          ? mainDelta
+                          : CalcPatternOffset(mainDelta);
         if (IsReverse()) {
+            offset = -offset;
+        }
+        if (canOverScroll) {
             offset = -offset;
         }
         ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
         auto isMouseWheelScroll =
             info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
-        scrollPositionCallback_(offset, SCROLL_FROM_BAR, isMouseWheelScroll);
+        int32_t source = canOverScroll ? SCROLL_FROM_BAR_OVER_DRAG : SCROLL_FROM_BAR;
+        scrollPositionCallback_(offset, source, isMouseWheelScroll);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
                                                                 : info.GetMainVelocity() / info.GetMainDelta() * offset,
@@ -750,6 +764,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(0, NG::SceneStatus::END);
     }
+    dragEndReachEdge_ = canOverScrollWithDelta_ && canOverScrollWithDelta_(.0f);
     auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("inner scrollBar HandleDragEnd velocity:%f", velocity);
@@ -764,7 +779,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             .dragDistance = CalcPatternOffset(GetDragOffset()),
             .snapDirection = SnapDirection::NONE,
             .source = SCROLL_FROM_BAR,
-            .fromScrollBar = true,
+            .fromScrollBar = !isTouchScreen_,
         };
         bool isWillFling = false;
         if (info.GetInputEventType() != InputEventType::AXIS) {
@@ -774,6 +789,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         if (scrollBarOnDidStopDraggingCallback_) {
             scrollBarOnDidStopDraggingCallback_(isWillFling);
         }
+        DragEndOverScroll();
         return;
     }
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
@@ -793,13 +809,15 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         .animationVelocity = -velocity,
         .dragDistance = CalcPatternOffset(GetDragOffset()),
         .snapDirection = SnapDirection::NONE,
-        .fromScrollBar = true,
+        .fromScrollBar = !isTouchScreen_,
+        .source = SCROLL_FROM_BAR,
     };
     if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {
         isDriving_ = false;
         if (scrollBarOnDidStopDraggingCallback_) {
             scrollBarOnDidStopDraggingCallback_(true);
         }
+        DragEndOverScroll();
         return;
     }
 
@@ -816,20 +834,53 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     if (scrollBarOnDidStopDraggingCallback_) {
         scrollBarOnDidStopDraggingCallback_(true);
     }
-    frictionController_->PlayMotion(frictionMotion_);
+    if (isTouchScreen_ && dragEndReachEdge_) {
+        reachBarEdgeOverScroll_(.0f);
+    } else {
+        frictionController_->PlayMotion(frictionMotion_);
+    }
 }
 
 void ScrollBar::ProcessFrictionMotion(double value)
 {
-    if (scrollPositionCallback_) {
-        auto offset = CalcPatternOffset(value - frictionPosition_);
-        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING, false)) {
-            if (frictionController_ && frictionController_->IsRunning()) {
-                frictionController_->Stop();
+    if (!scrollPositionCallback_) {
+        frictionPosition_ = value;
+        return;
+    }
+    auto offset = CalcPatternOffset(value - frictionPosition_);
+    CalcFlingVelocity(offset);
+    if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING, false)) {
+        if (frictionController_ && frictionController_->IsRunning()) {
+            frictionController_->Stop();
+            if (!dragEndReachEdge_ && isTouchScreen_ && reachBarEdgeOverScroll_) {
+                reachBarEdgeOverScroll_(scrollBarFlingVelocity_);
             }
         }
     }
     frictionPosition_ = value;
+}
+
+void ScrollBar::CalcFlingVelocity(float offset)
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    uint64_t currentVsync = context->GetVsyncTime();
+    if (lastVsyncTime_ == 0) {
+        lastVsyncTime_ = currentVsync;
+        return;
+    }
+    uint64_t diff = currentVsync - lastVsyncTime_;
+    if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_VSYNC_DIFF_TIME) {
+        scrollBarFlingVelocity_ = offset / diff * MILLIS_PER_NANO_SECONDS;
+    }
+    lastVsyncTime_ = currentVsync;
+}
+
+void ScrollBar::DragEndOverScroll()
+{
+    if (isTouchScreen_ && dragEndReachEdge_ && reachBarEdgeOverScroll_) {
+        reachBarEdgeOverScroll_(.0f);
+    }
 }
 
 void ScrollBar::ProcessFrictionMotionStop()
