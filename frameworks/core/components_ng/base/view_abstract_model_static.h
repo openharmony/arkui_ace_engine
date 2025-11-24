@@ -267,6 +267,7 @@ public:
 
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
+    static void ResetBackground(FrameNode* frameNode);
     static void SetFlexGrow(FrameNode* frameNode, float value);
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void ResetFlexShrink(FrameNode* frameNode);

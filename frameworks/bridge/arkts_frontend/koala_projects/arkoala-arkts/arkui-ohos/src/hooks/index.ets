@@ -113,6 +113,11 @@ export function hookParallelGesture(commonMethod: ArkCommonMethodComponent, gest
 
 export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, value: GestureModifier | undefined): void {
     if (value === undefined) {
+        let currentGestureEvent = commonMethod.getGestureEvent();
+        if (currentGestureEvent !== undefined) {
+            currentGestureEvent.clearGestures();
+            commonMethod.setGestureEvent(undefined);    
+        }
         return;
     }
     const value_casted = value as GestureModifier
