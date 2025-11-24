@@ -197,7 +197,9 @@ void JSBaseNode::GetAndRegisterUpdateInstanceFunc(const JSCallbackInfo& info)
     EcmaVM* vm = info.GetVm();
     auto updateInstanceFunc = AceType::MakeRefPtr<JsFunction>(thisObj, JSRef<JSFunc>::Cast(updateInstance));
     CHECK_NULL_VOID(updateInstanceFunc);
-    auto updateJSInstanceCallback = [updateInstanceFunc, vm](int32_t instanceId) {
+    auto updateJSInstanceCallback = [updateInstanceFunc, vm,
+                                     execCtx = info.GetExecutionContext()](int32_t instanceId) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto uiContext = NG::UIContextHelper::GetUIContext(vm, instanceId);
         auto jsVal = JSRef<JSVal>::Make(uiContext);
         updateInstanceFunc->ExecuteJS(1, &jsVal);

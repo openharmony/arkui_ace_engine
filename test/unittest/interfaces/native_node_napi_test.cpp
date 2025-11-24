@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h"
+#include "frameworks/base/error/error_code.h"
 #include "gtest/gtest.h"
 #include "napi/napi_runtime.cpp"
 #include "native_interface.h"
@@ -795,4 +796,18 @@ HWTEST_F(NativeNodeNapiTest, NativeBackgroundImagePositionTest004, TestSize.Leve
     ArkUI_AttributeItem backgroundImagePosition3 = { .value = value, .size = 4 };
     auto ret3 = nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition3);
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest011
+ * @tc.desc: Test OH_ArkUI_GetNodeHandleFromNapiValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest011, TestSize.Level1)
+{
+    napi_env__* env = nullptr;
+    napi_value__* value = nullptr;
+    ArkUI_NodeHandle* context = nullptr;
+    int32_t code = OH_ArkUI_GetNodeHandleFromNapiValue(env, value, context);
+    EXPECT_EQ(code, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 }
