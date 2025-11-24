@@ -132,6 +132,10 @@ export interface IObservedObject extends IWatchSubscriberRegister {
 
 export const STATE_MGMT_FACTORY: IStateMgmtFactory = new __StateMgmtFactoryImpl();
 
+export interface ConsumeOptions<T> {
+    defaultValue?: T
+}
+
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
@@ -188,6 +192,13 @@ export interface IStateMgmtFactory {
         varName: string,
         provideAlias: string,
         watchFunc?: WatchFuncType
+    ): IConsumeDecoratedVariable<T>;
+    makeConsume<T>(
+        owningView: IVariableOwner,
+        varName: string,
+        provideAlias: string,
+        watchFunc?: WatchFuncType,
+        consumeOptions?: ConsumeOptions<T>
     ): IConsumeDecoratedVariable<T>;
     makeObjectLink<T>(
         owningView: IVariableOwner,
