@@ -340,6 +340,7 @@ private:
         std::function<void(int32_t)>&& callback);
     void OpenCustomDialogForServiceStatic(DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback);
+    void SetSubWindowVsyncListener(RefPtr<PipelineBase> parentPipeline, RefPtr<PipelineBase> childPipeline);
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {

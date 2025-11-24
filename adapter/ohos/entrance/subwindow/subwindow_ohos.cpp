@@ -257,6 +257,17 @@ void SubwindowOhos::InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>&
 #endif
 }
 
+void SubwindowOhos::SetSubWindowVsyncListener(RefPtr<PipelineBase> parentPipeline, RefPtr<PipelineBase> childPipeline)
+{
+    CHECK_NULL_VOID(parentPipeline);
+    CHECK_NULL_VOID(childPipeline);
+    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipeline);
+    CHECK_NULL_VOID(parentPipelineContext);
+    auto childPipelineContext = AceType::DynamicCast<NG::PipelineContext>(childPipeline);
+    CHECK_NULL_VOID(childPipelineContext);
+    childPipelineContext->SetVsyncListener(parentPipelineContext->GetVsyncListener());
+}
+
 void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -387,6 +398,12 @@ void SubwindowOhos::InitContainer()
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
+    // ArkTS static need set subwindow vsyncListener because subwindow does not enter into ArktsFrontend::RunPage
+    if (parentPipeline->GetFrontendType() == FrontendType::ARK_TS
+        || parentPipeline->GetFrontendType() == FrontendType::DYNAMIC_HYBRID_STATIC
+        || parentPipeline->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        SetSubWindowVsyncListener(parentPipeline, container->GetPipelineContext());
+    }
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
