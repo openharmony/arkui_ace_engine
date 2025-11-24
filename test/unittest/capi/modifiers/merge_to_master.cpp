@@ -17,9 +17,14 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS;
+using namespace OHOS::Ace;
+using namespace OHOS::Ace::NG::Converter;
 
 HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
 {
@@ -38,7 +43,9 @@ HWTEST_F(WaterFlowModifierTest, setCashedCountTest, TestSize.Level1)
     auto checkval = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
     EXPECT_EQ(checkVal, CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE);
 }
-using namespace testing;
-using namespace testing::ext;
-using namespace OHOS;
-using namespace OHOS::Ace;
+
+HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+}
