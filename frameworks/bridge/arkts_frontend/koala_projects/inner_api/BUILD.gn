@@ -37,6 +37,7 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/component/text.d.ets",
     "./arkui/component/stack.d.ets",
     "./arkui/component/idlize.d.ets",
+    "./arkui/component/securityUIExtensionComponent.d.ets"
   ]
   sources += [
     "./@koalaui/common.d.ets",
