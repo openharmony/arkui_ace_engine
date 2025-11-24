@@ -509,6 +509,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.pushAsync(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -517,6 +518,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.pushAsync(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -545,6 +547,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.pushNamedRouteAsync(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -553,6 +556,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.pushNamedRouteAsync(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -581,6 +585,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.replaceAsync(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -589,6 +594,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.replaceAsync(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -617,6 +623,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.replaceNamedRouteAsync(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -625,6 +632,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.replaceNamedRouteAsync(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 

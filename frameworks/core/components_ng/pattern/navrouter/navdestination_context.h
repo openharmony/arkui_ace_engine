@@ -69,6 +69,11 @@ public:
     virtual void OpenScope() {}
     virtual void CloseScope() {}
 
+    virtual bool IsStatic()
+    {
+        return false;
+    }
+
 protected:
     std::string name_;
     bool isEntry_ = false;

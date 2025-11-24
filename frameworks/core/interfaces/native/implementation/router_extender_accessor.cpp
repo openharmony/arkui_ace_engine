@@ -72,9 +72,36 @@ void Push0Impl(Ark_VMContext vmContext,
 void Push1Impl(Ark_NativePointer jsView,
                const Ark_PageRouterOptions* options,
                const Opt_RouterFinishCallback* finishCallback,
-               const Opt_AsyncCallback_Void* callback_)
+               const Opt_Callback_BusinessError_Void* callback_)
 {
     CHECK_NULL_VOID(jsView && options && finishCallback && callback_);
+    std::function<void(const std::string&, int32_t)> finishFunc = nullptr;
+    if (callback_->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        finishFunc = [callback = CallbackHelper(callback_->value)](const std::string& errStr, int32_t errCode) {
+            auto errorInfo = Converter::ArkValue<Ark_String>(errStr, Converter::FC);
+            callback.InvokeSync(errCode, errorInfo);
+        };
+    }
+    PageRouterOptions routerOptions;
+    routerOptions.errorCallback = finishFunc;
+    routerOptions.url = Converter::Convert<std::string>(options->options.url);
+    if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
+    }
+    if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
+    }
+    std::function<void()> callback;
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+            finish.InvokeSync(jsNode);
+        };
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->PushExtender(routerOptions, std::move(callback), jsView);
 }
 void Replace0Impl(Ark_VMContext vmContext,
                   Ark_AsyncWorkerPtr asyncWorker,
@@ -120,9 +147,36 @@ void Replace0Impl(Ark_VMContext vmContext,
 void Replace1Impl(Ark_NativePointer jsView,
                   const Ark_PageRouterOptions* options,
                   const Opt_RouterFinishCallback* finishCallback,
-                  const Opt_AsyncCallback_Void* callback_)
+                  const Opt_Callback_BusinessError_Void* callback_)
 {
     CHECK_NULL_VOID(jsView && options && finishCallback && callback_);
+    std::function<void(const std::string&, int32_t)> finishFunc = nullptr;
+    if (callback_->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        finishFunc = [callback = CallbackHelper(callback_->value)](const std::string& errStr, int32_t errCode) {
+            auto errorInfo = Converter::ArkValue<Ark_String>(errStr, Converter::FC);
+            callback.InvokeSync(errCode, errorInfo);
+        };
+    }
+    PageRouterOptions routerOptions;
+    routerOptions.errorCallback = finishFunc;
+    routerOptions.url = Converter::Convert<std::string>(options->options.url);
+    if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
+    }
+    if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
+    }
+    std::function<void()> callback;
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+            finish.InvokeSync(jsNode);
+        };
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->ReplaceExtender(routerOptions, std::move(callback), jsView);
 }
 void Back0Impl(const Opt_router_RouterOptions* options)
 {
@@ -263,8 +317,37 @@ void PushNamedRoute0Impl(Ark_VMContext vmContext,
 void PushNamedRoute1Impl(Ark_NativePointer jsView,
                          const Ark_PageRouterOptions* options,
                          const Opt_RouterFinishCallback* finishCallback,
-                         const Opt_AsyncCallback_Void* callback_)
+                         const Opt_Callback_BusinessError_Void* callback_)
 {
+    CHECK_NULL_VOID(jsView && options && finishCallback && callback_);
+    std::function<void(const std::string&, int32_t)> finishFunc = nullptr;
+    if (callback_->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        finishFunc = [callback = CallbackHelper(callback_->value)](const std::string& errStr, int32_t errCode) {
+            auto errorInfo = Converter::ArkValue<Ark_String>(errStr, Converter::FC);
+            callback.InvokeSync(errCode, errorInfo);
+        };
+    }
+    PageRouterOptions routerOptions;
+    routerOptions.errorCallback = finishFunc;
+    routerOptions.url = Converter::Convert<std::string>(options->options.url);
+    routerOptions.isNamedRouterMode = true;
+    if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
+    }
+    if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
+    }
+    std::function<void()> callback;
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+            finish.InvokeSync(jsNode);
+        };
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->PushNamedRouteExtender(routerOptions, std::move(callback), jsView);
 }
 void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
@@ -311,8 +394,37 @@ void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
 void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
                             const Ark_PageRouterOptions* options,
                             const Opt_RouterFinishCallback* finishCallback,
-                            const Opt_AsyncCallback_Void* callback_)
+                            const Opt_Callback_BusinessError_Void* callback_)
 {
+    CHECK_NULL_VOID(jsView && options && finishCallback && callback_);
+    std::function<void(const std::string&, int32_t)> finishFunc = nullptr;
+    if (callback_->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        finishFunc = [callback = CallbackHelper(callback_->value)](const std::string& errStr, int32_t errCode) {
+            auto errorInfo = Converter::ArkValue<Ark_String>(errStr, Converter::FC);
+            callback.InvokeSync(errCode, errorInfo);
+        };
+    }
+    PageRouterOptions routerOptions;
+    routerOptions.errorCallback = finishFunc;
+    routerOptions.url = Converter::Convert<std::string>(options->options.url);
+    routerOptions.isNamedRouterMode = true;
+    if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
+    }
+    if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
+    }
+    std::function<void()> callback;
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+            finish.InvokeSync(jsNode);
+        };
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->ReplaceNamedRouteExtender(routerOptions, std::move(callback), jsView);
 }
 } // RouterExtenderAccessor
 const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()

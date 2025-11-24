@@ -44,7 +44,7 @@ import { InteropNativeModule, nullptr } from "@koalaui/interop"
 import { RouterExtender, PageRouterOptions } from "#generated"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
-import { AsyncCallback } from "@ohos.base"
+import { AsyncCallback, BusinessError } from "@ohos.base"
 /**
  * THEORY OF OPERATIONS
  *
@@ -173,19 +173,19 @@ export type PageClassNameResolver = (page:string) => string | undefined
 export interface Router {
     push(options: router.RouterOptions, mode?: router.RouterMode): Promise<void>
 
-    // push(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
+    pushAsync(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
 
     pushNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void>
 
-    // pushNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
+    pushNamedRouteAsync(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
 
     replace(options: router.RouterOptions, mode?: router.RouterMode): Promise<void>
 
-    // replace(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
+    replaceAsync(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
 
     replaceNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void>
 
-    // replaceNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
+    replaceNamedRouteAsync(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void
 
     back(options?: router.RouterOptions): void
 
@@ -359,8 +359,8 @@ class RouterImpl implements Router {
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
                 return Promise.reject({
-                    code: 100002,
-                    message: "The uri of router is not exist."});
+                    code: 100001,
+                    message: "Internal error."});
             }
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
@@ -387,9 +387,17 @@ class RouterImpl implements Router {
             message: "The uri of router is not exist."});
     }
 
-    push(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+    pushAsync(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
         if (options.url === '/') {
             options.url = this.entryPage?.path! + this.entryPage?.url!;
+        }
+        let asyncCallback = (code: int32, message: string) => {
+            if (code != 0) {
+                let error: BusinessError = new BusinessError(code, message);
+                callback(error, undefined);
+            } else {
+                callback(null, undefined)
+            }
         }
         if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.url)) {
             let pagePushTransitionCallback = (jsNode: KPointer) => {
@@ -403,7 +411,7 @@ class RouterImpl implements Router {
             };
             let pageOptions: PageRouterOptions = { options, mode };
             const jsViewNodePtr = this.peerNodeList.at(this.peerNodeList.length - 1);
-            RouterExtender.push(jsViewNodePtr, pageOptions, pagePushTransitionCallback, callback);
+            RouterExtender.push(jsViewNodePtr, pageOptions, pagePushTransitionCallback, asyncCallback);
             return;
         }
         let className = this.getClassName(options.url);
@@ -430,6 +438,8 @@ class RouterImpl implements Router {
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                let error: BusinessError = new BusinessError(100001, "Internal error.");
+                callback(error, undefined);
                 return;
             }
             const jsViewNodePtr = peerNode!.peer.ptr;
@@ -450,8 +460,12 @@ class RouterImpl implements Router {
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options };
-            RouterExtender.push(jsViewNodePtr, pageOptions, pagePushTransitionCallback, callback);
+            RouterExtender.push(jsViewNodePtr, pageOptions, pagePushTransitionCallback, asyncCallback);
+            return;
         }
+        let error: BusinessError = new BusinessError(100002,
+            "Uri error. The URI of the page to redirect is incorrect or does not exist.");
+        callback(error, undefined);
     }
 
     pushNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void> {
@@ -500,8 +514,8 @@ class RouterImpl implements Router {
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
                 return Promise.reject({
-                    code: 100002,
-                    message: "The uri of router is not exist."});
+                    code: 100001,
+                    message: "Internal error."});
             }
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
@@ -529,11 +543,19 @@ class RouterImpl implements Router {
             return RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback);
         }
         return Promise.reject({
-            code: 100002,
-            message: "The uri of router is not exist."});
+            code: 100004,
+            message: "Named route error. The named route does not exist."});
     }
 
-    pushNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+    pushNamedRouteAsync(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+        let asyncCallback = (code: int32, message: string) => {
+            if (code != 0) {
+                let error: BusinessError = new BusinessError(code, message);
+                callback(error, undefined);
+            } else {
+                callback(null, undefined)
+            }
+        }
         if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name)) {
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -552,7 +574,7 @@ class RouterImpl implements Router {
                 mode: mode
             };
             const jsViewNodePtr = this.peerNodeList.at(this.peerNodeList.length - 1);
-            RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback, callback);
+            RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback, asyncCallback);
             return;
         }
         let className = options.name;
@@ -579,6 +601,8 @@ class RouterImpl implements Router {
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                let error: BusinessError = new BusinessError(100001, "Internal error.");
+                callback(error, undefined);
                 return;
             }
             const jsViewNodePtr = peerNode!.peer.ptr;
@@ -604,8 +628,12 @@ class RouterImpl implements Router {
                     recoverable: options.recoverable
                 }
             };
-            RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback, callback);
+            RouterExtender.pushNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback, asyncCallback);
+            return;
         }
+        let error: BusinessError = new BusinessError(100004,
+            "Named route error. The named route does not exist.");
+        callback(error, undefined);
     }
 
     replace(options: router.RouterOptions, mode?: router.RouterMode): Promise<void> {
@@ -652,8 +680,9 @@ class RouterImpl implements Router {
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
                 return Promise.reject({
-                    code: 100002,
-                    message: "The uri of router is not exist."});
+                    code: 200002,
+                    message: "Uri error. The URI of the page to be used for replacement is incorrect or does not exist."
+                });
             }
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
@@ -676,13 +705,22 @@ class RouterImpl implements Router {
             return RouterExtender.replace(jsViewNodePtr, pageOptions, pageEnterTransitionCallback);
         }
         return Promise.reject({
-            code: 100002,
-            message: "The uri of router is not exist."});
+            code: 200002,
+            message: "Uri error. The URI of the page to be used for replacement is incorrect or does not exist."
+        });
     }
 
-    replace(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+    replaceAsync(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
         if (options.url === '/') {
             options.url = this.entryPage?.path! + this.entryPage?.url!;
+        }
+        let asyncCallback = (code: int32, message: string) => {
+            if (code != 0) {
+                let error: BusinessError = new BusinessError(code, message);
+                callback(error, undefined);
+            } else {
+                callback(null, undefined)
+            }
         }
         if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.url, true)) {
             let pagePushTransitionCallback = (jsNode: KPointer) => {
@@ -696,7 +734,7 @@ class RouterImpl implements Router {
             };
             let pageOptions: PageRouterOptions = { options, mode };
             const jsViewNodePtr = this.peerNodeList.at(this.peerNodeList.length - 1);
-            RouterExtender.replace(jsViewNodePtr, pageOptions, pagePushTransitionCallback, callback);
+            RouterExtender.replace(jsViewNodePtr, pageOptions, pagePushTransitionCallback, asyncCallback);
             return;
         }
         let className = this.getClassName(options.url);
@@ -724,6 +762,9 @@ class RouterImpl implements Router {
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                let error: BusinessError = new BusinessError(200002,
+                    "Uri error. The URI of the page to be used for replacement is incorrect or does not exist.");
+                callback(error, undefined);
                 return;
             }
             const jsViewNodePtr = peerNode!.peer.ptr
@@ -747,8 +788,12 @@ class RouterImpl implements Router {
             if (mode != undefined) {
                 pageOptions.mode = mode;
             }
-            RouterExtender.replace(jsViewNodePtr, pageOptions, pageEnterTransitionCallback, callback)
+            RouterExtender.replace(jsViewNodePtr, pageOptions, pageEnterTransitionCallback, asyncCallback);
+            return;
         }
+        let error: BusinessError = new BusinessError(200002,
+            "Uri error. The URI of the page to be used for replacement is incorrect or does not exist.");
+        callback(error, undefined);
     }
 
     replaceNamedRoute(options: router.NamedRouterOptions, mode?: router.RouterMode): Promise<void> {
@@ -798,8 +843,8 @@ class RouterImpl implements Router {
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
                 return Promise.reject({
-                    code: 100002,
-                    message: "The uri of router is not exist."});
+                    code: 100004,
+                    message: "Named route error. The named route does not exist."});
             }
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
@@ -830,11 +875,19 @@ class RouterImpl implements Router {
             return RouterExtender.replaceNamedRoute(jsViewNodePtr, pageOptions, pageEnterTransitionCallback)
         }
         return Promise.reject({
-            code: 100002,
-            message: "The uri of router is not exist."});
+            code: 100004,
+            message: "Named route error. The named route does not exist."});
     }
 
-    replaceNamedRoute(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+    replaceNamedRouteAsync(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+        let asyncCallback = (code: int32, message: string) => {
+            if (code != 0) {
+                let error: BusinessError = new BusinessError(code, message);
+                callback(error, undefined);
+            } else {
+                callback(null, undefined)
+            }
+        }
         if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name, true)) {
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -853,7 +906,7 @@ class RouterImpl implements Router {
                 mode: mode
             };
             const jsViewNodePtr = this.peerNodeList.at(this.peerNodeList.length - 1);
-            RouterExtender.replaceNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback, callback);
+            RouterExtender.replaceNamedRoute(jsViewNodePtr, pageOptions, pagePushTransitionCallback, asyncCallback);
             return;
         }
         let className = options.name;
@@ -881,6 +934,9 @@ class RouterImpl implements Router {
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                let error: BusinessError = new BusinessError(100004,
+                    "Named route error. The named route does not exist.");
+                callback(error, undefined);
                 return;
             }
             const jsViewNodePtr = peerNode!.peer.ptr
@@ -909,8 +965,12 @@ class RouterImpl implements Router {
             if (mode != undefined) {
                 pageOptions.mode = mode;
             }
-            RouterExtender.replaceNamedRoute(jsViewNodePtr, pageOptions, pageEnterTransitionCallback, callback)
+            RouterExtender.replaceNamedRoute(jsViewNodePtr, pageOptions, pageEnterTransitionCallback, asyncCallback);
+            return;
         }
+        let error: BusinessError = new BusinessError(100004,
+            "Named route error. The named route does not exist.");
+        callback(error, undefined);
     }
 
     back(options?: router.RouterOptions): void {
@@ -930,7 +990,7 @@ class RouterImpl implements Router {
     back(index: int, param?: object): void {
         RouterExtender.back(index, param);
         if (index >= 1 && index <= this.showingPageIndex) {
-            let pageInfo = this.visiblePages.at(index);
+            let pageInfo = this.visiblePages.at(index - 1);
             if (pageInfo) {
                 pageInfo.params = param;
             }

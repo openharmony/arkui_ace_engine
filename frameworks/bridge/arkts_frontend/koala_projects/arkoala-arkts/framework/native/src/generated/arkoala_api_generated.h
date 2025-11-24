@@ -1131,6 +1131,8 @@ typedef struct Callback_Boolean_Void Callback_Boolean_Void;
 typedef struct Opt_Callback_Boolean_Void Opt_Callback_Boolean_Void;
 typedef struct Callback_Buffer_Void Callback_Buffer_Void;
 typedef struct Opt_Callback_Buffer_Void Opt_Callback_Buffer_Void;
+typedef struct Callback_BusinessError_Void Callback_BusinessError_Void;
+typedef struct Opt_Callback_BusinessError_Void Opt_Callback_BusinessError_Void;
 typedef struct Callback_ClickEvent_Void Callback_ClickEvent_Void;
 typedef struct Opt_Callback_ClickEvent_Void Opt_Callback_ClickEvent_Void;
 typedef struct Callback_ComputedBarAttribute_Void Callback_ComputedBarAttribute_Void;
@@ -9811,6 +9813,16 @@ typedef struct Opt_Callback_Buffer_Void {
     Ark_Tag tag;
     Callback_Buffer_Void value;
 } Opt_Callback_Buffer_Void;
+typedef struct Callback_BusinessError_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message);
+} Callback_BusinessError_Void;
+typedef struct Opt_Callback_BusinessError_Void {
+    Ark_Tag tag;
+    Callback_BusinessError_Void value;
+} Opt_Callback_BusinessError_Void;
 typedef struct Callback_ClickEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -27015,7 +27027,7 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     void (*push1)(Ark_NativePointer jsView,
                   const Ark_PageRouterOptions* options,
                   const Opt_RouterFinishCallback* finishCallback,
-                  const Opt_AsyncCallback_Void* callback_);
+                  const Opt_Callback_BusinessError_Void* callback_);
     void (*replace0)(Ark_VMContext vmContext,
                      Ark_AsyncWorkerPtr asyncWorker,
                      Ark_NativePointer jsView,
@@ -27025,7 +27037,7 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     void (*replace1)(Ark_NativePointer jsView,
                      const Ark_PageRouterOptions* options,
                      const Opt_RouterFinishCallback* finishCallback,
-                     const Opt_AsyncCallback_Void* callback_);
+                     const Opt_Callback_BusinessError_Void* callback_);
     void (*back0)(const Opt_router_RouterOptions* options);
     void (*back1)(Ark_Int32 index,
                   const Opt_Object* params);
@@ -27049,7 +27061,7 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     void (*pushNamedRoute1)(Ark_NativePointer jsView,
                             const Ark_PageRouterOptions* options,
                             const Opt_RouterFinishCallback* finishCallback,
-                            const Opt_AsyncCallback_Void* callback_);
+                            const Opt_Callback_BusinessError_Void* callback_);
     void (*replaceNamedRoute0)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_NativePointer jsView,
@@ -27059,7 +27071,7 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     void (*replaceNamedRoute1)(Ark_NativePointer jsView,
                                const Ark_PageRouterOptions* options,
                                const Opt_RouterFinishCallback* finishCallback,
-                               const Opt_AsyncCallback_Void* callback_);
+                               const Opt_Callback_BusinessError_Void* callback_);
 } GENERATED_ArkUIRouterExtenderAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {
