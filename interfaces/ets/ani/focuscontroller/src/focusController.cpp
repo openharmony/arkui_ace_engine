@@ -15,6 +15,7 @@
 #include <ani.h>
 #include <array>
 #include <iostream>
+#include <optional>
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
@@ -22,8 +23,50 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/core/common/container.h"
+#include "frameworks/base/error/error_code.h"
 
 namespace {
+static void AniThrow(ani_env* env, const std::string& errMsg, int32_t errorCode)
+{
+    CHECK_NULL_VOID(env);
+    ani_class errCls;
+    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError", &errCls)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindClass BusinessError failed.");
+        return;
+    }
+    ani_method errCtor {};
+    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &errCtor)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindMethod escompat.Error failed.");
+        return;
+    }
+    ani_string resultString {};
+    if (ANI_OK != env->String_NewUTF8(errMsg.c_str(), errMsg.size(), &resultString)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Convert string to ani string failed.");
+        return;
+    }
+    ani_ref undefinedRef {};
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Get undefined failed.");
+        return;
+    }
+    ani_object errObj {};
+    if (ANI_OK != env->Object_New(errCls, errCtor, &errObj, resultString, undefinedRef)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Create ani error object failed.");
+        return;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Int(errObj, "code", static_cast<ani_int>(errorCode))) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Set error code failed.");
+        return;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Ref(errObj, "message", resultString)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Set error message failed.");
+        return;
+    }
+    if (ANI_OK != env->ThrowError(static_cast<ani_error>(errObj))) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Throw ani error object failed.");
+        return;
+    }
+}
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -64,21 +107,9 @@ static void clearFocus(ani_env* env, [[maybe_unused]] ani_object object)
 static void requestFocus([[maybe_unused]] ani_env* env, ani_string key)
 {
     auto keyStr = ANIUtils_ANIStringToStdString(env, key);
-    auto focusCallback = [env](OHOS::Ace::NG::RequestFocusResult result) {
-        switch (result) {
-            case OHOS::Ace::NG::RequestFocusResult::NON_FOCUSABLE:
-                LOGI("This component is not focusable");
-                break;
-            case OHOS::Ace::NG::RequestFocusResult::NON_FOCUSABLE_ANCESTOR:
-                LOGI("This component has unfocusable ancestor.");
-                break;
-            case OHOS::Ace::NG::RequestFocusResult::NON_EXIST:
-                LOGI("The component doesn't exist, is currently invisible, or has been disabled.");
-                break;
-            default:
-                LOGI("An internal error occurred.");
-                break;
-        }
+    std::optional<OHOS::Ace::NG::RequestFocusResult> result;
+    auto focusCallback = [env, &result](OHOS::Ace::NG::RequestFocusResult requestResult) {
+        result = requestResult;
     };
     LOGI("focuscontroller requestFocus key %{public}s", keyStr.c_str());
     auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
@@ -88,6 +119,27 @@ static void requestFocus([[maybe_unused]] ani_env* env, ani_string key)
     focusManager->SetRequestFocusCallback(focusCallback);
     pipeline->RequestFocus(keyStr, true);
     focusManager->ResetRequestFocusCallback();
+
+    if (result.has_value()) {
+        switch (result.value()) {
+            case OHOS::Ace::NG::RequestFocusResult::NON_FOCUSABLE:
+                AniThrow(env, "This component is not focusable.",
+                    OHOS::Ace::ERROR_CODE_NON_FOCUSABLE);
+                break;
+            case OHOS::Ace::NG::RequestFocusResult::NON_FOCUSABLE_ANCESTOR:
+                AniThrow(env, "This component has unfocusable ancestor.",
+                    OHOS::Ace::ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
+                break;
+            case OHOS::Ace::NG::RequestFocusResult::NON_EXIST:
+                AniThrow(env, "The component doesn't exist, is currently invisible, or has been disabled.",
+                    OHOS::Ace::ERROR_CODE_NON_EXIST);
+                break;
+            default:
+                AniThrow(env, "An internal error occurred.",
+                    OHOS::Ace::ERROR_CODE_INTERNAL_ERROR);
+                break;
+        }
+    }
 }
 
 static void activate(ani_env* env, ani_boolean isActive, ani_object autoInactive)
