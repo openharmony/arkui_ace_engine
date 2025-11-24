@@ -103,6 +103,71 @@ HWTEST_F(UIInputEventTest, UIInputEventTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UIInputEventTest002
+ * @tc.desc: Test the UIInputEvent property functions in focus axis event case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, UIInputEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+    event.focusAxisEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+    event.focusAxisEvent.absRxValue = 0.5;
+    event.focusAxisEvent.absRyValue = 0.5;
+    event.focusAxisEvent.absThrottleValue = 0.5;
+    event.focusAxisEvent.absRudderValue = 0.5;
+    event.focusAxisEvent.absWheelValue = 0.5;
+    event.focusAxisEvent.absHat1XValue = 0.5;
+    event.focusAxisEvent.absHat1YValue = 0.5;
+    event.focusAxisEvent.absHat2XValue = 0.5;
+    event.focusAxisEvent.absHat2YValue = 0.5;
+    event.focusAxisEvent.absHat3XValue = 0.5;
+    event.focusAxisEvent.absHat3YValue = 0.5;
+    uiInputEvent.inputEvent = &event.focusAxisEvent;
+    uiInputEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.steps: step2. call functions.
+     */
+    auto absRxValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_RX);
+    auto absRyValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_RY);
+    auto absThrottleValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_THROTTLE);
+    auto absRudderValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_RUDDER);
+    auto absWheelValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_WHEEL);
+    auto absHat1XValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_HAT1X);
+    auto absHat1YValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_HAT1Y);
+    auto absHat2XValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_HAT2X);
+    auto absHat2YValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_HAT2Y);
+    auto absHat3XValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_HAT3X);
+    auto absHat3YValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, UI_FOCUS_AXIS_EVENT_ABS_HAT3Y);
+    auto errorValue = OH_ArkUI_FocusAxisEvent_GetAxisValue(inputEvent, -1);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(absRxValue, 0.5);
+    EXPECT_EQ(absRyValue, 0.5);
+    EXPECT_EQ(absThrottleValue, 0.5);
+    EXPECT_EQ(absRudderValue, 0.5);
+    EXPECT_EQ(absWheelValue, 0.5);
+    EXPECT_EQ(absHat1XValue, 0.5);
+    EXPECT_EQ(absHat1YValue, 0.5);
+    EXPECT_EQ(absHat2XValue, 0.5);
+    EXPECT_EQ(absHat2YValue, 0.5);
+    EXPECT_EQ(absHat3XValue, 0.5);
+    EXPECT_EQ(absHat3YValue, 0.5);
+    EXPECT_EQ(errorValue, 0.0);
+}
+
+/**
  * @tc.name: NativeTouchEventTest001
  * @tc.desc: Test OH_ArkUI_PointerEvent_GetChangedPointerId function.
  * @tc.type: FUNC

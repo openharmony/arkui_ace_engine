@@ -11387,6 +11387,28 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
     };
     ViewAbstract::SetOnKeyEventDispatch(frameNode, onKeyEvent);
 }
+static void FillFocusAxisValues(ArkUIFocusAxisEvent& focusAxisEvent, const FocusAxisEventInfo& info)
+{
+    focusAxisEvent.absXValue = info.GetAbsXValue();
+    focusAxisEvent.absYValue = info.GetAbsYValue();
+    focusAxisEvent.absZValue = info.GetAbsZValue();
+    focusAxisEvent.absRzValue = info.GetAbsRzValue();
+    focusAxisEvent.absGasValue = info.GetAbsGasValue();
+    focusAxisEvent.absBrakeValue = info.GetAbsBrakeValue();
+    focusAxisEvent.absHat0XValue = info.GetAbsHat0XValue();
+    focusAxisEvent.absHat0YValue = info.GetAbsHat0YValue();
+    focusAxisEvent.absRxValue = info.GetAbsRxValue();
+    focusAxisEvent.absRyValue = info.GetAbsRyValue();
+    focusAxisEvent.absThrottleValue = info.GetAbsThrottleValue();
+    focusAxisEvent.absRudderValue = info.GetAbsRudderValue();
+    focusAxisEvent.absWheelValue = info.GetAbsWheelValue();
+    focusAxisEvent.absHat1XValue = info.GetAbsHat1XValue();
+    focusAxisEvent.absHat1YValue = info.GetAbsHat1YValue();
+    focusAxisEvent.absHat2XValue = info.GetAbsHat2XValue();
+    focusAxisEvent.absHat2YValue = info.GetAbsHat2YValue();
+    focusAxisEvent.absHat3XValue = info.GetAbsHat3XValue();
+    focusAxisEvent.absHat3YValue = info.GetAbsHat3YValue();
+}
 void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11398,14 +11420,7 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.focusAxisEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
-        event.focusAxisEvent.absXValue = info.GetAbsXValue();
-        event.focusAxisEvent.absYValue = info.GetAbsYValue();
-        event.focusAxisEvent.absZValue = info.GetAbsZValue();
-        event.focusAxisEvent.absRzValue = info.GetAbsRzValue();
-        event.focusAxisEvent.absGasValue = info.GetAbsGasValue();
-        event.focusAxisEvent.absBrakeValue = info.GetAbsBrakeValue();
-        event.focusAxisEvent.absHat0XValue = info.GetAbsHat0XValue();
-        event.focusAxisEvent.absHat0YValue = info.GetAbsHat0YValue();
+        FillFocusAxisValues(event.focusAxisEvent, info);
         event.focusAxisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
         event.focusAxisEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
         event.focusAxisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());

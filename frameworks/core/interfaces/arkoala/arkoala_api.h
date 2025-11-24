@@ -435,6 +435,17 @@ struct ArkUIFocusAxisEvent {
     ArkUI_Float64 absHat0YValue;
     ArkUI_Float64 absBrakeValue;
     ArkUI_Float64 absGasValue;
+    ArkUI_Float64 absRxValue;
+    ArkUI_Float64 absRyValue;
+    ArkUI_Float64 absThrottleValue;
+    ArkUI_Float64 absRudderValue;
+    ArkUI_Float64 absWheelValue;
+    ArkUI_Float64 absHat1XValue;
+    ArkUI_Float64 absHat1YValue;
+    ArkUI_Float64 absHat2XValue;
+    ArkUI_Float64 absHat2YValue;
+    ArkUI_Float64 absHat3XValue;
+    ArkUI_Float64 absHat3YValue;
     ArkUI_Float64 tiltX;
     ArkUI_Float64 tiltY;
     ArkUI_Float64 pressure;
