@@ -157,9 +157,14 @@ int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
     return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
-int32_t InteractionImpl::AddPrivilege()
+int32_t InteractionImpl::AddPrivilege(const std::string& signature, const DragEventData& dragEventData)
 {
-    return InteractionManager::GetInstance()->AddPrivilege();
+    Msdp::DeviceStatus::DragEventData msdpDragEventData = {
+        .timestampMs = dragEventData.timestampMs,
+        .coordinateX = dragEventData.coordinateX,
+        .coordinateY = dragEventData.coordinateY,
+    };
+    return InteractionManager::GetInstance()->AddPrivilege(signature, msdpDragEventData);
 }
 
 int32_t InteractionImpl::EnterTextEditorArea(bool enable)

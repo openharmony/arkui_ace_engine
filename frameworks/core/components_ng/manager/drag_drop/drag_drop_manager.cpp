@@ -1328,9 +1328,10 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
 void DragDropManager::RequestDragSummaryInfoAndPrivilege()
 {
     RequireSummary();
-    int ret = InteractionInterface::GetInstance()->AddPrivilege();
-    if (ret != 0 && SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
+    int ret = InteractionInterface::GetInstance()->AddPrivilege(
+        lastDragPointerEvent_.signature, lastDragPointerEvent_.dragEventData);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
     }
     ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
     ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);

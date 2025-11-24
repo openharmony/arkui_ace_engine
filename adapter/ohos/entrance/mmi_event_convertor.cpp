@@ -957,6 +957,13 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     }
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetPointerEventAction(orgAction, event);
+    if (event.action == PointerAction::PULL_UP) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Transmits the authentication information.");
+        event.signature = pointerEvent->GetSignature();
+        event.dragEventData = { .timestampMs = pointerEvent->GetDistributeEventTime(),
+            .coordinateX = pointerItem.GetDisplayXPos(),
+            .coordinateY = pointerItem.GetDisplayYPos() };
+    }
 }
 
 void LogPointAxisInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
