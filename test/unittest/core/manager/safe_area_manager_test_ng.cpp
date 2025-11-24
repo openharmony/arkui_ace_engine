@@ -33,9 +33,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
-
 constexpr double DISPLAY_HEIGHT = 1280;
-
 constexpr double SYSTEM_LEFT_START = 0.0f;
 constexpr double SYSTEM_LEFT_END = 30.0f;
 constexpr double SYSTEM_RIGHT_START = DISPLAY_WIDTH - 30.0f;
@@ -79,13 +77,9 @@ class SafeAreaManagerTest : public testing::Test {
 public:
 
     static void SetUpTestCase();
-
     static void TearDownTestCase();
-
     void SetUp() override;
-
     void TearDown() override;
-
     struct Rect {
         float left;
         float right;
@@ -94,7 +88,6 @@ public:
     };
 
     void CommonExpectEQ(const Rect& s1, const Rect& s2);
-
     RefPtr<SafeAreaManager> safeAreaManager_;
     
     NG::SafeAreaInsets cutoutArea =
@@ -1365,17 +1358,14 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 {
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
-
     auto frameNode1 =
         FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<NavigationPattern>(), false);
-
     auto frameNode2 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<NavDestinationPattern>(), true);
-
     auto frameNode3 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_CONTENT_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true), false);
-
     auto frameNode4 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode1), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
@@ -1415,6 +1405,7 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         { false, true },
         { false, false }
     };
+
     for (int i= 0; i < modeArr.size(); ++i) {
         safeAreaManager_->SetKeyBoardAvoidMode(modeArr[i]);
         EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);
@@ -1434,6 +1425,7 @@ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInset, TestSize.Level1)
     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(keyboardInset.start, inset.start);
     EXPECT_EQ(keyboardInset.end, inset.end);
+
     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     keyboardInset = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
@@ -1449,11 +1441,14 @@ HWTEST_F(SafeAreaManagerTest, SetAndGetKeyboardInsetImplTest, TestSize.Level1)
 {
     safeAreaManager_->SetKeyboardInsetImpl([](SafeAreaManager* manager) { return manager->GetKeyboardWebInset(); });
     EXPECT_NE(safeAreaManager_->getKeyboardInset, nullptr);
+
     auto ret = safeAreaManager_->GetKeyboardInsetImpl();
     auto compare = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(ret, compare);
+
     safeAreaManager_->SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager*)>());
     EXPECT_EQ(safeAreaManager_->getKeyboardInset, nullptr);
+
     ret = safeAreaManager_->GetKeyboardInsetImpl();
     compare = safeAreaManager_->GetKeyboardInset();
     EXPECT_EQ(ret, compare);

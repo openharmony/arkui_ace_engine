@@ -64,6 +64,7 @@ import {
     HoverEffect,
     Visibility,
     ItemAlign,
+    LocalizedAlignment,
     Direction,
     Axis,
     FunctionKey,
@@ -308,6 +309,7 @@ export interface CommonMethod {
     flexShrink(value: number | undefined): this;
     flexBasis(value: number | string | undefined): this;
     alignSelf(value: ItemAlign | undefined): this;
+    layoutGravity(value: LocalizedAlignment | undefined): this;
     displayPriority(value: number | undefined): this;
     zIndex(value: number | undefined): this;
     direction(value: Direction | undefined): this;
@@ -563,6 +565,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public flexShrinkAttribute(value: number | undefined): void;
     public flexBasisAttribute(value: number | string | undefined): void;
     public alignSelfAttribute(value: ItemAlign | undefined): void;
+    public layoutGravityAttribute(value: LocalizedAlignment | undefined): void;
     public displayPriorityAttribute(value: number | undefined): void;
     public zIndexAttribute(value: number | undefined): void;
     public directionAttribute(value: Direction | undefined): void;
@@ -868,6 +871,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public flexShrink(value: number | undefined): this;
     public flexBasis(value: number | string | undefined): this;
     public alignSelf(value: ItemAlign | undefined): this;
+    public layoutGravity(value: LocalizedAlignment | undefined): this;
     public displayPriority(value: number | undefined): this;
     public zIndex(value: number | undefined): this;
     public direction(value: Direction | undefined): this;
@@ -1096,6 +1100,7 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
     public flexShrink_value?: number | undefined;
     public flexBasis_value?: number | string | undefined;
     public alignSelf_value?: ItemAlign | undefined;
+    public layoutGravity_value?: LocalizedAlignment | undefined;
     public displayPriority_value?: number | undefined;
     public zIndex_value?: number | undefined;
     public direction_value?: Direction | undefined;
@@ -1262,6 +1267,7 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
     public flexShrink(value: number | undefined): this;
     public flexBasis(value: number | string | undefined): this;
     public alignSelf(value: ItemAlign | undefined): this;
+    public layoutGravity(value: LocalizedAlignment | undefined): this;
     public displayPriority(value: number | undefined): this;
     public zIndex(value: number | undefined): this;
     public direction(value: Direction | undefined): this;

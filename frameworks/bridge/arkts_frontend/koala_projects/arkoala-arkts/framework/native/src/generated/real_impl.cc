@@ -1935,6 +1935,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Opt_ItemAlign* value)
     {
     }
+    void SetLayoutGravityImpl(Ark_NativePointer node,
+                              const Opt_LocalizedAlignment* value)
+    {
+    }
     void SetDisplayPriorityImpl(Ark_NativePointer node,
                                 const Opt_Number* value)
     {
@@ -1948,7 +1952,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetAlignImpl(Ark_NativePointer node,
-                      const Opt_Alignment* value)
+                      const Opt_Union_Alignment_LocalizedAlignment* value)
     {
     }
     void SetPositionImpl(Ark_NativePointer node,
@@ -8509,6 +8513,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetFlexShrinkImpl,
             CommonMethodModifier::SetFlexBasisImpl,
             CommonMethodModifier::SetAlignSelfImpl,
+            CommonMethodModifier::SetLayoutGravityImpl,
             CommonMethodModifier::SetDisplayPriorityImpl,
             CommonMethodModifier::SetZIndexImpl,
             CommonMethodModifier::SetDirectionImpl,

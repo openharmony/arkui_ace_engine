@@ -24,7 +24,7 @@ import { int32 } from "@koalaui/common"
 import { ModifierState } from "./CommonModifier"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
-import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
+import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
 import { LengthMetrics, ColorMetrics} from "arkui.Graphics"
 import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
@@ -228,6 +228,8 @@ export class CommonMethodModifier implements CommonMethod {
     _flexBasis_0_0value?: number | string | undefined
     _alignSelf_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignSelf_0_0value?: ItemAlign | undefined
+    _layoutGravity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _layoutGravity_0_0value?: LocalizedAlignment | undefined
     _displayPriority_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _displayPriority_0_0value?: number | undefined
     _zIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -235,7 +237,7 @@ export class CommonMethodModifier implements CommonMethod {
     _direction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _direction_0_0value?: Direction | undefined
     _align_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _align_0_0value?: Alignment | undefined
+    _align_0_0value?: Alignment | LocalizedAlignment | undefined
     _position_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _position_0_0value?: Position | Edges | LocalizedEdges | undefined
     _markAnchor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2154,6 +2156,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (this._layoutGravity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._layoutGravity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLayoutGravityAttribute((this._layoutGravity_0_0value as LocalizedAlignment | undefined));
+                    this._layoutGravity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._layoutGravity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._layoutGravity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLayoutGravityAttribute((undefined as LocalizedAlignment | undefined));
+                }
+            }
+        }
         if (this._displayPriority_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._displayPriority_0_flag) {
@@ -2212,7 +2232,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._align_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignAttribute((this._align_0_0value as Alignment | undefined));
+                    peer.setAlignAttribute((this._align_0_0value as Alignment | LocalizedAlignment | undefined));
                     this._align_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2222,7 +2242,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._align_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignAttribute((undefined as Alignment | undefined));
+                    peer.setAlignAttribute((undefined as Alignment | LocalizedAlignment | undefined));
                 }
             }
         }
@@ -5279,6 +5299,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._layoutGravity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._layoutGravity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.layoutGravity(modifier._layoutGravity_0_0value);
+                    break;
+                }
+                default: {
+                    this.layoutGravity((undefined as LocalizedAlignment | undefined));
+                }
+            }
+        }
         if (modifier._displayPriority_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._displayPriority_0_flag) {
@@ -5327,7 +5360,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.align((undefined as Alignment | undefined));
+                    this.align((undefined as Alignment | LocalizedAlignment | undefined));
                 }
             }
         }
@@ -7683,6 +7716,17 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    layoutGravity(value: LocalizedAlignment | undefined): this {
+        if (((this._layoutGravity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._layoutGravity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._layoutGravity_0_0value = value
+        } else
+        {
+            this._layoutGravity_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     displayPriority(value: number | undefined): this {
         if (((this._displayPriority_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._displayPriority_0_0value) !== (value)))
         {
@@ -7716,7 +7760,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    align(value: Alignment | undefined): this {
+    align(value: Alignment | LocalizedAlignment | undefined): this {
         if (((this._align_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._align_0_flag = AttributeUpdaterFlag.UPDATE

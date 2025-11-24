@@ -705,6 +705,31 @@ SetFocusData Convert(const Ark_FocusMovement& src)
 }
 
 template<>
+Alignment Convert(const Ark_LocalizedAlignment& src)
+{
+    switch (src) {
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP_START:
+            return Alignment::TOP_LEFT;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP:
+            return Alignment::TOP_CENTER;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_TOP_END:
+            return Alignment::TOP_RIGHT;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_START:
+            return Alignment::CENTER_LEFT;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_CENTER:
+            return Alignment::CENTER;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_END:
+            return Alignment::CENTER_RIGHT;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM_START:
+            return Alignment::BOTTOM_LEFT;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM:
+            return Alignment::BOTTOM_CENTER;
+        case Ark_LocalizedAlignment::ARK_LOCALIZED_ALIGNMENT_BOTTOM_END:
+            return Alignment::BOTTOM_RIGHT;
+    }
+}
+
+template<>
 void AssignCast(std::optional<BackgroundImageSizeType>& dst, const Ark_ImageSize& src)
 {
     switch (src) {
@@ -3765,6 +3790,17 @@ void SetAlignSelfImpl(Ark_NativePointer node,
         ViewAbstractModelStatic::SetAlignSelf(frameNode, OHOS::Ace::FlexAlign::AUTO);
     }
 }
+void SetLayoutGravityImpl(Ark_NativePointer node,
+                          const Opt_LocalizedAlignment* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto result = Converter::OptConvertPtr<OHOS::Ace::Alignment>(value);
+    if (result) {
+        // Implement Reset value
+        ViewAbstractModelStatic::SetLayoutGravity(frameNode, result.value());
+    }
+}
 void SetDisplayPriorityImpl(Ark_NativePointer node,
                             const Opt_Number* value)
 {
@@ -3802,14 +3838,34 @@ void SetDirectionImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetLayoutDirection(frameNode, direction.value());
 }
 void SetAlignImpl(Ark_NativePointer node,
-                  const Opt_Alignment* value)
+                  const Opt_Union_Alignment_LocalizedAlignment* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto alignment = Converter::OptConvertPtr<Alignment>(value);
-    if (alignment) {
-        // Implement Reset value
-        ViewAbstractModelStatic::SetAlign(frameNode, alignment.value());
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    switch (optValue->selector) {
+        case CASE_0: {
+            auto alignValue = optValue->value0;
+            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignValue);
+            if (result) {
+                ViewAbstractModelStatic::SetAlign(frameNode, result.value());
+            }
+            break;
+        }
+        case CASE_1: {
+            auto alignValue = optValue->value1;
+            auto result = Converter::OptConvert<OHOS::Ace::Alignment>(alignValue);
+            if (result) {
+                ViewAbstractModelStatic::SetAlign(frameNode, result.value());
+            }
+            break;
+        }
+        default:
+            LOGE("ARKOALA:SetAlignImpl: Unexpected value->selector: %{public}d\n", optValue->selector);
+            return;
     }
 }
 void SetPositionImpl(Ark_NativePointer node,
@@ -6032,6 +6088,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetFlexShrinkImpl,
         CommonMethodModifier::SetFlexBasisImpl,
         CommonMethodModifier::SetAlignSelfImpl,
+        CommonMethodModifier::SetLayoutGravityImpl,
         CommonMethodModifier::SetDisplayPriorityImpl,
         CommonMethodModifier::SetZIndexImpl,
         CommonMethodModifier::SetDirectionImpl,

@@ -777,6 +777,8 @@ typedef struct Opt_uiObserver_NavigationInfo Opt_uiObserver_NavigationInfo;
 typedef struct unifiedDataChannel_UnifiedDataPeer unifiedDataChannel_UnifiedDataPeer;
 typedef struct unifiedDataChannel_UnifiedDataPeer* Ark_unifiedDataChannel_UnifiedData;
 typedef struct Opt_unifiedDataChannel_UnifiedData Opt_unifiedDataChannel_UnifiedData;
+typedef struct Ark_Union_Alignment_LocalizedAlignment Ark_Union_Alignment_LocalizedAlignment;
+typedef struct Opt_Union_Alignment_LocalizedAlignment Opt_Union_Alignment_LocalizedAlignment;
 typedef struct Ark_Union_Boolean_I64 Ark_Union_Boolean_I64;
 typedef struct Opt_Union_Boolean_I64 Opt_Union_Boolean_I64;
 typedef struct Ark_Union_CircleShape_EllipseShape_PathShape_RectShape Ark_Union_CircleShape_EllipseShape_PathShape_RectShape;
@@ -5301,6 +5303,21 @@ typedef struct Opt_LoadingProgressStyle {
     Ark_Tag tag;
     Ark_LoadingProgressStyle value;
 } Opt_LoadingProgressStyle;
+typedef enum Ark_LocalizedAlignment {
+    ARK_LOCALIZED_ALIGNMENT_TOP_START,
+    ARK_LOCALIZED_ALIGNMENT_TOP,
+    ARK_LOCALIZED_ALIGNMENT_TOP_END,
+    ARK_LOCALIZED_ALIGNMENT_START,
+    ARK_LOCALIZED_ALIGNMENT_CENTER,
+    ARK_LOCALIZED_ALIGNMENT_END,
+    ARK_LOCALIZED_ALIGNMENT_BOTTOM_START,
+    ARK_LOCALIZED_ALIGNMENT_BOTTOM,
+    ARK_LOCALIZED_ALIGNMENT_BOTTOM_END,
+} Ark_LocalizedAlignment;
+typedef struct Opt_LocalizedAlignment {
+    Ark_Tag tag;
+    Ark_LocalizedAlignment value;
+} Opt_LocalizedAlignment;
 typedef enum Ark_LocalizedBarrierDirection {
     ARK_LOCALIZED_BARRIER_DIRECTION_START = 0,
     ARK_LOCALIZED_BARRIER_DIRECTION_END = 1,
@@ -8337,6 +8354,18 @@ typedef struct Opt_unifiedDataChannel_UnifiedData {
     Ark_Tag tag;
     Ark_unifiedDataChannel_UnifiedData value;
 } Opt_unifiedDataChannel_UnifiedData;
+typedef struct Ark_Union_Alignment_LocalizedAlignment {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Alignment value0;
+        Ark_LocalizedAlignment value1;
+    };
+} Ark_Union_Alignment_LocalizedAlignment;
+typedef struct Opt_Union_Alignment_LocalizedAlignment {
+    Ark_Tag tag;
+    Ark_Union_Alignment_LocalizedAlignment value;
+} Opt_Union_Alignment_LocalizedAlignment;
 typedef struct Ark_Union_Boolean_I64 {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -22050,6 +22079,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_Union_Number_String* value);
     void (*setAlignSelf)(Ark_NativePointer node,
                          const Opt_ItemAlign* value);
+    void (*setLayoutGravity)(Ark_NativePointer node,
+                             const Opt_LocalizedAlignment* value);
     void (*setDisplayPriority)(Ark_NativePointer node,
                                const Opt_Number* value);
     void (*setZIndex)(Ark_NativePointer node,
@@ -22057,7 +22088,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setDirection)(Ark_NativePointer node,
                          const Opt_Direction* value);
     void (*setAlign)(Ark_NativePointer node,
-                     const Opt_Alignment* value);
+                     const Opt_Union_Alignment_LocalizedAlignment* value);
     void (*setPosition)(Ark_NativePointer node,
                         const Opt_Union_Position_Edges_LocalizedEdges* value);
     void (*setMarkAnchor)(Ark_NativePointer node,
