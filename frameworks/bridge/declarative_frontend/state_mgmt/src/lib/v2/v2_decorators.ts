@@ -264,6 +264,18 @@ const Monitor = function (key : string, ...keys: string[]): (target: any, _: any
   };
 };
 
+const SyncMonitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
+  // Path can end with the star
+  const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
+  return function (target, _, descriptor): void {
+    stateMgmtConsole.debug(`@SyncMonitor('${pathsUniqueString}')`);
+    let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + target.constructor.name);
+    const monitorFunc = descriptor.value;
+    target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc
+                      : target[watchProp] = { [pathsUniqueString]: monitorFunc };
+  };
+};
+
 /**
 * @Monitor decorated function parameter type IMonitor
 * and sub-type IMonitorValue<T>
