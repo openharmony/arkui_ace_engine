@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
+import { IFactoryInternal } from '../base/iFactoryInternal';
+import { TrackedMutableStateMeta } from '../base/mutableStateMeta';
 import { IMutableKeyedStateMeta, IMutableStateMeta } from '../decorator';
-import { IFactoryInternal } from './iFactoryInternal';
-import { IBackingValue } from './iBackingValue';
-import { DecoratorBackingValue } from './backingValue';
-import { MutableKeyedStateMeta, MutableStateMeta } from './mutableStateMeta';
+import { IBackingValue } from '../base/iBackingValue';
 import { StateMgmtTool } from '#stateMgmtTool';
+import { DecoratorBackingValue } from '../base/backingValue';
+import { MutableKeyedStateMeta, MutableStateMeta } from '../base/mutableStateMeta';
 
+// FactoryInternalImpl contains implementation needed by unit test framework tracking
 export class FactoryInternalImpl implements IFactoryInternal {
     public mkDecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
         return new DecoratorBackingValue<T>(info, initValue);
     }
     public mkMutableStateMeta(info: string): IMutableStateMeta {
-        return new MutableStateMeta(info);
+        return new TrackedMutableStateMeta(info);
     }
     public mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta {
         return new MutableKeyedStateMeta(info);
