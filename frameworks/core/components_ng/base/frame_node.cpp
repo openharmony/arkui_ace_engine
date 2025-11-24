@@ -5666,12 +5666,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 
 void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
-    if (SystemProperties::GetSyncDebugTraceEnabled()) {
-        ACE_LAYOUT_TRACE_BEGIN("SyncGeometryNode[%s][self:%d][parent:%d][key:%s][paintRect:%s][needSyncRsNode:%d]",
-            tag_.c_str(), nodeId_, GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str(),
-            renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
-        ACE_LAYOUT_TRACE_END()
-    }
+    ACE_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s][paintRect:%s][needSyncRsNode:%d]",
+        tag_.c_str(), nodeId_, GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str(),
+        renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
 
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
@@ -5958,6 +5955,8 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 
 void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    ACE_SCOPED_TRACE("DoSetActiveChildRange id:%d %d:%d %d:%d %d", 
+        GetId(), start, end, cacheStart, cacheEnd, showCache);
     if (showCache) {
         start -= cacheStart;
         end += cacheEnd;
