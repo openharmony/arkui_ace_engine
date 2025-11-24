@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { memo_stable } from '@koalaui/runtime/annotations';
+import { memo_stable } from '@koalaui.runtime.annotations';
 import {
     ArkCommonMethodPeer,
     ArkCommonMethodComponent,
@@ -25,9 +25,9 @@ import {
     BackgroundBlurStyleOptions,
     DividerStyle,
 } from 'arkui.component.common';
-import { int32 } from '@koalaui/compat';
-import { KPointer } from '@koalaui/interop';
-import { ComponentBase } from 'arkui/ComponentBase';
+import { int32 } from '@koalaui.compat';
+import { KPointer } from '@koalaui.interop';
+import { ComponentBase } from 'arkui.ComponentBase';
 import { ResourceColor, Length } from 'arkui.component.units';
 import { PageFlipMode, EdgeEffect } from 'arkui.component.enums';
 import {

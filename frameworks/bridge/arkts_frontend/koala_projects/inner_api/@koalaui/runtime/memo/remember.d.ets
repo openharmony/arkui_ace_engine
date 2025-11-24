@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-import { memo } from '@koalaui/runtime/annotations'
-
-@memo
+import {
+    __memo_context_type as __memo_context_type,
+    __memo_id_type as __memo_id_type,
+} from 'arkui.stateManagement.runtime';
 export declare function remember<Value>(
+    __memo_context: __memo_context_type,
+    __memo_id: __memo_id_type,
     compute: () => Value
 ): Value;

@@ -15,7 +15,7 @@
 
 import { int32 } from '@koalaui/compat';
 import { KPointer } from '@koalaui/interop';
-import { ComponentBase } from 'arkui/ComponentBase';
+import { ComponentBase } from 'arkui.ComponentBase';
 import {
     ArkCommonMethodPeer,
     CommonMethod,

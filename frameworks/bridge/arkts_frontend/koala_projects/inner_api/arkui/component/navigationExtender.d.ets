@@ -14,8 +14,6 @@
  */
 
 import { NavPathStack, NavPathInfo, NavigationOptions } from 'arkui.component.navigation'
-import { ComponentBase } from 'arkui/ComponentBase';
-import { PeerNode } from 'arkui/PeerNode';
 
 type KPointer = long;
 type int32 = int;
@@ -35,8 +33,3 @@ export declare class NavExtender {
     public static popToName(pathStack: NavPathStack, name: string, animated: boolean): number;
 }
 export type NavExtender_OnUpdateStack = () => void;
-
-export declare class ArkComponentRootPeer extends PeerNode {
-    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0);
-    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkComponentRootPeer;
-}

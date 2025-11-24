@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { memo_stable } from '@koalaui/runtime/annotations';
+import { memo_stable } from '@koalaui.runtime.annotations';
 import {
     ArkCommonMethodPeer,
     CommonMethod,
@@ -22,7 +22,7 @@ import {
 } from 'arkui/component/common';
 import { ShadowOptions, AttributeModifier } from 'arkui.component.common';
 import { CustomBuilder } from 'arkui.component.builder';
-import { ComponentBase } from 'arkui/ComponentBase';
+import { ComponentBase } from 'arkui.ComponentBase';
 import { ResourceColor, Length, Font } from 'arkui.component.units';
 import {
     MarqueeState,
