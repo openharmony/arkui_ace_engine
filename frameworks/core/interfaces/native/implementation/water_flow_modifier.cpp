@@ -269,8 +269,7 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto countValue = Converter::OptConvertPtr<int32_t>(count);
     auto showValue = Converter::OptConvertPtr<bool>(show);
-    WaterFlowModelStatic::SetCachedCount(frameNode, countValue);
-    WaterFlowModelStatic::SetShowCached(frameNode, showValue);
+    WaterFlowModelStatic::SetCachedCount(frameNode, countValue, showValue);
 }
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
