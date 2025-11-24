@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/text_style.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -55,6 +56,9 @@ public:
     void SetOnBackPressedConsumed();
     void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
         std::map<std::string, std::string>& params);
+#ifndef PREVIEW
+    ModalUIExtensionCallbacks GetModalUIExtensionCallbacks(bool firstTry);
+#endif
     static void BuildAppbar(RefPtr<PipelineBase> pipleline);
     static void RegistAppBarNodeBuilder(
         std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder);

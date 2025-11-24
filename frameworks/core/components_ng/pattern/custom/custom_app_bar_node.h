@@ -29,6 +29,7 @@ const std::string ARKUI_APP_BAR_SCREEN = "arkui_app_bar_screen";
 const std::string ARKUI_APP_BG_COLOR = "arkui_app_bg_color";
 const std::string ARKUI_MENU_BAR_VISIBLE = "arkui_menu_bar_visible";
 const std::string ARKUI_EXTENSION_HOST_PARAMS = "arkui_extension_host_params";
+const std::string ARKUI_APP_BAR_RECEIVE = "arkui_app_bar_receive";
 
 class ACE_EXPORT CustomAppBarNode : public CustomNode {
     DECLARE_ACE_TYPE(CustomAppBarNode, CustomNode);
