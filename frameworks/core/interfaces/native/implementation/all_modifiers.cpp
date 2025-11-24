@@ -377,6 +377,7 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
 const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
+const GENERATED_ArkUIUIContextGetInfoAccessor* GetUIContextGetInfoAccessor();
 const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor();
 const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor();
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor();
@@ -694,6 +695,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUICommonEventAccessor,
         GetUIContextAtomicServiceBarAccessor,
         GetUIExtensionProxyAccessor,
+        GetUIContextGetInfoAccessor,
         GetUrlStyleAccessor,
         GetVideoControllerAccessor,
         GetWaterFlowSectionsAccessor,

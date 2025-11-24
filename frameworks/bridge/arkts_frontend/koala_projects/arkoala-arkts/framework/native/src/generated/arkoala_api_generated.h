@@ -8245,6 +8245,7 @@ typedef struct Ark_uiObserver_NavigationInfo {
     /* kind: Interface */
     Ark_String navigationId;
     Ark_NavPathStack pathStack;
+    Opt_Int32 uniqueId;
 } Ark_uiObserver_NavigationInfo;
 typedef struct Opt_uiObserver_NavigationInfo {
     Ark_Tag tag;
@@ -27708,6 +27709,10 @@ typedef struct GENERATED_ArkUIUIExtensionProxyAccessor {
                                                         const Opt_Callback_UIExtensionProxy_Void* callback_);
 } GENERATED_ArkUIUIExtensionProxyAccessor;
 
+typedef struct GENERATED_ArkUIUIContextGetInfoAccessor {
+    Opt_uiObserver_NavigationInfo (*getNavigationInfoByUniqueId)(Ark_Int32 id);
+} GENERATED_ArkUIUIContextGetInfoAccessor;
+
 typedef struct GENERATED_ArkUIUrlStyleAccessor {
     void (*destroyPeer)(Ark_UrlStyle peer);
     Ark_UrlStyle (*construct)(const Ark_String* url);
@@ -28199,6 +28204,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUICommonEventAccessor* (*getUICommonEventAccessor)();
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
     const GENERATED_ArkUIUIExtensionProxyAccessor* (*getUIExtensionProxyAccessor)();
+    const GENERATED_ArkUIUIContextGetInfoAccessor* (*getUIContextGetInfoAccessor)();
     const GENERATED_ArkUIUrlStyleAccessor* (*getUrlStyleAccessor)();
     const GENERATED_ArkUIVideoControllerAccessor* (*getVideoControllerAccessor)();
     const GENERATED_ArkUIWaterFlowSectionsAccessor* (*getWaterFlowSectionsAccessor)();

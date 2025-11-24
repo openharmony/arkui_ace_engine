@@ -169,6 +169,7 @@ struct ArkUIDragInfo {
 struct ArkUINavigationInfo {
     std::string navigationId;
     ani_ref navPathStack;
+    ani_int uniqueId;
 };
 
 struct ArkUINavDestinationInfo {

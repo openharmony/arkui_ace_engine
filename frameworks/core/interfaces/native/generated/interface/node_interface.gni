@@ -311,6 +311,7 @@ generated_sources = [
   "implementation/transition_effect_accessor.cpp",
   "implementation/ui_common_event_accessor.cpp",
   "implementation/ui_context_atomic_service_bar_accessor.cpp",
+  "implementation/ui_context_get_info_accessor.cpp",
   "implementation/ui_extension_component_modifier.cpp",
   "implementation/ui_extension_proxy_accessor.cpp",
   "implementation/ui_extension_proxy_peer.cpp",
