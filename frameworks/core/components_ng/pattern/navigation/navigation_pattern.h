@@ -464,6 +464,7 @@ public:
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
     std::unique_ptr<JsonValue> GetTopNavdestinationJson(bool needParam);
     RefPtr<NavigationPattern> GetParentNavigationPattern();
+    SizeF GetNavigationFrameSize();
     void RestoreJsStackIfNeeded();
 
     RefPtr<FrameNode> GetNavBasePageNode() const
