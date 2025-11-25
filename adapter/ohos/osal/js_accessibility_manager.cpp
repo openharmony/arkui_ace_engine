@@ -5366,7 +5366,7 @@ RetError JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAcc
         realMode &= ~static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN_REDUCED);
         realMode |= static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN);
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "search by id: %{public}" PRId64 ", mode: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_WEB, "ArkWeb search by id: %{public}" PRId64 ", mode: %{public}d",
         elementId, mode);
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
@@ -6932,8 +6932,8 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityIdNG(int64_t ele
     std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
     const RefPtr<NG::WebPattern>& webPattern)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "elementId: %{public}" PRId64 ", treeId: %{public}d, mode: %{public}d",
-        elementId, treeId_, mode);
+    TAG_LOGD(AceLogTag::ACE_WEB, "SearchWebElementInfoByIdNG elementId: %{public}" PRId64
+        ", treeId: %{public}d, mode: %{public}d", elementId, treeId_, mode);
     auto mainContext = context_.Upgrade();
     CHECK_NULL_VOID(mainContext);
 
@@ -6951,7 +6951,12 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityIdNG(int64_t ele
     auto node = webPattern->GetTransitionalNodeById(elementId);
     CHECK_NULL_VOID(node);
     UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
-    nodeInfo.SetAccessibilityVisible(webPattern->GetAccessibilityVisible(elementId));
+    NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(webNode);
+    nodeInfo.SetAccessibilityVisible(webPattern->GetAccessibilityVisible(elementId)
+        && webNode->GetAccessibilityVisible());
+    TAG_LOGD(AceLogTag::ACE_WEB, "SearchWebElementInfoByIdNG elementId: %{public}" PRId64
+        ", element AccessibilityVisible: %{public}d, Web AccessibilityVisible: %{public}d",
+        elementId, webPattern->GetAccessibilityVisible(elementId), webNode->GetAccessibilityVisible());
     infos.push_back(nodeInfo);
     SearchParameter param {elementId, "", mode, 0};
     UpdateWebCacheInfo(infos, elementId, commonProperty, ngPipeline, param, webPattern);
