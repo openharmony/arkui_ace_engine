@@ -542,15 +542,21 @@ void SetOnChangeImpl(Ark_NativePointer node,
         Converter::ArkArrayHolder<Array_String> stringHolder(values);
         Array_String stringArrayValues = stringHolder.ArkValue();
         auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
+
         std::vector<int32_t> selectedIndexes;
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
-
         Converter::ArkArrayHolder<Array_Int32> numberHolder(selectedIndexes);
         Array_Int32 intArrayValues = numberHolder.ArkValue();
-        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
-        arkCallback.Invoke(value, index);
+        if (static_cast<int32_t>(selectedIndexes.size()) == 1) {
+            auto singleIndex = Converter::ArkUnion<Ark_Union_I32_Array_I32, Ark_Int32>(
+                Converter::ArkValue<Ark_Int32>(selectedIndexes.at(0)));
+            arkCallback.Invoke(value, singleIndex);
+        } else {
+            auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
+            arkCallback.Invoke(value, index);
+        }
     };
     TextPickerModelStatic::SetOnCascadeChange(frameNode, std::move(onChange));
 }
@@ -568,13 +574,20 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
             const std::vector<double>& selecteds) {
         Array_String stringArrayValues = Converter::ArkValue<Array_String>(values, Converter::FC);
         auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
+
         std::vector<int32_t> selectedIndexes;
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
         Array_Int32 intArrayValues = Converter::ArkValue<Array_Int32>(selectedIndexes, Converter::FC);
-        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
-        arkCallback.Invoke(value, index);
+        if (static_cast<int32_t>(selectedIndexes.size()) == 1) {
+            auto singleIndex = Converter::ArkUnion<Ark_Union_I32_Array_I32, Ark_Int32>(
+                Converter::ArkValue<Ark_Int32>(selectedIndexes.at(0)));
+            arkCallback.Invoke(value, singleIndex);
+        } else {
+            auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
+            arkCallback.Invoke(value, index);
+        }
     };
     TextPickerModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
@@ -592,13 +605,20 @@ void SetOnEnterSelectedAreaImpl(Ark_NativePointer node,
             const std::vector<double>& selecteds) {
         Array_String stringArrayValues = Converter::ArkValue<Array_String>(values, Converter::FC);
         auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
+
         std::vector<int32_t> selectedIndexes;
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
         Array_Int32 intArrayValues = Converter::ArkValue<Array_Int32>(selectedIndexes, Converter::FC);
-        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
-        arkCallback.Invoke(value, index);
+        if (static_cast<int32_t>(selectedIndexes.size()) == 1) {
+            auto singleIndex = Converter::ArkUnion<Ark_Union_I32_Array_I32, Ark_Int32>(
+                Converter::ArkValue<Ark_Int32>(selectedIndexes.at(0)));
+            arkCallback.Invoke(value, singleIndex);
+        } else {
+            auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
+            arkCallback.Invoke(value, index);
+        }
     };
     TextPickerModelStatic::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));
 }
