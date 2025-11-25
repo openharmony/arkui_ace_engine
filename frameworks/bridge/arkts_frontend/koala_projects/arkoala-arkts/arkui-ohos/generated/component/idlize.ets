@@ -1051,9 +1051,9 @@ export class FrameNodeExtender {
         ArkUIGeneratedNativeModule._FrameNodeExtender_setMeasuredSize(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    static setLayoutPosition_serialize(peer: FrameNode, position: Position): void {
+    static setLayoutPosition_serialize(peer: FrameNode, position: Vector2): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        Position_serializer.write(thisSerializer, position)
+        Vector2_serializer.write(thisSerializer, position)
         ArkUIGeneratedNativeModule._FrameNodeExtender_setLayoutPosition(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -1063,37 +1063,61 @@ export class FrameNodeExtender {
         ArkUIGeneratedNativeModule._FrameNodeExtender_measure(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    static layout_serialize(peer: FrameNode, position: Position): void {
+    static layout_serialize(peer: FrameNode, position: Vector2): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        Position_serializer.write(thisSerializer, position)
+        Vector2_serializer.write(thisSerializer, position)
         ArkUIGeneratedNativeModule._FrameNodeExtender_layout(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     static setNeedsLayout_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_setNeedsLayout(extractors.toFrameNodePtr(peer))
     }
-    static getPositionToScreen_serialize(peer: FrameNode): Position {
+    static getPositionToScreen_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreen(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
-    static getPositionToWindowWithTransform_serialize(peer: FrameNode): Position {
+    static getPositionToWindowWithTransform_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindowWithTransform(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
-    static getPositionToParentWithTransform_serialize(peer: FrameNode): Position {
+    static getPositionToParentWithTransform_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParentWithTransform(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
-    static getPositionToScreenWithTransform_serialize(peer: FrameNode): Position {
+    static getPositionToScreenWithTransform_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreenWithTransform(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+         const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getUserConfigBorderWidth_serialize(peer: FrameNode): NodeEdgesLengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigBorderWidth(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : NodeEdgesLengthMetrics = NodeEdgesLengthMetrics_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getUserConfigPadding_serialize(peer: FrameNode): NodeEdgesLengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigPadding(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : NodeEdgesLengthMetrics = NodeEdgesLengthMetrics_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getUserConfigMargin_serialize(peer: FrameNode): NodeEdgesLengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigMargin(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : NodeEdgesLengthMetrics = NodeEdgesLengthMetrics_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getUserConfigSize_serialize(peer: FrameNode): SizeTLengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigSize(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : SizeTLengthMetrics = SizeTLengthMetrics_serializer.read(retvalDeserializer)
         return returnResult
     }
     static getFrameNodeByKey_serialize(name: string): KPointer {
@@ -1301,9 +1325,9 @@ export class FrameNodeExtender {
         FrameNodeExtender.setMeasuredSize_serialize(peer_casted, size_casted)
         return
     }
-    public static setLayoutPosition(peer: FrameNode, position: Position): void {
+    public static setLayoutPosition(peer: FrameNode, position: Vector2): void {
         const peer_casted = peer as (FrameNode)
-        const position_casted = position as (Position)
+        const position_casted = position as (Vector2)
         FrameNodeExtender.setLayoutPosition_serialize(peer_casted, position_casted)
         return
     }
@@ -1313,9 +1337,9 @@ export class FrameNodeExtender {
         FrameNodeExtender.measure_serialize(peer_casted, constraint_casted)
         return
     }
-    public static layout(peer: FrameNode, position: Position): void {
+    public static layout(peer: FrameNode, position: Vector2): void {
         const peer_casted = peer as (FrameNode)
-        const position_casted = position as (Position)
+        const position_casted = position as (Vector2)
         FrameNodeExtender.layout_serialize(peer_casted, position_casted)
         return
     }
@@ -1324,21 +1348,37 @@ export class FrameNodeExtender {
         FrameNodeExtender.setNeedsLayout_serialize(peer_casted)
         return
     }
-    public static getPositionToScreen(peer: FrameNode): Position {
+    public static getPositionToScreen(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToScreen_serialize(peer_casted)
     }
-    public static getPositionToWindowWithTransform(peer: FrameNode): Position {
+    public static getPositionToWindowWithTransform(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToWindowWithTransform_serialize(peer_casted)
     }
-    public static getPositionToParentWithTransform(peer: FrameNode): Position {
+    public static getPositionToParentWithTransform(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToParentWithTransform_serialize(peer_casted)
     }
-    public static getPositionToScreenWithTransform(peer: FrameNode): Position {
+    public static getPositionToScreenWithTransform(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToScreenWithTransform_serialize(peer_casted)
+    }
+    public static getUserConfigBorderWidth(peer: FrameNode): NodeEdgesLengthMetrics {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getUserConfigBorderWidth_serialize(peer_casted)
+    }
+    public static getUserConfigPadding(peer: FrameNode): NodeEdgesLengthMetrics {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getUserConfigPadding_serialize(peer_casted)
+    }
+    public static getUserConfigMargin(peer: FrameNode): NodeEdgesLengthMetrics {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getUserConfigMargin_serialize(peer_casted)
+    }
+    public static getUserConfigSize(peer: FrameNode): SizeTLengthMetrics {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getUserConfigSize_serialize(peer_casted)
     }
     public static getFrameNodeByKey(name: string): KPointer {
         const name_casted = name as (string)
@@ -4212,6 +4252,16 @@ export interface IndicatorStyle {
     mask?: boolean;
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
+export interface NodeEdgesLengthMetrics {
+    top: LengthMetrics | undefined;
+    left: LengthMetrics | undefined;
+    bottom: LengthMetrics | undefined;
+    right: LengthMetrics | undefined;
+}
+export interface SizeTLengthMetrics {
+    width: LengthMetrics;
+    height: LengthMetrics;
+}
 export type NavExtender_OnUpdateStack = () => void;
 export interface BorderRadiuses_graphics {
     topLeft: number;
@@ -4914,6 +4964,22 @@ export class PostMessageOptions_serializer {
         return value
     }
 }
+export class SizeTLengthMetrics_serializer {
+    public static write(buffer: SerializerBase, value: SizeTLengthMetrics): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForWidth  = value.width
+        LengthMetrics_serializer.write(valueSerializer, valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        LengthMetrics_serializer.write(valueSerializer, valueHolderForHeight)
+    }
+    public static read(buffer: DeserializerBase): SizeTLengthMetrics {
+        let valueDeserializer : DeserializerBase = buffer
+        const widthTmpResult : LengthMetrics = LengthMetrics_serializer.read(valueDeserializer)
+        const heightTmpResult : LengthMetrics = LengthMetrics_serializer.read(valueDeserializer)
+        let value : SizeTLengthMetrics = ({width: widthTmpResult, height: heightTmpResult} as SizeTLengthMetrics)
+        return value
+    }
+}
 export class SnapshotOptions_serializer {
     public static write(buffer: SerializerBase, value: SnapshotOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -5082,6 +5148,72 @@ export class ComponentInfo_serializer {
         const transformTmpBufValue15 : number = (valueDeserializer.readNumber() as number)
         const transformTmpResult : Matrix4Result = ([transformTmpBufValue0, transformTmpBufValue1, transformTmpBufValue2, transformTmpBufValue3, transformTmpBufValue4, transformTmpBufValue5, transformTmpBufValue6, transformTmpBufValue7, transformTmpBufValue8, transformTmpBufValue9, transformTmpBufValue10, transformTmpBufValue11, transformTmpBufValue12, transformTmpBufValue13, transformTmpBufValue14, transformTmpBufValue15] as Matrix4Result)
         let value : ComponentInfo = ({size: sizeTmpResult, localOffset: localOffsetTmpResult, windowOffset: windowOffsetTmpResult, screenOffset: screenOffsetTmpResult, translate: translateTmpResult, scale: scaleTmpResult, rotate: rotateTmpResult, transform: transformTmpResult} as ComponentInfo)
+        return value
+    }
+}
+export class NodeEdgesLengthMetrics_serializer {
+    public static write(buffer: SerializerBase, value: NodeEdgesLengthMetrics): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTop  = value.top
+        if (valueHolderForTop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTopTmpValue  = valueHolderForTop!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForTopTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLeft  = value.left
+        if (valueHolderForLeft !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeftTmpValue  = valueHolderForLeft!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForLeftTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBottom  = value.bottom
+        if (valueHolderForBottom !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBottomTmpValue  = valueHolderForBottom!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForBottomTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForRight  = value.right
+        if (valueHolderForRight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRightTmpValue  = valueHolderForRight!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForRightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NodeEdgesLengthMetrics {
+        let valueDeserializer : DeserializerBase = buffer
+        const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let topTmpBuf : LengthMetrics | undefined = undefined
+        if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            topTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const topTmpResult : LengthMetrics | undefined = topTmpBuf
+        const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let leftTmpBuf : LengthMetrics | undefined = undefined
+        if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            leftTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const leftTmpResult : LengthMetrics | undefined = leftTmpBuf
+        const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let bottomTmpBuf : LengthMetrics | undefined = undefined
+        if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            bottomTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const bottomTmpResult : LengthMetrics | undefined = bottomTmpBuf
+        const rightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let rightTmpBuf : LengthMetrics | undefined = undefined
+        if ((rightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            rightTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const rightTmpResult : LengthMetrics | undefined = rightTmpBuf
+        let value : NodeEdgesLengthMetrics = ({top: topTmpResult, left: leftTmpResult, bottom: bottomTmpResult, right: rightTmpResult} as NodeEdgesLengthMetrics)
         return value
     }
 }
