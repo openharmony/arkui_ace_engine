@@ -923,4 +923,27 @@ HWTEST_F(RichEditorAddSpanTestNg, ResetFirstNodeStyle001, TestSize.Level0)
     EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
+/**
+ * @tc.name: InitPlaceholderAccessibility001
+ * @tc.desc: Test the function InitPlaceholderAccessibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, InitPlaceholderAccessibility001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+
+    // AddPlaceholderSpan
+    auto index = richEditorPattern->AddPlaceholderSpan(BUILDER_NODE_1, {});
+    auto host = richEditorPattern->GetContentHost();
+    CHECK_NULL_VOID(host);
+    auto spanNode = AceType::DynamicCast<PlaceholderSpanNode>(host->GetChildAtIndex(index));
+    CHECK_NULL_VOID(spanNode);
+    richEditorPattern->InitPlaceholderAccessibility(spanNode, {});
+    auto accessibilityProperty = spanNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityDescription().empty());
+}
 } // namespace OHOS::Ace::NG

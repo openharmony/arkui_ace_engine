@@ -136,6 +136,7 @@ BuilderSpanOptions OptionsListBuilder::CreateBuilderSpanOptions(const RefPtr<Pla
     BuilderSpanOptions options;
     options.customNode = item->GetCustomNode();
     options.offset = item->rangeStart;
+    options.accessibilityOptions = item->accessibilityOptions;
     return options;
 }
 

@@ -903,6 +903,7 @@ public:
     PlaceholderRun run_;
     std::optional<Color> dragBackgroundColor_;
     bool isDragShadowNeeded_ = true;
+    std::optional<AccessibilitySpanOptions> accessibilityOptions;
     PlaceholderSpanItem()
     {
         this->spanItemType = SpanItemType::PLACEHOLDER;

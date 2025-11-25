@@ -307,6 +307,19 @@ SpanOptionBase Convert(const Ark_RichEditorBuilderSpanOptions& src)
     if (auto spanOffset = Converter::OptConvert<int32_t>(src.offset); spanOffset) {
         ret.offset = spanOffset.value() >= 0 ? spanOffset.value() : 0;
     }
+    auto accessibilitySpanOpts = src.accessibilitySpanOptions;
+    CHECK_NULL_RETURN(accessibilitySpanOpts.tag != INTEROP_TAG_UNDEFINED, ret);
+    AccessibilitySpanOptions accessibilityOpts;
+    auto accessibilitySpanOptsValue = accessibilitySpanOpts.value;
+    accessibilityOpts.accessibilityTextOpt =
+        Converter::OptConvert<std::string>(accessibilitySpanOptsValue.accessibilityText);
+    accessibilityOpts.accessibilityDescriptionOpt =
+        Converter::OptConvert<std::string>(accessibilitySpanOptsValue.accessibilityDescription);
+    auto accessibilityLevel = accessibilitySpanOptsValue.accessibilityLevel;
+    if (accessibilityLevel.tag != INTEROP_TAG_UNDEFINED) {
+        accessibilityOpts.accessibilityLevelOpt = Converter::Convert<std::string>(accessibilityLevel.value);
+    }
+    ret.accessibilityOptions = accessibilityOpts;
     return ret;
 }
 

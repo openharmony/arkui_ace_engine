@@ -2598,6 +2598,8 @@ typedef struct Opt_WorkerOptions Opt_WorkerOptions;
 typedef struct XComponentControllerPeer XComponentControllerPeer;
 typedef struct XComponentControllerPeer* Ark_XComponentController;
 typedef struct Opt_XComponentController Opt_XComponentController;
+typedef struct Ark_AccessibilitySpanOptions Ark_AccessibilitySpanOptions;
+typedef struct Opt_AccessibilitySpanOptions Opt_AccessibilitySpanOptions;
 typedef struct Ark_Void Ark_Void;
 typedef struct Opt_void Opt_void;
 typedef struct Ark_ActionSheetButtonOptions Ark_ActionSheetButtonOptions;
@@ -17107,6 +17109,16 @@ typedef struct Opt_XComponentController {
     Ark_Tag tag;
     Ark_XComponentController value;
 } Opt_XComponentController;
+typedef struct Ark_AccessibilitySpanOptions {
+    /* kind: Interface */
+    Opt_ResourceStr accessibilityText;
+    Opt_ResourceStr accessibilityDescription;
+    Opt_String accessibilityLevel;
+} Ark_AccessibilitySpanOptions;
+typedef struct Opt_AccessibilitySpanOptions {
+    Ark_Tag tag;
+    Ark_AccessibilitySpanOptions value;
+} Opt_AccessibilitySpanOptions;
 typedef struct Ark_Void {
     void* value;
 } Ark_Void;
@@ -18020,6 +18032,7 @@ typedef struct Ark_RichEditorBuilderSpanOptions {
     Opt_Int32 offset;
     Opt_ColorMetrics dragBackgroundColor;
     Opt_Boolean isDragShadowNeeded;
+    Opt_AccessibilitySpanOptions accessibilitySpanOptions;
 } Ark_RichEditorBuilderSpanOptions;
 typedef struct Opt_RichEditorBuilderSpanOptions {
     Ark_Tag tag;

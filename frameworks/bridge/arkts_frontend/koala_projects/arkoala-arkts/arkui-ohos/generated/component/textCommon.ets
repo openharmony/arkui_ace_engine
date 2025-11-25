@@ -435,6 +435,11 @@ export enum KeyboardAppearance {
     LIGHT_IMMERSIVE = 2,
     DARK_IMMERSIVE = 3
 }
+export interface AccessibilitySpanOptions {
+    accessibilityText?: ResourceStr;
+    accessibilityDescription?: ResourceStr;
+    accessibilityLevel?: string;
+}
 export class LayoutManager_serializer {
     public static write(buffer: SerializerBase, value: LayoutManager): void {
         let valueSerializer : SerializerBase = buffer
@@ -782,6 +787,92 @@ export class TextRange_serializer {
         }
         const endTmpResult : int32 | undefined = endTmpBuf
         let value : TextRange = ({start: startTmpResult, end: endTmpResult} as TextRange)
+        return value
+    }
+}
+export class AccessibilitySpanOptions_serializer {
+    public static write(buffer: SerializerBase, value: AccessibilitySpanOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAccessibilityText  = value.accessibilityText
+        if (valueHolderForAccessibilityText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityTextTmpValue  = valueHolderForAccessibilityText!
+            if (valueHolderForAccessibilityTextTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx0  = valueHolderForAccessibilityTextTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityTextTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityTextTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx1  = valueHolderForAccessibilityTextTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityTextTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityDescription  = value.accessibilityDescription
+        if (valueHolderForAccessibilityDescription !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityDescriptionTmpValue  = valueHolderForAccessibilityDescription!
+            if (valueHolderForAccessibilityDescriptionTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx0  = valueHolderForAccessibilityDescriptionTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityDescriptionTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityDescriptionTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx1  = valueHolderForAccessibilityDescriptionTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityDescriptionTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityLevel  = value.accessibilityLevel
+        if (valueHolderForAccessibilityLevel !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityLevelTmpValue  = valueHolderForAccessibilityLevel!
+            valueSerializer.writeString(valueHolderForAccessibilityLevelTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AccessibilitySpanOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const accessibilityTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityTextTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityTextTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityTextTmpBuf_ : string | Resource | undefined
+            if (accessibilityTextTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityTextTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityTextTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityTextTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityTextTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityTextTmpBuf = (accessibilityTextTmpBuf_ as string | Resource)
+        }
+        const accessibilityTextTmpResult : ResourceStr | undefined = accessibilityTextTmpBuf
+        const accessibilityDescriptionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityDescriptionTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityDescriptionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityDescriptionTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityDescriptionTmpBuf_ : string | Resource | undefined
+            if (accessibilityDescriptionTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityDescriptionTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityDescriptionTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityDescriptionTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityDescriptionTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityDescriptionTmpBuf = (accessibilityDescriptionTmpBuf_ as string | Resource)
+        }
+        const accessibilityDescriptionTmpResult : ResourceStr | undefined = accessibilityDescriptionTmpBuf
+        const accessibilityLevelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityLevelTmpBuf : string | undefined = undefined
+        if ((accessibilityLevelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilityLevelTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const accessibilityLevelTmpResult : string | undefined = accessibilityLevelTmpBuf
+        let value : AccessibilitySpanOptions = ({accessibilityText: accessibilityTextTmpResult, accessibilityDescription: accessibilityDescriptionTmpResult, accessibilityLevel: accessibilityLevelTmpResult} as AccessibilitySpanOptions)
         return value
     }
 }

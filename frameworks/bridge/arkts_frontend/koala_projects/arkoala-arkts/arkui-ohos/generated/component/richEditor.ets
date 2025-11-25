@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from "./common"
-import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, DecorationStyleResult, TextRange_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
+import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -902,6 +902,7 @@ export interface RichEditorBuilderSpanOptions {
     offset?: int32;
     dragBackgroundColor?: ColorMetrics;
     isDragShadowNeeded?: boolean;
+    accessibilitySpanOptions?: AccessibilitySpanOptions;
 }
 export interface PlaceholderStyle {
     font?: Font;
@@ -2040,13 +2041,21 @@ export class RichEditorBuilderSpanOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForAccessibilitySpanOptions  = value.accessibilitySpanOptions
+        if (valueHolderForAccessibilitySpanOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilitySpanOptionsTmpValue  = valueHolderForAccessibilitySpanOptions!
+            AccessibilitySpanOptions_serializer.write(valueSerializer, valueHolderForAccessibilitySpanOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorBuilderSpanOptions {
         let valueDeserializer : DeserializerBase = buffer
         const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetTmpBuf : int32 | undefined = undefined
         if ((offsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            offsetTmpBuf = (valueDeserializer.readInt32() as int32)
+            offsetTmpBuf = valueDeserializer.readInt32()
         }
         const offsetTmpResult : int32 | undefined = offsetTmpBuf
         const dragBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2061,7 +2070,13 @@ export class RichEditorBuilderSpanOptions_serializer {
             isDragShadowNeededTmpBuf = valueDeserializer.readBoolean()
         }
         const isDragShadowNeededTmpResult : boolean | undefined = isDragShadowNeededTmpBuf
-        let value : RichEditorBuilderSpanOptions = ({offset: offsetTmpResult, dragBackgroundColor: dragBackgroundColorTmpResult, isDragShadowNeeded: isDragShadowNeededTmpResult} as RichEditorBuilderSpanOptions)
+        const accessibilitySpanOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilitySpanOptionsTmpBuf : AccessibilitySpanOptions | undefined = undefined
+        if ((accessibilitySpanOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilitySpanOptionsTmpBuf = AccessibilitySpanOptions_serializer.read(valueDeserializer)
+        }
+        const accessibilitySpanOptionsTmpResult : AccessibilitySpanOptions | undefined = accessibilitySpanOptionsTmpBuf
+        let value : RichEditorBuilderSpanOptions = ({offset: offsetTmpResult, dragBackgroundColor: dragBackgroundColorTmpResult, isDragShadowNeeded: isDragShadowNeededTmpResult, accessibilitySpanOptions: accessibilitySpanOptionsTmpResult} as RichEditorBuilderSpanOptions)
         return value
     }
 }
