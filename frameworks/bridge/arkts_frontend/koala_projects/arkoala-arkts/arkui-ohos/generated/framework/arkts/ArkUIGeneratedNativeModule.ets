@@ -2757,6 +2757,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Toggle_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
+    native static _Toggle_button_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _Toggle_checkbox_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
     native static _ToggleInterface_setToggleOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ToggleAttribute_setOnChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

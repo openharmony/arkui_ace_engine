@@ -23585,6 +23585,14 @@ Ark_NativePointer impl_Toggle_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getToggleModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(Toggle_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+Ark_NativePointer impl_Toggle_button_construct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetNodeModifiers()->getToggleModifier()->buttonConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(Toggle_button_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+Ark_NativePointer impl_Toggle_checkbox_construct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetNodeModifiers()->getToggleModifier()->checkboxConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(Toggle_checkbox_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
 void impl_ToggleInterface_setToggleOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

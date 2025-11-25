@@ -162,6 +162,8 @@ const GENERATED_ArkUIToggleModifier* GetToggleModifier()
 {
     static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
         ToggleModifier::ConstructImpl,
+        ToggleModifier::buttonConstruct,
+        ToggleModifier::checkboxConstruct,
         ToggleInterfaceModifier::SetToggleOptionsImpl,
         ToggleAttributeModifier::SetOnChangeImpl,
         ToggleAttributeModifier::SetSelectedColorImpl,
