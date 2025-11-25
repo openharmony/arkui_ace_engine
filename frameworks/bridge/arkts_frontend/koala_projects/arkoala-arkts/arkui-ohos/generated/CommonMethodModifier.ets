@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
+import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty, hookCustomPropertyImpl } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
@@ -358,6 +358,9 @@ export class CommonMethodModifier implements CommonMethod {
     _onSizeChange_0_0value?: SizeChangeCallback | undefined
     _accessibilityFocusDrawLevel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _accessibilityFocusDrawLevel_0_0value?: FocusDrawLevel | undefined
+    _customProperty_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _customProperty_0_0value?: string
+    _customProperty_0_1value?: CustomProperty
     _expandSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
     _expandSafeArea_0_1value?: Array<SafeAreaEdge> | undefined
@@ -3330,6 +3333,26 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._accessibilityFocusDrawLevel_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setAccessibilityFocusDrawLevelAttribute((undefined as FocusDrawLevel | undefined));
+                }
+            }
+        }
+        if (this._customProperty_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._customProperty_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    // instructive change start
+                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string),
+                        (this._customProperty_0_1value as CustomProperty), this);
+                    // instructive change end
+                    this._customProperty_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._customProperty_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._customProperty_0_flag = AttributeUpdaterFlag.INITIAL;
                 }
             }
         }
@@ -8334,6 +8357,21 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._accessibilityFocusDrawLevel_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    customProperty(name: string, value: CustomProperty): this {
+        // instructive change start
+        hookCommonMethodModifierCustomProperty(this, name, value)
+        // instructive change end
+        if (((this._customProperty_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._customProperty_0_0value) !== (name)) || (true))
+        {
+            this._customProperty_0_flag = AttributeUpdaterFlag.UPDATE
+            this._customProperty_0_0value = name
+            this._customProperty_0_1value = value
+        } else
+        {
+            this._customProperty_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
