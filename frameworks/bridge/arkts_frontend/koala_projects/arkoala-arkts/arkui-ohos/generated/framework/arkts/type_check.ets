@@ -6071,6 +6071,9 @@ export class TypeChecker {
         }
         return false
     }
+    static isArray_Tuple_ResourceColor_F64(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_NativeEmbedParamItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -6084,9 +6087,6 @@ export class TypeChecker {
         return false
     }
     static isArray_ParticleOptionsInner(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
-    }
-    static isArray_Tuple_ResourceColor_F64(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Union_String_I32_I64_F64_Resource(value: Object | string | number | undefined): boolean {
