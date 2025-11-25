@@ -6361,6 +6361,23 @@ void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetMetaViewport(enabled);
 }
 
+bool CheckScriptRulesValid(const JSRef<JSVal>& jsScriptRules, const JSRef<JSVal>& jsScriptRegexRules) {
+    if (!jsScriptRules->IsArray()) {
+        return false;
+    }
+    if (JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0 && jsScriptRegexRules->IsUndefined()) {
+        return false;
+    }
+    if (!jsScriptRegexRules->IsUndefined() && !jsScriptRegexRules->IsArray()) {
+        return false;
+    }
+    if (JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0 &&
+        JSRef<JSArray>::Cast(jsScriptRegexRules)->Length() == 0) {
+        return false;
+    }
+    return true;
+}
+
 bool ParseJsRegexStrArray(const JSRef<JSVal>& jsScriptRegexRules,
                           std::vector<std::pair<std::string, std::string>>& scriptRegexRules)
 {
@@ -6413,17 +6430,7 @@ void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItem
         JSRef<JSVal> jsScript = itemObject->GetProperty("script");
         JSRef<JSVal> jsScriptRules = itemObject->GetProperty("scriptRules");
         JSRef<JSVal> jsScriptRegexRules = itemObject->GetProperty("regexRules");
-        if (!jsScriptRules->IsArray()) {
-            return;
-        }
-        if (JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0 && jsScriptRegexRules->IsUndefined()) {
-            return;
-        }
-        if (!jsScriptRegexRules->IsUndefined() && !jsScriptRegexRules->IsArray()) {
-            return;
-        }
-        if (JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0 &&
-            JSRef<JSArray>::Cast(jsScriptRegexRules)->Length() == 0) {
+        if (!CheckScriptRulesValid(jsScriptRules, jsScriptRegexRules)) {
             return;
         }
         if (!JSViewAbstract::ParseJsString(jsScript, script)) {
