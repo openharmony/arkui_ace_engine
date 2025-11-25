@@ -2080,6 +2080,8 @@ frameworks/core/components/common/properties/text_style_parser.cpp @huawei_g_fiv
 frameworks/core/components/common/properties/text_style_parser.h @huawei_g_five
 frameworks/core/components/common/properties/tween_option.h @arkui_framework_xnode
 frameworks/core/components/common/properties/background_image.h @ArkUI_Event
+frameworks/core/components/common/properties/ui_material.h @arkuicodepulse
+frameworks/core/components/common/properties/ui_material.cpp @arkuicodepulse
 frameworks/core/components/common/rotation/ @arkui_navigation
 frameworks/core/components/components.gni @arkui_architecture
 frameworks/core/components/container_modal/ @ArkUI_ability_group
@@ -3199,6 +3201,7 @@ interfaces/napi/kits/prompt/ @arkuipopupwindow_all
 interfaces/napi/kits/router/ @arkui_navigation
 interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkui_framework_xnode
+interfaces/napi/kits/ui_material/ @arkuicodepulse
 
 [Arkoala]
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkui_statemgmt

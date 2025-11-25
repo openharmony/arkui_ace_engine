@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ui_material.h"
+#include "core/components/common/properties/ui_material.h"
 
 #include "interfaces/inner_api/ace/utils.h"
 
