@@ -237,6 +237,12 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     ArkUI_TextMenuItem insertItem;
+    insertItem.content = nullptr;
+    insertItem.isDelContent = false;
+    insertItem.icon = nullptr;
+    insertItem.isDelIcon = false;
+    insertItem.labelInfo = nullptr;
+    insertItem.isDelLabel = false;
     if (OH_ArkUI_TextMenuItem_SetContent(&insertItem, item->content) != ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR) {
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
@@ -254,21 +260,20 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Erase(ArkUI_TextMenuItemArray* itemAr
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto eraseIter = itemArray->items.begin() + index;
-    ArkUI_TextMenuItem eraseItem = *eraseIter;
-    if (eraseItem.isDelContent && eraseItem.content) {
-        delete[] eraseItem.content;
-        eraseItem.content = nullptr;
-        eraseItem.isDelContent = false;
+    if (eraseIter->isDelContent && eraseIter->content) {
+        delete[] eraseIter->content;
+        eraseIter->content = nullptr;
+        eraseIter->isDelContent = false;
     }
-    if (eraseItem.isDelIcon && eraseItem.icon) {
-        delete[] eraseItem.icon;
-        eraseItem.icon = nullptr;
-        eraseItem.isDelIcon = false;
+    if (eraseIter->isDelIcon && eraseIter->icon) {
+        delete[] eraseIter->icon;
+        eraseIter->icon = nullptr;
+        eraseIter->isDelIcon = false;
     }
-    if (eraseItem.isDelLabel && eraseItem.labelInfo) {
-        delete[] eraseItem.labelInfo;
-        eraseItem.labelInfo = nullptr;
-        eraseItem.isDelLabel = false;
+    if (eraseIter->isDelLabel && eraseIter->labelInfo) {
+        delete[] eraseIter->labelInfo;
+        eraseIter->labelInfo = nullptr;
+        eraseIter->isDelLabel = false;
     }
     itemArray->items.erase(eraseIter);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;

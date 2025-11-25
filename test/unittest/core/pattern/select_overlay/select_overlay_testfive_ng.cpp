@@ -1435,6 +1435,14 @@ HWTEST_F(SelectOverlayFiveTestNg, CreateMenuNode003, TestSize.Level1)
         std::vector<MenuOptionsParam> paramlist;
         std::transform(params.begin(), params.end(), std::back_inserter(paramlist),
             [](NG::MenuItemParam item) { return item.menuOptionsParam; });
+        MenuOptionsParam menuItem1;
+        menuItem1.content = "item1";
+        menuItem1.id = OH_DEFAULT_COPY;
+        paramlist.emplace_back(menuItem1);
+        MenuOptionsParam menuItem2;
+        menuItem1.content = "item2";
+        menuItem1.id = OH_DEFAULT_CUT;
+        paramlist.emplace_back(menuItem2);
         return paramlist;
     };
     selectInfo.onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam& param) { return true; };

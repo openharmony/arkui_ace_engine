@@ -12651,5 +12651,6 @@ void TextFieldPattern::ReprocessAllRelatedToLPX()
             }
         }
     }
+    ProcessResponseArea();
 }
 } // namespace OHOS::Ace::NG
