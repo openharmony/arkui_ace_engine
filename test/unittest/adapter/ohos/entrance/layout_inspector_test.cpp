@@ -127,4 +127,24 @@ HWTEST_F(LayoutInspectorTest, EnableNodeTrace, TestSize.Level1)
     res = LayoutInspector::GetEnableNodeTrace();
     EXPECT_EQ(res, false);
 }
+
+/**
+ * @tc.name: EnableInteractionEventReport
+ * @tc.desc: Test cast to EnableInteractionEventReport
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutInspectorTest, EnableInteractionEventReport, TestSize.Level1)
+{
+    // test1: enable Interaction Event
+    std::string inspectorMsg = "{\"method\":\"ArkUI.InteractionEventOpen\"}";
+    LayoutInspector::ProcessMessages(inspectorMsg);
+    bool res = LayoutInspector::GetInteractionEventStatus();
+    EXPECT_EQ(res, true);
+
+    // test1: disable Interaction Event
+    inspectorMsg = "{\"method\":\"ArkUI.InteractionEventClose\"}";
+    LayoutInspector::ProcessMessages(inspectorMsg);
+    res = LayoutInspector::GetInteractionEventStatus();
+    EXPECT_EQ(res, false);
+}
 } // namespace OHOS::Ace::NG
