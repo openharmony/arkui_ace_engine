@@ -13714,6 +13714,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetShowInSubWindowImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShowInSubWindow(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetShowDefaultSelectedIconImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShowDefaultSelectedIcon(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetBackgroundColorImpl(Ark_NativePointer node,
                                 const Opt_ResourceColor* value)
     {
@@ -14162,7 +14186,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SliderInterfaceModifier
     namespace SliderAttributeModifier {
     void SetBlockColorImpl(Ark_NativePointer node,
-                           const Opt_ResourceColor* value)
+                           const Opt_Union_ResourceColor_LinearGradient* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14197,14 +14221,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetShowStepsImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+    void SetShowSteps0Impl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setShowSteps(");
+        string out("setShowSteps0(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -14386,6 +14410,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setEnableHapticFeedback(");
         WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetShowSteps1Impl(Ark_NativePointer node,
+                           const Opt_Boolean* value,
+                           const Opt_SliderShowStepOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShowSteps1(");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, options);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -23031,6 +23070,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetDividerStyleImpl,
             SelectAttributeModifier::SetAvoidanceImpl,
             SelectAttributeModifier::SetMenuOutlineImpl,
+            SelectAttributeModifier::SetShowInSubWindowImpl,
+            SelectAttributeModifier::SetShowDefaultSelectedIconImpl,
             SelectAttributeModifier::SetBackgroundColorImpl,
             SelectAttributeModifier::SetMenuAlignImpl,
         };
@@ -23089,7 +23130,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SliderAttributeModifier::SetBlockColorImpl,
             SliderAttributeModifier::SetTrackColorImpl,
             SliderAttributeModifier::SetSelectedColorImpl,
-            SliderAttributeModifier::SetShowStepsImpl,
+            SliderAttributeModifier::SetShowSteps0Impl,
             SliderAttributeModifier::SetTrackThicknessImpl,
             SliderAttributeModifier::SetOnChangeImpl,
             SliderAttributeModifier::SetBlockBorderColorImpl,
@@ -23105,6 +23146,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SliderAttributeModifier::SetSlideRangeImpl,
             SliderAttributeModifier::SetDigitalCrownSensitivityImpl,
             SliderAttributeModifier::SetEnableHapticFeedbackImpl,
+            SliderAttributeModifier::SetShowSteps1Impl,
             SliderAttributeModifier::SetShowTipsImpl,
         };
         return &ArkUISliderModifierImpl;
@@ -40426,7 +40468,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // SearchOpsAccessor
-
     namespace SelectExtenderAccessor {
     void SetDividerImpl(Ark_NativePointer node,
                         const Opt_DividerOptions* options)
@@ -40443,6 +40484,42 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // SelectExtenderAccessor
+    namespace SliderExtenderAccessor {
+    void SetPrefixImpl(Ark_NativePointer node,
+                       Ark_NativePointer prefixNode,
+                       const Opt_SliderPrefixOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setPrefix(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, prefixNode);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSuffixImpl(Ark_NativePointer node,
+                       Ark_NativePointer suffixNode,
+                       const Opt_SliderSuffixOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSuffix(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, suffixNode);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // SliderExtenderAccessor
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -48113,6 +48190,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &SelectExtenderAccessorImpl;
     }
+    const GENERATED_ArkUISliderExtenderAccessor* GetSliderExtenderAccessor()
+    {
+        static const GENERATED_ArkUISliderExtenderAccessor SliderExtenderAccessorImpl {
+            SliderExtenderAccessor::SetPrefixImpl,
+            SliderExtenderAccessor::SetSuffixImpl,
+        };
+        return &SliderExtenderAccessorImpl;
+    }
 
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     {
@@ -49156,6 +49241,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
             GetSelectExtenderAccessor,
+            GetSliderExtenderAccessor,
             GetSpringMotionAccessor,
             GetSpringPropAccessor,
             GetSslErrorHandlerAccessor,

@@ -27,8 +27,12 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_F64_serializer } from "./common"
 import { Color, CrownSensitivity, Axis } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookSliderContentModifier, extractors, hookSliderAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, extractors, WrappedBuilder, hookSliderContentModifier, hookSliderSetPrefixMethod, hookSliderSetSuffixMethod, hookSliderAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
+import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
+import { UIContext } from "@ohos.arkui.UIContext"
+import { CustomBuilder, CustomBuilderT } from "./builder"
+import { BuildOptions } from "arkui.BuilderNode"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -61,30 +65,38 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderInterface_setSliderOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBlockColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+    setBlockColorAttribute(value: ResourceColor | LinearGradient | undefined): void {
+         const thisSerializer : SerializerBase = SerializerBase.hold()
+         if (value !== undefined) {
+             thisSerializer.writeInt8(RuntimeType.OBJECT)
+             const valueTmpValue  = value!
+            if (valueTmpValue instanceof ResourceColor) {
+                 thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
+                if (valueTmpValueForIdx0 instanceof Color) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
+                } else if (valueTmpValueForIdx0 instanceof number) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((3).toByte())
+                    const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
+                }
+            } else if (valueTmpValue instanceof LinearGradient) {
+                 thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as LinearGradient
+                LinearGradient_serializer.write(thisSerializer, valueTmpValueForIdx1)
+             }
+         } else {
+             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SliderAttribute_setBlockColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -161,7 +173,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_setSelectedColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setShowStepsAttribute(value: boolean | undefined): void {
+    setShowSteps0Attribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -170,7 +182,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SliderAttribute_setShowSteps(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SliderAttribute_setShowSteps0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTrackThicknessAttribute(value: Length | undefined): void {
@@ -445,6 +457,25 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setShowSteps1Attribute(value: boolean | undefined, options?: SliderShowStepOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SliderShowStepOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SliderAttribute_setShowSteps1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setShowTipsAttribute(value: boolean | undefined, content?: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -526,11 +557,27 @@ export interface SliderConfiguration extends CommonConfiguration<SliderConfigura
     step: double;
     triggerChange: SliderTriggerChangeCallback;
 }
+export interface SliderCustomContentOptions {
+    accessibilityText?: ResourceStr;
+    accessibilityDescription?: ResourceStr;
+    accessibilityLevel?: string;
+    accessibilityGroup?: boolean;
+}
+export interface SliderPrefixOptions extends SliderCustomContentOptions {
+}
+export interface SliderSuffixOptions extends SliderCustomContentOptions {
+}
+export interface SliderStepItemAccessibility {
+    text?: ResourceStr;
+}
+export interface SliderShowStepOptions {
+    stepsAccessibility?: Map<number, SliderStepItemAccessibility>;
+}
 export interface SliderAttribute extends CommonMethod {
     setSliderOptions(options?: SliderOptions): this {
         throw new Error("Unimplemented method setSliderOptions")
     }
-    blockColor(value: ResourceColor | undefined): this {
+    blockColor(value: ResourceColor | LinearGradient | undefined): this {
         throw new Error("Unimplemented method blockColor")
     }
     trackColor(value: ResourceColor | LinearGradient | undefined): this {
@@ -590,6 +637,15 @@ export interface SliderAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableHapticFeedback")
     }
+    showSteps(value: boolean | undefined, options?: SliderShowStepOptions): this {
+        throw new Error("Unimplemented method showSteps")
+    }
+    prefix(content: ComponentContent | undefined, options?: SliderPrefixOptions): this {
+        throw new Error("Unimplemented method prefix")
+    }
+    suffix(content: ComponentContent | undefined, options?: SliderSuffixOptions): this {
+        throw new Error("Unimplemented method suffix")
+    }
     showTips(value: boolean | undefined, content?: ResourceStr): this {
         throw new Error("Unimplemented method showTips")
     }
@@ -598,7 +654,7 @@ export interface SliderAttribute extends CommonMethod {
     }
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
-    blockColor_value?: ResourceColor | undefined
+    blockColor_value?: ResourceColor | LinearGradient | undefined
     trackColor_value?: ResourceColor | LinearGradient | undefined
     selectedColor_value?: ResourceColor | LinearGradient | undefined
     showSteps_value?: boolean | undefined
@@ -622,7 +678,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     setSliderOptions(options?: SliderOptions): this {
         return this
     }
-    blockColor(value: ResourceColor | undefined): this {
+    blockColor(value: ResourceColor | LinearGradient | undefined): this {
         return this
     }
     trackColor(value: ResourceColor | LinearGradient | undefined): this {
@@ -682,6 +738,15 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
+    showSteps(value: boolean | undefined, options?: SliderShowStepOptions): this {
+        return this
+    }
+    prefix(content: ComponentContent | undefined, options?: SliderPrefixOptions): this {
+        return this
+    }
+    suffix(content: ComponentContent | undefined, options?: SliderSuffixOptions): this {
+        return this
+    }
     showTips(value: boolean | undefined, content?: ResourceStr): this {
         return this
     }
@@ -706,9 +771,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
-    public blockColor(value: ResourceColor | undefined): this {
+    public blockColor(value: ResourceColor | LinearGradient | undefined): this {
         if (this.checkPriority("blockColor")) {
-            const value_casted = value as (ResourceColor | undefined)
+            const value_casted = value as (ResourceColor | LinearGradient | undefined)
             this.getPeer()?.setBlockColorAttribute(value_casted)
             return this
         }
@@ -733,7 +798,7 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     public showSteps(value: boolean | undefined): this {
         if (this.checkPriority("showSteps")) {
             const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setShowStepsAttribute(value_casted)
+            this.getPeer()?.setShowSteps0Attribute(value_casted)
             return this
         }
         return this
@@ -864,6 +929,27 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
+    public showSteps(value: boolean | undefined, options?: SliderShowStepOptions): this {
+        if (this.checkPriority("showSteps")) {
+            const value_casted = value as (boolean | undefined)
+            const options_casted = options as (SliderShowStepOptions | undefined)
+            this.getPeer()?.setShowSteps1Attribute(value_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public prefix(content: ComponentContent | undefined, options?: SliderPrefixOptions): this {
+        if (this.checkPriority("prefix")) {
+            hookSliderSetPrefixMethod(this, content, options)
+        }
+        return this
+    }
+    public suffix(content: ComponentContent | undefined, options?: SliderSuffixOptions): this {
+        if (this.checkPriority("suffix")) {
+            hookSliderSetSuffixMethod(this, content, options)
+        }
+        return this
+    }
     public showTips(value: boolean | undefined, content?: ResourceStr): this {
         if (this.checkPriority("showTips")) {
             const value_casted = value as (boolean | undefined)
@@ -985,6 +1071,44 @@ export class SliderConfiguration_serializer {
             return;
         }
         let value : SliderConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, min: minTmpResult, max: maxTmpResult, step: stepTmpResult, triggerChange: triggerChangeTmpResult} as SliderConfiguration)
+        return value
+    }
+}
+export class SliderShowStepOptions_serializer {
+    public static write(buffer: SerializerBase, value: SliderShowStepOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForStepsAccessibility  = value.stepsAccessibility
+        if (valueHolderForStepsAccessibility !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStepsAccessibilityTmpValue  = valueHolderForStepsAccessibility!
+            valueSerializer.writeInt32((valueHolderForStepsAccessibilityTmpValue.size).toInt())
+            for (const pair of valueHolderForStepsAccessibilityTmpValue) {
+                const valueHolderForStepsAccessibilityTmpValueKeyVar = pair[0]
+                const valueHolderForStepsAccessibilityTmpValueValueVar = pair[1]
+                valueSerializer.writeNumber(valueHolderForStepsAccessibilityTmpValueKeyVar)
+                SliderStepItemAccessibility_serializer.write(valueSerializer, valueHolderForStepsAccessibilityTmpValueValueVar)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SliderShowStepOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const stepsAccessibilityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let stepsAccessibilityTmpBuf : Map<number, SliderStepItemAccessibility> | undefined = undefined
+        if ((stepsAccessibilityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const stepsAccessibilityTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
+            let stepsAccessibilityTmpBuf_ : Map<number, SliderStepItemAccessibility> = new Map<number, SliderStepItemAccessibility>()
+            // TODO: TS map resize
+            for (let stepsAccessibilityTmpBuf_IVar = 0; stepsAccessibilityTmpBuf_IVar < stepsAccessibilityTmpBuf_SizeVar; stepsAccessibilityTmpBuf_IVar++) {
+                const stepsAccessibilityTmpBuf_KeyVar : number = (valueDeserializer.readNumber() as number)
+                const stepsAccessibilityTmpBuf_ValueVar : SliderStepItemAccessibility = SliderStepItemAccessibility_serializer.read(valueDeserializer)
+                stepsAccessibilityTmpBuf_.set(stepsAccessibilityTmpBuf_KeyVar, stepsAccessibilityTmpBuf_ValueVar)
+            }
+            stepsAccessibilityTmpBuf = stepsAccessibilityTmpBuf_
+        }
+        const stepsAccessibilityTmpResult : Map<number, SliderStepItemAccessibility> | undefined = stepsAccessibilityTmpBuf
+        let value : SliderShowStepOptions = ({stepsAccessibility: stepsAccessibilityTmpResult} as SliderShowStepOptions)
         return value
     }
 }
@@ -1197,6 +1321,247 @@ export class SliderOptions_serializer {
         }
         const reverseTmpResult : boolean | undefined = reverseTmpBuf
         let value : SliderOptions = ({value: valueTmpResult, min: minTmpResult, max: maxTmpResult, step: stepTmpResult, style: styleTmpResult, direction: directionTmpResult, reverse: reverseTmpResult} as SliderOptions)
+        return value
+    }
+}
+export class SliderPrefixOptions_serializer {
+    public static write(buffer: SerializerBase, value: SliderPrefixOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAccessibilityText  = value.accessibilityText
+        if (valueHolderForAccessibilityText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityTextTmpValue  = valueHolderForAccessibilityText!
+            if (valueHolderForAccessibilityTextTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx0  = valueHolderForAccessibilityTextTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityTextTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityTextTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx1  = valueHolderForAccessibilityTextTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityTextTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityDescription  = value.accessibilityDescription
+        if (valueHolderForAccessibilityDescription !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityDescriptionTmpValue  = valueHolderForAccessibilityDescription!
+            if (valueHolderForAccessibilityDescriptionTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx0  = valueHolderForAccessibilityDescriptionTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityDescriptionTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityDescriptionTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx1  = valueHolderForAccessibilityDescriptionTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityDescriptionTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityLevel  = value.accessibilityLevel
+        if (valueHolderForAccessibilityLevel !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityLevelTmpValue  = valueHolderForAccessibilityLevel!
+            valueSerializer.writeString(valueHolderForAccessibilityLevelTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityGroup  = value.accessibilityGroup
+        if (valueHolderForAccessibilityGroup !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityGroupTmpValue  = valueHolderForAccessibilityGroup!
+            valueSerializer.writeBoolean(valueHolderForAccessibilityGroupTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SliderPrefixOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const accessibilityTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityTextTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityTextTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityTextTmpBuf_ : string | Resource | undefined
+            if (accessibilityTextTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityTextTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityTextTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityTextTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityTextTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityTextTmpBuf = (accessibilityTextTmpBuf_ as string | Resource)
+        }
+        const accessibilityTextTmpResult : ResourceStr | undefined = accessibilityTextTmpBuf
+        const accessibilityDescriptionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityDescriptionTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityDescriptionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityDescriptionTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityDescriptionTmpBuf_ : string | Resource | undefined
+            if (accessibilityDescriptionTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityDescriptionTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityDescriptionTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityDescriptionTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityDescriptionTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityDescriptionTmpBuf = (accessibilityDescriptionTmpBuf_ as string | Resource)
+        }
+        const accessibilityDescriptionTmpResult : ResourceStr | undefined = accessibilityDescriptionTmpBuf
+        const accessibilityLevelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityLevelTmpBuf : string | undefined = undefined
+        if ((accessibilityLevelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilityLevelTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const accessibilityLevelTmpResult : string | undefined = accessibilityLevelTmpBuf
+        const accessibilityGroupTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityGroupTmpBuf : boolean | undefined = undefined
+        if ((accessibilityGroupTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilityGroupTmpBuf = valueDeserializer.readBoolean()
+        }
+        const accessibilityGroupTmpResult : boolean | undefined = accessibilityGroupTmpBuf
+        let value : SliderPrefixOptions = ({accessibilityText: accessibilityTextTmpResult, accessibilityDescription: accessibilityDescriptionTmpResult, accessibilityLevel: accessibilityLevelTmpResult, accessibilityGroup: accessibilityGroupTmpResult} as SliderPrefixOptions)
+        return value
+    }
+}
+export class SliderStepItemAccessibility_serializer {
+    public static write(buffer: SerializerBase, value: SliderStepItemAccessibility): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForText  = value.text
+        if (valueHolderForText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextTmpValue  = valueHolderForText!
+            if (valueHolderForTextTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForTextTmpValueForIdx0  = valueHolderForTextTmpValue as string
+                valueSerializer.writeString(valueHolderForTextTmpValueForIdx0)
+            } else if (valueHolderForTextTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SliderStepItemAccessibility {
+        let valueDeserializer : DeserializerBase = buffer
+        const textTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textTmpBuf : ResourceStr | undefined = undefined
+        if ((textTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const textTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let textTmpBuf_ : string | Resource | undefined
+            if (textTmpBuf_UnionSelector == (0).toChar()) {
+                textTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (textTmpBuf_UnionSelector == (1).toChar()) {
+                textTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for textTmpBuf_ has to be chosen through deserialisation.")
+            }
+            textTmpBuf = (textTmpBuf_ as string | Resource)
+        }
+        const textTmpResult : ResourceStr | undefined = textTmpBuf
+        let value : SliderStepItemAccessibility = ({text: textTmpResult} as SliderStepItemAccessibility)
+        return value
+    }
+}
+export class SliderSuffixOptions_serializer {
+    public static write(buffer: SerializerBase, value: SliderSuffixOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAccessibilityText  = value.accessibilityText
+        if (valueHolderForAccessibilityText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityTextTmpValue  = valueHolderForAccessibilityText!
+            if (valueHolderForAccessibilityTextTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx0  = valueHolderForAccessibilityTextTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityTextTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityTextTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityTextTmpValueForIdx1  = valueHolderForAccessibilityTextTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityTextTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityDescription  = value.accessibilityDescription
+        if (valueHolderForAccessibilityDescription !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityDescriptionTmpValue  = valueHolderForAccessibilityDescription!
+            if (valueHolderForAccessibilityDescriptionTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx0  = valueHolderForAccessibilityDescriptionTmpValue as string
+                valueSerializer.writeString(valueHolderForAccessibilityDescriptionTmpValueForIdx0)
+            } else if (valueHolderForAccessibilityDescriptionTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx1  = valueHolderForAccessibilityDescriptionTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityDescriptionTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityLevel  = value.accessibilityLevel
+        if (valueHolderForAccessibilityLevel !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityLevelTmpValue  = valueHolderForAccessibilityLevel!
+            valueSerializer.writeString(valueHolderForAccessibilityLevelTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAccessibilityGroup  = value.accessibilityGroup
+        if (valueHolderForAccessibilityGroup !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccessibilityGroupTmpValue  = valueHolderForAccessibilityGroup!
+            valueSerializer.writeBoolean(valueHolderForAccessibilityGroupTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SliderSuffixOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const accessibilityTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityTextTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityTextTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityTextTmpBuf_ : string | Resource | undefined
+            if (accessibilityTextTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityTextTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityTextTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityTextTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityTextTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityTextTmpBuf = (accessibilityTextTmpBuf_ as string | Resource)
+        }
+        const accessibilityTextTmpResult : ResourceStr | undefined = accessibilityTextTmpBuf
+        const accessibilityDescriptionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityDescriptionTmpBuf : ResourceStr | undefined = undefined
+        if ((accessibilityDescriptionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const accessibilityDescriptionTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let accessibilityDescriptionTmpBuf_ : string | Resource | undefined
+            if (accessibilityDescriptionTmpBuf_UnionSelector == (0).toChar()) {
+                accessibilityDescriptionTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (accessibilityDescriptionTmpBuf_UnionSelector == (1).toChar()) {
+                accessibilityDescriptionTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for accessibilityDescriptionTmpBuf_ has to be chosen through deserialisation.")
+            }
+            accessibilityDescriptionTmpBuf = (accessibilityDescriptionTmpBuf_ as string | Resource)
+        }
+        const accessibilityDescriptionTmpResult : ResourceStr | undefined = accessibilityDescriptionTmpBuf
+        const accessibilityLevelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityLevelTmpBuf : string | undefined = undefined
+        if ((accessibilityLevelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilityLevelTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const accessibilityLevelTmpResult : string | undefined = accessibilityLevelTmpBuf
+        const accessibilityGroupTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accessibilityGroupTmpBuf : boolean | undefined = undefined
+        if ((accessibilityGroupTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accessibilityGroupTmpBuf = valueDeserializer.readBoolean()
+        }
+        const accessibilityGroupTmpResult : boolean | undefined = accessibilityGroupTmpBuf
+        let value : SliderSuffixOptions = ({accessibilityText: accessibilityTextTmpResult, accessibilityDescription: accessibilityDescriptionTmpResult, accessibilityLevel: accessibilityLevelTmpResult, accessibilityGroup: accessibilityGroupTmpResult} as SliderSuffixOptions)
         return value
     }
 }

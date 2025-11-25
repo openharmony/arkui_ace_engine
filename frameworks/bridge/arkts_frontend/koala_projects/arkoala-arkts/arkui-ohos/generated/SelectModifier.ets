@@ -95,6 +95,10 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _avoidance_0_0value?: AvoidanceMode | undefined
     _menuOutline_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuOutline_0_0value?: MenuOutlineOptions | undefined
+    _showInSubWindow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _showInSubWindow_0_0value?: boolean | undefined
+    _showDefaultSelectedIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _showDefaultSelectedIcon_0_0value?: boolean | undefined
     _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundColor_0_0value?: ResourceColor | undefined
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -572,6 +576,42 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (this._showInSubWindow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._showInSubWindow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setShowInSubWindowAttribute((this._showInSubWindow_0_0value as boolean | undefined));
+                    this._showInSubWindow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._showInSubWindow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._showInSubWindow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setShowInSubWindowAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._showDefaultSelectedIcon_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._showDefaultSelectedIcon_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setShowDefaultSelectedIconAttribute((this._showDefaultSelectedIcon_0_0value as boolean | undefined));
+                    this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setShowDefaultSelectedIconAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._backgroundColor_0_flag) {
@@ -950,6 +990,32 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (modifier._showInSubWindow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._showInSubWindow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.showInSubWindow(modifier._showInSubWindow_0_0value);
+                    break;
+                }
+                default: {
+                    this.showInSubWindow((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._showDefaultSelectedIcon_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._showDefaultSelectedIcon_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.showDefaultSelectedIcon(modifier._showDefaultSelectedIcon_0_0value);
+                    break;
+                }
+                default: {
+                    this.showDefaultSelectedIcon((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._backgroundColor_0_flag) {
@@ -1260,6 +1326,28 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         } else
         {
             this._menuOutline_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    showInSubWindow(value: boolean | undefined): this {
+        if (((this._showInSubWindow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._showInSubWindow_0_0value) !== (value)))
+        {
+            this._showInSubWindow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._showInSubWindow_0_0value = value
+        } else
+        {
+            this._showInSubWindow_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
+        if (((this._showDefaultSelectedIcon_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._showDefaultSelectedIcon_0_0value) !== (value)))
+        {
+            this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.UPDATE
+            this._showDefaultSelectedIcon_0_0value = value
+        } else
+        {
+            this._showDefaultSelectedIcon_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

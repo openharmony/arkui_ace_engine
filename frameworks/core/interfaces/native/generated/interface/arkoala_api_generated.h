@@ -1517,6 +1517,8 @@ typedef struct LoadingProgressModifierBuilder LoadingProgressModifierBuilder;
 typedef struct Opt_LoadingProgressModifierBuilder Opt_LoadingProgressModifierBuilder;
 typedef struct Map_AxisModel_Float64 Map_AxisModel_Float64;
 typedef struct Opt_Map_AxisModel_Float64 Opt_Map_AxisModel_Float64;
+typedef struct Map_Number_SliderStepItemAccessibility Map_Number_SliderStepItemAccessibility;
+typedef struct Opt_Map_Number_SliderStepItemAccessibility Opt_Map_Number_SliderStepItemAccessibility;
 typedef struct Map_String_ComponentContent Map_String_ComponentContent;
 typedef struct Opt_Map_String_ComponentContent Opt_Map_String_ComponentContent;
 typedef struct Map_String_Int32 Map_String_Int32;
@@ -2333,6 +2335,8 @@ typedef struct Ark_SlideRange Ark_SlideRange;
 typedef struct Opt_SlideRange Opt_SlideRange;
 typedef struct Ark_SliderConfiguration Ark_SliderConfiguration;
 typedef struct Opt_SliderConfiguration Opt_SliderConfiguration;
+typedef struct Ark_SliderShowStepOptions Ark_SliderShowStepOptions;
+typedef struct Opt_SliderShowStepOptions Opt_SliderShowStepOptions;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
 typedef struct Opt_SpringBackAction Opt_SpringBackAction;
@@ -2816,6 +2820,12 @@ typedef struct Ark_SliderBlockStyle Ark_SliderBlockStyle;
 typedef struct Opt_SliderBlockStyle Opt_SliderBlockStyle;
 typedef struct Ark_SliderOptions Ark_SliderOptions;
 typedef struct Opt_SliderOptions Opt_SliderOptions;
+typedef struct Ark_SliderPrefixOptions Ark_SliderPrefixOptions;
+typedef struct Opt_SliderPrefixOptions Opt_SliderPrefixOptions;
+typedef struct Ark_SliderStepItemAccessibility Ark_SliderStepItemAccessibility;
+typedef struct Opt_SliderStepItemAccessibility Opt_SliderStepItemAccessibility;
+typedef struct Ark_SliderSuffixOptions Ark_SliderSuffixOptions;
+typedef struct Opt_SliderSuffixOptions Opt_SliderSuffixOptions;
 typedef struct Ark_StarStyleOptions Ark_StarStyleOptions;
 typedef struct Opt_StarStyleOptions Opt_StarStyleOptions;
 typedef struct Ark_StepperOptions Ark_StepperOptions;
@@ -12851,6 +12861,16 @@ typedef struct Opt_SizeChangeCallback {
     Ark_Tag tag;
     SizeChangeCallback value;
 } Opt_SizeChangeCallback;
+typedef struct Map_Number_SliderStepItemAccessibility {
+    /* kind: ContainerType */
+    Ark_Int32 size;
+    Ark_Number* keys;
+    Ark_SliderStepItemAccessibility* values;
+} Map_Number_SliderStepItemAccessibility;
+typedef struct Opt_Map_Number_SliderStepItemAccessibility {
+    Ark_Tag tag;
+    Map_Number_SliderStepItemAccessibility value;
+} Opt_Map_Number_SliderStepItemAccessibility;
 typedef struct SliderModifierBuilder {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15616,6 +15636,14 @@ typedef struct Opt_SliderConfiguration {
     Ark_Tag tag;
     Ark_SliderConfiguration value;
 } Opt_SliderConfiguration;
+typedef struct Ark_SliderShowStepOptions {
+    /* kind: Interface */
+    Opt_Map_Number_SliderStepItemAccessibility stepsAccessibility;
+} Ark_SliderShowStepOptions;
+typedef struct Opt_SliderShowStepOptions {
+    Ark_Tag tag;
+    Ark_SliderShowStepOptions value;
+} Opt_SliderShowStepOptions;
 typedef struct Ark_SnapshotOptions {
     /* kind: Interface */
     Opt_Number scale;
@@ -18220,6 +18248,36 @@ typedef struct Opt_SliderOptions {
     Ark_Tag tag;
     Ark_SliderOptions value;
 } Opt_SliderOptions;
+typedef struct Ark_SliderPrefixOptions {
+    /* kind: Interface */
+    Opt_ResourceStr accessibilityText;
+    Opt_ResourceStr accessibilityDescription;
+    Opt_String accessibilityLevel;
+    Opt_Boolean accessibilityGroup;
+} Ark_SliderPrefixOptions;
+typedef struct Opt_SliderPrefixOptions {
+    Ark_Tag tag;
+    Ark_SliderPrefixOptions value;
+} Opt_SliderPrefixOptions;
+typedef struct Ark_SliderStepItemAccessibility {
+    /* kind: Interface */
+    Opt_ResourceStr text;
+} Ark_SliderStepItemAccessibility;
+typedef struct Opt_SliderStepItemAccessibility {
+    Ark_Tag tag;
+    Ark_SliderStepItemAccessibility value;
+} Opt_SliderStepItemAccessibility;
+typedef struct Ark_SliderSuffixOptions {
+    /* kind: Interface */
+    Opt_ResourceStr accessibilityText;
+    Opt_ResourceStr accessibilityDescription;
+    Opt_String accessibilityLevel;
+    Opt_Boolean accessibilityGroup;
+} Ark_SliderSuffixOptions;
+typedef struct Opt_SliderSuffixOptions {
+    Ark_Tag tag;
+    Ark_SliderSuffixOptions value;
+} Opt_SliderSuffixOptions;
 typedef struct Ark_StarStyleOptions {
     /* kind: Interface */
     Opt_ResourceStr backgroundUri;
@@ -24004,6 +24062,10 @@ typedef struct GENERATED_ArkUISelectModifier {
                          const Opt_AvoidanceMode* value);
     void (*setMenuOutline)(Ark_NativePointer node,
                            const Opt_MenuOutlineOptions* value);
+    void (*setShowInSubWindow)(Ark_NativePointer node,
+                               const Opt_Boolean* value);
+    void (*setShowDefaultSelectedIcon)(Ark_NativePointer node,
+                                       const Opt_Boolean* value);
     void (*setBackgroundColor)(Ark_NativePointer node,
                                const Opt_ResourceColor* value);
     void (*setMenuAlign)(Ark_NativePointer node,
@@ -24081,13 +24143,13 @@ typedef struct GENERATED_ArkUISliderModifier {
     void (*setSliderOptions)(Ark_NativePointer node,
                              const Opt_SliderOptions* options);
     void (*setBlockColor)(Ark_NativePointer node,
-                          const Opt_ResourceColor* value);
+                          const Opt_Union_ResourceColor_LinearGradient* value);
     void (*setTrackColor)(Ark_NativePointer node,
                           const Opt_Union_ResourceColor_LinearGradient* value);
     void (*setSelectedColor)(Ark_NativePointer node,
                              const Opt_Union_ResourceColor_LinearGradient* value);
-    void (*setShowSteps)(Ark_NativePointer node,
-                         const Opt_Boolean* value);
+    void (*setShowSteps0)(Ark_NativePointer node,
+                          const Opt_Boolean* value);
     void (*setTrackThickness)(Ark_NativePointer node,
                               const Opt_Length* value);
     void (*setOnChange)(Ark_NativePointer node,
@@ -24118,6 +24180,9 @@ typedef struct GENERATED_ArkUISliderModifier {
                                        const Opt_CrownSensitivity* value);
     void (*setEnableHapticFeedback)(Ark_NativePointer node,
                                     const Opt_Boolean* value);
+    void (*setShowSteps1)(Ark_NativePointer node,
+                          const Opt_Boolean* value,
+                          const Opt_SliderShowStepOptions* options);
     void (*setShowTips)(Ark_NativePointer node,
                         const Opt_Boolean* value,
                         const Opt_ResourceStr* content);
@@ -28032,6 +28097,15 @@ typedef struct GENERATED_ArkUISelectExtenderAccessor {
                        const Opt_DividerOptions* options);
 } GENERATED_ArkUISelectExtenderAccessor;
 
+typedef struct GENERATED_ArkUISliderExtenderAccessor {
+    void (*setPrefix)(Ark_NativePointer node,
+                      Ark_NativePointer prefixNode,
+                      const Opt_SliderPrefixOptions* options);
+    void (*setSuffix)(Ark_NativePointer node,
+                      Ark_NativePointer suffixNode,
+                      const Opt_SliderSuffixOptions* options);
+} GENERATED_ArkUISliderExtenderAccessor;
+
 typedef struct GENERATED_ArkUISpringBackActionAccessor {
     void (*destroyPeer)(Ark_SpringBackAction peer);
     Ark_SpringBackAction (*construct)();
@@ -29021,6 +29095,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUISearchControllerAccessor* (*getSearchControllerAccessor)();
     const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUISelectExtenderAccessor* (*getSelectExtenderAccessor)();
+    const GENERATED_ArkUISliderExtenderAccessor* (*getSliderExtenderAccessor)();
     const GENERATED_ArkUISpringBackActionAccessor* (*getSpringBackActionAccessor)();
     const GENERATED_ArkUISpringMotionAccessor* (*getSpringMotionAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();
@@ -29386,4 +29461,3 @@ struct OH_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
-

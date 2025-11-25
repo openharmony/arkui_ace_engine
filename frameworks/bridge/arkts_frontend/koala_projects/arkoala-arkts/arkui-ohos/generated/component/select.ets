@@ -807,6 +807,30 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuOutline(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setShowInSubWindowAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setShowInSubWindow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setShowDefaultSelectedIconAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setShowDefaultSelectedIcon(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -963,6 +987,12 @@ export interface SelectAttribute extends CommonMethod {
     menuOutline(value: MenuOutlineOptions | undefined): this {
         throw new Error("Unimplemented method menuOutline")
     }
+    showInSubWindow(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showInSubWindow")
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showDefaultSelectedIcon")
+    }
     backgroundColor(value: ResourceColor | undefined): this
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         throw new Error("Unimplemented method menuAlign")
@@ -999,6 +1029,8 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     dividerStyle_value?: DividerStyleOptions | undefined
     avoidance_value?: AvoidanceMode | undefined
     menuOutline_value?: MenuOutlineOptions | undefined
+    showInSubWindow_value?: boolean | undefined
+    showDefaultSelectedIcon_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined
     backgroundColor_value?: ResourceColor | undefined
     setSelectOptions(options: Array<SelectOption>): this {
@@ -1083,6 +1115,12 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
         return this
     }
     menuOutline(value: MenuOutlineOptions | undefined): this {
+        return this
+    }
+    showInSubWindow(value: boolean | undefined): this {
+        return this
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
         return this
     }
     backgroundColor(value: ResourceColor | undefined): this {
@@ -1320,6 +1358,22 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         if (this.checkPriority("menuOutline")) {
             const value_casted = value as (MenuOutlineOptions | undefined)
             this.getPeer()?.setMenuOutlineAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public showInSubWindow(value: boolean | undefined): this {
+        if (this.checkPriority("showInSubWindow")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setShowInSubWindowAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public showDefaultSelectedIcon(value: boolean | undefined): this {
+        if (this.checkPriority("showDefaultSelectedIcon")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setShowDefaultSelectedIconAttribute(value_casted)
             return this
         }
         return this

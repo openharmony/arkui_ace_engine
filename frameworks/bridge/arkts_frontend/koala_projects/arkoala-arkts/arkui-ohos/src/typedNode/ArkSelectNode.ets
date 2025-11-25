@@ -215,6 +215,18 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         this.markDirty();
         return this;
     }
+    setShowInSubWindow(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.setShowInSubWindowAttribute(value_casted);
+        this.markDirty();
+        return this;
+    }
+    showDefaultSelectedIcon(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.setShowDefaultSelectedIconAttribute(value_casted);
+        this.markDirty();
+        return this;
+    }
     backgroundColor(value: ResourceColor | undefined): this {
         const value_casted = value as (ResourceColor | undefined)
         this.getPeer()?.setBackgroundColorAttribute(value_casted)

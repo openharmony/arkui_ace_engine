@@ -71,8 +71,10 @@ import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
+import { ComponentContent } from "arkui.ComponentContent";
 import { ArkTextPickerComponent, ArkTextPickerPeer, DividerOptions } from "#generated";
 import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
+import { ArkSliderComponent, ArkSliderPeer, SliderExtender, SliderPrefixOptions, SliderSuffixOptions } from "#generated";
 import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
 import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from '#generated';
@@ -585,6 +587,46 @@ export function hookSelectSetDividerMethod(
       value_casted = value as (DividerOptions | undefined)
     }
     SelectExtender.setDivider(selectPeer.peer.ptr, value_casted)
+}
+
+export function hookSliderSetPrefixMethod(
+  node: ArkSliderComponent | ArkSliderPeer, content: ComponentContent | undefined, options?: SliderPrefixOptions | undefined): void {
+    const sliderPeer: ArkSliderPeer = node instanceof ArkSliderComponent ? (node as ArkSliderComponent).getPeer() :
+       (node as ArkSliderPeer);
+    if (!sliderPeer || !sliderPeer.peer || !sliderPeer.peer.ptr) {
+      return;
+    }
+    let ptr: KPointer = 0;
+    if (content != undefined && content.getNodePtr() !== undefined) {
+        ptr = content.getNodePtr() as KPointer;
+    }
+    let valueCasted: SliderPrefixOptions | undefined;
+    if (options === null || options === undefined) {
+      valueCasted = undefined;
+    } else {
+        valueCasted = options as SliderPrefixOptions;
+    }
+    SliderExtender.setPrefix(sliderPeer.peer.ptr, ptr, valueCasted);
+}
+
+export function hookSliderSetSuffixMethod(
+  node: ArkSliderComponent | ArkSliderPeer, content: ComponentContent | undefined, options?: SliderSuffixOptions | undefined): void {
+    const sliderPeer: ArkSliderPeer = node instanceof ArkSliderComponent ? (node as ArkSliderComponent).getPeer() :
+       (node as ArkSliderPeer);
+    if (!sliderPeer || !sliderPeer.peer || !sliderPeer.peer.ptr) {
+      return;
+    }
+    let ptr: KPointer = 0;
+    if (content != undefined && content.getNodePtr() !== undefined) {
+        ptr = content.getNodePtr() as KPointer;
+    } 
+    let valueCasted: SliderSuffixOptions | undefined;
+    if (options === null || options === undefined) {
+      valueCasted = undefined;
+    } else {
+        valueCasted = options as SliderSuffixOptions;
+    }
+    SliderExtender.setSuffix(sliderPeer.peer.ptr, ptr, valueCasted);
 }
 
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
