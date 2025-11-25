@@ -68,6 +68,9 @@ public:
 void AppBarTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
@@ -77,6 +80,7 @@ void AppBarTestNg::SetUpTestSuite()
 
 void AppBarTestNg::TearDownTestSuite()
 {
+    MockContainer::Current()->pipelineContext_ = nullptr;
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
 }
@@ -1320,4 +1324,101 @@ HWTEST_F(AppBarTestNg, SetCustomAppBarNode002, TestSize.Level1)
     auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
     EXPECT_NE(customAppBar, nullptr);
 }
+
+/**
+ * @tc.name: SetMenuBarVisibleCallBack001
+ * @tc.desc: Test SetMenuBarVisibleCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, SetMenuBarVisibleCallBack001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage, atomicServicePattern, customAppBar.
+     * @tc.expected: stage, atomicServicePattern, customAppBar are not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    RefPtr<AtomicServicePattern> atomicServicePattern = AceType::MakeRefPtr<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    atomicServicePattern->customAppBarNodeNode_ = custom;
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+
+    /**
+     * @tc.steps: step2. Expect the callback is used.
+     */
+    std::string name1 = "qw";
+    customAppBar->customCallback_ = [&name1](const std::string& name, const std::string& value) { name1 = "test"; };
+    atomicServicePattern->SetMenuBarVisibleCallBack(true);
+    EXPECT_EQ(name1, "test");
+}
+
+/**
+ * @tc.name: SetMenuBarVisible001
+ * @tc.desc: Test SetMenuBarVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, SetMenuBarVisible001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage, atomicServicePattern, customAppBar.
+     * @tc.expected: stage, atomicServicePattern, customAppBar are not null.
+     */
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto atomicServicePattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    atomicServicePattern->customAppBarNodeNode_ = custom;
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+
+    /**
+     * @tc.steps: step2. Expect the callback is used.
+     */
+    std::string name1 = "qw";
+    customAppBar->customCallback_ = [&name1](const std::string& name, const std::string& value) { name1 = "test"; };
+    appBar->SetMenuBarVisible(true);
+    EXPECT_EQ(name1, "test");
+}
+
+/**
+ * @tc.name: ExtensionHostParamsCallBack001
+ * @tc.desc: Test ExtensionHostParamsCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, ExtensionHostParamsCallBack001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage, atomicServicePattern, customAppBar.
+     * @tc.expected: stage, atomicServicePattern, customAppBar are not null.
+     */
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto atomicServicePattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    atomicServicePattern->customAppBarNodeNode_ = custom;
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+    /**
+     * @tc.steps: step2. Expect the callback is used.
+     */
+    std::string name1 = "qw";
+    customAppBar->customCallback_ = [&name1](const std::string& name, const std::string& value) { name1 = "test"; };
+    appBar->FireExtensionHostParams();
+    EXPECT_EQ(name1, "test");
+}
+
 } // namespace OHOS::Ace::NG

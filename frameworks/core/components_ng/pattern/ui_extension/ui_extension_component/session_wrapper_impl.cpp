@@ -79,6 +79,7 @@ constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 constexpr char UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING[] =
     "ohos.ace.uiextension.allowCrossProcessNesting";
 constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
+constexpr const char* const UIEXTENSION_CONFIG_MENUBAR = "ohos.system.atomicservice.menubar.params";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
@@ -765,6 +766,9 @@ void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
     auto str = UIExtensionContainerHandler::FromUIContentTypeToStr(container->GetUIContentType());
     configParam.SetParam(UIEXTENSION_HOST_UICONTENT_TYPE, AAFwk::String::Box(str));
     UpdateConfigParamByContainerHandler(configParam);
+    AAFwk::WantParams menuBarWantParam;
+    UpdateMenuBarWantPtr(wantPtr, menuBarWantParam);
+    configParam.SetParam(UIEXTENSION_CONFIG_MENUBAR, AAFwk::WantParamWrapper::Box(menuBarWantParam));
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);
@@ -789,6 +793,20 @@ void SessionWrapperImpl::UpdateConfigParamByContainerHandler(AAFwk::WantParams& 
         auto allowCrossProcessNesting = uIExtensionContainerHandler->IsAllowCrossProcessNesting();
         configParam.SetParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING,
             AAFwk::Boolean::Box(allowCrossProcessNesting));
+    }
+}
+
+void SessionWrapperImpl::UpdateMenuBarWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr, AAFwk::WantParams& wantParam)
+{
+    CHECK_NULL_VOID(wantPtr);
+    std::map<std::string, sptr<AAFwk::IInterface>> params = wantPtr->GetParams().GetParams();
+    auto copyParams = params;
+    const std::string prefix = "com.atomicservice.";
+    for (const auto& [key, value] : copyParams) {
+        if (key.find(prefix) != std::string::npos) {
+            wantParam.SetParam(key, value);
+            params.erase(key);
+        }
     }
 }
 

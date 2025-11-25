@@ -27,6 +27,8 @@ const std::string ARKUI_APP_BAR_ON_BACK_PRESSED = "arkui_app_bar_on_back_pressed
 const std::string ARKUI_APP_BAR_BAR_INFO = "arkui_app_bar_info";
 const std::string ARKUI_APP_BAR_SCREEN = "arkui_app_bar_screen";
 const std::string ARKUI_APP_BG_COLOR = "arkui_app_bg_color";
+const std::string ARKUI_MENU_BAR_VISIBLE = "arkui_menu_bar_visible";
+const std::string ARKUI_EXTENSION_HOST_PARAMS = "arkui_extension_host_params";
 
 class ACE_EXPORT CustomAppBarNode : public CustomNode {
     DECLARE_ACE_TYPE(CustomAppBarNode, CustomNode);
@@ -54,6 +56,8 @@ public:
     void FireCustomCallback(const std::string& eventName, bool value)
     {
         if (customCallback_) {
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "app bar FireCustomCallback eventName =%{public}s, param = %{public}s",
+                eventName.c_str(), BoolToString(value).c_str());
             customCallback_(eventName, BoolToString(value));
         }
     }

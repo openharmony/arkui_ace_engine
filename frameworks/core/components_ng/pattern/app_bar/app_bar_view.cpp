@@ -138,6 +138,16 @@ void AppBarView::BindJSContainer()
     pattern->AppInfoCallBack();
     pattern->AppScreenCallBack();
     pattern->AppBgColorCallBack();
+    FireExtensionHostParams();
+}
+
+void AppBarView::FireExtensionHostParams()
+{
+    auto atomicService = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atomicService);
+    auto atomicServicePattern = atomicService->GetPattern<NG::AtomicServicePattern>();
+    CHECK_NULL_VOID(atomicServicePattern);
+    atomicServicePattern->ExtensionHostParamsCallBack();
 }
 
 void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
@@ -618,4 +628,14 @@ void AppBarView::RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelin
     CHECK_NULL_VOID(pattern);
     pattern->RemoveRectChangeListener(id);
 }
+
+void AppBarView::SetMenuBarVisible(bool visible)
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBarVisibleCallBack(visible);
+}
+
 } // namespace OHOS::Ace::NG
