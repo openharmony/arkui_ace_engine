@@ -305,8 +305,12 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> |
-        AttributeModifier<CommonMethod> | undefined): this {
+    attributeModifier(
+        value: AttributeModifier<ListAttribute> |
+        AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> |
+        undefined
+    ): this {
         throw new Error('Unimplemented method attributeModifier')
     }
 }
