@@ -440,7 +440,13 @@ int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqu
 int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO);
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+        return ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO;
+    }
     CHECK_NULL_RETURN(child, ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED);
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(child)) {
+        return ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
     auto result =
@@ -451,6 +457,9 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
 int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
     CHECK_NULL_RETURN(node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(node) || !OHOS::Ace::NodeModel::CheckIsCNode(child)) {
+        return OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()
