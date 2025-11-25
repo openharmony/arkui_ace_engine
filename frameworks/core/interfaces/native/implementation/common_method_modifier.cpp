@@ -3146,27 +3146,27 @@ void SetNextFocusImpl(Ark_NativePointer node,
     if (!setFocusData) {
         return;
     }
-    if (setFocusData->forward.has_value() && setFocusData->forward.value().c_str() != NULL
+    if (setFocusData->forward.has_value() && setFocusData->forward.value().c_str() != nullptr
         && setFocusData->forward.value().c_str()[0] != 0) {
         ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, setFocusData->forward.value());
     }
-    if (setFocusData->backward.has_value() && setFocusData->backward.value().c_str() != NULL
+    if (setFocusData->backward.has_value() && setFocusData->backward.value().c_str() != nullptr
         && setFocusData->backward.value().c_str()[0] != 0) {
         ViewAbstract::SetNextFocus(frameNode, FocusIntension::SHIFT_TAB, setFocusData->backward.value());
     }
-    if (setFocusData->up.has_value() && setFocusData->up.value().c_str() != NULL
+    if (setFocusData->up.has_value() && setFocusData->up.value().c_str() != nullptr
         && setFocusData->up.value().c_str()[0] != 0) {
         ViewAbstract::SetNextFocus(frameNode, FocusIntension::UP, setFocusData->up.value());
     }
-    if (setFocusData->down.has_value() && setFocusData->down.value().c_str() != NULL
+    if (setFocusData->down.has_value() && setFocusData->down.value().c_str() != nullptr
         && setFocusData->down.value().c_str()[0] != 0) {
         ViewAbstract::SetNextFocus(frameNode, FocusIntension::DOWN, setFocusData->down.value());
     }
-    if (setFocusData->left.has_value() && setFocusData->left.value().c_str() != NULL
+    if (setFocusData->left.has_value() && setFocusData->left.value().c_str() != nullptr
         && setFocusData->left.value().c_str()[0] != 0) {
         ViewAbstract::SetNextFocus(frameNode, FocusIntension::LEFT, setFocusData->left.value());
     }
-    if (setFocusData->right.has_value() && setFocusData->right.value().c_str() != NULL
+    if (setFocusData->right.has_value() && setFocusData->right.value().c_str() != nullptr
         && setFocusData->right.value().c_str()[0] != 0) {
         ViewAbstract::SetNextFocus(frameNode, FocusIntension::RIGHT, setFocusData->right.value());
     }
