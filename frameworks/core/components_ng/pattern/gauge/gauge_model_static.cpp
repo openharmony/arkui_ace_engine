@@ -97,6 +97,13 @@ void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType
     frameNode->MarkModifyDone();
 }
 
+void GaugeModelStatic::ReSetDescription(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, false, frameNode);
+    frameNode->MarkModifyDone();
+}
+
 void GaugeModelStatic::SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue, frameNode);
