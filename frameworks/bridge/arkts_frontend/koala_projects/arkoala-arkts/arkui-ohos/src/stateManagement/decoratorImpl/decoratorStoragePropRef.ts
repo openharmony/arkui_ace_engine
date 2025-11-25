@@ -34,8 +34,7 @@ import { uiUtils } from '../base/uiUtilsImpl';
 
 export class StoragePropRefDecoratedVariable<T>
     extends DecoratedV1VariableBase<T>
-    implements IStoragePropRefDecoratedVariable<T>, ILocalStoragePropRefDecoratedVariable<T>
-{
+    implements IStoragePropRefDecoratedVariable<T>, ILocalStoragePropRefDecoratedVariable<T> {
     backing_: IBackingValue<T>;
     backingStorageValue_: AbstractProperty<T>;
     storageWatchFunc_: WatchFunc;
@@ -51,7 +50,9 @@ export class StoragePropRefDecoratedVariable<T>
         super(decoratorName, owningView, varName, watchFunc);
         this.propName = propName;
         this.backingStorageValue_ = storagePropRef;
-        this.backingStorageValue_.onChange(this.onStorageObjChanged);
+        this.backingStorageValue_.onChange((key: string, newValue: T) => {
+            this.onStorageObjChanged(key, newValue);
+        });
         const initValue = this.backingStorageValue_.get();
         this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
@@ -68,7 +69,7 @@ export class StoragePropRefDecoratedVariable<T>
         this.updateValueFromStorage();
     }
 
-    onStorageObjChanged<T>(key: string, newValue: T): void {
+    onStorageObjChanged(key: string, newValue: T): void {
         this.updateValueFromStorage();
     }
 
