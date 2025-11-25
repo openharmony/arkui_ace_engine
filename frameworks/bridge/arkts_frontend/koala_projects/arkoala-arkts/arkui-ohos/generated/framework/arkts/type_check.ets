@@ -90,6 +90,7 @@ import { IndexerAlign, AlphabetIndexerOptions } from "./../../component/alphabet
 import { IndicatorComponentController } from "./../../component/indicatorcomponent"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { ItemState } from "./../../component/stepperItem"
+import { default as text } from "@ohos.graphics.text"
 import { LayoutMode, SelectedMode, TabBarSymbol, TabBarIconStyle, TabBarOptions, BoardStyle, SubTabBarIndicatorStyle, TabBarLabelStyle, BottomTabBarStyle, SubTabBarStyle } from "./../../component/tabContent"
 import { LinearIndicatorController, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../../component/linearindicator"
 import { ListItemGroupStyle, ListItemGroupOptions } from "./../../component/listItemGroup"
@@ -668,6 +669,15 @@ export class TypeChecker {
     static isColumnSplitDividerStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof ColumnSplitDividerStyle
     }
+    static iscommon2D_Color(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof common2D.Color
+    }
+    static iscommon2D_Point(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof common2D.Point
+    }
+    static iscommon2D_Rect(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof common2D.Rect
+    }
     static isCommonMethod(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean, arg35: boolean, arg36: boolean, arg37: boolean, arg38: boolean, arg39: boolean, arg40: boolean, arg41: boolean, arg42: boolean, arg43: boolean, arg44: boolean, arg45: boolean, arg46: boolean, arg47: boolean, arg48: boolean, arg49: boolean, arg50: boolean, arg51: boolean, arg52: boolean, arg53: boolean, arg54: boolean, arg55: boolean, arg56: boolean, arg57: boolean, arg58: boolean, arg59: boolean, arg60: boolean, arg61: boolean, arg62: boolean, arg63: boolean, arg64: boolean, arg65: boolean, arg66: boolean, arg67: boolean, arg68: boolean, arg69: boolean, arg70: boolean, arg71: boolean, arg72: boolean, arg73: boolean, arg74: boolean, arg75: boolean, arg76: boolean, arg77: boolean, arg78: boolean, arg79: boolean, arg80: boolean, arg81: boolean, arg82: boolean, arg83: boolean, arg84: boolean, arg85: boolean, arg86: boolean, arg87: boolean, arg88: boolean, arg89: boolean, arg90: boolean, arg91: boolean, arg92: boolean, arg93: boolean, arg94: boolean, arg95: boolean, arg96: boolean, arg97: boolean, arg98: boolean, arg99: boolean, arg100: boolean, arg101: boolean, arg102: boolean, arg103: boolean, arg104: boolean, arg105: boolean, arg106: boolean, arg107: boolean, arg108: boolean, arg109: boolean, arg110: boolean, arg111: boolean, arg112: boolean, arg113: boolean, arg114: boolean, arg115: boolean, arg116: boolean, arg117: boolean, arg118: boolean, arg119: boolean, arg120: boolean, arg121: boolean, arg122: boolean, arg123: boolean, arg124: boolean, arg125: boolean, arg126: boolean, arg127: boolean, arg128: boolean, arg129: boolean, arg130: boolean, arg131: boolean, arg132: boolean, arg133: boolean, arg134: boolean, arg135: boolean, arg136: boolean, arg137: boolean, arg138: boolean, arg139: boolean, arg140: boolean, arg141: boolean, arg142: boolean, arg143: boolean, arg144: boolean, arg145: boolean, arg146: boolean, arg147: boolean, arg148: boolean, arg149: boolean, arg150: boolean, arg151: boolean, arg152: boolean, arg153: boolean, arg154: boolean, arg155: boolean, arg156: boolean): boolean {
         return value instanceof CommonMethod
     }
@@ -955,6 +965,9 @@ export class TypeChecker {
     }
     static isdrawing_ColorFilter(value: Object | string | number | undefined): boolean {
         return value instanceof drawing.ColorFilter
+    }
+    static isdrawing_FontMetrics(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean): boolean {
+        return value instanceof drawing.FontMetrics
     }
     static isdrawing_Lattice(value: Object | string | number | undefined): boolean {
         return value instanceof drawing.Lattice
@@ -2348,7 +2361,7 @@ export class TypeChecker {
     static isPositionLengthMetricsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PositionLengthMetricsInner
     }
-    static isPositionWithAffinity(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isPositionWithAffinity(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PositionWithAffinity
     }
     static isPosterOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -3094,6 +3107,63 @@ export class TypeChecker {
     }
     static isTerminationInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof TerminationInfo
+    }
+    static istext_Affinity(value: Object | string | number | undefined): boolean {
+        return value instanceof text.Affinity
+    }
+    static istext_Decoration(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof text.Decoration
+    }
+    static istext_EllipsisMode(value: Object | string | number | undefined): boolean {
+        return value instanceof text.EllipsisMode
+    }
+    static istext_FontFeature(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof text.FontFeature
+    }
+    static istext_FontStyle(value: Object | string | number | undefined): boolean {
+        return value instanceof text.FontStyle
+    }
+    static istext_FontVariation(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof text.FontVariation
+    }
+    static istext_FontWeight(value: Object | string | number | undefined): boolean {
+        return value instanceof text.FontWeight
+    }
+    static istext_LineMetrics(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean): boolean {
+        return value instanceof text.LineMetrics
+    }
+    static istext_RectHeightStyle(value: Object | string | number | undefined): boolean {
+        return value instanceof text.RectHeightStyle
+    }
+    static istext_RectStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof text.RectStyle
+    }
+    static istext_RectWidthStyle(value: Object | string | number | undefined): boolean {
+        return value instanceof text.RectWidthStyle
+    }
+    static istext_RunMetrics(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof text.RunMetrics
+    }
+    static istext_TextBaseline(value: Object | string | number | undefined): boolean {
+        return value instanceof text.TextBaseline
+    }
+    static istext_TextBox(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof text.TextBox
+    }
+    static istext_TextDecorationStyle(value: Object | string | number | undefined): boolean {
+        return value instanceof text.TextDecorationStyle
+    }
+    static istext_TextDecorationType(value: Object | string | number | undefined): boolean {
+        return value instanceof text.TextDecorationType
+    }
+    static istext_TextDirection(value: Object | string | number | undefined): boolean {
+        return value instanceof text.TextDirection
+    }
+    static istext_TextShadow(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof text.TextShadow
+    }
+    static istext_TextStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean): boolean {
+        return value instanceof text.TextStyle
     }
     static isTextAlign(value: Object | string | number | undefined): boolean {
         return value instanceof TextAlign
@@ -5282,6 +5352,66 @@ export class TypeChecker {
     static TabsCacheMode_FromNumeric(ordinal: int32): TabsCacheMode {
         return TabsCacheMode.fromValue(ordinal)
     }
+    static text_Affinity_ToNumeric(value: text.Affinity): int32 {
+        return value.valueOf()
+    }
+    static text_Affinity_FromNumeric(ordinal: int32): text.Affinity {
+        return text.Affinity.fromValue(ordinal)
+    }
+    static text_EllipsisMode_ToNumeric(value: text.EllipsisMode): int32 {
+        return value.valueOf()
+    }
+    static text_EllipsisMode_FromNumeric(ordinal: int32): text.EllipsisMode {
+        return text.EllipsisMode.fromValue(ordinal)
+    }
+    static text_FontStyle_ToNumeric(value: text.FontStyle): int32 {
+        return value.valueOf()
+    }
+    static text_FontStyle_FromNumeric(ordinal: int32): text.FontStyle {
+        return text.FontStyle.fromValue(ordinal)
+    }
+    static text_FontWeight_ToNumeric(value: text.FontWeight): int32 {
+        return value.valueOf()
+    }
+    static text_FontWeight_FromNumeric(ordinal: int32): text.FontWeight {
+        return text.FontWeight.fromValue(ordinal)
+    }
+    static text_RectHeightStyle_ToNumeric(value: text.RectHeightStyle): int32 {
+        return value.valueOf()
+    }
+    static text_RectHeightStyle_FromNumeric(ordinal: int32): text.RectHeightStyle {
+        return text.RectHeightStyle.fromValue(ordinal)
+    }
+    static text_RectWidthStyle_ToNumeric(value: text.RectWidthStyle): int32 {
+        return value.valueOf()
+    }
+    static text_RectWidthStyle_FromNumeric(ordinal: int32): text.RectWidthStyle {
+        return text.RectWidthStyle.fromValue(ordinal)
+    }
+    static text_TextBaseline_ToNumeric(value: text.TextBaseline): int32 {
+        return value.valueOf()
+    }
+    static text_TextBaseline_FromNumeric(ordinal: int32): text.TextBaseline {
+        return text.TextBaseline.fromValue(ordinal)
+    }
+    static text_TextDecorationStyle_ToNumeric(value: text.TextDecorationStyle): int32 {
+        return value.valueOf()
+    }
+    static text_TextDecorationStyle_FromNumeric(ordinal: int32): text.TextDecorationStyle {
+        return text.TextDecorationStyle.fromValue(ordinal)
+    }
+    static text_TextDecorationType_ToNumeric(value: text.TextDecorationType): int32 {
+        return value.valueOf()
+    }
+    static text_TextDecorationType_FromNumeric(ordinal: int32): text.TextDecorationType {
+        return text.TextDecorationType.fromValue(ordinal)
+    }
+    static text_TextDirection_ToNumeric(value: text.TextDirection): int32 {
+        return value.valueOf()
+    }
+    static text_TextDirection_FromNumeric(ordinal: int32): text.TextDirection {
+        return text.TextDirection.fromValue(ordinal)
+    }
     static TextAlign_ToNumeric(value: TextAlign): int32 {
         return value.valueOf()
     }
@@ -5749,6 +5879,9 @@ export class TypeChecker {
             return e instanceof ImageAnalyzerType
         }
         return false
+    }
+    static isArray_text_TextBox(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
     }
     static isArray_ColorStop(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
@@ -6277,6 +6410,15 @@ export class TypeChecker {
             return e instanceof TextDataDetectorType
         }
         return false
+    }
+    static isArray_text_FontFeature(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_text_TextShadow(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_text_FontVariation(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
     }
     static isArray_Array_String(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {

@@ -4594,6 +4594,10 @@ export class ArkUIGeneratedNativeModule {
     native static _LayoutManager_getLineCount(ptr: KPointer): int32
     @ani.unsafe.Quick
     native static _LayoutManager_getGlyphPositionAtCoordinate(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getLineMetrics(ptr: KPointer, lineNumber: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getRectsForRange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, widthStyle: KInt, heightStyle: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _LayoutPolicy_construct(): KPointer
     @ani.unsafe.Direct

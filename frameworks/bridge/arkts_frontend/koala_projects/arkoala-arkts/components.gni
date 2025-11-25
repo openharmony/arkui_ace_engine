@@ -371,6 +371,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/ohos.curves.ets",
   "arkui-preprocessed/arkui/framework/ohos.data.unifiedDataChannel.ets",
   "arkui-preprocessed/arkui/framework/ohos.graphics.common2D.ets",
+  "arkui-preprocessed/arkui/framework/ohos.graphics.text.ets",
   "arkui-preprocessed/arkui/framework/ohos.font.ets",
   "arkui-preprocessed/arkui/framework/ohos.font.custom.ets",
   "arkui-preprocessed/arkui/framework/ohos.graphics.drawing.ets",

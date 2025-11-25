@@ -31586,6 +31586,28 @@ KInteropReturnBuffer impl_LayoutManager_getGlyphPositionAtCoordinate(Ark_NativeP
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_3(LayoutManager_getGlyphPositionAtCoordinate, KInteropReturnBuffer, Ark_NativePointer, KDouble, KDouble)
+KInteropReturnBuffer impl_LayoutManager_getLineMetrics(Ark_NativePointer thisPtr, Ark_Int32 lineNumber) {
+        Ark_LayoutManager self = reinterpret_cast<Ark_LayoutManager>(thisPtr);
+        const auto &retValue = GetAccessors()->getLayoutManagerAccessor()->getLineMetrics(self, lineNumber);
+        SerializerBase _retSerializer {};
+        text_LineMetrics_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(LayoutManager_getLineMetrics, KInteropReturnBuffer, Ark_NativePointer, Ark_Int32)
+KInteropReturnBuffer impl_LayoutManager_getRectsForRange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, Ark_Int32 widthStyle, Ark_Int32 heightStyle) {
+        Ark_LayoutManager self = reinterpret_cast<Ark_LayoutManager>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TextRange rangeValueTemp = TextRange_serializer::read(thisDeserializer);;
+        const auto &retValue = GetAccessors()->getLayoutManagerAccessor()->getRectsForRange(self, static_cast<Ark_TextRange*>(&rangeValueTemp), static_cast<Ark_text_RectWidthStyle>(widthStyle), static_cast<Ark_text_RectHeightStyle>(heightStyle));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_text_TextBox retValueTmpElement = retValue.array[retValueCounterI];
+            text_TextBox_serializer::write(_retSerializer, retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_5(LayoutManager_getRectsForRange, KInteropReturnBuffer, Ark_NativePointer, KSerializerBuffer, int32_t, Ark_Int32, Ark_Int32)
 Ark_NativePointer impl_LayoutPolicy_construct() {
         return GetAccessors()->getLayoutPolicyAccessor()->construct();
 }

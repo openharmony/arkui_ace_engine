@@ -744,10 +744,17 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation001, TestSize.Level0)
  */
 HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
+
+    /**
+     * @tc.steps: step2. set empty styledString
+     */
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
@@ -756,6 +763,10 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation002, TestSize.Level0)
     auto newFrameNode = ImageSpanNode::GetOrCreateSpanNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     richEditorNode_->children_.push_back(newFrameNode);
+
+    /**
+     * @tc.steps: step3. process delete operation
+     */
     richEditorPattern->DeleteSpansOperation(0, 5);
     EXPECT_EQ(richEditorPattern->textForDisplay_.size(), 0);
 }

@@ -423,6 +423,22 @@ namespace OHOS::Ace::NG::Converter {
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,
         ConvContext *ctx);
+    void AssignArkValue(Ark_text_Affinity& dst, const TextAffinity& src);
+    void AssignArkValue(Ark_common2D_Rect& dst, const OHOS::Ace::NG::RectT<float>& src);
+    void AssignArkValue(Ark_text_TextDirection& dst, const OHOS::Ace::TextDirection& src);
+    void AssignArkValue(Ark_text_TextBox& dst, const ParagraphManager::TextBox& src);
+    void AssignArkValue(Ark_text_LineMetrics& dst, const OHOS::Ace::TextLineMetrics& src, ConvContext *ctx);
+    void AssignArkValue(Map_Int32_text_RunMetrics& dst, const std::map<size_t, RunMetrics>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_RunMetrics& dst, const RunMetrics& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_TextStyle& dst, const TextStyle& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_Decoration& dst, const TextDecoration& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_TextDecorationType& dst, const TextDecoration& src, ConvContext *ctx);
+    void AssignArkValue(Ark_common2D_Color& dst, const Color& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_FontWeight& dst, const FontWeight& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_FontStyle& dst, const OHOS::Ace::FontStyle& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_TextBaseline& dst, const TextBaseline& src, ConvContext *ctx);
+    void AssignArkValue(Ark_text_EllipsisMode& dst, const EllipsisMode& src, ConvContext *ctx);
+    void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx);
 
     // SORTED_SECTION
     template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);
