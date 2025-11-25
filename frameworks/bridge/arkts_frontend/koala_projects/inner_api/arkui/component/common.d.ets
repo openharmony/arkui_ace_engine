@@ -16,7 +16,7 @@
  * @file
  * @kit ArkUI
  */
-import { memo_stable } from '@koalaui/runtime/annotations';
+import { memo_stable } from '@koalaui.runtime.annotations';
 import { Resource } from 'global.resource';
 import { CircleShape, EllipseShape, PathShape, RectShape } from '@ohos.arkui.shape';
 import { LengthMetrics } from 'arkui.Graphics';
@@ -76,8 +76,8 @@ import {
     TransitionType,
 } from 'arkui.component.enums';
 import { CustomBuilder } from 'arkui.component.builder';
-import { PeerNode } from 'arkui/PeerNode';
-import { ComponentBase } from 'arkui/ComponentBase';
+import { PeerNode } from 'arkui.PeerNode';
+import { ComponentBase } from 'arkui.ComponentBase';
 import {
     LayoutPolicy,
     CrownEvent,
@@ -173,7 +173,7 @@ import image from '@ohos.multimedia.image';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import drawing from '@ohos.graphics.drawing';
 
-type KPointer = long;
+type KPointer = LockGrantedCallback;
 type int32 = int;
 
 type PixelMap = image.PixelMap;
@@ -331,7 +331,7 @@ export interface CommonMethod {
         dropOptions?: DropOptions
     ): this;
     onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this;
-    allowDrop(value: Array<UniformDataType> | undefined): this;
+    allowDrop(value: Array<UniformDataType> | Array<string> | undefined): this;
     draggable(value: boolean | undefined): this;
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this;
     onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this;
@@ -589,7 +589,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public onDrop0Attribute(value: ((event: DragEvent, extraParams?: string) => void) | undefined): void;
     public onDrop1Attribute(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): void;
     public onDragEndAttribute(value: ((event: DragEvent, extraParams?: string) => void) | undefined): void;
-    public allowDropAttribute(value: Array<UniformDataType> | undefined): void;
+    public allowDropAttribute(value: Array<UniformDataType> | Array<string> | undefined): void;
     public draggableAttribute(value: boolean | undefined): void;
     public dragPreview0Attribute(value: CustomBuilder | DragItemInfo | string | undefined): void;
     public dragPreview1Attribute(
@@ -895,7 +895,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
         dropOptions?: DropOptions
     ): this;
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this;
-    public allowDrop(value: Array<UniformDataType> | undefined): this;
+    public allowDrop(value: Array<UniformDataType> | Array<string> | undefined): this;
     public draggable(value: boolean | undefined): this;
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this;
     public onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this;
@@ -1119,7 +1119,7 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
     public onDragLeave_value?: ((event: DragEvent, extraParams?: string) => void) | undefined;
     public onDrop_value?: ((event: DragEvent, extraParams?: string) => void) | undefined;
     public onDragEnd_value?: ((event: DragEvent, extraParams?: string) => void) | undefined;
-    public allowDrop_value?: Array<UniformDataType> | undefined;
+    public allowDrop_value?: Array<UniformDataType> | Array<string> | undefined;
     public draggable_value?: boolean | undefined;
     public dragPreview_value?: CustomBuilder | DragItemInfo | string | undefined;
     public onPreDrag_value?: ((parameter: PreDragStatus) => void) | undefined;
@@ -1291,7 +1291,7 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
         dropOptions?: DropOptions
     ): this;
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this;
-    public allowDrop(value: Array<UniformDataType> | undefined): this;
+    public allowDrop(value: Array<UniformDataType> | Array<string> | undefined): this;
     public draggable(value: boolean | undefined): this;
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this;
     public onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this;

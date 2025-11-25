@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { PeerNode } from 'arkui/PeerNode';
+import { PeerNode } from 'arkui.PeerNode';
 import { int32 } from '@koalaui/compat';
 
 export type PageClassNameResolver = (page: string) => string | undefined;

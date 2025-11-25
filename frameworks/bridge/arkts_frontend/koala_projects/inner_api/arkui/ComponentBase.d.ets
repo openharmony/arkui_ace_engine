@@ -16,8 +16,8 @@
 import {
     __memo_context_type as __memo_context_type,
     __memo_id_type as __memo_id_type,
-} from 'arkui.incremental.runtime.state';
-import { PeerNode } from 'arkui/PeerNode';
+} from 'arkui.stateManagement.runtime';
+import { PeerNode } from 'arkui.PeerNode';
 // import { AnimateParam, UIGestureEvent } from "./component";
 export declare class ComponentBase {
     protected peer?: PeerNode | undefined;

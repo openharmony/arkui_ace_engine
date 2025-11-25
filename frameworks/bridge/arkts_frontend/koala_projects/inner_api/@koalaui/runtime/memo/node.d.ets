@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-import { memo } from '@koalaui/runtime/annotations'
 import {
     __memo_context_type as __memo_context_type,
     __memo_id_type as __memo_id_type,
-} from 'arkui.incremental.runtime.state';
-import { IncrementalNode } from '@koalaui/runtime/tree/IncrementalNode';
-import { uint32 } from '@koalaui/compat';
+} from 'arkui.stateManagement.runtime';
+import { IncrementalNode } from '@koalaui.runtime.tree.IncrementalNode';
+import { uint32 } from '@koalaui.compat';
 
-@memo
 export declare function NodeAttach<Node extends IncrementalNode>(
+    __memo_context: __memo_context_type,
+    __memo_id: __memo_id_type,
     create: () => Node,
-    @memo
-    update: (node: Node) => void,
+    update: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, node: Node) => void,
     reuseKey?: string
 ): void;
 export declare function contextNode<T extends IncrementalNode>(
