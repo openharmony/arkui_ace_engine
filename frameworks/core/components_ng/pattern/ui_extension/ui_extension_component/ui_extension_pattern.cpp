@@ -401,6 +401,12 @@ bool UIExtensionPattern::CheckHostUiContentConstraint()
         AceType::DynamicCast<UIExtensionContainerHandler>(containerHandler);
     CHECK_NULL_RETURN(uIExtensionContainerHandler, true);
     UIContentType hostUIContentType = uIExtensionContainerHandler->GetHostUIContentType();
+    if (hostUIContentType == UIContentType::DYNAMIC_COMPONENT &&
+        uIExtensionContainerHandler->IsAllowCrossProcessNesting()) {
+        UIEXT_LOGI("Allow cross process nesting.");
+        return true;
+    }
+
     static std::set<UIContentType> dcNotSupportHostUIContentType = {
         UIContentType::ISOLATED_COMPONENT,
         UIContentType::DYNAMIC_COMPONENT
