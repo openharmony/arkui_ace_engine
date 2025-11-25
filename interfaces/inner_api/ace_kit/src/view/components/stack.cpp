@@ -28,11 +28,21 @@ Stack::Stack()
         NG::StackModelNG::CreateFrameNode(Ace::Kit::ViewStackProcessor::ClaimNodeId()));
 }
 
+Stack::Stack(RefPtr<FrameNode>& node)
+{
+    node_ = node;
+}
+
 Stack::~Stack() = default;
 
 RefPtr<Stack> Stack::Create()
 {
     return Referenced::MakeRefPtr<Stack>();
+}
+
+RefPtr<Stack> Stack::Create(RefPtr<FrameNode>& node)
+{
+    return Referenced::MakeRefPtr<Stack>(node);
 }
 
 void Stack::SetAlignment(Ace::Alignment align)

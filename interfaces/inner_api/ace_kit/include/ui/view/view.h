@@ -50,6 +50,8 @@ public:
     void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
     void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     void SetOpacity(double opacity);
+    TextDirection GetDirection();
+    TextDirection GetNonAutoLayoutDirection();
 
 protected:
     View();

@@ -146,6 +146,7 @@ ohos_unittest("ace_kit_test") {
     "$ace_root/interfaces/inner_api/ace_kit/src/utils/measure_utils.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/column.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/menu_view.cpp",
+    "$ace_root/interfaces/inner_api/ace_kit/src/view/components/stack.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/text.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/draw/content_modifier.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.cpp",
@@ -189,6 +190,10 @@ ohos_unittest("ace_kit_test") {
   configs = [
     "$ace_root/test/unittest:ace_unittest_config",
     "$ace_root/interfaces/inner_api/ace_kit:ace_kit_config",
+  ]
+
+  include_dirs = [
+    "$ace_root/interfaces/inner_api/ace_kit/src/",
   ]
 
   deps = [
