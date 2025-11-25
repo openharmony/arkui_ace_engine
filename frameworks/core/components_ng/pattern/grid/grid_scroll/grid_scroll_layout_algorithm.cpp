@@ -723,7 +723,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
         info_.startIndex_ == 0) {
         if (((NonNegative(info_.currentOffset_) && !canOverScrollStart_) ||
                 (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) ||
-            isChildrenUpdated_) {
+            (isChildrenUpdated_ && scrollSource_ != SCROLL_FROM_ANIMATION_SPRING)) {
             info_.currentOffset_ = info_.contentStartOffset_;
             info_.prevOffset_ = info_.contentStartOffset_;
         }
