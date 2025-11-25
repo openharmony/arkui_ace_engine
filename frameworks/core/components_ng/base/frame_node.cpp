@@ -5958,8 +5958,6 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 
 void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
-    ACE_SCOPED_TRACE("DoSetActiveChildRange id:%d %d:%d %d:%d %d", 
-        GetId(), start, end, cacheStart, cacheEnd, showCache);
     if (showCache) {
         start -= cacheStart;
         end += cacheEnd;
