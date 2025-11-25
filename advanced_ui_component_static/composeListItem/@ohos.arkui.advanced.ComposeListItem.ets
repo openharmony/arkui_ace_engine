@@ -20,7 +20,7 @@ import {
   FlexOptions, MarqueeStartPolicy, ButtonType, Color, HitTestMode, ItemAlign, ToggleType, HoverEffect, TextOverflow,
   ImageFit, SymbolEffectStrategy, $r, LocalizedMargin, Margin, ButtonStyleMode, ButtonRole, ButtonAttribute,
   ColumnOptions, ButtonOptions, OnCheckboxChangeCallback, FlexSpaceOptions, RowOptions, ClickEvent, MeasureResult,
-  HoverEvent, SizeChangeCallback, CommonMethod, ShadowOptions,
+  HoverEvent, SizeChangeCallback, CommonMethod, ShadowOptions,ClassCastError
 } from '@ohos.arkui.component'
 import { State, PropRef, Watch, Link } from '@ohos.arkui.stateManagement'
 import { Theme } from '@ohos.arkui.theme';
@@ -108,7 +108,7 @@ export class OperateCheck {
   public accessibilityLevel?: string;
 }
 
-const TEXT_MAX_LINE: number = 1;
+const TEXT_MAX_LINE: int = 1;
 const ITEM_BORDER_SHOWN: number = 2;
 const TEXT_COLUMN_SPACE: number = 4;
 const TEXT_SAFE_MARGIN: number = 8;
@@ -221,8 +221,8 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
       this.ComposeListItem.fontSizeScale = Math.min(
         this.ComposeListItem.maxFontScale, config.fontSizeScale ?? 1);
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as ClassCastError).code;
+      let message = (paramError as ClassCastError).message;
       hilog.error(0x3900, 'Ace',
         `ComposeListItem environmentCallback error: ${code}, ${message}`);
     }
@@ -235,30 +235,30 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
 
 @Component
 struct ContentItemStruct {
-  @PropRef @Watch('onPropChange') iconStyle: IconType | null = null;
-  @PropRef @Watch('onPropChange') icon: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
-  @PropRef @Watch('onPropChange') primaryText: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') secondaryText: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') description: ResourceStr | null = null;
+  @PropRef @Watch('onPropChange') iconStyle: IconType | undefined = undefined;
+  @PropRef @Watch('onPropChange') icon: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | undefined = undefined;
+  @PropRef @Watch('onPropChange') primaryText: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') secondaryText: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') description: ResourceStr | undefined = undefined;
   @State itemRowSpace: number = NORMAL_ITEM_ROW_SPACE;
   @PropRef leftWidth: string = LEFT_PART_WIDTH;
   @State @Watch('onPropChange') primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
   @State @Watch('onPropChange') secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @State @Watch('onPropChange') descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
-  @PropRef fontSizeScale: number | null = 0;
-  @PropRef parentDirection?: FlexDirection | null = null;
-  @PropRef itemDirection?: FlexDirection | null = null;
+  @PropRef fontSizeScale: number | undefined = 0;
+  @PropRef parentDirection: FlexDirection | undefined = undefined;
+  @PropRef itemDirection: FlexDirection | undefined = undefined;
   @PropRef @Watch('onPropChange') isFocus: boolean = false;
   @State primaryTextSize: string | number | Resource = $r('sys.float.ohos_id_text_size_body1');
   @State primaryTextColors: ResourceColor = $r('sys.color.font_primary');
-  @PropRef itemHeight: number | null = null;
+  @PropRef itemHeight: number | undefined = undefined;
   @State iconColor: ResourceColor | null = null;
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State secondaryThirdTextSize: string | number | Resource =
     $r('sys.float.composeListItem_left_secondary_tertiary_text_size');
   @State descriptionColors: ResourceColor = $r('sys.color.font_tertiary');
-  @Link isWrapText?: Boolean | null;
+  @Link isWrapText: Boolean;
   @State @Watch('onPropChange') isWrapFirstText: Boolean = false;
   @State @Watch('onPropChange') isWrapSecondText: Boolean = false;
   @State @Watch('onPropChange') isWrapThirdText: Boolean = false;
@@ -393,7 +393,7 @@ struct ContentItemStruct {
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-              this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
+              this.isWrapFirstText = this.judgeIsWrap(this.primaryText as ResourceStr, this.primaryTextSize,
                 newValue.height as number);
             }
           } as SizeChangeCallback)
@@ -409,7 +409,7 @@ struct ContentItemStruct {
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-              this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
+              this.isWrapSecondText = this.judgeIsWrap(this.secondaryText as ResourceStr, this.secondaryThirdTextSize,
                 newValue.height as number);
             }
           } as SizeChangeCallback)
@@ -425,7 +425,7 @@ struct ContentItemStruct {
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-              this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
+              this.isWrapThirdText = this.judgeIsWrap(this.description as ResourceStr, this.secondaryThirdTextSize,
                 newValue.height as number);
             }
           } as SizeChangeCallback)
@@ -477,8 +477,8 @@ struct ContentItemStruct {
   }
 }
 
-class CreateIconParam {
-  public icon?: OperateIcon;
+interface CreateIconParam {
+  icon?: OperateIcon;
 }
 
 class OperateItemStructController {
@@ -491,17 +491,17 @@ class OperateItemStructController {
 }
 
 @Component
-export struct OperateItemStruct {
-  @PropRef @Watch('onPropChange') arrow: OperateIcon | null = null;
-  @PropRef @Watch('onPropChange') icon: OperateIcon | null = null;
-  @PropRef @Watch('onPropChange') subIcon: OperateIcon | null = null;
-  @PropRef @Watch('onPropChange') button: OperateButton | null = null;
-  @PropRef @Watch('onPropChange') toggle: OperateCheck | null = null;
-  @PropRef @Watch('onPropChange') checkBox: OperateCheck | null = null;
-  @PropRef @Watch('onPropChange') radio: OperateCheck | null = null;
-  @PropRef @Watch('onPropChange') image: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
-  @PropRef @Watch('onPropChange') text: ResourceStr | null = null;
+struct OperateItemStruct {
+  @PropRef @Watch('onPropChange') arrow: OperateIcon | undefined = undefined;
+  @PropRef @Watch('onPropChange') icon: OperateIcon | undefined = undefined;
+  @PropRef @Watch('onPropChange') subIcon: OperateIcon | undefined = undefined;
+  @PropRef @Watch('onPropChange') button: OperateButton | undefined = undefined;
+  @PropRef @Watch('onPropChange') toggle: OperateCheck | undefined = undefined;
+  @PropRef @Watch('onPropChange') checkBox: OperateCheck | undefined = undefined;
+  @PropRef @Watch('onPropChange') radio: OperateCheck | undefined = undefined;
+  @PropRef @Watch('onPropChange') image: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | undefined = undefined;
+  @PropRef @Watch('onPropChange') text: ResourceStr | undefined = undefined;
   @State switchState: boolean = false;
   @State radioState: boolean = false;
   @State checkBoxState: boolean = false;
@@ -523,7 +523,7 @@ export struct OperateItemStruct {
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
   @Link @Watch('onPropChange') isChecked: boolean;
   private controller: OperateItemStructController = new OperateItemStructController();
-  @State @Watch('onPropChange') contentItem?: ContentItem;
+  @State @Watch('onPropChange') contentItem?: ContentItem = undefined;
   @Link containerDirection: FlexDirection
   @State flexTextWidth: number = 0
   @State rowTextWidth: number = 0
@@ -624,6 +624,9 @@ export struct OperateItemStruct {
         }
       }
     })
+    .accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -678,6 +681,9 @@ export struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
+    .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
   }
 
@@ -723,7 +729,7 @@ export struct OperateItemStruct {
         fadeout: true,
         marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
       })
-      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
+      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
       .draggable(false)
       .flexShrink(1)
   }
@@ -786,6 +792,9 @@ export struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
+    .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -827,6 +836,9 @@ export struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
+      .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -866,6 +878,9 @@ export struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
+      .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -884,6 +899,9 @@ export struct OperateItemStruct {
           this.switchState = !this.switchState;
         })
         .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
+        .accessibilityLevel(getAccessibilityLevelOnChange(this.toggle?.accessibilityLevel, this.toggle?.onChange))
+        .accessibilityText(getAccessibilityText(this.toggle?.accessibilityText ?? ''))
+        .accessibilityDescription(getAccessibilityText(this.toggle?.accessibilityDescription ?? ''))
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) } as LocalizedMargin)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -968,7 +986,7 @@ export struct OperateItemStruct {
               fadeout: true,
               marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
-            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
+            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -1045,6 +1063,9 @@ export struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
+    .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   getFlexOptions(): FlexOptions {
@@ -1107,11 +1128,12 @@ function getAccessibilityText(resource: ResourceStr): string {
     if (typeof resource === 'string') {
       resourceString = resource as string;
     } else {
+      resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id);
     }
     return resourceString;
   } catch (error) {
-    let code: number = (error as BusinessError).code;
-    let message: string = (error as BusinessError).message;
+    let code: number = (error as ClassCastError).code;
+    let message: string = (error as ClassCastError).message;
     hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
     return '';
   }
@@ -1154,8 +1176,8 @@ function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: (
 
 @Component
 export struct ComposeListItem {
-  @PropRef @Watch('onPropChange') contentItem?: ContentItem;
-  @PropRef @Watch('onPropChange') operateItem?: OperateItem;
+  @PropRef @Watch('onPropChange') contentItem: ContentItem | undefined = undefined;
+  @PropRef @Watch('onPropChange') operateItem: OperateItem | undefined = undefined;
   @State frontColor: ResourceColor | undefined = $r('sys.color.composeListItem_container_normal_color');
   @State borderSize: number = 0;
   @State canFocus: boolean = false;
@@ -1183,6 +1205,7 @@ export struct ComposeListItem {
   private operateItemStructRef: OperateItemStructController = new OperateItemStructController();
   envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
   applicationContext: ApplicationContext = new ApplicationContext()
+  @State NORMAL_BG_COLOR: ResourceColor = $r('sys.color.composeListItem_container_normal_color');
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -1214,8 +1237,9 @@ export struct ComposeListItem {
       } else {
         const systemIconLineHeight =
           LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
-        this.itemHeight = (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ?
-        ItemHeight.SECOND_HEIGHT as number: systemIconLineHeight as number;
+        this.itemHeight =
+          (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT as number :
+            systemIconLineHeight as number;
       }
     } else if (this.contentItem?.description === undefined) {
       let iconStyle: IconType = (this.contentItem?.iconStyle as IconType);
@@ -1239,6 +1263,20 @@ export struct ComposeListItem {
         this.itemHeight = iconSize + SAFE_LIST_PADDING;
       }
     }
+    if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+      `;
+    } else {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+        ${getAccessibilityText(this.operateItem?.text ?? '')}
+      `;
+    }
   }
 
   aboutToAppear() {
@@ -1250,19 +1288,19 @@ export struct ComposeListItem {
         let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
         this.applicationContext = hostContext.getApplicationContext();
         try {
-          this.callbackId = this.applicationContext.on('environment', this.envCallback);
+          this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
         } catch (paramError) {
           hilog.error(0x3900, 'Ace',
             `ComposeListItem Faild to get environment param error `);
         }
       }
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as ClassCastError).code;
+      let message = (paramError as ClassCastError).message;
       hilog.error(0x3900, 'Ace',
         `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
     }
-    if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+    if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
       this.onFontSizeScaleChange();
     }
   }
@@ -1271,7 +1309,7 @@ export struct ComposeListItem {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if (context.getHostContext() !== undefined) {
-        this.applicationContext.off('environment', this.callbackId as Int,
+        this.applicationContext.offEnvironment(this.callbackId as Int,
           (err: BusinessError<void> | null): void => {
             hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
           })
@@ -1434,7 +1472,7 @@ export struct ComposeListItem {
       Flex(this.getFlexOptions()) {
         if (this.contentItem === null) {
           ContentItemStruct({
-            isWrapText: this.isWrapText as Boolean
+            isWrapText: this.isWrapText
           })
         }
         if (this.contentItem !== null) {
@@ -1450,7 +1488,7 @@ export struct ComposeListItem {
             itemDirection: this.contentItemDirection,
             isFocus: this.isFocus,
             itemHeight: this.itemHeight,
-            isWrapText: this.isWrapText as Boolean
+            isWrapText: this.isWrapText
           });
         }
         if (this.operateItem !== null) {
@@ -1478,6 +1516,7 @@ export struct ComposeListItem {
           })
         }
       }
+      .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
       .constraintSize({
         minHeight: this.itemHeight
       })
@@ -1501,7 +1540,7 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-          this.frontColor = isHover ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+          this.frontColor = isHover ? FOCUSED_BG_COLOR : this.NORMAL_BG_COLOR;
           if (isHover) {
             this.zoomIn()
           } else {
@@ -1532,6 +1571,8 @@ export struct ComposeListItem {
       .padding(this.containerPadding)
     }
     .width('100%')
+    .accessibilityGroup(true)
+    .accessibilityText(this.accessibilityTextBuilder)
     .onFocus(() => {
       this.isFocus = true;
       this.frontColor = FOCUSED_BG_COLOR;
@@ -1539,7 +1580,7 @@ export struct ComposeListItem {
     })
     .onBlur(() => {
       this.isFocus = false;
-      this.frontColor = NORMAL_BG_COLOR;
+      this.frontColor = this.NORMAL_BG_COLOR;
       this.zoomOut();
     })
     .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
