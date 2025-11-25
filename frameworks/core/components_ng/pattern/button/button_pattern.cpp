@@ -597,15 +597,6 @@ void ButtonPattern::InitButtonLabel()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
-    auto buttonRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(buttonRenderContext);
-    auto textRenderContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textRenderContext);
-    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
-        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
-    } else {
-        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
-    }
 
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
