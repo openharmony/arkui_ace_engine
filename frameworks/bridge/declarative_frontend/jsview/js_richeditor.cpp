@@ -2304,7 +2304,7 @@ void JSRichEditorController::DeleteBackward(const JSCallbackInfo& args)
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     CHECK_NULL_VOID(richEditorController);
-    richEditorController->DeleteBackwardFunction();
+    richEditorController->DeleteBackward();
 }
 
 void JSRichEditorController::JSBind(BindingTarget globalObj)

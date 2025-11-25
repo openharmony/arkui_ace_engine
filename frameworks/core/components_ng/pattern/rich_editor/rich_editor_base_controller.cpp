@@ -98,7 +98,7 @@ void RichEditorBaseController::StopEditing()
     richEditorPattern->StopEditing();
 }
 
-void RichEditorBaseController::DeleteBackwardFunction()
+void RichEditorBaseController::DeleteBackward()
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);

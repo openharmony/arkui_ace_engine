@@ -37,7 +37,7 @@ public:
     void CloseSelectionMenu() override;
     bool IsEditing() override;
     void StopEditing() override;
-    void DeleteBackwardFunction() override;
+    void DeleteBackward() override;
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;

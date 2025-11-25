@@ -67,7 +67,7 @@ public:
     void DeleteBackward()
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            controller->DeleteBackwardFunction();
+            controller->DeleteBackward();
         }
     }
 

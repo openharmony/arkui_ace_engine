@@ -393,11 +393,11 @@ HWTEST_F(RichEditorChangeReasonTest, ControllerSetTypingParagraphStyle001, TestS
 }
 
 /**
- * @tc.name: ControllerDeleteBackwardFunction
- * @tc.desc: test DeleteBackwardFunction
+ * @tc.name: ControllerDeleteBackward
+ * @tc.desc: test DeleteBackward
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeReasonTest, DeleteBackwardFunction001, TestSize.Level0)
+HWTEST_F(RichEditorChangeReasonTest, DeleteBackward001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -409,7 +409,7 @@ HWTEST_F(RichEditorChangeReasonTest, DeleteBackwardFunction001, TestSize.Level0)
     ASSERT_NE(richEditorController, nullptr);
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
 
-    richEditorController->DeleteBackwardFunction();
+    richEditorController->DeleteBackward();
     EXPECT_NE(richEditorPattern->IsPreviewTextInputting(), true);
 }
 
