@@ -663,7 +663,7 @@ struct TabContentItem {
                     .hitTestBehavior(HitTestMode.None)
                     .focusable(true)
                 } else {
-                  Image(this.item.icon as Resource)
+                  Image((this.item?.icon ?? '') as ResourceStr)
                     .alt(this.item.title)
                     .width(this.getImageLayoutWidth())
                     .height(TabContentItem.imageSize)
@@ -798,21 +798,15 @@ struct ImageMenuItem {
     }
   }
 
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+  private toStringFormat(resource: ResourceStr | undefined): string {
     if (typeof resource === 'string') {
       return resource as string;
     } else if (typeof resource === 'undefined') {
-      return '';
+      return '' as string;
     } else {
-      let resourceString: undefined | string = '';
-      try {
-        resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
-      } catch (exception) {
-        let code: int | undefined = (exception as ClassCastError)?.code;
-        let message: string | undefined = (exception as ClassCastError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
-      }
-      return resourceString;
+      let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+      getStringSync((resource as Resource).id)
+      return str as string;
     }
   }
 
@@ -826,9 +820,25 @@ struct ImageMenuItem {
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
     } else if (this.item.accessibilityText) {
-      return this.item.accessibilityText as string;
+      if (typeof this.item.accessibilityText === 'string') {
+        return this.item.accessibilityText as string;
+      } else if (typeof this.item.accessibilityText === 'undefined') {
+        return '' as string;
+      } else {
+        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+        getStringSync((this.item.accessibilityText as Resource).id)
+        return str as string;
+      }
     } else if (this.item.label) {
-      return this.item.label as string;
+      if (typeof this.item.label === 'string') {
+        return this.item.label as string;
+      } else if (typeof this.item.label === 'undefined') {
+        return '' as string;
+      } else {
+        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+        getStringSync((this.item.label as Resource).id)
+        return str as string;
+      }
     }
     return ' ';
   }
