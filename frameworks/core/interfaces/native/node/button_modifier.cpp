@@ -36,6 +36,7 @@ constexpr uint32_t INDEX_VALUE_TEXT_OVERFLOW_0 = 0;
 constexpr uint32_t INDEX_VALUE_MAX_LINES_1 = 1;
 constexpr uint32_t INDEX_VALUE_ADAPT_HEIGHT_2 = 2;
 constexpr uint32_t INDEX_VALUE_FONT_STYLE_3 = 3;
+constexpr uint32_t INDEX_VALUE_TEXT_ALIGN_4 = 4;
 constexpr uint32_t INDEX_DIMENSION_MIN_FONT_SIZE_0 = 0;
 constexpr uint32_t INDEX_DIMENSION_MAX_FONT_SIZE_1 = 1;
 constexpr uint32_t INDEX_DIMENSION_FONT_SIZE_2 = 2;
@@ -53,6 +54,7 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+const std::vector<TextAlign> TEXT_ALIGN = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
@@ -407,6 +409,10 @@ void SetButtonValueParameters(const int32_t* valueArray, const size_t dataCount,
         result < static_cast<int32_t>(FONT_STYLES.size())) {
         buttonParameters.fontStyle = FONT_STYLES[result];
     }
+    if (SetButtonValue(valueArray, INDEX_VALUE_TEXT_ALIGN_4, dataCount, result) && result >= 0 &&
+        result < static_cast<int32_t>(TEXT_ALIGN.size())) {
+        buttonParameters.textAlign = TEXT_ALIGN[result];
+    }
 }
 
 void SetButtonStringParameters(
@@ -440,6 +446,9 @@ void SetButtonLabelStyle(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters, 
     SetButtonValueParameters(valueArray, dataCountArray[INDEX_VALUE_ARRAY_COUNT], buttonParameters);
     SetButtonDimensionParameters(dimensionArray, dataCountArray[INDEX_DIMENSION_ARRAY_COUNT], buttonParameters);
     ButtonCompleteParameters(buttonParameters);
+    if (!buttonParameters.textAlign.has_value()) {
+        ButtonModelNG::ResetTextAlign(frameNode);
+    }
     ButtonModelNG::SetLabelStyle(frameNode, buttonParameters);
 }
 

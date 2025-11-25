@@ -88,6 +88,7 @@ public:
         const ButtonDoubleType buttonDoubleType) = 0;
     virtual void CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& resObj,
         const ButtonStringType buttonStringType) = 0;
+    virtual void ResetTextAlign() {}
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

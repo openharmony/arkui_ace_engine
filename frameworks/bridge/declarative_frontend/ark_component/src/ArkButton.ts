@@ -252,8 +252,9 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
         fontFamily = this.value.font.family;
         fontWeight = this.value.font.weight;
       }
+      let textAlign = this.value.textAlign; // number(enum) -> Ace::TextAlign
       getUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
-        heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
+        heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily, textAlign);
     }
   }
   checkObjectDiff(): boolean {
@@ -263,7 +264,8 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
         this.value.minFontSize === this.stageValue.minFontSize &&
         this.value.maxFontSize === this.stageValue.maxFontSize &&
         this.value.heightAdaptivePolicy === this.stageValue.heightAdaptivePolicy &&
-        this.value.font === this.stageValue.font);
+        this.value.font === this.stageValue.font &&
+        this.value.textAlign === this.stageValue.textAlign);
     } else {
       return true;
     }

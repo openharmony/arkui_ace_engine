@@ -20828,6 +20828,7 @@ typedef struct Ark_ButtonLabelStyle {
     Opt_Union_F64_ResourceStr maxFontSize;
     Opt_TextHeightAdaptivePolicy heightAdaptivePolicy;
     Opt_Font font;
+    Opt_TextAlign textAlign;
 } Ark_ButtonLabelStyle;
 typedef struct Opt_ButtonLabelStyle {
     Ark_Tag tag;
