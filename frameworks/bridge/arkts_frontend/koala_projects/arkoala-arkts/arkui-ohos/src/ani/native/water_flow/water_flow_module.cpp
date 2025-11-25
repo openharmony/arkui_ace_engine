@@ -200,9 +200,19 @@ ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
     }
 
     if (isGetItemMainSizeByIndex) {
+        ani_vm* vm = nullptr;
+        env->GetVM(&vm);
+
         ani_ref fnObjGlobalRef = nullptr;
         env->GlobalReference_Create(func, &fnObjGlobalRef);
-        auto onGetItemMainSizeByIndex = [fnObjGlobalRef, env](int32_t index) {
+
+        auto onGetItemMainSizeByIndex = [fnObjGlobalRef, vm](int32_t index) {
+            ani_env* env = nullptr;
+            ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || !env) {
+                return 0.0f;
+            }
+
             ani_ref aniRes;
             ani_ref aniIndex = AniUtils::CreateInt32(env, index);
 
