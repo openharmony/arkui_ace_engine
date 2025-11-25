@@ -574,12 +574,12 @@ export class FrameNode implements MaterializedBase {
         let errorMessage: string = 'The FrameNode cannot be set whether to support cross-language common attribute setting.';
         const error = Error(errorMessage);
         if (!this.isModifiable()) {
-            throw new BusinessError(100021, error);
+            throw new BusinessError(100022, error);
         }
         let setting: boolean = options.attributeSetting ? options.attributeSetting! : false;
         let isSupport = FrameNodeExtender.setCrossLanguageOptions(this, setting);
         if (!isSupport) {
-            throw new BusinessError(100021, error);
+            throw new BusinessError(100022, error);
         }
     }
     public getCrossLanguageOptions(): CrossLanguageOptions {
@@ -594,15 +594,16 @@ export class FrameNode implements MaterializedBase {
     }
     adoptChild(child: FrameNode): void{
     if (child === undefined || child === null) {
-        return;
+        const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
+        throw new BusinessError(100025, error);
     }
-    if (!this.checkValid(this) || !this.isModifiable()) {
+    if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
-    if (!child.checkValid(this) || !child.isModifiable()) {
-        const error = Error('The child node is not modifiable.');
-        throw new BusinessError(100021, error);
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+        const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
     let result = FrameNodeExtender.adoptChild(this, child_casted);
@@ -614,15 +615,16 @@ export class FrameNode implements MaterializedBase {
   }
     removeAdoptedChild(child: FrameNode): void {
     if (child === undefined || child === null) {
-      return;
+        const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
+        throw new BusinessError(100025, error);
     }
-    if (!this.checkValid(this) || !this.isModifiable()) {
+    if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
-    if (!child.checkValid(this) || !child.isModifiable()) {
-        const error = Error('The child node is not modifiable.');
-        throw new BusinessError(100021, error);
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+        const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
     let result = FrameNodeExtender.removeAdoptedChild(this, child_casted);
@@ -691,7 +693,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getNodePropertyValue(this, property_casted);
     }
     public getRenderNode(): RenderNode | null {
-        return this.renderNode_ ? this.renderNode_! : null;
+        return (this.renderNode_ && this.renderNode_?.peer?.ptr) ? this.renderNode_! : null;
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
         const node_casted = node as (FrameNode)
@@ -1359,9 +1361,7 @@ export namespace typeNode {
         }
     }
 
-    overload createNode {
-        createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
-        createGridColNode, createDividerNode, createBlankNode, createRelativeContainerNode, createListNode,
+    overload createNode { createListNode,
         createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
         createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
         createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,
@@ -1370,7 +1370,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createColumnNode(context: UIContext, type: 'Column'): ColumnFrameNode {
+    export function createColumnNode(context: UIContext): ColumnFrameNode {
         return new ColumnFrameNode(context, 'Column', (node: FrameNode, type: ModifierType): ArkColumnNode => {
             let arknode = new ArkColumnNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1381,7 +1381,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRowNode(context: UIContext, type: 'Row'): RowFrameNode {
+    export function createRowNode(context: UIContext): RowFrameNode {
         return new RowFrameNode(context, 'Row', (node: FrameNode, type: ModifierType): ArkRowNode => {
             let arknode = new ArkRowNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1392,7 +1392,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createStackNode(context: UIContext, type: 'Stack'): StackFrameNode {
+    export function createStackNode(context: UIContext): StackFrameNode {
         return new StackFrameNode(context, 'Stack', (node: FrameNode, type: ModifierType): ArkStackNode => {
             let arknode = new ArkStackNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1403,7 +1403,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createFlexNode(context: UIContext, type: 'Flex'): FlexFrameNode {
+    export function createFlexNode(context: UIContext): FlexFrameNode {
         return new FlexFrameNode(context, 'Flex', (node: FrameNode, type: ModifierType): ArkFlexNode => {
             let arknode = new ArkFlexNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1414,7 +1414,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createGridRowNode(context: UIContext, type: 'GridRow'): GridRowFrameNode {
+    export function createGridRowNode(context: UIContext): GridRowFrameNode {
         return new GridRowFrameNode(context, 'GridRow', (node: FrameNode, type: ModifierType): ArkGridRowNode => {
             let arknode = new ArkGridRowNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1425,7 +1425,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createGridColNode(context: UIContext, type: 'GridCol'): GridColFrameNode {
+    export function createGridColNode(context: UIContext): GridColFrameNode {
         return new GridColFrameNode(context, 'GridCol', (node: FrameNode, type: ModifierType): ArkGridColNode => {
             let arknode = new ArkGridColNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1436,7 +1436,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createDividerNode(context: UIContext, type: 'Divider'): DividerFrameNode {
+    export function createDividerNode(context: UIContext): DividerFrameNode {
         return new DividerFrameNode(context, 'Divider', (node: FrameNode, type: ModifierType): ArkDividerNode => {
             let arknode = new ArkDividerNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1447,7 +1447,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createBlankNode(context: UIContext, type: 'Blank'): BlankFrameNode {
+    export function createBlankNode(context: UIContext): BlankFrameNode {
         return new BlankFrameNode(context, 'Blank', (node: FrameNode, type: ModifierType): ArkBlankNode => {
             let arknode = new ArkBlankNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
@@ -1458,7 +1458,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRelativeContainerNode(context: UIContext, type: 'RelativeContainer'): RelativeContainerFrameNode {
+    export function createRelativeContainerNode(context: UIContext): RelativeContainerFrameNode {
         return new RelativeContainerFrameNode(context, 'RelativeContainer', (node: FrameNode, type: ModifierType): ArkRelativeContainerNode => {
             let arknode = new ArkRelativeContainerNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

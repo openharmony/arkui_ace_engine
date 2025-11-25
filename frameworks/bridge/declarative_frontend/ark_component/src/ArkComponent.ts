@@ -3662,22 +3662,27 @@ class ClickEffectModifier extends ModifierWithKey<ClickEffect | null> {
   }
 }
 
-class KeyBoardShortCutModifier extends ModifierWithKey<ArkKeyBoardShortCut> {
-  constructor(value: ArkKeyBoardShortCut) {
+class KeyBoardShortCutModifier extends ModifierWithKey<Array<ArkKeyBoardShortCut>> {
+  constructor(value: Array<ArkKeyBoardShortCut>) {
     super(value);
   }
   static identity: Symbol = Symbol('keyboardShortcut');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().common.resetKeyBoardShortCut(node);
-    } else if (this.value.action === undefined) {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+      getUINativeModule().common.resetKeyBoardShortCutAll(node);
     } else {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
+      while (this.value.length !== 0) {
+        let item = this.value.shift();
+        if (item === undefined) {
+          continue;
+        }
+        if (item.action === undefined) {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys);
+        } else {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys, item.action);
+        }
+      }
     }
-  }
-  checkObjectDiff(): boolean {
-    return !this.value.isEqual(this.stageValue);
   }
 }
 
@@ -4050,6 +4055,21 @@ class OnChildTouchTestModifier extends ModifierWithKey<ChildTouchTestCallback> {
   }
 }
 
+class SystemMaterialModifier extends ModifierWithKey<SystemUiMaterial | undefined> {
+  constructor(value: SystemUiMaterial | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemMaterial');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSystemMaterial(node);
+    }
+    else {
+      getUINativeModule().common.setSystemMaterial(node, this.value);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -4107,6 +4127,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _gestureEvent: UIGestureEvent;
   _instanceId: number;
   _needDiff: boolean;
+  _keyboardShortcutList: Array<ArkKeyBoardShortCut>;
   private _onVisibleAreaChange: ArkOnVisibleAreaChange = null;
   private _onPreDragEvent: PreDragCallback = null;
   private _onTouchInterceptEvent: TouchInterceptCallback = null;
@@ -4139,6 +4160,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this._changed = false;
     this._classType = classType;
     this._needDiff = true;
+    this._keyboardShortcutList = new Array();
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -5678,7 +5700,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
     keyboardShortCut.action = action;
-    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
+    this._keyboardShortcutList.push(keyboardShortCut);
+    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier,
+      this._keyboardShortcutList);
     return this;
   }
 
@@ -5901,6 +5925,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   clipShape(value: CircleShape | EllipseShape | PathShape | RectShape): this {
     modifierWithKey(this._modifiersWithKeys, ClipShapeModifier.identity, ClipShapeModifier, value);
+    return this;
+  }
+  systemMaterial(material: SystemUiMaterial | undefined) {
+    modifierWithKey(this._modifiersWithKeys, SystemMaterialModifier.identity, SystemMaterialModifier, material);
     return this;
   }
 }
@@ -6191,7 +6219,8 @@ class UIGestureEvent {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
         getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
-          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback);
+          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.distanceThreshold, 
+          tapGesture.limitFingerCount, tapGesture.onActionCallback);
         break;
       }
       case CommonGestureType.LONG_PRESS_GESTURE: {
@@ -6295,7 +6324,7 @@ function addGestureToGroup(nodePtr: Object | null, gesture: any, gestureGroupPtr
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
       getUINativeModule().common.addTapGestureToGroup(nodePtr, tapGesture.gestureTag, tapGesture.allowedTypes,
-        tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback,
+        tapGesture.fingers, tapGesture.count, tapGesture.distanceThreshold, tapGesture.limitFingerCount, tapGesture.onActionCallback,
         gestureGroupPtr);
       break;
     }

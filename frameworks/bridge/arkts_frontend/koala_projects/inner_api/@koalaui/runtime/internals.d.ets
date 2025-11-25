@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-import { StateContext } from '@koalaui.runtime.states.State'
+import { StateContext } from 'arkui.incremental.runtime.state'
 
 export declare function __context(): StateContext;

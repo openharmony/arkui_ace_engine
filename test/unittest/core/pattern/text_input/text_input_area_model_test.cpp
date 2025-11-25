@@ -2115,4 +2115,19 @@ HWTEST_F(TextInputAreaTest, SetCapitalizationMode001, TestSize.Level1)
     textFieldModelNG.SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::WORDS);
     EXPECT_EQ(AutoCapitalizationMode::WORDS, pattern->GetAutoCapitalizationMode());
 }
+
+/**
+ * @tc.name: TextInputAreaDeleteBackwardModelNG001
+ * @tc.desc: test ModelNG DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG001, TestSize.Level1)
+{
+    CreateTextField("挖矿时间到!⛏️", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    TextFieldModelNG::DeleteBackward(frameNode_.GetRawPtr());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "挖矿时间到!");
+}
 } // namespace OHOS::Ace::NG

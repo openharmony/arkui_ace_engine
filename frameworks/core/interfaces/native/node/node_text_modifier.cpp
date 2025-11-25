@@ -427,6 +427,31 @@ void ResetTextLineHeightMultiply(ArkUINodeHandle node)
     }
 }
 
+void SetTextTextSelection(ArkUINodeHandle node, ArkUISelectionOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextTextSelection(
+        frameNode, options->start, options->end, static_cast<MenuPolicy>(options->menuPolicy));
+}
+
+void GetTextTextSelection(ArkUINodeHandle node, ArkUISelectionOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextSelectionOptions textSelectionOptions = TextModelNG::GetTextSelectionOptions(frameNode);
+    options->start = textSelectionOptions.start;
+    options->end = textSelectionOptions.end;
+    options->menuPolicy = static_cast<ArkUIMenuPolicy>(textSelectionOptions.menuPolicy);
+}
+
+void ResetTextTextSelection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextTextSelection(frameNode, 0, 0, static_cast<MenuPolicy>(0));
+}
+
 void SetTextMinimumLineHeight(
     ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* minimumlineHeightRawPtr)
 {
@@ -1262,35 +1287,6 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetSelectDetectEnable(frameNode);
-}
-
-void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::vector<TextDataDetectType> typelists;
-    for (ArkUI_Int32 i = 0; i < size; ++i) {
-        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
-    }
-    TextModelNG::SetSelectDetectConfig(frameNode, typelists);
-}
-
-ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    std::vector<TextDataDetectType> types = TextModelNG::GetSelectDetectConfig(frameNode);
-    for (uint32_t i = 0; i < types.size(); i++) {
-        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
-    }
-    return types.size();
-}
-
-void ResetSelectDetectorConfig(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextModelNG::ResetSelectDetectConfig(frameNode);
 }
 
 ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
@@ -2546,6 +2542,9 @@ const ArkUITextModifier* GetTextModifier()
         .setTextLineHeightMultiply = SetTextLineHeightMultiply,
         .getTextLineHeightMultiply = GetTextLineHeightMultiply,
         .resetTextLineHeightMultiply = ResetTextLineHeightMultiply,
+        .setTextTextSelection = SetTextTextSelection,
+        .getTextTextSelection = GetTextTextSelection,
+        .resetTextTextSelection = ResetTextTextSelection,
         .setTextMinimumLineHeight = SetTextMinimumLineHeight,
         .getTextMinimumLineHeight = GetTextMinimumLineHeight,
         .resetTextMinimumLineHeight = ResetTextMinimumLineHeight,
@@ -2630,9 +2629,6 @@ const ArkUITextModifier* GetTextModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,
@@ -2809,9 +2805,6 @@ const CJUITextModifier* GetCJUITextModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
         .resetTextLineSpacing = ResetTextLineSpacing,

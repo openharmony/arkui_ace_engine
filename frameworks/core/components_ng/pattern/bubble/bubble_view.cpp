@@ -220,6 +220,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     }
     auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
+    popupProp->UpdateIsModal(param->IsBlockEvent());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     popupPaintProp->UpdateIsTips(param->IsTips());
     popupPaintProp->UpdateShowAtAnchor(param->GetAnchorType());
@@ -423,6 +424,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->GetTargetSpace().has_value()) {
         layoutProps->UpdateTargetSpace(param->GetTargetSpace().value());
     }
+    layoutProps->UpdateIsModal(param->IsBlockEvent());
     auto popupPaintProps = popupNode->GetPaintProperty<BubbleRenderProperty>();
     popupPaintProps->UpdateUseCustom(param->IsUseCustom());
     popupPaintProps->UpdateEnableArrow(param->EnableArrow());

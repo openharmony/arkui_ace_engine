@@ -18,8 +18,8 @@
 
 import { KBoolean, KStringPtr, MaterializedBase } from "@koalaui/interop"
 import { int32, int64 } from "@koalaui/common"
-import { AccessibilityHoverType, Alignment, AnimationPropertyType, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisType, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, ObscuredReasons, ModifierKey, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, RenderFit, FocusDrawLevel, ImageRepeat, ResponseType, FunctionKey, CopyOptions, CrownAction, CrownSensitivity, DialogButtonStyle, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FoldStatus, FontStyle, FontWeight, GradientDirection, HeightBreakpoint, HorizontalAlign, IlluminatedType, ImageFit, ImageSpanAlignment, InteractionHand, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, MouseAction, MouseButton, NestedScrollMode, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, ResponseRegionSupportedTool, ScrollSource, SharedTransitionEffectType, TextAlign, TextCase, TextContentStyle, TextDecorationStyle, TextDecorationType, TextHeightAdaptivePolicy, TextOverflow, TextSelectableMode, TitleHeight, TouchType, TransitionType, Nullable, WidthBreakpoint, VerticalAlign, Week, WordBreak, XComponentType } from "./../../component/enums"
-import { AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, BlendApplyType, BlendMode, BlurStyle, BlurStyleActivePolicy, TouchEvent, ChainStyle, Rectangle, ResponseRegion, TouchTestInfo, SafeAreaType, SafeAreaEdge, MenuElement, CommonMethod, LayoutPolicy, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, BackgroundOptions, BackgroundImageOptions, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, ContentClipMode, DismissReason, DragBehavior, DraggingSizeChangeEffect, DragPreviewMode, DragResult, EffectEdge, FinishCallbackType, HapticFeedbackMode, HoverModeAreaType, KeyboardAvoidMode, LayoutSafeAreaEdge, LayoutSafeAreaType, RectResult, CommonConfiguration, MenuPolicy, MenuPreviewMode, NestedScrollOptions, PixelMapMock, PopupStateChangeParam, RepeatMode, SelectionOptions, ScrollResult, ScrollSizeMode, TextContentControllerBase, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SizeResult, SourceTool, SourceType, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestStrategy, TransitionEdge, AsymmetricTransitionOption, TransitionHierarchyStrategy, UICommonEvent, HoverCallback, KeyframeState, KeyframeAnimateParam, VerticalAlignParam, Measurable, Layoutable, ChildrenMainSize, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, ModifierKeyStateGetter, EdgeEffectOptions, ExpectedFrameRateRange, HorizontalAlignParam, InputCounterOptions, ItemDragEventHandler, OnMoveHandler, ItemDragInfo, FractionStop, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, MeasureResult, MotionBlurAnchor, OverlayOffset, PopupButton, SheetDismiss, SpringBackAction, TouchObject, BlurStyleOptions, BindOptions, ContextMenuAnimationOptions, AnimationNumberRange, MultiShadowOptions, FadingEdgeOptions, HistoricalPoint, LightSource, PopupMaskType, ReuseIdCallback, SheetTitleOptions, TerminationInfo, TextDecorationOptions, DividerStyle, PointLightStyle, BorderRadiusType, PopupStateChangeCallback, EventTarget, BaseEvent, GeometryInfo, PickerDialogButtonStyle, PickerTextStyle, PopupCommonOptions, PopupMessageOptions, SingleLengthDetent, DoubleLengthDetents, TripleLengthDetents } from "./../../component/common"
+import { AccessibilityHoverType, Alignment, AnimationPropertyType, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisType, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, ObscuredReasons, ModifierKey, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, ResponseType, FunctionKey, CopyOptions, CrownAction, CrownSensitivity, DialogButtonStyle, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FoldStatus, FontStyle, FontWeight, GradientDirection, HeightBreakpoint, HorizontalAlign, IlluminatedType, ImageFit, ImageSpanAlignment, InteractionHand, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, MouseAction, MouseButton, NestedScrollMode, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, ResponseRegionSupportedTool, ScrollSource, SharedTransitionEffectType, TextAlign, TextCase, TextContentStyle, TextDecorationStyle, TextDecorationType, TextHeightAdaptivePolicy, TextOverflow, TextSelectableMode, TitleHeight, TouchType, TransitionType, Nullable, WidthBreakpoint, VerticalAlign, Week, WordBreak, XComponentType } from "./../../component/enums"
+import { AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, AvailableLayoutArea, BlendApplyType, BlendMode, BlurStyle, BlurStyleActivePolicy, TouchEvent, ChainStyle, Rectangle, ResponseRegion, TouchTestInfo, SafeAreaType, SafeAreaEdge, MenuElement, CommonMethod, LayoutPolicy, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, BackgroundOptions, BackgroundImageOptions, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, ContentClipMode, DismissReason, DragBehavior, DraggingSizeChangeEffect, DragPreviewMode, DragResult, EffectEdge, FinishCallbackType, HapticFeedbackMode, HoverModeAreaType, KeyboardAvoidMode, LayoutSafeAreaEdge, LayoutSafeAreaType, RectResult, CommonConfiguration, MenuPolicy, MenuPreviewMode, ModalMode, NestedScrollOptions, PixelMapMock, PopupStateChangeParam, PreviewScaleMode, RepeatMode, SelectionOptions, ScrollResult, ScrollSizeMode, TextContentControllerBase, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SizeResult, SourceTool, SourceType, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestStrategy, TransitionEdge, AsymmetricTransitionOption, TransitionHierarchyStrategy, UICommonEvent, HoverCallback, KeyframeState, KeyframeAnimateParam, VerticalAlignParam, Measurable, Layoutable, ChildrenMainSize, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, ModifierKeyStateGetter, EdgeEffectOptions, ExpectedFrameRateRange, HorizontalAlignParam, InputCounterOptions, ItemDragEventHandler, OnMoveHandler, ItemDragInfo, FractionStop, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, MeasureResult, MotionBlurAnchor, OverlayOffset, PopupBorderLinearGradient, PopupButton, SheetDismiss, SpringBackAction, TouchObject, BlurStyleOptions, BindOptions, ContextMenuAnimationOptions, AnimationNumberRange, MultiShadowOptions, FadingEdgeOptions, HistoricalPoint, LightSource, MenuMaskType, PopupMaskType, ReuseIdCallback, SheetTitleOptions, TerminationInfo, TextDecorationOptions, DividerStyle, PointLightStyle, BorderRadiusType, PopupStateChangeCallback, EventTarget, BaseEvent, GeometryInfo, PickerDialogButtonStyle, PickerTextStyle, PopupCommonOptions, PopupMessageOptions, SingleLengthDetent, DoubleLengthDetents, TripleLengthDetents } from "./../../component/common"
 import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionProxy, TabsAnimationEvent, TabsCacheMode, TabsController, TabContentAnimatedTransition, TabsOptions, BarGridColumnOptions, ScrollableBarModeOptions } from "./../../component/tabs"
 import { ArrowPosition, AvoidanceMode, MenuAlignType, MenuItemConfiguration, SelectOption, MenuOutlineOptions } from "./../../component/select"
 import { AttributeModifier, extractors, DrawModifier, GestureModifier, WrappedBuilder, ContentModifier, UIGestureEvent, LocalStorage, AttributeUpdater, CustomStyles } from "#handwritten"
@@ -29,7 +29,7 @@ import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWith
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, LocalizedBarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
-import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, LevelOrderExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionNumberInner, RotateResult, ScaleResult, SizeNumberInner, TranslateResult, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SizeTLengthMetrics, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, NodeEdgesLengthMetrics, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner } from "./../../component/idlize"
+import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, LevelOrderExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionF64Inner, RotateResult, ScaleResult, SizeF64Inner, TranslateResult, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SizeTLengthMetrics, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, NodeEdgesLengthMetrics, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner } from "./../../component/idlize"
 import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, DirectionalEdgesT, VP, DividerStyleOptions, LengthConstrain, Offset, PX, LPX, MarkStyle } from "./../../component/units"
 import { Resource } from "global.resource"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
@@ -43,7 +43,7 @@ import { ChainEdgeEffect, ListItemAlign, ListItemGroupArea, ListScroller, CloseS
 import { CircleShape, ShapeSize, EllipseShape, PathShape, RectShape, CommonShapeMethod, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "@ohos.arkui.shape"
 import { ColorContent, ResizableOptions, DynamicRangeMode, ImageContent, ImageInterpolation, ImageAttribute, ImageRenderMode, ImageRotateOrientation, ImageCompleteEvent, ImageSourceSize, ImageError } from "./../../component/image"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
-import { GestureRecognizer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture, GestureGroup, GestureMask, EventTargetInfo, GestureControl, GestureMode, GesturePriority, GestureRecognizerState, LongPressRecognizer, PanDirection, PanGestureOptions, PanGestureHandlerOptions, PanRecognizer, PinchRecognizer, RotationGesture, RotationGestureHandlerOptions, GestureEvent, RotationRecognizer, ScrollableTargetInfo, SwipeDirection, SwipeGesture, SwipeGestureHandlerOptions, SwipeRecognizer, TapRecognizer, GestureHandler, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, TapGestureEvent } from "./../../component/gesture"
+import { GestureRecognizer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture, GestureGroup, GestureMask, EventTargetInfo, GestureControl, GestureMode, GesturePriority, GestureRecognizerState, LongPressRecognizer, PanDirection, PanGestureOptions, PanGestureHandlerOptions, PanRecognizer, PinchRecognizer, RotationGesture, RotationGestureHandlerOptions, GestureEvent, RotationRecognizer, ScrollableTargetInfo, SwipeDirection, SwipeGesture, SwipeGestureHandlerOptions, SwipeRecognizer, TapRecognizer, EventLocationInfo, GestureHandler, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, TapGestureEvent } from "./../../component/gesture"
 import { LengthMetrics, LengthMetricsUnit, LengthUnit, Size, ColorMetrics, DrawContext, Frame, Vector2, SizeT } from "arkui.Graphics"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { FocusBoxStyle, FocusPriority, KeyProcessingMode } from "./../../component/focus"
@@ -60,6 +60,7 @@ import { default as contextConstant } from "@ohos.app.ability.contextConstant"
 import { default as webview } from "@ohos.web.webview"
 import { default as curves } from "@ohos.curves"
 import { CustomDialogController, CustomDialogControllerOptions, CustomDialogControllerExternalOptions } from "./../../component/customDialogController"
+import { default as promptAction, ImmersiveMode, LevelMode, LevelOrder } from "@ohos.promptAction"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelConfiguration, DataPanelOptions, DataPanelShadowOptions } from "./../../component/dataPanel"
 import { DatePickerDialog, DatePickerMode, DatePickerDialogOptions, DatePickerOptions, LunarSwitchStyle } from "./../../component/datePicker"
 import { DialogAlignment, DialogButtonDirection, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParam } from "./../../component/alertDialog"
@@ -85,7 +86,6 @@ import { default as rpc } from "@ohos.rpc"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAIOptions, ImageAnalyzerConfig } from "./../../component/imageCommon"
 import { ImageLoadResult } from "./../../component/imageSpan"
 import { ImageModifier } from "./../../ImageModifier"
-import { ImmersiveMode, LevelMode, LevelOrder } from "@ohos.promptAction"
 import { IndexerAlign, AlphabetIndexerOptions } from "./../../component/alphabetIndexer"
 import { IndicatorComponentController } from "./../../component/indicatorcomponent"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
@@ -338,6 +338,9 @@ export class TypeChecker {
     static isAutoPlayOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof AutoPlayOptions
     }
+    static isAvailableLayoutArea(value: Object | string | number | undefined): boolean {
+        return value instanceof AvailableLayoutArea
+    }
     static isAvoidanceMode(value: Object | string | number | undefined): boolean {
         return value instanceof AvoidanceMode
     }
@@ -410,7 +413,7 @@ export class TypeChecker {
     static isBaseEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean): boolean {
         return value instanceof BaseEvent
     }
-    static isBaseGestureEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isBaseGestureEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof BaseGestureEvent
     }
     static isBaselineOffsetStyle(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -713,7 +716,7 @@ export class TypeChecker {
     static iscontextConstant_AreaMode(value: Object | string | number | undefined): boolean {
         return value instanceof contextConstant.AreaMode
     }
-    static isContextMenuAnimationOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+    static isContextMenuAnimationOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof ContextMenuAnimationOptions
     }
     static isContextMenuDataMediaType(value: Object | string | number | undefined): boolean {
@@ -728,7 +731,7 @@ export class TypeChecker {
     static isContextMenuMediaType(value: Object | string | number | undefined): boolean {
         return value instanceof ContextMenuMediaType
     }
-    static isContextMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean): boolean {
+    static isContextMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean): boolean {
         return value instanceof ContextMenuOptions
     }
     static isContextMenuSourceType(value: Object | string | number | undefined): boolean {
@@ -779,7 +782,7 @@ export class TypeChecker {
     static isCustomDialogControllerOptionsExtender(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean, arg35: boolean, arg36: boolean, arg37: boolean): boolean {
         return value instanceof CustomDialogControllerOptionsExtender
     }
-    static isCustomPopupOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean): boolean {
+    static isCustomPopupOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
         return value instanceof CustomPopupOptions
     }
     static isCustomSpan(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
@@ -1058,6 +1061,9 @@ export class TypeChecker {
     static isEventHub(value: Object | string | number | undefined): boolean {
         return value instanceof EventHub
     }
+    static isEventLocationInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+        return value instanceof EventLocationInfo
+    }
     static isEventResult(value: Object | string | number | undefined): boolean {
         return value instanceof EventResult
     }
@@ -1244,7 +1250,7 @@ export class TypeChecker {
     static isGestureControl_GestureType(value: Object | string | number | undefined): boolean {
         return value instanceof GestureControl.GestureType
     }
-    static isGestureEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean): boolean {
+    static isGestureEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean): boolean {
         return value instanceof GestureEvent
     }
     static isGestureGroup(value: Object | string | number | undefined): boolean {
@@ -1673,6 +1679,9 @@ export class TypeChecker {
     static isLoadingProgressStyle(value: Object | string | number | undefined): boolean {
         return value instanceof LoadingProgressStyle
     }
+    static isLocalizedAlignment(value: Object | string | number | undefined): boolean {
+        return value instanceof LocalizedAlignment
+    }
     static isLocalizedAlignRuleOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof LocalizedAlignRuleOptions
     }
@@ -1760,6 +1769,9 @@ export class TypeChecker {
     static isMenuItemOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof MenuItemOptions
     }
+    static isMenuMaskType(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof MenuMaskType
+    }
     static isMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof MenuOptions
     }
@@ -1786,6 +1798,9 @@ export class TypeChecker {
     }
     static isMixedMode(value: Object | string | number | undefined): boolean {
         return value instanceof MixedMode
+    }
+    static isModalMode(value: Object | string | number | undefined): boolean {
+        return value instanceof ModalMode
     }
     static isModalTransition(value: Object | string | number | undefined): boolean {
         return value instanceof ModalTransition
@@ -2303,10 +2318,13 @@ export class TypeChecker {
     static isPopInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PopInfo
     }
+    static isPopupBorderLinearGradient(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PopupBorderLinearGradient
+    }
     static isPopupButton(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PopupButton
     }
-    static isPopupCommonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean): boolean {
+    static isPopupCommonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean): boolean {
         return value instanceof PopupCommonOptions
     }
     static isPopupMaskType(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -2315,7 +2333,7 @@ export class TypeChecker {
     static isPopupMessageOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PopupMessageOptions
     }
-    static isPopupOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean): boolean {
+    static isPopupOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean): boolean {
         return value instanceof PopupOptions
     }
     static isPopupStateChangeParam(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -2324,11 +2342,11 @@ export class TypeChecker {
     static isPosition(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Position
     }
+    static isPositionF64Inner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PositionF64Inner
+    }
     static isPositionLengthMetricsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PositionLengthMetricsInner
-    }
-    static isPositionNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
-        return value instanceof PositionNumberInner
     }
     static isPositionWithAffinity(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof PositionWithAffinity
@@ -2354,6 +2372,9 @@ export class TypeChecker {
     static isPreviewMenuOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof PreviewMenuOptions
     }
+    static isPreviewScaleMode(value: Object | string | number | undefined): boolean {
+        return value instanceof PreviewScaleMode
+    }
     static isPreviewText(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PreviewText
     }
@@ -2377,6 +2398,9 @@ export class TypeChecker {
     }
     static isProgressType(value: Object | string | number | undefined): boolean {
         return value instanceof ProgressType
+    }
+    static ispromptAction_CommonState(value: Object | string | number | undefined): boolean {
+        return value instanceof promptAction.CommonState
     }
     static isProtectedResourceType(value: Object | string | number | undefined): boolean {
         return value instanceof ProtectedResourceType
@@ -2443,6 +2467,9 @@ export class TypeChecker {
     }
     static isRenderProcessNotRespondingReason(value: Object | string | number | undefined): boolean {
         return value instanceof RenderProcessNotRespondingReason
+    }
+    static isRenderStrategy(value: Object | string | number | undefined): boolean {
+        return value instanceof RenderStrategy
     }
     static isRepeatMode(value: Object | string | number | undefined): boolean {
         return value instanceof RepeatMode
@@ -2813,8 +2840,8 @@ export class TypeChecker {
     static isSize(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Size
     }
-    static isSizeNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
-        return value instanceof SizeNumberInner
+    static isSizeF64Inner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof SizeF64Inner
     }
     static isSizeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof SizeOptions
@@ -3044,7 +3071,7 @@ export class TypeChecker {
     static isTabsOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TabsOptions
     }
-    static isTapGestureEvent(value: Object | string | number | undefined): boolean {
+    static isTapGestureEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof TapGestureEvent
     }
     static isTapRecognizer(value: Object | string | number | undefined): boolean {
@@ -3610,6 +3637,12 @@ export class TypeChecker {
     }
     static AutoCapitalizationMode_FromNumeric(ordinal: int32): AutoCapitalizationMode {
         return AutoCapitalizationMode.fromValue(ordinal)
+    }
+    static AvailableLayoutArea_ToNumeric(value: AvailableLayoutArea): int32 {
+        return value.valueOf()
+    }
+    static AvailableLayoutArea_FromNumeric(ordinal: int32): AvailableLayoutArea {
+        return AvailableLayoutArea.fromValue(ordinal)
     }
     static AvoidanceMode_ToNumeric(value: AvoidanceMode): int32 {
         return value.valueOf()
@@ -4535,6 +4568,12 @@ export class TypeChecker {
     static LoadingProgressStyle_FromNumeric(ordinal: int32): LoadingProgressStyle {
         return LoadingProgressStyle.fromValue(ordinal)
     }
+    static LocalizedAlignment_ToNumeric(value: LocalizedAlignment): int32 {
+        return value.getOrdinal()
+    }
+    static LocalizedAlignment_FromNumeric(ordinal: int32): LocalizedAlignment {
+        return LocalizedAlignment.values()[ordinal]
+    }
     static LocalizedBarrierDirection_ToNumeric(value: LocalizedBarrierDirection): int32 {
         return value.valueOf()
     }
@@ -4594,6 +4633,12 @@ export class TypeChecker {
     }
     static MixedMode_FromNumeric(ordinal: int32): MixedMode {
         return MixedMode.fromValue(ordinal)
+    }
+    static ModalMode_ToNumeric(value: ModalMode): int32 {
+        return value.valueOf()
+    }
+    static ModalMode_FromNumeric(ordinal: int32): ModalMode {
+        return ModalMode.fromValue(ordinal)
     }
     static ModalTransition_ToNumeric(value: ModalTransition): int32 {
         return value.valueOf()
@@ -4823,6 +4868,12 @@ export class TypeChecker {
     static PreDragStatus_FromNumeric(ordinal: int32): PreDragStatus {
         return PreDragStatus.fromValue(ordinal)
     }
+    static PreviewScaleMode_ToNumeric(value: PreviewScaleMode): int32 {
+        return value.valueOf()
+    }
+    static PreviewScaleMode_FromNumeric(ordinal: int32): PreviewScaleMode {
+        return PreviewScaleMode.fromValue(ordinal)
+    }
     static ProgressStatus_ToNumeric(value: ProgressStatus): int32 {
         return value.valueOf()
     }
@@ -4840,6 +4891,12 @@ export class TypeChecker {
     }
     static ProgressType_FromNumeric(ordinal: int32): ProgressType {
         return ProgressType.fromValue(ordinal)
+    }
+    static promptAction_CommonState_ToNumeric(value: promptAction.CommonState): int32 {
+        return value.valueOf()
+    }
+    static promptAction_CommonState_FromNumeric(ordinal: int32): promptAction.CommonState {
+        return promptAction.CommonState.fromValue(ordinal)
     }
     static ProtectedResourceType_ToNumeric(value: ProtectedResourceType): int32 {
         return value.getOrdinal()
@@ -4888,6 +4945,12 @@ export class TypeChecker {
     }
     static RenderProcessNotRespondingReason_FromNumeric(ordinal: int32): RenderProcessNotRespondingReason {
         return RenderProcessNotRespondingReason.fromValue(ordinal)
+    }
+    static RenderStrategy_ToNumeric(value: RenderStrategy): int32 {
+        return value.valueOf()
+    }
+    static RenderStrategy_FromNumeric(ordinal: int32): RenderStrategy {
+        return RenderStrategy.fromValue(ordinal)
     }
     static RepeatMode_ToNumeric(value: RepeatMode): int32 {
         return value.valueOf()
@@ -6023,6 +6086,9 @@ export class TypeChecker {
     static isArray_ParticleOptionsInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_Tuple_ResourceColor_F64(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_Union_String_I32_I64_F64_Resource(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
             const array = value as Array<Object>
@@ -6380,12 +6446,12 @@ export class TypeChecker {
         }
         return false
     }
-    static isArray_ParticlePropertyAnimation_Number(value: Object | string | number | undefined): boolean {
+    static isArray_ParticlePropertyAnimation_F64(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
             const array = value as Array<Object>
             if (array.length == 0) return true
             const e = array[0]
-            return e instanceof ParticlePropertyAnimation<number>
+            return e instanceof ParticlePropertyAnimation<double>
         }
         return false
     }

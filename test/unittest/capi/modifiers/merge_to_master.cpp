@@ -15,9 +15,43 @@
 
 #include <gtest/gtest.h>
 
+// declarations
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "point_light_test.h"
+#include "select_modifier_test.h"
+#include "slider_modifier_test.h"
+#include "swiper_modifier_test.h"
+#include "image_common_methods_test.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS;
+using namespace OHOS::Ace;
+using namespace OHOS::Ace::NG::Converter;
+
+HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : testFixtureEnumArkDragBehaviorValues) {
+        dragEvent_->SetDragBehavior(value);
+        EXPECT_EQ(expected, accessor_->getDragBehavior(peer_)) <<
+            "Input value is: " << input << ", method: getDragBehavior";
+    }
+}
+
+HWTEST_F(WaterFlowModifierTest, setCashedCountTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(modifier_->setCashedCount, nullptr);
+    auto checkval = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
+    EXPECT_EQ(checkVal, CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE);
+}
+
+HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+}

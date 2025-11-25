@@ -166,7 +166,6 @@ const std::string ACTION_PARAM = "action";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
-constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
 
@@ -3322,15 +3321,15 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
     rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
 }
 
-void UIContentImpl::AddKeyFrameCanvasNodeCallback(const std::function<
-    void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+void UIContentImpl::AddKeyFrameNodeCallback(const std::function<
+    void(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameCanvasNodeCallback");
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameNodeCallback");
     addNodeCallback_ = callback;
 }
 
-void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode)
+void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3344,20 +3343,20 @@ void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvas
         CHECK_NULL_VOID(window_);
         auto surfaceNode = window_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
-        CHECK_NULL_VOID(canvasNode);
-        canvasNode->SetRSUIContext(surfaceNode->GetRSUIContext());
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "canvasNode %{public}" PRIu64 "",
-            surfaceNode->GetId(), canvasNode->GetId());
-        surfaceNode->AddChild(canvasNode, -1);
+        CHECK_NULL_VOID(keyFrameNode);
+        keyFrameNode->SetRSUIContext(surfaceNode->GetRSUIContext());
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "keyFrameNode %{public}" PRIu64 "",
+            surfaceNode->GetId(), keyFrameNode->GetId());
+        surfaceNode->AddChild(keyFrameNode, -1);
     }
 #endif
 #endif
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameNode.");
     auto rootElement = context->GetRootElement();
     CHECK_NULL_VOID(rootElement);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
-    rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
+    rosenRenderContext->LinkKeyFrameNodeToRootNode(context->GetRootElement());
 }
 
 void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
@@ -3459,11 +3458,11 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         CloseSyncTransaction(transactionController, transactionHandler);
         return;
     }
-    rosenRenderContext->CreateCanvasNode();
-    canvasNode_ = rosenRenderContext->GetCanvasNode();
-    if (addNodeCallback_ && canvasNode_) {
+    rosenRenderContext->CreateKeyFrameNode();
+    keyFrameNode_ = rosenRenderContext->GetKeyFrameNode();
+    if (addNodeCallback_ && keyFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
-        addNodeCallback_(canvasNode_, rsTransaction);
+        addNodeCallback_(keyFrameNode_, rsTransaction);
     }
     CloseSyncTransaction(transactionController, transactionHandler);
     std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
@@ -3495,7 +3494,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     switch (reason) {
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
             if (!rosenRenderContext->GetIsDraggingFlag()) {
-                if (rosenRenderContext->GetCanvasNode()) {
+                if (rosenRenderContext->GetKeyFrameNode()) {
                     rosenRenderContext->SetReDraggingFlag(true);
                 }
                 rosenRenderContext->SetIsDraggingFlag(true);
@@ -3504,9 +3503,10 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
             return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
             rosenRenderContext->SetIsDraggingFlag(false);
+            rosenRenderContext->SetReDraggingFlag(false);
             [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
-            animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
+            animateRes = rosenRenderContext->SetKeyFrameNodeOpacityAnimation(
                 config.GetKeyFrameConfig().animationDuration_,
                 config.GetKeyFrameConfig().animationDelay_,
                 reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
@@ -3633,9 +3633,6 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     const RefPtr<Platform::AceContainer>& container)
 {
     CHECK_NULL_VOID(info);
-    if (reason != OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-        return;
-    }
     auto rect = info->rect_;
     Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetKeyboardInfo(pipelineContext, keyboardRect.Height());
@@ -3860,19 +3857,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
-            pipelineContext, info, container] {
-                if (avoidAreas.empty() && !info) {
+        if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
+            KeyboardAvoid(reason, instanceId_, pipelineContext, info, container);
+        }
+        taskExecutor->PostTask([context, config, avoidAreas] {
+                if (avoidAreas.empty()) {
                     return;
                 }
                 if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
                     context->AnimateOnSafeAreaUpdate();
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
-                if (pipelineContext) {
-                    TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in advance");
-                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
-                }
             },
             TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
@@ -3943,7 +3938,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
         viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
-        if (pipelineContext) {
+        if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
             TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
             KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
         }
@@ -4503,8 +4498,7 @@ void UIContentImpl::SetFormViewScale(float width, float height, float formViewSc
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
-        ((formViewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : formViewScale);
+    float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE : formViewScale;
 
     auto density = SystemProperties::GetResolution() / viewScale;
     TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f, density: %{public}f.", viewScale, density);

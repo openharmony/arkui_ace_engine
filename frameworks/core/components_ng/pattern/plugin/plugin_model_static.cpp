@@ -18,6 +18,9 @@
 #ifndef ARKUI_CAPI_UNITTEST
 #include "core/components/plugin/plugin_sub_container.h"
 #include "core/components/plugin/resource/plugin_manager_delegate.h"
+#else
+#include "test/unittest/capi/stubs/mock_plugin_sub_container.h"
+#include "test/unittest/capi/stubs/mock_plugin_manager_delegate.h"
 #endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"

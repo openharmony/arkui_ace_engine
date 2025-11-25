@@ -462,7 +462,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier001, TestSize.Leve
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
     EXPECT_NE(selectOverlayPaintMethod, nullptr);
     selectOverlayPaintMethod->isCreated_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
     /**
      * @tc.steps: step2. call UpdateContentModifier.
      * @tc.expected: the isCreated_ value is correct.
@@ -522,7 +521,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier002, TestSize.Leve
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
     EXPECT_NE(selectOverlayPaintMethod, nullptr);
     selectOverlayPaintMethod->isCreated_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
     /**
      * @tc.steps: step2. call UpdateContentModifier.
      * @tc.expected: the isCreated_ value is correct.
@@ -583,9 +581,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier003, TestSize.Leve
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     PaintWrapper* paintWrapper = nullptr;
     selectOverlayPaintMethod->isCreated_ = true;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, true);
     selectOverlayPaintMethod->handleIsShown_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
 }
@@ -641,16 +637,13 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier004, TestSize.Leve
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
     EXPECT_NE(selectOverlayPaintMethod, nullptr);
     selectOverlayPaintMethod->isCreated_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
     /**
      * @tc.steps: step2. call UpdateContentModifier, mock TextOverlayTheme is nullptr.
      * @tc.expected: the handleIsShown_ value is correct.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
     selectOverlayPaintMethod->isCreated_ = true;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, true);
     selectOverlayPaintMethod->handleIsShown_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
 }
@@ -711,9 +704,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier005, TestSize.Leve
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayPaintMethod->isCreated_ = true;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, true);
     selectOverlayPaintMethod->handleIsShown_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_EQ(selectOverlayPaintMethod->isCreated_, true);
     EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, true);
@@ -834,11 +825,8 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier007, TestSize.Leve
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayPaintMethod->isCreated_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
     selectOverlayPaintMethod->handleIsShown_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
     selectOverlayPaintMethod->hasShowAnimation_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->hasShowAnimation_, false);
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
     EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, true);

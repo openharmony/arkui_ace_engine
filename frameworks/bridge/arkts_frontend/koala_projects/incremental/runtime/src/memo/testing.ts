@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey, uint32 } from "@koalaui/common"
-import { GlobalStateManager } from "../states/GlobalStateManager"
-import { ComputableState, StateManager } from "../states/State"
+import { KoalaCallsiteKey, uint32 } from '@koalaui/common'
+import { GlobalStateManager } from '../states/GlobalStateManager'
+import { ComputableState, StateManager } from '../states/State'
 import { ReadableState } from 'arkui.incremental.runtime.state';
-import { IncrementalNode } from "../tree/IncrementalNode"
-import { Disposable } from "../states/Disposable"
-import { memoRoot } from "./entry"
-import { NodeAttach } from "./node"
+import { IncrementalNode } from '../tree/IncrementalNode'
+import { Disposable } from '../states/Disposable'
+import { memoRoot } from './entry'
+import { NodeAttach } from './node'
 
 /** @internal */
 export class TestNode extends IncrementalNode {

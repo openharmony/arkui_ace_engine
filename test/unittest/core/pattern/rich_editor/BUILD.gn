@@ -58,6 +58,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_span_node_test_ng.cpp",
     "rich_editor_span_test.cpp",
     "rich_editor_string_undo_callback_test_ng.cpp",
+    "rich_editor_string_undo_drag_test_ng.cpp",
     "rich_editor_string_undo_test_ng.cpp",
     "rich_editor_style_change_test_ng.cpp",
     "rich_editor_style_test_ng.cpp",

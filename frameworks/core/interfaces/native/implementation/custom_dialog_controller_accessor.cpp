@@ -97,6 +97,12 @@ Ark_CustomDialogControllerExternalOptions GetExternalOptionsImpl(Ark_CustomDialo
     result.customStyle = peer->GetCustomStyle();
     return result;
 }
+Ark_promptAction_CommonState GetStateImpl(Ark_CustomDialogController peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto state = peer->GetState();
+    return Converter::ArkValue<Ark_promptAction_CommonState>(state);
+}
 void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
 {
     CHECK_NULL_VOID(peer);
@@ -113,6 +119,7 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
         CustomDialogControllerAccessor::OpenImpl,
         CustomDialogControllerAccessor::CloseImpl,
         CustomDialogControllerAccessor::GetExternalOptionsImpl,
+        CustomDialogControllerAccessor::GetStateImpl,
     };
     return &CustomDialogControllerAccessorImpl;
 }

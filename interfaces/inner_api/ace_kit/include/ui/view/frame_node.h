@@ -104,6 +104,7 @@ public:
     virtual int32_t GetContainerModalTitleHeight() = 0;
     virtual NG::OffsetF GetContainerModalButtonsOffset() = 0;
     virtual NG::SizeF GetContainerModalButtonsSize() = 0;
+    virtual LayoutConstraintInfo GetLayoutConstraint() const = 0;
 
     virtual RefPtr<UIContext> GetUIContext() const = 0;
     virtual void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) = 0;

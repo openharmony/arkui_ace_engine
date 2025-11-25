@@ -183,6 +183,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest004, TestSize.Level0)
         layoutWrapper->AppendChild(itemLayoutWrapper);
         index++;
     }
+
     for (int32_t i = START_INDEX; i < THREE_ITEM_SIZE - 1; i++) {
         auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, index, AceType::MakeRefPtr<Pattern>());
         RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -385,6 +386,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest005, TestSize.Level0)
         EXPECT_EQ(childOffset, OffsetF(0.0f, 0.0f));
         index++;
     }
+
     auto sixthChildWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     auto sixthChildSize = sixthChildWrapper->GetGeometryNode()->GetFrameSize();
     auto sixthChildOffset = sixthChildWrapper->GetGeometryNode()->GetFrameOffset();
@@ -416,6 +418,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest006, TestSize.Level0)
     columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
     auto columnLayoutAlgorithm = columnLayoutPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(columnLayoutAlgorithm == nullptr);
+
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(columnLayoutAlgorithm));
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(RK356_WIDTH), CalcLength(COLUMN_HEIGHT)));
@@ -502,11 +505,13 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest006, TestSize.Level0)
     auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(firstChildSize, SizeF(TWENTY_PERCENT_WIDTH, ROW_HEIGHT / 4));
     EXPECT_EQ(firstChildOffset, OFFSET_TOP_LEFT);
+
     auto secondChildWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
     auto secondChildSize = secondChildWrapper->GetGeometryNode()->GetFrameSize();
     auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
     EXPECT_EQ(secondChildSize, SizeF(TWENTY_PERCENT_WIDTH, ROW_HEIGHT / 4 * 3));
     EXPECT_EQ(secondChildOffset, OffsetF(0.0f, ROW_HEIGHT / 4));
+
     auto thirdChildWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
     auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
     auto thirdChildOffset = thirdChildWrapper->GetGeometryNode()->GetFrameOffset();
@@ -594,6 +599,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest018, TestSize.Level0)
     rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, ROW_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
     for (int32_t i = START_INDEX; i < THREE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i + THREE_ITEM_SIZE);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();

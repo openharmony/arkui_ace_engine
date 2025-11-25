@@ -590,6 +590,7 @@ namespace Converter {
     template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
+    template<> EventLocationInfo Convert(const Ark_EventLocationInfo& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
     template<> FontInfo Convert(const Ark_font_FontInfo& src);
@@ -725,6 +726,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedType& src);
     template<> void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<Ark_Resource_Simple>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<AvailableLayoutAreaMode>& dst, const Ark_AvailableLayoutArea& src);
+    template<> void AssignCast(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
@@ -821,7 +824,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src);
     template<> void AssignCast(std::optional<MenuPreviewMode>& dst, const Ark_MenuPreviewMode& src);
     template<> void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src);
+    template<> void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessageSource& src);
     template<> void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src);
+    template<> void AssignCast(std::optional<ModalMode>& dst, const Ark_ModalMode& src);
     template<> void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src);
     template<> void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
@@ -843,6 +848,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
+    template<> void AssignCast(std::optional<PopupLinearGradientProperties>& dst, const Ark_PopupBorderLinearGradient& src);
+    template<> void AssignCast(std::optional<PreviewScaleMode>& dst, const Ark_PreviewScaleMode& src);
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src);
     template<> void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src);
@@ -951,6 +958,27 @@ namespace Converter {
         }
         return std::nullopt;
     }
+    
+    class ConverterStatus {
+    public:
+        inline static DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
+    };
+
+    class DefaultDimensionUnit {
+    public:
+        explicit DefaultDimensionUnit(DimensionUnit unit)
+        {
+            save_ = ConverterStatus::DEFAULT_UNIT;
+            ConverterStatus::DEFAULT_UNIT = unit;
+        }
+        ~DefaultDimensionUnit()
+        {
+            ConverterStatus::DEFAULT_UNIT = save_;
+        }
+
+    private:
+        DimensionUnit save_;
+    };
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

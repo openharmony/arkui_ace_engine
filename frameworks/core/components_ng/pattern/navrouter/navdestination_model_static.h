@@ -76,6 +76,9 @@ public:
     static void SetHideItemText(FrameNode* frameNode, bool isHideItemText);
     static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
     static void SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori);
+    static void SetOnNewParam(
+        FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& onNewParamCallback);
+    static void SetOnPop(FrameNode* frameNode, std::function<void(const RefPtr<NavPathInfo>&)>&& popCallback);
 };
 } // namespace OHOS::Ace::NG
 

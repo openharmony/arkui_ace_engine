@@ -19,11 +19,12 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
-import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
+import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
 import { LengthMetrics, ColorMetrics} from "arkui.Graphics"
 import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
@@ -38,6 +39,7 @@ import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
 export class CommonMethodModifier implements CommonMethod {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -226,6 +228,8 @@ export class CommonMethodModifier implements CommonMethod {
     _flexBasis_0_0value?: number | string | undefined
     _alignSelf_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignSelf_0_0value?: ItemAlign | undefined
+    _layoutGravity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _layoutGravity_0_0value?: LocalizedAlignment | undefined
     _displayPriority_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _displayPriority_0_0value?: number | undefined
     _zIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -233,7 +237,7 @@ export class CommonMethodModifier implements CommonMethod {
     _direction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _direction_0_0value?: Direction | undefined
     _align_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _align_0_0value?: Alignment | undefined
+    _align_0_0value?: Alignment | LocalizedAlignment | undefined
     _position_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _position_0_0value?: Position | Edges | LocalizedEdges | undefined
     _markAnchor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -361,6 +365,9 @@ export class CommonMethodModifier implements CommonMethod {
     _expandSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
     _expandSafeArea_0_1value?: Array<SafeAreaEdge> | undefined
+    _ignoreLayoutSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
+    _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
     _background_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _background_0_0value?: CustomBuilder | undefined
     _background_0_1value?: BackgroundOptions | undefined
@@ -376,6 +383,9 @@ export class CommonMethodModifier implements CommonMethod {
     _backgroundBlurStyle_0_0value?: BlurStyle | undefined
     _backgroundBlurStyle_0_1value?: BackgroundBlurStyleOptions | undefined
     _backgroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
+    _borderRadius_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _borderRadius_1_0value?: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+    _borderRadius_1_1value?: RenderStrategy | undefined
     _backgroundEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundEffect_1_0value?: BackgroundEffectOptions | undefined
     _backgroundEffect_1_1value?: SystemAdaptiveOptions | undefined
@@ -488,6 +498,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
     _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
         if (this._width_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -1033,7 +1044,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._borderRadius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBorderRadiusAttribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderRadius0Attribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
                     this._borderRadius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1043,7 +1054,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._borderRadius_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBorderRadiusAttribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderRadius0Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
                 }
             }
         }
@@ -2145,6 +2156,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (this._layoutGravity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._layoutGravity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLayoutGravityAttribute((this._layoutGravity_0_0value as LocalizedAlignment | undefined));
+                    this._layoutGravity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._layoutGravity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._layoutGravity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLayoutGravityAttribute((undefined as LocalizedAlignment | undefined));
+                }
+            }
+        }
         if (this._displayPriority_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._displayPriority_0_flag) {
@@ -2203,7 +2232,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._align_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignAttribute((this._align_0_0value as Alignment | undefined));
+                    peer.setAlignAttribute((this._align_0_0value as Alignment | LocalizedAlignment | undefined));
                     this._align_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2213,7 +2242,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._align_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignAttribute((undefined as Alignment | undefined));
+                    peer.setAlignAttribute((undefined as Alignment | LocalizedAlignment | undefined));
                 }
             }
         }
@@ -3351,6 +3380,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (this._ignoreLayoutSafeArea_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._ignoreLayoutSafeArea_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIgnoreLayoutSafeAreaAttribute((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                }
+            }
+        }
         if (this._background_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._background_0_flag) {
@@ -3474,6 +3521,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._foregroundBlurStyle_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setForegroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._borderRadius_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._borderRadius_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBorderRadius1Attribute((this._borderRadius_1_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (this._borderRadius_1_1value as RenderStrategy | undefined));
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._borderRadius_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBorderRadius1Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined));
                 }
             }
         }
@@ -4037,6 +4102,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
+        this._state = modifier._state;
         if (modifier._width_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._width_0_flag) {
@@ -5233,6 +5299,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._layoutGravity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._layoutGravity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.layoutGravity(modifier._layoutGravity_0_0value);
+                    break;
+                }
+                default: {
+                    this.layoutGravity((undefined as LocalizedAlignment | undefined));
+                }
+            }
+        }
         if (modifier._displayPriority_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._displayPriority_0_flag) {
@@ -5281,7 +5360,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.align((undefined as Alignment | undefined));
+                    this.align((undefined as Alignment | LocalizedAlignment | undefined));
                 }
             }
         }
@@ -6117,6 +6196,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._ignoreLayoutSafeArea_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._ignoreLayoutSafeArea_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.ignoreLayoutSafeArea(modifier._ignoreLayoutSafeArea_0_0value, modifier._ignoreLayoutSafeArea_0_1value);
+                    break;
+                }
+                default: {
+                    this.ignoreLayoutSafeArea((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                }
+            }
+        }
         if (modifier._background_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._background_0_flag) {
@@ -6205,6 +6297,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.foregroundBlurStyle((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._borderRadius_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._borderRadius_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.borderRadius(modifier._borderRadius_1_0value, modifier._borderRadius_1_1value);
+                    break;
+                }
+                default: {
+                    this.borderRadius((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined));
                 }
             }
         }
@@ -7611,6 +7716,17 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    layoutGravity(value: LocalizedAlignment | undefined): this {
+        if (((this._layoutGravity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._layoutGravity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._layoutGravity_0_0value = value
+        } else
+        {
+            this._layoutGravity_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     displayPriority(value: number | undefined): this {
         if (((this._displayPriority_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._displayPriority_0_0value) !== (value)))
         {
@@ -7644,7 +7760,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    align(value: Alignment | undefined): this {
+    align(value: Alignment | LocalizedAlignment | undefined): this {
         if (((this._align_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._align_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8371,6 +8487,18 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        if (((this._ignoreLayoutSafeArea_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.UPDATE
+            this._ignoreLayoutSafeArea_0_0value = types
+            this._ignoreLayoutSafeArea_0_1value = edges
+        } else
+        {
+            this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         if (((this._background_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
@@ -8453,6 +8581,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._foregroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        if (((this._borderRadius_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._borderRadius_1_flag = AttributeUpdaterFlag.UPDATE
+            this._borderRadius_1_0value = value
+            this._borderRadius_1_1value = type
+        } else
+        {
+            this._borderRadius_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

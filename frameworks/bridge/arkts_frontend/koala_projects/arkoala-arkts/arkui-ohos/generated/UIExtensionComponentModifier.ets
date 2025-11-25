@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { RecordData } from "./component/pluginComponent"
 import { ErrorCallback, BusinessError } from "@ohos.base"
 export class UIExtensionComponentModifier extends CommonMethodModifier implements UIExtensionComponentAttribute,AttributeModifier<UIExtensionComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -47,6 +49,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
     _onDrawReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDrawReady_0_0value?: (() => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkUIExtensionComponentPeer;
         if (this._onRemoteReady_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -142,6 +145,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
     }
     mergeModifier(modifier: UIExtensionComponentModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onRemoteReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onRemoteReady_0_flag) {

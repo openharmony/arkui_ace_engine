@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_ANIMATION_OPTION_H
 
 #include <functional>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -235,6 +236,13 @@ private:
     AnimationDirection direction_ = AnimationDirection::NORMAL;
     FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
     RefPtr<FrameRateRange> rateRange_;
+};
+
+struct AnimationCallbackInfo {
+    std::optional<float> currentOffset;
+    std::optional<float> targetOffset;
+    std::optional<float> velocity;
+    bool isForceStop = false;
 };
 } // namespace OHOS::Ace
 

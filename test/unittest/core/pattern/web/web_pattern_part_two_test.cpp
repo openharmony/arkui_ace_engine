@@ -23,7 +23,7 @@
 #undef private
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "third_party/cJSON/cJSON.h"
+#include "cJSON.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "nweb_autofill.h"

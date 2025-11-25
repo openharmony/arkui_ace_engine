@@ -24,6 +24,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { AttributeModifier, hookPluginComponentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -152,7 +153,9 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPluginComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookPluginComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

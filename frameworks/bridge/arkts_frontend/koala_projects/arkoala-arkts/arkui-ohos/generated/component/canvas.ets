@@ -25,6 +25,7 @@ import { ColorMetrics_serializer, Size_serializer, LengthMetrics_serializer } fr
 import { drawing_Canvas_serializer } from "./../framework/ohos.graphics.drawing"
 import { ColorMetrics, Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
 import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookSetCanvasOptions, hookCanvasStartImageAnalyzer, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext, registerAttach, unregisterAttach, registerDetach, unregisterDetach } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as drawing } from "@ohos.graphics.drawing"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { default as image } from "@ohos.multimedia.image"
@@ -789,7 +790,9 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
         return this
     }
     public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCanvasAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookCanvasAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

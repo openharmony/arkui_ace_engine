@@ -24,6 +24,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Alignment, FoldStatus, AppRotation } from "./enums"
 import { AttributeModifier, hookFolderStackAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -241,7 +242,9 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFolderStackAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFolderStackAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

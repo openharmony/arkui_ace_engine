@@ -111,6 +111,7 @@ public:
 
     void NotifyHostWindowMode(int32_t mode) override;
     void ReDispatchWantParams() override;
+    void UpdateConfigParamByContainerHandler(AAFwk::WantParams& configParam);
 
 private:
     int32_t GetFrameNodeId() const;

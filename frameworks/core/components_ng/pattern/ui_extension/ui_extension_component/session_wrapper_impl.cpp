@@ -38,12 +38,14 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
+#include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
@@ -74,6 +76,8 @@ constexpr char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
 constexpr char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 // Set the UIExtension type of the EmbeddedComponent.
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
+constexpr char UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING[] =
+    "ohos.ace.uiextension.allowCrossProcessNesting";
 constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t AVOID_DELAY_TIME = 30;
@@ -760,9 +764,32 @@ void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
     container->GetExtensionConfig(configParam);
     auto str = UIExtensionContainerHandler::FromUIContentTypeToStr(container->GetUIContentType());
     configParam.SetParam(UIEXTENSION_HOST_UICONTENT_TYPE, AAFwk::String::Box(str));
+    UpdateConfigParamByContainerHandler(configParam);
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);
+}
+
+void SessionWrapperImpl::UpdateConfigParamByContainerHandler(AAFwk::WantParams& configParam)
+{
+    auto container = Platform::AceContainer::GetContainer(GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto containerHandler = container->GetContainerHandler();
+    CHECK_NULL_VOID(containerHandler);
+    if (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        auto platformContainerHandler = AceType::DynamicCast<NG::PlatformContainerHandler>(containerHandler);
+        CHECK_NULL_VOID(platformContainerHandler);
+        auto allowCrossProcessNesting = platformContainerHandler->IsAllowCrossProcessNesting();
+        configParam.SetParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING,
+            AAFwk::Boolean::Box(allowCrossProcessNesting));
+    }
+    if (container->IsUIExtensionWindow()) {
+        auto uIExtensionContainerHandler = AceType::DynamicCast<NG::UIExtensionContainerHandler>(containerHandler);
+        CHECK_NULL_VOID(uIExtensionContainerHandler);
+        auto allowCrossProcessNesting = uIExtensionContainerHandler->IsAllowCrossProcessNesting();
+        configParam.SetParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING,
+            AAFwk::Boolean::Box(allowCrossProcessNesting));
+    }
 }
 
 void SessionWrapperImpl::ReDispatchWantParams()
@@ -1308,9 +1335,9 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     int64_t curTime = GetCurrentTimestamp();
     static bool isDeviceTypeDefault = false;
     static std::once_flag onceFlag;
-    std::call_once(onceFlag, [this]() {
+    std::call_once(onceFlag, []() {
         std::string deviceType = OHOS::system::GetParameter(PROPERTY_DEVICE_TYPE, PROPERTY_DEVICE_TYPE_DEFAULT);
-        isDeviceTypeDefault = deviceType.compare(PROPERTY_DEVICE_TYPE_DEFAULT) == 0;
+        isDeviceTypeDefault = deviceType == PROPERTY_DEVICE_TYPE_DEFAULT;
     });
     if ((displayAreaWindow_ != curWindow && needWaitLayout) || isDeviceTypeDefault) {
         UIEXT_LOGI("OccupiedArea wait layout, displayAreaWindow: %{public}s,"

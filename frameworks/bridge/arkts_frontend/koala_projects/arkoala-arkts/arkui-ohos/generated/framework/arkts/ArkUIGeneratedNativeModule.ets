@@ -291,7 +291,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setBorderColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setBorderRadius(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CommonMethod_setBorderRadius0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setBorderImage(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -414,6 +414,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setFlexBasis(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setAlignSelf(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CommonMethod_setLayoutGravity(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setDisplayPriority(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -547,6 +549,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setExpandSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setIgnoreLayoutSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setBackground(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setBackgroundImage0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -560,6 +564,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setBackgroundEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setForegroundBlurStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CommonMethod_setBorderRadius1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setOnClick1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1236,6 +1242,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MenuAttribute_setMenuItemGroupDivider(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _MenuAttribute_setSubMenuExpandingMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _MenuAttribute_setSubMenuExpandSymbol(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _MenuItem_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -3385,6 +3393,8 @@ export class ArkUIGeneratedNativeModule {
     native static _BaseGestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _BaseGestureEvent_getFingerInfos(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaselineOffsetStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -3760,6 +3770,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ConsoleMessage_getMessageLevel(ptr: KPointer): int32
     @ani.unsafe.Direct
+    native static _ConsoleMessage_getSource(ptr: KPointer): int32
+    @ani.unsafe.Direct
     native static _ContentModifierHelper_contentModifierButton(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ContentModifierHelper_resetContentModifierButton(node: KPointer): void
@@ -3834,6 +3846,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _CustomDialogController_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
+    native static _CustomDialogController_getState(ptr: KPointer): int32
+    @ani.unsafe.Direct
     native static _CustomDialogControllerExtender_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _CustomDialogControllerExtender_getFinalizer(): KPointer
@@ -3845,6 +3859,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogControllerExtender_setOwnerView(ptr: KPointer, content: KPointer): void
     @ani.unsafe.Quick
     native static _CustomDialogControllerExtender_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _CustomDialogControllerExtender_getState(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _CustomSpan_construct(): KPointer
     @ani.unsafe.Direct
@@ -4219,6 +4235,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _GestureEvent_getFingerInfos(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureEvent_getOffsetX(ptr: KPointer): double
     @ani.unsafe.Direct
@@ -4259,6 +4277,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _GestureEvent_setVelocity(ptr: KPointer, velocity: KDouble): void
+    @ani.unsafe.Quick
+    native static _GestureEvent_getTapLocation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
@@ -4575,6 +4595,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LayoutPolicy_getMatchParent(): KPointer
     @ani.unsafe.Direct
+    native static _LayoutPolicy_getWrapContent(): KPointer
+    @ani.unsafe.Direct
+    native static _LayoutPolicy_getFixAtIdealSize(): KPointer
+    @ani.unsafe.Direct
     native static _LazyBuild_ApplyLazyBuilder(): void
     @ani.unsafe.Direct
     native static _LazyBuild_SetListItemLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -4726,8 +4750,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MenuItemConfiguration_getContentModifier(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MenuItemConfiguration_setContentModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _MenuItemConfiguration_getValue(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getValue(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MenuItemConfiguration_setValue(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -5292,6 +5316,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): int32
     @ani.unsafe.Direct
+    native static _RenderNodeExtender_insertChild(peer: KPointer, child: KPointer): int32
+    @ani.unsafe.Direct
     native static _RenderNodeExtender_removeChild(peer: KPointer, node: KPointer): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_clearChildren(peer: KPointer): void
@@ -5344,10 +5370,10 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorBaseController_construct(): KPointer
     @ani.unsafe.Direct
     native static _RichEditorBaseController_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _RichEditorBaseController_getCaretOffset(ptr: KPointer): int32
-    @ani.unsafe.Direct
-    native static _RichEditorBaseController_setCaretOffset(ptr: KPointer, offset: KInt): boolean
+    @ani.unsafe.Quick
+    native static _RichEditorBaseController_getCaretOffset(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RichEditorBaseController_setCaretOffset(ptr: KPointer, offset: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _RichEditorBaseController_closeSelectionMenu(ptr: KPointer): void
     @ani.unsafe.Quick
@@ -5356,12 +5382,12 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorBaseController_setTypingStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorBaseController_setSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _RichEditorBaseController_isEditing(ptr: KPointer): boolean
+    @ani.unsafe.Quick
+    native static _RichEditorBaseController_isEditing(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _RichEditorBaseController_stopEditing(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _RichEditorBaseController_getLayoutManager(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _RichEditorBaseController_getLayoutManager(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _RichEditorBaseController_getPreviewText(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
@@ -5370,14 +5396,14 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorController_construct(): KPointer
     @ani.unsafe.Direct
     native static _RichEditorController_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _RichEditorController_addTextSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
-    @ani.unsafe.Direct
-    native static _RichEditorController_addImageSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
-    @ani.unsafe.Direct
-    native static _RichEditorController_addBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
-    @ani.unsafe.Direct
-    native static _RichEditorController_addSymbolSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Quick
+    native static _RichEditorController_addTextSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RichEditorController_addImageSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RichEditorController_addBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RichEditorController_addSymbolSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _RichEditorController_updateSpanStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -5392,16 +5418,16 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorController_getSelection(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _RichEditorController_fromStyledString(ptr: KPointer, value: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _RichEditorController_toStyledString(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _RichEditorController_toStyledString(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _RichEditorStyledStringController_construct(): KPointer
     @ani.unsafe.Direct
     native static _RichEditorStyledStringController_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _RichEditorStyledStringController_setStyledString(ptr: KPointer, styledString: KPointer): void
-    @ani.unsafe.Direct
-    native static _RichEditorStyledStringController_getStyledString(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _RichEditorStyledStringController_getStyledString(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _RichEditorStyledStringController_getSelection(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -5578,8 +5604,8 @@ export class ArkUIGeneratedNativeModule {
     native static _StyledStringController_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _StyledStringController_setStyledString(ptr: KPointer, styledString: KPointer): void
-    @ani.unsafe.Direct
-    native static _StyledStringController_getStyledString(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _StyledStringController_getStyledString(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _SubmitEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -5712,6 +5738,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TapGestureEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _TapGestureEvent_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _TapGestureEvent_getTapLocation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TapRecognizer_construct(): KPointer
     @ani.unsafe.Direct
@@ -5736,8 +5764,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextBaseController_setSelection(ptr: KPointer, selectionStart: number, selectionEnd: number, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextBaseController_closeSelectionMenu(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _TextBaseController_getLayoutManager(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _TextBaseController_getLayoutManager(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextClockController_construct(): KPointer
     @ani.unsafe.Direct
@@ -5767,6 +5795,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _TextContentControllerBase_getText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): string
     @ani.unsafe.Direct
+    native static _TextContentControllerBase_deleteBackward(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _TextController_construct(): KPointer
     @ani.unsafe.Direct
     native static _TextController_getFinalizer(): KPointer
@@ -5777,17 +5807,19 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextController_getLayoutManager(ptr: KPointer): KPointer
     @ani.unsafe.Direct
+    native static _TextController_setTextSelection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _TextEditControllerEx_construct(): KPointer
     @ani.unsafe.Direct
     native static _TextEditControllerEx_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _TextEditControllerEx_isEditing(ptr: KPointer): boolean
+    @ani.unsafe.Quick
+    native static _TextEditControllerEx_isEditing(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextEditControllerEx_stopEditing(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _TextEditControllerEx_setCaretOffset(ptr: KPointer, offset: number): boolean
-    @ani.unsafe.Direct
-    native static _TextEditControllerEx_getCaretOffset(ptr: KPointer): number
+    @ani.unsafe.Quick
+    native static _TextEditControllerEx_setCaretOffset(ptr: KPointer, offset: number): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextEditControllerEx_getCaretOffset(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _TextEditControllerEx_getPreviewText(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -6020,10 +6052,6 @@ export class ArkUIGeneratedNativeModule {
     native static _UrlStyle_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _UrlStyle_getUrl(ptr: KPointer): string
-    @ani.unsafe.Direct
-    native static _UserDataSpan_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _UserDataSpan_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _VideoController_construct(): KPointer
     @ani.unsafe.Direct

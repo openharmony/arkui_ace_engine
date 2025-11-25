@@ -50,6 +50,7 @@ template("ace_core_components_theme_set") {
       "theme_manager_impl.cpp",
       "theme_manager_multi_thread.cpp",
       "theme_utils.cpp",
+      "ui_material_theme.cpp",
     ]
 
     # add sources only needed by wearable like watch.

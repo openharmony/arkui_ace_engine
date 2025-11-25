@@ -1902,6 +1902,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Dimension& src)
 {
     switch (src.selector) {
@@ -1935,6 +1950,21 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Boolean_MenuMaskType& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3343,6 +3373,7 @@ ASSIGN_OPT(Opt_ArrowPosition)
 ASSIGN_OPT(Opt_AttributeUpdaterFlag)
 ASSIGN_OPT(Opt_AudioSessionType)
 ASSIGN_OPT(Opt_AutoCapitalizationMode)
+ASSIGN_OPT(Opt_AvailableLayoutArea)
 ASSIGN_OPT(Opt_AvoidanceMode)
 ASSIGN_OPT(Opt_Axis)
 ASSIGN_OPT(Opt_AxisAction)
@@ -3400,6 +3431,7 @@ ASSIGN_OPT(Opt_ConfigurationConstant_ColorMode)
 ASSIGN_OPT(Opt_ConfigurationConstant_Direction)
 ASSIGN_OPT(Opt_ConfigurationConstant_ScreenDensity)
 ASSIGN_OPT(Opt_ConsoleMessage)
+ASSIGN_OPT(Opt_ConsoleMessageSource)
 ASSIGN_OPT(Opt_ContentClipMode)
 ASSIGN_OPT(Opt_ContentType)
 ASSIGN_OPT(Opt_contextConstant_AreaMode)
@@ -3565,6 +3597,7 @@ ASSIGN_OPT(Opt_ListItemStyle)
 ASSIGN_OPT(Opt_ListScroller)
 ASSIGN_OPT(Opt_LoadingProgressConfiguration)
 ASSIGN_OPT(Opt_LoadingProgressStyle)
+ASSIGN_OPT(Opt_LocalizedAlignment)
 ASSIGN_OPT(Opt_LocalizedBarrierDirection)
 ASSIGN_OPT(Opt_LongPressRecognizer)
 ASSIGN_OPT(Opt_MarqueeStartPolicy)
@@ -3577,6 +3610,7 @@ ASSIGN_OPT(Opt_MenuPreviewMode)
 ASSIGN_OPT(Opt_MenuType)
 ASSIGN_OPT(Opt_MessageLevel)
 ASSIGN_OPT(Opt_MixedMode)
+ASSIGN_OPT(Opt_ModalMode)
 ASSIGN_OPT(Opt_ModalTransition)
 ASSIGN_OPT(Opt_ModelType)
 ASSIGN_OPT(Opt_ModifierKey)
@@ -3651,14 +3685,17 @@ ASSIGN_OPT(Opt_PlaybackSpeed)
 ASSIGN_OPT(Opt_PlayMode)
 ASSIGN_OPT(Opt_pointer_PointerStyle)
 ASSIGN_OPT(Opt_PopupStateChangeParam)
+ASSIGN_OPT(Opt_PositionF64Inner)
 ASSIGN_OPT(Opt_PositionWithAffinity)
 ASSIGN_OPT(Opt_PreDragStatus)
 ASSIGN_OPT(Opt_PreparedInfo)
+ASSIGN_OPT(Opt_PreviewScaleMode)
 ASSIGN_OPT(Opt_ProgressConfiguration)
 ASSIGN_OPT(Opt_ProgressMask)
 ASSIGN_OPT(Opt_ProgressStatus)
 ASSIGN_OPT(Opt_ProgressStyle)
 ASSIGN_OPT(Opt_ProgressType)
+ASSIGN_OPT(Opt_promptAction_CommonState)
 ASSIGN_OPT(Opt_ProtectedResourceType)
 ASSIGN_OPT(Opt_PulseSymbolEffect)
 ASSIGN_OPT(Opt_RadioIndicatorType)
@@ -3670,6 +3707,7 @@ ASSIGN_OPT(Opt_RenderExitReason)
 ASSIGN_OPT(Opt_RenderFit)
 ASSIGN_OPT(Opt_RenderMode)
 ASSIGN_OPT(Opt_RenderProcessNotRespondingReason)
+ASSIGN_OPT(Opt_RenderStrategy)
 ASSIGN_OPT(Opt_RepeatMode)
 ASSIGN_OPT(Opt_resourceManager_ResourceManager)
 ASSIGN_OPT(Opt_ResponseRegionSupportedTool)
@@ -3723,6 +3761,7 @@ ASSIGN_OPT(Opt_SheetType)
 ASSIGN_OPT(Opt_SideBarContainerType)
 ASSIGN_OPT(Opt_SideBarPosition)
 ASSIGN_OPT(Opt_Size)
+ASSIGN_OPT(Opt_SizeF64Inner)
 ASSIGN_OPT(Opt_SizeResult)
 ASSIGN_OPT(Opt_SlideEffect)
 ASSIGN_OPT(Opt_SliderBlockType)
@@ -3810,6 +3849,7 @@ ASSIGN_OPT(Opt_TransitionEffect)
 ASSIGN_OPT(Opt_TransitionHierarchyStrategy)
 ASSIGN_OPT(Opt_TransitionType)
 ASSIGN_OPT(Opt_TranslateResult)
+ASSIGN_OPT(Opt_Tuple_Double_Double)
 ASSIGN_OPT(Opt_Tuple_F64_F64)
 ASSIGN_OPT(Opt_Tuple_I32_I32)
 ASSIGN_OPT(Opt_Tuple_I32_I32_I32_I32)
@@ -3860,7 +3900,6 @@ ASSIGN_OPT(Opt_Union_String_Number)
 ASSIGN_OPT(Opt_Union_SwiperAnimationMode_Boolean)
 ASSIGN_OPT(Opt_Union_TextInputStyle_TextContentStyle)
 ASSIGN_OPT(Opt_UrlStyle)
-ASSIGN_OPT(Opt_UserDataSpan)
 ASSIGN_OPT(Opt_Vec4)
 ASSIGN_OPT(Opt_VerticalAlign)
 ASSIGN_OPT(Opt_VideoController)
@@ -4404,6 +4443,7 @@ ASSIGN_OPT(Opt_Environment)
 ASSIGN_OPT(Opt_ErrorEvent)
 ASSIGN_OPT(Opt_ErrorInformation)
 ASSIGN_OPT(Opt_Event)
+ASSIGN_OPT(Opt_EventLocationInfo)
 ASSIGN_OPT(Opt_ExpectedFrameRateRange)
 ASSIGN_OPT(Opt_FingerInfo)
 ASSIGN_OPT(Opt_FirstMeaningfulPaint)
@@ -4528,6 +4568,7 @@ ASSIGN_OPT(Opt_PluginErrorData)
 ASSIGN_OPT(Opt_PolygonOptions)
 ASSIGN_OPT(Opt_PolylineOptions)
 ASSIGN_OPT(Opt_PopInfo)
+ASSIGN_OPT(Opt_PopupBorderLinearGradient)
 ASSIGN_OPT(Opt_PopupButton)
 ASSIGN_OPT(Opt_PosterOptions)
 ASSIGN_OPT(Opt_PostMessageOptions)
@@ -4691,6 +4732,7 @@ ASSIGN_OPT(Opt_Union_String_Resource)
 ASSIGN_OPT(Opt_Union_String_Resource_ComponentContent)
 ASSIGN_OPT(Opt_Union_String_Resource_LinearGradientOptions)
 ASSIGN_OPT(Opt_Union_String_Resource_PixelMap)
+ASSIGN_OPT(Opt_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner)
 ASSIGN_OPT(Opt_VerticalAlignParam)
 ASSIGN_OPT(Opt_ViewportRect)
 ASSIGN_OPT(Opt_VisibleAreaEventOptions)
@@ -4766,6 +4808,7 @@ ASSIGN_OPT(Opt_MenuElement)
 ASSIGN_OPT(Opt_MenuItemConfiguration)
 ASSIGN_OPT(Opt_MenuItemGroupOptions)
 ASSIGN_OPT(Opt_MenuItemOptions)
+ASSIGN_OPT(Opt_MenuMaskType)
 ASSIGN_OPT(Opt_NativeXComponentParameters)
 ASSIGN_OPT(Opt_NavDestinationCommonTitle)
 ASSIGN_OPT(Opt_NavDestinationContext)
@@ -4831,6 +4874,7 @@ ASSIGN_OPT(Opt_Tuple_Length_Length)
 ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_F64)
 ASSIGN_OPT(Opt_UnderlineColor)
 ASSIGN_OPT(Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions)
+ASSIGN_OPT(Opt_Union_Boolean_MenuMaskType)
 ASSIGN_OPT(Opt_Union_Boolean_PopupMaskType)
 ASSIGN_OPT(Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext)
 ASSIGN_OPT(Opt_Union_Dimension_Array_Dimension)

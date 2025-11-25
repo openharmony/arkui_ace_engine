@@ -1685,4 +1685,20 @@ void WebClientImpl::OnClippedSelectionBoundsChanged(int x, int y, int width, int
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnClippedSelectionBoundsChanged(x, y, width, height);
 }
+
+void WebClientImpl::OnCameraCaptureStateChanged(int originalState, int newState)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnCameraCaptureStateChanged(originalState, newState);
+}
+
+void WebClientImpl::OnMicrophoneCaptureStateChanged(int originalState, int newState)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnMicrophoneCaptureStateChanged(originalState, newState);
+}
 } // namespace OHOS::Ace

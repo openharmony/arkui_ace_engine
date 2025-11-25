@@ -1347,6 +1347,28 @@ void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
 }
 
 template<>
+void AssignCast(std::optional<ModalMode>& dst, const Ark_ModalMode& src)
+{
+    switch (src) {
+        case ARK_MODAL_MODE_AUTO: dst = ModalMode::AUTO; break;
+        case ARK_MODAL_MODE_NONE: dst = ModalMode::NONE; break;
+        case ARK_MODAL_MODE_TARGET_WINDOW: dst = ModalMode::TARGET_WINDOW; break;
+        default:
+            LOGE("Unexpected enum value in Ark_ModalMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AvailableLayoutAreaMode>& dst, const Ark_AvailableLayoutArea& src)
+{
+    switch (src) {
+        case ARK_AVAILABLE_LAYOUT_AREA_SAFE_AREA: dst = AvailableLayoutAreaMode::SAFE_AREA; break;
+        default:
+            LOGE("Unexpected enum value in Ark_AvailableLayoutArea: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<MenuPreviewMode>& dst, const Ark_MenuPreviewMode& src)
 {
     switch (src) {
@@ -1570,6 +1592,27 @@ void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
         case ARK_MESSAGE_LEVEL_LOG: dst = MessageLevel::LOG; break;
         case ARK_MESSAGE_LEVEL_WARN: dst = MessageLevel::WARN; break;
         default: LOGE("Unexpected enum value in Ark_MessageLevel: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessageSource& src)
+{
+    switch (src) {
+        case ARK_CONSOLE_MESSAGE_SOURCE_XML: dst = ConsoleMessageSource::XML; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT: dst = ConsoleMessageSource::JAVASCRIPT; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_NETWORK: dst = ConsoleMessageSource::NETWORK; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_CONSOLE_API: dst = ConsoleMessageSource::CONSOLE_API; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_STORAGE: dst = ConsoleMessageSource::STORAGE; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_RENDERING: dst = ConsoleMessageSource::RENDERING; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_SECURITY: dst = ConsoleMessageSource::SECURITY; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_OTHER: dst = ConsoleMessageSource::OTHER; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_DEPRECATION: dst = ConsoleMessageSource::DEPRECATION; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_WORKER: dst = ConsoleMessageSource::WORKER; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION: dst = ConsoleMessageSource::VIOLATION; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION: dst = ConsoleMessageSource::INTERVENTION; break;
+        case ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION: dst = ConsoleMessageSource::RECOMMENDATION; break;
+        default: LOGE("Unexpected enum value in Ark_ConsoleMessageSource: %{public}d", src);
     }
 }
 
@@ -2306,6 +2349,20 @@ void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
         case ARK_SOURCE_TOOL_JOYSTICK: dst = SourceTool::JOYSTICK; break;
         default: {
             LOGE("Unexpected enum value in Ark_SourceTool: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<PreviewScaleMode>& dst, const Ark_PreviewScaleMode& src)
+{
+    switch (src) {
+        case ARK_PREVIEW_SCALE_MODE_AUTO: dst = PreviewScaleMode::AUTO; break;
+        case ARK_PREVIEW_SCALE_MODE_CONSTANT: dst = PreviewScaleMode::CONSTANT; break;
+        case ARK_PREVIEW_SCALE_MODE_MAINTAIN: dst = PreviewScaleMode::MAINTAIN; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_PreviewScaleMode: %{public}d", src);
             dst = std::nullopt;
         }
     }

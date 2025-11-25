@@ -314,6 +314,14 @@ export interface GestureInfo {
     type: GestureControl.GestureType;
     isSystemGesture: boolean;
 }
+export interface EventLocationInfo {
+    x: double;
+    y: double;
+    windowX: double;
+    windowY: double;
+    displayX: double;
+    displayY: double;
+}
 export interface FingerInfo {
     id: int32;
     globalX: double;
@@ -335,6 +343,7 @@ export interface TapGestureParameters extends BaseHandlerOptions {
 export interface TapGestureHandlerOptions extends BaseHandlerOptions {
     count?: int32;
     fingers?: int32;
+    distanceThreshold?: double;
 }
 export interface LongPressGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: int32;
@@ -504,6 +513,34 @@ export class TapRecognizer_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return TapRecognizerInternal.fromPtr(ptr)
+    }
+}
+export class EventLocationInfo_serializer {
+    public static write(buffer: SerializerBase, value: EventLocationInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+        const valueHolderForWindowX  = value.windowX
+        valueSerializer.writeFloat64(valueHolderForWindowX)
+        const valueHolderForWindowY  = value.windowY
+        valueSerializer.writeFloat64(valueHolderForWindowY)
+        const valueHolderForDisplayX  = value.displayX
+        valueSerializer.writeFloat64(valueHolderForDisplayX)
+        const valueHolderForDisplayY  = value.displayY
+        valueSerializer.writeFloat64(valueHolderForDisplayY)
+    }
+    public static read(buffer: DeserializerBase): EventLocationInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        const windowXTmpResult : double = valueDeserializer.readFloat64()
+        const windowYTmpResult : double = valueDeserializer.readFloat64()
+        const displayXTmpResult : double = valueDeserializer.readFloat64()
+        const displayYTmpResult : double = valueDeserializer.readFloat64()
+        let value : EventLocationInfo = ({x: xTmpResult, y: yTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult} as EventLocationInfo)
+        return value
     }
 }
 export class FingerInfo_serializer {
@@ -758,6 +795,7 @@ export class BaseGestureEvent_serializer {
 }
 export interface BaseGestureEvent extends BaseEvent {
     fingerList: Array<FingerInfo>
+    fingerInfos?: Array<FingerInfo> | undefined
 }
 export class BaseGestureEventInternal extends BaseEventInternal implements MaterializedBase,BaseGestureEvent {
     get fingerList(): Array<FingerInfo> {
@@ -765,6 +803,13 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
     }
     set fingerList(fingerList: Array<FingerInfo>) {
         this.setFingerList(fingerList)
+    }
+    get fingerInfos(): Array<FingerInfo> | undefined {
+        return this.getFingerInfos()
+    }
+    set fingerInfos(fingerInfos: Array<FingerInfo> | undefined) {
+        const fingerInfos_NonNull  = (fingerInfos as Array<FingerInfo>)
+        this.setFingerInfos(fingerInfos_NonNull)
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -790,6 +835,12 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         this.setFingerList_serialize(fingerList_casted)
         return
     }
+    private getFingerInfos(): Array<FingerInfo> | undefined {
+        return this.getFingerInfos_serialize()
+    }
+    private setFingerInfos(fingerInfos: Array<FingerInfo> | undefined): void {
+        return
+    }
     private getFingerList_serialize(): Array<FingerInfo> {
         const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerList(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -811,10 +862,27 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         ArkUIGeneratedNativeModule._BaseGestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private getFingerInfos_serialize(): Array<FingerInfo> | undefined {
+        const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerInfos(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<FingerInfo> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<FingerInfo> = new Array<FingerInfo>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
+        }
+        const returnResult : Array<FingerInfo> | undefined = buffer
+        return returnResult
+    }
 }
 export interface GestureEvent extends BaseEvent {
     repeat: boolean
     fingerList: Array<FingerInfo>
+    fingerInfos?: Array<FingerInfo> | undefined
     offsetX: double
     offsetY: double
     angle: double
@@ -825,6 +893,7 @@ export interface GestureEvent extends BaseEvent {
     velocityX: double
     velocityY: double
     velocity: double
+    tapLocation?: EventLocationInfo | undefined
 }
 export class GestureEventInternal extends BaseEventInternal implements MaterializedBase,GestureEvent {
     get repeat(): boolean {
@@ -838,6 +907,13 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     }
     set fingerList(fingerList: Array<FingerInfo>) {
         this.setFingerList(fingerList)
+    }
+    get fingerInfos(): Array<FingerInfo> | undefined {
+        return this.getFingerInfos()
+    }
+    set fingerInfos(fingerInfos: Array<FingerInfo> | undefined) {
+        const fingerInfos_NonNull  = (fingerInfos as Array<FingerInfo>)
+        this.setFingerInfos(fingerInfos_NonNull)
     }
     get offsetX(): double {
         return this.getOffsetX()
@@ -899,6 +975,13 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     set velocity(velocity: double) {
         this.setVelocity(velocity)
     }
+    get tapLocation(): EventLocationInfo | undefined {
+        return this.getTapLocation()
+    }
+    set tapLocation(tapLocation: EventLocationInfo | undefined) {
+        const tapLocation_NonNull  = (tapLocation as EventLocationInfo)
+        this.setTapLocation(tapLocation_NonNull)
+    }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
     }
@@ -929,6 +1012,12 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     private setFingerList(fingerList: Array<FingerInfo>): void {
         const fingerList_casted = fingerList as (Array<FingerInfo>)
         this.setFingerList_serialize(fingerList_casted)
+        return
+    }
+    private getFingerInfos(): Array<FingerInfo> | undefined {
+        return this.getFingerInfos_serialize()
+    }
+    private setFingerInfos(fingerInfos: Array<FingerInfo> | undefined): void {
         return
     }
     private getOffsetX(): double {
@@ -1011,6 +1100,12 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         this.setVelocity_serialize(velocity_casted)
         return
     }
+    private getTapLocation(): EventLocationInfo | undefined {
+        return this.getTapLocation_serialize()
+    }
+    private setTapLocation(tapLocation: EventLocationInfo | undefined): void {
+        return
+    }
     private getRepeat_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getRepeat(this.peer!.ptr)
         return retval
@@ -1038,6 +1133,22 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         }
         ArkUIGeneratedNativeModule._GestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private getFingerInfos_serialize(): Array<FingerInfo> | undefined {
+        const retval  = ArkUIGeneratedNativeModule._GestureEvent_getFingerInfos(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<FingerInfo> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<FingerInfo> = new Array<FingerInfo>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
+        }
+        const returnResult : Array<FingerInfo> | undefined = buffer
+        return returnResult
     }
     private getOffsetX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getOffsetX(this.peer!.ptr)
@@ -1108,6 +1219,17 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     }
     private setVelocity_serialize(velocity: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setVelocity(this.peer!.ptr, velocity)
+    }
+    private getTapLocation_serialize(): EventLocationInfo | undefined {
+        const retval  = ArkUIGeneratedNativeModule._GestureEvent_getTapLocation(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : EventLocationInfo | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = EventLocationInfo_serializer.read(retvalDeserializer)
+        }
+        const returnResult : EventLocationInfo | undefined = buffer
+        return returnResult
     }
 }
 export class LongPressRecognizerInternal {
@@ -1686,8 +1808,16 @@ export class SwipeGestureEventInternal extends BaseGestureEventInternal implemen
     }
 }
 export interface TapGestureEvent {
+    tapLocation?: EventLocationInfo | undefined
 }
 export class TapGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,TapGestureEvent {
+    get tapLocation(): EventLocationInfo | undefined {
+        return this.getTapLocation()
+    }
+    set tapLocation(tapLocation: EventLocationInfo | undefined) {
+        const tapLocation_NonNull  = (tapLocation as EventLocationInfo)
+        this.setTapLocation(tapLocation_NonNull)
+    }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
     }
@@ -1703,6 +1833,23 @@ export class TapGestureEventInternal extends BaseGestureEventInternal implements
     }
     public static fromPtr(ptr: KPointer): TapGestureEventInternal {
         return new TapGestureEventInternal(ptr)
+    }
+    private getTapLocation(): EventLocationInfo | undefined {
+        return this.getTapLocation_serialize()
+    }
+    private setTapLocation(tapLocation: EventLocationInfo | undefined): void {
+        return
+    }
+    private getTapLocation_serialize(): EventLocationInfo | undefined {
+        const retval  = ArkUIGeneratedNativeModule._TapGestureEvent_getTapLocation(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : EventLocationInfo | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = EventLocationInfo_serializer.read(retvalDeserializer)
+        }
+        const returnResult : EventLocationInfo | undefined = buffer
+        return returnResult
     }
 }
 export namespace GestureControl {

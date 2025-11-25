@@ -4752,9 +4752,16 @@ void AceContainer::GetExtensionConfig(AAFwk::WantParams& want)
 
 void AceContainer::SetIsFocusActive(bool isFocusActive)
 {
-    auto pipelineContext = DynamicCast<NG::PipelineContext>(GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetIsFocusActive(isFocusActive);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([weak = WeakClaim(this), isFocusActive]() {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetIsFocusActive(isFocusActive);
+    },
+    TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
 }
 
 bool AceContainer::CloseWindow(int32_t instanceId)

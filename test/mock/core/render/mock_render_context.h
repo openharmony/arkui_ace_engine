@@ -48,6 +48,11 @@ public:
     MOCK_METHOD0(UpdateCustomBackground, void());
     MOCK_METHOD1(SetSurfaceBufferOpaque, void(bool));
 
+    const RefPtr<NG::ChainedTransitionEffect> GetChainedTransitionEffect()
+    {
+        return chainedTransitionEffect_;
+    }
+
     void SetVisible(bool visible) override
     {
         isVisible_ = visible;
@@ -92,6 +97,11 @@ public:
         return paintRect_;
     }
 
+    void SetTransitionUserCallback(TransitionFinishCallback&& callback) override
+    {
+        transitionUserCallback_ = std::move(callback);
+    }
+
 #ifdef ENHANCED_ANIMATION
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
@@ -115,7 +125,16 @@ public:
         groupProperty->propEffectOption = effectOption;
     }
 
-    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    void OnUseEffectUpdate(bool useEffect) override
+    {
+        propUseEffect_ = useEffect;
+    }
+
+    void OnUseEffectTypeUpdate(EffectType effectType) override
+    {
+        propUseEffectType_ = effectType;
+    }
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propMotionBlur = motionBlurOption;
@@ -166,6 +185,8 @@ public:
     std::function<void()> transitionOutCallback_;
     Color actualForegroundColor_;
 
+    RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
+    TransitionFinishCallback transitionUserCallback_;
 private:
     size_t animationsCount_ = 0;
 };

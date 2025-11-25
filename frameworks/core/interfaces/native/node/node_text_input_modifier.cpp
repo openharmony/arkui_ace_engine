@@ -1896,35 +1896,6 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     TextFieldModelNG::ResetSelectDetectEnable(frameNode);
 }
 
-void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::vector<TextDataDetectType> typelists;
-    for (ArkUI_Int32 i = 0; i < size; ++i) {
-        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
-    }
-    TextFieldModelNG::SetSelectDetectConfig(frameNode, typelists);
-}
-
-ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    std::vector<TextDataDetectType> types = TextFieldModelNG::GetSelectDetectConfig(frameNode);
-    for (uint32_t i = 0; i < types.size(); i++) {
-        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
-    }
-    return types.size();
-}
-
-void ResetSelectDetectorConfig(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::ResetSelectDetectConfig(frameNode);
-}
-
 ArkUI_CharPtr GetTextInputFontFeature(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2702,6 +2673,13 @@ void ResetTextInputOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+
+void TextInputDeleteBackward(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::DeleteBackward(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2712,9 +2690,6 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextInputCaretColor = SetTextInputCaretColor,
         .resetTextInputCaretColor = ResetTextInputCaretColor,
         .setTextInputType = SetTextInputType,
@@ -2940,7 +2915,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
         .getTextInputShowCounterOptions = GetTextInputShowCounterOptions,
         .setTextInputOnWillAttachIME = SetTextInputOnWillAttachIME,
-        .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME
+        .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME,
+        .textInputDeleteBackward = TextInputDeleteBackward,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2953,9 +2929,6 @@ const CJUITextInputModifier* GetCJUITextInputModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextInputCaretColor = SetTextInputCaretColor,
         .resetTextInputCaretColor = ResetTextInputCaretColor,
         .setTextInputType = SetTextInputType,

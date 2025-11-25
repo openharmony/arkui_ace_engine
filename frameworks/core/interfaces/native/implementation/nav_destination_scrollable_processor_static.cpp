@@ -77,7 +77,7 @@ std::vector<WeakPtr<ScrollerPeer>> ParseScrollerArray(const Opt_Array_Scroller* 
 
     auto scrollerArray = info->value.array;
     auto arraySize = info->value.length;
-    for (size_t idx = 0; idx < arraySize; idx++) {
+    for (int32_t idx = 0; idx < arraySize; idx++) {
         auto item = scrollerArray[idx];
         scrollers.emplace_back(AceType::WeakClaim(item));
     }
@@ -98,7 +98,7 @@ std::vector<std::pair<WeakPtr<ScrollerPeer>, WeakPtr<ScrollerPeer>>> ParseNested
 
     auto nestedScrollerArray = info->value.array;
     auto arraySize = info->value.length;
-    for (size_t idx = 0; idx < arraySize; idx++) {
+    for (int32_t idx = 0; idx < arraySize; idx++) {
         auto parent = nestedScrollerArray[idx].parent;
         auto child = nestedScrollerArray[idx].child;
         nestedScrollers.emplace_back(AceType::WeakClaim(child), AceType::WeakClaim(parent));

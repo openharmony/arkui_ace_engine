@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod } from "./component/common"
 import { AnimationStatus, FillMode } from "./component/enums"
 export class ImageAnimatorModifier extends CommonMethodModifier implements ImageAnimatorAttribute,AttributeModifier<ImageAnimatorAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -62,6 +64,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFinish_0_0value?: (() => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImageAnimatorPeer;
         if (this._images_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -301,6 +304,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     }
     mergeModifier(modifier: ImageAnimatorModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._images_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._images_0_flag) {

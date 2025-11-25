@@ -3209,30 +3209,9 @@ bool TextFieldPattern::PrepareAIMenuOptions(
     auto detectorAdapter = GetSelectDetectorAdapter();
     int selectedAiEntityNum = 0;
     auto spanIter = detectorAdapter->aiSpanMap_.begin();
-    std::unordered_map<TextDataDetectType, bool> typeMap;
-    // Default. All Detect Types
-    for (auto& mapItr : TEXT_DETECT_MAP) {
-        typeMap[mapItr.first] = true;
-    }
-    // First. Use DataDetectorConfig
-    if (selectDetectEnabled_) {
-        if (selectDetectEnabledIsUserSet_) {
-            for (auto& mapItr : TEXT_DETECT_MAP) {
-                typeMap[mapItr.first] = true;
-            }
-        }
-        if (selectDetectConfigIsUserSet_ && !selectDataDetectorTypes_.empty()) {
-            typeMap.clear();
-            for (auto typeItr : selectDataDetectorTypes_) {
-                typeMap[typeItr] = true;
-            }
-        }
-    } else {
-        typeMap.clear();
-    }
     aiMenuOptions.clear();
     for (; spanIter != detectorAdapter->aiSpanMap_.end(); spanIter++) {
-        if (typeMap.find(spanIter->second.type) == typeMap.end()) {
+        if (TEXT_DETECT_MAP.find(spanIter->second.type) == TEXT_DETECT_MAP.end()) {
             continue;
         }
         selectedAiEntityNum++;
@@ -4292,33 +4271,6 @@ void TextFieldPattern::ResetSelectDetectEnable()
 {
     selectDetectEnabledIsUserSet_ = false;
     selectDetectEnabled_ = true;
-}
-
-void TextFieldPattern::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
-{
-    if (types.empty()) {
-        types = TEXT_DETECT_ALL_TYPES_VECTOR;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(GetSelectDetectorAdapter());
-    selectDetectorAdapter_->frameNode_ = host;
-    selectDetectConfigIsUserSet_ = true;
-    if (types == selectDataDetectorTypes_) {
-        return;
-    }
-    selectDataDetectorTypes_ = types;
-}
-
-std::vector<TextDataDetectType> TextFieldPattern::GetSelectDetectConfig()
-{
-    return selectDataDetectorTypes_;
-}
-
-void TextFieldPattern::ResetSelectDetectConfig()
-{
-    selectDetectConfigIsUserSet_ = false;
-    selectDataDetectorTypes_.clear();
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)

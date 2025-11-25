@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -86,6 +87,11 @@ public:
     RefPtr<FrameNode> GetSheetMaskNode() const
     {
         return sheetMaskNode_;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<SheetWrapperAccessibilityProperty>();
     }
 
     void SetSheetPageNode(RefPtr<FrameNode> node)

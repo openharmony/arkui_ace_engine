@@ -173,7 +173,7 @@ struct ArkUINavigationInfo {
 };
 
 struct ArkUINavDestinationInfo {
-    ani_double uniqueId;
+    ani_int uniqueId;
     ani_int index;
     std::string name;
     std::string navDestinationId;
@@ -247,7 +247,7 @@ struct ArkUIDragPointerEvent {
 struct ArkUIDragControllerAsync {
     ani_env* env = nullptr;
     bool isArray = false;
-    const char* extraParams;
+    std::string extraParams;
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
     SharedPointerWrapper unifiedData;
@@ -654,7 +654,8 @@ struct ArkUIAniStyledStringModifier {
     void* (*getPixelMap)(ArkUIStyledString peer);
 };
 struct ArkUIAniVideoModifier {
-    void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
+    void (*setOnError)(ArkUINodeHandle node, std::function<void(const std::string&)>&& onError);
+    void (*parseVideoError)(const std::string& jsonStr, int32_t& code, std::string& message);
 };
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);

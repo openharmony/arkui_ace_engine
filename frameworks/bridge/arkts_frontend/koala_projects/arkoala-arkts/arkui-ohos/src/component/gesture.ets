@@ -33,6 +33,7 @@ export class TapGestureHandler extends GestureHandler {
         super();
         this.finger = options?.fingers;
         this.count = options?.count;
+        this.distanceThreshold = options?.distanceThreshold;
         this.isFingerCountLimited = options?.isFingerCountLimited;
     }
     onAction(event: (event: GestureEvent) => void): this {
@@ -906,7 +907,6 @@ export class ScrollableTargetInfoTransfer {
         if(input === null) {
             return new Object();
         }
-        let objectInternal : ScrollableTargetInfo = new ScrollableTargetInfo();
         let peer: KPointer = ArkUIAniModule._CreateScrollableTargetInfoAccessor()
         let esValue: ESValue = ESValue.wrap(input);
         let id = esValue.invokeMethod("getId");
@@ -922,8 +922,7 @@ export class ScrollableTargetInfoTransfer {
         if (pointer.isNumber()) {
             ArkUIAniModule._ScrollableTargetInfoAccessorWithPointer(peer, pointer.toNumber() as long)
         }
-        objectInternal.peer!.ptr = peer;
-        return objectInternal;
+        return ScrollableTargetInfoInternal.fromPtr(peer);
     }
     static transferDynamic(input: Object): Any { 
         if (input == null) {
@@ -949,15 +948,13 @@ export class EventTargetInfoTransfer {
         if(input === null) {
             return new Object();
         }
-        let objectInternal : EventTargetInfo = new EventTargetInfo();
         let esValue: ESValue = ESValue.wrap(input);
         let peer: KPointer = ArkUIAniModule._CreateEventTargetInfoAccessor()
         let id = esValue.invokeMethod("getId");
         if (id.isString()) {
             ArkUIAniModule._EventTargetInfoAccessorWithId(peer, id.toString())
         }
-        objectInternal.peer!.ptr = peer;
-        return objectInternal;
+        return EventTargetInfoInternal.fromPtr(peer);
     }
     static transferDynamic(input: Object): Any { 
         if (input == null) {

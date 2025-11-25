@@ -444,9 +444,7 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
         TextPickerModelStatic::SetHasSelectAttr(frameNode, textPickerOptions.hasSelected);
         TextPickerModelStatic::SetColumns(frameNode, textPickerOptions.options);
         TextPickerModelStatic::SetValues(frameNode, textPickerOptions.values);
-        if (textPickerOptions.isCascade || textPickerOptions.hasSelected) {
-            TextPickerModelStatic::SetSelecteds(frameNode, textPickerOptions.selecteds);
-        }
+        TextPickerModelStatic::SetSelecteds(frameNode, textPickerOptions.selecteds);
         TextPickerModelStatic::SetColumnWidths(frameNode, textPickerOptions.columnWidths);
     }
 }
@@ -655,9 +653,8 @@ void SetGradientHeightImpl(Ark_NativePointer node,
     auto heightDimension = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(heightDimension);
     if (heightDimension && heightDimension->ConvertToVp() > 1.0f) {
-        heightDimension.reset();
+        TextPickerModelStatic::SetGradientHeight(frameNode, heightDimension);
     }
-    TextPickerModelStatic::SetGradientHeight(frameNode, heightDimension);
 }
 void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)

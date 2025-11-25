@@ -120,7 +120,9 @@ public:
     }
     bool GetPropActionNames(Accessibility::PropValue& value) override
     {
-        return false;
+        value.valueType = Accessibility::ValueType::ARRAY;
+        value.valueArray.insert(mockValueArray_.begin(), mockValueArray_.end());
+        return true;
     }
     std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> GetChildren() override
     {
@@ -180,7 +182,7 @@ public:
     {
         return false;
     }
-
+    std::set<std::string> mockValueArray_;
     std::shared_ptr<FocusRulesCheckNode> mockNextNode_;
     bool mockChildTreeContainer = false;
 private:
@@ -344,7 +346,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindForwardScrollAncestor003, TestSize.
     AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
     auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
     // 1. parent can not GetPropActionName
-    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateAccessibilityProperty() = nullptr;
     auto result = focusStrategy.FindForwardScrollAncestor(condition, checkNode, targetNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
     EXPECT_EQ(targetNodes.size(), 0);
@@ -768,4 +770,32 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindPrevReadableNode001, TestSize.Level
     ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL);
 }
 
+/**
+ * @tc.name: CheckParentEarlyStopTest001
+ * @tc.desc: Test the method CheckParentEarlyStop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, CheckParentEarlyStopTest001, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::shared_ptr<MockFocusRulesCheckNode> parentNode1;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    AceFocusMoveDetailCondition condition;
+    // 1. parentNode nullptr, returns success
+    auto result = focusStrategy.CheckParentEarlyStop(parentNode1, targetNode);
+    ASSERT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    // 2. parentNode not nullptr, returns success
+    std::shared_ptr<MockFocusRulesCheckNode> parentNode2 = std::make_shared<MockFocusRulesCheckNode>(0);
+    result = focusStrategy.CheckParentEarlyStop(parentNode2, targetNode);
+    ASSERT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    // 3. parentNode IsChildTreeContainer, returns FIND_CHILDTREE
+    parentNode2->mockChildTreeContainer = true;
+    result = focusStrategy.CheckParentEarlyStop(parentNode2, targetNode);
+    ASSERT_EQ(result, AceFocusMoveResult::FIND_CHILDTREE);
+    // 4. parentNode IsSupportScrollBackward, returns FIND_FAIL_IN_SCROLL
+    parentNode2->mockChildTreeContainer = false;
+    parentNode2->mockValueArray_.insert("scrollBackward");
+    result = focusStrategy.CheckParentEarlyStop(parentNode2, targetNode);
+    ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL_IN_SCROLL);
+}
 } // namespace OHOS::Ace::NG

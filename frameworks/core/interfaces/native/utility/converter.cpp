@@ -844,9 +844,9 @@ std::u16string Convert(const Ark_String& src)
 template<>
 std::string Convert(const Ark_String& src)
 {
-    if (src.chars == nullptr) return "";
+    if (src.chars == nullptr || src.length == 0) return "";
     const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
-    if (data[0] == UTF16_BOM) {
+    if (src.length >= sizeof(data[0]) && data[0] == UTF16_BOM) {
         // Handle utf16 strings
         ++data;
         return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
@@ -967,14 +967,14 @@ template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return StringUtils::StringToDimension(str, true);
+    return StringUtils::StringToDimensionWithUnit(str, ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
 CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return StringUtils::StringToCalcDimension(str, true);
+    return StringUtils::StringToCalcDimension(str, false, ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
@@ -1017,7 +1017,7 @@ std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src
 template<>
 Dimension Convert(const Ark_Number& src)
 {
-    return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
+    return Dimension(Converter::Convert<float>(src), ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
@@ -1397,21 +1397,14 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
         gradient.SetRepeat(repeatingOpt.value());
     }
 
-    auto gradientColors = Converter::Convert<std::vector<std::pair<Color, Dimension>>>(value.colors);
-
+    auto gradientColors = Converter::Convert<std::vector<GradientColor>>(value.colors);
+    
     if (gradientColors.size() == 1) {
-        auto item = gradientColors.front();
-        GradientColor gradientColor;
-        gradientColor.SetColor(item.first);
-        gradientColor.SetDimension(item.second);
-        gradient.AddColor(gradientColor);
-        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColors.front());
+        gradient.AddColor(gradientColors.front());
     } else {
         for (auto item : gradientColors) {
-            GradientColor gradientColor;
-            gradientColor.SetColor(item.first);
-            gradientColor.SetDimension(item.second);
-            gradient.AddColor(gradientColor);
+            gradient.AddColor(item);
         }
     }
     return gradient;
@@ -2414,39 +2407,34 @@ template<>
 ResponseRegion Convert(const Ark_ResponseRegion &src)
 {
     ResponseRegion dst;
+    dst.SetWidth(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
+    dst.SetHeight(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
+    dst.SetX(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
+    dst.SetY(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
+    dst.SetTool(ResponseRegionSupportedTool::ALL);
     if (auto dim = OptConvert<CalcDimension>(src.width); dim) {
         if (dim.has_value()) {
             dst.SetWidth(*dim);
-        } else {
-            dst.SetWidth(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
         }
     }
     if (auto dim = OptConvert<CalcDimension>(src.height); dim) {
         if (dim.has_value()) {
             dst.SetHeight(*dim);
-        } else {
-            dst.SetHeight(CalcDimension(NUM_DOUBLE_1, DimensionUnit::PERCENT));
         }
     }
     if (auto dim = OptConvert<CalcDimension>(src.x); dim) {
         if (dim.has_value()) {
             dst.SetX(*dim);
-        } else {
-            dst.SetX(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
         }
     }
     if (auto dim = OptConvert<CalcDimension>(src.y); dim) {
         if (dim.has_value()) {
             dst.SetY(*dim);
-        } else {
-            dst.SetY(CalcDimension(NUM_DOUBLE_0, DimensionUnit::VP));
         }
     }
     if (auto dim = OptConvert<ResponseRegionSupportedTool>(src.tool); dim) {
         if (dim.has_value()) {
             dst.SetTool(*dim);
-        } else {
-            dst.SetTool(ResponseRegionSupportedTool::FINGER);
         }
     }
     return dst;
@@ -2488,6 +2476,19 @@ FingerInfo Convert(const Ark_FingerInfo& src)
     dst.localLocation_.SetY(Converter::Convert<float>(src.localY));
     dst.screenLocation_.SetX(Converter::Convert<float>(src.displayX));
     dst.screenLocation_.SetY(Converter::Convert<float>(src.displayY));
+    return dst;
+}
+
+template<>
+EventLocationInfo Convert(const Ark_EventLocationInfo& src)
+{
+    EventLocationInfo dst;
+    dst.localLocation_.SetX(Converter::Convert<double>(src.x));
+    dst.localLocation_.SetY(Converter::Convert<double>(src.y));
+    dst.windowLocation_.SetX(Converter::Convert<double>(src.windowX));
+    dst.windowLocation_.SetY(Converter::Convert<double>(src.windowY));
+    dst.globalDisplayLocation_.SetX(Converter::Convert<double>(src.displayX));
+    dst.globalDisplayLocation_.SetY(Converter::Convert<double>(src.displayY));
     return dst;
 }
 
@@ -2911,6 +2912,7 @@ PickerTextStyle Convert(const Ark_TextPickerTextStyle& src)
         style.fontWeight = font->fontWeight;
         style.fontStyle = font->fontStyle;
     }
+    DefaultDimensionUnit defaultUnit(DimensionUnit::FP);
     style.minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
     style.maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
     style.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);

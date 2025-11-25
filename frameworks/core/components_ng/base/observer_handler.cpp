@@ -73,7 +73,8 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
         return;
     }
-    pathInfo->OpenScope();
+    std::shared_ptr<NavPathInfoScope> scope = nullptr;
+    scope = pathInfo->Scope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
         GetNavigationUniqueId(pattern));
@@ -85,7 +86,6 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         }
     }
     navigationHandleFunc_(info);
-    pathInfo->CloseScope();
 }
 
 void UIObserverHandler::NotifyNavigationStateChangeForAni(
@@ -337,6 +337,11 @@ void UIObserverHandler::SetHandleTabContentUpdateFuncForAni(TabContentHandleFunc
     tabContentHandleFuncForAni_ = func;
 }
 
+UIObserverHandler::NavDestinationSwitchHandleFuncForAni UIObserverHandler::GetHandleNavDestinationSwitchFuncForAni()
+{
+    return navDestinationSwitchHandleFuncForAni_;
+}
+
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(const RefPtr<UINode>& current)
 {
     auto nav = AceType::DynamicCast<FrameNode>(current);
@@ -494,6 +499,7 @@ void UIObserverHandler::HandleLayoutDoneCallBack()
 void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
     std::optional<NavDestinationInfo>&& to, NavigationOperation operation)
 {
+    NotifyNavDestinationSwitchForAni(from, to, operation);
     CHECK_NULL_VOID(navDestinationSwitchHandleFunc_);
     auto container = Container::Current();
     if (!container) {
@@ -508,6 +514,20 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
     NavDestinationSwitchInfo switchInfo(GetUIContextValue(), std::forward<std::optional<NavDestinationInfo>>(from),
         std::forward<std::optional<NavDestinationInfo>>(to), operation);
     navDestinationSwitchHandleFunc_(info, switchInfo);
+}
+
+void UIObserverHandler::NotifyNavDestinationSwitchForAni(
+    std::optional<NavDestinationInfo>& from, std::optional<NavDestinationInfo>& to, NavigationOperation operation)
+{
+    CHECK_NULL_VOID(navDestinationSwitchHandleFuncForAni_);
+    auto container = Container::CurrentSafelyWithCheck();
+    if (!container) {
+        LOGW("notify destination event failed, current UI instance invalid");
+        return;
+    }
+    NavDestinationSwitchInfo switchInfo(
+        GetUIContextValue(), std::optional<NavDestinationInfo>(from), std::optional<NavDestinationInfo>(to), operation);
+    navDestinationSwitchHandleFuncForAni_(switchInfo);
 }
 
 void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
@@ -593,6 +613,11 @@ void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
 void UIObserverHandler::SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func)
 {
     navDestinationSwitchHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleNavDestinationSwitchFuncForAni(NavDestinationSwitchHandleFuncForAni func)
+{
+    navDestinationSwitchHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)

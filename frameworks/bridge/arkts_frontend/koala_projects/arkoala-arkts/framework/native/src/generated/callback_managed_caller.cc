@@ -3899,7 +3899,7 @@ void callManagedCallback_StyledStringMarshallingValue_Void(Ark_Int32 resourceId,
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_Callback_StyledStringMarshallingValue_Void);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, value);
+    argsSerializer.writeObject(value);
     enqueueCallback(10, &callbackBuffer);
 }
 void callManagedCallback_StyledStringMarshallingValue_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_UserDataSpan value)
@@ -3909,7 +3909,7 @@ void callManagedCallback_StyledStringMarshallingValue_VoidSync(Ark_VMContext vmC
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_StyledStringMarshallingValue_Void);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, value);
+    argsSerializer.writeObject(value);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedCallback_SwipeActionState_Void(Ark_Int32 resourceId, Ark_SwipeActionState state)
@@ -4645,6 +4645,27 @@ void callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_VoidSync(Ark_
     } else {
         argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
     }
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
+void callManagedCallback_VisibilityChangeReason_Void(Ark_Int32 resourceId, Ark_VisibilityChangeReason value0)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_VisibilityChangeReason_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(static_cast<Ark_VisibilityChangeReason>(value0));
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_VisibilityChangeReason_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_VisibilityChangeReason value0)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_VisibilityChangeReason_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(static_cast<Ark_VisibilityChangeReason>(value0));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedCallback_Void(Ark_Int32 resourceId)
@@ -6399,7 +6420,7 @@ void callManagedOnSubmitCallbackSync(Ark_VMContext vmContext, Ark_Int32 resource
     SubmitEvent_serializer::write(argsSerializer, event);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnSwiperAnimationEndCallback(Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationEndCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6407,22 +6428,22 @@ void callManagedOnSwiperAnimationEndCallback(Ark_Int32 resourceId, Ark_Number in
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnSwiperAnimationEndCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnSwiperAnimationEndCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationEndCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnSwiperAnimationEndCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnSwiperAnimationStartCallback(Ark_Int32 resourceId, Ark_Number index, Ark_Number targetIndex, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationStartCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_SwiperAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6430,24 +6451,24 @@ void callManagedOnSwiperAnimationStartCallback(Ark_Int32 resourceId, Ark_Number 
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnSwiperAnimationStartCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    argsSerializer.writeNumber(targetIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnSwiperAnimationStartCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_Number targetIndex, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperAnimationStartCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_SwiperAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnSwiperAnimationStartCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    argsSerializer.writeNumber(targetIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnSwiperGestureSwipeCallback(Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperGestureSwipeCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6455,18 +6476,18 @@ void callManagedOnSwiperGestureSwipeCallback(Ark_Int32 resourceId, Ark_Number in
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnSwiperGestureSwipeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnSwiperGestureSwipeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_SwiperAnimationEvent extraInfo)
+void callManagedOnSwiperGestureSwipeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnSwiperGestureSwipeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
@@ -7406,7 +7427,7 @@ void callManagedStyledStringMarshallCallback(Ark_Int32 resourceId, Ark_UserDataS
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_StyledStringMarshallCallback);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, marshallableVal);
+    argsSerializer.writeObject(marshallableVal);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
@@ -7419,7 +7440,7 @@ void callManagedStyledStringMarshallCallbackSync(Ark_VMContext vmContext, Ark_In
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_StyledStringMarshallCallback);
     argsSerializer.writeInt32(resourceId);
-    UserDataSpan_serializer::write(argsSerializer, marshallableVal);
+    argsSerializer.writeObject(marshallableVal);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
@@ -8225,6 +8246,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_UIExtensionProxy_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_UIExtensionProxy_Void);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_CustomBuilder_DragItemInfo_Void);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void);
+        case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_Void);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Void);
         case Kind_Callback_WebKeyboardOptions_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebKeyboardOptions_Void);
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilder);
@@ -8547,6 +8569,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_UIExtensionProxy_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_UIExtensionProxy_VoidSync);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_CustomBuilder_DragItemInfo_VoidSync);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_VoidSync);
+        case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_VoidSync);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VoidSync);
         case Kind_Callback_WebKeyboardOptions_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebKeyboardOptions_VoidSync);
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilderSync);

@@ -23,6 +23,7 @@ import { CommonConfiguration, Bindable_I32_serializer, Bindable_Global_Resource_
 import { ResourceStr, Font_serializer, DividerStyleOptions_serializer, Offset_serializer, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
 import { Resource } from "global.resource"
 import { extractors, ContentModifier, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -198,7 +199,23 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     }
     private getValue_serialize(): ResourceStr {
         const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getValue(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ResourceStr = ""
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
+            let buffer_ : string | Resource | undefined
+            if (buffer_UnionSelector == (0).toChar()) {
+                buffer_ = (retvalDeserializer.readString() as string)
+            } else if (buffer_UnionSelector == (1).toChar()) {
+                buffer_ = Resource_serializer.read(retvalDeserializer)
+            } else {
+                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+            }
+            buffer = (buffer_ as string | Resource)
+        }
+        const returnResult : ResourceStr = buffer
+        return returnResult
     }
     private setValue_serialize(value: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1325,7 +1342,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         return this
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSelectAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSelectAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -232,6 +232,7 @@ public:
     void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetCameraCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) override;
     void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnInterceptKeyboardAttach(
@@ -265,6 +266,7 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) override;
     void SetBackToTop(bool isBackToTop) override;
     void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
@@ -411,6 +413,10 @@ public:
     static void SetOnSafeBrowsingCheckFinish(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinish);
     static void SetBackToTop(FrameNode* frameNode, bool isBackToTop);
+    static void SetCameraCaptureStateChangedId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetMicrophoneCaptureStateChangedId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

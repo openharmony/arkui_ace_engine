@@ -286,6 +286,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_MarqueeState& dst, int32_t src);
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
     void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src);
+    void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
     void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src);
     void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src);
     void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);
@@ -316,6 +317,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, ConvContext *ctx);
+    void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
     void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src);
     void AssignArkValue(Ark_RectResult& dst, const RectF& src);
     void AssignArkValue(Ark_Rectangle& dst, const Rect& src);
@@ -416,6 +418,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NativeEmbedParamStatus& dst, const NativeEmbedParamStatus& src);
     void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src);
     void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& dst, const RefPtr<UnifiedData>& src);
+    void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src);
 
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,

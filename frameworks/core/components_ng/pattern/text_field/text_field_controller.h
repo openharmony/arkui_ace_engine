@@ -56,6 +56,7 @@ public:
     std::u16string GetText() override;
     SelectionInfo GetSelection() override;
     void SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value) override;
+    void DeleteBackward() override;
 
 private:
     WeakPtr<Pattern> pattern_;

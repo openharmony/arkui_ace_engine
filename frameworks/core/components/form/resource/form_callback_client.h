@@ -182,6 +182,25 @@ public:
             TaskExecutor::TaskType::UI, "ArkUIFormProcessDueControlForm");
     }
 
+    void ProcessCheckForm() override
+    {
+        TAG_LOGD(AceLogTag::ACE_FORM, "FormCallbackClient::ProcessCheckForm");
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (!formManagerDelegate) {
+                    TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm formManagerDelegate is nullptr");
+                    return;
+                }
+                formManagerDelegate->ProcessCheckForm();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessCheckForm");
+    }
+
 private:
     int32_t instanceId_ = -1;
     WeakPtr<FormManagerDelegate> delegate_;

@@ -23,6 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { AttributeModifier, hookListItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -243,7 +244,9 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookListItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

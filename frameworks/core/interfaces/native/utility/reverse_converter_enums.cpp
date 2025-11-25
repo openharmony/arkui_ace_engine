@@ -422,6 +422,26 @@ void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
     }
 }
 
+void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src)
+{
+    switch (src) {
+        case ConsoleMessageSource::XML: dst = ARK_CONSOLE_MESSAGE_SOURCE_XML; break;
+        case ConsoleMessageSource::JAVASCRIPT: dst = ARK_CONSOLE_MESSAGE_SOURCE_JAVASCRIPT; break;
+        case ConsoleMessageSource::NETWORK: dst = ARK_CONSOLE_MESSAGE_SOURCE_NETWORK; break;
+        case ConsoleMessageSource::CONSOLE_API: dst = ARK_CONSOLE_MESSAGE_SOURCE_CONSOLE_API; break;
+        case ConsoleMessageSource::STORAGE: dst = ARK_CONSOLE_MESSAGE_SOURCE_STORAGE; break;
+        case ConsoleMessageSource::RENDERING: dst = ARK_CONSOLE_MESSAGE_SOURCE_RENDERING; break;
+        case ConsoleMessageSource::SECURITY: dst = ARK_CONSOLE_MESSAGE_SOURCE_SECURITY; break;
+        case ConsoleMessageSource::OTHER: dst = ARK_CONSOLE_MESSAGE_SOURCE_OTHER; break;
+        case ConsoleMessageSource::DEPRECATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_DEPRECATION; break;
+        case ConsoleMessageSource::WORKER: dst = ARK_CONSOLE_MESSAGE_SOURCE_WORKER; break;
+        case ConsoleMessageSource::VIOLATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_VIOLATION; break;
+        case ConsoleMessageSource::INTERVENTION: dst = ARK_CONSOLE_MESSAGE_SOURCE_INTERVENTION; break;
+        case ConsoleMessageSource::RECOMMENDATION: dst = ARK_CONSOLE_MESSAGE_SOURCE_RECOMMENDATION; break;
+        default: LOGE("Unexpected enum value in ConsoleMessageSource: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
 {
     switch (src) {
@@ -538,6 +558,19 @@ void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHa
             dst = static_cast<Ark_PasteButtonOnClickResult>(-1);
             LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
             break;
+    }
+}
+void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src){
+    switch (src) {
+        case PromptActionCommonState::UNINITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_UNINITIALIZED; break;
+        case PromptActionCommonState::INITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_INITIALIZED; break;
+        case PromptActionCommonState::APPEARING: dst = ARK_PROMPT_ACTION_COMMON_STATE_APPEARING; break;
+        case PromptActionCommonState::APPEARED: dst = ARK_PROMPT_ACTION_COMMON_STATE_APPEARED; break;
+        case PromptActionCommonState::DISAPPEARING: dst = ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARING; break;
+        case PromptActionCommonState::DISAPPEARED: dst = ARK_PROMPT_ACTION_COMMON_STATE_DISAPPEARED; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_promptAction_CommonState>;
+            LOGE("Unexpected enum value in PromptActionCommonState: %{public}d", src);
     }
 }
 

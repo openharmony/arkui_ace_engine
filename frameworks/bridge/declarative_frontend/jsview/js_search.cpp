@@ -217,28 +217,6 @@ void JSSearch::SetSelectDetectEnable(const JSCallbackInfo& info)
     }
 }
 
-void JSSearch::SetSelectDetectConfig(const JSCallbackInfo& info)
-{
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        SearchModel::GetInstance()->ResetSelectDetectConfig();
-        return;
-    }
-    CHECK_NULL_VOID(info[0]->IsObject());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getTypes = paramObject->GetProperty("types");
-    CHECK_NULL_VOID(getTypes->IsArray());
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
-    CHECK_NULL_VOID(array->IsArray());
-    std::vector<TextDataDetectType> typesList;
-    for (size_t i = 0; i < array->Length(); ++i) {
-        JSRef<JSVal> type = array->GetValueAt(i);
-        if (type->IsNumber()) {
-            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
-        }
-    }
-    SearchModel::GetInstance()->SetSelectDetectConfig(typesList);
-}
-
 void JSSearch::Create(const JSCallbackInfo& info)
 {
     std::optional<std::u16string> key;
@@ -1084,7 +1062,7 @@ void JSSearch::ParseBorderRadius(const JSRef<JSVal>& args)
 
 void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 {
-    SetCornerApplyType(info);
+    SetRenderStrategy(info);
     auto jsValue = info[0];
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };

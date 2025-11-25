@@ -76,6 +76,10 @@ export enum BorderStyle {
     SOLID = 0,
     Solid = 0
 }
+export enum RenderStrategy {
+    FAST = 0,
+    OFFSCREEN = 1
+}
 export enum LineJoinStyle {
     MITER = 0,
     Miter = 0,
@@ -243,6 +247,17 @@ export enum Alignment {
     Bottom = 7,
     BOTTOM_END = 8,
     BottomEnd = 8
+}
+export enum LocalizedAlignment {
+    TOP_START = "'top_start'",
+    TOP = "'top'",
+    TOP_END = "'top_end'",
+    START = "'start'",
+    CENTER = "'center'",
+    END = "'end'",
+    BOTTOM_START = "'bottom_start'",
+    BOTTOM = "'bottom'",
+    BOTTOM_END = "'bottom_end'"
 }
 export enum TransitionType {
     ALL = 0,

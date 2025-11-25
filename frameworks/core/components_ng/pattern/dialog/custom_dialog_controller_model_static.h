@@ -24,14 +24,15 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT CustomDialogControllerModelStatic {
 public:
     static void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
-        const WeakPtr<AceType>& controller, std::function<RefPtr<UINode>()>&& builder);
+        const WeakPtr<AceType>& controller, std::function<RefPtr<UINode>()>&& builder, bool& hasBind);
     static void SetCloseDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
         const WeakPtr<AceType>& controller);
+    static PromptActionCommonState GetState(std::vector<WeakPtr<AceType>>& dialogs, bool& hasBind);
 
 private:
     static TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,
         DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, std::function<void()>&& buildFunc,
-        const RefPtr<OverlayManager>& overlayManager);
+        bool& hasBind, const RefPtr<OverlayManager>& overlayManager);
     static TaskExecutor::Task ParseCloseDialogTask(const WeakPtr<AceType>& controller,
         DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
         const RefPtr<OverlayManager>& overlayManager);

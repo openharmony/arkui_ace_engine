@@ -1322,4 +1322,28 @@ HWTEST_F(TextTestNgFive, HandleClickEvent002, TestSize.Level1)
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -2);
     pattern->pManager_->Reset();
 }
+
+/**
+ * @tc.name: AllowVisibleAreaCheck001
+ * @tc.desc: Test AllowVisibleAreaCheck.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFive, AllowVisibleAreaCheck001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set the TextOverflow value to Marquee.
+     */
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    EXPECT_EQ(textPattern->AllowVisibleAreaCheck(), true);
+}
 } // namespace OHOS::Ace::NG

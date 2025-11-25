@@ -17,14 +17,14 @@ import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdTy
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
-import { ObserveWrappedBase } from './observeWrappedBase';
+import { ObserveWrappedKeyedMeta } from './observeWrappedBase';
 
 final class CONSTANT {
     public static readonly OB_SET_ANY_PROPERTY = '__OB_ANY_INDEX';
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
+export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWrappedKeyedMeta, ISubscribedWatches {
     public store_: Set<K>;
     // Use public access to enable unit testing.
     @JSONStringifyIgnore
@@ -217,5 +217,14 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }
         this.store_.forEach(callbackfn);
+    }
+
+    public override addRefAnyKey(): void {
+        this.meta_.addRef(CONSTANT.OB_SET_ANY_PROPERTY);
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
+    }
+
+    public override addRefLength(): void {
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
     }
 }

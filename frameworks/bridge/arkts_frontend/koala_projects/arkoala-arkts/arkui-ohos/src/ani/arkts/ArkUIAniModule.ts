@@ -43,6 +43,7 @@ import matrix4 from '@ohos.matrix4';
 import uiEffect from '@ohos.graphics.uiEffect';
 import { DrawModifier } from "#handwritten"
 import { JavaScriptProxy } from '#generated';
+import { ErrorCallback } from '@ohos.base';
 
 export class ArkUIAniModule {
     static {
@@ -265,7 +266,8 @@ export class ArkUIAniModule {
     native static _RequireArkoalaNodeId(capacity: KInt): KInt
 
     // for Video
-    native static _Video_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
+    native static _Video_SetVoidCallback(ptr: KPointer, callback: () => void): void;
+    native static _Video_SetErrorCallback(ptr: KPointer, callback: ErrorCallback): void;
 
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;

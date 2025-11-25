@@ -264,4 +264,36 @@ HWTEST_F(ViewAbstractModelStaticTestNg, ViewAbstractModelStaticTestNg006, TestSi
     viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(AceType::RawPtr(targetNode), menuParam);
     EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isBindCustomMenu, true);
 }
+
+/**
+ * @tc.name: SetBackgroundImagePosition
+ * @tc.desc: Test SetBackgroundImagePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestStatic, SetBackgroundImagePosition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode and renderContext
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. set background image position and check renderContext's background image position
+     * @tc.expected: renderContext's background image position is set correctly
+     */
+    BackgroundImagePosition bgImgPosition;
+    ViewAbstractModelStatic::SetBackgroundImagePosition(frameNode, bgImgPosition, false);
+    EXPECT_TRUE(renderContext->GetBackgroundImagePosition().has_value());
+    EXPECT_EQ(renderContext->GetBackgroundImagePosition().value(), bgImgPosition);
+
+    /**
+     * @tc.steps: step2. reset background image position and check renderContext's background image position
+     * @tc.expected: renderContext's background image position is reset correctly
+     */
+    ViewAbstractModelStatic::SetBackgroundImagePosition(frameNode, bgImgPosition, true);
+    EXPECT_FALSE(renderContext->GetBackgroundImagePosition().has_value());
+}
 } // namespace OHOS::Ace::NG

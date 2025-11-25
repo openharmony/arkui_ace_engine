@@ -1080,28 +1080,6 @@ void JSText::SetSelectDetectEnable(const JSCallbackInfo& info)
     }
 }
 
-void JSText::SetSelectDetectConfig(const JSCallbackInfo& info)
-{
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
-        TextModel::GetInstance()->ResetSelectDetectConfig();
-        return;
-    }
-    CHECK_NULL_VOID(info[0]->IsObject());
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getTypes = paramObject->GetProperty("types");
-    CHECK_NULL_VOID(getTypes->IsArray());
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
-    CHECK_NULL_VOID(array->IsArray());
-    std::vector<TextDataDetectType> typesList;
-    for (size_t i = 0; i < array->Length(); ++i) {
-        JSRef<JSVal> type = array->GetValueAt(i);
-        if (type->IsNumber()) {
-            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
-        }
-    }
-    TextModel::GetInstance()->SetSelectDetectConfig(typesList);
-}
-
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1449,6 +1427,42 @@ void JSTextController::GetLayoutManager(const JSCallbackInfo& args)
     args.SetReturnValue(obj);
 }
 
+void JSTextController::SetTextSelection(const JSCallbackInfo& info)
+{
+    if (info.Length() < 2) { /* 2:args number */
+        return;
+    }
+    auto controller = controllerWeak_.Upgrade();
+    int32_t selectionStart = 0;
+    int32_t selectionEnd = 0;
+    SelectionOptions options;
+    if (controller) {
+        const auto& start = info[0];
+        const auto& end = info[1];
+        if (start->IsUndefined() || start->IsNull()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "SetTextSelection: The selectionStart is NULL");
+        } else if (start->IsNumber()) {
+            selectionStart = start->ToNumber<int32_t>();
+        }
+        if (end->IsUndefined() || end->IsNull()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "SetTextSelection: The selectionEnd is NULL");
+        } else if (end->IsNumber()) {
+            selectionEnd = end->ToNumber<int32_t>();
+        }
+        if (info.Length() == 3 && info[2]->IsObject()) { /* 2, 3:args number */
+            JSRef<JSObject> optionsObj = JSRef<JSObject>::Cast(info[2]); /* 2:args number */
+            JSRef<JSVal> menuPolicy = optionsObj->GetProperty("menuPolicy");
+            int32_t tempPolicy = 0;
+            if (!menuPolicy->IsNull() && JSContainerBase::ParseJsInt32(menuPolicy, tempPolicy)) {
+                options.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
+            }
+        }
+        controller->SetTextSelection(selectionStart, selectionEnd, options);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "SetTextSelection: The JSTextController is NULL");
+    }
+}
+
 void JSTextController::SetStyledString(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
@@ -1476,6 +1490,7 @@ void JSTextController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextController>::Declare("TextController");
     JSClass<JSTextController>::Method("closeSelectionMenu", &JSTextController::CloseSelectionMenu);
+    JSClass<JSTextController>::CustomMethod("setTextSelection", &JSTextController::SetTextSelection);
     JSClass<JSTextController>::CustomMethod("setStyledString", &JSTextController::SetStyledString);
     JSClass<JSTextController>::CustomMethod("getLayoutManager", &JSTextController::GetLayoutManager);
     JSClass<JSTextController>::Bind(globalObj, JSTextController::Constructor, JSTextController::Destructor);

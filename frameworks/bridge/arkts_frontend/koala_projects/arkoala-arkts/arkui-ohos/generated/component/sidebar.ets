@@ -30,6 +30,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { extractors, hookSideBarContainerAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
 import { SideBarContainerModifier } from "./../SideBarContainerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -479,7 +480,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         return this
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSideBarContainerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSideBarContainerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

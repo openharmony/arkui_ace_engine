@@ -25,6 +25,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Visibility } from "./enums"
 import { VoidCallback } from "./units"
 import { AttributeModifier, extractors, hookFormComponentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -435,7 +436,9 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFormComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFormComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

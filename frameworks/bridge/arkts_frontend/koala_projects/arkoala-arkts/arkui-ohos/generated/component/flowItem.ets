@@ -23,6 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AttributeModifier, hookFlowItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -79,7 +80,9 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements Fl
         return this
     }
     public attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFlowItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookFlowItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

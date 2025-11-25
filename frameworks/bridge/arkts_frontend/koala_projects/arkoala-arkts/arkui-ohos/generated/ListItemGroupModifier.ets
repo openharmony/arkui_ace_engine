@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -26,6 +27,7 @@ import { CommonMethod, ChildrenMainSize } from "./component/common"
 import { ListDividerOptions } from "./component/list"
 export class ListItemGroupModifier extends CommonMethodModifier implements ListItemGroupAttribute,AttributeModifier<ListItemGroupAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,6 +42,7 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
     _childrenMainSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _childrenMainSize_0_0value?: ChildrenMainSize | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkListItemGroupPeer;
         if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -81,6 +84,7 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
     }
     mergeModifier(modifier: ListItemGroupModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._divider_0_flag) {

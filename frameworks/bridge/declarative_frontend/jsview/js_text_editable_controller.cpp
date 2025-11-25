@@ -37,6 +37,7 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::CustomMethod("getSelection", &JSTextEditableController::GetSelection);
     JSClass<JSTextEditableController>::CustomMethod("clearPreviewText", &JSTextEditableController::ClearPreviewText);
     JSClass<JSTextEditableController>::CustomMethod("getText", &JSTextEditableController::GetText);
+    JSClass<JSTextEditableController>::Method("deleteBackward", &JSTextEditableController::DeleteBackward);
     JSClass<JSTextEditableController>::Method("stopEditing", &JSTextEditableController::StopEditing);
     JSClass<JSTextEditableController>::Bind(
         globalObj, JSTextEditableController::Constructor, JSTextEditableController::Destructor);
@@ -336,4 +337,15 @@ void JSTextEditableController::ClearPlaceholderStyledString()
 {
     placeholderStyledString_ = nullptr;
 }
+
+void JSTextEditableController::DeleteBackward()
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->DeleteBackward();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "DeleteBackward: The JSTextEditableController is null");
+    }
+}
+
 } // namespace OHOS::Ace::Framework

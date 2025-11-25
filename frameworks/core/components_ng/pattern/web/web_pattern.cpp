@@ -669,6 +669,7 @@ WebPattern::~WebPattern()
         pipController_.clear();
     }
     UninitRotationEventCallback();
+    UninitMenuLifeCycleCallback();
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -1145,6 +1146,53 @@ bool WebPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo,
     selectInfo.menuCallback.onMenuShow = selectMenuParams->onMenuShow;
     selectInfo.menuCallback.onMenuHide = selectMenuParams->onMenuHide;
     return true;
+}
+
+void WebPattern::RegisterMenuLifeCycleCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web register contextMenu life cycle callback.");
+    overlayManager->RegisterMenuLifeCycleCallback(
+        host->GetId(), [weak = WeakClaim(this)](const MenuLifeCycleEvent& menuLifeCycleEvent) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->NotifyMenuLifeCycleEvent(menuLifeCycleEvent);
+        });
+}
+
+void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent:%{public}d.",
+        static_cast<int>(menuLifeCycleEvent));
+    if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
+        isMenuShownFromWeb_ = true;
+        isLastEventMenuClose_ = false;
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
+        isMenuShownFromWeb_ = false;
+        isLastEventMenuClose_ = true;
+        if (!isFocus_) {
+            CHECK_NULL_VOID(delegate_);
+            delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
+            delegate_->OnBlur();
+        }
+        UninitMenuLifeCycleCallback();
+    }
+}
+
+void WebPattern::UninitMenuLifeCycleCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->UnRegisterMenuLifeCycleCallback(host->GetId());
 }
 
 void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
@@ -3163,6 +3211,11 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     isFocus_ = false;
 
     if (isDragStartFromWeb_) {
+        return;
+    }
+    if (isMenuShownFromWeb_) {
+        TAG_LOGI(
+            AceLogTag::ACE_WEB, "ContextMenu intercept web blur blurReason:%{public}d", static_cast<int>(blurReason));
         return;
     }
     if (!selectPopupMenuShowing_) {

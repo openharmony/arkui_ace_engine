@@ -38,6 +38,7 @@ export class RenderNodeInternal {
 }
 
 const ERROR_CODE_NODE_IS_ADOPTED = 106206;
+const ERROR_CODE_NO_ERROR = 0;
 
 export class RenderNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
@@ -354,44 +355,38 @@ export class RenderNode implements MaterializedBase {
         if (this.childrenList.findIndex(element => element === node_casted) !== -1) {
             return
         }
-        this.childrenList.push(node)
-        node.parentRenderNode = new WeakRef<RenderNode>(this)
         let result = RenderNodeExtender.appendChild(this, node_casted);
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
             const error = Error("The parameter 'node' is invalid: the node has already been adopted.");
             throw new BusinessError(100025, error);
         }
+        this.childrenList.push(node)
+        node.parentRenderNode = new WeakRef<RenderNode>(this)
         return
     }
     public insertChildAfter(child: RenderNode, sibling: RenderNode | null): void {
-        const child_casted = child as (RenderNode)
-        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 111")
-        let indexOfNode = this.childrenList.findIndex(element => element === child_casted)
+        let indexOfNode = this.childrenList.findIndex(element => element === child)
         if (indexOfNode !== -1) {
             return
         }
-        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 222")
-        child.parentRenderNode = new WeakRef<RenderNode>(this);
-        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 333")
         let indexOfSibling = this.childrenList.findIndex(element => element === sibling)
         if (indexOfSibling === -1) {
-            return
+            sibling = null;
         }
-        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 444")
+        let result = ERROR_CODE_NO_ERROR;
+        let childrenListStartPosition: number = 0;
         if (sibling === undefined || sibling === null) {
-            this.childrenList.splice(0 as int32, 0 as int32, child)
-            return
+            result = RenderNodeExtender.insertChild(this, child);
         } else {
-            this.childrenList.splice(indexOfSibling + 1, 0, child)
+            result = RenderNodeExtender.insertChildAfter(this, child, sibling!);
+            childrenListStartPosition = indexOfSibling + 1;
         }
-        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 555")
-        const sibling_casted = sibling as RenderNode
-        let result = RenderNodeExtender.insertChildAfter(this, child, sibling_casted);
         if (result === ERROR_CODE_NODE_IS_ADOPTED) {
             const error = Error("The parameter 'child' is invalid: the node has already been adopted.");
             throw new BusinessError(100025, error);
         }
-        InteropNativeModule._NativeLog("FFZZYY insertChildAfter 666")
+        this.childrenList.splice(childrenListStartPosition, 0, child);
+        child.parentRenderNode = new WeakRef<RenderNode>(this);
         return
     }
     public removeChild(node: RenderNode): void {

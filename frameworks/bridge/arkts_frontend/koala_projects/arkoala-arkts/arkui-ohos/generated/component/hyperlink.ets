@@ -26,6 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookHyperlinkAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -159,7 +160,9 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         return this
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookHyperlinkAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookHyperlinkAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

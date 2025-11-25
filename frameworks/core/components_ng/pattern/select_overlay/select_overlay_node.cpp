@@ -2468,6 +2468,7 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& 
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     selectMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     selectMenu_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 
@@ -2498,7 +2499,8 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& 
 
     selectMenu_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    styleOption.blurStyle = menuTheme ?
+        static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
     styleOption.colorMode = ConvertColorMode(colorMode);
     selectMenu_->GetRenderContext()->UpdateBackBlurStyle(styleOption);
 
@@ -3582,6 +3584,7 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
     auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     auto colorMode = pipelineContext->GetColorMode();
     if (caller) {
         colorMode = caller->GetLocalColorMode();
@@ -3592,7 +3595,8 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
         renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     }
     BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    styleOption.blurStyle = menuTheme ?
+        static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
     styleOption.colorMode = ConvertColorMode(colorMode);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdateBackBlurStyle(styleOption);

@@ -240,12 +240,13 @@ public:
     void SetSelectDetectEnable(bool value);
     bool GetSelectDetectEnable();
     void ResetSelectDetectEnable();
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types);
-    std::vector<TextDataDetectType> GetSelectDetectConfig();
-    void ResetSelectDetectConfig();
+    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {}
+    std::vector<TextDataDetectType> GetSelectDetectConfig()
+    {
+        return std::vector<TextDataDetectType>();
+    }
+    void ResetSelectDetectConfig() {}
     void SelectAIDetect();
-    void UseSelectDetectConfigFollow(std::unordered_map<TextDataDetectType, bool>& optionTypes);
-    void UseSelectDetectConfigUserSet(std::unordered_map<TextDataDetectType, bool>& optionTypes);
     // --------------- select AI detect end -------------------
     void SetTextDetectEnableMultiThread(bool enable);
     bool GetTextDetectEnable()
@@ -319,6 +320,11 @@ public:
     std::list<RefPtr<SpanItem>> GetSpanItemChildren()
     {
         return spans_;
+    }
+
+    int32_t GetPlaceholderCount()
+    {
+        return placeholderCount_;
     }
 
     int32_t GetDisplayWideTextLength()
@@ -613,6 +619,9 @@ public:
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
+    void ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
+    bool IsShowMenu(MenuPolicy options, bool defaultValue);
     void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
@@ -703,6 +712,11 @@ public:
     std::vector<CustomSpanPlaceholderInfo> GetCustomSpanPlaceholderInfo()
     {
         return customSpanPlaceholder_;
+    }
+
+    TextSelectionOptions GetTextSelectionOptions()
+    {
+        return textSelectionOptions_;
     }
 
     void ClearCustomSpanPlaceholderInfo()
@@ -941,6 +955,13 @@ public:
     virtual void MarkContentNodeForRender() {};
     float TextContentAlignOffsetY();
 
+    bool AllowVisibleAreaCheck() const override
+    {
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProperty, false);
+        return textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE;
+    }
+
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
     int32_t GetClickedSpanPosition()
@@ -1112,8 +1133,6 @@ protected:
     RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
     bool selectDetectEnabledIsUserSet_ = false; // Process the logic following interface dataDetectorConfig
     bool selectDetectEnabled_ = true;
-    bool selectDetectConfigIsUserSet_ = false; // Process the logic following interface dataDetectorConfig
-    std::vector<TextDataDetectType> selectDataDetectorTypes_;
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
@@ -1123,6 +1142,7 @@ protected:
         WeakPtr<SpanItem> span;
     };
     std::vector<SubComponentInfoEx> subComponentInfos_;
+    TextSelectionOptions textSelectionOptions_ = {0, 0, MenuPolicy::DEFAULT};
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;

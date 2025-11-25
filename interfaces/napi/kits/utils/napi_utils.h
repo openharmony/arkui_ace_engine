@@ -29,7 +29,6 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
-#include "securec.h"
 
 namespace OHOS::Ace::Napi {
 

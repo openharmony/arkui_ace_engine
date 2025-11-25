@@ -21,8 +21,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkWithThemePeer, WithThemeAttribute } from "./component/withTheme"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from './CommonModifier'
 export class WithThemeModifier implements WithThemeAttribute,AttributeModifier<WithThemeAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -33,6 +35,7 @@ export class WithThemeModifier implements WithThemeAttribute,AttributeModifier<W
     applyDisabledAttribute(instance: WithThemeAttribute): void { }
     applySelectedAttribute(instance: WithThemeAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkWithThemePeer;
     }
     mergeModifier(modifier: WithThemeModifier): void {

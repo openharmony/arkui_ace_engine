@@ -985,7 +985,7 @@ private:
     void CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode);
     void CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode);
-    void SetDragNodeNeedClean();
+    void SetDragNodeNeedClean(bool needClean = true);
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();

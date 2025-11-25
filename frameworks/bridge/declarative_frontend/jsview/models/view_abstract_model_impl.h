@@ -157,7 +157,7 @@ public:
     void SetMotionPath(const MotionPathOption& option) override;
     void SetRenderGroup(bool isRenderGroup) override {}
     void SetRenderFit(RenderFit renderFit) override {}
-    void SetCornerApplyType(CornerApplyType cornerApplyType) override {}
+    void SetRenderStrategy(RenderStrategy renderStrategy) override {}
 
     void SetFlexBasis(const Dimension& value) override;
     void SetAlignSelf(FlexAlign value) override;

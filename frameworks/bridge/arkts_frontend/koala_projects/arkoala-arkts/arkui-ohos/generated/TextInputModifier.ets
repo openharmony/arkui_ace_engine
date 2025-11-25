@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -32,6 +33,7 @@ import { CustomBuilder } from "./component/builder"
 import { CancelButtonOptions, CancelButtonSymbolOptions } from "./component/search"
 export class TextInputModifier extends CommonMethodModifier implements TextInputAttribute,AttributeModifier<TextInputAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -189,6 +191,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _showCounter_0_0value?: boolean | undefined
     _showCounter_0_1value?: InputCounterOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextInputPeer;
         if (this._type_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -1490,6 +1493,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     }
     mergeModifier(modifier: TextInputModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._type_0_flag) {

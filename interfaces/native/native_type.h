@@ -314,6 +314,13 @@ typedef struct ArkUI_PixelRoundPolicy ArkUI_PixelRoundPolicy;
 typedef struct ArkUI_ShowCounterConfig ArkUI_ShowCounterConfig;
 
 /**
+ * @brief Defines the text content base controller.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_TextContentBaseController ArkUI_TextContentBaseController;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -2801,6 +2808,20 @@ typedef enum {
 } ArkUI_PixelRoundCalcPolicy;
 
 /**
+ * @brief Menu pop-up strategy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Determine whether to pop up the menu according to the underlying default logic. */
+    ARKUI_MENU_POLICY_DEFAULT = 0,
+    /** Never pop up the menu. */
+    ARKUI_MENU_POLICY_HIDE = 1,
+    /** Always pop up the menu. */
+    ARKUI_MENU_POLICY_SHOW = 2,
+} ArkUI_MenuPolicy;
+
+/**
  * @brief Define the direction to expand the swipe action.
  *
  * @since 21
@@ -2839,6 +2860,22 @@ typedef enum {
 } ArkUI_ItemFillPolicy;
 
 /**
+ * @brief Define the event tool type that support response region settings.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** All source tool type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_ALL = 0,
+    /** The Finger type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_FINGER = 1,
+    /** The pen type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_PEN = 2,
+    /** The mouse type. */
+    ARKUI_RESPONSE_REGIN_SUPPORTED_TOOL_MOUSE = 3,
+} ArkUI_ResponseRegionSupportedTool;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12
@@ -2865,6 +2902,13 @@ typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArr
    * @since 19
    */
 typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
+
+/**
+  * @brief Defines the selection options.
+  *
+  * @since 23
+  */
+typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
 
 typedef struct {
     float x;
@@ -5927,6 +5971,40 @@ int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
     ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
 
 /**
+ * @brief Create selection options.
+ *
+ * @return A pointer to the selection options object.
+ * @since 23
+ */
+ArkUI_SelectionOptions* OH_ArkUI_SelectionOptions_Create();
+
+/**
+ * @brief Dispose selection options object.
+ *
+ * @param options Pointer to the selection options object. to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectionOptions_Dispose(ArkUI_SelectionOptions* options);
+
+/**
+ * @brief Sets the menu policy for selection options.
+ *
+ * @param options Pointer to the selection options.
+ * @param menuPolicy The menu policy.
+ * @since 23
+ */
+void OH_ArkUI_SelectionOptions_SetMenuPolicy(
+    ArkUI_SelectionOptions* options, ArkUI_MenuPolicy menuPolicy);
+
+/**
+ * @brief Gets the menu policy of selection options.
+ *
+ * @param options Pointer to the selection options object.
+ * @return Returns the menu policy.
+ * @since 23
+ */
+ArkUI_MenuPolicy OH_ArkUI_SelectionOptions_GetMenuPolicy(ArkUI_SelectionOptions* options);
+/**
  * @brief Defines the text menu item for edit menu item.
  *
  * @since 23
@@ -6582,6 +6660,31 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData));
+
+/**
+ * @brief Create an object of the text content base controller.
+ *
+ * @return A pointer to the controller object.
+ * @since 23
+ */
+ArkUI_TextContentBaseController* OH_ArkUI_TextContentBaseController_Create();
+
+/**
+ * @brief Dispose an object of the text content base controller.
+ *
+ * @param controller Pointer to the controller object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_Dispose(ArkUI_TextContentBaseController* controller);
+
+/**
+ * @brief Delete the last character of the input field component.
+ *
+ * @param controller Pointer to the configuration object to be modified.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseController* controller);
+
 #ifdef __cplusplus
 };
 #endif

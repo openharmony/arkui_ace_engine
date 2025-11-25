@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey, KoalaCallsiteKeys } from "@koalaui/common"
-import { RuntimeProfiler } from "../common/RuntimeProfiler"
-import { GlobalStateManager } from "../states/GlobalStateManager"
-import { ComputableState, StateManager } from "../states/State"
+import { KoalaCallsiteKey, KoalaCallsiteKeys } from '@koalaui/common'
+import { RuntimeProfiler } from '../common/RuntimeProfiler'
+import { GlobalStateManager } from '../states/GlobalStateManager'
+import { ComputableState, StateManager } from '../states/State'
 import { StateContext } from 'arkui.incremental.runtime.state';
-import { IncrementalNode } from "../tree/IncrementalNode"
+import { IncrementalNode } from '../tree/IncrementalNode'
 
 /**
  * @param node - a root node for the composition

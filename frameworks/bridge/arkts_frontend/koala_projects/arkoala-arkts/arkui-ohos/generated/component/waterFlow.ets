@@ -30,6 +30,7 @@ import { FlexDirection, ScrollSource } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from "./scroll"
 import { ScrollState } from "./list"
 import { AttributeModifier, hookWaterFlowAttributeModifier, AttributeUpdater, hookWaterFlowOptionsImpl } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -472,7 +473,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         return this
     }
     public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWaterFlowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookWaterFlowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -1791,35 +1791,6 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     TextFieldModelNG::ResetSelectDetectEnable(frameNode);
 }
 
-void SetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* types, ArkUI_Int32 size)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::vector<TextDataDetectType> typelists;
-    for (ArkUI_Int32 i = 0; i < size; ++i) {
-        typelists.push_back(static_cast<TextDataDetectType>(types[i]));
-    }
-    TextFieldModelNG::SetSelectDetectConfig(frameNode, typelists);
-}
-
-ArkUI_Int32 GetSelectDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    std::vector<TextDataDetectType> types = TextFieldModelNG::GetSelectDetectConfig(frameNode);
-    for (uint32_t i = 0; i < types.size(); i++) {
-        (*values)[i] = static_cast<ArkUI_Int32>(types[i]);
-    }
-    return types.size();
-}
-
-void ResetSelectDetectorConfig(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::ResetSelectDetectConfig(frameNode);
-}
-
 void SetAllOptionalBorderStyle(
     NG::BorderStyleProperty& borderStyles, const uint32_t* values, ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
 {
@@ -2595,6 +2566,13 @@ void ResetTextAreaOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+
+void TextAreaDeleteBackward(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::DeleteBackward(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2605,9 +2583,6 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,
@@ -2797,7 +2772,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaCustomKeyboardOption = GetTextAreaCustomKeyboardOption,
         .resetTextAreaCustomKeyboard = ResetTextAreaCustomKeyboard,
         .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
-        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME
+        .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME,
+        .textAreaDeleteBackward = TextAreaDeleteBackward,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2810,9 +2786,6 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
-        .setSelectDetectorConfig = SetSelectDetectorConfig,
-        .getSelectDetectorConfig = GetSelectDetectorConfig,
-        .resetSelectDetectorConfig = ResetSelectDetectorConfig,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,

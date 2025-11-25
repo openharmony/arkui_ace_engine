@@ -28,6 +28,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Resource } from "global.resource"
 import { FontStyle, FontWeight, Color, BorderStyle, Alignment, Axis, TextHeightAdaptivePolicy } from "./enums"
 import { extractors, hookSecurityComponentMethodAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -1256,7 +1257,9 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         return this
     }
     public attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookSecurityComponentMethodAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => { 
+          hookSecurityComponentMethodAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -28,6 +28,8 @@ class ACE_EXPORT TextController : public TextControllerBase {
 public:
     void SetPattern(const WeakPtr<TextPattern>& pattern);
     void CloseSelectionMenu() override;
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd,
+        const SelectionOptions options) override;
     void SetStyledString(const RefPtr<SpanStringBase>& value, bool closeSelectOverlay = true) override;
     WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
 

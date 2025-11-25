@@ -33,6 +33,7 @@
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
+#include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "converter.h"
 #include "validators.h"
@@ -603,7 +604,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             CreateStylePeer<CustomSpanPeer, OHOS::Ace::NG::CustomSpanImpl>(dst, src);
             break;
         case Ace::SpanType::ExtSpan: {
-            LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
+            auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(src);
+            CHECK_NULL_VOID(userDataSpanHolder);
+            dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_UserDataSpan>(userDataSpanHolder->span_);
             break;
         }
         default: LOGE("Unexpected enum value in SpanType: %{public}d", src->GetSpanType());
@@ -687,6 +690,7 @@ void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
     dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());
     dst.componentHeight = Converter::ArkValue<Ark_Int32>(src.GetComponentHeight());
     dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
+    dst.error = ArkValue<Opt_BusinessError>(std::nullopt);
 }
 
 void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
@@ -966,5 +970,15 @@ void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& s
     dst.id = ArkValue<Ark_String>(src.id);
     dst.name = ArkValue<Opt_String>(src.name);
     dst.value = ArkValue<Opt_String>(src.value);
+}
+
+void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src)
+{
+    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
+    dst.y =  ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
+    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetX()));
+    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
 }
 } // namespace OHOS::Ace::NG::Converter

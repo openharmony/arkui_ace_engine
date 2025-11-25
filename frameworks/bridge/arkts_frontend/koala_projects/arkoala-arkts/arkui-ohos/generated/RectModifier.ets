@@ -22,6 +22,7 @@ import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
 import { Resource } from "global.resource"
 import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -29,6 +30,7 @@ import { ArkRectPeer, RadiusItem, RectAttribute } from "./component/rect"
 import { int32 } from "@koalaui/common"
 export class RectModifier extends CommonMethodModifier implements RectAttribute,AttributeModifier<RectAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -67,6 +69,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRectPeer;
         if (this._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -324,6 +327,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
     }
     mergeModifier(modifier: RectModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._radiusWidth_0_flag) {

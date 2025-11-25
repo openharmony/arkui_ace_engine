@@ -2587,7 +2587,10 @@ void NavigationPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(layoutProperty);
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(Dimension(0.0));
     auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(Dimension(0.0));
-    bool navBarWidthRangeEqual = userSetMinNavBarWidthValue.Value() >= userSetMaxNavBarWidthValue.Value();
+    double frameWidth = GetNavigationFrameSize().Width();
+    double userSetMinNavBarWidthPx = userSetMinNavBarWidthValue.ConvertToPxWithSize(frameWidth);
+    double userSetMaxNavBarWidthPx = userSetMaxNavBarWidthValue.ConvertToPxWithSize(frameWidth);
+    bool navBarWidthRangeEqual = GreatOrEqual(userSetMinNavBarWidthPx, userSetMaxNavBarWidthPx);
     if ((userSetNavBarWidthFlag_ && !userSetNavBarRangeFlag_) || (userSetNavBarRangeFlag_ && navBarWidthRangeEqual)) {
         isDividerDraggable_ = false;
         return;
@@ -3421,7 +3424,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(RefPtr<NavDestinationContext>
     auto host = GetHost();
     auto NavdestinationSwitchFunc =
         UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
-    if (!host || !NavdestinationSwitchFunc) {
+    auto navDestinationSwitchFuncForAni =
+        UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFuncForAni();
+    if (!host || (!NavdestinationSwitchFunc && !navDestinationSwitchFuncForAni)) {
         return;
     }
 
@@ -3441,8 +3446,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(RefPtr<NavDestinationContext>
     } else if (to) {
         pathInfo = to->GetNavPathInfo();
     }
+    std::shared_ptr<NavPathInfoScope> scope = nullptr;
     if (pathInfo) {
-        pathInfo->OpenScope();
+        scope = pathInfo->Scope();
     }
     auto state = NavDestinationState::ON_HIDDEN;
     auto context = host->GetContextRefPtr();
@@ -3456,9 +3462,6 @@ void NavigationPattern::NotifyNavDestinationSwitch(RefPtr<NavDestinationContext>
     BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, false, toInfo);
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(
         std::move(fromInfo), std::move(toInfo), operation);
-    if (pathInfo) {
-        pathInfo->CloseScope();
-    }
 }
 
 void NavigationPattern::AppendFilterNodesFromHideNodes(std::set<RefPtr<NavDestinationGroupNode>>& filterNodes)
@@ -4731,7 +4734,12 @@ void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)
     CHECK_NULL_VOID(navPathInfo);
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnNewParam(navPathInfo->GetParamObj());
+    bool isStatic = navPathInfo->IsStatic();
+    if (isStatic) {
+        eventHub->FireOnNewParamStatic(navPathInfo);
+    } else {
+        eventHub->FireOnNewParam(navPathInfo->GetParamObj());
+    }
 }
 
 void NavigationPattern::GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes)
@@ -5275,13 +5283,18 @@ void NavigationPattern::ClearPageAndNavigationConfig()
 
 void NavigationPattern::UpdateNavigationStatus()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameWidth = geometryNode->GetFrameSize().Width();
+    auto frameWidth = GetNavigationFrameSize().Width();
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
     SetNavigationWidthToolBarManager(initNavBarWidth_, frameWidth - initNavBarWidth_ - dividerWidth, dividerWidth);
+}
+
+SizeF NavigationPattern::GetNavigationFrameSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    return geometryNode->GetFrameSize();
 }
 
 void NavigationPattern::SetNavigationWidthToolBarManager(float navBarWidth, float navDestWidth, float dividerWidth)

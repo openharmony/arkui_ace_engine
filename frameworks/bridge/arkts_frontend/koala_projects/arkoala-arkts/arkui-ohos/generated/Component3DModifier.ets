@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { ResourceStr, Dimension } from "./component/units"
 import { Resource } from "global.resource"
 export class Component3DModifier extends CommonMethodModifier implements Component3DAttribute,AttributeModifier<Component3DAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -52,6 +54,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
     _customRender_0_0value?: ResourceStr | undefined
     _customRender_0_1value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkComponent3DPeer;
         if (this._environment_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -183,6 +186,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
     }
     mergeModifier(modifier: Component3DModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._environment_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._environment_0_flag) {

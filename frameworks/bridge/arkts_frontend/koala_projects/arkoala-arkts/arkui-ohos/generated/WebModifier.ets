@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -29,6 +30,7 @@ import { VoidCallback } from "./component/units"
 import { CustomBuilder } from "./component/builder"
 export class WebModifier extends CommonMethodModifier implements WebAttribute,AttributeModifier<WebAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -319,6 +321,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _bindSelectionMenu_0_2value?: WebResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptionsExt | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkWebPeer;
         if (this._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -2808,6 +2811,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     }
     mergeModifier(modifier: WebModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._javaScriptAccess_0_flag) {

@@ -640,6 +640,10 @@ export struct ListBootcamp {
   @State lanesMinLength: Length = 1;
   @State enableLanesMaxLength: boolean = false;
   @State lanesMaxLength: Length = 1;
+  @State useLengthConstrain: boolean = true
+  @State enableUseLengthConstrain: boolean = true;
+  @State enableLanesFillType: boolean = false;
+  @State lanesFillType: PresetFillType = PresetFillType.BREAKPOINT_DEFAULT;
   @State enableLanesGutter: boolean = false;
   @State lanesGutter: Dimension = 0;
   @State enableAlignListItem: boolean = false;
@@ -1422,10 +1426,13 @@ export struct ListBootcamp {
       .chainAnimation(useEnabled(this.enableChainAnimation, this.chainAnimation))
       .multiSelectable(useEnabled(this.enableMultiSelectable, this.multiSelectable))
       .lanes(
-        {
-          minLength: useEnabled(this.enableLanesMinLength, this.lanesMinLength),
-          maxLength: useEnabled(this.enableLanesMaxLength, this.lanesMaxLength)
-        },
+        this.useLengthConstrain ?
+          {
+            minLength: useEnabled(this.enableLanesMinLength, this.lanesMinLength),
+            maxLength: useEnabled(this.enableLanesMaxLength, this.lanesMaxLength)
+          } :
+          { fillType: useEnabled(this.enableLanesFillType, this.lanesFillType) }
+        ,
         useEnabled(this.enableLanesGutter, this.lanesGutter)
       )
       .alignListItem(useEnabled(this.enableAlignListItem, this.alignListItem))
@@ -1593,6 +1600,27 @@ export struct ListBootcamp {
           value: $lanesMaxLength,
           min: 1,
           max: 5
+        })
+
+        RadioBlock({
+          title: 'useLengthConstrain',
+          isEnabled: $enableUseLengthConstrain,
+          value: $useLengthConstrain,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'lanes.fillType',
+          isEnabled: $enableLanesFillType,
+          value: $lanesFillType,
+          dataSource: [
+            { label: 'BREAKPOINT_DEFAULT', value: PresetFillType.BREAKPOINT_DEFAULT },
+            { label: 'BREAKPOINT_SM1MD2LG3', value: PresetFillType.BREAKPOINT_SM1MD2LG3 },
+            { label: 'BREAKPOINT_SM2MD3LG5', value: PresetFillType.BREAKPOINT_SM2MD3LG5 }
+          ]
         })
 
         SliderBlock({

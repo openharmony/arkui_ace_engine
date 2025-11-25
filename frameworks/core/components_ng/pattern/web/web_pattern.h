@@ -635,6 +635,9 @@ public:
     void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void RegisterMenuLifeCycleCallback();
+    void NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent);
+    void UninitMenuLifeCycleCallback();
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
     void OnQuickMenuDismissed();

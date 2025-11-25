@@ -354,6 +354,8 @@ public:
     bool OnVerifyPinRequestByJS(
         std::shared_ptr<NWeb::NWebJSVerifyPinResult> result, const std::string& identity) override;
     void OnClippedSelectionBoundsChanged(int x, int y, int width, int height) override;
+    void OnCameraCaptureStateChanged(int originalState, int new_state) override;
+    void OnMicrophoneCaptureStateChanged(int originalState, int newState) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

@@ -27,6 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier, hookMenuItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { Color } from "./enums"
 import { CustomBuilder } from "./builder"
@@ -362,7 +363,9 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMenuItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookMenuItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -28,6 +28,7 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookIndicatorComponentAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { IndicatorComponentModifier } from "./../IndicatorComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class IndicatorComponentControllerInternal {
@@ -322,7 +323,9 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         return this
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookIndicatorComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookIndicatorComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

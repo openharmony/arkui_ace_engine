@@ -3431,15 +3431,20 @@ class KeyBoardShortCutModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().common.resetKeyBoardShortCut(node);
-    } else if (this.value.action === undefined) {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+      getUINativeModule().common.resetKeyBoardShortCutAll(node);
     } else {
-      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
+      while (this.value.length !== 0) {
+        let item = this.value.shift();
+        if (item === undefined) {
+          continue;
+        }
+        if (item.action === undefined) {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys);
+        } else {
+          getUINativeModule().common.setKeyBoardShortCut(node, item.value, item.keys, item.action);
+        }
+      }
     }
-  }
-  checkObjectDiff() {
-    return !this.value.isEqual(this.stageValue);
   }
 }
 KeyBoardShortCutModifier.identity = Symbol('keyboardShortcut');
@@ -3644,6 +3649,20 @@ class FreezeModifier extends ModifierWithKey {
   }
 }
 FreezeModifier.identity = Symbol('freeze');
+class SystemMaterialModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetSystemMaterial(node);
+    }
+    else {
+      getUINativeModule().common.setSystemMaterial(node, this.value);
+    }
+  }
+}
+SystemMaterialModifier.identity = Symbol('systemMaterial');
 class OnVisibleAreaChangeModifier extends ModifierWithKey {
   constructor(value) {
       super(value);
@@ -3825,6 +3844,7 @@ class ArkComponent {
     this._changed = false;
     this._classType = classType;
     this._needDiff = true;
+    this._keyboardShortcutList = new Array();
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -5228,7 +5248,9 @@ class ArkComponent {
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
     keyboardShortCut.action = action;
-    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
+    this._keyboardShortcutList.push(keyboardShortCut);
+    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier,
+      this._keyboardShortcutList);
     return this;
   }
   accessibilityGroup(value) {
@@ -5430,6 +5452,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, FreezeModifier.identity, FreezeModifier, value);
     return this;
   }
+  systemMaterial(material) {
+    modifierWithKey(this._modifiersWithKeys, SystemMaterialModifier.identity, SystemMaterialModifier, material);
+    return this;
+  }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
@@ -5464,6 +5490,7 @@ class TapGestureHandler extends GestureHandler {
     if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.count = options.count;
+      this.distanceThreshold = options.distanceThreshold;
       this.limitFingerCount = options.isFingerCountLimited;
     }
   }
@@ -5924,8 +5951,8 @@ class UIGestureEvent {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture = gesture;
         getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
-          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount,
-          tapGesture.onActionCallback);
+          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.distanceThreshold,
+          tapGesture.limitFingerCount, tapGesture.onActionCallback);
         break;
       }
       case CommonGestureType.LONG_PRESS_GESTURE: {
@@ -6029,7 +6056,7 @@ function addGestureToGroup(nodePtr, gesture, gestureGroupPtr) {
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture = gesture;
       getUINativeModule().common.addTapGestureToGroup(nodePtr, tapGesture.gestureTag, tapGesture.allowedTypes,
-        tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback,
+        tapGesture.fingers, tapGesture.count, tapGesture.distanceThreshold, tapGesture.limitFingerCount, tapGesture.onActionCallback,
         gestureGroupPtr);
       break;
     }
@@ -11961,22 +11988,6 @@ class SearchSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 SearchSelectDetectorEnableModifier.identity = Symbol('searchSelectDetectorEnable');
-class SearchSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().search.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-SearchSelectDetectorConfigModifier.identity = Symbol('searchSelectDetectorConfig');
 class SearchOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12061,10 +12072,6 @@ class ArkSearchComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorEnableModifier.identity, SearchSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorConfigModifier.identity, SearchSelectDetectorConfigModifier, config);
     return this;
   }
   showCounter(value) {
@@ -13117,6 +13124,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode) {
+    throw new Error('Method not implemented.');
+  }
+  systemMaterial(material) {
     throw new Error('Method not implemented.');
   }
   attributeModifier(modifier) {
@@ -14515,22 +14525,6 @@ class TextSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextSelectDetectorEnableModifier.identity = Symbol('textSelectDetectorEnable');
-class TextSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().text.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().text.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-TextSelectDetectorConfigModifier.identity = Symbol('textSelectDetectorConfig');
 class TextOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14804,10 +14798,6 @@ class ArkTextComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextSelectDetectorEnableModifier.identity, TextSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextSelectDetectorConfigModifier.identity, TextSelectDetectorConfigModifier, config);
     return this;
   }
   font(value, options) {
@@ -16447,22 +16437,6 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextAreaSelectDetectorEnableModifier.identity = Symbol('textAreaSelectDetectorEnable');
-class TextAreaSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textArea.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textArea.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-TextAreaSelectDetectorConfigModifier.identity = Symbol('textAreaSelectDetectorConfig');
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16483,10 +16457,6 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorConfigModifier.identity, TextAreaSelectDetectorConfigModifier, config);
     return this;
   }
   allowChildCount() {
@@ -18486,22 +18456,6 @@ class TextInputSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextInputSelectDetectorEnableModifier.identity = Symbol('textInputSelectDetectorEnable');
-class TextInputSelectDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textInput.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textInput.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-TextInputSelectDetectorConfigModifier.identity = Symbol('textInputSelectDetectorConfig');
 
 class TextInputOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
@@ -18531,10 +18485,6 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorEnableModifier.identity, TextInputSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorConfigModifier.identity, TextInputSelectDetectorConfigModifier, config);
     return this;
   }
   setText(value) {
@@ -22860,6 +22810,7 @@ if (globalThis.Toggle !== undefined) {
 class ArkSelectComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+    this._menuItemMap = new Map();
   }
   allowChildCount() {
     return 0;
@@ -22971,7 +22922,11 @@ class ArkSelectComponent extends ArkComponent {
       getUINativeModule().select.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
-    this.builder = modifier.applyContent();
+    this.applyContent = modifier.applyContent();
+    if (this.builder !== this.applyContent) {
+      this._menuItemMap.clear();
+      this.builder = this.applyContent;
+    }
     this.modifier = modifier;
     getUINativeModule().select.setContentModifierBuilder(this.nativePtr, this);
   }
@@ -22979,9 +22934,13 @@ class ArkSelectComponent extends ArkComponent {
     menuItemConfiguration.contentModifier = this.modifier;
     const index = menuItemConfiguration.index;
     const xNode = globalThis.requireNapi('arkui.node');
-    this.menuItemNodes = new xNode.BuilderNode(context);
-    this.menuItemNodes.build(this.builder, menuItemConfiguration);
-    return this.menuItemNodes.getFrameNode();
+    if (!this._menuItemMap.has(index)) {
+      this._menuItemMap.set(index, new xNode.BuilderNode(context));
+      this._menuItemMap.get(index).build(this.builder, menuItemConfiguration);
+    } else {
+      this._menuItemMap.get(index).update(menuItemConfiguration);
+    }
+    return this._menuItemMap.get(index).getFrameNode();
   }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
@@ -32381,6 +32340,14 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
     return this;
   }
+  onCameraCaptureStateChanged(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangedModifier.identity, WebOnCameraCaptureStateChangedModifier, callback);
+    return this;
+  }
+  onMicrophoneCaptureStateChanged(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangedModifier.identity, WebOnMicrophoneCaptureStateChangedModifier, callback);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -34002,6 +33969,36 @@ class WebBackToTopModifier extends ModifierWithKey {
   }
 }
 WebBackToTopModifier.identity = Symbol('webBackToTopModifier');
+
+class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnCameraCaptureStateChanged(node);
+    }
+    else {
+      getUINativeModule().web.setOnCameraCaptureStateChanged(node, this.value);
+    }
+  }
+}
+WebOnCameraCaptureStateChangedModifier.identity = Symbol('webOnCameraCaptureStateChangedModifier');
+
+class WebOnMicrophoneCaptureStateChangedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnMicrophoneCaptureStateChanged(node);
+    }
+    else {
+      getUINativeModule().web.setOnMicrophoneCaptureStateChanged(node, this.value);
+    }
+  }
+}
+WebOnMicrophoneCaptureStateChangedModifier.identity = Symbol('webOnMicrophoneCaptureStateChangedModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

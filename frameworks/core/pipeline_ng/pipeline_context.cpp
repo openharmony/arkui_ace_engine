@@ -3609,11 +3609,54 @@ void PipelineContext::DumpData(
     }
 }
 
+namespace {
+struct RootComp {
+    bool operator()(const RefPtr<UINode>& a1, const RefPtr<UINode>& a2) const
+    {
+        return a1->GetId() == a2->GetId() ? AceType::RawPtr(a1) < AceType::RawPtr(a2) : a1->GetId() < a2->GetId();
+    }
+};
+RefPtr<UINode> GetRoot(const RefPtr<UINode>& uiNode)
+{
+    if (const auto& parent = uiNode->GetParent()) {
+        if (parent->GetChildIndex(uiNode) == -1) {
+            LOGW("parent [%{public}d %{public}s] do not contain child [%{public}d %{public}s]",
+                parent->GetId(), parent->GetTag().c_str(), uiNode->GetId(), uiNode->GetTag().c_str());
+            return uiNode;
+        }
+        return GetRoot(parent);
+    }
+    return uiNode;
+}
+std::set<RefPtr<UINode>, RootComp> GetAllRoots()
+{
+    std::set<RefPtr<UINode>, RootComp> roots;
+    ElementRegister::GetInstance()->IterateElements([&roots](auto id, auto& element) {
+        if (const auto& uiNode = AceType::DynamicCast<UINode>(element)) {
+            roots.emplace(GetRoot(uiNode));
+        }
+        return false;
+    });
+    return roots;
+}
+}
+
 void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
 {
     if (params.size() > 1 && params[1] == "-lastpage") {
         auto lastPage = stageManager_->GetLastPage();
         DumpData(lastPage, params, hasJson);
+    } else if (params.size() > 1 && params[1] == "-all") {
+        auto isAll = DumpLog::GetInstance().IsDumpAllNodes();
+        DumpLog::GetInstance().SetDumpAllNodes(true);
+        for (auto& uiNode : GetAllRoots()) {
+            if (auto frameNode = AceType::DynamicCast<FrameNode>(uiNode)) {
+                DumpData(frameNode, params, hasJson);
+            } else {
+                uiNode->DumpTree(GetDepthFromParams(params), hasJson);
+            }
+        }
+        DumpLog::GetInstance().SetDumpAllNodes(isAll);
     } else {
         DumpData(rootNode_, params, hasJson);
     }
@@ -3644,6 +3687,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
     DumpLog::GetInstance().Print(1, "finishCount:" + GetUnexecutedFinishCount());
+    DumpLog::GetInstance().Print(1, "UINodeCount:" + std::to_string(UINode::Count()));
     if (params[0] == "-element") {
         DumpElement(params, hasJson);
     } else if (params[0] == "-navigation") {
@@ -3721,7 +3765,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             }
         });
     } else if (params[0] == "-default") {
-        rootNode_->DumpTree(depth);
+        if (params.size() > 1 && params[1] == "-all") {
+            auto isAll = DumpLog::GetInstance().IsDumpAllNodes();
+            DumpLog::GetInstance().SetDumpAllNodes(true);
+            for (auto& uiNode : GetAllRoots()) {
+                uiNode->DumpTree(depth);
+            }
+            DumpLog::GetInstance().SetDumpAllNodes(isAll);
+        } else {
+            rootNode_->DumpTree(depth);
+        }
         DumpLog::GetInstance().OutPutDefault();
     } else if (params[0] == "-overlay") {
         if (overlayManager_) {

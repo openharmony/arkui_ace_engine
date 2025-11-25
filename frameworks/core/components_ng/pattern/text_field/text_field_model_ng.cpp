@@ -1444,48 +1444,6 @@ void TextFieldModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
     pattern->ResetSelectDetectEnable();
 }
 
-void TextFieldModelNG::SetSelectDetectConfig(std::vector<TextDataDetectType>& types)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectDetectConfig(types);
-}
-
-void TextFieldModelNG::SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectDetectConfig(types);
-}
-
-std::vector<TextDataDetectType> TextFieldModelNG::GetSelectDetectConfig(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, std::vector<TextDataDetectType>());
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
-    return pattern->GetSelectDetectConfig();
-}
-
-void TextFieldModelNG::ResetSelectDetectConfig()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetSelectDetectConfig();
-}
-
-void TextFieldModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetSelectDetectConfig();
-}
-
 void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& value)
 {
     if (value.caretWidth.has_value()) {
@@ -2796,6 +2754,13 @@ Color TextFieldModelNG::GetTextAreaScrollBarColor(FrameNode* frameNode)
 void TextFieldModelNG::ResetTextAreaScrollBarColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, frameNode);
+}
+
+void TextFieldModelNG::DeleteBackward(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->HandleOnDelete(true);
 }
 
 } // namespace OHOS::Ace::NG

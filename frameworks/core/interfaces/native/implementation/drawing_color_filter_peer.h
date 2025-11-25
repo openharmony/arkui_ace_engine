@@ -15,7 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAWING_COLOR_FILTER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAWING_COLOR_FILTER_PEER_IMPL_H
 
-#include "adapter/ohos/osal/drawing_color_filter_ohos.h"
+#include "base/image/drawing_color_filter.h"
 #include "base/memory/referenced.h"
 
 struct drawing_ColorFilterPeer final {

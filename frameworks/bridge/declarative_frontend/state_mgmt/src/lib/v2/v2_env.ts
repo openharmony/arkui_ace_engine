@@ -42,7 +42,13 @@ type EnvRegistry = { [K in keyof EnvTypeMap]?: IEnvironmentValue<EnvTypeMap[K]> 
 type SystemEnvRegistry = { number?: EnvRegistry };
 
 // varName -> envKey
-type EnvMeta = Record<string, keyof EnvTypeMap>;
+// key -> [ varName0, varName1, ..., varNameN ]
+interface EnvMeta {
+  // varName -> envKey
+  varToKey: Record<string, keyof EnvTypeMap>;
+  // key -> [ varName0, varName1, ..., varNameN ]
+  keyToVars: Record<string, string[]>;
+}
 
 /**
  * EnvV2
@@ -63,30 +69,29 @@ class EnvV2 {
 
   public static addEnvKeyVariableDecoMeta<K extends keyof EnvTypeMap>(proto: Object, varName: string, key: K): void {
     // add decorator meta data to prototype
-    const meta = proto[EnvV2.ENV_DECO_META] ??= {} as EnvMeta;
-    // find varName -> key, key -> [varName1, varName2,..., varNameN]
-    meta[varName] = key ;
+  const meta = proto[EnvV2.ENV_DECO_META] ??= {
+    varToKey: {},
+    keyToVars: {},
+  } as EnvMeta;
+    // find varName -> key
+    meta.varToKey[varName] = key ;
     const prefixKey: string = `${EnvV2.ENV_KEY_PREFIX}${key}`;
-    if (!meta[prefixKey]) {
-      meta[prefixKey] = new Array<string>();
-    }
-    meta[prefixKey].push(varName);
+    // key -> [varName1, varName2,..., varNameN]
+    (meta.keyToVars[prefixKey] ??= []).push(varName);
   }
 
   public static findEnvValueFromView<K extends keyof EnvTypeMap>(key: K, view: ViewBuildNodeBase): IEnvironmentValue<EnvTypeMap[K]> | undefined {
-    if (view instanceof PUV2ViewBase) {
-      const meta = view[EnvV2.ENV_DECO_META];
-      if (meta) {
-        const prefixKey: string = `${EnvV2.ENV_KEY_PREFIX}${key}`;
-        const varNames = meta[prefixKey];
-        if (varNames && Array.isArray(varNames) && varNames.length > 0) {
-          const varName: string = varNames[0];
-          const storeProp = ObserveV2.ENV_PREFIX + varName;
-          const existingEnvValue = view[storeProp];
-          if (existingEnvValue) {
-            stateMgmtConsole.debug(`find envValue key ${key} from view ${view.debugInfo__()}. Returning the existing one.`);
-            return existingEnvValue;
-          }
+    const meta = view[EnvV2.ENV_DECO_META];
+    if (meta) {
+      const prefixKey: string = `${EnvV2.ENV_KEY_PREFIX}${key}`;
+      const varNames = meta.keyToVars[prefixKey];
+      if (varNames && Array.isArray(varNames) && varNames.length > 0) {
+        const varName: string = varNames[0];
+        const storeProp = ObserveV2.ENV_PREFIX + varName;
+        const existingEnvValue = view[storeProp];
+        if (existingEnvValue) {
+          stateMgmtConsole.debug(`find envValue key ${key} from view ${view.debugInfo__()}. Returning the existing one.`);
+          return existingEnvValue;
         }
       }
     }
@@ -94,15 +99,9 @@ class EnvV2 {
   }
 
 
-  public static findEnvRecursively<K extends keyof EnvTypeMap>(key: K, view: ViewBuildNodeBase): IEnvironmentValue<EnvTypeMap[K]> | undefined {
-    stateMgmtConsole.debug(`findEnv: searching '${key}' from view: ${view.debugInfo__()}`);
-
-    // if view is viewpu or viewv2, check if it has the @Env(key)
-    // if it contains @Env(key), return existingEnvValue
-    const existingEnvValue = EnvV2.findEnvValueFromView(key, view);
-    if (existingEnvValue) {
-      return existingEnvValue;
-    }
+  public static findEnvRecursively<K extends keyof EnvTypeMap>(
+    key: K, view: ViewBuildNodeBase, viewInstanceId: number): IEnvironmentValue<EnvTypeMap[K]> | undefined {
+    stateMgmtConsole.debug(`findEnvRecursively: searching '${key}' from view: ${view.debugInfo__()}`);
 
     let parent: ViewBuildNodeBase | undefined;
     if (view instanceof PUV2ViewBase) {
@@ -113,9 +112,15 @@ class EnvV2 {
       parent = (view as any).__parentViewOfBuildNode?.deref();
     }
 
-    if (parent) {
+    if (parent && parent instanceof PUV2ViewBase && parent.__latestInstanceId__Internal === viewInstanceId) {
       stateMgmtConsole.debug(`findEnvRecursively: view ${view.debugInfo__()} has parent ${parent.debugInfo__()}, find @Env(${key}) in parent`);
-      return EnvV2.findEnvRecursively(key, parent);
+      // if view is viewpu or viewv2, check if it has the @Env(key)
+      // if it contains @Env(key), return existingEnvValue
+      const existingEnvValue = EnvV2.findEnvValueFromView(key, parent);
+      if (existingEnvValue) {
+        return existingEnvValue;
+      }
+      return EnvV2.findEnvRecursively(key, parent, viewInstanceId);
     }
 
     // if parent is undefined, stop finding and return undefined
@@ -138,31 +143,20 @@ class EnvV2 {
     const envRegister = newInstanceId ? EnvV2.envValues[newInstanceId] ??= {} : EnvV2.envValues[instanceId] ??= {};
 
     // step one: find EnvValue in parent recursively
-    let parent: ViewBuildNodeBase | undefined;
-
-    if (view instanceof PUV2ViewBase) {
-      // view may be created by view or buildernode
-      parent = (view.getParent()  || view.__parentViewBuildNode__) as PUV2ViewBase;
-    } else {
-      // if view is buildernode
-      parent =(view as any).__parentViewOfBuildNode?.deref();
-    }
-    if (parent) {
-      stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} has parent ${parent.debugInfo__()}, find @Env(${key}) ${varName} in parent`);
-      const existingEnv = EnvV2.findEnvRecursively(key, parent);
-      if (existingEnv) {
-        return existingEnv;
-      }
+    const existingEnv = EnvV2.findEnvRecursively(key, view, view.__latestInstanceId__Internal);
+    if (existingEnv) {
+      stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} 1. find @Env(${key}) ${varName} in parent, return existing one`);
+      return existingEnv;
     }
 
     // step two: find EnvValue in envRegister Global
-    const storeProp = ObserveV2.ENV_PREFIX + varName;
     const envValueInGlobal = envRegister[key];
     if (envValueInGlobal) {
-        view[storeProp] = envValueInGlobal;
-        return envValueInGlobal;
+      stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} 2. find @Env(${key}) ${varName} in global, return existing one`);
+      return envValueInGlobal;
     }
 
+    // step three: if cannot find both in parent and global, create new one
     const factory = envFactoryMap[key];
     if (!factory) {
       const message = `${key} has not been registered in factory envFactoryMap, internal error.`;
@@ -170,9 +164,9 @@ class EnvV2 {
       throw new Error(message);
     }
     const uiContext = newInstanceId ? getUIContextUsingInstanceId(newInstanceId): view.getUIContext();
+    stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} 3. cannot find @Env(${key}) ${varName} in parent/global, create new one`);
     const newEnv: IEnvironmentValue<EnvTypeMap[K]> = factory(uiContext);
     envRegister[key] = newEnv;
-    view[storeProp] = newEnv;
     return newEnv;
   }
 

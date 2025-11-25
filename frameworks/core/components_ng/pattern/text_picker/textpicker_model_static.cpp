@@ -596,7 +596,6 @@ void TextPickerModelStatic::SetCascadeColumnsNode(FrameNode* frameNode,
         auto differ = columnCount - reOptions.size();
         for (uint32_t i = 0; i < differ; i++) {
             NG::TextCascadePickerOptions differOption;
-            memset_s(&differOption, sizeof(differOption), 0, sizeof(differOption));
             reOptions.emplace_back(differOption);
         }
     }
@@ -653,7 +652,6 @@ void TextPickerModelStatic::SetValues(FrameNode* frameNode, const std::vector<st
         for (uint32_t i = 0; i < options.size(); i++) {
             ValidateData(options[i], values, i, selectedValues, valuesIndex);
         }
-        TextPickerModelStatic::SetSelecteds(frameNode, valuesIndex);
     } else {
         for (uint32_t i = 0; i < values.size(); i++) {
             selectedValues.emplace_back(values[i]);

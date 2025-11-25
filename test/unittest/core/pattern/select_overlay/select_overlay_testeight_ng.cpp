@@ -1502,4 +1502,60 @@ HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg002, TestS
     EXPECT_EQ(actualStyleOption.blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
     EXPECT_EQ(actualStyleOption.colorMode, ThemeColorMode::DARK); // Should convert from ColorMode::DARK
 }
+
+/**
+ * @tc.name: UpdateContentModifier001
+ * @tc.desc: Test UpdateContentModifier with circle show settings.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayNineTestNg, UpdateContentModifier001, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+    selectInfo.firstHandle.isCircleShow = true;
+    selectInfo.secondHandle.isCircleShow = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    selectInfo.singleLineHeight = NODE_ID;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
+    selectOverlayNode->AddExtensionMenuOptions(infoPtr, 0);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
+
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = pattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
+    EXPECT_NE(selectOverlayPaintMethod, nullptr);
+
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
+
+    auto contentModifier = pattern->selectOverlayContentModifier_;
+    ASSERT_NE(contentModifier, nullptr);
+    EXPECT_TRUE(contentModifier->firstCircleIsShow_->Get());
+    EXPECT_FALSE(contentModifier->secondCircleIsShow_->Get());
+}
 } // namespace OHOS::Ace::NG

@@ -181,6 +181,9 @@ export class ToolBarV2Item {
 
   @Computed
   get symbol(): ToolBarV2SymbolGlyph | undefined {
+    if (this.icon === undefined) {
+      return undefined;
+    }
     if (this.icon instanceof ToolBarV2SymbolGlyph) {
       return this.icon as ToolBarV2SymbolGlyph;
     }
@@ -189,6 +192,9 @@ export class ToolBarV2Item {
 
   @Computed
   get image(): ToolBarV2ItemImage | undefined {
+    if (this.icon === undefined) {
+      return undefined;
+    }
     if (!(this.icon instanceof ToolBarV2SymbolGlyph)) {
       return this.icon as ToolBarV2ItemImage;
     }
@@ -420,7 +426,7 @@ export struct ToolBarV2 {
             .fontColor([this.getIconColor(index)])
             .margin({ bottom: $r('sys.float.padding_level1') } as Margin)
         } else {
-          Image(this.toolBarList[index]?.image?.src as ResourceStr)
+          Image((this.toolBarList[index]?.image?.src ?? '') as ResourceStr)
             .width(IMAGE_SIZE)
             .height(IMAGE_SIZE)
             .fillColor(this.getIconColor(index))

@@ -31,23 +31,6 @@ class TextInputSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TextInputSelectDetectorConfigModifier extends ModifierWithKey<SelectDetectorConfig> {
-  constructor(value: SelectDetectorConfig) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textInputSelectDetectorConfig');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().textInput.resetSelectDetectorConfig(node);
-    } else {
-      getUINativeModule().textInput.setSelectDetectorConfig(node, this.value.types);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types);
-  }
-}
-
 class TextInputStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -1562,10 +1545,6 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorEnableModifier.identity, TextInputSelectDetectorEnableModifier, value);
-    return this;
-  }
-  selectedDataDetectorConfig(config) {
-    modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorConfigModifier.identity, TextInputSelectDetectorConfigModifier, config);
     return this;
   }
   setText(value: ResourceStr): TextInputAttribute {

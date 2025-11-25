@@ -27,6 +27,7 @@ import { ResourceColor } from "./units"
 import { Color, FontWeight } from "./enums"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { AttributeModifier, hookSymbolSpanAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -320,7 +321,9 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
-        hookSymbolSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSymbolSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -19,6 +19,7 @@
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Font_serializer, BorderRadiuses_serializer, DividerStyleOptions_serializer, Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions } from "./units"
 import { Resource_serializer } from "./../framework/resource"
+import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -27,7 +28,9 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookMenuAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
+import { ModifierStateManager } from '../CommonModifier';
+import { extractors, AttributeModifier, hookMenuAttributeModifier, AttributeUpdater } from "#handwritten"
+import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -156,6 +159,18 @@ export class ArkMenuPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MenuAttribute_setSubMenuExpandingMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSubMenuExpandSymbolAttribute(value: SymbolGlyphModifier | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            SymbolGlyphModifier_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MenuAttribute_setSubMenuExpandSymbol(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SubMenuExpandingMode {
     SIDE_EXPAND = 0,
@@ -184,6 +199,9 @@ export interface MenuAttribute extends CommonMethod {
     subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
         throw new Error("Unimplemented method subMenuExpandingMode")
     }
+    subMenuExpandSymbol(value: SymbolGlyphModifier | undefined): this {
+        throw new Error("Unimplemented method subMenuExpandSymbol")
+    }
     attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -195,6 +213,7 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
     menuItemDivider_value?: DividerStyleOptions | undefined
     menuItemGroupDivider_value?: DividerStyleOptions | undefined
     subMenuExpandingMode_value?: SubMenuExpandingMode | undefined
+    subMenuExpandSymbol_value?: SymbolGlyphModifier | undefined
     attributeModifier_value?: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined
     setMenuOptions(): this {
         return this
@@ -215,6 +234,9 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
         return this
     }
     subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
+        return this
+    }
+    subMenuExpandSymbol(value: SymbolGlyphModifier | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -285,8 +307,18 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
         }
         return this
     }
+    public subMenuExpandSymbol(value: SymbolGlyphModifier | undefined): this {
+        if (this.checkPriority("subMenuExpandSymbol")) {
+            const value_casted = value as (SymbolGlyphModifier | undefined)
+            this.getPeer()?.setSubMenuExpandSymbolAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMenuAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookMenuAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

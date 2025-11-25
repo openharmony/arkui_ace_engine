@@ -236,6 +236,22 @@ HWTEST_F(SafeContainerTest, SafeListTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SafeMapEmplaceTest
+ * @tc.desc: Test basic map operations and element access
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeContainerTest, SafeMapEmplaceTest001, TestSize.Level1)
+{
+    SafeMap<int, std::string> m;
+    m[10] = "ten";
+    EXPECT_EQ(m[10], "ten");
+    m[10] = "ten_2";
+    EXPECT_EQ(m[10], "ten_2");
+    m.try_emplace(40, "hello");
+    EXPECT_EQ(m.at(40), "hello");
+}
+
+/**
  * @tc.name: SafeMapTest001
  * @tc.desc: Test basic map operations and element access
  * @tc.type: FUNC

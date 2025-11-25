@@ -312,6 +312,11 @@ public:
         ViewAbstract::SetCompositingFilter(compositingFilter);
     }
 
+    void SetSystemMaterial(const UiMaterial* material) override
+    {
+        ViewAbstract::SetSystemMaterial(material);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -931,9 +936,9 @@ public:
         ViewAbstract::SetRenderFit(renderFit);
     }
 
-    void SetCornerApplyType(CornerApplyType cornerApplyType) override
+    void SetRenderStrategy(RenderStrategy renderStrategy) override
     {
-        ViewAbstract::SetCornerApplyType(cornerApplyType);
+        ViewAbstract::SetRenderStrategy(renderStrategy);
     }
 
     void SetFlexBasis(const Dimension& value) override
@@ -1529,6 +1534,19 @@ public:
         std::function<void()>&& onKeyboardShortcutAction) override
     {
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
+    }
+
+    static void ResetKeyboardShortcutAll(FrameNode* frameNode)
+    {
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->ClearSingleKeyboardShortcutAll();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+        return;
     }
 
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override

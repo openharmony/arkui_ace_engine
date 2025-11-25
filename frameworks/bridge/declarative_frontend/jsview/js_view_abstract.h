@@ -297,7 +297,7 @@ public:
     static void ParseBorderWidth(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void ParseBorderRadius(const JSRef<JSVal>& args);
-    static void SetCornerApplyType(const JSCallbackInfo& info);
+    static void SetRenderStrategy(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args);
     static void ParseDashGap(const JSRef<JSVal>& args);
@@ -353,6 +353,7 @@ public:
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
     static void JsSetFreeze(const JSCallbackInfo& info);
+    static void JsSystemMaterial(const JSCallbackInfo& info);
     static void ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
     // outer border
@@ -669,7 +670,7 @@ public:
      */
     static void JSBind(BindingTarget globalObj);
     static void JsNotifyDragStartRequest(const JSCallbackInfo& info);
-    static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
+    static void ParseDialogCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj,
         std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static void ParseAppearDialogCallback(const JSCallbackInfo& info, DialogProperties& dialogProperties);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);

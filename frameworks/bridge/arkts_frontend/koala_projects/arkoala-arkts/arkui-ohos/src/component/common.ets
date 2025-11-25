@@ -6,6 +6,7 @@ import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
 import { ArkUIAniModule } from "arkui.ani"
 import { DrawContext } from "arkui.Graphics"
+import { Bindable, Callback } from "#generated"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
@@ -126,7 +127,6 @@ export class KeyEventTransfer {
         if (input === null) {
             return new Object();
         }
-        let objectInternal: KeyEventInternal = new KeyEventInternal();
         let esValue: ESValue = ESValue.wrap(input);
         const global = ESValue.getGlobal();
         const bindFunc = global.getProperty('convertKeyEventPointer');
@@ -137,8 +137,7 @@ export class KeyEventTransfer {
         let pointerConvertValue = convertResult.toNumber();
 
         let peer: KPointer = ArkUIAniModule._CreateKeyEventAccessorWithPointer(pointerConvertValue as long)
-        objectInternal.peer!.ptr = peer;
-        return objectInternal;
+        return KeyEventInternal.fromPtr(peer);
     }
 
     public static transferDynamic(input: Object): Any {
@@ -264,8 +263,7 @@ export class ClickEventTransfer {
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
         let peer: KPointer = ArkUIAniModule._createClickEventAccessorWithPointer(innerPointer as long)
-        let clickEvent: ClickEventInternal = new ClickEventInternal();
-        clickEvent.peer!.ptr = peer;
+        let clickEvent = ClickEventInternal.fromPtr(peer);
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
@@ -395,8 +393,7 @@ export class HoverEventTransfer {
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
         let peer: KPointer = ArkUIAniModule._createHoverEventAccessorWithPointer(innerPointer as long)
-        let hoverEvent: HoverEventInternal = new HoverEventInternal();
-        hoverEvent.peer!.ptr = peer;
+        let hoverEvent = HoverEventInternal.fromPtr(peer);
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
@@ -524,8 +521,7 @@ export class MouseEventTransfer {
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
         let peer: KPointer = ArkUIAniModule._createMouseEventAccessorWithPointer(innerPointer as long)
-        let mouseEvent: MouseEventInternal = new MouseEventInternal();
-        mouseEvent.peer!.ptr = peer;
+        let mouseEvent = MouseEventInternal.fromPtr(peer);
         const buttonValue = esValue.getProperty("button").toNumber();
         mouseEvent.button = TypeChecker.MouseButton_FromNumeric(buttonValue as int32);
         const actionValue = esValue.getProperty("action").toNumber();
@@ -679,8 +675,7 @@ export class TouchEventTransfer {
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
         let peer: KPointer = ArkUIAniModule._createTouchEventAccessorWithPointer(innerPointer as long)
-        let touchEvent: TouchEventInternal = new TouchEventInternal();
-        touchEvent.peer!.ptr = peer;
+        let touchEvent = TouchEventInternal.fromPtr(peer);
         const sourceValue = esValue.getProperty("source").toNumber();
         touchEvent.source = TypeChecker.SourceType_FromNumeric(sourceValue as int32);
         const timestampValue = esValue.getProperty("timestamp").toNumber();
@@ -879,8 +874,7 @@ export class AxisEventTransfer {
         let convertResult = convertFunc.invoke(esValue);
         let innerPointer = convertResult.toNumber();
         let peer: KPointer = ArkUIAniModule._createAxisEventAccessorWithPointer(innerPointer as long)
-        let axisEvent: AxisEventInternal = new AxisEventInternal();
-        axisEvent.peer!.ptr = peer;
+        let axisEvent = AxisEventInternal.fromPtr(peer);
         const sourceValue = esValue.getProperty("source").toNumber();
         axisEvent.source = TypeChecker.SourceType_FromNumeric(sourceValue as int32);
         const timestampValue = esValue.getProperty("timestamp").toNumber();
@@ -1122,4 +1116,8 @@ export class ArkCommonPeer extends ArkCommonMethodPeer {
 export interface DynamicNode {
     onMove(handler?: OnMoveHandler): this;
     onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
+}
+
+export function makeBindable<T>(value: T, onChange: Callback<T>): Bindable<T> {
+    return { value, onChange } as Bindable<T>;
 }

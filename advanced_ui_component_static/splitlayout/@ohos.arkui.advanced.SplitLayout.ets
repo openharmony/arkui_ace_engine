@@ -16,7 +16,8 @@
 import {
   Component, ResourceStr, Column, GridRow, BreakpointsReference, GridRowDirection, Row, GridCol, Stack, Alignment,
   Image, Scroll, Text, FontWeight, TextAlign, HorizontalAlign, BarState, NestedScrollMode, Flex, FlexAlign, Area,
-  ItemAlign, FlexDirection, $r, Padding, LocalizedMargin, Margin, BreakPoints, GridColColumnOption, BuilderParam
+  ItemAlign, FlexDirection, $r, Padding, LocalizedMargin, Margin, BreakPoints, GridColColumnOption, BuilderParam,
+  Builder
 } from '@ohos.arkui.component';
 import { State, PropRef } from '@ohos.arkui.stateManagement';
 import { LengthMetrics } from '@ohos.arkui.node';
@@ -30,7 +31,8 @@ const TEXT_MARGIN_RIGHT_48: number = 48;
 
 @Component
 export struct SplitLayout {
-  @BuilderParam container: () => void = () => {};
+  @BuilderParam container: () => void =this.doBuilder;
+  @Builder doBuilder(){}
   @State sizeValue: string = '';
   @State areaWidth: number = 0;
   @State imageBackgroundColor: string = '#19000000';

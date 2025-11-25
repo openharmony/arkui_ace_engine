@@ -47,6 +47,16 @@ public:
 
     virtual void OnAccessibilityParentRectInfoUpdate() {};
 
+    bool IsAllowCrossProcessNesting() const
+    {
+        return allowCrossProcessNesting_;
+    }
+
+    void SetAllowCrossProcessNesting(bool allowCrossProcessNesting)
+    {
+        allowCrossProcessNesting_ = allowCrossProcessNesting;
+    }
+
 private:
     bool GetAccessibilityParentRect(HandlerReply& reply);
     void GetDCAccessibilityParentRect(HandlerReply& reply);
@@ -54,6 +64,7 @@ private:
     WeakPtr<Pattern> hostPattern_;
     AccessibilityParentRectInfo rectInfo_;
     mutable std::shared_mutex rectInfoMutex_;
+    bool allowCrossProcessNesting_ = false;
 };
 
 } // namespace OHOS::Ace

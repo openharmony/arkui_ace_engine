@@ -49,6 +49,7 @@ public:
         value->propFollowTransformOfTarget_ = CloneFollowTransformOfTarget();
         value->propEnableHoverMode_ = CloneEnableHoverMode();
         value->propShowAtAnchor_ = CloneShowAtAnchor();
+        value->propIsModal_ = CloneIsModal();
         return value;
     }
 
@@ -71,6 +72,7 @@ public:
         ResetFollowTransformOfTarget();
         ResetEnableHoverMode();
         ResetShowAtAnchor();
+        ResetIsModal();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -89,6 +91,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FollowTransformOfTarget, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowAtAnchor, TipsAnchorType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsModal, bool, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);

@@ -158,6 +158,9 @@ public:
     void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void StartCustomNodeAnimation(bool select);
     RefPtr<GroupManager> GetGroupManager();
+    static int32_t ParseCommand(const std::string& command, bool& selectStatus);
+    void ReportChangeEvent(bool selectStatus);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     void SaveCheckboxSettingData(const CheckboxSettingData& checkboxSettingData)
     {

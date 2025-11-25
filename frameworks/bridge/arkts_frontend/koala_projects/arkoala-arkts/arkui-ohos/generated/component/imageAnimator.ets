@@ -24,6 +24,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AnimationStatus, FillMode } from "./enums"
 import { AttributeModifier, extractors, hookImageAnimatorAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -447,7 +448,9 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageAnimatorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookImageAnimatorAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

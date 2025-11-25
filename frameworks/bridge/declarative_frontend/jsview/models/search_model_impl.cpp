@@ -211,11 +211,7 @@ void SearchModelImpl::SetMaxFontScale(const float value) {}
 
 void SearchModelImpl::SetSelectDetectEnable(bool value) {};
 
-void SearchModelImpl::SetSelectDetectConfig(std::vector<TextDataDetectType>& types) {};
-
 void SearchModelImpl::ResetSelectDetectEnable() {}
-
-void SearchModelImpl::ResetSelectDetectConfig() {}
 
 void SearchModelImpl::SetBackBorder()
 {

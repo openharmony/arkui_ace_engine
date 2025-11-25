@@ -61,7 +61,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @see PrimeNumbers
      */
     isKind(kind: uint32): boolean {
-        return this.kind % kind == 0
+        return this.kind % kind === 0
     }
 
     /**
@@ -158,17 +158,17 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @returns text representation of the node
      */
     toString(): string {
-        return className(this) + ": " + this.kind
+        return className(this) + ': ' + this.kind
     }
 
     /**
      * @returns text representation of a tree hierarchy starting from this node
      */
     toHierarchy(): string {
-        let str = ""
-        for (let node = this._parent; node; node = node!._parent) str += "  "
+        let str = ''
+        for (let node = this._parent; node; node = node!._parent) str += '  '
         str += this.toString()
-        for (let node = this._child; node; node = node!._next) str += "\n" + node!.toHierarchy()
+        for (let node = this._child; node; node = node!._next) str += '\n' + node!.toHierarchy()
         return str
     }
 
@@ -199,17 +199,17 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param count - a number of child nodes to skip during the incremental update
      * @internal
      */
-    incrementalUpdateSkip(count: uint32) {
+    incrementalUpdateSkip(count: uint32): void {
         if (count > 0) {
             const prev = this._incremental
             let next = prev ? prev._next : this._child
             while (1 < count--) {
-                if (next === undefined) throw new Error("child node is expected here")
+                if (next === undefined) throw new Error('child node is expected here')
                 next = next._next
             }
             this._incremental = next
         }
-        else throw new Error("unexpected count of child nodes to skip: " + count)
+        else throw new Error('unexpected count of child nodes to skip: ' + count)
     }
 
     /**
@@ -217,15 +217,15 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * when the incremental update of all children of this node is completed.
      * @internal
      */
-    incrementalUpdateDone(parent?: IncrementalNode) {
-        if (this._disposed) throw new Error("child node is already disposed")
+    incrementalUpdateDone(parent?: IncrementalNode): void {
+        if (this._disposed) throw new Error('child node is already disposed')
         this._incremental = undefined
         if (parent) {
             const prev = parent._incremental
             const next = prev ? prev._next : parent._child
             if (this._parent) {
-                if (this._parent != parent) throw new Error("child node belongs to another parent")
-                if (this != next) throw new Error("child node is not expected here")
+                if (this._parent !== parent) throw new Error('child node belongs to another parent')
+                if (this !== next) throw new Error('child node is not expected here')
                 parent._incremental = this
             } else {
                 parent._incremental = this

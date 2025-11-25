@@ -31,6 +31,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color, CopyOptions, TextAlign } from "./enums"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier, hookSearchAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
 import { ColorMetrics } from "arkui.Graphics"
@@ -1604,7 +1605,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSearchAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookSearchAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

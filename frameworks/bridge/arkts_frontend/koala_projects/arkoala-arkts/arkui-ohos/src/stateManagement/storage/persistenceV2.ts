@@ -536,7 +536,7 @@ export class PersistenceV2Impl {
             : (this.entriesMap_.has(key) ? this.entriesMap_.get(key) : undefined);
 
         if (obj === undefined) {
-            StateMgmtConsole.log(`Cannot save the key '${key}'! The key is disconnected`);
+            StateMgmtConsole.warn(`Cannot save the key '${key}'! The key is disconnected`);
             return false;
         }
         let status = true;

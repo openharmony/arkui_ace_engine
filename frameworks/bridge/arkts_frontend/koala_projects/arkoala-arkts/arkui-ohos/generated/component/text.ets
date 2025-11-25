@@ -16,15 +16,15 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
 import { LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, FontSettingOptions, MenuType } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer } from "./../framework/resource"
 import { LengthMetrics_serializer } from "./../Graphics"
-import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Font_serializer, ResourceColor, Length, Font, VoidCallback } from "./units"
 import { SelectionMenuOptions_serializer, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, PreviewMenuOptions } from "./richEditor"
 import { ComponentBase } from "./../ComponentBase"
@@ -33,6 +33,7 @@ import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptiveP
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
 import { AttributeModifier, hookTextAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -75,6 +76,13 @@ export class TextController implements MaterializedBase {
     public getLayoutManager(): LayoutManager {
         return this.getLayoutManager_serialize()
     }
+    public setTextSelection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined, options?: SelectionOptions): void {
+        const selectionStart_casted = selectionStart as (int32 | undefined)
+        const selectionEnd_casted = selectionEnd as (int32 | undefined)
+        const options_casted = options as (SelectionOptions | undefined)
+        this.setTextSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
+        return
+    }
     closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._TextController_closeSelectionMenu(this.peer!.ptr)
     }
@@ -85,6 +93,32 @@ export class TextController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextController_getLayoutManager(this.peer!.ptr)
         const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
         return obj
+    }
+    setTextSelection_serialize(selectionStart: int32 | undefined, selectionEnd: int32 | undefined, options?: SelectionOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (selectionStart !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const selectionStartTmpValue  = selectionStart!
+            thisSerializer.writeInt32(selectionStartTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (selectionEnd !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const selectionEndTmpValue  = selectionEnd!
+            thisSerializer.writeInt32(selectionEndTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SelectionOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextController_setTextSelection(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class ArkTextPeer extends ArkCommonMethodPeer {
@@ -1578,7 +1612,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+          hookTextAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

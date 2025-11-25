@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
@@ -27,6 +28,7 @@ import { Visibility } from "./component/enums"
 import { VoidCallback } from "./component/units"
 export class FormComponentModifier extends CommonMethodModifier implements FormComponentAttribute,AttributeModifier<FormComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState	
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -59,6 +61,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
     _onUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUpdate_0_0value?: ((value0: FormCallbackInfo) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkFormComponentPeer;
         if (this._size_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -262,6 +265,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
     }
     mergeModifier(modifier: FormComponentModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._size_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._size_0_flag) {

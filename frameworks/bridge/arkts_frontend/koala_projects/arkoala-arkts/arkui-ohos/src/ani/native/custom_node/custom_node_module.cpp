@@ -16,10 +16,27 @@
 #include "custom_node_module.h"
 #include "load.h"
 #include "utils/ani_utils.h"
+#include "log/log.h"
 
 #include <memory>
  
 namespace OHOS::Ace::Ani {
+ani_object CreateInt(ani_env* env, ani_int value)
+{
+    ani_class cls;
+    if (env->FindClass("std.core.Int", &cls) != ANI_OK) {
+        return nullptr;
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", "i:", &ctor) != ANI_OK) {
+        return nullptr;
+    }
+    ani_object rs;
+    if (env->Object_New(cls, ctor, &rs, value) != ANI_OK) {
+        return nullptr;
+    }
+    return rs;
+}
  
 ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
                              ani_int id, ani_object obj)
@@ -44,9 +61,18 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_type type;
     env->Object_GetType(obj, &type);
 
-    ani_method onPageShowMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onPageShow", ":", &onPageShowMethod);
-    auto&& onPageShow = [vm, weakRef, onPageShowMethod]() {
+    static ani_ref customComponentObj = nullptr;
+    if (!customComponentObj) {
+        if (env->GlobalReference_Create(type, &customComponentObj) != ANI_OK) {
+            HILOGE("Failed to create global reference");
+        }
+    }
+
+    static ani_method onPageShowMethod = nullptr;
+    if (!onPageShowMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onPageShow", ":", &onPageShowMethod);
+    }
+    auto&& onPageShow = [vm, weakRef]() {
         ani_env* env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
 
@@ -58,9 +84,11 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         }
     };
 
-    ani_method onPageHideMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onPageHide", ":", &onPageHideMethod);
-    auto&& onPageHide = [vm, weakRef, onPageHideMethod]() {
+    static ani_method onPageHideMethod = nullptr;
+    if (!onPageHideMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onPageHide", ":", &onPageHideMethod);
+    }
+    auto&& onPageHide = [vm, weakRef]() {
         ani_env* env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
 
@@ -72,9 +100,11 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         }
     };
 
-    ani_method onBackPressMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onBackPress", ":z", &onBackPressMethod);
-    auto&& onBackPress = [vm, weakRef, onBackPressMethod]() {
+    static ani_method onBackPressMethod = nullptr;
+    if (!onBackPressMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onBackPress", ":z", &onBackPressMethod);
+    }
+    auto&& onBackPress = [vm, weakRef]() {
         ani_env* env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
 
@@ -88,9 +118,12 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return result;
     };
 
-    ani_method pageTransitionMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "pageTransition", ":", &pageTransitionMethod);
-    auto pageTransition = [vm, weakRef, pageTransitionMethod]() {
+    static ani_method pageTransitionMethod = nullptr;
+    if (!pageTransitionMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "pageTransition", ":", &
+            pageTransitionMethod);
+    }
+    auto pageTransition = [vm, weakRef]() {
         ani_env* env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
         ani_boolean released;
@@ -101,9 +134,11 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         }
     };
 
-    ani_method onCleanupMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onCleanup", nullptr, &onCleanupMethod);
-    auto onCleanupFunc = [vm, weakRef, onCleanupMethod]() {
+    static ani_method onCleanupMethod = nullptr;
+    if (!onCleanupMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onCleanup", nullptr, &onCleanupMethod);
+    }
+    auto onCleanupFunc = [vm, weakRef]() {
         ani_env* env = nullptr;
         if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
             return;
@@ -119,10 +154,12 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         }
     };
 
-    ani_method onDumpInspectorMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onDumpInspector", ":C{std.core.String}",
-        &onDumpInspectorMethod);
-    auto onDumpInspector = [vm, weakRef, onDumpInspectorMethod]() {
+    static ani_method onDumpInspectorMethod = nullptr;
+    if (!onDumpInspectorMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onDumpInspector", ":C{std.core.String}", &
+            onDumpInspectorMethod);
+    }
+    auto onDumpInspector = [vm, weakRef]() {
         ani_env *env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
         ani_boolean released;
@@ -136,9 +173,12 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return AniUtils::ANIStringToStdString(env, aniStr);
     };
 
-    ani_method setActiveMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "setActiveInternal", nullptr, &setActiveMethod);
-    auto setActive = [vm, weakRef, setActiveMethod](bool a, bool b) {
+    static ani_method setActiveMethod = nullptr;
+    if (!setActiveMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "setActiveInternal", "zz:", &
+            setActiveMethod);
+    }
+    auto setActive = [vm, weakRef](bool a, bool b) {
         ani_env *env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
         ani_boolean released;
@@ -225,7 +265,8 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
     env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
-    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
+    env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
     env->Object_SetPropertyByName_Int(res, "index", info.index);
 
     ani_string navDesName {};
@@ -250,7 +291,10 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
     env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
     ani_enum_item navModeItem;
     env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
-    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    ani_int navModeInt;
+    env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
+    ani_object mode_obj = CreateInt(env, navModeInt);
+    env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
     return res;
 }
 
@@ -271,7 +315,8 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
     env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
-    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
+    env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
     env->Object_SetPropertyByName_Int(res, "index", info.index);
 
     ani_string navDesName {};
@@ -296,7 +341,10 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
     env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
     ani_enum_item navModeItem;
     env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
-    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    ani_int navModeInt;
+    env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
+    ani_object mode_obj = CreateInt(env, navModeInt);
+    env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
     return res;
 }
 
@@ -318,7 +366,8 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
     ani_method routerInfoCtor;
     env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
-    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
+    env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
     env->Object_SetPropertyByName_Int(res, "index", info.index);
     ani_string navDesName {};
     env->String_NewUTF8(info.name.c_str(), info.name.size(), &navDesName);
@@ -339,7 +388,10 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
     ani_enum_item navModeItem;
     env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
 
-    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    ani_int navModeInt;
+    env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
+    ani_object mode_obj = CreateInt(env, navModeInt);
+    env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
     return res;
 }
 

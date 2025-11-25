@@ -129,6 +129,10 @@ export struct WaterFlowBootcamp {
   @State layoutDirection: FlexDirection = FlexDirection.Column;
   @State enableLayoutMode: boolean = false;
   @State layoutMode: WaterFlowLayoutMode = WaterFlowLayoutMode.ALWAYS_TOP_DOWN;
+  @State enableUseFillType: boolean = true;
+  @State useFillType: boolean = false;
+  @State enableFillType: boolean = false;
+  @State fillType: PresetFillType = PresetFillType.BREAKPOINT_DEFAULT;
   @State enableColumnsTemplate: boolean = false;
   @State columnsTemplate: string = '1fr';
   @State enableRowsTemplate: boolean = false;
@@ -759,7 +763,10 @@ export struct WaterFlowBootcamp {
           end: useEnabled(this.enableScrollBarMarginEnd, LengthMetrics.vp(this.scrollBarMarginEnd))
         })
         .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
-        .columnsTemplate(useEnabled(this.enableColumnsTemplate, this.columnsTemplate))
+        .columnsTemplate(
+          this.useFillType ?
+          useEnabled(this.enableColumnsTemplate, this.columnsTemplate) :
+            { fillType: useEnabled(this.enableFillType, this.fillType) })
         .rowsTemplate(useEnabled(this.enableRowsTemplate, this.rowsTemplate))
         .itemConstraintSize(
           {
@@ -1483,6 +1490,28 @@ export struct WaterFlowBootcamp {
               { label: '1fr 1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr 1fr' }
             ]
           })
+
+          RadioBlock({
+            title: 'useFillType',
+            isEnabled: $enableUseFillType,
+            value: $useFillType,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false }
+            ]
+          })
+
+          RadioBlock({
+            title: 'fillType',
+            isEnabled: $enableFillType,
+            value: $fillType,
+            dataSource: [
+              { label: 'BREAKPOINT_DEFAULT', value: PresetFillType.BREAKPOINT_DEFAULT },
+              { label: 'BREAKPOINT_SM1MD2LG3', value: PresetFillType.BREAKPOINT_SM1MD2LG3 },
+              { label: 'BREAKPOINT_SM2MD3LG5', value: PresetFillType.BREAKPOINT_SM2MD3LG5 }
+            ]
+          })
+
         } else if (FlexDirection.Row === this.layoutDirection || FlexDirection.RowReverse === this.layoutDirection) {
           RadioBlock({
             title: 'rowsTemplate',

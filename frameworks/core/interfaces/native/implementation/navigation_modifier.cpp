@@ -76,6 +76,7 @@ void SetNavigationOptionsImpl(Ark_NativePointer node,
     auto navigationStack = pathStack->GetNavPathStack();
     navigationPattern->SetNavigationStack(navigationStack);
     navigationStack->SetOnStateChangedCallback(nullptr);
+    navigationStack->RegisterOnResultCallback();
 }
 } // namespace NavigationInterfaceModifier
 

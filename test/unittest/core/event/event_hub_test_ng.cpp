@@ -1022,6 +1022,82 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EventHubFrameNodeTest006
+ * @tc.desc: test set event about visibleAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubFrameNodeTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. set userVisibleAreaRatios, userVisibleAreaCallback.
+     * @tc.expected: HasVisibleAreaCallback is equal to true.
+     */
+    VisibleCallbackInfo callbackInfo;
+    const std::function<void(bool, double)>&& jsCallback = [](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    std::vector<double> ratios = { 0, 1.0 };
+    flag = 0;
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, true);
+    EXPECT_EQ(flag, 0);
+    EXPECT_EQ(eventHub->HasVisibleAreaCallback(true), true);
+    EXPECT_EQ(eventHub->GetVisibleAreaRatios(true), ratios);
+    EXPECT_NE(eventHub->GetVisibleAreaCallback(true).callback, nullptr);
+
+    /**
+     * @tc.steps: step3. clear userVisibleAreaRatios, userVisibleAreaCallback_.
+     * @tc.expected: userVisibleAreaRatios is empty, callback in userVisibleAreaCallback is nullptr.
+     */
+    eventHub->CleanVisibleAreaCallback(true, false);
+    EXPECT_EQ(eventHub->GetVisibleAreaRatios(true).empty(), true);
+    EXPECT_EQ(eventHub->GetVisibleAreaCallback(true).callback, nullptr);
+}
+
+/**
+ * @tc.name: EventHubFrameNodeTest007
+ * @tc.desc: test set event about visibleAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubFrameNodeTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. set innerVisibleAreaRatios, innerVisibleAreaCallback.
+     * @tc.expected: HasVisibleAreaCallback is equal to true.
+     */
+    VisibleCallbackInfo callbackInfo;
+    const std::function<void(bool, double)>&& jsCallback = [](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    std::vector<double> ratios = { 0, 1.0 };
+    flag = 0;
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, false);
+    EXPECT_EQ(flag, 0);
+    EXPECT_EQ(eventHub->HasVisibleAreaCallback(false), true);
+    EXPECT_EQ(eventHub->GetVisibleAreaRatios(false), ratios);
+    EXPECT_NE(eventHub->GetVisibleAreaCallback(false).callback, nullptr);
+
+    /**
+     * @tc.steps: step3. clear innerVisibleAreaRatios, innerVisibleAreaCallback_.
+     * @tc.expected: innerVisibleAreaRatios is empty, callback in innerVisibleAreaCallback is nullptr.
+     */
+    eventHub->CleanVisibleAreaCallback(false, false);
+    EXPECT_EQ(eventHub->GetVisibleAreaRatios(false).empty(), true);
+    EXPECT_EQ(eventHub->GetVisibleAreaCallback(false).callback, nullptr);
+}
+
+/**
  * @tc.name: EventHubTest006
  * @tc.desc: OnAttachContext
  * @tc.type: FUNC

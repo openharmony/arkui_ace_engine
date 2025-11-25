@@ -2342,6 +2342,12 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                           webCom->GetOnLoadFinishedEventId(), oldContext);
         onSafeBrowsingCheckFinishV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckFinishEvent()
                                                       : nullptr;
+        onCameraCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnCameraCaptureStateChangedEvent()
+                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                           webCom->GetCameraCaptureStateChangedId(), oldContext);
+        onMicrophoneCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnMicrophoneCaptureStateChangedEvent()
+                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                           webCom->GetMicrophoneCaptureStateChangedId(), oldContext);
     }
     return true;
 }
@@ -6213,6 +6219,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         auto webPattern = delegate->webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->SetAILinkMenuShow(false);
+        webPattern->RegisterMenuLifeCycleCallback();
         if (delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, true, true);
             result = true;
@@ -6239,6 +6246,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
             webPattern->SetAILinkMenuShow(false);
+            webPattern->RegisterMenuLifeCycleCallback();
             if (delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, true, true);
                 result = true;
@@ -8749,6 +8757,22 @@ void WebDelegate::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
         TaskExecutor::TaskType::JS, "ArkUIWebViewportFitChanged");
 }
 
+void WebDelegate::OnCameraCaptureStateChanged(int originalState, int newState)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), originalState, newState]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onCameraCaptureStateChangedV2 = delegate->onCameraCaptureStateChangedV2_;
+            if (onCameraCaptureStateChangedV2) {
+                onCameraCaptureStateChangedV2(std::make_shared<CameraCaptureStateEvent>(
+                    static_cast<int32_t>(originalState), static_cast<int32_t>(newState)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebCameraStateChanged");
+}
+
 void WebDelegate::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
     bool changed = false;
@@ -9581,5 +9605,21 @@ void WebDelegate::UnregisterFreeMultiWindowListener()
     } else {
         TAG_LOGE(AceLogTag::ACE_WEB, "UnregisterSwitchFreeMultiWindowListener failed, webId: %{public}d", GetWebId());
     }
+}
+
+void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newState)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), originalState, newState]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onMicrophoneCaptureStateChangedV2 = delegate->onMicrophoneCaptureStateChangedV2_;
+            if (onMicrophoneCaptureStateChangedV2) {
+                onMicrophoneCaptureStateChangedV2(std::make_shared<MicrophoneCaptureStateEvent>(
+                    static_cast<int32_t>(originalState), static_cast<int32_t>(newState)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
 }
 } // namespace OHOS::Ace

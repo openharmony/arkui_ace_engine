@@ -66,9 +66,7 @@ public:
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetSelectDetectEnable(bool value) override;
-    void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) override;
     void ResetSelectDetectEnable() override;
-    void ResetSelectDetectConfig() override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
@@ -153,13 +151,13 @@ public:
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
     static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
+    static void SetTextTextSelection(FrameNode* frameNode,
+        int32_t startIndex, int32_t endIndex, MenuPolicy menuItem);
+    static TextSelectionOptions GetTextSelectionOptions(FrameNode* frameNode);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
-    static void SetSelectDetectConfig(FrameNode* frameNode, std::vector<TextDataDetectType>& types);
-    static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
-    static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void ResetFontFeature(FrameNode* frameNode);
     static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);

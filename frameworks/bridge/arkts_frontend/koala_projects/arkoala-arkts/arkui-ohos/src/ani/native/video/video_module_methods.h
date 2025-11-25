@@ -19,7 +19,10 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
-void SetVideoPixelMap(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_object pixelMap);
+void SetVideoOnErrorVoidCallback(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_fn_object callback);
+void SetVideoOnErrorErrorCallback(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_fn_object callback);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_VIDEO_MODULE_METHODS_H

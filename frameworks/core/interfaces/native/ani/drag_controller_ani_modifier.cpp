@@ -237,7 +237,7 @@ void prepareDataForCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     ArkUIDragNotifyMessage& notifyMsg)
 {
     arkUIAsync->env = asyncCtx->env;
-    arkUIAsync->extraParams = asyncCtx->extraParams.c_str();
+    arkUIAsync->extraParams = asyncCtx->extraParams;
     arkUIAsync->isArray = asyncCtx->isArray;
     arkUIAsync->dragAction = asyncCtx->dragAction;
     arkUIAsync->deferred = asyncCtx->deferred;
@@ -872,8 +872,8 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     CHECK_NULL_RETURN(dragAsyncContext, nullptr);
     dragAsyncContext->env = asyncCtx.env;
     dragAsyncContext->isArray = asyncCtx.isArray;
-    if (asyncCtx.extraParams) {
-        dragAsyncContext->extraParams = std::string(asyncCtx.extraParams);
+    if (!asyncCtx.extraParams.empty()) {
+        dragAsyncContext->extraParams = asyncCtx.extraParams;
     }
     dragAsyncContext->hasHandle = asyncCtx.hasHandle;
     void* touchPointPtr = asyncCtx.touchPoint;
