@@ -6361,7 +6361,8 @@ void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetMetaViewport(enabled);
 }
 
-bool CheckScriptRulesValid(const JSRef<JSVal>& jsScriptRules, const JSRef<JSVal>& jsScriptRegexRules) {
+bool CheckScriptRulesValid(const JSRef<JSVal>& jsScriptRules, const JSRef<JSVal>& jsScriptRegexRules)
+{
     if (!jsScriptRules->IsArray()) {
         return false;
     }
