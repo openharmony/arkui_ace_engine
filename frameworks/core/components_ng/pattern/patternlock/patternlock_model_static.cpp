@@ -64,7 +64,8 @@ void PatternLockModelStatic::SetSideLength(FrameNode* frameNode, const std::opti
     if (sideLength.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(PatternLockLayoutProperty, SideLength, sideLength.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(PatternLockLayoutProperty, SideLength, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            PatternLockLayoutProperty, SideLength, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
