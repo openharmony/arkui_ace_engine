@@ -177,6 +177,9 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         UseEffectTypeToString(propUseEffectType_.value_or(EffectType::DEFAULT)).c_str(), filter);
     json->PutExtAttr("renderStrategy",
         StringUtils::ToString(GetRenderStrategyValue(RenderStrategy::FAST)).c_str(), filter);
+    if (GetExcludeFromRenderGroup().has_value()) {
+        json->PutExtAttr("excludeFromRenderGroup", GetExcludeFromRenderGroupValue() ? "true" : "false", filter);
+    }
 }
 
 void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

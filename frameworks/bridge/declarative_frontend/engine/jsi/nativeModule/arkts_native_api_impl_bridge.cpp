@@ -1295,6 +1295,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSystemMaterial));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSystemMaterial"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSystemMaterial));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setExcludeFromRenderGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExcludeFromRenderGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExcludeFromRenderGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExcludeFromRenderGroup));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);

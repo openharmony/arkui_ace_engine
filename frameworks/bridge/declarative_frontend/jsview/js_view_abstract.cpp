@@ -9699,6 +9699,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
+    JSClass<JSViewAbstract>::StaticMethod("excludeFromRenderGroup", &JSViewAbstract::JSExcludeFromRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
 
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
@@ -11598,6 +11599,19 @@ void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
         isRenderGroup = info[0]->ToBoolean();
     }
     ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
+}
+
+void JSViewAbstract::JSExcludeFromRenderGroup(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    bool exclude = false;
+    auto arg0 = info[0];
+    if (arg0->IsBoolean()) {
+        exclude = arg0->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetExcludeFromRenderGroup(exclude);
 }
 
 void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)

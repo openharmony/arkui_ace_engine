@@ -3974,6 +3974,20 @@ void ResetRenderGroup(ArkUINodeHandle node)
     ViewAbstract::SetRenderGroup(frameNode, false);
 }
 
+void SetExcludeFromRenderGroup(ArkUINodeHandle node, ArkUI_Bool exclude)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetExcludeFromRenderGroup(frameNode, exclude);
+}
+
+void ResetExcludeFromRenderGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetExcludeFromRenderGroup(frameNode, false);
+}
+
 void SetRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10260,6 +10274,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetSphericalEffect = ResetSphericalEffect,
         .setRenderGroup = SetRenderGroup,
         .resetRenderGroup = ResetRenderGroup,
+        .setExcludeFromRenderGroup = SetExcludeFromRenderGroup,
+        .resetExcludeFromRenderGroup = ResetExcludeFromRenderGroup,
         .setRenderFit = SetRenderFit,
         .resetRenderFit = ResetRenderFit,
         .setUseEffect = SetUseEffect,
