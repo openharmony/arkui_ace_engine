@@ -602,4 +602,45 @@ HWTEST_F(OverlayManagerTestFourNg, GetMainPipelineContext002, TestSize.Level1)
     auto context = dialogManager.GetMainPipelineContext(frameNode, isTargetNodeInSubwindow);
     EXPECT_EQ(context, AceType::Claim(pipeline));
 }
+
+/**
+ * @tc.name: BindKeyboardWithNode002
+ * @tc.desc: Test BindKeyboardWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, BindKeyboardWithNode002, TestSize.Level1)
+{
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("STAGE", TARGET_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    RefPtr<FrameNode> frameNode1 = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = rootNode->GetContext();
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    pipeline->SetTextFieldManager(textFieldManager);
+    OverlayManager overlayManager(rootNode);
+    overlayManager.customKeyboardMap_.insert({ TWO, frameNode });
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>("node", 2002, AceType::MakeRefPtr<Pattern>());;
+    int32_t targetId = TARGET_ID;
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto targetNode = FrameNode::CreateFrameNode("tag", TARGET_ID_NEW, pattern, false);
+    WeakPtr<UINode> weakNode = targetNode;
+    overlayManager.rootNodeWeak_ = weakNode;
+    overlayManager.BindKeyboardWithNode(customNode, targetId);
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    customNode = AceType::MakeRefPtr<FrameNode>("node", 0, AceType::MakeRefPtr<Pattern>());
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    textFieldManager->SetCustomKeyboardId(0);
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    overlayManager.oldTargetId_ = 3;
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+    overlayManager.oldTargetId_ = 2;
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), true);
+    overlayManager.oldTargetId_ = -1;
+    overlayManager.customKeyboardMap_.insert({ -1, frameNode1 });
+    overlayManager.BindKeyboardWithNode(customNode, targetId);
+    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
+}
 } // namespace OHOS::Ace::NG

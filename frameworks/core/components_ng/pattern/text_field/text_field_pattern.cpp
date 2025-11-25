@@ -1175,6 +1175,7 @@ void TextFieldPattern::HandleFocusEvent()
     ResetFirstClickAfterGetFocus();
     SetFocusStyle();
     ReportTextChangeEvent(FIELD_FOCUS_EVENT);
+    OnFocusCustomKeyboardChange();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
@@ -1604,10 +1605,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
     StopTwinkling();
-    if (((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_)) {
-        CloseKeyboard(true);
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "textfield %{public}d on blur, close custom keyboard", host->GetId());
-    }
     HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
@@ -1627,6 +1624,54 @@ void TextFieldPattern::HandleBlurEvent()
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
     ClearFocusStyle();
+}
+
+void TextFieldPattern::OnFocusCustomKeyboardChange()
+{
+    auto currentNode = GetHost();
+    CHECK_NULL_VOID(currentNode);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    if (!textFieldManager->NeedCloseKeyboard()) {
+        return;
+    }
+    if (customKeyboard_) {
+        bool matched = GetCustomKeyboardIsMatched(customKeyboard_->GetId());
+        textFieldManager->ProcessCustomKeyboard(matched, currentNode->GetId());
+        SetCustomKeyboardNodeId(customKeyboard_);
+        return;
+    }
+    textFieldManager->ProcessCustomKeyboard(false, currentNode->GetId());
+    SetCustomKeyboardNodeId(nullptr);
+}
+
+bool TextFieldPattern::NeedCloseKeyboard()
+{
+    return (customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
+}
+
+void TextFieldPattern::ProcessCustomKeyboard(bool matched, int32_t nodeId)
+{
+    auto preNode = GetHost();
+    CHECK_NULL_VOID(preNode);
+    if (!matched) {
+        CloseKeyboard(true);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "textfield %{public}d customKeyboard unmatched, close custom keyboard",
+            preNode->GetId());
+    } else if (nodeId != preNode->GetId()) {
+        isCustomKeyboardAttached_ = false;
+    }
+}
+
+void TextFieldPattern::CloseTextCustomKeyboard(int32_t nodeId)
+{
+    auto preNode = GetHost();
+    CHECK_NULL_VOID(preNode);
+    if ((HasCustomKeyboard()) && GetIsCustomKeyboardAttached() && nodeId != preNode->GetId()) {
+        CloseCustomKeyboard();
+    }
 }
 
 void TextFieldPattern::ModifyInnerStateInBlurEvent()
@@ -5238,11 +5283,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
-    if (customKeyboardBuilder_) {
-        overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
-    } else {
-        overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
-    }
+    RequestCustomKeyboardBuilder();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->SetLastRequestKeyboardId(GetRequestKeyboardId());
@@ -5256,6 +5297,23 @@ bool TextFieldPattern::RequestCustomKeyboard()
     }
     keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), safeHeight);
     return true;
+}
+
+void TextFieldPattern::RequestCustomKeyboardBuilder()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (customKeyboardBuilder_) {
+        SetCustomKeyboardNodeId(nullptr);
+        overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+    } else {
+        SetCustomKeyboardNodeId(customKeyboard_);
+        overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
+    }
 }
 
 bool TextFieldPattern::CloseCustomKeyboard()
@@ -11726,6 +11784,33 @@ void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardB
 #endif
     }
     customKeyboardBuilder_ = keyboardBuilder;
+}
+
+void TextFieldPattern::SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeyboardNode)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    WeakPtr<FrameNode> weakNode = frameNode;
+    textFieldManager->SetPreNode(weakNode);
+    if (customKeyboardNode) {
+        textFieldManager->SetCustomKeyboardId(customKeyboardNode->GetId());
+    } else {
+        textFieldManager->SetCustomKeyboardId(-1);
+    }
+}
+
+bool TextFieldPattern::GetCustomKeyboardIsMatched(int32_t CustomKeyboardId)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto id = textFieldManager->GetCustomKeyboardId();
+    return CustomKeyboardId == id;
 }
 
 void TextFieldPattern::SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)

@@ -1359,4 +1359,67 @@ HWTEST_F(TextFieldPatternTestNine, GetMaxIndent, TestSize.Level0)
     width = textFieldLayoutAlgorithm->GetMaxIndent(&layoutWrapper, std::numeric_limits<double>::infinity());
     EXPECT_EQ(width, 200.0f);
 }
+
+/**
+ * @tc.name: OnFocusNodeChange001
+ * @tc.desc: test OnFocusNodeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnFocusNodeChange001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = pattern->GetContext();
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    auto refPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    WeakPtr<FrameNode> weakNode(frameNode);
+    textFieldManager->SetPreNode(weakNode);
+    pipeline->SetTextFieldManager(textFieldManager);
+    pattern->OnFocusCustomKeyboardChange();
+    refPattern->customKeyboardBuilder_ = [] () {};
+    refPattern->isCustomKeyboardAttached_ = true;
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>("node", 2002, AceType::MakeRefPtr<Pattern>());
+    pattern->customKeyboard_ = customNode;
+    pattern->OnFocusCustomKeyboardChange();
+    EXPECT_FALSE(pattern->isCustomKeyboardAttached_);
+    refPattern->isCustomKeyboardAttached_ = true;
+    textFieldManager->SetPreNode(weakNode);
+    pipeline->SetTextFieldManager(textFieldManager);
+    pattern->OnFocusCustomKeyboardChange();
+    EXPECT_FALSE(pattern->isCustomKeyboardAttached_);
+    refPattern->isCustomKeyboardAttached_ = true;
+    pattern->customKeyboard_ = nullptr;
+    textFieldManager->SetPreNode(weakNode);
+    pipeline->SetTextFieldManager(textFieldManager);
+    pattern->OnFocusCustomKeyboardChange();
+    EXPECT_FALSE(pattern->isCustomKeyboardAttached_);
+}
+
+/**
+ * @tc.name: SetCustomKeyboardNodeId001
+ * @tc.desc: test SetCustomKeyboardNodeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SetCustomKeyboardNodeId, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = pattern->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    pipeline->SetTextFieldManager(textFieldManager);
+    RefPtr<UINode> customNode;
+    pattern->SetCustomKeyboardNodeId(customNode);
+    EXPECT_EQ(pattern->GetCustomKeyboardIsMatched(2002), false);
+    customNode = AceType::MakeRefPtr<FrameNode>("node", 2002, AceType::MakeRefPtr<Pattern>());
+    pattern->SetCustomKeyboardNodeId(customNode);
+    EXPECT_EQ(pattern->GetCustomKeyboardIsMatched(2002), true);
+}
 } // namespace OHOS::Ace::NG
