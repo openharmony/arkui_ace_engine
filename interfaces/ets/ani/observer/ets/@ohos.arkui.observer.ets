@@ -144,13 +144,12 @@ import hilog from '@ohos.hilog'
                 return staticValue;
             }
             let navigationId = dynamicValue.getProperty("navigationId");
-            if (!navigationId.isString()) {
-                throw Error("navigationId in NavigationInfo type Error");
+            if (navigationId.isString()) {
+                staticValue.navigationId = navigationId.toString();
             }
-            staticValue.navigationId = navigationId.toString();
             let navPathStack = dynamicValue.getProperty("pathStack");
             if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
-                staticValue.pathStack = navPathStack.unwrap() as NavPathStack;
+                // pathStack needs analysis to static NavPathStack
             }
             return staticValue;
         }
@@ -251,8 +250,6 @@ import hilog from '@ohos.hilog'
                 staticValue.navigationId = navigationId.toString();
             } else if (navigationId.isObject()) {
                 staticValue.navigationId = navigationId.toStaticObject() as Resource;
-            } else {
-                throw Error("navigationId in NavDestinationInfo type Error");
             }
 
             let name = dynamicValue.getProperty("name");
@@ -260,50 +257,37 @@ import hilog from '@ohos.hilog'
                 staticValue.name = name.toString();
             } else if (name.isObject()) {
                 staticValue.name = name.toStaticObject() as Resource;
-            } else {
-                throw Error("name in NavDestinationInfo type Error");
             }
 
             let state = dynamicValue.getProperty("state");
-            if (!state.isNumber()) {
-                throw Error("state in NavDestinationInfo type Error");
+            if (state.isNumber()) {
+                staticValue.state = NavDestinationInfoImpl.castToNavDestinationInfo(state.toNumber());
             }
-            staticValue.state = NavDestinationInfoImpl.castToNavDestinationInfo(state.toNumber());
 
             let index = dynamicValue.getProperty("index");
-            if (!index.isNumber()) {
-                throw Error("index in NavDestinationInfo type Error");
+            if (index.isNumber()) {
+                staticValue.index = index.toNumber() as int;
             }
-            staticValue.index = index.toNumber() as int;
 
             let param = dynamicValue.getProperty("param");
-            if (param.isString()) {
+            if (param.isObject()) {
                 staticValue.param = param.toStaticObject();
-            } else if (!(param.isUndefined() || param.isNull())) {
-                throw Error("param in NavDestinationInfo type Error");
-            }   
-            
-            let navDestinationId = dynamicValue.getProperty("navDestinationId");
-            if (!navDestinationId.isString()) {
-                throw Error("navDestinationId in NavDestinationInfo type Error");
             }
-            staticValue.navDestinationId = navDestinationId.toString();
+
+            let navDestinationId = dynamicValue.getProperty("navDestinationId");
+            if (navDestinationId.isString()) {
+                staticValue.navDestinationId = navDestinationId.toString();
+            }
 
             let uniqueId = dynamicValue.getProperty("uniqueId");
-            if (!uniqueId.isNumber()) {
-                throw Error("uniqueId in NavDestinationInfo type Error");
-            } else if (!(uniqueId.isUndefined() || uniqueId.isNull())) {
-                throw Error("uniqueId in NavDestinationInfo type Error");
+            if (uniqueId.isNumber()) {
+                staticValue.uniqueId = uniqueId.toNumber() as int;
             }
-            staticValue.uniqueId = uniqueId.toNumber() as int;
 
             let mode = dynamicValue.getProperty("mode");
-            if (!mode.isNumber()) {
-                throw Error("mode in NavDestinationInfo type Error");
-            } else if (!(mode.isUndefined() || mode.isNull())) {
-                throw Error("mode in NavDestinationInfo type Error");
+            if (mode.isNumber()) {
+                staticValue.mode = NavDestinationInfoImpl.castToNavDestinationMode(mode.toNumber());
             }
-            staticValue.mode = NavDestinationInfoImpl.castToNavDestinationMode(mode.toNumber());
 
             return staticValue;
         }
@@ -369,7 +353,7 @@ import hilog from '@ohos.hilog'
             } else if (value === 4) {
                 return RouterPageState.ON_BACK_PRESS;
             } else {
-                throw Error("state in NavDestinationInfo type Error");
+                throw Error("state in RouterPageInfo type Error");
             }
         }
         static transferStatic(input: Any): Object {
@@ -380,38 +364,34 @@ import hilog from '@ohos.hilog'
             }
             let context = dynamicValue.getProperty('context');
             if (context.typeOf() !== 'undefined' && context.typeOf() !== 'null') {
-                staticValue.context = context.unwrap() as UIContext | UIAbilityContext;
+                // context needs analysis to static UIContext and UIAbilityContext
             }
 
             let index = dynamicValue.getProperty('index');
-            if (!index.isNumber()) {
-                throw Error("index in RouterPageInfo type Error");
+            if (index.isNumber()) {
+                staticValue.index = index.toNumber() as int;
             }
-            staticValue.index = index.toNumber() as int;
 
             let name = dynamicValue.getProperty('name');
-            if (!name.isString()) {
-                throw Error("name in RouterPageInfo type Error");
+            if (name.isString()) {
+                staticValue.name = name.toString();
             }
-            staticValue.name = name.toString();
 
             let path = dynamicValue.getProperty('path');
-            if (!path.isString()) {
-                throw Error("path in RouterPageInfo type Error");
+            if (path.isString()) {
+                staticValue.path = path.toString();
             }
-            staticValue.path = path.toString();
 
             let pageId = dynamicValue.getProperty('pageId');
-            if (!pageId.isString()) {
-                throw Error("pageId in RouterPageInfo type Error");
+            if (pageId.isString()) {
+                staticValue.pageId = pageId.toString();
             }
-            staticValue.pageId = pageId.toString();
 
             let state = dynamicValue.getProperty('state');
-            if (!state.isNumber()) {
-                throw Error("state in RouterPageInfo type Error");
+            if (state.isNumber()) {
+                staticValue.state = RouterPageInfo.castToRouterPageState(state.toNumber());
             }
-            staticValue.state = RouterPageInfo.castToRouterPageState(state.toNumber());
+
             return staticValue;
         }
 
