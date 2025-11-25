@@ -685,14 +685,7 @@ Opt_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
     auto locOptions = Converter::OptConvertPtr<ImageSpanOptions>(options).value_or(ImageSpanOptions{});
     std::optional<ImageSourceInfo> info;
     Converter::VisitUnion(*value,
-        [&info](const Ark_NativePointer& val) {
-            auto pixelMap = reinterpret_cast<PixelMap*>(val);
-            CHECK_NULL_VOID(pixelMap);
-            RefPtr<PixelMap> PixelMapRef = AceType::Claim(pixelMap);
-            CHECK_NULL_VOID(PixelMapRef);
-            info = ImageSourceInfo(PixelMapRef);
-        },
-        [&info](const Ark_ResourceStr& val) {
+        [&info](const auto& val) {
             info = Converter::OptConvert<ImageSourceInfo>(val);
         },
         []() {}
