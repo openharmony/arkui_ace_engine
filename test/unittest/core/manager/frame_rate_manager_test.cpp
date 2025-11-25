@@ -127,19 +127,25 @@ HWTEST_F(FrameRateRangeTest, GetDisplaySyncRate, TestSize.Level1)
  */
 HWTEST_F(FrameRateRangeTest, GetExpectedRateTest, TestSize.Level1)
 {
+    int32_t nodeId1 = 1;
+    int32_t nodeId2 = 2;
+    int32_t nodeId3 = 3;
+    uint32_t displaySyncType = 1;
+    int32_t rate = 120;
     FrameRateManager frameRageManager;
-    frameRageManager.AddNodeRate(1, "", 0);
-    frameRageManager.SetDisplaySyncRate(0, 1);
+    frameRageManager.AddNodeRate(nodeId1, "", 0);
+    frameRageManager.SetDisplaySyncRate(0, displaySyncType);
     frameRageManager.SetDisplaySyncRate(0, 0);
     EXPECT_EQ(true, frameRageManager.IsRateChanged());
     frameRageManager.SetAnimateRate(0, true);
     auto [expectedRate, expectedRateType] = frameRageManager.GetExpectedRate();
     EXPECT_EQ(UI_ANIMATION_FRAME_RATE_TYPE & expectedRateType, UI_ANIMATION_FRAME_RATE_TYPE);
-
-    int32_t rate = 120;
-    frameRageManager.AddNodeRate(2, "refresh2_drag_scene", rate);
+    frameRageManager.AddNodeRate(nodeId2, "refresh_drag_scene", rate);
+    auto [expectedRate1, expectedRateType1] = frameRageManager.GetExpectedRate();
+    EXPECT_EQ(rate, expectedRate1);
+    EXPECT_EQ(REFRESH_DRAG_FRAME_RATE_TYPE & expectedRateType1, REFRESH_DRAG_FRAME_RATE_TYPE);
+    frameRageManager.AddNodeRate(nodeId3, "unknown_scene", rate);
     auto [expectedRate2, expectedRateType2] = frameRageManager.GetExpectedRate();
     EXPECT_EQ(rate, expectedRate2);
-    EXPECT_EQ(REFRESH_DRAG_FRAME_RATE_TYPE & expectedRateType2, REFRESH_DRAG_FRAME_RATE_TYPE);
 }
 } // namespace OHOS::Ace::NG
