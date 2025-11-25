@@ -1164,7 +1164,9 @@ void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
         if (navigationStackExtend) {
             auto navPathStackVal =
                 JsConverter::ConvertNapiValueToJsVal(navigationStackExtend->GetNavPathStackExtendObj());
-            navPathStackObj = JSRef<JSObject>::Cast(navPathStackVal);
+            if (navPathStackVal->IsObject()) {
+                navPathStackObj = JSRef<JSObject>::Cast(navPathStackVal);
+            }
         }
     } else {
         // ArkTS dynamic
