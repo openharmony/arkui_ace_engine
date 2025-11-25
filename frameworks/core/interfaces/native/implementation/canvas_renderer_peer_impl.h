@@ -126,12 +126,12 @@ public:
     void SetFillStyle(const std::optional<Color>& color);
     void SetFillStyle(const uint32_t colorNum);
     void SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient);
-    void SetFillStyle(const int32_t id);
+    void SetFillStylePattern(const int32_t id);
     void SetStrokeStyle(const std::string& colorStr);
     void SetStrokeStyle(const std::optional<Color>& color);
     void SetStrokeStyle(const uint32_t colorNum);
     void SetStrokeStyle(const std::shared_ptr<Ace::Gradient>& gradient);
-    void SetStrokeStyle(const int32_t id);
+    void SetStrokeStylePattern(const int32_t id);
     void SetFilter(const std::string& filterStr);
     void SetImageSmoothingEnabled(bool enabled);
     void SetImageSmoothingQuality(const std::string& quality);
