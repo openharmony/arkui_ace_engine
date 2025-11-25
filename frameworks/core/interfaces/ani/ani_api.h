@@ -654,7 +654,8 @@ struct ArkUIAniStyledStringModifier {
     void* (*getPixelMap)(ArkUIStyledString peer);
 };
 struct ArkUIAniVideoModifier {
-    void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
+    void (*setOnError)(ArkUINodeHandle node, std::function<void(const std::string&)>&& onError);
+    void (*parseVideoError)(const std::string& jsonStr, int32_t& code, std::string& message);
 };
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);

@@ -15,8 +15,10 @@
 
 import { SerializerBase, runtimeType, RuntimeType } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { ArkVideoComponent, VideoOptions, ImageAIOptions, ImageAnalyzerConfig } from "#generated"
+import { ArkVideoComponent, ArkVideoPeer, VideoOptions, ImageAIOptions, ImageAnalyzerConfig, VoidCallback } from "#generated"
 import { ImageAIOptions_serializer, VideoOptions_serializer } from "#generated"
+import { ArkUIAniModule } from "arkui.ani";
+import { ErrorCallback } from "@ohos.base";
 
 export class VideoOpsHandWritten {
     static hookSetVideoOptionsImpl(component: ArkVideoComponent, value: VideoOptions): void {
@@ -50,8 +52,8 @@ export class VideoOpsHandWritten {
         }
     }
     static hookSetVideoAnalyzerConfigImpl(
-        component: ArkVideoComponent, config: ImageAnalyzerConfig | undefined): void {
-        const peer = component.getPeer();
+        component: ArkVideoComponent | ArkVideoPeer, config: ImageAnalyzerConfig | undefined): void {
+        const peer = (component instanceof ArkVideoComponent) ? component.getPeer() : component;
         if (peer === undefined || config === undefined) {
             return;
         }
@@ -70,6 +72,25 @@ export class VideoOpsHandWritten {
         const analyzerConfigFunc = global.getProperty('hookVideoSetAnalyzerConfig');
         if (!(analyzerConfigFunc.isNull() || analyzerConfigFunc.isUndefined())) {
             analyzerConfigFunc.invoke(ESObject.wrap(peerPtr), configObj);
+        }
+    }
+    static hookSetVideoOnErrorImpl(
+        component: ArkVideoComponent | ArkVideoPeer,
+        value: VoidCallback | ErrorCallback | undefined): void {
+        const peer = (component instanceof ArkVideoComponent) ? component.getPeer() : component;
+        if (peer === undefined) {
+            return;
+        }
+        let peerPtr = peer.peer.ptr;
+        if (value === undefined) {
+            ArkUIAniModule._Video_SetVoidCallback(peerPtr, () => {});
+            return;
+        }
+        const valueTmpValue = value!;
+        if (valueTmpValue instanceof VoidCallback) {
+            ArkUIAniModule._Video_SetVoidCallback(peerPtr, valueTmpValue as VoidCallback);
+        } else if (valueTmpValue instanceof ErrorCallback) {
+            ArkUIAniModule._Video_SetErrorCallback(peerPtr, valueTmpValue as ErrorCallback);
         }
     }
 }

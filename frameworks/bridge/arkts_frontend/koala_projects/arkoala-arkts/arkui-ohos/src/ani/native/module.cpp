@@ -804,9 +804,14 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
         },
         ani_native_function {
-            "_Video_Transfer_PixelMap",
-            "lC{@ohos.multimedia.image.image.PixelMap}:",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetVideoPixelMap)
+            "_Video_SetVoidCallback",
+            "lC{std.core.Function0}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetVideoOnErrorVoidCallback)
+        },
+        ani_native_function {
+            "_Video_SetErrorCallback",
+            "lC{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetVideoOnErrorErrorCallback)
         },
         ani_native_function {
             "_Shape_Transfer_PixelMap",

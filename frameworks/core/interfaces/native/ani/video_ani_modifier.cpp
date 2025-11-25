@@ -16,29 +16,38 @@
 #include "video_ani_modifier.h"
 
 #include "base/log/log.h"
+#include "base/json/json_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_model_static.h"
-#if defined(PIXEL_MAP_SUPPORTED)
-#include "pixel_map.h"
-#include "base/image/pixel_map.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
-void SetVideoPixelMap(ArkUINodeHandle node, void* pixelMap)
+void SetVideoOnError(ArkUINodeHandle node, std::function<void(const std::string&)>&& onError)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(pixelMap);
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto pixelMapRef = PixelMap::CreatePixelMap(pixelMap);
-    VideoModelStatic::SetPosterSourceByPixelMap(frameNode, pixelMapRef);
-#endif
+    CHECK_NULL_VOID(onError);
+    VideoModelStatic::SetOnError(frameNode, std::move(onError));
+}
+
+void ParseVideoError(const std::string& jsonStr, int32_t& code, std::string& message)
+{
+    auto data = JsonUtil::ParseJsonString(jsonStr);
+    CHECK_NULL_VOID(data);
+    auto codeVal = data->GetValue("code");
+    auto messageVal = data->GetValue("message");
+    CHECK_NULL_VOID(codeVal);
+    CHECK_NULL_VOID(messageVal);
+    code = codeVal->GetInt();
+    message = messageVal->GetString();
 }
 
 const ArkUIAniVideoModifier* GetVideoAniModifier()
 {
-    static const ArkUIAniVideoModifier impl = { .setPixelMap = OHOS::Ace::NG::SetVideoPixelMap };
+    static const ArkUIAniVideoModifier impl = {
+        .setOnError = OHOS::Ace::NG::SetVideoOnError,
+        .parseVideoError = OHOS::Ace::NG::ParseVideoError,
+    };
     return &impl;
 }
 
