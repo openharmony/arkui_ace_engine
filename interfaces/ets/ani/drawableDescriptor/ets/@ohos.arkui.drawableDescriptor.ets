@@ -14,6 +14,7 @@
  */
 
 import image from '@ohos.multimedia.image';
+import drawing from '@ohos.graphics.drawing';
 
 class NativeDestructor {
   private ptr: long = 0
@@ -150,6 +151,12 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   static getMaskClipPath(): string {
     return DrawableDescriptorInner.getMaskClipPath()
   }
+
+  setBlendMode(mode: drawing.BlendMode | undefined): void {
+    if (mode != undefined) {
+      DrawableDescriptorInner.setBlendMode(this, mode)
+    }
+  }
 }
 
 export interface AnimationOptions {
@@ -193,6 +200,7 @@ class DrawableDescriptorInner {
   native static createBackground(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static createMask(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static getMaskClipPath(): string;
+  native static setBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void;
   native static nativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor;
   native static destructDrawable(ptr: long): void;
 }

@@ -508,6 +508,42 @@ napi_value JsDrawableDescriptor::GetMaskClipPath(napi_env env, napi_callback_inf
     return result;
 }
 
+bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType)
+{
+    size_t argc = 1;
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        return false;
+    }
+    napi_typeof(env, argv[0], &valueType);
+    return true;
+}
+
+napi_value JsDrawableDescriptor::SetBlendMode(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    void* native = nullptr;
+    napi_unwrap(env, thisVar, &native);
+    auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
+    if (!drawable) {
+        return nullptr;
+    }
+    napi_value argv[1] = { 0 };
+    napi_valuetype valueType = napi_undefined;
+    if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_number)) {
+        HILOGI("invalid number value for blendMode");
+        return nullptr;
+    }
+    int32_t mode;
+    napi_get_value_int32(env, argv[0], &mode);
+    drawable->SetBlendMode(mode);
+    napi_close_escapable_handle_scope(env, scope);
+    return nullptr;
+}
+
 napi_value JsDrawableDescriptor::GetPixelMap(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -1136,6 +1172,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetLayeredDrawableDe
         DECLARE_NAPI_FUNCTION("getBackground", GetBackground),
         DECLARE_NAPI_FUNCTION("getMask", GetMask),
         DECLARE_NAPI_STATIC_FUNCTION("getMaskClipPath", GetMaskClipPath),
+        DECLARE_NAPI_FUNCTION("setBlendMode", SetBlendMode),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }

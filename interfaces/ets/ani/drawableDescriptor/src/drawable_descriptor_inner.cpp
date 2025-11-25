@@ -412,6 +412,27 @@ ani_object CreateDrawableByNapiType(ani_env* env, DrawableType drawableType, voi
     return retValue;
 }
 
+void SetBlendMode(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_enum_item blendMode)
+{
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
+    auto* layeredDrawable = reinterpret_cast<LayeredDrawableDescriptor*>(nativeObj);
+    if (layeredDrawable == nullptr) {
+        return;
+    }
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(blendMode, &isUndefined);
+    ani_int mode = -1;
+    if (isUndefined) {
+        return;
+    } else {
+        if (ANI_OK != env->EnumItem_GetValue_Int(blendMode, &mode)) {
+            return;
+        }
+    }
+    layeredDrawable->SetBlendMode(mode);
+}
+
 ani_object NativeTransferStatic(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object input, ani_string typeName)
 {
@@ -480,6 +501,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "getMaskClipPath", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableMaskClipPath) },
         ani_native_function {
             "nativeTransferStatic", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::NativeTransferStatic) },
+        ani_native_function { "setBlendMode", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::SetBlendMode) },
         ani_native_function { "destructDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::DestructDrawable) },
     };
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());
