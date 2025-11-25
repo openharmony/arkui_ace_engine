@@ -15,7 +15,7 @@
 
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponent } from "./ArkCustomComponent"
-import { SyntaxItemPeer } from "./base/RepeatImpl"
+import { SyntaxItemPeer } from "./base/SyntaxNodeBase"
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "#generated";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";

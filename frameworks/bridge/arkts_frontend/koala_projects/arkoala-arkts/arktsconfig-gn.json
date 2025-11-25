@@ -85,9 +85,6 @@
             "@ohos/arkui/componentSnapshot": [
                 "@ohos.arkui.componentSnapshot.ets"
             ],
-            "@ohos/mediaquery": [
-                "@ohos.mediaquery.ets"
-            ],
             "@ohos/arkui/dragController": [
                 "@ohos.arkui.dragController.ets"
             ],
