@@ -42,7 +42,8 @@ public:
         const std::shared_ptr<FocusRulesCheckNode>& resultNode, Accessibility::AccessibilityElementInfo& info) override;
     bool UpdateElementInfo(
         const std::shared_ptr<FocusRulesCheckNode>& resultNode, Accessibility::AccessibilityElementInfo& info) override;
-
+    bool CanSendHoverWithTargetIdByReadableRules(
+        int64_t currentId, int64_t& targetId);
 private:
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;
     WeakPtr<AccessibilityProvider> accessibilityProvider_;

@@ -76,4 +76,21 @@ bool FocusStrategyOsalThird::UpdateElementInfo(
     JsThirdProviderInteractionOperation::FillNodeConfig(config_, info);
     return true;
 }
+
+bool FocusStrategyOsalThird::CanSendHoverWithTargetIdByReadableRules(
+    int64_t currentId, int64_t& targetId)
+{
+    targetId = currentId;
+    UpdateOriginNodeInfo(currentId);
+    auto checkNode = GetCurrentCheckNode();
+    CHECK_NULL_RETURN(checkNode, true);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto changeResult = NeedChangeToReadableNodeThroughAncestor(checkNode, targetNode);
+    CHECK_NE_RETURN(changeResult, true, true); // changeResult false means not change, send targetId with currentId
+    CHECK_NULL_RETURN(targetNode, false); // changeResult true but no targetNode means not find any readable
+    targetId = targetNode->GetAccessibilityId();
+    HILOG_INFO_FOCUS("third CanSendHoverWithTargetId %{public}" PRId64
+        ", currentId %{public}" PRId64, targetId, currentId);
+    return true;
+}
 } // OHOS::Ace::Framework

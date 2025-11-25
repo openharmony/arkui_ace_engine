@@ -108,6 +108,7 @@ public:
         int64_t splitElementId,
         std::shared_ptr<ArkUI_AccessibilityElementInfo>& nativeInfo);
 
+    void CheckAndSendHoverEnterByReadableRules(int64_t thirdElementId);
 private:
     void GetHostRectTranslateInfo(NodeConfig& config);
     void GetNodeConfig(NodeConfig& nodeConfig);
