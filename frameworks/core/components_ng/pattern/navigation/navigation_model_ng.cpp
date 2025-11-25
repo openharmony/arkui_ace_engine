@@ -3245,4 +3245,21 @@ void NavigationModelNG::SetEnableVisibilityLifecycleWithContentCover(FrameNode* 
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableVisibilityLifecycleWithContentCover(isEnable);
 }
+
+void NavigationModelNG::SetBackButtonTitleResource(FrameNode* frameNode, std::string text,
+                                                   const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    NavigationTitleUtil::SetAccessibility(backButtonNode, text);
+    NavigationTitleUtil::SetBackButtonText(titleBarNode, text, "navigation.backButtonIcon.accessibilityText",
+                                           resObj);
+}
 } // namespace OHOS::Ace::NG

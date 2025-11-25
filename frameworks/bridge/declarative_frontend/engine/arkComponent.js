@@ -20796,6 +20796,18 @@ class ArkNavigationToolBarConfiguration {
   }
 }
 
+class ArkNavBackButton {
+
+  constructor() {
+    this.icon = undefined;
+    this.text = undefined;
+  }
+
+  isEqual(another) {
+    return this.icon === another.icon && this.text === another.text;
+  }
+}
+
 class ArkEmitterPropertyOptions {
   constructor() {
     this.index = undefined;
@@ -25921,9 +25933,14 @@ class ArkNavDestinationComponent extends ArkComponent {
       NavDestinationHideBackButtonModifier, value);
     return this;
   }
-  backButtonIcon(value) {
+  backButtonIcon(value, text) {
+    let config = new ArkNavBackButton();
+    config.text = value;
+    if (!isNull(text)) {
+      config.text = text;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
-      NavDestinationBackButtonIconModifier, value);
+      NavDestinationBackButtonIconModifier, config);
     return this;
   }
   mode(value) {
@@ -27253,8 +27270,13 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ModeModifier.identity, ModeModifier, value);
     return this;
   }
-  backButtonIcon(value) {
-    modifierWithKey(this._modifiersWithKeys, BackButtonIconModifier.identity, BackButtonIconModifier, value);
+  backButtonIcon(value, text) {
+    let config = new ArkNavBackButton();
+    config.icon = value;
+    if (!isNull(text)) {
+      config.text = text;
+    }
+    modifierWithKey(this._modifiersWithKeys, BackButtonIconModifier.identity, BackButtonIconModifier, config);
     return this;
   }
   hideNavBar(value) {
@@ -27543,7 +27565,7 @@ class BackButtonIconModifier extends ModifierWithKey {
       getUINativeModule().navigation.resetBackButtonIcon(node);
     }
     else {
-      getUINativeModule().navigation.setBackButtonIcon(node, this.value);
+      getUINativeModule().navigation.setBackButtonIcon(node, this.value.icon, this.value.text);
     }
   }
   checkObjectDiff() {
@@ -27639,7 +27661,7 @@ class NavDestinationBackButtonIconModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().navDestination.resetBackButtonIcon(node);
     } else {
-      getUINativeModule().navDestination.setBackButtonIcon(node, this.value);
+      getUINativeModule().navDestination.setBackButtonIcon(node, this.value.icon, this.value.text);
     }
   }
 }

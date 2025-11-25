@@ -2011,6 +2011,20 @@ class ArkNavigationTitle {
   }
 }
 
+class ArkNavBackButton {
+  icon: any;
+  text: ResourceStr | undefined;
+
+  constructor() {
+    this.icon = undefined;
+    this.text = undefined;
+  }
+
+  isEqual(another: ArkNavBackButton) {
+    return this.icon === another.icon && this.text === another.text;
+  }
+}
+
 class ArkNavigationToolBarConfiguration {
   value: Array<ToolbarItem> | undefined;
   options?: NavigationToolbarOptions | undefined;

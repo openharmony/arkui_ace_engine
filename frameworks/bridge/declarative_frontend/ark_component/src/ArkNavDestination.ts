@@ -92,7 +92,12 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationToolBarConfigurationModifier, configuration);
     return this;
   }
-  backButtonIcon(value: any): this {
+  backButtonIcon(value: any, text?: ResourceStr): this {
+    let config: ArkNavBackButton = new ArkNavBackButton();
+    config.text = value;
+    if (!isNull(text)) {
+      config.text = text;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
       NavDestinationBackButtonIconModifier, value);
     return this;
@@ -345,8 +350,8 @@ class NavDestinationBackgroundColorModifier extends ModifierWithKey<ResourceColo
   }
 }
 
-class NavDestinationBackButtonIconModifier extends ModifierWithKey<object> {
-  constructor(value: object) {
+class NavDestinationBackButtonIconModifier extends ModifierWithKey<ArkNavBackButton> {
+  constructor(value: ArkNavBackButton) {
     super(value);
   }
   static identity: Symbol = Symbol('backButtonIcon');
@@ -354,7 +359,7 @@ class NavDestinationBackButtonIconModifier extends ModifierWithKey<object> {
     if (reset) {
       getUINativeModule().navDestination.resetBackButtonIcon(node);
     } else {
-      getUINativeModule().navDestination.setBackButtonIcon(node, this.value);
+      getUINativeModule().navDestination.setBackButtonIcon(node, this.value.icon, this.value.text);
     }
   }
 }

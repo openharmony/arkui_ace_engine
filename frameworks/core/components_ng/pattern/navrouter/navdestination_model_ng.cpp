@@ -2075,4 +2075,15 @@ void NavDestinationModelNG::SetTitleAnimationElapsedTime(FrameNode* frameNode, i
     CHECK_NULL_VOID(navDestination);
     navDestination->SetTitleAnimationElapsedTime(elapsedTime);
 }
+
+void NavDestinationModelNG::SetBackButtonTextResource(FrameNode* frameNode, const std::string& text,
+                                                      const RefPtr<ResourceObject>& resObj)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    NavigationTitleUtil::SetBackButtonText(titleBarNode, text,
+        "navDestination.backButtonIcon.accessibilityText", resObj);
+}
 } // namespace OHOS::Ace::NG

@@ -114,6 +114,8 @@ public:
         const RefPtr<FrameNode>& barNode, float translate, bool isTitle);
     static bool IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode);
     static bool SetTitleAnimationElapsedTime(AnimationOption& option, const RefPtr<FrameNode>& pushEnterNode);
+    static void SetBackButtonText(const RefPtr<TitleBarNode>& titleBarNode, const std::string& text,
+                                  const std::string& key, const RefPtr<ResourceObject> ResourceObject);
 };
 
 } // namespace OHOS::Ace::NG

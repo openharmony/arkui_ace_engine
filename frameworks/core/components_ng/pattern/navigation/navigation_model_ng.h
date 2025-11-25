@@ -185,6 +185,8 @@ public:
         std::function<void(const RefPtr<NavigationStack>&)>&& setHomePathInfoCallback) override;
     void SetEnableVisibilityLifecycleWithContentCover(bool isEnable) override;
     static void SetEnableVisibilityLifecycleWithContentCover(FrameNode* frameNode, bool isEnable);
+    static void SetBackButtonTitleResource(FrameNode* frameNode, std::string text,
+        const RefPtr<ResourceObject>& resObj);
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

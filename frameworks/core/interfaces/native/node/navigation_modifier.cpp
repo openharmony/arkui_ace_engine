@@ -870,6 +870,23 @@ void SetBeforeCreateLayoutWrapperCallBack(ArkUINodeHandle node, void (*beforeCre
     };
     NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(frameNode, std::move(beforeCreateLayoutWrapperCallBack));
 }
+
+void SetNavBackButtonText(ArkUINodeHandle node, ArkUI_CharPtr text, ArkUI_VoidPtr textResource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto resource = AceType::Claim(reinterpret_cast<ResourceObject*>(textResource));
+    NavigationModelNG::SetBackButtonTitleResource(frameNode, text, resource);
+}
+
+void ResetNavBackButtonText(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::TITLE_BAR,
+        "navigation.backButtonIcon.accessibilityText");
+}
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -942,6 +959,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setIsCustomTitleBarSize = SetIsCustomTitleBarSize,
         .resetIsCustomTitleBarSize = ResetIsCustomTitleBarSize,
         .setBeforeCreateLayoutWrapperCallBack = SetBeforeCreateLayoutWrapperCallBack,
+        .setNavBackButtonText = SetNavBackButtonText,
+        .resetNavBackButtonText = ResetNavBackButtonText,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
