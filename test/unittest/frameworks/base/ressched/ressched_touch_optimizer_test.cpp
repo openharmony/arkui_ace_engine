@@ -804,28 +804,28 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect003, TestSize.Level1)
     TouchEvent resultPoint;
     
     optimizer_->rvsEnable_ = true;
-    rvsSignalEnable_ = false;
+    optimizer_->rvsSignalEnable_ = false;
     optimizer_->dptHistoryPointX_.clear();
     optimizer_->dptHistoryPointY_.clear();
     optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
     EXPECT_EQ(resultPoint.x, touchEvent.x);
 
     optimizer_->rvsEnable_ = false;
-    rvsSignalEnable_ = false;
+    optimizer_->rvsSignalEnable_ = false;
     optimizer_->dptHistoryPointX_.clear();
     optimizer_->dptHistoryPointY_.clear();
     optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
     EXPECT_EQ(resultPoint.x, touchEvent.x);
 
     optimizer_->rvsEnable_ = false;
-    rvsSignalEnable_ = true;
+    optimizer_->rvsSignalEnable_ = true;
     optimizer_->dptHistoryPointX_.clear();
     optimizer_->dptHistoryPointY_.clear();
     optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
     EXPECT_EQ(resultPoint.x, touchEvent.x);
 
     optimizer_->rvsEnable_ = true;
-    rvsSignalEnable_ = true;
+    optimizer_->rvsSignalEnable_ = true;
     optimizer_->dptHistoryPointX_.clear();
     optimizer_->dptHistoryPointY_.clear();
     optimizer_->DispatchPointSelect(false, touchEvent, resamplePoint, resultPoint);
