@@ -5666,9 +5666,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 
 void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
-    ACE_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s][paintRect:%s][needSyncRsNode:%d]",
-        tag_.c_str(), nodeId_, GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str(),
-        renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_TRACE_BEGIN("SyncGeometryNode[%s][self:%d][parent:%d][key:%s][paintRect:%s][needSyncRsNode:%d]",
+            tag_.c_str(), nodeId_, GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
+        ACE_LAYOUT_TRACE_END()
+    }
 
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
