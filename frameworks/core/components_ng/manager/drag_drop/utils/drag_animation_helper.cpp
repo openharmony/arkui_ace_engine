@@ -723,7 +723,7 @@ bool DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     AddDragNodeCopy(manager, frameNode, gatherNode);
     MarkDirtyNode(gatherNode);
     
-    pipeline->FlushPipelineImmediately();
+    pipeline->FlushUITasks();
     manager->SetIsGatherWithMenu(false);
 
     //do gather animation before lifting
