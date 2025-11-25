@@ -151,6 +151,9 @@ public:
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
     static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
+    static void SetTextTextSelection(FrameNode* frameNode,
+        int32_t startIndex, int32_t endIndex, MenuPolicy menuItem);
+    static TextSelectionOptions GetTextSelectionOptions(FrameNode* frameNode);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);

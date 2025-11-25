@@ -1373,6 +1373,30 @@ int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_P
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_SelectionOptions* OH_ArkUI_SelectionOptions_Create()
+{
+    ArkUI_SelectionOptions* options = new ArkUI_SelectionOptions;
+    options->menuPolicy = ArkUI_MenuPolicy::ARKUI_MENU_POLICY_DEFAULT;
+    return options;
+}
+
+void OH_ArkUI_SelectionOptions_Dispose(ArkUI_SelectionOptions* options)
+{
+    delete options;
+}
+
+void OH_ArkUI_SelectionOptions_SetMenuPolicy(ArkUI_SelectionOptions* options, ArkUI_MenuPolicy menuPolicy)
+{
+    CHECK_NULL_VOID(options);
+    options->menuPolicy = menuPolicy;
+}
+
+ArkUI_MenuPolicy OH_ArkUI_SelectionOptions_GetMenuPolicy(ArkUI_SelectionOptions* options)
+{
+    CHECK_NULL_RETURN(options, ArkUI_MenuPolicy::ARKUI_MENU_POLICY_DEFAULT);
+    return options->menuPolicy;
+}
+
 ArkUI_ShowCounterConfig* OH_ArkUI_ShowCounterConfig_Create()
 {
     ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig { { 0, 0.0f }, { 0, 0.0f } };

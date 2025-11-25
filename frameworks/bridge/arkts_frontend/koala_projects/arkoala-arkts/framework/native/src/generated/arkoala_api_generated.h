@@ -28329,6 +28329,10 @@ typedef struct GENERATED_ArkUITextControllerAccessor {
     void (*setStyledString)(Ark_TextController peer,
                             Ark_StyledString value);
     Ark_LayoutManager (*getLayoutManager)(Ark_TextController peer);
+    void (*setTextSelection)(Ark_TextController peer,
+                             const Opt_Int32* selectionStart,
+                             const Opt_Int32* selectionEnd,
+                             const Opt_SelectionOptions* options);
 } GENERATED_ArkUITextControllerAccessor;
 
 typedef struct GENERATED_ArkUITextEditControllerExAccessor {

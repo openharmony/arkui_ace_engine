@@ -17673,6 +17673,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void SetTextSelectionImpl(Ark_TextController peer,
+                              const Opt_Int32* selectionStart,
+                              const Opt_Int32* selectionEnd,
+                              const Opt_SelectionOptions* options)
+    {
+    }
     } // TextControllerAccessor
     namespace TextEditControllerExAccessor {
     void DestroyPeerImpl(Ark_TextEditControllerEx peer)
@@ -21808,6 +21814,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextControllerAccessor::CloseSelectionMenuImpl,
             TextControllerAccessor::SetStyledStringImpl,
             TextControllerAccessor::GetLayoutManagerImpl,
+            TextControllerAccessor::SetTextSelectionImpl,
         };
         return &TextControllerAccessorImpl;
     }

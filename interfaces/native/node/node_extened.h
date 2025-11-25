@@ -245,6 +245,10 @@ struct ArkUI_ShowCounterConfig {
     ArkUI_OptionalUint counterTextOverflowColor;
 };
 
+struct ArkUI_SelectionOptions {
+    ArkUI_MenuPolicy menuPolicy;
+};
+
 struct ArkUI_TextContentBaseController {
     ArkUI_NodeHandle node;
     ArkUI_NodeAttributeType textFieldType;

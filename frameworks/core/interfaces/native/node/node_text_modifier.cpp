@@ -427,6 +427,31 @@ void ResetTextLineHeightMultiply(ArkUINodeHandle node)
     }
 }
 
+void SetTextTextSelection(ArkUINodeHandle node, ArkUISelectionOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextTextSelection(
+        frameNode, options->start, options->end, static_cast<MenuPolicy>(options->menuPolicy));
+}
+
+void GetTextTextSelection(ArkUINodeHandle node, ArkUISelectionOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextSelectionOptions textSelectionOptions = TextModelNG::GetTextSelectionOptions(frameNode);
+    options->start = textSelectionOptions.start;
+    options->end = textSelectionOptions.end;
+    options->menuPolicy = static_cast<ArkUIMenuPolicy>(textSelectionOptions.menuPolicy);
+}
+
+void ResetTextTextSelection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextTextSelection(frameNode, 0, 0, static_cast<MenuPolicy>(0));
+}
+
 void SetTextMinimumLineHeight(
     ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* minimumlineHeightRawPtr)
 {
@@ -2517,6 +2542,9 @@ const ArkUITextModifier* GetTextModifier()
         .setTextLineHeightMultiply = SetTextLineHeightMultiply,
         .getTextLineHeightMultiply = GetTextLineHeightMultiply,
         .resetTextLineHeightMultiply = ResetTextLineHeightMultiply,
+        .setTextTextSelection = SetTextTextSelection,
+        .getTextTextSelection = GetTextTextSelection,
+        .resetTextTextSelection = ResetTextTextSelection,
         .setTextMinimumLineHeight = SetTextMinimumLineHeight,
         .getTextMinimumLineHeight = GetTextMinimumLineHeight,
         .resetTextMinimumLineHeight = ResetTextMinimumLineHeight,

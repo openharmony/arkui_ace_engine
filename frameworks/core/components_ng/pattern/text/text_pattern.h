@@ -322,6 +322,11 @@ public:
         return spans_;
     }
 
+    int32_t GetPlaceholderCount()
+    {
+        return placeholderCount_;
+    }
+
     int32_t GetDisplayWideTextLength()
     {
         return textForDisplay_.length();
@@ -614,6 +619,9 @@ public:
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
+    void ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
+    bool IsShowMenu(MenuPolicy options, bool defaultValue);
     void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
@@ -704,6 +712,11 @@ public:
     std::vector<CustomSpanPlaceholderInfo> GetCustomSpanPlaceholderInfo()
     {
         return customSpanPlaceholder_;
+    }
+
+    TextSelectionOptions GetTextSelectionOptions()
+    {
+        return textSelectionOptions_;
     }
 
     void ClearCustomSpanPlaceholderInfo()
@@ -1129,6 +1142,7 @@ protected:
         WeakPtr<SpanItem> span;
     };
     std::vector<SubComponentInfoEx> subComponentInfos_;
+    TextSelectionOptions textSelectionOptions_ = {0, 0, MenuPolicy::DEFAULT};
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;

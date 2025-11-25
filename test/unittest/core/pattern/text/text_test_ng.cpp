@@ -933,6 +933,24 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTextSelection001
+ * @tc.desc: Test SetTextSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextSelection001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t start = 1;
+    int32_t end = 1;
+    OHOS::Ace::SelectionOptions options;
+    pattern->SetSelectionFlag(start, end, options);
+    EXPECT_EQ(pattern->selectOverlay_, 1);
+}
+
+/**
  * @tc.name: TextLayoutAlgorithm001
  * @tc.desc: Test TextLayoutAlgorithm.
  * @tc.type: FUNC

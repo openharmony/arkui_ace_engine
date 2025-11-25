@@ -12499,6 +12499,50 @@ int32_t SetLineHeightMultiple(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetTextTextSelection(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWO_PARAM);
+    if (actualSize < 0) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetTextTextSelection(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[NUM_0].i32 >= item->value[NUM_1].i32) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetTextTextSelection(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUISelectionOptions menuOption;
+    menuOption.start = item->value[NUM_0].i32;
+    menuOption.end = item->value[NUM_1].i32;
+    if (item->object != nullptr) {
+        auto menuItem = reinterpret_cast<ArkUI_SelectionOptions*>(item->object);
+        menuOption.menuPolicy = static_cast<ArkUIMenuPolicy>(menuItem->menuPolicy);
+    }
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextTextSelection(
+        node->uiNodeHandle, &menuOption);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextTextSelection(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUISelectionOptions options;
+    auto modifier = fullImpl->getNodeModifiers()->getTextModifier();
+    modifier->getTextTextSelection(node->uiNodeHandle, &options);
+    g_numberValues[NUM_0].i32 = options.start;
+    g_numberValues[NUM_1].i32 = options.end;
+    ArkUI_SelectionOptions* menuOptions = new ArkUI_SelectionOptions;
+    menuOptions->menuPolicy = static_cast<ArkUI_MenuPolicy>(options.menuPolicy);
+    g_attributeItem.object = menuOptions;
+    return &g_attributeItem;
+}
+
+void ResetTextTextSelection(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextTextSelection(node->uiNodeHandle);
+}
+
 int32_t SetMaxLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -18047,7 +18091,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight, SetLineCount, SetOptimizeTrailingSpace,
         SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign, SetTextContentAlign, SetTextMinLines,
         SetSelectDetectorEnable, nullptr, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
-        nullptr, SetEditMenuOption, SetTextBindSelectionMenu };
+        nullptr, SetEditMenuOption, SetTextBindSelectionMenu, SetTextTextSelection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -18065,7 +18109,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace, GetTextLinearGradient,
         GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines, GetSelectDetectorEnable,
         nullptr, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager,
-        nullptr, nullptr };
+        nullptr, nullptr, GetTextTextSelection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -18085,7 +18129,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetHalfLeading, ResetFontWeight, ResetLineCount, ResetOptimizeTrailingSpace, ResetTextLinearGradient,
         ResetTextRadialGradient, ResetTextVerticalAlign, ResetTextContentAlign, ResetTextMinLines,
         ResetSelectDetectorEnable, nullptr, ResetMinLineHeight, ResetMaxLineHeight,
-        ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu };
+        ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu, ResetTextTextSelection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

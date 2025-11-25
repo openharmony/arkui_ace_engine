@@ -5807,6 +5807,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextController_getLayoutManager(ptr: KPointer): KPointer
     @ani.unsafe.Direct
+    native static _TextController_setTextSelection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _TextEditControllerEx_construct(): KPointer
     @ani.unsafe.Direct
     native static _TextEditControllerEx_getFinalizer(): KPointer

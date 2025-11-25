@@ -36787,6 +36787,33 @@ Ark_NativePointer impl_TextController_getLayoutManager(Ark_NativePointer thisPtr
         return GetAccessors()->getTextControllerAccessor()->getLayoutManager(self);
 }
 KOALA_INTEROP_DIRECT_1(TextController_getLayoutManager, Ark_NativePointer, Ark_NativePointer)
+void impl_TextController_setTextSelection(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_TextController self = reinterpret_cast<Ark_TextController>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto selectionStartValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Int32 selectionStartValueTempTmpBuf = {};
+        selectionStartValueTempTmpBuf.tag = selectionStartValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((selectionStartValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            selectionStartValueTempTmpBuf.value = thisDeserializer.readInt32();
+        }
+        Opt_Int32 selectionStartValueTemp = selectionStartValueTempTmpBuf;;
+        const auto selectionEndValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Int32 selectionEndValueTempTmpBuf = {};
+        selectionEndValueTempTmpBuf.tag = selectionEndValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((selectionEndValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            selectionEndValueTempTmpBuf.value = thisDeserializer.readInt32();
+        }
+        Opt_Int32 selectionEndValueTemp = selectionEndValueTempTmpBuf;;
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SelectionOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = SelectionOptions_serializer::read(thisDeserializer);
+        }
+        Opt_SelectionOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetAccessors()->getTextControllerAccessor()->setTextSelection(self, static_cast<Opt_Int32*>(&selectionStartValueTemp), static_cast<Opt_Int32*>(&selectionEndValueTemp), static_cast<Opt_SelectionOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TextController_setTextSelection, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_TextEditControllerEx_construct() {
         return GetAccessors()->getTextEditControllerExAccessor()->construct();
 }

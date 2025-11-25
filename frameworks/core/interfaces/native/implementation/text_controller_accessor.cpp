@@ -61,6 +61,21 @@ Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
     layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
     return layoutManagerPeer;
 }
+void SetTextSelectionImpl(Ark_TextController peer,
+                          const Opt_Int32* selectionStart,
+                          const Opt_Int32* selectionEnd,
+                          const Opt_SelectionOptions* options)
+{
+    CHECK_NULL_VOID(peer && peer->controller);
+    auto selectionStartOpt = Converter::OptConvertPtr<int32_t>(selectionStart);
+    auto selectionEndOpt = Converter::OptConvertPtr<int32_t>(selectionEnd);
+    auto selectionOptions = Converter::OptConvertPtr<SelectionOptions>(options);
+    int32_t startValue = selectionStartOpt.value_or(0);
+    int32_t endValue = selectionEndOpt.value_or(0);
+    SelectionOptions optionsValue =
+        selectionOptions.has_value() ? selectionOptions.value() : SelectionOptions();
+    peer->controller->SetTextSelection(startValue, endValue, optionsValue);
+}
 } // TextControllerAccessor
 const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
 {
@@ -71,6 +86,7 @@ const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
         TextControllerAccessor::CloseSelectionMenuImpl,
         TextControllerAccessor::SetStyledStringImpl,
         TextControllerAccessor::GetLayoutManagerImpl,
+        TextControllerAccessor::SetTextSelectionImpl,
     };
     return &TextControllerAccessorImpl;
 }
