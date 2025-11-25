@@ -549,13 +549,9 @@ public:
         }
     }
 
-    ShadowStyle GetMenuDefaultShadowStyle()
+    ShadowStyle GetMenuDefaultShadowStyle(PipelineContext* pipeline)
     {
         auto shadowStyle = ShadowStyle::OuterDefaultMD;
-
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, shadowStyle);
-        auto pipeline = host->GetContextRefPtr();
         CHECK_NULL_RETURN(pipeline, shadowStyle);
         auto menuTheme = pipeline->GetTheme<MenuTheme>();
         CHECK_NULL_RETURN(menuTheme, shadowStyle);
@@ -563,7 +559,7 @@ public:
         return shadowStyle;
     }
 
-    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, PipelineContext* pipelineContext);
 
     bool UseContentModifier()
     {
