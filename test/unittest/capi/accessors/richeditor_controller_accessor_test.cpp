@@ -444,12 +444,10 @@ HWTEST_F(RichEditorControllerAccessorTest, getSpansTest, TestSize.Level1)
     options.end = TEST_VALUE.length() * 2;
 
     auto value = Converter::ArkValue<Opt_RichEditorRange>(options);
-    auto spans = accessor_->getSpans(peer_, &value);
-#ifdef WRONG_GEN
+    auto spansResult = accessor_->getSpans(peer_, &value);
     auto resultOpt = Converter::GetOpt(spansResult);
     ASSERT_TRUE(resultOpt.has_value());
     auto spans = resultOpt.value();
-#endif
 
     ASSERT_TRUE(spans.length == 1);
     auto spansVec =
@@ -513,12 +511,10 @@ HWTEST_F(RichEditorControllerAccessorTest, getSelectionTest, TestSize.Level1)
     richEditorPattern->AddTextSpan(textSpanOptions);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), TEST_VALUE.length() * 2);
 
-    auto selection = accessor_->getSelection(peer_);
-#ifdef WRONG_GEN
+    auto selectionResult = accessor_->getSelection(peer_);
     auto resultOpt = Converter::GetOpt(selectionResult);
     ASSERT_TRUE(resultOpt.has_value());
     auto selection = resultOpt.value();
-#endif
     EXPECT_EQ(Converter::Convert<int32_t>(selection.selection.value0), TEST_VALUE.length() * 2);
     EXPECT_EQ(Converter::Convert<int32_t>(selection.selection.value1), TEST_VALUE.length() * 2);
 
