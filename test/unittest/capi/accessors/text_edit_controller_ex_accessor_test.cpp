@@ -123,12 +123,10 @@ HWTEST_F(TextEditControllerExAccessorTest, GetPreviewTextTest, TestSize.Level1)
     ASSERT_NE(accessor_->getPreviewText, nullptr);
     PreviewTextInfo previewText = {.offset = OFFSET, .value = u"info"};
     EXPECT_CALL(*peer_, GetPreviewText()).Times(1).WillOnce(Return(previewText));
-    auto checkValue = accessor_->getPreviewText(peer_);
-#ifdef WRONG_GEN
+    auto previewTextOpt = accessor_->getPreviewText(peer_);
     auto checkValueOpt = Converter::GetOpt(previewTextOpt);
     ASSERT_TRUE(checkValueOpt.has_value());
     auto checkValue = checkValueOpt.value();
-#endif
     EXPECT_EQ(Converter::Convert<std::string>(checkValue.value), "info");
     EXPECT_EQ(Converter::Convert<int32_t>(checkValue.offset), OFFSET);
 }
