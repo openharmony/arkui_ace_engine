@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,8 @@ import {
   DragItemInfo, Alignment, DragEvent, IDataSource, DataChangeListener, Visibility, GestureModifier, ClassCastError,
   CustomDialogController, UIGestureEvent, LongPressGestureHandler, Margin, ShadowStyle, Stack, Column, Divider,
   LineCapStyle, TextInput, EnterKeyType, Blank, FlexAlign, ResponseType, MouseEvent, MouseButton, Placement, Area,
-  HoverEvent, CustomPopupOptions, CommonMethod, BorderStyle, Type, OnSubmitCallback, OnDragEventCallback
+  HoverEvent, CustomPopupOptions, CommonMethod, BorderStyle, Type, OnSubmitCallback, OnDragEventCallback, $r,
+  BuilderParam, Color
 } from '@ohos.arkui.component';
 
 import {
@@ -31,9 +32,6 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import resourceManager from '@ohos.resourceManager';
-import { $r } from '@ohos.arkui.component'
-import { Margin } from '@ohos.arkui.component'
-import { BuilderParam, ResourceColor } from '@ohos.arkui.component'
 import accessibility from '@ohos.accessibility'
 
 const IMAGE_NODE_HEIGHT: number = 24;
@@ -1244,7 +1242,20 @@ export struct TreeView {
       );
     }
   }
-
+  public sendAccessibility(textAnnouncedForAccessibility: string): void {
+    const context = this.getUIContext().getHostContext();
+    let bundleName: string = 'defaultBundle';
+    if (context) {
+      bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    }
+    let eventInfo= new accessibility.EventInfo(
+      'announceForAccessibility', // 表示主动播报的事件。
+      bundleName as string, // 目标应用名；不可缺省。
+      'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+    );
+    eventInfo.textAnnouncedForAccessibility = textAnnouncedForAccessibility
+    accessibility.sendAccessibilityEvent(eventInfo);
+  }
   private clickInner(itemInner: NodeInfo) {
     this.viewLastIndex = this.listNodeDataSource.getLastIndex();
     let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
@@ -1363,7 +1374,7 @@ export struct TreeView {
           let primaryTitleText = this.listNodeDataSource.getAccessibleTitleText(primaryTitle);
           let secondaryTitleText = this.listNodeDataSource.getAccessibleTitleText(secondaryTitle);
           let title: string = `${primaryTitleText}, ${secondaryTitleText}`;
-          this.listNodeDataSource.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
+          this.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
             title));
 
           let allParentNode: number[] = [];
@@ -1385,9 +1396,7 @@ export struct TreeView {
             setTimeout(() => {
               this.accessibilityNodeType = AccessibilityNodeType.TEXT;
             }, ENTER_EXIT_DURATION)
-            console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(eventInfo)}`)
           } catch (error) {
-            console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(error)}`)
           }
           return () => {
             this.draggingPopup(currentNodeInfo)
@@ -1480,7 +1489,7 @@ export struct TreeView {
       this.listNodeDataSource.setIsDrag(false);
       this.listNodeDataSource.notifyDataReload();
     })
-    // /* DragEvent Drop. */
+    /* DragEvent Drop. */
     .onDrop((event: DragEvent, extraParams?: string) => {
       let nodeInfo1: NodeInfo[] = [];
       for(let  i =0 ;i< this.listNodeDataSource.listNode.length;i++){
@@ -2368,7 +2377,7 @@ export class ListNodeDataSource extends BasicDataSource {
     if (!this.checkIndex(index)) {
       return;
     }
-    // this.listNode[index.toInt()].setNodeColor(color);
+    this.listNode[index.toInt()].setNodeColor(color);
     this.listNode[index.toInt()].setNodeBorder(false);
   }
 
@@ -2867,7 +2876,6 @@ export class ListNodeDataSource extends BasicDataSource {
 
   public getData(index: int): NodeInfo {
     if (index < 0 || index >= this.loadedListNode.length) {
-      // return undefined;
       return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
     }
     return this.loadedListNode[index.toInt()];
@@ -3163,13 +3171,19 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public sendAccessibility(textAnnouncedForAccessibility: string): void {
-    // let eventInfo: accessibility.EventInfo = ({
-    //   type: 'announceForAccessibility', // 表示主动播报的事件。
-    //   bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName, // 目标应用名；不可缺省。
-    //   triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
-    //   textAnnouncedForAccessibility: textAnnouncedForAccessibility // 主动播报的内容。
-    // });
-    // accessibility.sendAccessibilityEvent(eventInfo);
+    // const context = this.getUIContext().getHostContext();
+    // let bundleName: string = 'defaultBundle';
+    // if (context) {
+    //   bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    // }
+    //
+    let eventInfo= new accessibility.EventInfo(
+      'announceForAccessibility', // 表示主动播报的事件。
+      'defaultBundle', // 目标应用名；不可缺省。
+      'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+    );
+    eventInfo.textAnnouncedForAccessibility = textAnnouncedForAccessibility
+    accessibility.sendAccessibilityEvent(eventInfo);
   }
 
   public getAccessibleTitleText(resource: ResourceStr | undefined): string {
@@ -3724,7 +3738,7 @@ export class ListNodeDataSource extends BasicDataSource {
     let currentNode: NodeItem = stack.shift() as NodeItem;
     if (!found && currentNode) {
       found = callback(currentNode) === true;
-      if (!found && currentNode.children.length> 0) {
+      if (!found && currentNode.children.length > 0) {
         stack.unshift(...currentNode.children);
         currentNode = stack.shift() as NodeItem;
       }
@@ -4029,7 +4043,6 @@ export class ListNodeDataSource extends BasicDataSource {
     }
     if (!this.nodeIdAndNodeIndexMap.has(nodeItem.currentNodeId)) {
       hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: not has nodeItem.');
-      hilog.error(LOG_CODE, TAG, 'emptyNodeInfo: ' + emptyNodeInfo);
       return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
     }
     let index: number = this.nodeIdAndNodeIndexMap.get(nodeItem.currentNodeId) as number;
@@ -4320,34 +4333,33 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 }
 
-// class ButtonGestureModifier implements GestureModifier {
-//   public static readonly longPressTime: number = 500;
-//   public static readonly minFontSize: number = 1.75;
-//   public fontSize: number = 1;
-//   public controller: CustomDialogController | null = null;
-//
-//   constructor(controller: CustomDialogController | null) {
-//     this.controller = controller;
-//   }
-//
-//   applyGesture(event: UIGestureEvent): void {
-//     if (this.fontSize >= ButtonGestureModifier.minFontSize) {
-//       event.addGesture(
-//         new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
-//           .onAction(() => {
-//             if (event) {
-//               this.controller?.open();
-//             }
-//           })
-//           .onActionEnd(() => {
-//             this.controller?.close();
-//           })
-//       )
-//     } else {
-//       event.clearGestures();
-//     }
-//   }
-// }
+class ButtonGestureModifier implements GestureModifier {
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime as int })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
+}
 
 @Component
 export struct TreeViewInner {
@@ -4509,7 +4521,7 @@ export struct TreeViewInner {
     } else {
       return title;
     }
-    return '';
+    return ' ';
   }
 
   private getAccessibilityDescription(): string {
@@ -4640,22 +4652,23 @@ export struct TreeViewInner {
   private accessibilityRefocus() {
     this.clickButtonFlag = false;
     const context = this.getUIContext().getHostContext();
-    let bundleName: string | undefined = 'defaultBundle';
+    let bundleName: string = 'defaultBundle';
     if (context) {
-      bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName;
+      bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
     }
 
-    // let eventInfo: accessibility.EventInfo = new accessibility.EventInfo(
-    //   'requestFocusForAccessibility',
-    //   bundleName,
-    //   'common'
-    // )
-    // accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-    //   setTimeout(() => {
-    //     this.clickButtonFlag = true;
-    //   }, ENTER_EXIT_DURATION)
-    // })
+    let eventInfo = new accessibility.EventInfo(
+      'requestFocusForAccessibility',
+      bundleName as string,
+      'common'
+    )
+    accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+      setTimeout(() => {
+        this.clickButtonFlag = true;
+      }, ENTER_EXIT_DURATION)
+    })
   }
+
 
   @Builder
   popupForShowTitle(text: ResourceStr | undefined, backgroundColor: undefined | ResourceColor,
@@ -4718,6 +4731,22 @@ export struct TreeViewInner {
     }
   }
 
+  @Builder
+  popupBuilder(){
+    this.popupForShowTitle(this.item.getPopUpInfo().popUpText,
+      this.item.getPopUpInfo().popUpColor,
+      this.item.getPopUpInfo().popUpTextColor)
+  }
+
+  propColor( item: NodeInfo): undefined | Color | String | Resource | Long {
+    if(item.getPopUpInfo().popUpColor  === undefined){
+      return undefined;
+    }else{
+      return item.getPopUpInfo().popUpColor as Resource
+    }
+  }
+
+
   build() {
     if (this.item.getNodeIsShow()) {
       Stack() {
@@ -4727,7 +4756,7 @@ export struct TreeViewInner {
               .height(this.listNodeDataSource.getFlagLine().flagLineHeight)
               .color(this.listNodeDataSource.getFlagLine()
                 .flagLineColor)
-              // .visibility(this.listNodeDataSource.getVisibility(this.item))
+              .visibility(this.listNodeDataSource.getVisibility(this.item))
               .lineCap(LineCapStyle.Round)
               .margin({ start: LengthMetrics.vp(this.item.getFlagLineLeftMargin()) } as LocalizedMargin)
               .focusable(true)
@@ -4740,8 +4769,8 @@ export struct TreeViewInner {
                       SymbolGlyph()
                         .fontColor([this.getLeftIconColor()])
                         .attributeModifier(this.item.symbolSource)
-                        // .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
-                        // this.decideSymbolFontScale(true)}vp`)
+                        .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
+                        this.decideSymbolFontScale(true)}vp`)
                         .effectStrategy(SymbolEffectStrategy.NONE)
                         .symbolEffect(new SymbolEffect(), false)
                         .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
@@ -4749,7 +4778,7 @@ export struct TreeViewInner {
                         .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
                     } else {
                       if (Util.isSymbolResource(this.item.imageSource)) {
-                        SymbolGlyph(this.item.imageSource as Resource)
+                        SymbolGlyph(this.item.imageSource  as Resource)
                           .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
                           this.decideSymbolFontScale(true)}vp`)
                           .fontColor([this.getLeftIconColor()])
@@ -4757,7 +4786,7 @@ export struct TreeViewInner {
                             this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
                           .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
                       } else {
-                        Image(this.item.imageSource as Resource)
+                        Image((this.item?.imageSource ?? '') as ResourceStr)
                           .objectFit(ImageFit.Contain)
                           .height(this.item.getNodeItem().imageNode?.itemHeight)
                           .width(this.item.getNodeItem().imageNode?.itemWidth)
@@ -4862,10 +4891,10 @@ export struct TreeViewInner {
               .height(LIST_ITEM_HEIGHT)
               .layoutWeight(1)
               .focusable(true)
-              // .accessibilityGroup(true) liufeng
+              .accessibilityGroup(true)
               .id(`treeView_node${this.item.getNodeCurrentNodeId()}`)
-              // .accessibilityText(this.getAccessibilityReadText(this.item.getNodeCurrentNodeId()))
-              // .accessibilityDescription(this.getAccessibilityDescription())
+              .accessibilityText(this.getAccessibilityReadText(this.item.getNodeCurrentNodeId()))
+              .accessibilityDescription(this.getAccessibilityDescription())
               .onClick(this.isAccessibilityEnabled ? () => {
                 this.onClickNode();
                 this.callBackClick();
@@ -4893,21 +4922,21 @@ export struct TreeViewInner {
                     this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
                   this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
                   setTimeout(() => {
-                    // this.accessibilityRefocus(); liufeng
+                    this.accessibilityRefocus();
                   }, ACCESSIBILITY_REFOCUS_DELAY_TIME)
                 } as () => void)
                 .id(`treeView_button${this.item.getNodeCurrentNodeId()}`)
 
-                // .accessibilityText(this.getAccessibilityReadButtonText(this.item.getNodeItem()
-                //   .imageCollapse?.collapseSource === ARROW_RIGHT))
-                // .accessibilityDescription(this.getAccessibilityReadButtonDescription())
+                .accessibilityText(this.getAccessibilityReadButtonText(this.item.getNodeItem()
+                  .imageCollapse?.collapseSource === ARROW_RIGHT))
+                .accessibilityDescription(this.getAccessibilityReadButtonDescription())
               }
             }
             .focusable(true)
             .width('100%')
             .height(this.item.getNodeHeight())
             .padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) } as LocalizedPadding)
-            // .bindContextMenu(this.builder, ResponseType.RightClick)
+            .bindContextMenu(this.builder, ResponseType.RightClick)
           }.focusable(true)
         }
         .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
@@ -4943,15 +4972,13 @@ export struct TreeViewInner {
           event.stopPropagation();
         })
         .padding({ top: LengthMetrics.vp(0), bottom: LengthMetrics.vp(0) } as LocalizedPadding)
-        // .bindPopup(this.item.getPopUpInfo().popUpIsShow, {
-        //   builder: () => this.popupForShowTitle(this.item.getPopUpInfo().popUpText,
-        //     this.item.getPopUpInfo().popUpColor,
-        //     this.item.getPopUpInfo().popUpTextColor),
-        //   placement: Placement.BottomLeft,
-        //   popupColor: this.item.getPopUpInfo().popUpColor,
-        //   autoCancel: true,
-        //   enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
-        // } as CustomPopupOptions)
+        .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
+          builder: this.popupBuilder,
+          placement: Placement.BottomLeft,
+          popupColor: this.propColor(this.item),
+          autoCancel: true,
+          enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
+        } as CustomPopupOptions)
         .onAreaChange((oldValue: Area, newValue: Area) => {
           let columnWidthNum: number = Number.parseInt(newValue.width.toString());
           this.columnWidth = columnWidthNum;
@@ -4977,8 +5004,7 @@ export struct TreeViewInner {
   }
 }
 
-export
-class NodeItem {
+export class NodeItem {
   public childNodeInfo: ChildNodeInfo;
   public nodeLevel: number;
   public children: NodeItem[];
