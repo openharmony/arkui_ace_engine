@@ -64,9 +64,8 @@ public:
         }
     }
 
-    RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& target)
+    RefPtr<OverlayManager> GetOverlayManager(int32_t targetId)
     {
-        auto targetId = target->GetId();
         auto it = targetOverlayMap_.find(targetId);
         if (it != targetOverlayMap_.end()) {
             return it->second;
@@ -74,9 +73,8 @@ public:
         return nullptr;
     }
 
-    void DeleteOverlayManager(const RefPtr<FrameNode>& target)
+    void DeleteOverlayManager(int32_t targetId)
     {
-        auto targetId = target->GetId();
         auto it = targetOverlayMap_.find(targetId);
         if (it != targetOverlayMap_.end()) {
             targetOverlayMap_.erase(it);

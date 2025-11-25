@@ -158,8 +158,7 @@ class ACE_FORCE_EXPORT SheetManager : public Singleton<SheetManager> {
 public:
     static RefPtr<OverlayManager> FindPageNodeOverlay(
         const RefPtr<FrameNode>& targetNode, bool isShow, bool isStartByUIContext = false);
-    static RefPtr<OverlayManager> GetOverlayFromPage(
-        int32_t rootNodeId, RootNodeType rootNodeType, const RefPtr<FrameNode>& targetNode);
+    static RefPtr<OverlayManager> GetOverlayFromPage(int32_t rootNodeId, RootNodeType rootNodeType, int32_t targetId);
 
     int32_t OpenBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
          std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
@@ -201,8 +200,7 @@ public:
 
     bool RemoveSheetByESC();
 
-    void DeleteOverlayForWindowScene(
-        int32_t rootNodeId, RootNodeType rootNodeType, const RefPtr<FrameNode>& targetNode);
+    void DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType, int32_t targetId);
 
     void CloseSheetInSubWindow(const SheetKey& sheetKey);
     static void SetMaskInteractive(const RefPtr<FrameNode>& maskNode, bool isInteractive);
