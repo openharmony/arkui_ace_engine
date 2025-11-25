@@ -2463,7 +2463,7 @@ void SetPixelRoundImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<uint16_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        ViewAbstractModelStatic::SetPixelRound(frameNode, static_cast<uint16_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
         return;
     }
     ViewAbstractModelStatic::SetPixelRound(frameNode, *convValue);
@@ -4065,7 +4065,10 @@ void SetOffsetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto varOpt = Converter::OptConvertPtr<OffsetOrEdgesParam>(value);
-    CHECK_NULL_VOID(varOpt);
+    if (!varOpt) {
+        ViewAbstractModelStatic::SetOffset(frameNode, OffsetT<Dimension>(Dimension(0), Dimension(0)));
+        return;
+    }
     if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
         ViewAbstractModelStatic::SetOffset(frameNode, offset->value());
     } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value()); edges) {

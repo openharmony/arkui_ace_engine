@@ -1158,13 +1158,16 @@ struct SymbolGlyphChild {
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
     constraint: ConstraintSizeOptions): SizeResult {
     children.forEach((child) => {
-      this.result = child.measure(constraint);
+      let childMeasureResult = child.measure(constraint);
+      if (childMeasureResult) {
+        this.result = childMeasureResult!;
+      }
     })
     console.log(`zzzz Child onMeasureSize ${JSON.stringify(this.result)}`)
     this.changeSymbolWidth(this.result)
     return this.result;
   }
-
+  
   getSymbolGlyphResource(): Resource | undefined {
     if (this.icon && (this.icon instanceof Resource)) {
       return this.icon as Resource;

@@ -31491,7 +31491,11 @@ KInteropReturnBuffer impl_Layoutable_getMargin(Ark_NativePointer thisPtr) {
         Ark_Layoutable self = reinterpret_cast<Ark_Layoutable>(thisPtr);
         const auto &retValue = GetAccessors()->getLayoutableAccessor()->getMargin(self);
         SerializerBase _retSerializer {};
-        DirectionalEdgesT_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            DirectionalEdgesT_serializer::write(_retSerializer, retValue.value);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(Layoutable_getMargin, KInteropReturnBuffer, Ark_NativePointer)
@@ -31499,7 +31503,11 @@ KInteropReturnBuffer impl_Layoutable_getPadding(Ark_NativePointer thisPtr) {
         Ark_Layoutable self = reinterpret_cast<Ark_Layoutable>(thisPtr);
         const auto &retValue = GetAccessors()->getLayoutableAccessor()->getPadding(self);
         SerializerBase _retSerializer {};
-        DirectionalEdgesT_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            DirectionalEdgesT_serializer::write(_retSerializer, retValue.value);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(Layoutable_getPadding, KInteropReturnBuffer, Ark_NativePointer)
@@ -31507,7 +31515,11 @@ KInteropReturnBuffer impl_Layoutable_getBorderWidth(Ark_NativePointer thisPtr) {
         Ark_Layoutable self = reinterpret_cast<Ark_Layoutable>(thisPtr);
         const auto &retValue = GetAccessors()->getLayoutableAccessor()->getBorderWidth(self);
         SerializerBase _retSerializer {};
-        DirectionalEdgesT_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            DirectionalEdgesT_serializer::write(_retSerializer, retValue.value);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(Layoutable_getBorderWidth, KInteropReturnBuffer, Ark_NativePointer)
@@ -32124,7 +32136,11 @@ KInteropReturnBuffer impl_Measurable_measure(Ark_NativePointer thisPtr, KSeriali
         Ark_ConstraintSizeOptions constraintValueTemp = ConstraintSizeOptions_serializer::read(thisDeserializer);;
         const auto &retValue = GetAccessors()->getMeasurableAccessor()->measure(self, static_cast<Ark_ConstraintSizeOptions*>(&constraintValueTemp));
         SerializerBase _retSerializer {};
-        MeasureResult_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            MeasureResult_serializer::write(_retSerializer, retValue.value);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_3(Measurable_measure, KInteropReturnBuffer, Ark_NativePointer, KSerializerBuffer, int32_t)
@@ -32132,7 +32148,11 @@ KInteropReturnBuffer impl_Measurable_getMargin(Ark_NativePointer thisPtr) {
         Ark_Measurable self = reinterpret_cast<Ark_Measurable>(thisPtr);
         const auto &retValue = GetAccessors()->getMeasurableAccessor()->getMargin(self);
         SerializerBase _retSerializer {};
-        DirectionalEdgesT_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            DirectionalEdgesT_serializer::write(_retSerializer, retValue.value);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(Measurable_getMargin, KInteropReturnBuffer, Ark_NativePointer)
@@ -32140,7 +32160,11 @@ KInteropReturnBuffer impl_Measurable_getPadding(Ark_NativePointer thisPtr) {
         Ark_Measurable self = reinterpret_cast<Ark_Measurable>(thisPtr);
         const auto &retValue = GetAccessors()->getMeasurableAccessor()->getPadding(self);
         SerializerBase _retSerializer {};
-        DirectionalEdgesT_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            DirectionalEdgesT_serializer::write(_retSerializer, retValue.value);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(Measurable_getPadding, KInteropReturnBuffer, Ark_NativePointer)
@@ -32148,7 +32172,11 @@ KInteropReturnBuffer impl_Measurable_getBorderWidth(Ark_NativePointer thisPtr) {
         Ark_Measurable self = reinterpret_cast<Ark_Measurable>(thisPtr);
         const auto &retValue = GetAccessors()->getMeasurableAccessor()->getBorderWidth(self);
         SerializerBase _retSerializer {};
-        DirectionalEdgesT_serializer::write(_retSerializer, retValue);
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            DirectionalEdgesT_serializer::write(_retSerializer, retValue.value);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(Measurable_getBorderWidth, KInteropReturnBuffer, Ark_NativePointer)
