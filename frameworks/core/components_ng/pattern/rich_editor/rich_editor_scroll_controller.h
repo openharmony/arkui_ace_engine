@@ -174,7 +174,6 @@ public:
         float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DIS.ConvertToPx() : AUTO_SCROLL_EDGE_DIS.ConvertToPx();
         bool hotAreaOverflow = GetHotAreaOverflow(isDragging, edgeThreshold);
         if (hotAreaOverflow) {
-            LOGE("xytest, HotAreaOverflow %{public}d", hotAreaOverflow);
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: hot area height is great than max height.");
             return;
         }
