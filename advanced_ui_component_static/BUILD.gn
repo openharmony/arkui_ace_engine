@@ -44,6 +44,9 @@ group("advanced_ui_component_static") {
       "progressbutton:progressButton",
       "progressbuttonV2:progressButtonV2",
       "tabtitlebar:tabTitleBar",
+      "exceptionprompt:exceptionPrompt",
+      "toolbar:toolBar",
+      "filter:Filter",
     ]
   }
 }
