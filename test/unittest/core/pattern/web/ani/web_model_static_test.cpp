@@ -2861,6 +2861,30 @@ HWTEST_F(WebModelStaticTest, SetEnableSelectedDataDetector001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableImageAnalyzer001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEnableImageAnalyzer001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetEnableImageAnalyzer(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableImageAnalyzer(false), true);
+
+    WebModelStatic::SetEnableImageAnalyzer(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableImageAnalyzer(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetForceEnableZoom001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC

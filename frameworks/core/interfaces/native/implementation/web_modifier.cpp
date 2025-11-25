@@ -2803,6 +2803,17 @@ void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableSelectedDataDetector(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
+
+void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableImageAnalyzer(frameNode, convValue.value_or(true));
+#endif // WEB_SUPPORTED
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -2945,6 +2956,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
         WebAttributeModifier::SetZoomControlAccessImpl,
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+        WebAttributeModifier::SetEnableImageAnalyzerImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
     };
