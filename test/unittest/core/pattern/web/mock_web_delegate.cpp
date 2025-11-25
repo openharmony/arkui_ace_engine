@@ -312,6 +312,12 @@ bool FileSelectorParamOhos::IsAcceptAllOptionExcluded()
 {
     return false;
 }
+AcceptFileTypeLists FileSelectorParamOhos::GetAccepts()
+{
+    AcceptFileTypeLists result;
+
+    return result;
+}
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result) {}
 void WebPermissionRequestOhos::Deny() const {}
 std::string WebPermissionRequestOhos::GetOrigin() const

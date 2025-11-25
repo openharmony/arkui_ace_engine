@@ -1599,6 +1599,8 @@ public:
         JSClass<JSFileSelectorParam>::CustomMethod("getDescriptions", &JSFileSelectorParam::GetDescriptions);
         JSClass<JSFileSelectorParam>::CustomMethod(
             "isAcceptAllOptionExcluded", &JSFileSelectorParam::IsAcceptAllOptionExcluded);
+        JSClass<JSFileSelectorParam>::CustomMethod(
+            "getAcceptableFileTypes", &JSFileSelectorParam::GetAcceptableFileTypes);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
     }
@@ -1691,6 +1693,40 @@ public:
         auto isAcceptAllOptionExcluded = JSVal(ToJSValue(param_->IsAcceptAllOptionExcluded()));
         auto descriptionRef = JSRef<JSVal>::Make(isAcceptAllOptionExcluded);
         args.SetReturnValue(descriptionRef);
+    }
+
+    void GetAcceptableFileTypes(const JSCallbackInfo& args)
+    {
+        auto accepts = param_->GetAccepts();
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        AcceptFileTypeLists::iterator accept;
+        size_t i = 0;
+        for (accept = accepts.begin(); accept != accepts.end(); ++accept) {
+            auto fileTypes = *accept;
+            JSRef<JSArray> fileTypesRef = JSRef<JSArray>::New();
+            AcceptFileTypeList::iterator fileType;
+            size_t j = 0;
+            for (fileType = fileTypes.begin(); fileType != fileTypes.end(); ++fileType) {
+                auto type = *fileType;
+                auto mimeType = JSVal(ToJSValue(type.mimeType));
+                auto mimeTypeRef = JSRef<JSVal>::Make(mimeType);
+                auto acceptType = type.acceptType;
+                auto acceptTypeRef = JSRef<JSArray>::New();
+                std::vector<std::string>::iterator ext;
+                size_t k = 0;
+                for (ext = acceptType.begin(); ext != acceptType.end(); ++ext) {
+                    auto valueStr = JSVal(ToJSValue("." + *ext));
+                    auto value = JSRef<JSVal>::Make(valueStr);
+                    acceptTypeRef->SetValueAt(k++, value);
+                }
+                auto obj = JSRef<JSObject>::New();
+                obj->SetPropertyObject("MimeType", mimeTypeRef);
+                obj->SetPropertyObject("AcceptType", acceptTypeRef);
+                fileTypesRef->SetValueAt(j++, obj);
+            }
+            result->SetValueAt(i++, fileTypesRef);
+        }
+        args.SetReturnValue(result);
     }
 
 private:
