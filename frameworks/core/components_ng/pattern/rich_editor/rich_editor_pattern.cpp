@@ -64,6 +64,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_utils.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
@@ -109,12 +110,6 @@ constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG = 3000;
-constexpr int32_t AUTO_SCROLL_INTERVAL = 15;
-constexpr Dimension CARET_BOTTOM_DISTANCE = 16.0_vp;
-constexpr Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 58.0_vp;
-constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
-constexpr float TIME_UNIT = 1000.0f;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr float DEFAILT_OPACITY = 0.2f;
@@ -177,6 +172,7 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     if (!dataDetectorAdapter_) {
         dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
     }
+    scrollController_ = MakeRefPtr<RichEditorScrollController>(this);
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -2173,7 +2169,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
     }
     auto caretOffset = startOffset + textPaintOffset + rootOffset;
     CHECK_NULL_RETURN(overlayMod_, caretOffset);
-    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, richTextRect_.Right()));
+    caretOffset.SetX(std::clamp(caretOffset.GetX(), richTextRect_.Left(), richTextRect_.Right()));
     return caretOffset;
 }
 
@@ -4596,7 +4592,8 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
         AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
         auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
         AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::IN_BOUNDARY);
-    } else if (isAutoScrollRunning_) {
+        MarkContentNodeForRender();
+    } else if (scrollController_->isAutoScrollRunning_) {
         StopAutoScroll();
     }
 }
@@ -10044,13 +10041,15 @@ void RichEditorPattern::InitScrollablePattern()
     auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
-    CHECK_NULL_VOID(!barDisplayMode_.has_value() || barDisplayMode_.value() != barState);
+    bool singleLine = layoutProperty->GetSingleLineValue(false);
+    CHECK_NULL_VOID(!barDisplayMode_.has_value() || barDisplayMode_.value() != barState || singleLine != isSingleLineMode_);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setBarState=%{public}d", barState);
     barDisplayMode_ = barState;
     if (!GetScrollableEvent()) {
         AddScrollEvent();
     }
-    SetAxis(Axis::VERTICAL);
+    isSingleLineMode_ = singleLine;
+    SetAxis(isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     if (barState != DisplayMode::AUTO) {
         barState = DisplayMode::ON;
     }
@@ -10143,6 +10142,7 @@ void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)
 
 bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
 {
+    CHECK_NULL_RETURN(offset != 0, false);
     auto scrollBar = GetScrollBar();
     if (source == SCROLL_FROM_START) {
         IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
@@ -10155,7 +10155,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
             AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
         return true;
     }
-    if (IsReachedBoundary(offset)) {
+    if (scrollController_->IsReachAvoidBoundary(offset)) {
         return false;
     }
     if (scrollBar && source == SCROLL_FROM_JUMP) {
@@ -10163,8 +10163,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
         scrollBar->ScheduleDisappearDelayTask();
     }
     auto newOffset = MoveTextRect(offset);
-    MoveFirstHandle(newOffset);
-    MoveSecondHandle(newOffset);
+    scrollController_->MoveHandleOnScroll(newOffset);
     dataDetectorAdapter_->aiSpanRects_.clear();
     return true;
 }
@@ -10194,51 +10193,13 @@ float RichEditorPattern::GetCrossOverHeight() const
 
 float RichEditorPattern::MoveTextRect(float offset)
 {
-    auto keyboardOffset = GetCrossOverHeight();
-    if (GreatNotEqual(richTextRect_.Height(), contentRect_.Height() - keyboardOffset)) {
-        if (GreatNotEqual(richTextRect_.GetY() + offset, contentRect_.GetY())) {
-            offset = contentRect_.GetY() - richTextRect_.GetY();
-        } else if (LessNotEqual(richTextRect_.Bottom() + offset, contentRect_.Bottom() - keyboardOffset)) {
-            offset = contentRect_.Bottom() - keyboardOffset - richTextRect_.Bottom();
-        }
-    } else if (!NearEqual(richTextRect_.GetY(), contentRect_.GetY())) {
-        offset = contentRect_.GetY() - richTextRect_.GetY();
-    } else {
-        return 0.0f;
-    }
-    if (NearEqual(offset, 0.0f)) {
-        return offset;
-    }
-    scrollOffset_ = richTextRect_.GetY() + offset;
-    richTextRect_.SetOffset(OffsetF(richTextRect_.GetX(), scrollOffset_));
+    offset = scrollController_->MoveTextRect(offset);
     UpdateScrollBarOffset();
     UpdateChildrenOffset();
     if (auto host = GetContentHost(); host) {
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     return offset;
-}
-
-void RichEditorPattern::MoveFirstHandle(float offset)
-{
-    if (SelectOverlayIsOn() && !NearEqual(offset, 0.0f)) {
-        textSelector_.selectionBaseOffset.AddY(offset);
-        auto firstHandleOffset = textSelector_.firstHandle.GetOffset();
-        firstHandleOffset.AddY(offset);
-        textSelector_.firstHandle.SetOffset(firstHandleOffset);
-        selectOverlay_->UpdateFirstHandleOffset();
-    }
-}
-
-void RichEditorPattern::MoveSecondHandle(float offset)
-{
-    if (SelectOverlayIsOn() && !NearEqual(offset, 0.0f)) {
-        textSelector_.selectionDestinationOffset.AddY(offset);
-        auto secondHandleOffset = textSelector_.secondHandle.GetOffset();
-        secondHandleOffset.AddY(offset);
-        textSelector_.secondHandle.SetOffset(secondHandleOffset);
-        selectOverlay_->UpdateSecondHandleOffset();
-    }
 }
 
 void RichEditorPattern::SetNeedMoveCaretToContentRect()
@@ -10252,38 +10213,40 @@ void RichEditorPattern::MoveCaretToContentRect()
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     MoveCaretToContentRect(caretOffset, caretHeight);
 }
-
-void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight)
+void RichEditorPattern::MoveCaretToContentRectHorizontal(const OffsetF& caretOffset)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "MoveCaretToContentRect Horizontal");
+    if (LessOrEqual(richTextRect_.Width(), contentRect_.Width()) || isShowPlaceholder_) {
+        return;
+    }
+    auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_VOID(overlayModifier);
+    auto caretWidth = overlayModifier->GetCaretWidth();
+    float distance = scrollController_->CalCaretToContentRectDistanceHorizontal(caretOffset, caretWidth);
+    OnScrollCallback(distance, SCROLL_FROM_NONE);
+}
+
+void RichEditorPattern::MoveCaretToContentRectVertical(const OffsetF& caretOffset, float caretHeight)
+{
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "MoveCaretToContentRect Vertical");
     auto keyboardOffset = GetCrossOverHeight();
-    auto contentRect = GetTextContentRect();
-    auto textRect = GetTextRect();
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarAppearAnimation();
         scrollBar->ScheduleDisappearDelayTask();
     }
-    if (LessOrEqual(textRect.Height(), contentRect.Height() - keyboardOffset) || isShowPlaceholder_) {
+    if (LessOrEqual(richTextRect_.Height(), contentRect_.Height() - keyboardOffset) || isShowPlaceholder_) {
         return;
     }
-    if (LessNotEqual(contentRect.GetSize().Height(), caretHeight) &&
-        !NearEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom() - keyboardOffset)) {
-        OnScrollCallback(contentRect.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
-    }
-    if (LessNotEqual(contentRect.GetSize().Height(), caretHeight)) {
-        return;
-    }
-    if (LessNotEqual(caretOffset.GetY(), contentRect.GetY())) {
-        if (LessOrEqual(caretOffset.GetX(), GetTextRect().GetX())) {
-            OnScrollCallback(contentRect.GetY() - caretOffset.GetY() + caretHeight, SCROLL_FROM_NONE);
-        } else {
-            OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
-        }
-    } else if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom() - keyboardOffset)) {
-        auto distance = contentRect.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight -
-            CARET_BOTTOM_DISTANCE.ConvertToPx();
-        OnScrollCallback(distance, SCROLL_FROM_NONE);
-    }
+
+    float distance = scrollController_->CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
+    OnScrollCallback(distance, SCROLL_FROM_NONE);
+}
+
+void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight)
+{
+    isSingleLineMode_ ? MoveCaretToContentRectHorizontal(caretOffset)
+                      : MoveCaretToContentRectVertical(caretOffset, caretHeight);
 }
 
 void RichEditorPattern::MoveCaretToContentRect(float offset, int32_t source)
@@ -10355,20 +10318,11 @@ bool RichEditorPattern::IsSelectAreaVisible()
     return !selectArea.IsEmpty() && LessNotEqual(selectArea.Top(), keyboardInsert.start);
 }
 
-bool RichEditorPattern::IsReachedBoundary(float offset)
-{
-    auto keyboardOffset = GetCrossOverHeight();
-    return (NearEqual(richTextRect_.GetY(), contentRect_.GetY()) && GreatNotEqual(offset, 0.0f)) ||
-           (NearEqual(richTextRect_.GetY() + richTextRect_.Height(),
-                contentRect_.GetY() + contentRect_.Height() - keyboardOffset) &&
-               LessNotEqual(offset, 0.0f));
-}
-
 void RichEditorPattern::CheckScrollable()
 {
     auto gestureHub = GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    scrollable_ = GetTextContentLength() > 0 && GreatNotEqual(richTextRect_.Height(), contentRect_.Height());
+    scrollable_ = GetTextContentLength() > 0 && scrollController_->NeedScroll();
     SetScrollEnabled(scrollable_);
 }
 
@@ -10422,86 +10376,12 @@ void RichEditorPattern::UpdateChildrenOffset()
 
 void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy)
 {
-    if (NearEqual(prevAutoScrollOffset_.GetY(), offset.GetY())) {
-        return;
-    }
-    prevAutoScrollOffset_ = offset;
-    auto contentRect = GetTextContentRect();
-    auto isDragging = param.autoScrollEvent == AutoScrollEvent::DRAG;
-    float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx()
-                                     : AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-    auto maxHeight = isDragging ? frameRect_.Height() : contentRect.Height();
-    if (GreatNotEqual(edgeThreshold * 2, maxHeight)) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: hot area height is great than max height.");
-        return;
-    }
-    float topEdgeThreshold = isDragging ? edgeThreshold : edgeThreshold + contentRect.GetY();
-    float bottomThreshold = isDragging ? frameRect_.Height() - edgeThreshold : contentRect.Bottom() - edgeThreshold;
-    if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
-        auto handleTopOffset = offset;
-        auto handleBottomOffset = OffsetF(offset.GetX(), offset.GetY() + param.handleRect.Height());
-        if (GreatNotEqual(handleBottomOffset.GetY(), bottomThreshold)) {
-            param.offset = bottomThreshold - handleBottomOffset.GetY();
-            ScheduleAutoScroll(param);
-        } else if (LessNotEqual(handleTopOffset.GetY(), topEdgeThreshold)) {
-            param.offset = topEdgeThreshold - handleTopOffset.GetY();
-            ScheduleAutoScroll(param);
-        } else {
-            StopAutoScroll();
-        }
-        return;
-    }
-    // drag and mouse
-    if (GreatNotEqual(offset.GetY(), bottomThreshold)) {
-        param.offset = isDragging ? -CalcDragSpeed(bottomThreshold, frameRect_.Height(), offset.GetY())
-                                  : bottomThreshold - offset.GetY();
-        ScheduleAutoScroll(param);
-    } else if (LessNotEqual(offset.GetY(), topEdgeThreshold)) {
-        param.offset = isDragging ? CalcDragSpeed(topEdgeThreshold, 0, offset.GetY())
-                                  : topEdgeThreshold - offset.GetY();
-        ScheduleAutoScroll(param);
-    } else {
-        StopAutoScroll();
-    }
+    scrollController_->AutoScrollByEdgeDetection(param, offset, strategy);
 }
 
-float RichEditorPattern::CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point)
+float RichEditorPattern::GetScrollOffset() const
 {
-    auto distanceRatio = (point - hotAreaStart) / (hotAreaEnd - hotAreaStart);
-    auto speedFactor = Curves::SHARP->MoveInternal(distanceRatio);
-    return ((MAX_DRAG_SCROLL_SPEED * speedFactor) / TIME_UNIT) * AUTO_SCROLL_INTERVAL;
-}
-
-void RichEditorPattern::ScheduleAutoScroll(AutoScrollParam param)
-{
-    if (GreatNotEqual(param.offset, 0.0f) && IsReachTop()) {
-        return;
-    }
-    if (LessNotEqual(param.offset, 0.0f) && IsReachBottom()) {
-        return;
-    }
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    if (param.isFirstRun_) {
-        param.isFirstRun_ = false;
-        currentScrollParam_ = param;
-        if (isAutoScrollRunning_) {
-            return;
-        }
-    }
-    autoScrollTask_.Reset([weak = WeakClaim(this)]() {
-        auto client = weak.Upgrade();
-        CHECK_NULL_VOID(client);
-        client->OnAutoScroll(client->currentScrollParam_);
-        if (client->IsReachTop() || client->IsReachBottom()) {
-            client->StopAutoScroll();
-        }
-    });
-    isAutoScrollRunning_ = true;
-    taskExecutor->PostDelayedTask(autoScrollTask_, TaskExecutor::TaskType::UI, AUTO_SCROLL_INTERVAL,
-        "ArkUIRichEditorScheduleAutoScroll");
+    return scrollController_->GetScrollOffset();
 }
 
 void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
@@ -10517,7 +10397,7 @@ void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
         case AutoScrollEvent::CARET:
             break;
         case AutoScrollEvent::HANDLE: {
-            param.isFirstHandle ? MoveSecondHandle(newOffset) : MoveFirstHandle(newOffset);
+            scrollController_->MoveHandleOnScroll(newOffset, !param.isFirstHandle);
             selectOverlay_->OnHandleMove(param.handleRect, param.isFirstHandle);
             break;
         }
@@ -10535,16 +10415,12 @@ void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
             return;
     }
     CHECK_NULL_VOID(!NearEqual(newOffset, 0.0f));
-    ScheduleAutoScroll(param);
+    scrollController_->ScheduleAutoScroll(param);
 }
 
 void RichEditorPattern::StopAutoScroll()
 {
-    isAutoScrollRunning_ = false;
-    autoScrollTask_.Cancel();
-    prevAutoScrollOffset_ = OffsetF(0.0f, 0.0f);
-    auto scrollBar = GetScrollBar();
-    IF_PRESENT(scrollBar, ScheduleDisappearDelayTask());
+    scrollController_->StopAutoScroll();
 }
 
 bool RichEditorPattern::NeedAiAnalysis(
@@ -10898,6 +10774,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("undoStyle", static_cast<int32_t>(undoStyle), filter);
     json->PutExtAttr("enableAutoSpacing", isEnableAutoSpacing_ ? "true" : "false", filter);
     json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
+    json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const
@@ -13022,6 +12899,7 @@ void RichEditorPattern::HandleOnPageDown()
 
 void RichEditorPattern::HandlePageScroll(bool isPageUp)
 {
+    CHECK_NULL_VOID(!isSingleLineMode_);
     auto visibleRect = selectOverlay_->GetVisibleRect();
     float distance = isPageUp ? visibleRect.Height() : -visibleRect.Height();
     RectF curCaretRect = GetCaretRect();

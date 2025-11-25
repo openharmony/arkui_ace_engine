@@ -74,6 +74,7 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
         const auto& info = *iter;
         float x = AdjustParagraphX(info, contentRect);
         float y = info.topPos + offset.GetY();
+        x += offset.GetX() - contentRect.GetX();
         info.paragraph->Paint(drawingContext.canvas, x, y);
         pManager_->PaintLeadingMarginSpan(info, offset, drawingContext);
     }

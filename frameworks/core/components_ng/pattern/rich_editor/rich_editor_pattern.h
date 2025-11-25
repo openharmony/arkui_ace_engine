@@ -99,6 +99,7 @@ class RichEditorUndoManager;
 struct UndoRedoRecord;
 class RichEditorContentPattern;
 class StyleManager;
+class RichEditorScrollController;
 using SpanOptions = std::variant<TextSpanOptions, ImageSpanOptions, SymbolSpanOptions, BuilderSpanOptions>;
 using OptionsList = std::list<SpanOptions>;
 
@@ -433,9 +434,7 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         HandleSysScaleChanged();
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(
-            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(),
-            AISpanLayoutInfo{ GetAISpanMap(), NeedShowAIDetect() });
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(Claim(this));
     }
 
     void HandleSysScaleChanged()
@@ -1028,10 +1027,7 @@ public:
         return richTextRect_;
     }
 
-    float GetScrollOffset() const
-    {
-        return scrollOffset_;
-    }
+    float GetScrollOffset() const;
 
     RefPtr<ScrollBar> GetScrollControllerBar()
     {
@@ -1433,6 +1429,9 @@ private:
     friend class StringUndoManager;
     friend class RichEditorContentPattern;
     friend class StyleManager;
+    friend class RichEditorLayoutAlgorithm;
+    friend class RichEditorPaintMethod;
+    friend class RichEditorScrollController;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
@@ -1440,6 +1439,7 @@ private:
     Color GetUrlPressColor();
     Color GetScrollBarColor() const;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
+    RefPtr<RichEditorScrollController> scrollController_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertGlobalToTextOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
@@ -1646,19 +1646,12 @@ private:
 
     // add for scroll.
     void UpdateChildrenOffset();
-    void MoveFirstHandle(float offset);
-    void MoveSecondHandle(float offset);
     void InitScrollablePattern();
-    bool IsReachedBoundary(float offset);
     void UpdateScrollBarOffset() override;
     void CheckScrollable();
     void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
-    void ScheduleAutoScroll(AutoScrollParam param);
     void OnAutoScroll(AutoScrollParam param);
-    void StopAutoScroll();
-    void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
-    float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
     void SetNeedMoveCaretToContentRect();
     void MoveCaretToContentRect();
@@ -1670,15 +1663,6 @@ private:
         return true;
     }
     void ProcessInnerPadding();
-    bool IsReachTop()
-    {
-        return NearEqual(richTextRect_.GetY(), contentRect_.GetY());
-    }
-
-    bool IsReachBottom()
-    {
-        return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
-    }
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
@@ -1869,13 +1853,8 @@ private:
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
-    float scrollOffset_ = 0.0f;
     bool isFirstCallOnReady_ = false;
     bool scrollable_ = true;
-    CancelableCallback<void()> autoScrollTask_;
-    OffsetF prevAutoScrollOffset_;
-    AutoScrollParam currentScrollParam_;
-    bool isAutoScrollRunning_ = false;
     // add for ai input analysis
     bool hasClicked_ = false;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
@@ -1948,6 +1927,8 @@ private:
     // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     int32_t touchedFingerCount_ = 0;
+    bool isSingleLineMode_ = false;
+
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;
 #endif
