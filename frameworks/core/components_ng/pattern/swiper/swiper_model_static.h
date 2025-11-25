@@ -66,9 +66,9 @@ public:
     static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
     static void ResetDisplayCount(FrameNode* frameNode);
     static void SetMinSize(FrameNode* frameNode, const Dimension& minSize);
-    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
+    static void SetPreviousMargin(FrameNode* frameNode, const std::optional<Dimension>& prevMargin,
         const std::optional<bool> &ignoreBlank = false);
-    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
+    static void SetNextMargin(FrameNode* frameNode, const std::optional<Dimension>& nextMargin,
         const std::optional<bool> &ignoreBlank = false);
     static void SetOnChangeEvent(FrameNode* frameNode,
         std::function<void(const BaseEventInfo* info)>&& onChangeEvent);

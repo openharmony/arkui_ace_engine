@@ -508,6 +508,12 @@ void SwiperPattern::OnHostChildUpdateDone()
 {
     Pattern::OnHostChildUpdateDone();
 
+    if (!isBindIndicator_) {
+        InitIndicator();
+    } else if (NeedForceMeasure()) {
+        MarkDirtyBindIndicatorNode();
+    }
+    InitCapture();
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     if (HasLeftButtonNode()) {

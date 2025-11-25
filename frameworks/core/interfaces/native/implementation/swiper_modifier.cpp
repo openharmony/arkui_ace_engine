@@ -759,11 +759,8 @@ void SetPrevMarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optMargin = Converter::OptConvert<Dimension>(*value);
-    if (!optMargin) {
-        optMargin = Dimension(0.0);
-    }
     auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
-    SwiperModelStatic::SetPreviousMargin(frameNode, *optMargin, optIgnore);
+    SwiperModelStatic::SetPreviousMargin(frameNode, optMargin, optIgnore);
 }
 void SetNextMarginImpl(Ark_NativePointer node,
                        const Opt_Length* value,
@@ -772,11 +769,8 @@ void SetNextMarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optMargin = Converter::OptConvertPtr<Dimension>(value);
-    if (!optMargin) {
-        optMargin = Dimension(0.0);
-    }
     auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
-    SwiperModelStatic::SetNextMargin(frameNode, *optMargin, optIgnore);
+    SwiperModelStatic::SetNextMargin(frameNode, optMargin, optIgnore);
 }
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
