@@ -16,7 +16,7 @@ import { CustomTextDecoder, float32, float64, int32, int64 } from "@koalaui/comm
 import { Tags, CallbackResource } from "./SerializerBase";
 import { pointer, KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
 import { NativeBuffer } from "./NativeBuffer";
-import { ResourceHolder } from "../arkts/ResourceManager";
+import { ResourceHolder } from "./ResourceManager";
 import { InteropNativeModule } from "./InteropNativeModule";
 
 export class DeserializerBase {

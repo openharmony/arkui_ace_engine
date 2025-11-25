@@ -16,9 +16,7 @@
 #include <vector>
 #include <map>
 
-#ifndef KOALA_INTEROP_MEM_ANALYZER
 #include <atomic>
-#endif
 
 #ifdef KOALA_INTEROP_MODULE
 #undef KOALA_INTEROP_MODULE
@@ -741,6 +739,28 @@ KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
     return result;
 }
 KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
+#endif
+
+#if defined(KOALA_ANI)
+KNativePointer impl_AllocAtomic(KInt initial)
+{
+    return new std::atomic_int(initial);
+}
+KOALA_INTEROP_DIRECT_1(AllocAtomic, KNativePointer, KInt)
+
+void impl_FreeAtomic(KNativePointer rawReference)
+{
+    auto* reference = reinterpret_cast<std::atomic_int*>(rawReference);
+    delete reference;
+}
+KOALA_INTEROP_DIRECT_V1(FreeAtomic, KNativePointer)
+
+KBoolean impl_CompareAndSwapAtomic(KNativePointer rawReference, KInt expectedValue, KInt newValue)
+{
+    auto* reference = reinterpret_cast<std::atomic_int*>(rawReference);
+    return reference->compare_exchange_strong(expectedValue, newValue);
+}
+KOALA_INTEROP_DIRECT_3(CompareAndSwapAtomic, KBoolean, KNativePointer, KInt, KInt)
 #endif
 
 #if defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ) || \

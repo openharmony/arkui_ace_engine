@@ -27,63 +27,47 @@ export interface Disposable {
 }
 
 export class ResourceHolder {
-
-    private instanceLock = new Mutex()
-    private resources = new containers.ConcurrentHashMap<ResourceId, ResourceInfo>();
-
-    private static staticLock = new Mutex()
-
     private static nextResourceId: ResourceId = 100
-    private static _instance: ResourceHolder = new ResourceHolder();
+    private resources: Map<ResourceId, ResourceInfo> = new Map<ResourceId, ResourceInfo>()
+    private static _instance: ResourceHolder|undefined = undefined
     private static disposables = new Array<Disposable>();
     private static disposablesSize = 0
 
     static instance(): ResourceHolder {
-        return ResourceHolder._instance
+        if (ResourceHolder._instance == undefined) {
+            ResourceHolder._instance = new ResourceHolder()
+        }
+        return ResourceHolder._instance!
     }
 
     public hold(resourceId: ResourceId) {
-        this.instanceLock.lock()
-        if (!this.resources.has(resourceId)) {
-            this.instanceLock.unlock()
-            throw new Error(`Resource ${resourceId} does not exists, can not hold`);
-        }
-        this.resources.get(resourceId)!.holdersCount++;
-        this.instanceLock.unlock()
+        if (!this.resources.has(resourceId))
+            throw new Error(`Resource ${resourceId} does not exists, can not hold`)
+        this.resources.get(resourceId)!.holdersCount++
     }
 
     public release(resourceId: ResourceId) {
-        this.instanceLock.lock()
-        if (!this.resources.has(resourceId)) {
-            this.instanceLock.unlock()
-            throw new Error(`Resource ${resourceId} does not exists, can not release`);
-        }
-        const resource = this.resources.get(resourceId)!;
-        resource.holdersCount--;
-        if (resource.holdersCount <= 0) this.resources.delete(resourceId);
-        this.instanceLock.unlock()
+        if (!this.resources.has(resourceId))
+            throw new Error(`Resource ${resourceId} does not exists, can not release`)
+        const resource = this.resources.get(resourceId)!
+        resource.holdersCount--
+        if (resource.holdersCount <= 0)
+            this.resources.delete(resourceId)
     }
 
     public registerAndHold(resource: object): ResourceId {
-        this.instanceLock.lock()
         const resourceId = ResourceHolder.nextResourceId++
         this.resources.set(resourceId, {
             resource: resource,
             holdersCount: 1,
         })
-        this.instanceLock.unlock()
         return resourceId
     }
 
     public get(resourceId: ResourceId): object {
-        this.instanceLock.lock()
-        if (!this.resources.has(resourceId)) {
-            this.instanceLock.unlock()
+        if (!this.resources.has(resourceId))
             throw new Error(`Resource ${resourceId} does not exists`)
-        }
-        const resource = this.resources.get(resourceId)!.resource
-        this.instanceLock.unlock()
-        return resource
+        return this.resources.get(resourceId)!.resource
     }
 
     public has(resourceId: ResourceId): boolean {
@@ -91,18 +75,15 @@ export class ResourceHolder {
     }
 
     static register(resource: Disposable) {
-        ResourceHolder.staticLock.lock()
         if (ResourceHolder.disposablesSize < ResourceHolder.disposables.length) {
             ResourceHolder.disposables[ResourceHolder.disposablesSize] = resource
         } else {
             ResourceHolder.disposables.push(resource)
         }
         ResourceHolder.disposablesSize++
-        ResourceHolder.staticLock.unlock()
     }
 
     static unregister(resource: Disposable) {
-        ResourceHolder.staticLock.lock()
         const index = ResourceHolder.disposables.indexOf(resource);
         if (index !== -1 && index < ResourceHolder.disposablesSize) {
             if (index !== ResourceHolder.disposablesSize - 1) {
@@ -110,21 +91,16 @@ export class ResourceHolder {
             }
             ResourceHolder.disposablesSize--;
         }
-        ResourceHolder.staticLock.unlock()
     }
 
     static disposeAll() {
-        ResourceHolder.staticLock.lock()
         for (let i = 0; i < ResourceHolder.disposablesSize; ++i) {
             ResourceHolder.disposables[i].dispose()
         }
         ResourceHolder.disposablesSize = 0
-        ResourceHolder.staticLock.unlock()
     }
 
     static compactDisposables() {
-        ResourceHolder.staticLock.lock()
         ResourceHolder.disposables = ResourceHolder.disposables.slice(0, ResourceHolder.disposablesSize);
-        ResourceHolder.staticLock.unlock()
     }
 }
