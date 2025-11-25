@@ -281,20 +281,23 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            if (plugin) {
-                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
-                    const frozen = this.manager!.frozen
-                    this.manager!.frozen = true
-                    memoEntry<void>(context, 0, builder)
-                    this.manager!.frozen = frozen
-                })
-            } else {
-                Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
-                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
-            }
-            InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
-            root = this.trackFrame(() => this.rootState!.value)
-            InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
+            root = this.trackFrame(() => {
+                if (plugin) {
+                    this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
+                        const frozen = this.manager!.frozen
+                        this.manager!.frozen = true
+                        memoEntry<void>(context, 0, builder)
+                        this.manager!.frozen = frozen
+                    })
+                } else {
+                    Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+                    this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
+                }
+                InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
+                root = this.rootState!.value
+                InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
+                return root
+            })
         } catch (e) {
             if (e instanceof Error) {
                 InteropNativeModule._NativeLog(`ArkTS Application.start error name: ${e.name} message: ${e.message}`);
