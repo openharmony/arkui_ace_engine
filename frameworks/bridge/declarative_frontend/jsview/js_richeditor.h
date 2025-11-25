@@ -240,6 +240,7 @@ public:
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
+    void DeleteBackward(const JSCallbackInfo& args);
     void ToStyledString(const JSCallbackInfo& args);
     void FromStyledString(const JSCallbackInfo& args);
 

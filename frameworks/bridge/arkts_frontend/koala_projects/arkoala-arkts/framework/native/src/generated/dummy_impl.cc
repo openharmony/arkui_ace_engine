@@ -39072,6 +39072,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("deleteBackward(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // RichEditorBaseControllerAccessor
     namespace RichEditorControllerAccessor {
     void DestroyPeerImpl(Ark_RichEditorController peer)
@@ -47933,6 +47943,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
             RichEditorBaseControllerAccessor::GetPreviewTextImpl,
             RichEditorBaseControllerAccessor::GetCaretRectImpl,
+            RichEditorBaseControllerAccessor::DeleteBackwardImpl,
         };
         return &RichEditorBaseControllerAccessorImpl;
     }

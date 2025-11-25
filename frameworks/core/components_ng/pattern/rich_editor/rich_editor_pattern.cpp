@@ -1732,6 +1732,12 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options, TextChangeReaso
     AfterContentChange(changeValue);
 }
 
+void RichEditorPattern::DeleteBackwardFunction()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "DeleteBackwardFunction called");
+    HandleOnDelete(true);
+}
+
 void RichEditorPattern::DeleteSpansOperation(int32_t start, int32_t end)
 {
     auto startInfo = GetSpanPositionInfo(start);

@@ -16368,6 +16368,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
+    {
+    }
     } // RichEditorBaseControllerAccessor
     namespace RichEditorControllerAccessor {
     void DestroyPeerImpl(Ark_RichEditorController peer)

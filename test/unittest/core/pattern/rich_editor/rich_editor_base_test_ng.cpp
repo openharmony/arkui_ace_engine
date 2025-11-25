@@ -909,6 +909,54 @@ HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetKeyboardAppearance001
+ * @tc.desc: test SetKeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetKeyboardAppearance001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+
+    KeyboardAppearance value = KeyboardAppearance::LIGHT_IMMERSIVE;
+    richEditorModel.SetKeyboardAppearance(value);
+    EXPECT_EQ(richEditorPattern->GetKeyboardAppearance(), value);
+
+    value = KeyboardAppearance::IMMERSIVE;
+    richEditorModel.SetKeyboardAppearance(richEditorNode, value);
+    EXPECT_EQ(richEditorPattern->GetKeyboardAppearance(), value);
+}
+
+/**
+ * @tc.name: SetPlaceholder001
+ * @tc.desc: test SetPlaceholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetPlaceholder001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorModel.GetRichEditorController();
+    EXPECT_NE(richEditorController, nullptr);
+
+    PlaceholderOptions options;
+    options.value = std::nullopt;
+    richEditorModel.SetPlaceholder(options);
+    EXPECT_FALSE(options.value.has_value());
+
+    richEditorModel.SetPlaceholder(richEditorNode, options);
+    EXPECT_FALSE(options.fontSize.has_value());
+}
+
+/**
  * @tc.name: onDraw001
  * @tc.desc: Verify the onDraw Magnifier.
  * @tc.type: FUNC

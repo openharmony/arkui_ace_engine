@@ -2298,6 +2298,15 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
     args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
 }
 
+void JSRichEditorController::DeleteBackward(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    CHECK_NULL_VOID(richEditorController);
+    richEditorController->DeleteBackward();
+}
+
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -2321,6 +2330,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("deleteBackward", &JSRichEditorController::DeleteBackward);
     JSClass<JSRichEditorController>::CustomMethod("getLayoutManager", &JSRichEditorController::GetLayoutManager);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
     JSClass<JSRichEditorController>::CustomMethod("toStyledString", &JSRichEditorController::ToStyledString);

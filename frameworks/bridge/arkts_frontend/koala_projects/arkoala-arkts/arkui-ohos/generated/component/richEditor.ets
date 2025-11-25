@@ -98,6 +98,10 @@ export class RichEditorBaseController implements MaterializedBase {
     public isEditing(): boolean | undefined {
         return this.isEditing_serialize()
     }
+    public deleteBackward(): void {
+        this.deleteBackward_serialize()
+        return
+    }
     public stopEditing(): void {
         this.stopEditing_serialize()
         return
@@ -211,6 +215,9 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult : RectResult | undefined = buffer
         return returnResult
+    }
+    deleteBackward_serialize(): void {
+        ArkUIGeneratedNativeModule._RichEditorBaseController_deleteBackward(this.peer!.ptr)
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {
