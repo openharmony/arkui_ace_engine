@@ -353,9 +353,9 @@ void WebModelStatic::JavaScriptOnHeadEnd(
 {
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
-
+    ScriptRegexItems scriptRegexItems;
     CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
