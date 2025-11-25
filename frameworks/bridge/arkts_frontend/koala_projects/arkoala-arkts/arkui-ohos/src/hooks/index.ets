@@ -58,10 +58,10 @@ import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent  } from "#generated";
-import { ArkWaterFlowComponent, WaterFlowOptions } from "#generated";
+import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
-import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
+import { WaterFlowHandWritten } from './WaterFlowHandWritten';
 import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
 import { ArkVideoComponent, ArkVideoPeer, VideoOptions } from "#generated";
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, ImageAnalyzerConfig } from "#generated";
