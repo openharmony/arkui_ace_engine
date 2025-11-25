@@ -95,9 +95,6 @@ public:
 
     void SetTargetIndex(int32_t index)
     {
-        if (index < 0 || index >= totalItemCount_) {
-            index = 0;
-        }
         if (index != selectedIndex_) {
             SwipeTo(index);
         }
@@ -321,7 +318,7 @@ private:
     LayoutConstraintF layoutConstraint_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
     std::vector<int32_t> offScreenItemsIndex_;
-    std::optional<int32_t> targetIndex_ = 0;
+    std::optional<int32_t> targetIndex_;
 
     ContainerPickerUtils::PositionMap itemPosition_;
 
