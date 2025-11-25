@@ -33676,6 +33676,40 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+                                            Ark_Int32 lineNumber)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getLineMetrics(");
+        WriteToString(&out, lineNumber);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                            const Ark_TextRange* range,
+                                            Ark_text_RectWidthStyle widthStyle,
+                                            Ark_text_RectHeightStyle heightStyle)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getRectsForRange(");
+        WriteToString(&out, range);
+        out.append(", ");
+        WriteToString(&out, widthStyle);
+        out.append(", ");
+        WriteToString(&out, heightStyle);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // LayoutManagerAccessor
     namespace LayoutPolicyAccessor {
     void DestroyPeerImpl(Ark_LayoutPolicy peer)
@@ -47095,6 +47129,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LayoutManagerAccessor::GetFinalizerImpl,
             LayoutManagerAccessor::GetLineCountImpl,
             LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+            LayoutManagerAccessor::GetLineMetricsImpl,
+            LayoutManagerAccessor::GetRectsForRangeImpl,
         };
         return &LayoutManagerAccessorImpl;
     }

@@ -16,8 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { default as text } from "@ohos.graphics.text"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
@@ -31,6 +33,8 @@ import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 export interface LayoutManager {
     getLineCount(): int32
     getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity
+    getLineMetrics(lineNumber: int32): text.LineMetrics
+    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox>
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     peer?: Finalizable | undefined = undefined
@@ -61,6 +65,16 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const y_casted = y as (double)
         return this.getGlyphPositionAtCoordinate_serialize(x_casted, y_casted)
     }
+    public getLineMetrics(lineNumber: int32): text.LineMetrics {
+        const lineNumber_casted = lineNumber as (int32)
+        return this.getLineMetrics_serialize(lineNumber_casted)
+    }
+    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+        const range_casted = range as (TextRange)
+        const widthStyle_casted = widthStyle as (text.RectWidthStyle)
+        const heightStyle_casted = heightStyle as (text.RectHeightStyle)
+        return this.getRectsForRange_serialize(range_casted, widthStyle_casted, heightStyle_casted)
+    }
     getLineCount_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
         return retval
@@ -69,6 +83,26 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : PositionWithAffinity = PositionWithAffinity_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics {
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : text.LineMetrics = text_LineMetrics_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextRange_serializer.write(thisSerializer, range)
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<text.TextBox> = new Array<text.TextBox>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+        }
+        const returnResult : Array<text.TextBox> = buffer
         return returnResult
     }
 }
@@ -386,7 +420,13 @@ export interface StyledStringChangeValue {
 }
 export interface PositionWithAffinity {
     position: int32;
+    affinity: text.Affinity;
 }
+export type Affinity = text.Affinity;
+export type LineMetrics = text.LineMetrics;
+export type RectWidthStyle = text.RectWidthStyle;
+export type RectHeightStyle = text.RectHeightStyle;
+export type TextBox = text.TextBox;
 export interface CaretStyle {
     width?: Length;
     color?: ResourceColor;
@@ -444,19 +484,6 @@ export class LayoutManager_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutManagerInternal.fromPtr(ptr)
-    }
-}
-export class PositionWithAffinity_serializer {
-    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForPosition  = value.position
-        valueSerializer.writeInt32(valueHolderForPosition)
-    }
-    public static read(buffer: DeserializerBase): PositionWithAffinity {
-        let valueDeserializer : DeserializerBase = buffer
-        const positionTmpResult : int32 = valueDeserializer.readInt32()
-        let value : PositionWithAffinity = ({position: positionTmpResult} as PositionWithAffinity)
-        return value
     }
 }
 export class StyledStringController_serializer {
@@ -636,6 +663,22 @@ export class InsertValue_serializer {
         const insertOffsetTmpResult : int32 = valueDeserializer.readInt32()
         const insertValueTmpResult : string = (valueDeserializer.readString() as string)
         let value : InsertValue = ({insertOffset: insertOffsetTmpResult, insertValue: insertValueTmpResult} as InsertValue)
+        return value
+    }
+}
+export class PositionWithAffinity_serializer {
+    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForPosition  = value.position
+        valueSerializer.writeInt32(valueHolderForPosition)
+        const valueHolderForAffinity  = value.affinity
+        valueSerializer.writeInt32(valueHolderForAffinity.valueOf())
+    }
+    public static read(buffer: DeserializerBase): PositionWithAffinity {
+        let valueDeserializer : DeserializerBase = buffer
+        const positionTmpResult : int32 = valueDeserializer.readInt32()
+        const affinityTmpResult : text.Affinity = text.Affinity.fromValue(valueDeserializer.readInt32())
+        let value : PositionWithAffinity = ({position: positionTmpResult, affinity: affinityTmpResult} as PositionWithAffinity)
         return value
     }
 }

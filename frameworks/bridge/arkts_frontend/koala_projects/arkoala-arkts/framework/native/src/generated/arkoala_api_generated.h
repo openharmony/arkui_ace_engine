@@ -570,8 +570,6 @@ typedef struct Ark_PopupStateChangeParam Ark_PopupStateChangeParam;
 typedef struct Opt_PopupStateChangeParam Opt_PopupStateChangeParam;
 typedef struct Ark_PositionF64Inner Ark_PositionF64Inner;
 typedef struct Opt_PositionF64Inner Opt_PositionF64Inner;
-typedef struct Ark_PositionWithAffinity Ark_PositionWithAffinity;
-typedef struct Opt_PositionWithAffinity Opt_PositionWithAffinity;
 typedef struct Ark_PreparedInfo Ark_PreparedInfo;
 typedef struct Opt_PreparedInfo Opt_PreparedInfo;
 typedef struct Ark_ProgressConfiguration Ark_ProgressConfiguration;
@@ -694,6 +692,10 @@ typedef struct Opt_TabsController Opt_TabsController;
 typedef struct TapRecognizerPeer TapRecognizerPeer;
 typedef struct TapRecognizerPeer* Ark_TapRecognizer;
 typedef struct Opt_TapRecognizer Opt_TapRecognizer;
+typedef struct Ark_text_FontFeature Ark_text_FontFeature;
+typedef struct Opt_text_FontFeature Opt_text_FontFeature;
+typedef struct Ark_text_FontVariation Ark_text_FontVariation;
+typedef struct Opt_text_FontVariation Opt_text_FontVariation;
 typedef struct TextAreaControllerPeer TextAreaControllerPeer;
 typedef struct TextAreaControllerPeer* Ark_TextAreaController;
 typedef struct Opt_TextAreaController Opt_TextAreaController;
@@ -1076,6 +1078,14 @@ typedef struct Array_String Array_String;
 typedef struct Opt_Array_String Opt_Array_String;
 typedef struct Array_StyleOptions Array_StyleOptions;
 typedef struct Opt_Array_StyleOptions Opt_Array_StyleOptions;
+typedef struct Array_text_FontFeature Array_text_FontFeature;
+typedef struct Opt_Array_text_FontFeature Opt_Array_text_FontFeature;
+typedef struct Array_text_FontVariation Array_text_FontVariation;
+typedef struct Opt_Array_text_FontVariation Opt_Array_text_FontVariation;
+typedef struct Array_text_TextBox Array_text_TextBox;
+typedef struct Opt_Array_text_TextBox Opt_Array_text_TextBox;
+typedef struct Array_text_TextShadow Array_text_TextShadow;
+typedef struct Opt_Array_text_TextShadow Opt_Array_text_TextShadow;
 typedef struct Array_TextCascadePickerRangeContent Array_TextCascadePickerRangeContent;
 typedef struct Opt_Array_TextCascadePickerRangeContent Opt_Array_TextCascadePickerRangeContent;
 typedef struct Array_TextDataDetectorType Array_TextDataDetectorType;
@@ -1527,6 +1537,8 @@ typedef struct Map_AxisModel_Float64 Map_AxisModel_Float64;
 typedef struct Opt_Map_AxisModel_Float64 Opt_Map_AxisModel_Float64;
 typedef struct Map_Number_SliderStepItemAccessibility Map_Number_SliderStepItemAccessibility;
 typedef struct Opt_Map_Number_SliderStepItemAccessibility Opt_Map_Number_SliderStepItemAccessibility;
+typedef struct Map_Int32_text_RunMetrics Map_Int32_text_RunMetrics;
+typedef struct Opt_Map_Int32_text_RunMetrics Opt_Map_Int32_text_RunMetrics;
 typedef struct Map_String_ComponentContent Map_String_ComponentContent;
 typedef struct Opt_Map_String_ComponentContent Opt_Map_String_ComponentContent;
 typedef struct Map_String_Int32 Map_String_Int32;
@@ -1866,6 +1878,10 @@ typedef struct Ark_ColumnOptionsV2 Ark_ColumnOptionsV2;
 typedef struct Opt_ColumnOptionsV2 Opt_ColumnOptionsV2;
 typedef struct Ark_CommandPath Ark_CommandPath;
 typedef struct Opt_CommandPath Opt_CommandPath;
+typedef struct Ark_common2D_Color Ark_common2D_Color;
+typedef struct Opt_common2D_Color Opt_common2D_Color;
+typedef struct Ark_common2D_Point Ark_common2D_Point;
+typedef struct Opt_common2D_Point Opt_common2D_Point;
 typedef struct Ark_common2D_Rect Ark_common2D_Rect;
 typedef struct Opt_common2D_Rect Opt_common2D_Rect;
 typedef struct Ark_ComputedBarAttribute Ark_ComputedBarAttribute;
@@ -1935,6 +1951,8 @@ typedef struct Opt_DragItemInfo Opt_DragItemInfo;
 typedef struct DrawContextPeer DrawContextPeer;
 typedef struct DrawContextPeer* Ark_DrawContext;
 typedef struct Opt_DrawContext Opt_DrawContext;
+typedef struct Ark_drawing_FontMetrics Ark_drawing_FontMetrics;
+typedef struct Opt_drawing_FontMetrics Opt_drawing_FontMetrics;
 typedef struct DrawingRenderingContextPeer DrawingRenderingContextPeer;
 typedef struct DrawingRenderingContextPeer* Ark_DrawingRenderingContext;
 typedef struct Opt_DrawingRenderingContext Opt_DrawingRenderingContext;
@@ -2235,6 +2253,8 @@ typedef struct Ark_PopupBorderLinearGradient Ark_PopupBorderLinearGradient;
 typedef struct Opt_PopupBorderLinearGradient Opt_PopupBorderLinearGradient;
 typedef struct Ark_PopupButton Ark_PopupButton;
 typedef struct Opt_PopupButton Opt_PopupButton;
+typedef struct Ark_PositionWithAffinity Ark_PositionWithAffinity;
+typedef struct Opt_PositionWithAffinity Opt_PositionWithAffinity;
 typedef struct Ark_PositionLengthMetricsInner Ark_PositionLengthMetricsInner;
 typedef struct Opt_PositionLengthMetricsInner Opt_PositionLengthMetricsInner;
 typedef struct Ark_PosterOptions Ark_PosterOptions;
@@ -2367,6 +2387,12 @@ typedef struct Ark_TabContentAnimatedTransition Ark_TabContentAnimatedTransition
 typedef struct Opt_TabContentAnimatedTransition Opt_TabContentAnimatedTransition;
 typedef struct Ark_TargetInfo Ark_TargetInfo;
 typedef struct Opt_TargetInfo Opt_TargetInfo;
+typedef struct Ark_text_LineMetrics Ark_text_LineMetrics;
+typedef struct Opt_text_LineMetrics Opt_text_LineMetrics;
+typedef struct Ark_text_RectStyle Ark_text_RectStyle;
+typedef struct Opt_text_RectStyle Opt_text_RectStyle;
+typedef struct Ark_text_TextBox Ark_text_TextBox;
+typedef struct Opt_text_TextBox Opt_text_TextBox;
 typedef struct Ark_TextClockOptions Ark_TextClockOptions;
 typedef struct Opt_TextClockOptions Opt_TextClockOptions;
 typedef struct Ark_TextContentControllerOptions Ark_TextContentControllerOptions;
@@ -2850,6 +2876,10 @@ typedef struct Ark_TabsOptions Ark_TabsOptions;
 typedef struct Opt_TabsOptions Opt_TabsOptions;
 typedef struct Ark_TerminationInfo Ark_TerminationInfo;
 typedef struct Opt_TerminationInfo Opt_TerminationInfo;
+typedef struct Ark_text_Decoration Ark_text_Decoration;
+typedef struct Opt_text_Decoration Opt_text_Decoration;
+typedef struct Ark_text_TextShadow Ark_text_TextShadow;
+typedef struct Opt_text_TextShadow Opt_text_TextShadow;
 typedef struct Ark_TextCascadePickerRangeContent Ark_TextCascadePickerRangeContent;
 typedef struct Opt_TextCascadePickerRangeContent Opt_TextCascadePickerRangeContent;
 typedef struct Ark_TextChangeOptions Ark_TextChangeOptions;
@@ -3070,6 +3100,8 @@ typedef struct Ark_SweepGradientOptions Ark_SweepGradientOptions;
 typedef struct Opt_SweepGradientOptions Opt_SweepGradientOptions;
 typedef struct Ark_SwipeActionItem Ark_SwipeActionItem;
 typedef struct Opt_SwipeActionItem Opt_SwipeActionItem;
+typedef struct Ark_text_TextStyle Ark_text_TextStyle;
+typedef struct Opt_text_TextStyle Opt_text_TextStyle;
 typedef struct Ark_TextAreaOptions Ark_TextAreaOptions;
 typedef struct Opt_TextAreaOptions Opt_TextAreaOptions;
 typedef struct Ark_TextDataDetectorConfig Ark_TextDataDetectorConfig;
@@ -3298,6 +3330,8 @@ typedef struct Opt_TabBarLabelStyle Opt_TabBarLabelStyle;
 typedef struct TapGestureEventPeer TapGestureEventPeer;
 typedef struct TapGestureEventPeer* Ark_TapGestureEvent;
 typedef struct Opt_TapGestureEvent Opt_TapGestureEvent;
+typedef struct Ark_text_RunMetrics Ark_text_RunMetrics;
+typedef struct Opt_text_RunMetrics Opt_text_RunMetrics;
 typedef struct Ark_TextBackgroundStyle Ark_TextBackgroundStyle;
 typedef struct Opt_TextBackgroundStyle Opt_TextBackgroundStyle;
 typedef struct Ark_TextPickerTextStyle Ark_TextPickerTextStyle;
@@ -6532,6 +6566,104 @@ typedef struct Opt_TabsCacheMode {
     Ark_Tag tag;
     Ark_TabsCacheMode value;
 } Opt_TabsCacheMode;
+typedef enum Ark_text_Affinity {
+    ARK_TEXT_AFFINITY_UPSTREAM = 0,
+    ARK_TEXT_AFFINITY_DOWNSTREAM = 1,
+} Ark_text_Affinity;
+typedef struct Opt_text_Affinity {
+    Ark_Tag tag;
+    Ark_text_Affinity value;
+} Opt_text_Affinity;
+typedef enum Ark_text_EllipsisMode {
+    ARK_TEXT_ELLIPSIS_MODE_START = 0,
+    ARK_TEXT_ELLIPSIS_MODE_MIDDLE = 1,
+    ARK_TEXT_ELLIPSIS_MODE_END = 2,
+} Ark_text_EllipsisMode;
+typedef struct Opt_text_EllipsisMode {
+    Ark_Tag tag;
+    Ark_text_EllipsisMode value;
+} Opt_text_EllipsisMode;
+typedef enum Ark_text_FontStyle {
+    ARK_TEXT_FONT_STYLE_NORMAL = 0,
+    ARK_TEXT_FONT_STYLE_ITALIC = 1,
+    ARK_TEXT_FONT_STYLE_OBLIQUE = 2,
+} Ark_text_FontStyle;
+typedef struct Opt_text_FontStyle {
+    Ark_Tag tag;
+    Ark_text_FontStyle value;
+} Opt_text_FontStyle;
+typedef enum Ark_text_FontWeight {
+    ARK_TEXT_FONT_WEIGHT_W100 = 0,
+    ARK_TEXT_FONT_WEIGHT_W200 = 1,
+    ARK_TEXT_FONT_WEIGHT_W300 = 2,
+    ARK_TEXT_FONT_WEIGHT_W400 = 3,
+    ARK_TEXT_FONT_WEIGHT_W500 = 4,
+    ARK_TEXT_FONT_WEIGHT_W600 = 5,
+    ARK_TEXT_FONT_WEIGHT_W700 = 6,
+    ARK_TEXT_FONT_WEIGHT_W800 = 7,
+    ARK_TEXT_FONT_WEIGHT_W900 = 8,
+} Ark_text_FontWeight;
+typedef struct Opt_text_FontWeight {
+    Ark_Tag tag;
+    Ark_text_FontWeight value;
+} Opt_text_FontWeight;
+typedef enum Ark_text_RectHeightStyle {
+    ARK_TEXT_RECT_HEIGHT_STYLE_TIGHT = 0,
+    ARK_TEXT_RECT_HEIGHT_STYLE_MAX = 1,
+    ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_MIDDLE = 2,
+    ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_TOP = 3,
+    ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_BOTTOM = 4,
+    ARK_TEXT_RECT_HEIGHT_STYLE_STRUT = 5,
+} Ark_text_RectHeightStyle;
+typedef struct Opt_text_RectHeightStyle {
+    Ark_Tag tag;
+    Ark_text_RectHeightStyle value;
+} Opt_text_RectHeightStyle;
+typedef enum Ark_text_RectWidthStyle {
+    ARK_TEXT_RECT_WIDTH_STYLE_TIGHT = 0,
+    ARK_TEXT_RECT_WIDTH_STYLE_MAX = 1,
+} Ark_text_RectWidthStyle;
+typedef struct Opt_text_RectWidthStyle {
+    Ark_Tag tag;
+    Ark_text_RectWidthStyle value;
+} Opt_text_RectWidthStyle;
+typedef enum Ark_text_TextBaseline {
+    ARK_TEXT_TEXT_BASELINE_ALPHABETIC = 0,
+    ARK_TEXT_TEXT_BASELINE_IDEOGRAPHIC = 1,
+} Ark_text_TextBaseline;
+typedef struct Opt_text_TextBaseline {
+    Ark_Tag tag;
+    Ark_text_TextBaseline value;
+} Opt_text_TextBaseline;
+typedef enum Ark_text_TextDecorationStyle {
+    ARK_TEXT_TEXT_DECORATION_STYLE_SOLID = 0,
+    ARK_TEXT_TEXT_DECORATION_STYLE_DOUBLE = 1,
+    ARK_TEXT_TEXT_DECORATION_STYLE_DOTTED = 2,
+    ARK_TEXT_TEXT_DECORATION_STYLE_DASHED = 3,
+    ARK_TEXT_TEXT_DECORATION_STYLE_WAVY = 4,
+} Ark_text_TextDecorationStyle;
+typedef struct Opt_text_TextDecorationStyle {
+    Ark_Tag tag;
+    Ark_text_TextDecorationStyle value;
+} Opt_text_TextDecorationStyle;
+typedef enum Ark_text_TextDecorationType {
+    ARK_TEXT_TEXT_DECORATION_TYPE_NONE = 0,
+    ARK_TEXT_TEXT_DECORATION_TYPE_UNDERLINE = 1,
+    ARK_TEXT_TEXT_DECORATION_TYPE_OVERLINE = 2,
+    ARK_TEXT_TEXT_DECORATION_TYPE_LINE_THROUGH = 3,
+} Ark_text_TextDecorationType;
+typedef struct Opt_text_TextDecorationType {
+    Ark_Tag tag;
+    Ark_text_TextDecorationType value;
+} Opt_text_TextDecorationType;
+typedef enum Ark_text_TextDirection {
+    ARK_TEXT_TEXT_DIRECTION_RTL = 0,
+    ARK_TEXT_TEXT_DIRECTION_LTR = 1,
+} Ark_text_TextDirection;
+typedef struct Opt_text_TextDirection {
+    Ark_Tag tag;
+    Ark_text_TextDirection value;
+} Opt_text_TextDirection;
 typedef enum Ark_TextAlign {
     ARK_TEXT_ALIGN_CENTER = 1,
     ARK_TEXT_ALIGN_START = 0,
@@ -7880,14 +8012,6 @@ typedef struct Opt_PositionF64Inner {
     Ark_Tag tag;
     Ark_PositionF64Inner value;
 } Opt_PositionF64Inner;
-typedef struct Ark_PositionWithAffinity {
-    /* kind: Interface */
-    Ark_Int32 position;
-} Ark_PositionWithAffinity;
-typedef struct Opt_PositionWithAffinity {
-    Ark_Tag tag;
-    Ark_PositionWithAffinity value;
-} Opt_PositionWithAffinity;
 typedef struct Ark_PreparedInfo {
     /* kind: Interface */
     Ark_Int32 duration;
@@ -8160,6 +8284,24 @@ typedef struct Opt_TapRecognizer {
     Ark_Tag tag;
     Ark_TapRecognizer value;
 } Opt_TapRecognizer;
+typedef struct Ark_text_FontFeature {
+    /* kind: Interface */
+    Ark_String name;
+    Ark_Int32 value;
+} Ark_text_FontFeature;
+typedef struct Opt_text_FontFeature {
+    Ark_Tag tag;
+    Ark_text_FontFeature value;
+} Opt_text_FontFeature;
+typedef struct Ark_text_FontVariation {
+    /* kind: Interface */
+    Ark_String axis;
+    Ark_Float64 value;
+} Ark_text_FontVariation;
+typedef struct Opt_text_FontVariation {
+    Ark_Tag tag;
+    Ark_text_FontVariation value;
+} Opt_text_FontVariation;
 typedef struct Opt_TextAreaController {
     Ark_Tag tag;
     Ark_TextAreaController value;
@@ -9735,6 +9877,42 @@ typedef struct Opt_Array_StyleOptions {
     Ark_Tag tag;
     Array_StyleOptions value;
 } Opt_Array_StyleOptions;
+typedef struct Array_text_FontFeature {
+    /* kind: ContainerType */
+    Ark_text_FontFeature* array;
+    Ark_Int32 length;
+} Array_text_FontFeature;
+typedef struct Opt_Array_text_FontFeature {
+    Ark_Tag tag;
+    Array_text_FontFeature value;
+} Opt_Array_text_FontFeature;
+typedef struct Array_text_FontVariation {
+    /* kind: ContainerType */
+    Ark_text_FontVariation* array;
+    Ark_Int32 length;
+} Array_text_FontVariation;
+typedef struct Opt_Array_text_FontVariation {
+    Ark_Tag tag;
+    Array_text_FontVariation value;
+} Opt_Array_text_FontVariation;
+typedef struct Array_text_TextBox {
+    /* kind: ContainerType */
+    Ark_text_TextBox* array;
+    Ark_Int32 length;
+} Array_text_TextBox;
+typedef struct Opt_Array_text_TextBox {
+    Ark_Tag tag;
+    Array_text_TextBox value;
+} Opt_Array_text_TextBox;
+typedef struct Array_text_TextShadow {
+    /* kind: ContainerType */
+    Ark_text_TextShadow* array;
+    Ark_Int32 length;
+} Array_text_TextShadow;
+typedef struct Opt_Array_text_TextShadow {
+    Ark_Tag tag;
+    Array_text_TextShadow value;
+} Opt_Array_text_TextShadow;
 typedef struct Array_TextCascadePickerRangeContent {
     /* kind: ContainerType */
     Ark_TextCascadePickerRangeContent* array;
@@ -11960,6 +12138,16 @@ typedef struct Opt_Map_AxisModel_Float64 {
     Ark_Tag tag;
     Map_AxisModel_Float64 value;
 } Opt_Map_AxisModel_Float64;
+typedef struct Map_Int32_text_RunMetrics {
+    /* kind: ContainerType */
+    Ark_Int32 size;
+    Ark_Int32* keys;
+    Ark_text_RunMetrics* values;
+} Map_Int32_text_RunMetrics;
+typedef struct Opt_Map_Int32_text_RunMetrics {
+    Ark_Tag tag;
+    Map_Int32_text_RunMetrics value;
+} Opt_Map_Int32_text_RunMetrics;
 typedef struct Map_Number_SliderStepItemAccessibility {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -13556,6 +13744,26 @@ typedef struct Opt_CommandPath {
     Ark_Tag tag;
     Ark_CommandPath value;
 } Opt_CommandPath;
+typedef struct Ark_common2D_Color {
+    /* kind: Interface */
+    Ark_Int32 alpha;
+    Ark_Int32 red;
+    Ark_Int32 green;
+    Ark_Int32 blue;
+} Ark_common2D_Color;
+typedef struct Opt_common2D_Color {
+    Ark_Tag tag;
+    Ark_common2D_Color value;
+} Opt_common2D_Color;
+typedef struct Ark_common2D_Point {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+} Ark_common2D_Point;
+typedef struct Opt_common2D_Point {
+    Ark_Tag tag;
+    Ark_common2D_Point value;
+} Opt_common2D_Point;
 typedef struct Ark_common2D_Rect {
     /* kind: Interface */
     Ark_Float64 left;
@@ -13808,6 +14016,29 @@ typedef struct Opt_DrawContext {
     Ark_Tag tag;
     Ark_DrawContext value;
 } Opt_DrawContext;
+typedef struct Ark_drawing_FontMetrics {
+    /* kind: Interface */
+    Opt_Int32 flags;
+    Ark_Float64 top;
+    Ark_Float64 ascent;
+    Ark_Float64 descent;
+    Ark_Float64 bottom;
+    Ark_Float64 leading;
+    Opt_Float64 avgCharWidth;
+    Opt_Float64 maxCharWidth;
+    Opt_Float64 xMin;
+    Opt_Float64 xMax;
+    Opt_Float64 xHeight;
+    Opt_Float64 capHeight;
+    Opt_Float64 underlineThickness;
+    Opt_Float64 underlinePosition;
+    Opt_Float64 strikethroughThickness;
+    Opt_Float64 strikethroughPosition;
+} Ark_drawing_FontMetrics;
+typedef struct Opt_drawing_FontMetrics {
+    Ark_Tag tag;
+    Ark_drawing_FontMetrics value;
+} Opt_drawing_FontMetrics;
 typedef struct Opt_DrawingRenderingContext {
     Ark_Tag tag;
     Ark_DrawingRenderingContext value;
@@ -15185,6 +15416,15 @@ typedef struct Opt_PopupButton {
     Ark_Tag tag;
     Ark_PopupButton value;
 } Opt_PopupButton;
+typedef struct Ark_PositionWithAffinity {
+    /* kind: Interface */
+    Ark_Int32 position;
+    Ark_text_Affinity affinity;
+} Ark_PositionWithAffinity;
+typedef struct Opt_PositionWithAffinity {
+    Ark_Tag tag;
+    Ark_PositionWithAffinity value;
+} Opt_PositionWithAffinity;
 typedef struct Ark_PositionLengthMetricsInner {
     /* kind: Interface */
     Ark_LengthMetrics x;
@@ -15754,6 +15994,45 @@ typedef struct Opt_TargetInfo {
     Ark_Tag tag;
     Ark_TargetInfo value;
 } Opt_TargetInfo;
+typedef struct Ark_text_LineMetrics {
+    /* kind: Interface */
+    Ark_Int32 startIndex;
+    Ark_Int32 endIndex;
+    Ark_Float64 ascent;
+    Ark_Float64 descent;
+    Ark_Float64 height;
+    Ark_Float64 width;
+    Ark_Float64 left;
+    Ark_Float64 baseline;
+    Ark_Int32 lineNumber;
+    Ark_Float64 topHeight;
+    Map_Int32_text_RunMetrics runMetrics;
+} Ark_text_LineMetrics;
+typedef struct Opt_text_LineMetrics {
+    Ark_Tag tag;
+    Ark_text_LineMetrics value;
+} Opt_text_LineMetrics;
+typedef struct Ark_text_RectStyle {
+    /* kind: Interface */
+    Ark_common2D_Color color;
+    Ark_Float64 leftTopRadius;
+    Ark_Float64 rightTopRadius;
+    Ark_Float64 rightBottomRadius;
+    Ark_Float64 leftBottomRadius;
+} Ark_text_RectStyle;
+typedef struct Opt_text_RectStyle {
+    Ark_Tag tag;
+    Ark_text_RectStyle value;
+} Opt_text_RectStyle;
+typedef struct Ark_text_TextBox {
+    /* kind: Interface */
+    Ark_common2D_Rect rect;
+    Ark_text_TextDirection direction;
+} Ark_text_TextBox;
+typedef struct Opt_text_TextBox {
+    Ark_Tag tag;
+    Ark_text_TextBox value;
+} Opt_text_TextBox;
 typedef struct Ark_TextClockOptions {
     /* kind: Interface */
     Opt_Float64 timeZoneOffset;
@@ -18353,6 +18632,27 @@ typedef struct Opt_TerminationInfo {
     Ark_Tag tag;
     Ark_TerminationInfo value;
 } Opt_TerminationInfo;
+typedef struct Ark_text_Decoration {
+    /* kind: Interface */
+    Opt_text_TextDecorationType textDecoration;
+    Opt_common2D_Color color;
+    Opt_text_TextDecorationStyle decorationStyle;
+    Opt_Float64 decorationThicknessScale;
+} Ark_text_Decoration;
+typedef struct Opt_text_Decoration {
+    Ark_Tag tag;
+    Ark_text_Decoration value;
+} Opt_text_Decoration;
+typedef struct Ark_text_TextShadow {
+    /* kind: Interface */
+    Opt_common2D_Color color;
+    Opt_common2D_Point point;
+    Opt_Float64 blurRadius;
+} Ark_text_TextShadow;
+typedef struct Opt_text_TextShadow {
+    Ark_Tag tag;
+    Ark_text_TextShadow value;
+} Opt_text_TextShadow;
 typedef struct Ark_TextCascadePickerRangeContent {
     /* kind: Interface */
     Ark_Union_String_Resource text;
@@ -19528,6 +19828,33 @@ typedef struct Opt_SwipeActionItem {
     Ark_Tag tag;
     Ark_SwipeActionItem value;
 } Opt_SwipeActionItem;
+typedef struct Ark_text_TextStyle {
+    /* kind: Interface */
+    Opt_text_Decoration decoration;
+    Opt_common2D_Color color;
+    Opt_text_FontWeight fontWeight;
+    Opt_text_FontStyle fontStyle;
+    Opt_text_TextBaseline baseline;
+    Opt_Array_String fontFamilies;
+    Opt_Float64 fontSize;
+    Opt_Float64 letterSpacing;
+    Opt_Float64 wordSpacing;
+    Opt_Float64 heightScale;
+    Opt_Boolean halfLeading;
+    Opt_Boolean heightOnly;
+    Opt_String ellipsis;
+    Opt_text_EllipsisMode ellipsisMode;
+    Opt_String locale;
+    Opt_Float64 baselineShift;
+    Opt_Array_text_FontFeature fontFeatures;
+    Opt_Array_text_TextShadow textShadows;
+    Opt_text_RectStyle backgroundRect;
+    Opt_Array_text_FontVariation fontVariations;
+} Ark_text_TextStyle;
+typedef struct Opt_text_TextStyle {
+    Ark_Tag tag;
+    Ark_text_TextStyle value;
+} Opt_text_TextStyle;
 typedef struct Ark_TextAreaOptions {
     /* kind: Interface */
     Opt_ResourceStr placeholder;
@@ -21056,6 +21383,15 @@ typedef struct Opt_TapGestureEvent {
     Ark_Tag tag;
     Ark_TapGestureEvent value;
 } Opt_TapGestureEvent;
+typedef struct Ark_text_RunMetrics {
+    /* kind: Interface */
+    Ark_text_TextStyle textStyle;
+    Ark_drawing_FontMetrics fontMetrics;
+} Ark_text_RunMetrics;
+typedef struct Opt_text_RunMetrics {
+    Ark_Tag tag;
+    Ark_text_RunMetrics value;
+} Opt_text_RunMetrics;
 typedef struct Ark_TextBackgroundStyle {
     /* kind: Interface */
     Opt_ResourceColor color;
@@ -26894,6 +27230,12 @@ typedef struct GENERATED_ArkUILayoutManagerAccessor {
     Ark_PositionWithAffinity (*getGlyphPositionAtCoordinate)(Ark_LayoutManager peer,
                                                              Ark_Float64 x,
                                                              Ark_Float64 y);
+    Ark_text_LineMetrics (*getLineMetrics)(Ark_LayoutManager peer,
+                                           Ark_Int32 lineNumber);
+    Array_text_TextBox (*getRectsForRange)(Ark_LayoutManager peer,
+                                           const Ark_TextRange* range,
+                                           Ark_text_RectWidthStyle widthStyle,
+                                           Ark_text_RectHeightStyle heightStyle);
 } GENERATED_ArkUILayoutManagerAccessor;
 
 typedef struct GENERATED_ArkUILayoutPolicyAccessor {

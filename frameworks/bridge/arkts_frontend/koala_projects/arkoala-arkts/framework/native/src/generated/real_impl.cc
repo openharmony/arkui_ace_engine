@@ -14353,6 +14353,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+                                            Ark_Int32 lineNumber)
+    {
+        return {};
+    }
+    Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                            const Ark_TextRange* range,
+                                            Ark_text_RectWidthStyle widthStyle,
+                                            Ark_text_RectHeightStyle heightStyle)
+    {
+        return {};
+    }
     } // LayoutManagerAccessor
     namespace LayoutPolicyAccessor {
     void DestroyPeerImpl(Ark_LayoutPolicy peer)
@@ -20355,6 +20367,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LayoutManagerAccessor::GetFinalizerImpl,
             LayoutManagerAccessor::GetLineCountImpl,
             LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+            LayoutManagerAccessor::GetLineMetricsImpl,
+            LayoutManagerAccessor::GetRectsForRangeImpl,
         };
         return &LayoutManagerAccessorImpl;
     }

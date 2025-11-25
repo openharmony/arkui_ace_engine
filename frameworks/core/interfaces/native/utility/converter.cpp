@@ -3606,7 +3606,42 @@ ScrollFrameResult Convert(const Ark_OnScrollFrameBeginHandlerResult& from)
     ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
     return ret;
 }
-
+template<> 
+RectWidthStyle Convert(const Ark_text_RectWidthStyle& src)
+{
+    switch (src) {
+        case Ark_text_RectWidthStyle::ARK_TEXT_RECT_WIDTH_STYLE_TIGHT:
+            return RectWidthStyle::TIGHT;
+        case Ark_text_RectWidthStyle::ARK_TEXT_RECT_WIDTH_STYLE_MAX:
+            return RectWidthStyle::MAX;
+        default:
+            LOGE("Unexpected enum value in Ark_text_RectWidthStyle: %{public}d", src);
+            break;
+    }
+    return RectWidthStyle::TIGHT;
+}
+template<> 
+RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
+{
+    switch (src) {
+        case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_TIGHT:
+            return RectHeightStyle::TIGHT;
+        case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_MAX:
+            return RectHeightStyle::MAX;
+        case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_MIDDLE:
+            return RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE;
+        case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_TOP:
+            return RectHeightStyle::INCLUDE_LINE_SPACE_TOP; 
+        case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_BOTTOM:
+            return RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM;
+        case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_STRUT:
+            return RectHeightStyle::STRUT;
+        default:
+            LOGE("Unexpected enum value in Ark_text_RectHeightStyle: %{public}d", src);
+            break;
+    }
+    return RectHeightStyle::TIGHT;
+}
 template<>
 void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
 {
