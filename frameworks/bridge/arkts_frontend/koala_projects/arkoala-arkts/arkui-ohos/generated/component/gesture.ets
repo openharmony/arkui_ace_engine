@@ -343,6 +343,7 @@ export interface TapGestureParameters extends BaseHandlerOptions {
 export interface TapGestureHandlerOptions extends BaseHandlerOptions {
     count?: int32;
     fingers?: int32;
+    distanceThreshold?: double;
 }
 export interface LongPressGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: int32;
