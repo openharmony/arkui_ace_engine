@@ -77,7 +77,7 @@ group("advanced_ui_component") {
     "downloadfilebutton/interfaces:downloadfilebutton",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
     "formmenu/interfaces:formmenu",
-    "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
+    # "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
   ]
