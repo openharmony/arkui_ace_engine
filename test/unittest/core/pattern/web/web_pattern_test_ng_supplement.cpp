@@ -447,12 +447,13 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentEndByOrder005, TestSize
 
     webPattern->delegate_ = nullptr;
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::map<std::string, std::vector<std::pair<std::string, std::string>>> scriptRegexItems;
     std::vector<std::string> scriptItemsByOrder;
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
-    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
     EXPECT_TRUE(webPattern->onDocumentEndScriptItemsByOrder_.has_value());
 #endif
 }
