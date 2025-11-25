@@ -745,7 +745,7 @@ void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const
 {
     auto packageName = Container::CurrentBundleName();
     auto versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::WEBVIEW, EVENT_KEY_BLANKLESS_SNAPSHOT_TOUCH,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ARKWEB_UE, EVENT_KEY_BLANKLESS_SNAPSHOT_TOUCH,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_PNAMEID, packageName,
         EVENT_KEY_PVERSIONID, versionName,
