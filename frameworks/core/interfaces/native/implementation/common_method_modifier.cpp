@@ -2266,6 +2266,9 @@ void SetResponseRegionListImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<ResponseRegion>>(value); convArray) {
         ViewAbstract::SetResponseRegionList(frameNode, *convArray);
+    } else {
+        std::vector<ResponseRegion> emptyArray;
+        ViewAbstract::SetResponseRegionList(frameNode, emptyArray);
     }
 }
 
