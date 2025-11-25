@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -1939,6 +1940,17 @@ void SetHeightInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
         ViewAbstractModelStatic::SetHeight(frameNode, *value);
     }
 }
+void SetBlankHeight(FrameNode *frameNode, std::optional<CalcDimension> value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::BLANK_ETS_TAG) {
+        return;
+    }
+    if (!value.has_value()) {
+        return;
+    }
+    BlankModelNG::SetHeight(frameNode, value.value());
+}
 void SetHeightImpl(Ark_NativePointer node,
                    const Opt_Union_Length_LayoutPolicy* value)
 {
@@ -1952,6 +1964,7 @@ void SetHeightImpl(Ark_NativePointer node,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetHeightInternal(frameNode, result);
+            SetBlankHeight(frameNode, result);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             LOGE("HeightImpl: Ark_LayoutPolicy processint is not implemented yet!");
