@@ -128,7 +128,10 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         case Event_CallCallback: {
             std::pair<int, CallbackBuffer> &callback = callbackCallSubqueue.front();
             serializer.writeInt32(callback.first);
-            interop_memcpy(result + serializer.length(), size - serializer.length(), callback.second.buffer, sizeof(CallbackBuffer::buffer));
+            interop_memcpy(
+                result + serializer.length(),
+                size - serializer.length(),
+                callback.second.buffer, sizeof(CallbackBuffer::buffer));
             break;
         }
         case Event_HoldManagedResource:

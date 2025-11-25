@@ -43,16 +43,16 @@ export class RuntimeProfiler {
         if (!set.delete(node)) { console.log('node is already disposed') }
     }
 
-    static startTrace = (s: string) => {}
+    static startTrace = (s: string): void => {}
 
-    static endTrace = () => {}
+    static endTrace = (): void => {}
 
     static initTrace(start: (s: string) => void, end: () => void): void {
         RuntimeProfiler.startTrace = start
         RuntimeProfiler.endTrace = end
     }
 
-    static nativeLog = (s: string) => {}
+    static nativeLog = (s: string): void => {}
 
     static initNativeLog(cb: (s: string) => void): void {
         RuntimeProfiler.nativeLog = cb
