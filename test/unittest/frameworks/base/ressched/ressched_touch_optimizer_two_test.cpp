@@ -814,7 +814,7 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal002, TestSize.Level
  * @tc.desc: Test SetPointReverseSignal when RVS is false and rvsSignalEnable_ is true
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal002, TestSize.Level1)
+HWTEST_F(ResSchedTouchOptimizerTwoTest, SetPointReverseSignal003, TestSize.Level1)
 {
     optimizer_->rvsEnable_ = true;
     optimizer_->rvsSignalEnable_ = true;
