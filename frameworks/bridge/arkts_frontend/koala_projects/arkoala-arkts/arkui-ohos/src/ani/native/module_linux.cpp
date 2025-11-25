@@ -361,6 +361,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ForEachNode_Construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
+        },
+        ani_native_function {
+            "_SetCustomCallbackWithCheck",
+            "lC{arkui.FrameNode.FrameNode}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
         }
     };
 

@@ -42,6 +42,7 @@ import curves from '@ohos.curves';
 import matrix4 from '@ohos.matrix4';
 import uiEffect from '@ohos.graphics.uiEffect';
 import { DrawModifier } from "#handwritten"
+import { FrameNode } from "arkui.FrameNode"
 
 export class ArkUIAniModule {
     static {
@@ -109,6 +110,7 @@ export class ArkUIAniModule {
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetFrameNodeDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
+    native static _SetCustomCallbackWithCheck(ptr: KPointer, node: FrameNode): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
