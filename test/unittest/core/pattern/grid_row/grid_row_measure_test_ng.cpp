@@ -1629,11 +1629,17 @@ HWTEST_F(GridRowMeasureTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
     
     selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
         LayoutCalPolicy::FIX_AT_IDEAL_SIZE, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+    /**
+     * @tc.expected: FIX_AT_IDEAL_SIZE will not constrained by parent constraint.
+     */
     EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, 90));
 
     layoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(50), CalcLength(50)));
     selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
         LayoutCalPolicy::FIX_AT_IDEAL_SIZE, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+    /**
+     * @tc.expected: FIX_AT_IDEAL_SIZE will constrained by minSize and maxSize.
+     */
     EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, 50));
 }
 } // namespace OHOS::Ace::NG

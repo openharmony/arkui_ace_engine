@@ -167,7 +167,7 @@ namespace OHOS::Ace::NG::Converter {
         if (optReference.has_value()) {
             toValue.reference = optReference.value();
         }
-        if (!optBreakpoints.has_value()) {
+        if (!optBreakpoints.has_value() || static_cast<int32_t>(optBreakpoints->size()) > MAX_NUMBER_BREAKPOINT - 1) {
             return toValue;
         }
         toValue.breakpoints.clear();
