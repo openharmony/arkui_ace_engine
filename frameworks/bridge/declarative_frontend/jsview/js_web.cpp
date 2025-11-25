@@ -6362,7 +6362,8 @@ void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
 }
 
 bool ParseJsRegexStrArray(const JSRef<JSVal>& jsScriptRegexRules,
-                          std::vector<std::pair<std::string, std::string>>& scriptRegexRules) {
+                          std::vector<std::pair<std::string, std::string>>& scriptRegexRules)
+{
     auto paramArray = JSRef<JSArray>::Cast(jsScriptRegexRules);
     size_t length = paramArray->Length();
     if (length == 0) {
