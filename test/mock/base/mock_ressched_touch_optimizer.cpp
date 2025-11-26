@@ -124,6 +124,5 @@ void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
     vsyncFlushed_ = false;
     isTpFlushFrameDisplayPeriod_ = false;
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
 }
 } // namespace OHOS::Ace
