@@ -133,6 +133,16 @@ HWTEST_F(LayoutPropertyTestNg, SetOverlayOffset001, TestSize.Level0)
     layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
     EXPECT_EQ(layoutProperty->overlayOffsetX_, Dimension::FromString("0.0px"));
     EXPECT_EQ(layoutProperty->overlayOffsetY_, Dimension::FromString("0.0px"));
+
+    /**
+     * @tc.steps6 Call UpdateFlexBasis with error scenarios.
+        @tc.expect: overlayOffsetX_ == 0 and overlayOffsetY_ == 0
+     */
+    overlayOffsetX = std::nullopt;
+    overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("3px"));
+    layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    EXPECT_EQ(layoutProperty->overlayOffsetX_, Dimension::FromString("0.0px"));
+    EXPECT_EQ(layoutProperty->overlayOffsetY_, Dimension::FromString("0.0px"));
 }
 
 /**
