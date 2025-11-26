@@ -2129,15 +2129,16 @@ void DialogPattern::UpdateHostWindowRect()
         return;
     }
 
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+    CHECK_NULL_VOID(subwindow);
     auto needUpdate = true;
     if (SystemProperties::IsSuperFoldDisplayDevice()) {
         auto container = AceEngine::Get().GetContainer(currentId);
         auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
-        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow() && dialogProperties_.isModal;
+        needUpdate = isHalfFold && dialogProperties_.isModal;
     }
 
-    if (needUpdate) {
+    if (needUpdate && subwindow->IsSameDisplayWithParentWindow()) {
         InitHostWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
