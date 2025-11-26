@@ -170,12 +170,10 @@ HWTEST_F(MeasurableAccessorTest, MeasureTestNoConstraint, TestSize.Level1)
     EXPECT_CALL(*layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty(), UpdateCalcMinSize(_)).Times(0);
     EXPECT_CALL(*layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty(), UpdateCalcMaxSize(_)).Times(0);
 
-    auto measureResult = accessor_->measure(peer_, &constraint);
-#ifdef WRONG_GEN
+    auto measure = accessor_->measure(peer_, &constraint);
     auto managerOpt = Converter::GetOpt(measure);
     ASSERT_TRUE(managerOpt.has_value());
     auto measureResult = managerOpt.value();
-#endif
     EXPECT_FLOAT_EQ(Converter::Convert<float>(measureResult.width), 12.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(measureResult.height), 13.0f);
 }
@@ -219,12 +217,10 @@ HWTEST_F(MeasurableAccessorTest, MeasureTest, TestSize.Level1)
             .Times(1);
     }
 
-    auto measureResult = accessor_->measure(peer_, &constraint);
-#ifdef WRONG_GEN
+    auto measure = accessor_->measure(peer_, &constraint);
     auto managerOpt = Converter::GetOpt(measure);
     ASSERT_TRUE(managerOpt.has_value());
     auto measureResult = managerOpt.value();
-#endif
     EXPECT_FLOAT_EQ(Converter::Convert<float>(measureResult.width), 12.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(measureResult.height), 13.0f);
 }
@@ -243,12 +239,10 @@ HWTEST_F(MeasurableAccessorTest, GetMarginTest, TestSize.Level1)
         .right = CalcLength(60.25f, DimensionUnit::VP),
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateMargin(margin);
-    auto result = accessor_->getMargin(peer_);
-#ifdef WRONG_GEN
+    auto directional = accessor_->getMargin(peer_);
     auto directionalOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(directionalOpt.has_value());
     auto result = directionalOpt.value();
-#endif
 
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.top), 70.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.bottom), 100.0f);
@@ -269,12 +263,10 @@ HWTEST_F(MeasurableAccessorTest, GetMarginTestRTL, TestSize.Level1)
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateMargin(margin);
-    auto result = accessor_->getMargin(peer_);
-#ifdef WRONG_GEN
+    auto directional = accessor_->getMargin(peer_);
     auto directionalOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(directionalOpt.has_value());
     auto result = directionalOpt.value();
-#endif
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.end), 40.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.start), 60.25f);
 }
@@ -293,12 +285,10 @@ HWTEST_F(MeasurableAccessorTest, GetPaddingTest, TestSize.Level1)
         .right = CalcLength(60.25f, DimensionUnit::VP),
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdatePadding(padding);
-    auto result = accessor_->getPadding(peer_);
-#ifdef WRONG_GEN
+    auto directional = accessor_->getPadding(peer_);
     auto paddingOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(paddingOpt.has_value());
     auto result = paddingOpt.value();
-#endif
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.top), 70.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.bottom), 100.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.start), 40.0f);
@@ -319,12 +309,10 @@ HWTEST_F(MeasurableAccessorTest, GetBorderWidthTest, TestSize.Level1)
         .rightDimen = Dimension(3.5, DimensionUnit::VP),
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateBorderWidth(borderWidth);
-    auto result = accessor_->getBorderWidth(peer_);
-#ifdef WRONG_GEN
+    auto directional = accessor_->getBorderWidth(peer_);
     auto borderWidthOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(borderWidthOpt.has_value());
     auto result = borderWidthOpt.value();
-#endif
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.top), 6.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.bottom), 4.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.start), 10.0f);
@@ -344,12 +332,10 @@ HWTEST_F(MeasurableAccessorTest, GetBorderWidthTestRTL, TestSize.Level1)
     };
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
     layoutWrapper_->childLayoutWrapper_->GetMockLayoutProperty()->UpdateBorderWidth(borderWidth);
-    auto result = accessor_->getBorderWidth(peer_);
-#ifdef WRONG_GEN
+    auto directional = accessor_->getBorderWidth(peer_);
     auto borderWidthOpt = Converter::GetOpt(directional);
     ASSERT_TRUE(borderWidthOpt.has_value());
     auto result = borderWidthOpt.value();
-#endif
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.end), 10.0f);
     EXPECT_FLOAT_EQ(Converter::Convert<float>(result.start), 3.5f);
 }
