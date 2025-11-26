@@ -20,7 +20,7 @@ import { int32, int64 } from '@koalaui/common';
 import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from '@koalaui/interop';
 import { PeerNode } from './PeerNode';
 import { ArkUINativeModule } from '#components';
-import { EventEmulator } from '#generated';
+import { EventEmulator, SystemOps } from '#generated';
 import { UserView, UserViewBuilder } from './UserView';
 import { EntryPoint } from './component/customComponent';
 import { ClickEvent, ClickEventInternal } from '#generated';
@@ -234,14 +234,19 @@ export class Application {
         router.runPage(routerOption, builder)
     }
 
-    private computeRoot(): PeerNode {
-        let result: PeerNode
+    private trackFrame<T>(frame: () => T): T {
+        const handle = SystemOps.StartFrame()
         try {
-            result = this.rootState!.value
-            this.rootPointer = result.peer.ptr
+            return frame()
         } finally {
+            SystemOps.EndFrame(handle)
         }
-        return result
+    }
+
+    private computeRoot(): PeerNode {
+        const peerNode = this.rootState!.value
+        this.rootPointer = peerNode.peer.ptr
+        return peerNode
     }
 
     start(plugin: boolean): pointer {
@@ -276,20 +281,23 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            if (plugin) {
-                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
-                    const frozen = this.manager!.frozen
-                    this.manager!.frozen = true
-                    memoEntry<void>(context, 0, builder)
-                    this.manager!.frozen = frozen
-                })
-            } else {
-                Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
-                this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
-            }
-            InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
-            root = this.rootState!.value
-            InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
+            root = this.trackFrame(() => {
+                if (plugin) {
+                    this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
+                        const frozen = this.manager!.frozen
+                        this.manager!.frozen = true
+                        memoEntry<void>(context, 0, builder)
+                        this.manager!.frozen = frozen
+                    })
+                } else {
+                    Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+                    this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
+                }
+                InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
+                root = this.rootState!.value
+                InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
+                return root
+            })
         } catch (e) {
             if (e instanceof Error) {
                 InteropNativeModule._NativeLog(`ArkTS Application.start error name: ${e.name} message: ${e.message}`);
@@ -343,12 +351,12 @@ export class Application {
             preState = uiContextRouter.getPreState();
         }
         ObserveSingleton.instance.updateDirty();
-        this.updateStates(this.manager!, rootState, preState);
+        this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
             ObserveSingleton.instance.updateDirty();
-            this.updateStates(this.manager!, rootState, preState);
+            this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
             ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
