@@ -1164,6 +1164,20 @@ class WebOnShowFileSelectorModifier extends ModifierWithKey<(result: FileSelecto
   }
 }
 
+class WebOnTextSelectionChangeModifier extends ModifierWithKey<OnTextSelectionChangeCallback> {
+  constructor(value: OnTextSelectionChangeCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnTextSelectionChangeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().web.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+
 class WebOnDetectedBlankScreenModifier extends ModifierWithKey<OnDetectBlankScreenCallback> {
   constructor (value: OnDetectBlankScreenCallback) {
     super(value);
@@ -1777,6 +1791,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onFileSelectorShow(callback: (event?: { callback: Function; fileSelector: object; } | undefined) => void): this {
     throw new Error('Method not implemented.');
+  }
+  onTextSelectionChange(callback: OnTextSelectionChangeCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnTextSelectionChangeModifier.identity, WebOnTextSelectionChangeModifier, callback);
+    return this;
   }
   onDetectedBlankScreen(callback: OnDetectBlankScreenCallback): this {
     modifierWithKey(this._modifiersWithKeys, WebOnDetectedBlankScreenModifier.identity, WebOnDetectedBlankScreenModifier, callback);

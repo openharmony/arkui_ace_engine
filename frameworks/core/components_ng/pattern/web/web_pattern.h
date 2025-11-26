@@ -1004,6 +1004,10 @@ public:
     void OnStatusBarClick() override;
     void OnBackToTopUpdate(bool isBackToTop);
 
+    bool IsTextSelectionEnable()
+    {
+        return isTextSelectionEnable_;
+    }
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {
@@ -1567,6 +1571,7 @@ private:
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
+    bool isTextSelectionEnable_ = false;
     bool isMenuShownFromWeb_ = false;
     bool isLastEventMenuClose_ = false;
 

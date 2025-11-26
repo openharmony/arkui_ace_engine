@@ -1463,6 +1463,8 @@ bool WebDelegate::IsPcMode()
 {
     return g_setReturnStatus == STATUS_TRUE;
 }
+void WebDelegate::OnTextSelectionChange(const std::string& selectionTex, bool isFromOverlay) {}
+std::string WebDelegate::GetLastSelectionText() const { return ""; }
 void WebDelegate::OnDetectedBlankScreen(
     const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) {}
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,

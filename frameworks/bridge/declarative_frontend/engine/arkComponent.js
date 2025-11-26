@@ -31989,6 +31989,10 @@ class ArkWebComponent extends ArkComponent {
   onFileSelectorShow(callback) {
     throw new Error('Method not implemented.');
   }
+  onTextSelectionChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnTextSelectionChangeModifier.identity, WebOnTextSelectionChangeModifier, callback);
+    return this;
+  }
   onResourceLoad(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnResourceLoadModifier.identity, WebOnResourceLoadModifier, callback);
     return this;
@@ -33570,6 +33574,21 @@ class WebOnShowFileSelectorModifier extends ModifierWithKey {
   }
 }
 WebOnShowFileSelectorModifier.identity = Symbol('webOnShowFileSelectorModifier');
+
+class WebOnTextSelectionChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnTextSelectionChange(node);
+    }
+    else {
+      getUINativeModule().web.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+WebOnTextSelectionChangeModifier.identity = Symbol('webOnTextSelectionChangeModifier');
 
 class WebOnDetectedBlankScreenModifier extends ModifierWithKey {
   constructor(value) {

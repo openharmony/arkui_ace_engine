@@ -940,6 +940,24 @@ private:
     std::string url_;
 };
 
+class ACE_EXPORT TextSelectionChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TextSelectionChangedEvent, BaseEventInfo);
+
+public:
+    explicit TextSelectionChangedEvent(const std::string& selectionText)
+        : BaseEventInfo("TextSelectionChangedEvent"), selectionText_(selectionText)
+    {}
+    ~TextSelectionChangedEvent() = default;
+
+    const std::string& GetselectionText() const
+    {
+        return selectionText_;
+    }
+
+private:
+    std::string selectionText_;
+};
+
 class ACE_EXPORT DetectedBlankScreenEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(DetectedBlankScreenEvent, BaseEventInfo);
 

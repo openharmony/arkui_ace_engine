@@ -7034,6 +7034,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnShowFileSelector));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnShowFileSelector"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnShowFileSelector));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTextSelectionChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnTextSelectionChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTextSelectionChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnTextSelectionChange));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDetectedBlankScreen"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnDetectedBlankScreen));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDetectedBlankScreen"),

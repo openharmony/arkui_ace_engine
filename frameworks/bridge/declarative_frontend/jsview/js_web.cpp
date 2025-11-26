@@ -2436,6 +2436,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
     JSClass<JSWeb>::StaticMethod("onDetectedBlankScreen", &JSWeb::OnDetectedBlankScreen);
     JSClass<JSWeb>::StaticMethod("blankScreenDetectionConfig", &JSWeb::BlankScreenDetectionConfig);
+    JSClass<JSWeb>::StaticMethod("onTextSelectionChange", &JSWeb::OnTextSelectionChange);
     JSClass<JSWeb>::StaticMethod("enableImageAnalyzer", &JSWeb::EnableImageAnalyzer);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
@@ -2578,6 +2579,11 @@ JSRef<JSVal> PdfLoadEventToJSValue(const PdfLoadEvent& eventInfo)
     obj->SetProperty("result", eventInfo.GetResult());
     obj->SetProperty("url", eventInfo.GetUrl());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> TextSelectionChangedEventToJSValue(const TextSelectionChangedEvent& eventInfo)
+{
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetselectionText()));
 }
 
 JSRef<JSVal> DetectedBlankScreenEventToJSValue(const DetectedBlankScreenEvent &eventInfo)
@@ -7052,6 +7058,30 @@ void JSWeb::JSBackToTop(const JSCallbackInfo& args)
     } else {
         WebModel::GetInstance()->SetBackToTop(true);
     }
+}
+
+void JSWeb::OnTextSelectionChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<TextSelectionChangedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), TextSelectionChangedEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<TextSelectionChangedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnTextSelectionChange(jsCallback);
 }
 
 void JSWeb::OnDetectedBlankScreen(const JSCallbackInfo& args)

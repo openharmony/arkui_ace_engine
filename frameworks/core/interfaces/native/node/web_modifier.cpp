@@ -1716,6 +1716,36 @@ void ResetOnShowFileSelector(ArkUINodeHandle node)
     WebModelNG::SetOnShowFileSelector(frameNode, nullptr);
 }
 
+void SetOnTextSelectionChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (extraParam) {
+        auto* onTextSelectionChangeCallBackPtr =
+            reinterpret_cast<std::function<void(const TextSelectionChangedEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onTextSelectionChangeCallBackPtr);
+        auto onTextSelectionChangeCallBack = *onTextSelectionChangeCallBackPtr;
+        auto callback = [onTextSelectionChangeCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto textSelectionChangedEvent = static_cast<const TextSelectionChangedEvent*>(event);
+            if (textSelectionChangedEvent) {
+                auto& nonConstEvent = const_cast<TextSelectionChangedEvent&>(*textSelectionChangedEvent);
+                onTextSelectionChangeCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnTextSelectionChange(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnTextSelectionChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback = [](const BaseEventInfo* info) {};
+    WebModelNG::SetOnTextSelectionChange(frameNode, callback);
+}
+
 void SetOnDetectedBlankScreen(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2652,6 +2682,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnPromptCallBack = ResetOnPromptCallBack,
         .setOnShowFileSelector = SetOnShowFileSelector,
         .resetOnShowFileSelector = ResetOnShowFileSelector,
+        .setOnTextSelectionChange = SetOnTextSelectionChange,
+        .resetOnTextSelectionChange = ResetOnTextSelectionChange,
         .setOnDetectedBlankScreen = SetOnDetectedBlankScreen,
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
@@ -2889,6 +2921,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnPromptCallBack = ResetOnPromptCallBack,
         .setOnShowFileSelector = SetOnShowFileSelector,
         .resetOnShowFileSelector = ResetOnShowFileSelector,
+        .setOnTextSelectionChange = SetOnTextSelectionChange,
+        .resetOnTextSelectionChange = ResetOnTextSelectionChange,
         .setOnDetectedBlankScreen = SetOnDetectedBlankScreen,
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,

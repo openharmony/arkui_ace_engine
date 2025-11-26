@@ -255,6 +255,7 @@ public:
     void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetGestureFocusMode(GestureFocusMode mode) override;
     void SetRotateRenderEffect(WebRotateEffect effect) override;
+    void SetOnTextSelectionChange(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
         const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold) override;
@@ -372,6 +373,8 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType);
     static void SetOnShowFileSelector(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnTextSelectionChange(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnDetectedBlankScreen(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetBlankScreenDetectionConfig(
