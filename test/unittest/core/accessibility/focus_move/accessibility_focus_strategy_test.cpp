@@ -798,4 +798,42 @@ HWTEST_F(AccessibilityFocusStrategyTest, CheckParentEarlyStopTest001, TestSize.L
     result = focusStrategy.CheckParentEarlyStop(parentNode2, targetNode);
     ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL_IN_SCROLL);
 }
+
+/**
+ * @tc.name: IsFindNextReadableNode001
+ * @tc.desc: Test the method IsFindNextReadableNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindNextReadableNode001, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto frameNode = NG::FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto currentNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    auto parentNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto NextResult = focusStrategy.IsFindNextReadableNode(currentNode, parentNode, targetNode);
+    EXPECT_EQ(NextResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: IsFindPrevReadableNode001
+ * @tc.desc: Test the method IsFindPrevReadableNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindPrevReadableNode001, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto frameNode = NG::FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto currentNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    auto parentNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+
+    auto prevResult = focusStrategy.IsFindPrevReadableNode(currentNode, parentNode, targetNode);
+    EXPECT_EQ(prevResult, AceFocusMoveResult::FIND_FAIL);
+}
+
 } // namespace OHOS::Ace::NG

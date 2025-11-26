@@ -305,6 +305,35 @@ bool FrameNodeRulesCheckNode::IsInChildTree()
     return accessibilityManager->GetTreeId() > 0;
 }
 
+bool FrameNodeRulesCheckNode::IsHeaderFooterInScroll()
+{
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->IsHeaderOrFooter();
+}
+
+bool FrameNodeRulesCheckNode::IsBackward()
+{
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_TOP
+        && accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_BOTH_TOP_BOTTOM;
+}
+
+bool FrameNodeRulesCheckNode::IsForward()
+{
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_BOTTOM
+        && accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_BOTH_TOP_BOTTOM;
+}
+
 bool DetectParentRulesCheckNode::GetPropText(Accessibility::PropValue& value)
 {
     value.valueType = Accessibility::ValueType::STRING;

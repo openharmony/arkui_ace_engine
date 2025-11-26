@@ -56,6 +56,14 @@ struct OverlayAccessibilityProperty {
     bool isModal = true; // true means cannot focus lower component of dialog like components
 };
 
+enum ScrollableStatus : int32_t {
+    NOT_SUPPORT = 0,
+    AT_TOP = 1,
+    AT_BOTTOM = 2,
+    AT_BOTH_TOP_BOTTOM = 3,
+    AT_NEITHER_TOP_BOTTOM = 4,
+};
+
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
@@ -679,6 +687,17 @@ public:
     // used to indicate whether a dialog like component is modal
     void SetIsAccessibilityModal(bool isModal);
     virtual bool IsAccessibilityModal() const;
+    virtual bool GetAccessibilityInnerVisibleRect(RectF& rect)
+    {
+        return false;
+    }
+
+    void SetIsHeaderOrFooter(bool isFlag);
+    bool IsHeaderOrFooter() const;
+    virtual ScrollableStatus GetScrollableStatus() const
+    {
+        return NOT_SUPPORT;
+    }
 
 private:
     // node should be not-null
@@ -807,6 +826,7 @@ protected:
     std::optional<AccessibilityGroupOptions> accessibilityGroupOptions_;
     // used to maintain overlay, dialog like components' options
     std::optional<OverlayAccessibilityProperty> overlayProperty_;
+    std::optional<bool> isHeaderOrFooter_;
 };
 } // namespace OHOS::Ace::NG
 
