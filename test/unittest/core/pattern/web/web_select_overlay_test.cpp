@@ -6631,7 +6631,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeMenuOffsetTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: ComputeMenuOffset
+ * @tc.name: ComputeMenuOffset3
  * @tc.desc: Test InitWebMenuAvoidStrategy and ComputeMenuOffset in Select Overlay algorithm.
  * @tc.type: FUNC
  */
@@ -6692,7 +6692,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeMenuOffsetTest3, TestSize.Level1)
 }
 
 /**
- * @tc.name: WebMenuAvoidStrategy
+ * @tc.name: WebMenuAvoidStrategy000
  * @tc.desc: Test WebMenuAvoidStrategy.
  * @tc.type: FUNC
  */
@@ -6756,7 +6756,7 @@ HWTEST_F(WebSelectOverlayTest, WebMenuAvoidStrategyTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: WebMenuAvoidStrategy
+ * @tc.name: WebMenuAvoidStrategy001
  * @tc.desc: Test WebMenuAvoidStrategy.
  * @tc.type: FUNC
  */
@@ -6820,7 +6820,7 @@ HWTEST_F(WebSelectOverlayTest, WebMenuAvoidStrategyTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: WebMenuAvoidStrategy
+ * @tc.name: WebMenuAvoidStrategy002
  * @tc.desc: Test WebMenuAvoidStrategy.
  * @tc.type: FUNC
  */
@@ -6983,7 +6983,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest000, TestSize.Level1)
 }
 
 /**
- * @tc.name: ComputeSelectAreaRect
+ * @tc.name: ComputeSelectAreaRect001
  * @tc.desc: Test ComputeSelectAreaRect.
  * @tc.type: FUNC
  */
@@ -7015,7 +7015,7 @@ HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ComputeSelectAreaRect
+ * @tc.name: ComputeSelectAreaRect002
  * @tc.desc: Test ComputeSelectAreaRect.
  * @tc.type: FUNC
  */
