@@ -81,7 +81,7 @@ int32_t FormUtilsImpl::RouterEvent(
 void FormUtilsImpl::AddWantFreeInstallFlagForRouterEvent(const std::unique_ptr<JsonValue> &flag, AAFwk::Want &want)
 {
     if (flag->IsValid()) {
-        auto inputFlag = flag->GetInt();
+        auto inputFlag = flag->GetUInt();
         if (inputFlag & Want::FLAG_INSTALL_ON_DEMAND) {
             want.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
         }
