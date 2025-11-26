@@ -222,7 +222,7 @@ HWTEST_F(CommonMethodModifierTest19, TabStopTestDefaultValues, TestSize.Level1)
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_TabStopTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, TabStopTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabStop, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -233,6 +233,31 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_TabStopTestValidValues, TestSize.L
     using TestStep = std::tuple<Opt_Boolean, bool>;
     const std::vector<TestStep> testPlan = {
         {Converter::ArkValue<Opt_Boolean>(false), false}, {Converter::ArkValue<Opt_Boolean>(true), true}};
+
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setTabStop(node_, &inputValue);
+        EXPECT_EQ(focusHub->IsTabStop(), expectedValue);
+    }
+}
+
+/*
+* @tc.name: TabStopTestInvalidValues
+* @tc.desc:
+* @tc.type: FUNC
+*/
+HWTEST_F(CommonMethodModifierTest19, TabStopTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTabStop, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    using TestStep = std::tuple<Opt_Boolean, bool>;
+    static const std::vector<TestStep> testPlan = {
+        {Converter::ArkValue<Opt_Boolean>(true), true}, // init value
+        {Converter::ArkValue<Opt_Boolean>(Ark_Empty()), false} // empty value
+    };
 
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setTabStop(node_, &inputValue);

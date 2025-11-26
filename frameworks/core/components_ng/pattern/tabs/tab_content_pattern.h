@@ -40,6 +40,10 @@ public:
     {}
     ~TabContentPattern() override = default;
 
+    void SetShallowBuilder(const RefPtr<ShallowBuilder>&& shallowBuilder) {
+        shallowBuilder_ = std::move(shallowBuilder);
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
