@@ -1317,7 +1317,7 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         touchable = gestureEventHub->GetTouchable();
         hitTestMode = GestureEventHub::GetHitTestModeStr(gestureEventHub);
         responseRegionMap = gestureEventHub->GetResponseRegionMap();
-        responseRegion = gestureEventHub->GetResponseRegion();	
+        responseRegion = gestureEventHub->GetResponseRegion();
         mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
         monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
