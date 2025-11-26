@@ -39,7 +39,6 @@ void SetListItemLazyBuilderImpl(Ark_NativePointer node,
         const RefPtr<UINode>& uiNode = arkBuilder.BuildSync(Referenced::RawPtr(refPtr));
         if (uiNode) {
             uiNode->MountToParent(refPtr);
-            refPtr->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         return nullptr;
     };
