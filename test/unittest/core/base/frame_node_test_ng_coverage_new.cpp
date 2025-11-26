@@ -1674,13 +1674,13 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList002, TestSize.Level1)
     gestureEventHub->SetResponseRegionMap(regionMap);
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
     auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
-    EXPECT_TRUE(region.empty());
+    EXPECT_FALSE(region.empty());
 
     auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
     EXPECT_FALSE(region1.empty());
 
     auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
-    EXPECT_TRUE(region2.empty());
+    EXPECT_FALSE(region2.empty());
 }
 
 /**
@@ -1715,10 +1715,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList003, TestSize.Level1)
     gestureEventHub->SetResponseRegionMap(regionMap);
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
     auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
-    EXPECT_TRUE(region.empty());
+    EXPECT_FALSE(region.empty());
 
     auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
-    EXPECT_TRUE(region1.empty());
+    EXPECT_FALSE(region1.empty());
 
     auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
     EXPECT_FALSE(region2.empty());
@@ -1807,13 +1807,13 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList005, TestSize.Level1)
 
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
     auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
-    EXPECT_EQ(region.size(), 0);
+    EXPECT_EQ(region.size(), 1);
 
     auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
     EXPECT_EQ(region1.size(), 1);
 
     auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
-    EXPECT_EQ(region2.size(), 0);
+    EXPECT_EQ(region2.size(), 1);
 }
 
 /**

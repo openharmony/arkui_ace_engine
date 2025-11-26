@@ -1317,6 +1317,8 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         touchable = gestureEventHub->GetTouchable();
         hitTestMode = GestureEventHub::GetHitTestModeStr(gestureEventHub);
         responseRegionMap = gestureEventHub->GetResponseRegionMap();
+        responseRegion = gestureEventHub->GetResponseRegion();	
+        mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
         monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->PutExtAttr("touchable", touchable, filter);
@@ -3548,6 +3550,7 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
     if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+        responseRegionResult.emplace_back(rect);
         return;
     }
     if (width.value() < 0.0 || height.value() < 0.0) {
@@ -3599,6 +3602,9 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         for (const auto& region : responseRegionMap[ResponseRegionSupportedTool::ALL]) {
             ParseRegionAndAdd(region, scaleProperty, rect, responseRegionResult);
         }
+    }
+    if (responseRegionResult.empty()) {
+        responseRegionResult.emplace_back(rect);
     }
     return responseRegionResult;
 }
