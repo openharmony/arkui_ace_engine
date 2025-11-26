@@ -691,14 +691,7 @@ public:
         return spanItem_;
     }
 
-    void NotifyColorModeChange(uint32_t colorMode) override
-    {
-        UINode::NotifyColorModeChange(colorMode);
-        auto resourceMgr = GetResourceManager();
-        if (resourceMgr) {
-            resourceMgr->ReloadResources();
-        }
-    }
+    void NotifyColorModeChange(uint32_t colorMode) override;
 
     void UnregisterResource(const std::string& key) override;
     void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
@@ -1219,14 +1212,7 @@ public:
         SpanNode::RequestTextFlushDirty(Claim(this));
     }
 
-    void NotifyColorModeChange(uint32_t colorMode) override
-    {
-        UINode::NotifyColorModeChange(colorMode);
-        auto resourceMgr = GetResourceManager();
-        if (resourceMgr) {
-            resourceMgr->ReloadResources();
-        }
-    }
+    void NotifyColorModeChange(uint32_t colorMode) override;
 
     template<typename T>
     void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
