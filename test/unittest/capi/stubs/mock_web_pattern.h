@@ -106,6 +106,7 @@ public:
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableImageAnalyzer, bool);
 
     void SetWebSrc(const std::string &webSrc);
     void SetWebSrcStatic(const std::string &webSrc);
@@ -245,6 +246,7 @@ private:
     void OnEnableSelectedDataDetectorUpdate(bool enable) {}
     void OnZoomControlAccessUpdate(bool zoomControlAccess) {}
     void OnGestureFocusModeUpdate(GestureFocusMode mode) {}
+    void OnEnableImageAnalyzerUpdate(bool isEnabled) {}
 
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     NestedScrollOptionsExt nestedScroll_ = {
