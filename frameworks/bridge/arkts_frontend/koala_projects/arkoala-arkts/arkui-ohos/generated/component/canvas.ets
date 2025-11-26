@@ -507,7 +507,7 @@ export class OffscreenCanvas implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._OffscreenCanvas_getFinalizer()
     }
-    public transferToImageBitmap(): ImageBitmap {
+    public transferToImageBitmap(): ImageBitmap | undefined {
         return this.transferToImageBitmap_serialize()
     }
     public getContext2d(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
@@ -533,10 +533,16 @@ export class OffscreenCanvas implements MaterializedBase {
     getContext(contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
         return hookGetContext(this, contextType, options)
     }
-    transferToImageBitmap_serialize(): ImageBitmap {
+    transferToImageBitmap_serialize(): ImageBitmap | undefined {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_transferToImageBitmap(this.peer!.ptr)
-        const obj : ImageBitmap = ImageBitmapInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ImageBitmap | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (ImageBitmap_serializer.read(retvalDeserializer) as ImageBitmap)
+        }
+        const returnResult : ImageBitmap | undefined = buffer
+        return returnResult
     }
     getContext2d_serialize(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -2381,7 +2387,7 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         const quality_casted = quality as (number | undefined)
         return this.toDataURL_serialize(type_casted, quality_casted)
     }
-    public transferToImageBitmap(): ImageBitmap {
+    public transferToImageBitmap(): ImageBitmap | undefined {
         return this.transferToImageBitmap_serialize()
     }
     toDataURL_serialize(type?: string, quality?: number): string {
@@ -2404,9 +2410,15 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         thisSerializer.release()
         return retval
     }
-    transferToImageBitmap_serialize(): ImageBitmap {
+    transferToImageBitmap_serialize(): ImageBitmap | undefined {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_transferToImageBitmap(this.peer!.ptr)
-        const obj : ImageBitmap = ImageBitmapInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ImageBitmap | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (ImageBitmap_serializer.read(retvalDeserializer) as ImageBitmap)
+        }
+        const returnResult : ImageBitmap | undefined = buffer
+        return returnResult
     }
 }

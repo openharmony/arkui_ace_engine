@@ -26533,7 +26533,7 @@ typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
                                      const Ark_Number* height,
                                      const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
-    Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
+    Opt_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
     Ark_OffscreenCanvasRenderingContext2D (*getContext2d)(Ark_OffscreenCanvas peer,
                                                           const Opt_RenderingContextSettings* options);
     Ark_Number (*getHeight)(Ark_OffscreenCanvas peer);
@@ -26554,7 +26554,7 @@ typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
                             const Opt_Number* quality);
-    Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
+    Opt_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
 } GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor;
 
 typedef struct GENERATED_ArkUIPanGestureEventAccessor {

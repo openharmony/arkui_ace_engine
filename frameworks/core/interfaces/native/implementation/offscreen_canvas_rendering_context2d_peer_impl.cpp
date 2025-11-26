@@ -67,8 +67,9 @@ void OffscreenCanvasRenderingContext2DPeerImpl::RemoveOptions()
     std::lock_guard<std::mutex> lock(mutex_);
     offscreenPatternMap_.erase(contextId);
 }
-ImageBitmapPeer* OffscreenCanvasRenderingContext2DPeerImpl::TransferToImageBitmap(ImageBitmapPeer* bitmap)
+ImageBitmapPeer* OffscreenCanvasRenderingContext2DPeerImpl::TransferToImageBitmap()
 {
+    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
     CHECK_NULL_RETURN(bitmap, nullptr);
     ContainerScope scope(instanceId_);
     auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id_));

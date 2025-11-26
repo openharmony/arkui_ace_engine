@@ -64,11 +64,13 @@ Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
     auto result = peerImpl->ToDataURL(optType, optQuality);
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvasRenderingContext2D peer)
+Opt_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
-    return peer->TransferToImageBitmap(bitmap);
+    auto invalid = Converter::ArkValue<Opt_ImageBitmap>();
+    CHECK_NULL_RETURN(peer, invalid);
+    auto bitmap = peer->TransferToImageBitmap();
+    CHECK_NULL_RETURN(bitmap, invalid);
+    return Converter::ArkValue<Opt_ImageBitmap>(bitmap);
 }
 } // OffscreenCanvasRenderingContext2DAccessor
 const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor()

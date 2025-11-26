@@ -29,7 +29,7 @@ protected:
 
 public:
     void SetOptions(const double cw, const double ch);
-    ImageBitmapPeer* TransferToImageBitmap(ImageBitmapPeer* bitmap);
+    ImageBitmapPeer* TransferToImageBitmap();
     OffscreenCanvasRenderingContext2DPeer* GetContext2D(OffscreenCanvasRenderingContext2DPeer* offscreenCanvasContext,
         RenderingContextSettingsPeer* offscreenCanvasSettings);
     double OnGetHeight(double errValue);
