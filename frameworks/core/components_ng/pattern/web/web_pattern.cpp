@@ -2206,6 +2206,9 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         }
         ResetDragAction();
     }
+    if (CheckShouldBlockMouseEvent(info)) {
+        return;
+    }
     isHoverExit_ = false;
     if (info.GetAction() == MouseAction::HOVER_EXIT) {
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -2232,20 +2235,103 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 
 void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
 {
-    if (delegate_->IsFileSelectorShow() && info.GetAction() == MouseAction::HOVER_EXIT) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent blocked when FileSelector show.");
-        return;
-    }
     std::vector<int32_t> pressedCodes {};
     std::vector<KeyCode> keyCode = info.GetPressedKeyCodes();
     for (auto pCode : keyCode) {
         pressedCodes.push_back(static_cast<int32_t>(pCode));
     }
+    SupplementMouseEventsIfNeeded(info, clickNum, pressedCodes);
 
+    if (info.GetAction() == MouseAction::HOVER_EXIT) {
+        isHoverNWeb_ = false;
+    } else if (info.GetAction() == MouseAction::HOVER) {
+        isHoverNWeb_ = true;
+        isSupplementMouseLeave_ = false;
+    }
     std::shared_ptr<NWebMouseEventImpl> mouseEvent = std::make_shared<NWebMouseEventImpl>(
         info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetRawDeltaX(), info.GetRawDeltaY(),
         static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(info.GetAction()), clickNum, pressedCodes);
     delegate_->WebOnMouseEvent(mouseEvent);
+}
+
+bool WebPattern::CheckShouldBlockMouseEvent(const MouseInfo &info)
+{
+    if (isMenuShownFromWeb_) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            // When menu is showing ,the action down will be costed,
+            isUpSupplementDown_ = true;
+        }
+        if (info.GetAction() == MouseAction::HOVER_EXIT) {
+            isSupplementMouseLeave_ = true;
+        }
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "WebSendMouseEvent stopped because BindedMenu is showing. isUpSupplementDown_:%{public}d, "
+            "isSupplementMouseLeave_: %{public}d ", isUpSupplementDown_, isSupplementMouseLeave_);
+        return true;
+    }
+
+    if (delegate_ && delegate_->IsFileSelectorShow() && (info.GetAction() == MouseAction::HOVER_EXIT)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebSendMouseEvent stopped because fileselector showing");
+        return true;
+    }
+
+    if (isDragging_ && (info.GetAction() == MouseAction::HOVER_EXIT)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebSendMouseEvent stopped because mouse is dragging");
+        isSupplementMouseLeave_ = true;
+        return true;
+    }
+    return false;
+}
+
+void WebPattern::SupplementMouseEventsIfNeeded(
+    const MouseInfo &info, int32_t clickNum, std::vector<int32_t> pressedCodes)
+{
+    CHECK_NULL_VOID(delegate_);
+    if (isLastEventMenuClose_ && info.GetAction() == MouseAction::WINDOW_ENTER) {
+        // When the menu is closed and the mouse is inside the menu, a mouseMove event needs to be supplemented.
+        isSupplementMouseLeave_ = false;
+        TAG_LOGI(AceLogTag::ACE_WEB, "LastEvent is bindMenu close, WINDOW_ENTER only supplement mouseMove");
+        std::shared_ptr<NWebMouseEventImpl> mouseMoveEvent = std::make_shared<NWebMouseEventImpl>(mouseHoveredX_,
+            mouseHoveredY_,
+            MOUSE_EVENT_MAX_SIZE,
+            MOUSE_EVENT_MAX_SIZE,
+            static_cast<int32_t>(MouseButton::NONE_BUTTON),
+            static_cast<int32_t>(MouseAction::MOVE),
+            1,
+            std::vector<int32_t>{});
+        delegate_->WebOnMouseEvent(mouseMoveEvent);
+    }
+    isLastEventMenuClose_ = false;
+
+    if (isUpSupplementDown_ && (info.GetAction() == MouseAction::RELEASE)) {
+        // When the menu is closed and the mouse is outside the menu, a mouseMove and mouseDown event needs to be
+        // supplemented.
+        isUpSupplementDown_ = false;
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent supplement mouseMove And mouseDown when mouseUp");
+        std::shared_ptr<NWebMouseEventImpl> mouseMoveEvent = std::make_shared<NWebMouseEventImpl>(mouseHoveredX_,
+            mouseHoveredY_, MOUSE_EVENT_MAX_SIZE, MOUSE_EVENT_MAX_SIZE, static_cast<int32_t>(MouseButton::NONE_BUTTON),
+            static_cast<int32_t>(MouseAction::MOVE), 1, std::vector<int32_t>{});
+        delegate_->WebOnMouseEvent(mouseMoveEvent);
+
+        std::shared_ptr<NWebMouseEventImpl> mouseDownEvent =
+            std::make_shared<NWebMouseEventImpl>(info.GetLocalLocation().GetX(),
+                info.GetLocalLocation().GetY(), info.GetRawDeltaX(), info.GetRawDeltaY(),
+                static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(MouseAction::PRESS),
+                clickNum, pressedCodes);
+        delegate_->WebOnMouseEvent(mouseDownEvent);
+    }
+
+    if (isHoverNWeb_ && info.GetAction() == MouseAction::HOVER && isSupplementMouseLeave_) {
+        // Nweb not receive HOVER_EXIT, but HOVER is coming, need to supplement a HOVER_EXIT.
+        // isSupplementMouseLeave_ is true means the case what need supplement mouseleave.
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent supplement mouseLeave when HOVER");
+        std::shared_ptr<NWebMouseEventImpl> mouseLeaveEvent =
+            std::make_shared<NWebMouseEventImpl>(info.GetLocalLocation().GetX(),
+                info.GetLocalLocation().GetY(), info.GetRawDeltaX(), info.GetRawDeltaY(),
+                static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(MouseAction::HOVER_EXIT),
+                1, std::vector<int32_t>{});
+        delegate_->WebOnMouseEvent(mouseLeaveEvent);
+    }
 }
 
 void WebPattern::ResetDragAction()
