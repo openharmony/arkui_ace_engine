@@ -19,6 +19,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 constexpr int TOUCH_ID = 0;
+constexpr size_t MAX_HISTORY_TOUCH_INFO_SIZE = 2048;
 
 class TouchDelegateTest : public TouchDelegate {
     void DelegateTouchEvent(const TouchEvent& point)
@@ -1513,5 +1514,87 @@ HWTEST_F(EventManagerTestNg, EventManagerTest100, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     eventManager->MouseTest(event, frameNode, touchRestrict);
     EXPECT_EQ(eventManager->touchTestResults_.size(), 1);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo001
+ * @tc.desc: Test AddDumpTouchInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    TouchEvent touchEvent;
+    TimeStamp timeStamp;
+    NG::EventTouchInfoRecord& eventTouchInfoRecord = eventManager->GetEventTouchInfoRecord();
+    eventManager->AddDumpTouchInfo(touchEvent);
+    EXPECT_EQ(eventTouchInfoRecord.isUseDumpTouchInfo_, false);
+    eventManager->SetIsUseDumpTouchInfo(true);
+    eventManager->AddDumpTouchInfo(touchEvent);
+    EXPECT_EQ(eventTouchInfoRecord.isUseDumpTouchInfo_, true);
+    for (int i = 0; i < MAX_HISTORY_TOUCH_INFO_SIZE; i++) {
+        eventTouchInfoRecord.AddTouchPoint(touchEvent, timeStamp);
+    }
+    eventTouchInfoRecord.dequeMaxCnt_ = 2;
+    eventManager->SetIsUseDumpTouchInfo(true);
+    eventManager->AddDumpTouchInfo(touchEvent);
+    EXPECT_EQ(eventTouchInfoRecord.isUseDumpTouchInfo_, false);
+}
+
+/**
+ * @tc.name: DumpTouchInfo001
+ * @tc.desc: Test DumpTouchInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DumpTouchInfo001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    bool hasJson = false;
+    std::string param0 = "-touchmonitor";
+    std::string param1 = "-b";
+    std::string param2 = "-d";
+    std::string param3 = "-c";
+    std::string param4 = "-e";
+    std::string param5 = "-f";
+    TouchEvent touchEvent;
+    touchEvent.touchEventId = 0;
+    touchEvent.processTime = std::chrono::high_resolution_clock::now();
+    touchEvent.time = std::chrono::high_resolution_clock::now();
+    NG::EventTouchInfoRecord& eventTouchInfoRecord = eventManager->GetEventTouchInfoRecord();
+    TimeStamp timeStamp = std::chrono::high_resolution_clock::now();
+    eventTouchInfoRecord.AddTouchPoint(touchEvent, timeStamp);
+
+    std::vector<std::string> params0 = { param0, param4 };
+    eventManager->DumpTouchInfo(params0, hasJson);
+    EXPECT_EQ(eventTouchInfoRecord.touchHistory_.size(), 0);
+    std::vector<std::string> params1 = { param0, param1 };
+    eventManager->DumpTouchInfo(params1, hasJson);
+    EXPECT_TRUE(eventTouchInfoRecord.isUseDumpTouchInfo_);
+    eventTouchInfoRecord.AddTouchPoint(touchEvent, timeStamp);
+    std::vector<std::string> params2 = { param0, param2 };
+    eventManager->DumpTouchInfo(params2, hasJson);
+    EXPECT_EQ(eventTouchInfoRecord.touchHistory_.size(), 0);
+    std::vector<std::string> params3 = { param0, param3 };
+    eventManager->DumpTouchInfo(params3, hasJson);
+    std::vector<std::string> params4 = { param0 };
+    eventManager->DumpTouchInfo(params4, hasJson);
+    std::vector<std::string> params5 = { param0, param5 };
+    eventManager->DumpTouchInfo(params5, hasJson);
+    EXPECT_FALSE(hasJson);
+
+    hasJson = true;
+    eventTouchInfoRecord.AddTouchPoint(touchEvent, timeStamp);
+    eventManager->DumpTouchInfo(params2, hasJson);
+    EXPECT_EQ(eventTouchInfoRecord.touchHistory_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

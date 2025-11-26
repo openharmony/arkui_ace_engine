@@ -3750,6 +3750,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (eventManager_) {
             eventManager_->DumpEvent(EventTreeType::POST_EVENT, hasJson);
         }
+    } else if (params[0] == "-touchmonitor") {
+        if (eventManager_) {
+            eventManager_->DumpTouchInfo(params, hasJson);
+        }
     } else if (params[0] == "-imagecache") {
         if (imageCache_) {
             imageCache_->DumpCacheInfo();

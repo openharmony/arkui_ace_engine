@@ -24,6 +24,26 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace NG {
 /**
+ * @tc.name: PipelineContextTestNgTouchMonitor
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNgTouchMonitor, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    std::vector<std::string> params;
+    params.push_back("-touchmonitor");
+    params.push_back("-b");
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
+    context_->eventManager_ = nullptr;
+    ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
+}
+/**
  * @tc.name: PipelineContextTestNg501
  * @tc.desc: Test ResSchedReportAxisEvent.
  * @tc.type: FUNC
