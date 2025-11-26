@@ -655,6 +655,9 @@ export class UIContext {
     public getWindowName(): string | undefined {
         throw Error("getWindowName not implemented in UIContext!")
     }
+    public getWindowId(): int32 | undefined {
+        return undefined;
+    }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
         throw Error("getWindowWidthBreakpoint not implemented in UIContext!")
     }

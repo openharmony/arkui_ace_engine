@@ -615,6 +615,16 @@ std::optional<std::string> GetWindowName(ani_int instanceId)
     return windowName;
 }
 
+std::optional<uint32_t> GetWindowId(ani_int instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, std::nullopt);
+    ContainerScope scope(instanceId);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    return context->GetFocusWindowId();
+}
+
 ani_int GetWindowWidthBreakpoint()
 {
     return ViewAbstract::GetWindowWidthBreakpoint();
@@ -974,6 +984,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
         .getWindowName = OHOS::Ace::NG::GetWindowName,
+        .getWindowId = OHOS::Ace::NG::GetWindowId,
         .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
         .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,
         .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,

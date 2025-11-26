@@ -1605,8 +1605,15 @@ export class UIContextImpl extends UIContext {
         SystemOps.setFrameCallback(onFrameCallback, onIdleCallback, delayTime);
         return
     }
-      public getWindowName(): string | undefined {
+    public getWindowName(): string | undefined {
         return ArkUIAniModule._Common_getWindowName(this.instanceId_);
+    }
+    public getWindowId(): int32 | undefined {
+        let ret = ArkUIAniModule._Common_getWindowId(this.instanceId_);
+        if (ret === -1) {
+            return undefined;
+        }
+        return ret;
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
         let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();

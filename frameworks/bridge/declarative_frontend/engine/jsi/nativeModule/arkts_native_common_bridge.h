@@ -429,6 +429,7 @@ public:
     static ArkUINativeModuleValue RemoveGestureByTag(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ClearGestures(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetWindowId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowWidthBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowHeightBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue FreezeUINodeById(ArkUIRuntimeCallInfo* runtimeCallInfo);

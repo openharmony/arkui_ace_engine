@@ -44,6 +44,7 @@ import uiEffect from '@ohos.graphics.uiEffect';
 import { DrawModifier } from "#handwritten"
 import { JavaScriptProxy } from '#generated';
 import { ErrorCallback } from '@ohos.base';
+import { int32 } from '@koalaui/compat';
 
 export class ArkUIAniModule {
     static {
@@ -316,6 +317,7 @@ export class ArkUIAniModule {
     native static _Common_lpx2px(value:number, instanceId: KInt): number
     native static _Common_px2lpx(value:number, instanceId: KInt): number
     native static _Common_getWindowName(instanceId: KInt): string
+    native static _Common_getWindowId(instanceId: KInt): int32 | undefined
     native static _Common_getWindowWidthBreakpoint(): KInt
     native static _Common_getWindowHeightBreakpoint(): KInt
 

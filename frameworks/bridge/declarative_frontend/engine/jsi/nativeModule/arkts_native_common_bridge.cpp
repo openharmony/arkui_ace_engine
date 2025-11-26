@@ -10248,6 +10248,15 @@ ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtime
     return panda::StringRef::NewFromUtf8(vm, windowName.c_str());
 }
 
+ArkUINativeModuleValue CommonBridge::GetWindowId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
+    return panda::NumberRef::New(vm, context->GetFocusWindowId());
+}
+
 ArkUINativeModuleValue CommonBridge::GetWindowWidthBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
