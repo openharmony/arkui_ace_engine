@@ -1652,6 +1652,8 @@ private:
     void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
     void OnAutoScroll(AutoScrollParam param);
+    void StopAutoScroll();
+    void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
     float MoveTextRect(float offset);
     void SetNeedMoveCaretToContentRect();
     void MoveCaretToContentRect();
