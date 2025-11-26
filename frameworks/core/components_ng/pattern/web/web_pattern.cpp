@@ -418,6 +418,9 @@ void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surf
         }
         if (pip.pipWebPattern.Upgrade()) {
             pip.pipWebPattern.Upgrade()->SetPipNativeWindow(pip.delegateId, pip.childId, pip.frameRoutingId, window);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB, "pipWebPattern.Upgrade failed.");
+            OH_NativeWindow_DestroyNativeWindow(window);
         }
     }
 }
@@ -667,6 +670,12 @@ WebPattern::~WebPattern()
             pipCallbackMap_.erase(it);
         }
         pipController_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+        if (pipNativeWindow_ != nullptr) {
+            OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+        }
     }
     UninitRotationEventCallback();
     UninitMenuLifeCycleCallback();
@@ -9303,6 +9312,11 @@ void WebPattern::OnPip(int status,
 
 void WebPattern::SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window)
 {
+    std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+    if (pipNativeWindow_ != nullptr) {
+        OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+    }
+    pipNativeWindow_ = static_cast<OHNativeWindow*>(window);
     if (delegate_) {
         delegate_->SetPipNativeWindow(delegateId, childId, frameRoutingId, window);
     }
@@ -9523,6 +9537,15 @@ void WebPattern::EnablePip(uint32_t pipController)
 
 bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "StopPip. delegateId:%{public}d, childId:%{public}d frameRoutingId:%{public}d",
+        delegateId, childId, frameRoutingId);
+    {
+        std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+        if (pipNativeWindow_ != nullptr) {
+            OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+            pipNativeWindow_ = nullptr;
+        }
+    }
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     for (auto &it : pipCallbackMap_) {
         auto pip = it.second;
@@ -9547,6 +9570,15 @@ bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
 
 bool WebPattern::PageClosePip(int delegateId, int childId, int frameRoutingId)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "PageClosePip. delegateId:%{public}d, childId:%{public}d frameRoutingId:%{public}d",
+        delegateId, childId, frameRoutingId);
+    {
+        std::lock_guard<std::mutex> lock(pipNativeWindowMutex_);
+        if (pipNativeWindow_ != nullptr) {
+            OH_NativeWindow_DestroyNativeWindow(pipNativeWindow_);
+            pipNativeWindow_ = nullptr;
+        }
+    }
     std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
     for (auto &it : pipCallbackMap_) {
         auto pip = it.second;

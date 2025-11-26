@@ -1580,6 +1580,9 @@ private:
     bool isUpSupplementDown_ = false;
     bool isSupplementMouseLeave_ = false;
 
+    OHNativeWindow* pipNativeWindow_ = nullptr;
+    std::mutex pipNativeWindowMutex_;
+
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
