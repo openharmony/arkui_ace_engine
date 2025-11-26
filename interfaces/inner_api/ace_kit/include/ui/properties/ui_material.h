@@ -15,15 +15,15 @@
  
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_UI_MATERIAL_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_UI_MATERIAL_H
- 
+
 #include <vector>
- 
+
 namespace OHOS::Ace {
- 
+
 class UiMaterial {
 public:
     UiMaterial() = default;
-    ~UiMaterial() = default;
+    virtual ~UiMaterial() = default;
     bool operator==(const UiMaterial& other) const
     {
         return type_  == other.type_;
@@ -36,10 +36,10 @@ public:
     {
         return type_;
     }
-private:
+protected:
     int32_t type_{0};
 };
- 
+
 } // namespace OHOS::Ace
- 
+
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_UI_MATERIAL_H
