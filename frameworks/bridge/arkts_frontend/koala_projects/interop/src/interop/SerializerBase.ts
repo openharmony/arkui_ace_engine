@@ -55,14 +55,30 @@ export enum Tags {
 
 export function runtimeType(value: any): int32 {
     let type = typeof value
-    if (type == 'number') return RuntimeType.NUMBER
-    if (type == 'string') return RuntimeType.STRING
-    if (type == 'undefined') return RuntimeType.UNDEFINED
-    if (type == 'object') return RuntimeType.OBJECT
-    if (type == 'boolean') return RuntimeType.BOOLEAN
-    if (type == 'bigint') return RuntimeType.BIGINT
-    if (type == 'function') return RuntimeType.FUNCTION
-    if (type == 'symbol') return RuntimeType.SYMBOL
+    if (type === 'number') {
+        return RuntimeType.NUMBER
+    }
+    if (type === 'string') {
+        return RuntimeType.STRING
+    }
+    if (type === 'undefined') {
+        return RuntimeType.UNDEFINED
+    }
+    if (type === 'object') {
+        return RuntimeType.OBJECT
+    }
+    if (type === 'boolean') {
+        return RuntimeType.BOOLEAN
+    }
+    if (type === 'bigint') {
+        return RuntimeType.BIGINT
+    }
+    if (type === 'function') {
+        return RuntimeType.FUNCTION
+    }
+    if (type === 'symbol') {
+        return RuntimeType.SYMBOL
+    }
 
     throw new Error(`bug: ${value} is ${type}`)
 }
@@ -72,7 +88,7 @@ export function isInstanceOf(className: string, value: object | undefined): bool
     return value?.constructor.name === className
 }
 
-export function registerCallback(value: object|undefined): int32 {
+export function registerCallback(value: object | undefined): int32 {
     return wrapCallback((args: Uint8Array, length: int32) => {
         // Improve: deserialize the callback arguments and call the callback
         return 42
@@ -80,10 +96,11 @@ export function registerCallback(value: object|undefined): int32 {
 }
 
 export function toPeerPtr(value: object): KPointer {
-    if (value.hasOwnProperty('peer'))
+    try {
         return unsafeCast<MaterializedBase>(value).getPeer()?.ptr ?? nullptr
-    else
+    } catch {
         throw new Error('Value is not a MaterializedBase instance')
+    }
 }
 
 export interface CallbackResource {
