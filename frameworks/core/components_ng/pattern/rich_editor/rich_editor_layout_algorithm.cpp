@@ -349,8 +349,8 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     UpdateRichTextRect(optionalTextSize.value(), layoutWrapper);
     auto maxHeight = newContentConstraint.selfIdealSize.Height().value_or(newContentConstraint.maxSize.Height());
     auto contentHeight = std::min(res.Height(), maxHeight);
-    auto contentWidth = isSingleLineMode_ ? MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint).Width()
-                                          : res.Width();
+    auto contentWidth = isSingleLineMode_ ?
+        MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint).Width() : res.Width();
     return SizeF(contentWidth, contentHeight);
 }
 
