@@ -348,4 +348,42 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test008, TestSize.Level1)
         caseNum++;
     }
 }
+
+/**
+ * @tc.name: Test009
+ * @tc.desc: Test UpdateFingerListInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, Test009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pipelineContext and eventManager.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    context->eventManager_ = eventManager;
+
+    /**
+     * @tc.steps: step2. create clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    clickRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    clickRecognizer->lastRefereeState_ = RefereeState::SUCCEED;
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer->isPostEventResult_ = false;
+    eventManager->downFingerIds_.clear();
+    for (int32_t id = 0; id < 2; id++) {
+        eventManager->downFingerIds_[id] = id;
+    }
+    for (int32_t id = 0; id < 2; id++) {
+        TouchEvent event;
+        event.id = id;
+        event.pointers.clear();
+        clickRecognizer->touchPoints_[id] = event;
+    }
+    clickRecognizer->UpdateFingerListInfo();
+    EXPECT_EQ(clickRecognizer->lastPointEvent_, nullptr);
+}
 }; // namespace OHOS::Ace::NG
