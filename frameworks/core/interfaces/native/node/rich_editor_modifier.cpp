@@ -626,6 +626,22 @@ void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
+void SetRichEditorCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, ArkUI_Bool supportAvoidance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto *customKeyboardNode = reinterpret_cast<FrameNode*>(customKeyboard);
+    CHECK_NULL_VOID(customKeyboardNode);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboardNode, supportAvoidance);
+}
+
+void ResetRichEditorCustomKeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
+}
+
 void SetRichEditorOnDidIMEInput(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -783,6 +799,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
         .setRichEditorKeyboardAppearance = SetRichEditorKeyboardAppearance,
         .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
+        .setRichEditorCustomKeyboard = SetRichEditorCustomKeyboard,
+        .resetRichEditorCustomKeyboard = ResetRichEditorCustomKeyboard,
         .setRichEditorOnDidIMEInput = SetRichEditorOnDidIMEInput,
         .resetRichEditorOnDidIMEInput = ResetRichEditorOnDidIMEInput,
         .setRichEditorOnWillAttachIME = SetRichEditorOnWillAttachIME,

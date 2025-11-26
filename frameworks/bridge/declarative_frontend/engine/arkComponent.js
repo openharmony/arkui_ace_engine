@@ -10487,7 +10487,19 @@ class RichEditorKeyboardAppearanceModifier extends ModifierWithKey {
   }
 }
 RichEditorKeyboardAppearanceModifier.identity = Symbol('richEditorKeyboardAppearance');
-
+class RichEditorCustomKeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetCustomKeyboard(node);
+    } else {
+      getUINativeModule().richEditor.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
+    }
+  }
+}
+RichEditorCustomKeyboardModifier.identity = Symbol('richEditorCustomKeyboard');
 class RichEditorOnDidIMEInputModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10678,8 +10690,12 @@ class ArkRichEditorComponent extends ArkComponent {
   bindSelectionMenu(spanType, content, responseType, options) {
     throw new Error('Method not implemented.');
   }
-  customKeyboard(value) {
-    throw new Error('Method not implemented.');
+  customKeyboard(value, options) {
+    let arkValue = new ArkCustomKeyboard();
+    arkValue.value = value;
+    arkValue.supportAvoidance = options?.supportAvoidance;
+    modifierWithKey(this._modifiersWithKeys, RichEditorCustomKeyboardModifier.identity,
+      RichEditorCustomKeyboardModifier, arkValue);
   }
   onEditingChange(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);

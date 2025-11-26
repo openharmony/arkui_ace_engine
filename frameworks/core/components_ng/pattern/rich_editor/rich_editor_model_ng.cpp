@@ -207,9 +207,39 @@ void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool sup
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboardOption(supportAvoidance);
+    pattern->SetCustomKeyboard(std::move(func));
+}
+
+void RichEditorModelNG::SetCustomKeyboard(
+    FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboard(std::move(buildFunc));
+    pattern->SetCustomKeyboardOption(supportAvoidance);
+}
+
+void RichEditorModelNG::SetCustomKeyboardWithNode(FrameNode* customKeyboard, bool supportAvoidance)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboardOption(supportAvoidance);
+    pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
+}
+
+void RichEditorModelNG::SetCustomKeyboardWithNode(
+    FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
+        pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
         pattern->SetCustomKeyboardOption(supportAvoidance);
-        pattern->SetCustomKeyboard(std::move(func));
     }
 }
 
