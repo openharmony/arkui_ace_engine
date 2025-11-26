@@ -730,6 +730,8 @@ void SetDisplayArrowImpl(Ark_NativePointer node,
     auto optArrow = Converter::OptConvertPtr<ArrowStyleVariantType>(value);
     if (auto show = Converter::OptConvertPtr<bool>(isHoverShow); show) {
         SwiperModelStatic::SetHoverShow(frameNode, *show);
+    } else {
+        SwiperModelStatic::SetHoverShow(frameNode, false);
     }
     if (!optArrow) {
         SwiperModelStatic::SetDisplayArrow(frameNode, false);
