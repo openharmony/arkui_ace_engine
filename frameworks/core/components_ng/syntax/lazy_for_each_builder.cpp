@@ -1076,6 +1076,22 @@ namespace OHOS::Ace::NG {
         }
     }
 
+    void LazyForEachBuilder::ReorganizeOffscreenNode()
+    {
+        for (auto& [index, node] : cachedItems_) {
+            if (!node.second) {
+                continue;
+            }
+            ProcessOffscreenNode(node.second, true);
+        }
+        for (auto& [key, node] : expiringItem_) {
+            if (!node.second) {
+                continue;
+            }
+            ProcessOffscreenNode(node.second, false);
+        }
+    }
+
     const std::map<int32_t, LazyForEachChild>& LazyForEachBuilder::GetAllChildren()
     {
         if (!cachedItems_.empty()) {

@@ -31,6 +31,7 @@
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_ng/base/inspector.h"
 #undef private
 #undef protected
 
@@ -1480,6 +1481,29 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder14, TestSize.Level1)
     lazyForEachNode->needPredict_ = true;
     lazyForEachNode->GetFrameChildByIndex(0, false);
     EXPECT_NE(lazyForEachNode->GetFrameChildByIndex(0, false), nullptr);
+}
+
+/**
+ * @tc.name: ReorganizeOffscreenNode001
+ * @tc.desc: Test LazyForEachBuilder.ReorganizeOffscreenNode001
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ReorganizeOffscreenNode001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    auto node1 = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    auto node2 = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    auto node3 = AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("0", node1);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("1", nullptr);
+    lazyForEachBuilder->expiringItem_["2"] = LazyForEachCacheChild(2, node2);
+    lazyForEachBuilder->expiringItem_["3"] = LazyForEachCacheChild(3, node3);
+    lazyForEachBuilder->expiringItem_["4"] = LazyForEachCacheChild(4, nullptr);
+    lazyForEachBuilder->ProcessOffscreenNode(node1, false);
+    auto count1 = Inspector::offscreenNodes.size();
+    lazyForEachBuilder->ReorganizeOffscreenNode();
+    auto count2 = Inspector::offscreenNodes.size();
+    EXPECT_EQ(count2 - count1, 1);
 }
 
 } // namespace OHOS::Ace::NG
