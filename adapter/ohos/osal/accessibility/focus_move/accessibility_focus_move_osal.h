@@ -63,6 +63,18 @@ public:
     static bool IsProcessGetScrollAncestor(const Accessibility::AccessibilityFocusMoveParam& param);
 
     static bool IsProcessDetectFocusable(const Accessibility::AccessibilityFocusMoveParam& param);
+
+    virtual bool CheckIsRootType(
+        const std::shared_ptr<FocusRulesCheckNode>& checkNode);
+
+    virtual bool CheckIsReadable(
+        const std::shared_ptr<FocusRulesCheckNode>& checkNode);
+
+    virtual bool CheckIsReadableRulesEnable();
+
+    bool NeedChangeToReadableNodeThroughAncestor(
+        const std::shared_ptr<FocusRulesCheckNode>& checkNode, std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
 private:
     AceFocusMoveDetailCondition GetAceCondition(
         const Accessibility::AccessibilityFocusMoveParam& param);
