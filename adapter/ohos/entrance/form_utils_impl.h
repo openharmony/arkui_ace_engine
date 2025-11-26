@@ -19,6 +19,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "base/json/json_util.h"
 #include "core/components/form/resource/form_utils.h"
 #include "want.h"
 
@@ -36,6 +37,8 @@ public:
 
     int32_t BackgroundEvent(
         int64_t formId, const std::string& action, int32_t containerId, const std::string& defaultBundleName) override;
+
+    void AddWantFreeInstallFlagForRouterEvent(const std::unique_ptr<JsonValue> &eventAction, AAFwk::Want &want);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_FORM_UTILS_IMPL_H

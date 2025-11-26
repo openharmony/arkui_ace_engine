@@ -52,6 +52,7 @@ int32_t FormUtilsImpl::RouterEvent(
         }
     }
     want.SetParam("params", params->ToString());
+    AddWantFreeInstallFlagForRouterEvent(eventAction->GetValue("flag"), want);
     auto abilityName = eventAction->GetValue("abilityName");
     if (uri->IsValid() && !abilityName->IsValid()) {
         auto uriStr = uri->GetString();
@@ -75,6 +76,16 @@ int32_t FormUtilsImpl::RouterEvent(
     }
 
     return AppExecFwk::FormMgr::GetInstance().RouterEvent(formId, want, token_);
+}
+
+void FormUtilsImpl::AddWantFreeInstallFlagForRouterEvent(const std::unique_ptr<JsonValue> &flag, AAFwk::Want &want)
+{
+    if (flag->IsValid()) {
+        auto inputFlag = flag->GetInt();
+        if (inputFlag & Want::FLAG_INSTALL_ON_DEMAND) {
+            want.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
+        }
+    }
 }
 
 int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
