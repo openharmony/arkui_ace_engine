@@ -15,23 +15,24 @@
 
 import { pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
-import { MutableState } from '@koalaui/runtime'
 import { LazyForEachOps } from '#generated'
 import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation,
     DataMoveOperation, DataExchangeOperation, DataChangeListener } from '../component/lazyForEach'
+import { ILocalDecoratedVariable } from '../stateManagement/decorator'
 
 export class InternalListener implements DataChangeListener {
     private startIndex: int32; // Tracks the minimum item index that has changed
     private endIndex: int32;
     private changeCount: int32; // Tracks the number of items added or deleted
-    private version: MutableState<int32>; // reference to mark LazyForEach dirty
+    public version: ILocalDecoratedVariable<int32>; // reference to mark LazyForEach dirty
 
-    constructor(version: MutableState<int32>) {
+    constructor(version: ILocalDecoratedVariable<int32>) {
         this.startIndex = Number.POSITIVE_INFINITY.toInt();
         this.endIndex = Number.NEGATIVE_INFINITY.toInt();
         this.changeCount = 0;
         this.version = version;
     }
+
     /**
      * Notify the change of data to backend
      * @return the index of the first changed item
@@ -56,7 +57,7 @@ export class InternalListener implements DataChangeListener {
 
     onDataReloaded(): void {
         if (this.startIndex === Number.POSITIVE_INFINITY.toInt()) {
-            ++this.version.value
+            this.version.set(this.version.get() + 1)
         }
         this.startIndex = 0
         this.endIndex = Number.POSITIVE_INFINITY.toInt()
@@ -67,7 +68,7 @@ export class InternalListener implements DataChangeListener {
             return
         }
         if (this.startIndex === Number.POSITIVE_INFINITY.toInt()) {
-            ++this.version.value
+            this.version.set(this.version.get() + 1)
         }
         this.startIndex = Math.min(this.startIndex, index).toInt()
         ++this.changeCount
@@ -78,7 +79,7 @@ export class InternalListener implements DataChangeListener {
             return
         }
         if (this.startIndex === Number.POSITIVE_INFINITY.toInt()) {
-            ++this.version.value
+            this.version.set(this.version.get() + 1)
         }
         this.startIndex = Math.min(this.startIndex, Math.min(from, to)).toInt()
         this.endIndex = Math.max(this.endIndex, Math.max(from, to)).toInt()
@@ -89,7 +90,7 @@ export class InternalListener implements DataChangeListener {
             return
         }
         if (this.startIndex === Number.POSITIVE_INFINITY.toInt()) {
-            ++this.version.value
+            this.version.set(this.version.get() + 1)
         }
         this.startIndex = Math.min(this.startIndex, index).toInt()
         --this.changeCount
@@ -100,7 +101,7 @@ export class InternalListener implements DataChangeListener {
             return
         }
         if (this.startIndex === Number.POSITIVE_INFINITY.toInt()) {
-            ++this.version.value
+            this.version.set(this.version.get() + 1)
         }
         this.startIndex = Math.min(this.startIndex, index).toInt()
     }
@@ -145,7 +146,7 @@ export class InternalListener implements DataChangeListener {
             }
         }
         if (this.startIndex === Number.POSITIVE_INFINITY.toInt()) {
-            ++this.version.value
+            this.version.set(this.version.get() + 1)
         }
         this.startIndex = startIndex
         this.endIndex = endIndex
