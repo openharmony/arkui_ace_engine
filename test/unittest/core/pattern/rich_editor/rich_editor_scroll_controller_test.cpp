@@ -893,7 +893,7 @@ HWTEST_F(RichEditorScrollControllerTest, NeedScroll002, TestSize.Level0)
     auto& contentRect_ = scrollController->contentRect_;
 
     scrollController->isSingleLineMode_ = false;
-    textRect_.SetSize(SizeF(100.0f, 150.0f)); 
+    textRect_.SetSize(SizeF(100.0f, 150.0f));
     contentRect_.SetSize(SizeF(100.0f, 100.0f));
     EXPECT_TRUE(scrollController->NeedScroll());
 
