@@ -101,6 +101,7 @@ public:
     static ArkUINativeModuleValue IsVisible(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsClipToFrame(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsAttached(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue IsOnMainTree(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetInspectorInfo(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetCustomPropertyCapiByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCustomPropertyModiferByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);

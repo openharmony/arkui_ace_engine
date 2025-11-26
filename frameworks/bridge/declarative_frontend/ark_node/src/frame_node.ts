@@ -585,6 +585,10 @@ class FrameNode extends Disposable {
     return getUINativeModule().frameNode.isAttached(this.getNodePtr());
   }
 
+  isOnMainTree(): boolean {
+    return getUINativeModule().frameNode.isOnMainTree(this.getNodePtr());
+  }
+
   getInspectorInfo(): Object {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
