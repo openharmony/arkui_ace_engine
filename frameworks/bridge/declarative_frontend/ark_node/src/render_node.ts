@@ -490,7 +490,7 @@ class RenderNode extends Disposable {
       return;
     }
 
-    if (cptrVal == 0) {
+    if (cptrVal === 0) {
       this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
     } else {
       this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);

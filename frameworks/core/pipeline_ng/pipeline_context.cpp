@@ -832,7 +832,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushTouchEvents();
     FlushDragEvents();
     int64_t endTimestamp = GetSysTimestamp();
-    frameMetrics.inputHandlingDuration = endTimestamp - startTimestamp;
+    if (endTimestamp > startTimestamp) {
+        frameMetrics.inputHandlingDuration = static_cast<uint64_t>(endTimestamp - startTimestamp);
+    }
     {
         ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64
                                     "][inputHandlingDurationTimestamp:%" PRIu64
@@ -891,7 +893,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
     taskScheduler_->FlushAfterModifierTask();
     endTimestamp = GetSysTimestamp();
-    frameMetrics.layoutMeasureDuration = endTimestamp - startTimestamp;
+    if (endTimestamp > startTimestamp) {
+        frameMetrics.layoutMeasureDuration = static_cast<uint64_t>(endTimestamp - startTimestamp);
+    }
     {
         ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64
                                     "][layoutMeasureDurationStartTimestamp:%" PRIu64
