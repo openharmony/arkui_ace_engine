@@ -25785,22 +25785,22 @@ typedef struct GENERATED_ArkUIAccessibilityHoverEventAccessor {
                     Ark_AccessibilityHoverType type);
     Ark_Float64 (*getX)(Ark_AccessibilityHoverEvent peer);
     void (*setX)(Ark_AccessibilityHoverEvent peer,
-                 const Ark_Float64* x);
+                 Ark_Float64 x);
     Ark_Float64 (*getY)(Ark_AccessibilityHoverEvent peer);
     void (*setY)(Ark_AccessibilityHoverEvent peer,
-                 const Ark_Float64* y);
+                 Ark_Float64 y);
     Ark_Float64 (*getDisplayX)(Ark_AccessibilityHoverEvent peer);
     void (*setDisplayX)(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Float64* displayX);
+                        Ark_Float64 displayX);
     Ark_Float64 (*getDisplayY)(Ark_AccessibilityHoverEvent peer);
     void (*setDisplayY)(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Float64* displayY);
+                        Ark_Float64 displayY);
     Ark_Float64 (*getWindowX)(Ark_AccessibilityHoverEvent peer);
     void (*setWindowX)(Ark_AccessibilityHoverEvent peer,
-                       const Ark_Float64* windowX);
+                       Ark_Float64 windowX);
     Ark_Float64 (*getWindowY)(Ark_AccessibilityHoverEvent peer);
     void (*setWindowY)(Ark_AccessibilityHoverEvent peer,
-                       const Ark_Float64* windowY);
+                       Ark_Float64 windowY);
 } GENERATED_ArkUIAccessibilityHoverEventAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
@@ -25912,22 +25912,22 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
                       Ark_AxisAction action);
     Ark_Float64 (*getDisplayX)(Ark_AxisEvent peer);
     void (*setDisplayX)(Ark_AxisEvent peer,
-                        const Ark_Float64* displayX);
+                        Ark_Float64 displayX);
     Ark_Float64 (*getDisplayY)(Ark_AxisEvent peer);
     void (*setDisplayY)(Ark_AxisEvent peer,
-                        const Ark_Float64* displayY);
+                        Ark_Float64 displayY);
     Ark_Float64 (*getWindowX)(Ark_AxisEvent peer);
     void (*setWindowX)(Ark_AxisEvent peer,
-                       const Ark_Float64* windowX);
+                       Ark_Float64 windowX);
     Ark_Float64 (*getWindowY)(Ark_AxisEvent peer);
     void (*setWindowY)(Ark_AxisEvent peer,
-                       const Ark_Float64* windowY);
+                       Ark_Float64 windowY);
     Ark_Float64 (*getX)(Ark_AxisEvent peer);
     void (*setX)(Ark_AxisEvent peer,
-                 const Ark_Float64* x);
+                 Ark_Float64 x);
     Ark_Float64 (*getY)(Ark_AxisEvent peer);
     void (*setY)(Ark_AxisEvent peer,
-                 const Ark_Float64* y);
+                 Ark_Float64 y);
     Opt_Int32 (*getScrollStep)(Ark_AxisEvent peer);
     void (*setScrollStep)(Ark_AxisEvent peer,
                           const Opt_Int32* scrollStep);
@@ -25950,7 +25950,7 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
                       const Ark_EventTarget* target);
     Ark_Int64 (*getTimestamp)(Ark_BaseEvent peer);
     void (*setTimestamp)(Ark_BaseEvent peer,
-                         const Ark_Int64* Ark_Int64);
+                         Ark_Int64 timestamp);
     Ark_SourceType (*getSource)(Ark_BaseEvent peer);
     void (*setSource)(Ark_BaseEvent peer,
                       Ark_SourceType source);
@@ -25962,13 +25962,13 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
                             const Opt_Float64* axisVertical);
     Ark_Float64 (*getPressure)(Ark_BaseEvent peer);
     void (*setPressure)(Ark_BaseEvent peer,
-                        const Ark_Float64* pressure);
+                        Ark_Float64 pressure);
     Ark_Float64 (*getTiltX)(Ark_BaseEvent peer);
     void (*setTiltX)(Ark_BaseEvent peer,
-                     const Ark_Float64* tiltX);
+                     Ark_Float64 tiltX);
     Ark_Float64 (*getTiltY)(Ark_BaseEvent peer);
     void (*setTiltY)(Ark_BaseEvent peer,
-                     const Ark_Float64* tiltY);
+                     Ark_Float64 tiltY);
     Opt_Float64 (*getRollAngle)(Ark_BaseEvent peer);
     void (*setRollAngle)(Ark_BaseEvent peer,
                          const Opt_Float64* rollAngle);
@@ -26389,22 +26389,22 @@ typedef struct GENERATED_ArkUIClickEventAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_Float64 (*getDisplayX)(Ark_ClickEvent peer);
     void (*setDisplayX)(Ark_ClickEvent peer,
-                        const Ark_Float64* displayX);
+                        Ark_Float64 displayX);
     Ark_Float64 (*getDisplayY)(Ark_ClickEvent peer);
     void (*setDisplayY)(Ark_ClickEvent peer,
-                        const Ark_Float64* displayY);
+                        Ark_Float64 displayY);
     Ark_Float64 (*getWindowX)(Ark_ClickEvent peer);
     void (*setWindowX)(Ark_ClickEvent peer,
-                       const Ark_Float64* windowX);
+                       Ark_Float64 windowX);
     Ark_Float64 (*getWindowY)(Ark_ClickEvent peer);
     void (*setWindowY)(Ark_ClickEvent peer,
-                       const Ark_Float64* windowY);
+                       Ark_Float64 windowY);
     Ark_Float64 (*getX)(Ark_ClickEvent peer);
     void (*setX)(Ark_ClickEvent peer,
-                 const Ark_Float64* x);
+                 Ark_Float64 x);
     Ark_Float64 (*getY)(Ark_ClickEvent peer);
     void (*setY)(Ark_ClickEvent peer,
-                 const Ark_Float64* y);
+                 Ark_Float64 y);
     Opt_InteractionHand (*getHand)(Ark_ClickEvent peer);
     void (*setHand)(Ark_ClickEvent peer,
                     const Opt_InteractionHand* hand);
@@ -27195,7 +27195,7 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
                     Ark_KeyType type);
     Ark_Int32 (*getKeyCode)(Ark_KeyEvent peer);
     void (*setKeyCode)(Ark_KeyEvent peer,
-                       const Ark_Int32* keyCode);
+                       Ark_Int32 keyCode);
     Ark_String (*getKeyText)(Ark_KeyEvent peer);
     void (*setKeyText)(Ark_KeyEvent peer,
                        const Ark_String* keyText);
@@ -27204,13 +27204,13 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
                          Ark_KeySource keySource);
     Ark_Int32 (*getDeviceId)(Ark_KeyEvent peer);
     void (*setDeviceId)(Ark_KeyEvent peer,
-                        const Ark_Int32* deviceId);
+                        Ark_Int32 deviceId);
     Ark_Int32 (*getMetaKey)(Ark_KeyEvent peer);
     void (*setMetaKey)(Ark_KeyEvent peer,
-                       const Ark_Int32* metaKey);
+                       Ark_Int32 metaKey);
     Ark_Int64 (*getTimestamp)(Ark_KeyEvent peer);
     void (*setTimestamp)(Ark_KeyEvent peer,
-                         const Ark_Int64* timestamp);
+                         Ark_Int64 timestamp);
     Callback_Void (*getStopPropagation)(Ark_KeyEvent peer);
     void (*setStopPropagation)(Ark_KeyEvent peer,
                                const Callback_Void* stopPropagation);
@@ -27473,22 +27473,22 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
                       Ark_MouseAction action);
     Ark_Float64 (*getDisplayX)(Ark_MouseEvent peer);
     void (*setDisplayX)(Ark_MouseEvent peer,
-                        const Ark_Float64* displayX);
+                        Ark_Float64 displayX);
     Ark_Float64 (*getDisplayY)(Ark_MouseEvent peer);
     void (*setDisplayY)(Ark_MouseEvent peer,
-                        const Ark_Float64* displayY);
+                        Ark_Float64 displayY);
     Ark_Float64 (*getWindowX)(Ark_MouseEvent peer);
     void (*setWindowX)(Ark_MouseEvent peer,
-                       const Ark_Float64* windowX);
+                       Ark_Float64 windowX);
     Ark_Float64 (*getWindowY)(Ark_MouseEvent peer);
     void (*setWindowY)(Ark_MouseEvent peer,
-                       const Ark_Float64* windowY);
+                       Ark_Float64 windowY);
     Ark_Float64 (*getX)(Ark_MouseEvent peer);
     void (*setX)(Ark_MouseEvent peer,
-                 const Ark_Float64* x);
+                 Ark_Float64 x);
     Ark_Float64 (*getY)(Ark_MouseEvent peer);
     void (*setY)(Ark_MouseEvent peer,
-                 const Ark_Float64* y);
+                 Ark_Float64 y);
     Callback_Void (*getStopPropagation)(Ark_MouseEvent peer);
     void (*setStopPropagation)(Ark_MouseEvent peer,
                                const Callback_Void* stopPropagation);
