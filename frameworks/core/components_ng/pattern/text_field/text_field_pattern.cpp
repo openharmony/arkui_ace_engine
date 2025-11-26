@@ -4401,6 +4401,7 @@ void TextFieldPattern::InitEditingValueText(std::u16string content)
 
 bool TextFieldPattern::InitValueText(std::u16string content)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Init text len %{public}d", static_cast<int32_t>(content.length()));
     if (GetIsPreviewText()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Init when has previewText");
         return false;
@@ -11420,6 +11421,8 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
     CloseSelectOverlay(true);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    TAG_LOGI(ACE_TEXT_FIELD, "AddInsertCommand MarkDirtyNode %{public}d, reason: %{public}d", host->GetId(),
+        static_cast<int32_t>(reason));
 }
 
 void TextFieldPattern::AddInputCommand(const InputCommandInfo& inputCommandInfo)
