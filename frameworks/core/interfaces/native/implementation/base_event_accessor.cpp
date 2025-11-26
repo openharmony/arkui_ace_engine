@@ -201,7 +201,7 @@ Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
     CHECK_NULL_RETURN(peer, invalid);
     auto info = peer->GetBaseInfo();
     CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
             std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
             (const Array_String keys, const Callback_Boolean_Void continuation) {
         auto eventKeys = info->GetPressedKeyCodes();

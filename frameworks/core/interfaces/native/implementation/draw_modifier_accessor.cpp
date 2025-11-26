@@ -58,7 +58,7 @@ Callback_DrawContext_Void GetDrawBehind_callbackImpl(Ark_DrawModifier peer)
         CHECK_NULL_VOID(peer && peer->drawModifier && peer->drawModifier->drawBehindFunc && drawContext);
         peer->drawModifier->drawBehindFunc(*drawContext);
     };
-    auto callback = CallbackKeeper::RegisterReverseCallback<Callback_DrawContext_Void,
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_DrawContext_Void,
         std::function<void(Ark_DrawContext)>>(handler);
     return callback;
 }
@@ -78,7 +78,7 @@ Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
         CHECK_NULL_VOID(peer && peer->drawModifier && peer->drawModifier->drawContentFunc && drawContext);
         peer->drawModifier->drawContentFunc(*drawContext);
     };
-    auto callback = CallbackKeeper::RegisterReverseCallback<Callback_DrawContext_Void,
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_DrawContext_Void,
         std::function<void(Ark_DrawContext)>>(handler);
     return callback;
 }
