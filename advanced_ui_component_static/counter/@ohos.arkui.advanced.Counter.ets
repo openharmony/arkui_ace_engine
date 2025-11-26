@@ -611,7 +611,7 @@ export struct CounterComponent {
 
   private onOptionsChange(str: string) {
     this.type = this.options.type;
-    if (this.options.direction) {
+    if (this.options.direction !== undefined) {
       this.counterDirection = this.options.direction as Direction;
     } else {
       this.counterDirection = Direction.Auto;
