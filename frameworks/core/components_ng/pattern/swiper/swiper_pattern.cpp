@@ -1403,7 +1403,7 @@ void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const 
             pixelRoundTargetPos = -(GetDirection() == Axis::HORIZONTAL ? paintRect.GetX() : paintRect.GetY());
         }
 #endif
-        if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_) {
+        if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_ && SwiperUtils::IsStretch(props)) {
             // If property animation is running and the target index is the same as the running target index, the
             // animation is not played
             return;
