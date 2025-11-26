@@ -14,7 +14,7 @@
  */
 
 import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
-    rememberDisposable, rememberMutableState, scheduleCallback } from '@koalaui/runtime'
+    rememberDisposable, scheduleCallback } from '@koalaui/runtime'
 import { StateContext } from 'arkui.incremental.runtime.state'
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
@@ -27,6 +27,7 @@ import { LazyNodePeer, LazyItemNode, NodeHolder } from './SyntaxNodeBase'
 import { CustomComponent } from '../component/customComponent'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
+import { STATE_MGMT_FACTORY } from '../stateManagement/decorator'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
 
@@ -61,13 +62,13 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
         console.log(`dataSource totalCount changed from ${pool.total} to ${dataSource.totalCount()}`)
         pool.total = dataSource.totalCount()
     }
-    let changeCounter = rememberMutableState(0)
-    changeCounter.value //subscribe
     let listener = remember(() => {
+        let changeCounter = STATE_MGMT_FACTORY.makeStaticLocal<int32>('__backing_value_change_counter', 0)
         let res = new InternalListener(changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
+    listener.version.get() // subscribe
     const changeIndex = listener.flush(node.getPeerPtr()) // first item index that's affected by DataChange
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
