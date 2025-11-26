@@ -137,6 +137,12 @@ struct ImageSpanAttribute {
 
 enum class OptionSource { EXTERNAL_API = 0, USER_PASTE, UNDO_REDO, IME_INSERT, COLLBORATION };
 
+struct AccessibilitySpanOptions {
+    std::optional<std::string> accessibilityTextOpt;
+    std::optional<std::string> accessibilityDescriptionOpt;
+    std::optional<std::string> accessibilityLevelOpt;
+};
+
 struct SpanOptionBase {
     std::optional<int32_t> offset;
     UserGestureOptions userGestureOption;
@@ -145,6 +151,7 @@ struct SpanOptionBase {
     RefPtr<ResourceObject> dragBackgroundColorResObj;
     bool isDragShadowNeeded = true;
     OptionSource optionSource = OptionSource::EXTERNAL_API;
+    std::optional<AccessibilitySpanOptions> accessibilityOptions;
 
     std::string ToString() const
     {

@@ -650,6 +650,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
         TextChangeReason reason = TextChangeReason::UNKNOWN);
 #endif
+    void InitPlaceholderAccessibility(const RefPtr<PlaceholderSpanNode>& spanNode, const SpanOptionBase& options);
     std::u16string DeleteBackwardOperation(int32_t length, bool isIME = true);
     void DeleteForward(int32_t length = 1) override;
     void DeleteForward(int32_t length, TextChangeReason reason, bool isByIME = false);

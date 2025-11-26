@@ -641,7 +641,8 @@ void RichEditorPattern::AddPlaceholderSpan(const BuilderSpanOptions& options, bo
         undoManager_->RemoveBuilderSpanOptions(options.customNode);
         return;
     }
-    auto baseOption = SpanOptionBase { .offset = options.offset, .optionSource = OptionSource::UNDO_REDO };
+    auto baseOption = SpanOptionBase { .offset = options.offset, .optionSource = OptionSource::UNDO_REDO ,
+        .accessibilityOptions = options.accessibilityOptions };
     AddPlaceholderSpan(options.customNode, baseOption, reason);
 }
 
@@ -1263,9 +1264,8 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddPlaceholderSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
-    CHECK_NULL_RETURN(customNode, 0);
     auto host = GetContentHost();
-    CHECK_NULL_RETURN(host, 0);
+    CHECK_NULL_RETURN(customNode && host, 0);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddPlaceholderSpan");
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     NotifyExitTextPreview(false);
@@ -1280,9 +1280,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     int32_t insertIndex = options.offset.value_or(GetTextContentLength());
     AdjustSelectorForSymbol(insertIndex, HandleType::SECOND, SelectorAdjustPolicy::EXCLUDE);
     int32_t spanIndex = TextSpanSplit(insertIndex);
-    if (spanIndex == -1) {
-        spanIndex = static_cast<int32_t>(host->GetChildren().size());
-    }
+    IF_TRUE(spanIndex == -1, spanIndex = static_cast<int32_t>(host->GetChildren().size()));
     builderNodes.push_back(placeholderSpanNode);
     placeholderSpanNode->MountToParent(host, spanIndex);
     auto renderContext = placeholderSpanNode->GetRenderContext();
@@ -1291,6 +1289,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     spanItem->content = u" ";
     spanItem->SetCustomNode(customNode);
     spanItem->dragBackgroundColor_ = options.dragBackgroundColor;
+    spanItem->accessibilityOptions = options.accessibilityOptions;
     StyleManager::AddDragBackgroundColorResource(spanItem, options.dragBackgroundColorResObj);
     spanItem->isDragShadowNeeded_ = options.isDragShadowNeeded;
     AddSpanItem(spanItem, spanIndex);
@@ -1305,9 +1304,23 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     AddOnPlaceholderHoverEvent(placeholderSpanNode);
     placeholderSpanNode->MarkModifyDone();
     placeholderSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    InitPlaceholderAccessibility(placeholderSpanNode, options);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return spanIndex;
+}
+
+void RichEditorPattern::InitPlaceholderAccessibility(const RefPtr<PlaceholderSpanNode>& spanNode,
+    const SpanOptionBase& options)
+{
+    CHECK_NULL_VOID(spanNode);
+    auto accessibilityProperty = spanNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto& accessibilityOptions = options.accessibilityOptions;
+    const auto& value = accessibilityOptions.value_or(AccessibilitySpanOptions());
+    accessibilityProperty->SetAccessibilityLevel(value.accessibilityLevelOpt.value_or(""));
+    accessibilityProperty->SetAccessibilityTextWithEvent(value.accessibilityTextOpt.value_or(""));
+    accessibilityProperty->SetAccessibilityDescriptionWithEvent(value.accessibilityDescriptionOpt.value_or(""));
 }
 
 void RichEditorPattern::AddOnPlaceholderHoverEvent(const RefPtr<PlaceholderSpanNode>& placeholderSpanNode)

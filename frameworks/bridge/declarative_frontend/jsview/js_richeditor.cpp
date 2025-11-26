@@ -2286,6 +2286,30 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
     if (!isDragShadowNeeded->IsNull() && isDragShadowNeeded->IsBoolean()) {
         placeholderSpan.isDragShadowNeeded = isDragShadowNeeded->ToBoolean();
     }
+    auto accessibilityOptions = JSObjectCast(placeholderOptionObject->GetProperty("accessibilitySpanOptions"));
+    ParseAccessibilityOptions(accessibilityOptions, placeholderSpan);
+}
+
+void JSRichEditorController::ParseAccessibilityOptions(const JSRef<JSObject>& options, SpanOptionBase& placeholderSpan)
+{
+    AccessibilitySpanOptions accessibilityOptions;
+    if (options->IsUndefined()) {
+        placeholderSpan.accessibilityOptions = accessibilityOptions;
+        return;
+    }
+    auto accessibilityText = options->GetProperty("accessibilityText");
+    if (std::string text; JSContainerBase::ParseJsString(accessibilityText, text)) {
+        accessibilityOptions.accessibilityTextOpt = text;
+    }
+    auto accessibilityDescription = options->GetProperty("accessibilityDescription");
+    if (std::string text; JSContainerBase::ParseJsString(accessibilityDescription, text)) {
+        accessibilityOptions.accessibilityDescriptionOpt = text;
+    }
+    auto accessibilityLevel = options->GetProperty("accessibilityLevel");
+    if (!accessibilityLevel->IsNull() && accessibilityLevel->IsString()) {
+        accessibilityOptions.accessibilityLevelOpt = accessibilityLevel->ToString();
+    }
+    placeholderSpan.accessibilityOptions = accessibilityOptions;
 }
 
 void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
