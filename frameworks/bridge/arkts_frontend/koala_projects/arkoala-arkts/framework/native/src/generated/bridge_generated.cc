@@ -3523,6 +3523,7 @@ void impl_CommonMethod_setDirection(Ark_NativePointer thisPtr, KSerializerBuffer
         Opt_Direction valueValueTemp = valueValueTempTmpBuf;;
         GetNodeModifiers()->getCommonMethodModifier()->setDirection(self, static_cast<Opt_Direction*>(&valueValueTemp));
 }
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setDirection, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setAlign(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
