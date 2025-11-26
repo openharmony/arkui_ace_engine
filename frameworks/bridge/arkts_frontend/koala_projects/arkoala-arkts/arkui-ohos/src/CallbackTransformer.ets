@@ -14,7 +14,8 @@
  */
 
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
-import { KPointer } from "@koalaui/interop"
+import { KPointer, nullptr } from '@koalaui/interop';
+import { IncrementalNode } from '@koalaui/runtime';
 import { PeerNode } from "./PeerNode"
 import { CustomBuilder } from "./component/builder"
 import { CustomNodeBuilder, ArkComponentRootPeer } from "#generated"
@@ -47,6 +48,10 @@ function componentRootPeerFactory(): PeerNode {
     return ArkComponentRootPeer.create(undefined)
 }
 
+function componentFreeRootFactory(): IncrementalNode {
+    return new IncrementalNode();
+}
+
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
         const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -66,8 +71,8 @@ export class CallbackTransformer {
                     ExtendableComponent.current = lastExtendableComponent;
                 }
             };
-            const peer = createUiDetachedRoot(componentRootPeerFactory, cb);
-            return peer.peer.ptr;
+            const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(componentFreeRootFactory, cb);
+            return peer ? peer.peer.ptr : nullptr;
         }
     }
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {
