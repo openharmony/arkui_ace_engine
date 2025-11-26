@@ -1765,7 +1765,7 @@ HWTEST_F(TextFieldPatternTestEight, NotifyFillRequestSuccess001, TestSize.Level0
         return false;
     };
     eventHub->onWillChangeEvent_ = func;
-    pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType);
+    pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType, AceAutoFillTriggerType::AUTO_REQUEST);
     ChangeValueInfo info;
     EXPECT_FALSE(eventHub->FireOnWillChangeEvent(info));
 }

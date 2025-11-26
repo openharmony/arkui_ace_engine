@@ -1519,7 +1519,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     EXPECT_FALSE(pipeline->DumpPageViewData(nullptr, viewDataWrap));
     EXPECT_FALSE(pipeline->DumpPageViewData(frameNode, viewDataWrap));
     EXPECT_FALSE(pipeline->CheckNeedAutoSave());
-    pipeline->NotifyFillRequestSuccess(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, viewDataWrap);
+    auto triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
+    pipeline->NotifyFillRequestSuccess(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, viewDataWrap, triggerType,
+        nullptr);
     pipeline->NotifyFillRequestFailed(frameNode, 101);
 
     /**

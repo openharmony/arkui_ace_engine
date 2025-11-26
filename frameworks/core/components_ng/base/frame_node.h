@@ -1078,7 +1078,8 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler);
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     int32_t GetUiExtensionId();

@@ -33,6 +33,7 @@ public:
     void HasDataType(
         const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override;
     void SetData(const std::string& data, CopyOptions copyOption, bool isDragData) override;
+    void GetData(const std::function<void(const std::string&, bool)>& callback, bool syncMode) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode) override;
 
     void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override;

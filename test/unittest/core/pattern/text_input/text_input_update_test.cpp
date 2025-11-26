@@ -863,8 +863,9 @@ HWTEST_F(TextInputAutoFillTest, NotifyFillRequestSuccess, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
     });
 
+    auto triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
     pattern_->SetFillRequestFinish(false);
-    pattern_->NotifyFillRequestSuccess(nullptr, nullptr, AceAutoFillType::ACE_PASSWORD);
+    pattern_->NotifyFillRequestSuccess(nullptr, nullptr, AceAutoFillType::ACE_PASSWORD, triggerType);
     EXPECT_EQ(pattern_->IsFillRequestFinish(), true);
 }
 

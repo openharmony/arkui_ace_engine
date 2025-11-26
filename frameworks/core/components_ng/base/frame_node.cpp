@@ -2911,10 +2911,11 @@ RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
 }
 
 void FrameNode::NotifyFillRequestSuccess(
-    RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+    RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+    AceAutoFillTriggerType triggerType)
 {
     if (pattern_) {
-        pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType);
+        pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType, triggerType);
     }
 }
 

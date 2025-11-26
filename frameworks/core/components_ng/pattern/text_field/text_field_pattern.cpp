@@ -1975,35 +1975,43 @@ void TextFieldPattern::UpdateShowCountBorderStyle()
     }
 }
 
+void TextFieldPattern::HandleOnPasteCommon(const std::string& data)
+{
+    CHECK_NULL_VOID(!GetIsPreviewText());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    TextCommonEvent event;
+    const std::u16string pasteData = UtfUtils::Str8DebugToStr16(data);
+    eventHub->FireOnPasteWithEvent(pasteData, event);
+    OnReportPasteEvent(host);
+    if (event.IsPreventDefault()) {
+        CloseSelectOverlay(true);
+        selectController_->ResetHandles();
+        StartTwinkling();
+        suppressAccessibilityEvent_ = true;
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste len:%{public}d", static_cast<int32_t>(pasteData.length()));
+    AddInsertCommand(pasteData, InputReason::PASTE);
+}
+
 void TextFieldPattern::HandleOnPaste()
 {
-    auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
+    auto pasteCallback = [weak = WeakClaim(this)](const std::string& data, bool isFromAutoFill) {
         auto textfield = weak.Upgrade();
         CHECK_NULL_VOID(textfield);
+        if (isFromAutoFill) {
+            textfield->ProcessAutoFillOnPaste();
+            return;
+        }
         if (data.empty()) {
             TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste fail, because data is empty");
             textfield->suppressAccessibilityEvent_ = true;
             return;
         }
-
-        CHECK_NULL_VOID(!textfield->GetIsPreviewText());
-        auto host = textfield->GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        TextCommonEvent event;
-        const std::u16string pasteData = UtfUtils::Str8DebugToStr16(data);
-        eventHub->FireOnPasteWithEvent(pasteData, event);
-        textfield->OnReportPasteEvent(host);
-        if (event.IsPreventDefault()) {
-            textfield->CloseSelectOverlay(true);
-            textfield->selectController_->ResetHandles();
-            textfield->StartTwinkling();
-            textfield->suppressAccessibilityEvent_ = true;
-            return;
-        }
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste len:%{public}d", static_cast<int32_t>(pasteData.length()));
-        textfield->AddInsertCommand(pasteData, InputReason::PASTE);
+        textfield->HandleOnPasteCommon(data);
     };
     CHECK_NULL_VOID(GetClipboard());
     clipboard_->GetData(pasteCallback);
@@ -3016,6 +3024,13 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextFieldPattern::ProcessAutoFillOnPaste()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ProcessAutoFillOnPaste");
+    bool isPopup = false;
+    ProcessAutoFill(isPopup, true, false, AceAutoFillTriggerType::PASTE_REQUEST);
+}
+
 void TextFieldPattern::DoProcessAutoFill(SourceType sourceType)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
@@ -3052,12 +3067,8 @@ HintToTypeWrap TextFieldPattern::GetHintType()
     return container->PlaceHolderToType(onePlaceHolder);
 }
 
-bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bool isFromKeyBoard)
+bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType)
 {
-    if (isFromKeyBoard) {
-        return true;
-    }
-
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto isTriggerPassword = IsTriggerAutoFillPassword();
@@ -3150,20 +3161,28 @@ HintToTypeWrap TextFieldPattern::GetAutoFillTypeAndMetaData(bool isNeedToHitType
     return hintToTypeWrap;
 }
 
-bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)
+bool TextFieldPattern::CheckAutoFill(bool ignoreFillType, AceAutoFillTriggerType triggerType)
 {
+    if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST ||
+        triggerType == AceAutoFillTriggerType::PASTE_REQUEST) {
+        return true;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     bool isEnableAutoFill = layoutProperty->GetEnableAutoFillValue(true);
     if (!isEnableAutoFill) {
         return false;
     }
-    return CheckAutoFillType(GetAutoFillType(), isFromKeyBoard);
+    if (ignoreFillType) {
+        return true;
+    }
+    return CheckAutoFillType(GetAutoFillType());
 }
 
-bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool isNewPassWord)
+bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool ignoreFillType, bool isNewPassWord,
+    AceAutoFillTriggerType triggerType)
 {
-    if (!CheckAutoFill(isFromKeyBoard)) {
+    if (!CheckAutoFill(ignoreFillType, triggerType)) {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "don't need to auto fill.");
         return false;
     }
@@ -3200,7 +3219,7 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     };
 
     auto resultCode = container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_, true,
-        onUIExtNodeDestroy, onUIExtNodeBindingCompleted);
+        onUIExtNodeDestroy, onUIExtNodeBindingCompleted, triggerType);
     if (resultCode != AceAutoFillError::ACE_AUTO_FILL_PREVIOUS_REQUEST_NOT_FINISHED) {
         SetAutoFillTriggeredStateByType(autoFillType);
         SetFillRequestFinish(false);
@@ -8814,14 +8833,19 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
 }
 
 void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillType:%{public}d", static_cast<int32_t>(autoFillType));
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillType:%{public}d, triggerType:%{public}d",
+        static_cast<int32_t>(autoFillType), static_cast<int32_t>(triggerType));
     SetFillRequestFinish(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(viewDataWrap);
     CHECK_NULL_VOID(nodeWrap);
+    if (triggerType == AceAutoFillTriggerType::PASTE_REQUEST) {
+        HandleOnPasteCommon(nodeWrap->GetValue());
+        return;
+    }
     auto isFocus = nodeWrap->GetIsFocus();
     if (isFocus && !HasFocus()) {
         TextFieldRequestFocus(RequestFocusReason::AUTO_FILL);

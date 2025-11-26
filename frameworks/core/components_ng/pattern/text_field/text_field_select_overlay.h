@@ -116,7 +116,7 @@ private:
     void UpdateMagnifier(const OffsetF& offset, bool updateOnScroll);
     bool CheckIfInterruptProcessing(const OverlayRequest& request);
     SourceType lastSourceType_ = SourceType::NONE;
-    std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
+    std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html", "com.autofill.ohos.passwordvault" };
 };
 
 } // namespace OHOS::Ace::NG

@@ -547,7 +547,8 @@ public:
     virtual int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST)
     {
         return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
     }

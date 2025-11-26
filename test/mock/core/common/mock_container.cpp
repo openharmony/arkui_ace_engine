@@ -146,7 +146,8 @@ ColorMode MockContainer::GetMockColorMode()
 
 int32_t MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
     bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
-    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
 {
     if (autoFillType == AceAutoFillType::ACE_USER_NAME) {
         isPopup = true; // if TextInputType::USER_NAME
