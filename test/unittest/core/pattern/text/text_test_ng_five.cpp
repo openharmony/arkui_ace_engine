@@ -48,6 +48,7 @@ HWTEST_F(TextTestNgFive, TextOverlayModifierTest001, TestSize.Level1)
     textOverlayModifier.SetPrintOffset(paintOffset);
     textOverlayModifier.SetCursorColor(CURSOR_COLOR);
     textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
+
     std::vector<RectF> rectList;
     rectList.push_back(RectF(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
     textOverlayModifier.SetSelectedRects(rectList);
@@ -60,10 +61,12 @@ HWTEST_F(TextTestNgFive, TextOverlayModifierTest001, TestSize.Level1)
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     RectF contentRect;
     textOverlayModifier.SetContentRect(contentRect);
     textOverlayModifier.onDraw(context);
+
     EXPECT_EQ(textOverlayModifier.paintOffset_->Get(), paintOffset);
     EXPECT_EQ(textOverlayModifier.cursorColor_->Get(), CURSOR_COLOR);
     EXPECT_EQ(textOverlayModifier.selectedColor_->Get(), SELECTED_COLOR);
@@ -83,12 +86,15 @@ HWTEST_F(TextTestNgFive, TextPaintMethodTest002, TestSize.Level1)
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
+
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
+
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
