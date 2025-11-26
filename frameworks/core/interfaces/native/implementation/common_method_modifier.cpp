@@ -3346,7 +3346,7 @@ void SetTabStopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    ViewAbstract::SetTabStop(frameNode, convValue.value_or(false));
+    ViewAbstractModelStatic::SetTabStop(frameNode, convValue);
 }
 void SetOnFocusImpl(Ark_NativePointer node,
                     const Opt_Callback_Void* value)
