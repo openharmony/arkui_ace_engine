@@ -24,7 +24,7 @@ export interface AttributeModifier<T> {
     applyFocusedAttribute(instance: T): void {}
     applyDisabledAttribute(instance: T): void {}
     applySelectedAttribute(instance: T): void {}
-    monitorEventType(): number { return ModifierEventType.UI_STATE_NORMAL; }
+    monitoredStates(): int32 { return 0; }
 }
 
 export interface AnimatableArithmetic<T> {
