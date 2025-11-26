@@ -1107,8 +1107,8 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
         options?: NavigationTitleOptions): this;
     menus(value: Array<NavigationMenuItem> | undefined): this;
     hideTitleBar(value: boolean): this;
-    onShown(callback: () => void): this;
-    onHidden(callback: () => void): this;
+    onShown(callback: (reason: VisibilityChangeReason) => void): this;
+    onHidden(callback: (reason: VisibilityChangeReason) => void): this;
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;

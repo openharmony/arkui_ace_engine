@@ -112,11 +112,11 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationSystemTransitionModifier, value);
     return this;
   }
-  onShown(callback: () => void): this {
+  onShown(callback: (reason: VisibilityChangeReason) => void): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnShownModifier.identity, NavDestinationOnShownModifier, callback);
     return this;
   }
-  onHidden(callback: () => void): this {
+  onHidden(callback: (reason: VisibilityChangeReason) => void): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnHiddenModifier.identity, NavDestinationOnHiddenModifier, callback);
     return this;
   }
