@@ -330,7 +330,6 @@ public:
                                  : GreatNotEqual(textRect_.Height(), contentRect_.Height());
     }
 
-
     float GetScrollOffset()
     {
         return scrollOffset_;
