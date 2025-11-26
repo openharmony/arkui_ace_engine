@@ -37,7 +37,8 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .paragraphSpacing = textStyle.GetParagraphSpacing(),
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .optimizeTrailingSpace = textStyle.GetOptimizeTrailingSpace(),
-        .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation()
         };
 }
 

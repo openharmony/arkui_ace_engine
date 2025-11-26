@@ -734,6 +734,18 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setKeyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDividerColorAttribute(value: ColorMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -986,6 +998,9 @@ export interface SearchAttribute extends CommonMethod {
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         throw new Error("Unimplemented method keyboardAppearance")
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method compressLeadingPunctuation")
+    }
     dividerColor(value: ColorMetrics | undefined): this {
         throw new Error("Unimplemented method dividerColor")
     }
@@ -1047,6 +1062,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
+    compressLeadingPunctuation_value?: boolean | undefined
     dividerColor_value?: ColorMetrics | undefined
     attributeModifier_value?: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined
     setSearchOptions(options?: SearchOptions): this {
@@ -1182,6 +1198,9 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
         return this
     }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
         return this
     }
     dividerColor(value: ColorMetrics | undefined): this {
@@ -1573,6 +1592,14 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         if (this.checkPriority("dividerColor")) {
             const value_casted = value as (ColorMetrics | undefined)
             this.getPeer()?.setDividerColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public compressLeadingPunctuation(value: boolean | undefined): this {
+        if (this.checkPriority("compressLeadingPunctuation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
             return this
         }
         return this

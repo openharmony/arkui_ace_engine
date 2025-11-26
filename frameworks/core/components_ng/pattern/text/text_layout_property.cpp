@@ -194,6 +194,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("onlyBetweenLines", GetIsOnlyBetweenLines().value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("optimizeTrailingSpace", GetOptimizeTrailingSpace().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("compressLeadingPunctuation",
+        GetCompressLeadingPunctuation().value_or(false) ? "true" : "false", filter);
     if (HasLineHeightMultiply()) {
         json->PutExtAttr("lineHeightMultiply", std::to_string(GetLineHeightMultiply().value()).c_str(), filter);
     }

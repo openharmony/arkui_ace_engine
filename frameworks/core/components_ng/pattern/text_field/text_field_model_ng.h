@@ -160,6 +160,7 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetTextAreaScrollBarColor(const Color& value) override;
     void ResetTextAreaScrollBarColor() override;
@@ -375,6 +376,8 @@ public:
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
     static void SetTextAreaScrollBarColor(FrameNode* frameNode, const Color& value);

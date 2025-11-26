@@ -119,6 +119,7 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetUserMargin() override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
@@ -216,6 +217,8 @@ public:
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
     static void SetUserMargin(FrameNode* frameNode);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);

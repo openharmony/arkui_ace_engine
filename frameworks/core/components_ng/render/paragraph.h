@@ -190,6 +190,7 @@ struct ParagraphStyle {
     bool isFirstParagraphLineSpacing = true;
     bool optimizeTrailingSpace = false;
     bool enableAutoSpacing = false;
+    bool compressLeadingPunctuation = false;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -200,7 +201,8 @@ struct ParagraphStyle {
                drawableLeadingMargin == others.drawableLeadingMargin && fontSize == others.fontSize &&
                halfLeading == others.halfLeading && indent == others.indent &&
                paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
-               enableAutoSpacing == others.enableAutoSpacing;
+               enableAutoSpacing == others.enableAutoSpacing &&
+               compressLeadingPunctuation == others.compressLeadingPunctuation;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -230,6 +232,8 @@ struct ParagraphStyle {
         result += indent.ToString();
         result += ", enableAutoSpacing: ";
         result += enableAutoSpacing;
+        result += ", compressLeadingPunctuation: ";
+        result += compressLeadingPunctuation;
         return result;
     }
 };

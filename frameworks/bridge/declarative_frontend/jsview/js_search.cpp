@@ -175,6 +175,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("enableAutoSpacing", &JSSearch::SetEnableAutoSpacing);
     JSClass<JSSearch>::StaticMethod("onWillAttachIME", &JSSearch::SetOnWillAttachIME);
     JSClass<JSSearch>::StaticMethod("enableSelectedDataDetector", &JSSearch::SetSelectDetectEnable);
+    JSClass<JSSearch>::StaticMethod("compressLeadingPunctuation", &JSSearch::SetCompressLeadingPunctuation);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1770,6 +1771,15 @@ void JSSearch::SetEnableAutoSpacing(const JSCallbackInfo& info)
         enabled = info[0]->ToBoolean();
     }
     SearchModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
+void JSSearch::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
 }
 
 void JSSearch::SetOnWillAttachIME(const JSCallbackInfo& info)

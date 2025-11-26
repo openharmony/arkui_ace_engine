@@ -1596,6 +1596,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOptimizeTrailingSpace));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOptimizeTrailingSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOptimizeTrailingSpace));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetCompressLeadingPunctuation));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetCompressLeadingPunctuation));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFont));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
@@ -1927,6 +1931,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetEnableAutoSpacing));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetEnableAutoSpacing));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCompressLeadingPunctuation));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCompressLeadingPunctuation));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetMargin));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),
@@ -2621,6 +2629,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnableAutoSpacing));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnableAutoSpacing));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCompressLeadingPunctuation));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCompressLeadingPunctuation));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setController"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetController));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarColor"),
@@ -3050,6 +3062,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnableAutoSpacing));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnableAutoSpacing));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCompressLeadingPunctuation));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCompressLeadingPunctuation));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSecurityStateChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnSecurityStateChange));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSecurityStateChange"),

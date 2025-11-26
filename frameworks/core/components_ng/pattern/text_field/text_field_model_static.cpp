@@ -794,6 +794,11 @@ void TextFieldModelStatic::SetSelectAllValue(FrameNode* frameNode, const std::op
     TextFieldModelNG::SetSelectAllValue(frameNode, isSelectAllValue.value_or(false));
 }
 
+void TextFieldModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
 void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);

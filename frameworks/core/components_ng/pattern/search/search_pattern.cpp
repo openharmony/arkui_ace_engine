@@ -1812,6 +1812,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     textFieldPattern->ToJsonValueForStroke(json, filter);
     json->PutExtAttr("enableAutoSpacing", std::to_string(
         textFieldLayoutProperty->GetEnableAutoSpacing().value_or(false)).c_str(), filter);
+    json->PutExtAttr("compressLeadingPunctuation", std::to_string(
+        textFieldLayoutProperty->GetCompressLeadingPunctuation().value_or(false)).c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const

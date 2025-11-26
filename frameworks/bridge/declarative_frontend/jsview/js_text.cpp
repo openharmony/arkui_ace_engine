@@ -1222,6 +1222,17 @@ void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
+{
+    bool state = false;
+
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    
+    TextModel::GetInstance()->SetCompressLeadingPunctuation(state);
+}
+
 void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
 {
     bool state = false;
@@ -1399,6 +1410,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("lineHeightMultiple", &JSText::SetLineHeightMultiply);
     JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
     JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
+    JSClass<JSText>::StaticMethod("compressLeadingPunctuation", &JSText::SetCompressLeadingPunctuation);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

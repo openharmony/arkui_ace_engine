@@ -905,6 +905,23 @@ class SearchEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class SearchCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchCompressLeadingPunctuation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().search.setCompressLeadingPunctuation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: ResourceStr;
   placeholder?: ResourceStr;
@@ -1187,6 +1204,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, SearchEnableAutoSpacingModifier.identity, SearchEnableAutoSpacingModifier, value);
+    return this;
+  }
+  compressLeadingPunctuation(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchCompressLeadingPunctuationModifier.identity, SearchCompressLeadingPunctuationModifier, value);
     return this;
   }
   onWillAttachIME(callback: Callback<IMEClient>): this {

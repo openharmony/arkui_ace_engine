@@ -931,6 +931,8 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        CompressLeadingPunctuation, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         LineThicknessScale, float, 1.0f, TextStyleAttribute::DECORATION_THICKNESS_SCALE);

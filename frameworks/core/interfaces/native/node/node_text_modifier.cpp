@@ -1702,6 +1702,27 @@ void ResetTextOptimizeTrailingSpace(ArkUINodeHandle node)
     TextModelNG::SetOptimizeTrailingSpace(frameNode, DEFAULT_TRIM_SPACE);
 }
 
+void SetTextCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCompressLeadingPunctuation(frameNode, trim);
+}
+
+ArkUI_Int32 GetTextCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetCompressLeadingPunctuation(frameNode));
+}
+
+void ResetTextCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCompressLeadingPunctuation(frameNode, false);
+}
+
 void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2708,6 +2729,9 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextEditMenuOptions = ResetTextEditMenuOptions,
         .setTextBindSelectionMenu = SetTextBindSelectionMenu,
         .resetTextBindSelectionMenu = ResetTextBindSelectionMenu,
+        .setTextCompressLeadingPunctuation = SetTextCompressLeadingPunctuation,
+        .getTextCompressLeadingPunctuation = GetTextCompressLeadingPunctuation,
+        .resetTextCompressLeadingPunctuation = ResetTextCompressLeadingPunctuation
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

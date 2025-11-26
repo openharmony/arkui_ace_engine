@@ -50,6 +50,7 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propWordSpacing_.value == rhs.propWordSpacing_.value && propEllipsisMode_ == rhs.propEllipsisMode_ &&
            propLineBreakStrategy_ == rhs.propLineBreakStrategy_ &&
            propTextBackgroundStyle_ == rhs.propTextBackgroundStyle_ &&
+           propCompressLeadingPunctuation_ == rhs.propCompressLeadingPunctuation_ &&
            NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
 }
 

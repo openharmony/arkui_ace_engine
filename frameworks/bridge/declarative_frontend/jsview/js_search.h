@@ -109,6 +109,7 @@ public:
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);

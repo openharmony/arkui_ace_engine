@@ -100,6 +100,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
                 : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
     }
     style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
+    style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);

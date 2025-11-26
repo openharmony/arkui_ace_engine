@@ -60,6 +60,7 @@ public:
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
     static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest);

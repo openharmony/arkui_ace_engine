@@ -218,6 +218,8 @@ void TextModelImpl::SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {}
 
 void TextModelImpl::SetOptimizeTrailingSpace(bool trim) {}
 
+void TextModelImpl::SetCompressLeadingPunctuation(bool enabled) {}
+
 void TextModelImpl::SetGradientShaderStyle(NG::Gradient& gradient) {}
 
 void TextModelImpl::SetColorShaderStyle(const Color& value) {}

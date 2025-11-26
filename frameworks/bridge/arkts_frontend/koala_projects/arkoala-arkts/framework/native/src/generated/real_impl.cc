@@ -5268,6 +5268,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_SearchButtonOptions* option)
     {
     }
+    void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+    }
     void SetInputFilterImpl(Ark_NativePointer node,
                             const Opt_ResourceStr* value,
                             const Opt_Callback_String_Void* error)
@@ -6545,6 +6549,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                      const Opt_Boolean* value)
     {
     }
+    void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+    }
     void SetFontImpl(Ark_NativePointer node,
                      const Opt_Font* fontValue,
                      const Opt_FontSettingOptions* options)
@@ -6808,6 +6816,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                    const Opt_KeyboardAppearance* value)
+    {
+    }
+    void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
     {
     }
     void SetInputFilterImpl(Ark_NativePointer node,
@@ -7169,6 +7181,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                    const Opt_KeyboardAppearance* value)
+    {
+    }
+    void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
     {
     }
     void SetInputFilterImpl(Ark_NativePointer node,
@@ -9726,6 +9742,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetStopBackPressImpl,
             SearchAttributeModifier::SetOnWillChangeImpl,
             SearchAttributeModifier::SetKeyboardAppearanceImpl,
+            SearchAttributeModifier::SetCompressLeadingPunctuationImpl,
             SearchAttributeModifier::SetDividerColorImpl,
             SearchAttributeModifier::SetSearchButtonImpl,
             SearchAttributeModifier::SetInputFilterImpl,
@@ -10122,6 +10139,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetEditMenuOptionsImpl,
             TextAttributeModifier::SetHalfLeadingImpl,
             TextAttributeModifier::SetEnableHapticFeedbackImpl,
+            TextAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextAttributeModifier::SetFontImpl,
             TextAttributeModifier::SetFontWeightImpl,
             TextAttributeModifier::SetSelectionImpl,
@@ -10192,6 +10210,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetStopBackPressImpl,
             TextAreaAttributeModifier::SetOnWillChangeImpl,
             TextAreaAttributeModifier::SetKeyboardAppearanceImpl,
+            TextAreaAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextAreaAttributeModifier::SetInputFilterImpl,
             TextAreaAttributeModifier::SetShowCounterImpl,
             TextAreaAttributeModifier::SetCustomKeyboardImpl,
@@ -10292,6 +10311,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetStopBackPressImpl,
             TextInputAttributeModifier::SetOnWillChangeImpl,
             TextInputAttributeModifier::SetKeyboardAppearanceImpl,
+            TextInputAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextInputAttributeModifier::SetInputFilterImpl,
             TextInputAttributeModifier::SetCustomKeyboardImpl,
             TextInputAttributeModifier::SetShowCounterImpl,
