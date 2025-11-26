@@ -1658,6 +1658,8 @@ private:
     void SetNeedMoveCaretToContentRect();
     void MoveCaretToContentRect();
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
+    void MoveCaretToContentRectHorizontal(const OffsetF& caretOffset);
+    void MoveCaretToContentRectVertical(const OffsetF& caretOffset, float caretHeight);
     void MoveCaretToContentRect(float offset, int32_t source);
     bool IsCaretInContentArea();
     bool IsTextArea() const override
