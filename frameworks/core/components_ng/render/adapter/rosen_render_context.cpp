@@ -4152,6 +4152,7 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     auto parent = uiNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
+    FREE_NODE_CHECK(uiNode, OnZIndexUpdate, parent);
     auto task = [weak = WeakClaim(AceType::RawPtr(parent))]() {
         auto parent = weak.Upgrade();
         CHECK_NULL_VOID(parent);

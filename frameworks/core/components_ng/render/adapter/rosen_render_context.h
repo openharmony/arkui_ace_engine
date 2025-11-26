@@ -375,6 +375,7 @@ public:
     void OnPositionEdgesUpdate(const EdgesParam& value) override;
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
+    void OnZIndexUpdateMultiThread(const RefPtr<FrameNode>& parent);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
