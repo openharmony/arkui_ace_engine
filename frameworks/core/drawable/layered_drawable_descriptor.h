@@ -29,7 +29,9 @@ public:
         const RefPtr<PixelMap>& mask, bool foregroundOverBackground = false)
         : foreground_(foreground), background_(background), mask_(mask),
           foregroundOverBackground_(foregroundOverBackground)
-    {}
+    {
+        InitBlendMode();
+    }
 
     DrawableType GetDrawableType() const override
     {
@@ -82,6 +84,8 @@ public:
 
     RefPtr<PixelMap> GetMask();
 
+    void SetBlendMode(int32_t blendMode);
+
 private:
     void CreatePixelMap() override;
 
@@ -95,6 +99,8 @@ private:
 
     bool CreateMaskByData();
 
+    void InitBlendMode();
+
     std::string maskPath_;
     MediaData foregroundData_;
     MediaData backgroundData_;
@@ -104,6 +110,7 @@ private:
     RefPtr<PixelMap> mask_;
     RefPtr<PixelMap> composePixelMap_;
     bool foregroundOverBackground_ = false; // default: foreground uses SRC_OVER mode
+    int32_t blendMode_ = -1;
 };
 } // namespace OHOS::Ace
 

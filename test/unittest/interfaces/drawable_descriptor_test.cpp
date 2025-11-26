@@ -365,6 +365,58 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DrawableDescTest0015
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init layeredDrawble
+     */
+    auto drawable = Napi::LayeredDrawableDescriptor();
+
+    /**
+     * @tc.steps: step2. set param to layeredDrawable
+     */
+    drawable.SetForeground(std::make_shared<Media::PixelMap>());
+    drawable.SetBackground(std::make_shared<Media::PixelMap>());
+    drawable.SetMask(std::make_shared<Media::PixelMap>());
+    drawable.SetBlendMode(1);
+
+    /**
+     * @tc.steps: step3. check layeredDrawable blendMode has been setted.
+     */
+    EXPECT_EQ(drawable.blendMode_, 1);
+    EXPECT_EQ(drawable.foregroundOverBackground_, true);
+
+    /**
+     * @tc.steps: step4. set param to layeredDrawable
+     */
+    drawable.blendMode_ = -1;
+    drawable.foregroundOverBackground_ = false;
+    drawable.SetBlendMode(-10);
+
+    /**
+     * @tc.steps: step5. check layeredDrawable blendMode has not been setted.
+     */
+    EXPECT_EQ(drawable.blendMode_, -1);
+    EXPECT_EQ(drawable.foregroundOverBackground_, false);
+
+    /**
+     * @tc.steps: step6. set param to layeredDrawable
+     */
+    drawable.foregroundOverBackground_ = true;
+    drawable.InitBlendMode();
+
+    /**
+     * @tc.steps: step7. check layeredDrawable blendMode has not been setted.
+     */
+    EXPECT_EQ(drawable.blendMode_, 3);
+    EXPECT_EQ(drawable.foregroundOverBackground_, true);
+}
+
+/**
  * @tc.name: DrawableDescTest0017
  * @tc.desc: test LayeredDrawableDescriptor's member functions;
  * @tc.type: FUNC
