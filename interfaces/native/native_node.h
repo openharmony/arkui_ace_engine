@@ -7037,6 +7037,21 @@ typedef enum {
      * @since 20
      */
     NODE_REFRESH_MAX_PULL_DOWN_DISTANCE = 1009005,
+    /**
+     * @brief Sets whether the pull-up gesture cancels refresh.
+     * This attribute can be set, reset, and obtained through the API as required.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the pull-up gesture cancels refresh. The value <b>1</b> means that the pull-up gesture
+     * cancels refresh, and <b>0</b> means the opposite. Default value: <b>1</b>.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * * .value[0].i32: whether the pull-up gesture cancels refresh. The value <b>1</b> means that the pull-up gesture
+     * cancels refresh, and <b>0</b> means the opposite.
+     *
+     * @since 23
+     */
+    NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH = 1009006,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.

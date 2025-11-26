@@ -82,6 +82,11 @@ void RefreshModelNG::SetPullToRefresh(bool pullToRefresh)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh);
 }
 
+void RefreshModelNG::SetPullUpToCancelRefresh(bool pullUpToCancelRefresh)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullUpToCancelRefresh, pullUpToCancelRefresh);
+}
+
 void RefreshModelNG::SetRefreshOffset(const Dimension& offset)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset);
@@ -292,6 +297,11 @@ void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
 }
 
+void RefreshModelNG::SetPullUpToCancelRefresh(FrameNode* frameNode, bool pullUpToCancelRefresh)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullUpToCancelRefresh, pullUpToCancelRefresh, frameNode);
+}
+
 float RefreshModelNG::GetMaxPullDownDistance(FrameNode* frameNode)
 {
     float value = std::numeric_limits<float>::infinity();
@@ -318,6 +328,14 @@ bool RefreshModelNG::GetPullToRefresh(FrameNode* frameNode)
 {
     bool value = true;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullToRefresh, value, frameNode, value);
+    return value;
+}
+
+bool RefreshModelNG::GetPullUpToCancelRefresh(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RefreshLayoutProperty, PullUpToCancelRefresh, value, frameNode, value);
     return value;
 }
 

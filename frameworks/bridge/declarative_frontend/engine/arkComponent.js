@@ -21680,6 +21680,10 @@ class ArkRefreshComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
     return this;
   }
+  pullUpToCancelRefresh(value) {
+    modifierWithKey(this._modifiersWithKeys, PullUpToCancelRefreshModifier.identity, PullUpToCancelRefreshModifier, value);
+    return this;
+  }
   pullDownRatio(value) {
     modifierWithKey(this._modifiersWithKeys, PullDownRatioModifier.identity, PullDownRatioModifier, value);
     return this;
@@ -21760,6 +21764,20 @@ class PullToRefreshModifier extends ModifierWithKey {
   }
 }
 PullToRefreshModifier.identity = Symbol('pullToRefresh');
+class PullUpToCancelRefreshModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullUpToCancelRefresh(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullUpToCancelRefresh(node, this.value);
+    }
+  }
+}
+PullUpToCancelRefreshModifier.identity = Symbol('pullUpToCancelRefresh');
 class PullDownRatioModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

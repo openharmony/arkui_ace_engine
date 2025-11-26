@@ -23916,6 +23916,8 @@ typedef struct GENERATED_ArkUIRefreshModifier {
                              const Opt_Float64* value);
     void (*setPullToRefresh)(Ark_NativePointer node,
                              const Opt_Boolean* value);
+    void (*setPullUpToCancelRefresh)(Ark_NativePointer node,
+                             const Opt_Boolean* value); 
     void (*setOnOffsetChange)(Ark_NativePointer node,
                               const Opt_Callback_F64_Void* value);
     void (*setPullDownRatio)(Ark_NativePointer node,

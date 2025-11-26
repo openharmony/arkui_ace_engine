@@ -37,6 +37,7 @@ private:
     static void JsRefreshOffset(const JSCallbackInfo& info);
     static void JsRefreshOffset(const JSRef<JSVal>& jsValue);
     static void SetPullToRefresh(const JSCallbackInfo& info);
+    static void SetPullUpToCancelRefresh(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

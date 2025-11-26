@@ -6127,12 +6127,15 @@ struct ArkUIRefreshModifier {
     void (*resetRefreshOffset)(ArkUINodeHandle node);
     void (*setPullToRefresh)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetPullToRefresh)(ArkUINodeHandle node);
+    void (*setPullUpToCancelRefresh)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetPullUpToCancelRefresh)(ArkUINodeHandle node);
     void (*setRefreshContent)(ArkUINodeHandle node, ArkUINodeHandle content);
     void (*setPullDownRatio)(ArkUINodeHandle node, ArkUI_Float32 ratio);
     void (*resetPullDownRatio)(ArkUINodeHandle node);
     ArkUI_Float32 (*getPullDownRatio)(ArkUINodeHandle node);
     ArkUI_Float32 (*getRefreshOffset)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Bool (*getPullToRefresh)(ArkUINodeHandle node);
+    ArkUI_Bool (*getPullUpToCancelRefresh)(ArkUINodeHandle node);
     void (*setRefreshOnStateChangeCallback)(ArkUINodeHandle node, void* callback);
     void (*resetRefreshOnStateChangeCallback)(ArkUINodeHandle node);
     void (*setOnRefreshingCallback)(ArkUINodeHandle node, void* callback);

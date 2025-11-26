@@ -202,6 +202,7 @@ private:
     float builderMeasureBaseHeight_ = 0.0f;
     Dimension refreshOffset_ = 64.0_vp;
     bool pullToRefresh_ = true;
+    bool pullUpToCancelRefresh_ = true;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<float> ratio_;

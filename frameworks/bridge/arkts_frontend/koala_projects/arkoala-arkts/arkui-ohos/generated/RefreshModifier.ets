@@ -44,6 +44,8 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     _refreshOffset_0_0value?: double | undefined
     _pullToRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pullToRefresh_0_0value?: boolean | undefined
+    _pullUpToCancelRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pullUpToCancelRefresh_0_0value?: boolean | undefined
     _onOffsetChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onOffsetChange_0_0value?: ((value0: double) => void) | undefined
     _pullDownRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -121,6 +123,24 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 default: {
                     this._pullToRefresh_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setPullToRefreshAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._pullUpToCancelRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pullUpToCancelRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPullUpToCancelRefreshAttribute((this._pullUpToCancelRefresh_0_0value as boolean | undefined));
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPullUpToCancelRefreshAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -216,6 +236,19 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
             }
         }
+        if (modifier._pullUpToCancelRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pullUpToCancelRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pullUpToCancelRefresh(modifier._pullUpToCancelRefresh_0_0value);
+                    break;
+                }
+                default: {
+                    this.pullUpToCancelRefresh((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._onOffsetChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onOffsetChange_0_flag) {
@@ -284,6 +317,17 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         } else
         {
             this._pullToRefresh_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    pullUpToCancelRefresh(value: boolean | undefined): this {
+        if (((this._pullUpToCancelRefresh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pullUpToCancelRefresh_0_0value) !== (value)))
+        {
+            this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pullUpToCancelRefresh_0_0value = value
+        } else
+        {
+            this._pullUpToCancelRefresh_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
