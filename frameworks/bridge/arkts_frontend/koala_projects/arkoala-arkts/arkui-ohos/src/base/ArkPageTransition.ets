@@ -1,6 +1,5 @@
-import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,27 +13,28 @@ import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koala
  * limitations under the License.
  */
 
-import { int32, float32 } from "@koalaui/common"
-import { contextNode, remember } from "@koalaui/runtime"
-import { PeerNode, PeerNodeType } from "../PeerNode"
+import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from '@koalaui/runtime/annotations'
+import { int32, float32 } from '@koalaui/common'
+import { contextNode, remember } from '@koalaui/runtime'
+import { PeerNode, PeerNodeType } from '../PeerNode'
 import {
     CurrentRouter,
     CurrentRouterTransitionState,
     RouterTransitionVisibility,
     Router,
-} from "./Router"
+} from './Router'
 import {
     ArkPageTransitionData,
     ArkPageTransitionEnterComponent,
     ArkPageTransitionExitComponent,
-} from "./ArkPageTransitionData"
-import { AnimationExtender, Curve, DoubleAnimationParam, PageTransitionCallback, PageTransitionOptions } from "#generated"
-import { ArkCommonMethodPeer } from "#generated"
-import { ArkComponentRootPeer } from "#generated"
-import { SizeOptions } from "#generated"
-import { ScaleOptions, TranslateOptions } from "#generated"
-import { ArkUINativeModule } from "#components"
-import { RouteType, SlideEffect } from "#generated"
+} from './ArkPageTransitionData'
+import { AnimationExtender, Curve, DoubleAnimationParam, PageTransitionCallback, PageTransitionOptions } from '#generated'
+import { ArkCommonMethodPeer } from '#generated'
+import { ArkComponentRootPeer } from '#generated'
+import { SizeOptions } from '#generated'
+import { ScaleOptions, TranslateOptions } from '#generated'
+import { ArkUINativeModule } from '#components'
+import { RouteType, SlideEffect } from '#generated'
 
 interface PageTransitionCommonInterface {
     slide(value: SlideEffect): this
@@ -49,9 +49,9 @@ export interface PageTransitionExitInterface extends PageTransitionCommonInterfa
     onExit(event: PageTransitionCallback): this
 }
 
-const NO_SCALE:ScaleOptions = { x: 1.0, y: 1.0, z: 1.0, centerX: "50%", centerY: "50%" } as ScaleOptions
+const NO_SCALE:ScaleOptions = { x: 1.0, y: 1.0, z: 1.0, centerX: '50%', centerY: '50%' } as ScaleOptions
 const ZERO_TRANSLATE:TranslateOptions = { x: 0.0, y: 0.0, z:0.0 } as TranslateOptions
-const KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty" // See frameworks/core/components_ng/pattern/stage/page_pattern.cpp
+const KEY_PAGE_TRANSITION_PROPERTY = 'pageTransitionProperty' // See frameworks/core/components_ng/pattern/stage/page_pattern.cpp
 
 function sizeNotEmpty(size: SizeOptions): boolean {
     const w = size.width !== undefined ? size.width as number : 0
@@ -87,14 +87,16 @@ function slideTransition(size: SizeOptions, value: SlideEffect) : TranslateOptio
 
         return { x: xOffset, y: yOffset, z: 0 } as TranslateOptions
     } else {
-        throw Error("Size is empty of has undefined components")
+        throw Error('Size is empty of has undefined components')
     }
 }
 
-function progressAnimation(state: RouterTransitionVisibility, style: ArkPageTransitionData): DoubleAnimationParam | undefined {
+function progressAnimation(
+    state: RouterTransitionVisibility,
+    style: ArkPageTransitionData
+): DoubleAnimationParam | undefined {
     if (state == RouterTransitionVisibility.Hiding && style._onExit != undefined ||
-        state == RouterTransitionVisibility.Showing && style._onEnter != undefined)
-    {
+        state == RouterTransitionVisibility.Showing && style._onEnter != undefined) {
         return {
             propertyName: KEY_PAGE_TRANSITION_PROPERTY,
             startValue: 0 as float32,
@@ -115,7 +117,9 @@ function progressAnimation(state: RouterTransitionVisibility, style: ArkPageTran
 
 function findContainerNode(node: PeerNode): ArkCommonMethodPeer | undefined {
     for (let child = node.firstChild; child != undefined; child = child!.nextSibling) {
-        if (child!.isKind(PeerNodeType)) return child as ArkCommonMethodPeer
+        if (child!.isKind(PeerNodeType)) {
+            return child as ArkCommonMethodPeer
+        }
     }
     return undefined
 }
@@ -125,8 +129,14 @@ function getNodeSize(ptr: PeerNode): SizeOptions {
              height: ArkUINativeModule._GetMeasureHeight(ptr.getPeerPtr())} as SizeOptions
 }
 
-function launchTransitionForSize(node: ArkCommonMethodPeer, router: Router | undefined, size: SizeOptions,
-                                 pageId: int32, style: ArkPageTransitionData, state: RouterTransitionVisibility) {
+function launchTransitionForSize(
+    node: ArkCommonMethodPeer,
+    router: Router | undefined,
+    size: SizeOptions,
+    pageId: int32,
+    style: ArkPageTransitionData,
+    state: RouterTransitionVisibility
+):void {
     // router?.schedulePageTransition(pageId, () => {
     //     // console.log("#### Page transition animation: pageID =", pageId, " duration =", style.params.duration,
     //     //             " curve = ", style.params.curve === undefined || (typeof style.params.curve === "string") ? style.params.curve : Curve[style.params.curve],
@@ -230,13 +240,13 @@ function NotifyPageTransition(pageId: int32, style: ArkPageTransitionData, state
 
 @memo
 export function PageTransitionEnter(params: PageTransitionOptions): PageTransitionEnterInterface {
-    console.log("Implement PageTransitionEnter()")
+    console.log('Implement PageTransitionEnter()')
     return new ArkPageTransitionEnterComponent({})
 }
 
 @memo
 export function PageTransitionExit(params: PageTransitionOptions): PageTransitionExitInterface {
-    console.log("Implement PageTransitionExit()")
+    console.log('Implement PageTransitionExit()')
     return new ArkPageTransitionExitComponent({})
 }
 
@@ -246,7 +256,10 @@ export function PageTransitionEnterImpl(
     style: ((attributes: PageTransitionEnterInterface) => void) | undefined,
     params: PageTransitionOptions
 ) {
-    const receiver = remember<ArkPageTransitionEnterComponent>((): ArkPageTransitionEnterComponent => new ArkPageTransitionEnterComponent(params))
+    const receiver = remember<ArkPageTransitionEnterComponent>(
+        (): ArkPageTransitionEnterComponent =>
+            new ArkPageTransitionEnterComponent(params)
+    )
     style?.(receiver)
     const state = CurrentRouterTransitionState()
     if (state !== undefined && state.visibility == RouterTransitionVisibility.Showing) {
@@ -260,7 +273,10 @@ export function PageTransitionExitImpl(
     style: ((attributes: PageTransitionExitInterface) => void) | undefined,
     params: PageTransitionOptions
 ) {
-    const receiver = remember<ArkPageTransitionExitComponent>((): ArkPageTransitionExitComponent => new ArkPageTransitionExitComponent(params))
+    const receiver = remember<ArkPageTransitionExitComponent>(
+        (): ArkPageTransitionExitComponent =>
+            new ArkPageTransitionExitComponent(params)
+    )
     style?.(receiver)
     const state = CurrentRouterTransitionState()
     if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {

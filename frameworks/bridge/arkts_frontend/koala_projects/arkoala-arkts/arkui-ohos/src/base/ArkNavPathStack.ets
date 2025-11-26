@@ -14,13 +14,13 @@
  */
 
 import { InteropNativeModule, runtimeType, RuntimeType } from '@koalaui/interop'
-import { int32 } from "@koalaui/common"
-import { LaunchMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo } from "../component/navigation"
-import { NavExtender } from "#generated"
+import { int32 } from '@koalaui/common'
+import { LaunchMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo } from '../component/navigation'
+import { NavExtender } from '#generated'
 
 export class PathStackUtils {
-    static id: number = 0
-    static result: object | undefined = undefined
+    public static id: number = 0
+    public static result: object | undefined = undefined
     private static infoMaps: Map<string, NavPathInfo> = new Map<string, NavPathInfo>()
     private static infoArray: Array<NavPathInfo> = new Array<NavPathInfo>()
     static getParamByNavDestinationId(navDestinationId: string): Object | null | undefined {
@@ -68,7 +68,7 @@ export class PathStackUtils {
             }
             return
         }
-        const navDestinationId: string = "" + PathStackUtils.id
+        const navDestinationId: string = '' + PathStackUtils.id
         info.navDestinationId = navDestinationId
         if (isReplace) {
             let popInfo = PathStackUtils.infoArray.pop()
@@ -121,7 +121,7 @@ export class PathStackUtils {
                 PathStackUtils.callOnPop(id!)
             }
         } catch (error) {
-            InteropNativeModule._NativeLog("AceNavigation::popPage error: " + error)
+            InteropNativeModule._NativeLog('AceNavigation::popPage error: ' + error)
         }
         
     }
@@ -139,12 +139,16 @@ export class PathStackUtils {
                 PathStackUtils.infoMaps.delete(navDestinationId)
             }
         } catch (error) {
-            InteropNativeModule._NativeLog("AceNavigation::callOnPop error:" + error)
+            InteropNativeModule._NativeLog('AceNavigation::callOnPop error: ' + error)
         }
     }
-    static pushPath(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): void {
+    static pushPath(
+        pathStack: NavPathStack,
+        info: NavPathInfo,
+        animated?: boolean | undefined | NavigationOptions | undefined
+    ): void {
         let options: NavigationOptions = {animated: true, launchMode: LaunchMode.STANDARD}
-        if (typeof animated === "boolean") {
+        if (typeof animated === 'boolean') {
             options.animated = animated as boolean
         } else if (animated instanceof NavigationOptions) {
             let userSetOptions = animated as NavigationOptions
@@ -159,8 +163,14 @@ export class PathStackUtils {
         NavExtender.pushPath(pathStack, info, options)
     }
 
-    static pushPathByName(pathStack: NavPathStack, name: string, param: Object | null | undefined, onPop?: ((parameter: PopInfo) => void) | boolean | undefined, animated?: boolean): void {
-        if (typeof onPop === "boolean" || onPop === undefined) {
+    static pushPathByName(
+        pathStack: NavPathStack,
+        name: string,
+        param: Object | null | undefined,
+        onPop?: ((parameter: PopInfo) => void) | boolean | undefined,
+        animated?: boolean
+    ): void {
+        if (typeof onPop === 'boolean' || onPop === undefined) {
             const animate_cast = onPop as (boolean | undefined)
             let pathInfo: NavPathInfo = new NavPathInfo(name, param)
             PathStackUtils.pushPath(pathStack, pathInfo, animate_cast)
@@ -171,9 +181,13 @@ export class PathStackUtils {
         PathStackUtils.pushPath(pathStack, pathInfo, animated)
     }
 
-    static replacePath(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | NavigationOptions | undefined): void {
+    static replacePath(
+        pathStack: NavPathStack,
+        info: NavPathInfo,
+        animated?: boolean | NavigationOptions | undefined
+    ): void {
         let options: NavigationOptions = {animated: true, launchMode: LaunchMode.STANDARD}
-        if (typeof animated === "boolean") {
+        if (typeof animated === 'boolean') {
             options.animated = animated as boolean
         } else if (animated instanceof NavigationOptions) {
             let userSetOptions = animated as NavigationOptions
@@ -193,17 +207,20 @@ export class PathStackUtils {
         PathStackUtils.replacePath(pathStack, pathInfo, animated)
     }
 
-    static pop(pathStack: NavPathStack, result?: boolean | undefined | Object, animated?: boolean): NavPathInfo | undefined
-    {
+    static pop(
+        pathStack: NavPathStack,
+        result?: boolean | undefined | Object,
+        animated?: boolean
+    ): NavPathInfo | undefined {
         const result_type = runtimeType(result)
         if (result_type === RuntimeType.OBJECT) {
             PathStackUtils.result = result as Object
         }
         let animated_value: boolean = true
-        if (typeof result === "boolean") {
+        if (typeof result === 'boolean') {
             animated_value = result as (boolean)
         }
-        if (typeof animated === "boolean") {
+        if (typeof animated === 'boolean') {
             animated_value = animated!
         }
         const retval  = NavExtender.pop(pathStack, animated_value)
@@ -234,30 +251,40 @@ export class PathStackUtils {
         }
         return result
     }
-    static popToIndex(pathStack: NavPathStack, index: number, result?: boolean | undefined | Object, animated?: boolean) {
+    static popToIndex(
+        pathStack: NavPathStack,
+        index: number,
+        result?: boolean | undefined | Object,
+        animated?: boolean
+    ): void {
         if (result instanceof Object) {
             PathStackUtils.result = result as Object
         }
         let animated_value: boolean = true
-        if (typeof result === "boolean") {
+        if (typeof result === 'boolean') {
             animated_value = result as boolean
         }
-        if (typeof animated === "boolean") {
+        if (typeof animated === 'boolean') {
             animated_value = animated as boolean
         }
         const index_casted = index as int32
         PathStackUtils.popPage(index_casted)
         NavExtender.popToIndex(pathStack, index_casted, animated_value)
     }
-    static popToName(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): int32 {
+    static popToName(
+        pathStack: NavPathStack,
+        name: string,
+        result?: boolean | undefined | Object,
+        animated?: boolean
+        ): int32 {
         if (result instanceof Object) {
             PathStackUtils.result = result as Object
         }
         let animated_value: boolean = true
-        if (typeof result === "boolean") {
+        if (typeof result === 'boolean') {
             animated_value = result as boolean
         }
-        if (typeof animated === "boolean") {
+        if (typeof animated === 'boolean') {
             animated_value = animated as boolean
         }
         let index = NavExtender.popToName(pathStack, name, animated_value)
