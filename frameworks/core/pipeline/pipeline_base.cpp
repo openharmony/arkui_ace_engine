@@ -23,6 +23,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -52,6 +53,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
+    statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
                                uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
@@ -77,6 +79,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
+    statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
                                uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
@@ -1090,6 +1093,7 @@ bool PipelineBase::MaybeRelease()
 
 void PipelineBase::Destroy()
 {
+    GetStatisticEventReporter()->ForceReportStatisticEvents();
     CHECK_RUN_ON(UI);
     destroyed_ = true;
     ClearImageCache();

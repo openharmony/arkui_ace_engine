@@ -51,6 +51,7 @@
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
@@ -5586,6 +5587,9 @@ void PipelineContext::OnIdle(int64_t deadline)
 
     TriggerIdleCallback(deadline);
     UiNodeGc::ReleaseNodeRawMemory(deadline, taskExecutor_);
+    if (deadline - GetSysTimestamp() > TIME_THRESHOLD) {
+        GetStatisticEventReporter()->TryReportStatisticEvents(this);
+    }
 }
 
 void PipelineContext::Finish(bool /* autoFinish */) const
