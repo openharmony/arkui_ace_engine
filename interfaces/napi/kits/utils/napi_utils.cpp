@@ -1154,4 +1154,13 @@ int32_t GetStringFormatStartIndex(bool hasGetter)
 {
     return hasGetter ? 1 : 0;
 }
+
+int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext)
+{
+    int32_t result = 0;
+    napi_value instanceId = nullptr;
+    napi_get_named_property(env, uiContext, "instanceId_", &instanceId);
+    napi_get_value_int32(env, instanceId, &result);
+    return result;
+}
 } // namespace OHOS::Ace::Napi

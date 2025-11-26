@@ -443,6 +443,11 @@ extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
     return tmp.data();
 }
 
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_GetUIContentWindowID(int32_t instanceId)
+{
+    return UIContentImpl::GetUIContentWindowID(instanceId);
+}
+
 void AddAlarmLogFunc(const RefPtr<PipelineBase>& pipeline)
 {
     std::function<void(uint64_t, int, int)> logFunc = [pipeline](uint64_t nodeId, int count, int num) {
@@ -6182,5 +6187,17 @@ void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskEx
         return result;
     };
     UiSessionManager::GetInstance()->RegisterPipeLineExeAppAIFunction(exeAppAIFunctionCallback);
+}
+
+int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, -1);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, -1);
+    auto windowId = pipelineContext->GetFocusWindowId();
+    LOGI(
+        "GetUIContentWindowID entry success instanceId:[%{public}d],windowId:[%{public}d]", instanceId, windowId);
+    return static_cast<int32_t>(windowId);
 }
 } // namespace OHOS::Ace
