@@ -292,9 +292,7 @@ Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
     if (callback_) {
         auto arkCallback = CallbackHelper(*callback_);
         RefPtr<UserDataSpanHolder> currentSpan = nullptr;
-        CallbackKeeper::AnyResultHandlerType handlerDataFunc = [&tlvData, &currentSpan](const void* valuePtr) {
-            CHECK_NULL_VOID(valuePtr);
-            auto arkBuff = *(static_cast<const Ark_Buffer*>(valuePtr));
+        auto handlerDataFunc = [&tlvData, &currentSpan](const Ark_Buffer arkBuff) {
             TLVUtil::WriteUint8(tlvData, TLV_CUSTOM_MARSHALL_BUFFER_START);
             TLVUtil::WriteInt32(tlvData, arkBuff.length + sizeof(int32_t) + sizeof(int32_t));
             TLVUtil::WriteInt32(tlvData, currentSpan->GetStartIndex());
@@ -302,17 +300,16 @@ Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
             auto arkBuffData = static_cast<const uint8_t*>(arkBuff.data);
             tlvData.insert(tlvData.end(), arkBuffData, arkBuffData + arkBuff.length);
         };
-        auto continuation = CallbackKeeper::RegisterReverseCallback<Callback_Buffer_Void>(handlerDataFunc);
+        auto continuation = CallbackKeeper::Claim<Callback_Buffer_Void>(handlerDataFunc);
 
         auto spans = styledString->spanString->GetSpans(0, styledString->spanString->GetLength(), SpanType::ExtSpan);
         for (const RefPtr<SpanBase>& span : spans) {
             currentSpan = AceType::DynamicCast<UserDataSpanHolder>(span);
             if (currentSpan) {
-                arkCallback.InvokeSync(currentSpan->span_, continuation);
+                arkCallback.InvokeSync(currentSpan->span_, continuation.ArkValue());
             }
         }
         TLVUtil::WriteUint8(tlvData, TLV_END);
-        CallbackKeeper::ReleaseReverseCallback(continuation);
     }
     if (tlvData.empty()) {
         return {};
@@ -346,10 +343,14 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
             ContainerScope scope(instanceId);
             Ark_Buffer arkBuffer = BufferKeeper::Allocate(buff.size());
             std::copy(buff.begin(), buff.end(), reinterpret_cast<uint8_t*>(arkBuffer.data));
-            auto arkUserDataSpan = arkCallback.InvokeWithObtainResult<Ark_UserDataSpan,
-                Callback_StyledStringMarshallingValue_Void>(arkBuffer);
+            RefPtr<ExtSpan> result;
+            auto continuation = CallbackKeeper::Claim<Callback_StyledStringMarshallingValue_Void>(
+                [&result, spanStart, spanLength](Ark_UserDataSpan arkUserDataSpan) {
+                result = AceType::MakeRefPtr<UserDataSpanHolder>(arkUserDataSpan, spanStart, spanStart + spanLength);
+            });
+            arkCallback.InvokeSync(arkBuffer, continuation.ArkValue());
             arkBuffer.resource.release(arkBuffer.resource.resourceId);
-            return AceType::MakeRefPtr<UserDataSpanHolder>(arkUserDataSpan, spanStart, spanStart + spanLength);
+            return result;
         };
     }
 

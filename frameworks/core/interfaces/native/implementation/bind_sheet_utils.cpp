@@ -66,7 +66,7 @@ void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark
     if (shouldDismiss) {
         callbacks.shouldDismiss = [arkCallback = CallbackHelper(shouldDismiss.value())]() {
             Ark_SheetDismiss parameter;
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::DismissSheetStatic));
+            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissSheetStatic);
             parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
         };
@@ -86,7 +86,7 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
             Ark_DismissSheetAction parameter;
             auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
             parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::DismissSheetStatic));
+            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissSheetStatic);
             parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
         };
@@ -285,7 +285,7 @@ void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, cons
                 static_cast<BindSheetDismissReason>(reason));
             parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
                 .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::DismissContentCoverStatic));
+            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissContentCoverStatic);
             parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
         };
