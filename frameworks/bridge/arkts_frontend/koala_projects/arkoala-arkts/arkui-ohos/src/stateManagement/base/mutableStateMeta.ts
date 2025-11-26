@@ -16,7 +16,7 @@
 import { int32 } from '@koalaui/common';
 import { ArkUIAniModule } from 'arkui.ani';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
-import { MutableState, StateImpl } from '@koalaui/runtime';
+import { Dependent, MutableState } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
 import { RenderIdType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
@@ -146,8 +146,8 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     }
 
     shouldFireChange(): boolean {
-        const dependency = (this.__metaDependency as StateImpl<int32>).dependencies;
-        return !!(dependency && !dependency.empty);
+        const dependency = this.__metaDependency as Object as Dependent;
+        return dependency.hasDependencies();
     }
 }
 
