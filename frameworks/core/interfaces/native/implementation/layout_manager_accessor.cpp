@@ -46,49 +46,50 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 GetLineCountImpl(Ark_LayoutManager peer)
+Opt_Int32 GetLineCountImpl(Ark_LayoutManager peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    const auto errValue = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     CHECK_NULL_RETURN(peer, errValue);
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, errValue);
     int32_t count = handler->GetLineCount();
-    return Converter::ArkValue<Ark_Int32>(count);
+    return Converter::ArkValue<Opt_Int32>(count);
 }
-Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
+Opt_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
                                                           const Ark_Float64 x,
                                                           const Ark_Float64 y)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
-    CHECK_NULL_RETURN(handler, {});
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
     PositionWithAffinity result = handler->GetGlyphPositionAtCoordinate(
         Converter::Convert<Ark_Float64>(x),
         Converter::Convert<Ark_Float64>(y)
     );
-    return Converter::ArkValue<Ark_PositionWithAffinity>(result);
+    return Converter::ArkValue<Opt_PositionWithAffinity>(result);
 }
-Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                         Ark_Int32 lineNumber)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
-    CHECK_NULL_RETURN(handler, {});
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     TextLineMetrics lineMetrics = handler->GetLineMetrics(Converter::Convert<int>(lineNumber));
-    return Converter::ArkValue<Ark_text_LineMetrics>(lineMetrics, Converter::FC);
+    return Converter::ArkValue<Opt_text_LineMetrics>(lineMetrics, Converter::FC);
 }
-Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
-                                        const Ark_TextRange* range,
-                                        Ark_text_RectWidthStyle widthStyle,
-                                        Ark_text_RectHeightStyle heightStyle)
+Opt_Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                            const Ark_TextRange* range,
+                                            Ark_text_RectWidthStyle widthStyle,
+                                            Ark_text_RectHeightStyle heightStyle)
 {
-    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_text_TextBox>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
-    CHECK_NULL_RETURN(handler, {});
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_Array_text_TextBox>(Ark_Empty()));
     auto textRange = Converter::Convert<TextRange>(*range);
     auto dstHeightStyle = Converter::OptConvert<RectHeightStyle>(heightStyle);
     auto dstWidthStyle = Converter::OptConvert<RectWidthStyle>(widthStyle);
-    CHECK_NULL_RETURN(dstHeightStyle.has_value() && dstWidthStyle.has_value(), {});
+    CHECK_NULL_RETURN(dstHeightStyle.has_value() && dstWidthStyle.has_value(),
+        Converter::ArkValue<Opt_Array_text_TextBox>(Ark_Empty()));
     std::vector<NG::ParagraphManager::TextBox> textBoxes =
         handler->GetRectsForRange(textRange.start, textRange.end, dstHeightStyle.value(), dstWidthStyle.value());
     std::vector<Ark_text_TextBox> values;
@@ -96,7 +97,7 @@ Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
         auto tempBox = Converter::ArkValue<Ark_text_TextBox>(box, Converter::FC);
         values.push_back(tempBox);
     }
-    return Converter::ArkValue<Array_text_TextBox>(values, Converter::FC);
+    return Converter::ArkValue<Opt_Array_text_TextBox>(values, Converter::FC);
 }
 } // LayoutManagerAccessor
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()

@@ -27228,13 +27228,13 @@ typedef struct GENERATED_ArkUILayoutManagerAccessor {
     void (*destroyPeer)(Ark_LayoutManager peer);
     Ark_LayoutManager (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Int32 (*getLineCount)(Ark_LayoutManager peer);
-    Ark_PositionWithAffinity (*getGlyphPositionAtCoordinate)(Ark_LayoutManager peer,
+    Opt_Int32 (*getLineCount)(Ark_LayoutManager peer);
+    Opt_PositionWithAffinity (*getGlyphPositionAtCoordinate)(Ark_LayoutManager peer,
                                                              Ark_Float64 x,
                                                              Ark_Float64 y);
-    Ark_text_LineMetrics (*getLineMetrics)(Ark_LayoutManager peer,
+    Opt_text_LineMetrics (*getLineMetrics)(Ark_LayoutManager peer,
                                            Ark_Int32 lineNumber);
-    Array_text_TextBox (*getRectsForRange)(Ark_LayoutManager peer,
+    Opt_Array_text_TextBox (*getRectsForRange)(Ark_LayoutManager peer,
                                            const Ark_TextRange* range,
                                            Ark_text_RectWidthStyle widthStyle,
                                            Ark_text_RectHeightStyle heightStyle);
@@ -28497,13 +28497,13 @@ typedef struct GENERATED_ArkUIStyledStringAccessor {
                                   const Opt_Array_StyleOptions* styles);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getString)(Ark_StyledString peer);
-    Array_SpanStyle (*getStyles)(Ark_StyledString peer,
+    Opt_Array_SpanStyle (*getStyles)(Ark_StyledString peer,
                                  Ark_Int32 start,
                                  Ark_Int32 length,
                                  const Opt_StyledStringKey* styledKey);
     Ark_Boolean (*equals)(Ark_StyledString peer,
                           Ark_StyledString other);
-    Ark_StyledString (*subStyledString)(Ark_StyledString peer,
+    Opt_StyledString (*subStyledString)(Ark_StyledString peer,
                                         Ark_Int32 start,
                                         const Opt_Int32* length);
     void (*fromHtml)(Ark_VMContext vmContext,
@@ -28511,14 +28511,14 @@ typedef struct GENERATED_ArkUIStyledStringAccessor {
                      const Ark_String* html,
                      const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise);
     Ark_String (*toHtml)(Ark_StyledString styledString);
-    Ark_Buffer (*marshalling0)(Ark_StyledString styledString,
+    Opt_Buffer (*marshalling0)(Ark_StyledString styledString,
                                const StyledStringMarshallCallback* callback_);
     void (*unmarshalling0)(Ark_VMContext vmContext,
                            Ark_AsyncWorkerPtr asyncWorker,
                            const Ark_Buffer* buffer,
                            const StyledStringUnmarshallCallback* callback_,
                            const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    Ark_Buffer (*marshalling1)(Ark_StyledString styledString);
+    Opt_Buffer (*marshalling1)(Ark_StyledString styledString);
     void (*unmarshalling1)(Ark_VMContext vmContext,
                            Ark_AsyncWorkerPtr asyncWorker,
                            const Ark_Buffer* buffer,
@@ -28725,17 +28725,17 @@ typedef struct GENERATED_ArkUITextContentControllerBaseAccessor {
     void (*destroyPeer)(Ark_TextContentControllerBase peer);
     Ark_TextContentControllerBase (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_CaretOffset (*getCaretOffset)(Ark_TextContentControllerBase peer);
-    Ark_RectResult (*getTextContentRect)(Ark_TextContentControllerBase peer);
-    Ark_Int32 (*getTextContentLineCount)(Ark_TextContentControllerBase peer);
-    Ark_Int32 (*addText)(Ark_TextContentControllerBase peer,
+    Opt_CaretOffset (*getCaretOffset)(Ark_TextContentControllerBase peer);
+    Opt_RectResult (*getTextContentRect)(Ark_TextContentControllerBase peer);
+    Opt_Int32 (*getTextContentLineCount)(Ark_TextContentControllerBase peer);
+    Opt_Int32 (*addText)(Ark_TextContentControllerBase peer,
                          const Ark_String* text,
                          const Opt_TextContentControllerOptions* textOperationOptions);
     void (*deleteText)(Ark_TextContentControllerBase peer,
                        const Opt_TextRange* range);
-    Ark_TextRange (*getSelection)(Ark_TextContentControllerBase peer);
+    Opt_TextRange (*getSelection)(Ark_TextContentControllerBase peer);
     void (*clearPreviewText)(Ark_TextContentControllerBase peer);
-    Ark_String (*getText)(Ark_TextContentControllerBase peer,
+    Opt_String (*getText)(Ark_TextContentControllerBase peer,
                           const Opt_TextRange* range);
     void (*deleteBackward)(Ark_TextContentControllerBase peer);
 } GENERATED_ArkUITextContentControllerBaseAccessor;
@@ -28747,7 +28747,7 @@ typedef struct GENERATED_ArkUITextControllerAccessor {
     void (*closeSelectionMenu)(Ark_TextController peer);
     void (*setStyledString)(Ark_TextController peer,
                             Ark_StyledString value);
-    Ark_LayoutManager (*getLayoutManager)(Ark_TextController peer);
+    Opt_LayoutManager (*getLayoutManager)(Ark_TextController peer);
     void (*setTextSelection)(Ark_TextController peer,
                              const Opt_Int32* selectionStart,
                              const Opt_Int32* selectionEnd,

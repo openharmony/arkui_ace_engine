@@ -14348,25 +14348,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetLineCountImpl(Ark_LayoutManager peer)
+    Opt_Int32 GetLineCountImpl(Ark_LayoutManager peer)
     {
         return {};
     }
-    Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
+    Opt_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
                                                               Ark_Float64 x,
                                                               Ark_Float64 y)
     {
         return {};
     }
-    Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+    Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                             Ark_Int32 lineNumber)
     {
         return {};
     }
-    Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
-                                            const Ark_TextRange* range,
-                                            Ark_text_RectWidthStyle widthStyle,
-                                            Ark_text_RectHeightStyle heightStyle)
+    Opt_Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                                const Ark_TextRange* range,
+                                                Ark_text_RectWidthStyle widthStyle,
+                                                Ark_text_RectHeightStyle heightStyle)
     {
         return {};
     }
@@ -17060,23 +17060,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_String GetStringImpl(Ark_StyledString peer)
+    Opt_String GetStringImpl(Ark_StyledString peer)
     {
         return {};
     }
-    Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
+    Opt_Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
                                   Ark_Int32 start,
                                   Ark_Int32 length,
                                   const Opt_StyledStringKey* styledKey)
     {
         return {};
     }
-    Ark_Boolean EqualsImpl(Ark_StyledString peer,
+    Opt_Boolean EqualsImpl(Ark_StyledString peer,
                            Ark_StyledString other)
     {
         return {};
     }
-    Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
+    Opt_StyledString SubStyledStringImpl(Ark_StyledString peer,
                                          Ark_Int32 start,
                                          const Opt_Int32* length)
     {
@@ -17092,7 +17092,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
+    Opt_Buffer Marshalling0Impl(Ark_StyledString styledString,
                                 const StyledStringMarshallCallback* callback_)
     {
         return {};
@@ -17104,7 +17104,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
-    Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
+    Opt_Buffer Marshalling1Impl(Ark_StyledString styledString)
     {
         return {};
     }
@@ -17660,7 +17660,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
+    Opt_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
     {
         return {};
     }
@@ -17668,11 +17668,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
+    Opt_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
     {
         return {};
     }
-    Ark_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
+    Opt_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
                           const Ark_String* text,
                           const Opt_TextContentControllerOptions* textOperationOptions)
     {
@@ -17682,14 +17682,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Opt_TextRange* range)
     {
     }
-    Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
+    Opt_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
     {
         return {};
     }
     void ClearPreviewTextImpl(Ark_TextContentControllerBase peer)
     {
     }
-    Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
+    Opt_String GetTextImpl(Ark_TextContentControllerBase peer,
                            const Opt_TextRange* range)
     {
         return {};
@@ -17721,7 +17721,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              Ark_StyledString value)
     {
     }
-    Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
+    Opt_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
     {
         return {};
     }

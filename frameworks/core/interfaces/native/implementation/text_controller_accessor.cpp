@@ -18,6 +18,7 @@
 #include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -51,15 +52,15 @@ void SetStyledStringImpl(Ark_TextController peer,
     }
     peer->controller->SetStyledString(value->spanString);
 }
-Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
+Opt_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller, nullptr);
+    CHECK_NULL_RETURN(peer && peer->controller, Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
     auto layoutManagerAccessor = GetLayoutManagerAccessor();
-    CHECK_NULL_RETURN(layoutManagerAccessor, nullptr);
+    CHECK_NULL_RETURN(layoutManagerAccessor, Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
     auto layoutManagerPeer = layoutManagerAccessor->construct();
-    CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
+    CHECK_NULL_RETURN(layoutManagerPeer, Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
     layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
-    return layoutManagerPeer;
+    return Converter::ArkValue<Opt_LayoutManager>(layoutManagerPeer);
 }
 void SetTextSelectionImpl(Ark_TextController peer,
                           const Opt_Int32* selectionStart,

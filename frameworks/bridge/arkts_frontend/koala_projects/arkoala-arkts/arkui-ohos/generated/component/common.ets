@@ -1662,16 +1662,16 @@ export class TextContentControllerBase implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextContentControllerBase_getFinalizer()
     }
-    public getCaretOffset(): CaretOffset {
+    public getCaretOffset(): CaretOffset | undefined {
         return this.getCaretOffset_serialize()
     }
-    public getTextContentRect(): RectResult {
+    public getTextContentRect(): RectResult | undefined {
         return this.getTextContentRect_serialize()
     }
-    public getTextContentLineCount(): int32 {
+    public getTextContentLineCount(): int32 | undefined {
         return this.getTextContentLineCount_serialize()
     }
-    public addText(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
+    public addText(text: string, textOperationOptions?: TextContentControllerOptions): int32 | undefined {
         const text_casted = text as (string)
         const textOperationOptions_casted = textOperationOptions as (TextContentControllerOptions | undefined)
         return this.addText_serialize(text_casted, textOperationOptions_casted)
@@ -1681,14 +1681,14 @@ export class TextContentControllerBase implements MaterializedBase {
         this.deleteText_serialize(range_casted)
         return
     }
-    public getSelection(): TextRange {
+    public getSelection(): TextRange | undefined {
         return this.getSelection_serialize()
     }
     public clearPreviewText(): void {
         this.clearPreviewText_serialize()
         return
     }
-    public getText(range?: TextRange): string {
+    public getText(range?: TextRange): string | undefined {
         const range_casted = range as (TextRange | undefined)
         return this.getText_serialize(range_casted)
     }
@@ -1696,23 +1696,40 @@ export class TextContentControllerBase implements MaterializedBase {
         this.deleteBackward_serialize()
         return
     }
-    getCaretOffset_serialize(): CaretOffset {
+    getCaretOffset_serialize(): CaretOffset | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : CaretOffset = CaretOffset_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : CaretOffset | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = CaretOffset_serializer.read(retvalDeserializer)
+        }
+        const returnResult : CaretOffset | undefined = buffer
         return returnResult
     }
-    getTextContentRect_serialize(): RectResult {
+    getTextContentRect_serialize(): RectResult | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentRect(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : RectResult = RectResult_serializer.read(retvalDeserializer)
+         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RectResult | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = RectResult_serializer.read(retvalDeserializer)
+        }
+        const returnResult : RectResult | undefined = buffer
         return returnResult
     }
-    getTextContentLineCount_serialize(): int32 {
+    getTextContentLineCount_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentLineCount(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
+    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (textOperationOptions !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1723,7 +1740,14 @@ export class TextContentControllerBase implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_addText(this.peer!.ptr, text, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
     deleteText_serialize(range?: TextRange): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1737,16 +1761,21 @@ export class TextContentControllerBase implements MaterializedBase {
         ArkUIGeneratedNativeModule._TextContentControllerBase_deleteText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    getSelection_serialize(): TextRange {
+    getSelection_serialize(): TextRange | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getSelection(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : TextRange = TextRange_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : TextRange | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = TextRange_serializer.read(retvalDeserializer)
+        }
+        const returnResult : TextRange | undefined = buffer
         return returnResult
     }
     clearPreviewText_serialize(): void {
         ArkUIGeneratedNativeModule._TextContentControllerBase_clearPreviewText(this.peer!.ptr)
     }
-    getText_serialize(range?: TextRange): string {
+    getText_serialize(range?: TextRange): string | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (range !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1757,7 +1786,14 @@ export class TextContentControllerBase implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : string | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : string | undefined = buffer
+        return returnResult
     }
     deleteBackward_serialize(): void {
         ArkUIGeneratedNativeModule._TextContentControllerBase_deleteBackward(this.peer!.ptr)

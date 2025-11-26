@@ -134,12 +134,10 @@ HWTEST_F(TextControllerAccessorTest, getLayoutManagerTest, TestSize.Level1)
     const size_t expectedLineCount = 143;
     g_layoutInfo->SetLineCount(expectedLineCount);
 
-    auto manager = accessor_->getLayoutManager(peer_); // Create LayoutManager peer
-#ifdef WRONG_GEN
+    Opt_LayoutManager managerOpt = accessor_->getLayoutManager(peer_); // Create LayoutManager peer
     auto managerArk = Converter::GetOpt(managerOpt);
     ASSERT_TRUE(managerArk.has_value());
     auto manager = managerArk.value();
-#endif
     ASSERT_NE(manager, nullptr);
 
     auto layoutManagerAccessor = GeneratedModifier::GetLayoutManagerAccessor();

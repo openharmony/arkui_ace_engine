@@ -33660,19 +33660,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Int32 GetLineCountImpl(Ark_LayoutManager peer)
+    Opt_Int32 GetLineCountImpl(Ark_LayoutManager peer)
     {
         if (!needGroupedLog(1))
         {
-            return 0;
+            return {};
         }
         string out("getLineCount(");
         out.append(") \n");
-        out.append("[return 0] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return 0;
+        return {};
     }
-    Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
+    Opt_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
                                                               Ark_Float64 x,
                                                               Ark_Float64 y)
     {
@@ -33689,7 +33689,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+    Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                             Ark_Int32 lineNumber)
     {
         if (!needGroupedLog(1))
@@ -33703,10 +33703,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
-                                            const Ark_TextRange* range,
-                                            Ark_text_RectWidthStyle widthStyle,
-                                            Ark_text_RectHeightStyle heightStyle)
+    Opt_Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                                const Ark_TextRange* range,
+                                                Ark_text_RectWidthStyle widthStyle,
+                                                Ark_text_RectHeightStyle heightStyle)
     {
         if (!needGroupedLog(1))
         {
@@ -40804,7 +40804,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
+    Opt_Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
                                   Ark_Int32 start,
                                   Ark_Int32 length,
                                   const Opt_StyledStringKey* styledKey)
@@ -40838,22 +40838,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
+    Opt_StyledString SubStyledStringImpl(Ark_StyledString peer,
                                          Ark_Int32 start,
                                          const Opt_Int32* length)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_StyledString>(300);
+            return {};
         }
         string out("subStyledString(");
         WriteToString(&out, start);
         out.append(", ");
         WriteToString(&out, length);
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_StyledString>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_StyledString>(300);
+        return {};
     }
     void FromHtmlImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
@@ -40884,7 +40884,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
+    Opt_Buffer Marshalling0Impl(Ark_StyledString styledString,
                                 const StyledStringMarshallCallback* callback_)
     {
         if (!needGroupedLog(1))
@@ -40919,7 +40919,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
+    Opt_Buffer Marshalling1Impl(Ark_StyledString styledString)
     {
         if (!needGroupedLog(1))
         {
@@ -42326,7 +42326,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
+    Opt_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
     {
         if (!needGroupedLog(1))
         {
@@ -42338,7 +42338,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
+    Opt_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
     {
         if (!needGroupedLog(1))
         {
@@ -42350,34 +42350,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
+    Opt_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
     {
         if (!needGroupedLog(1))
         {
-            return 0;
+            return {};
         }
         string out("getTextContentLineCount(");
         out.append(") \n");
-        out.append("[return 0] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return 0;
+        return {};
     }
-    Ark_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
+    Opt_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
                           const Ark_String* text,
                           const Opt_TextContentControllerOptions* textOperationOptions)
     {
         if (!needGroupedLog(1))
         {
-            return 0;
+            return {};
         }
         string out("addText(");
         WriteToString(&out, text);
         out.append(", ");
         WriteToString(&out, textOperationOptions);
         out.append(") \n");
-        out.append("[return 0] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return 0;
+        return {};
     }
     void DeleteTextImpl(Ark_TextContentControllerBase peer,
                         const Opt_TextRange* range)
@@ -42391,7 +42391,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
+    Opt_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
     {
         if (!needGroupedLog(1))
         {
@@ -42413,7 +42413,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
+    Opt_String GetTextImpl(Ark_TextContentControllerBase peer,
                            const Opt_TextRange* range)
     {
         if (!needGroupedLog(1))
@@ -42495,17 +42495,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
+    Opt_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
     {
         if (!needGroupedLog(1))
         {
-            return reinterpret_cast<Ark_LayoutManager>(300);
+            return {};
         }
         string out("getLayoutManager(");
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_LayoutManager>(300)] \n");
+        out.append("[return {}] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_LayoutManager>(300);
+        return {};
     }
     void SetTextSelectionImpl(Ark_TextController peer,
                               const Opt_Int32* selectionStart,
