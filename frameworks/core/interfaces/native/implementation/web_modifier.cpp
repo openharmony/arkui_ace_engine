@@ -2766,7 +2766,8 @@ void SetBlankScreenDetectionConfigImpl(Ark_NativePointer node,
     if (detectionMethods.size() == 0) {
         detectionMethods = { 0 };
     }
-    auto contentfulNodesCountThreshold = *(Converter::OptConvert<int32_t>(optValue->contentfulNodesCountThreshold));
+    auto contentfulNodesCountThreshold =
+        Converter::OptConvert<int32_t>(optValue->contentfulNodesCountThreshold).value_or(0);
     contentfulNodesCountThreshold = contentfulNodesCountThreshold < 0 ? 0 : contentfulNodesCountThreshold;
 
     BlankScreenDetectionConfig config{enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold};

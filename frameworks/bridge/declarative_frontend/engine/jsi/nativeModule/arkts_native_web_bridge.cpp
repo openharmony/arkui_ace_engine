@@ -4586,9 +4586,12 @@ ArkUINativeModuleValue WebBridge::SetOnDetectedBlankScreen(ArkUIRuntimeCallInfo*
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weak);
         const char* detailsKeys[] = { "detectedContentfulNodesCount" };
-        Local<JSValueRef> detailsValues[] = { panda::NumberRef::New(vm, event.GetDetectedContentfulNodesCount()) };
-        auto detailsObject =
-            panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(detailsKeys), detailsKeys, detailsValues);
+        auto detailsObject = panda::JSValueRef::Undefined(vm);
+        if (event.GetDetectedContentfulNodesCount()) {
+            Local<JSValueRef> detailsValues[] = { panda::NumberRef::New(vm, event.GetDetectedContentfulNodesCount()) };
+            detailsObject =
+                panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(detailsKeys), detailsKeys, detailsValues);
+        }
         const char* eventKeys[] = { "url", "blankScreenReason", "blankScreenDetails" };
         Local<JSValueRef> eventValues[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
             panda::NumberRef::New(vm, event.GetBlankScreenReason()), detailsObject };
