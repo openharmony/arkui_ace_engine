@@ -1720,8 +1720,8 @@ public:
                     acceptTypeRef->SetValueAt(k++, value);
                 }
                 auto obj = JSRef<JSObject>::New();
-                obj->SetPropertyObject("MimeType", mimeTypeRef);
-                obj->SetPropertyObject("AcceptType", acceptTypeRef);
+                obj->SetPropertyObject("mimeType", mimeTypeRef);
+                obj->SetPropertyObject("acceptableType", acceptTypeRef);
                 fileTypesRef->SetValueAt(j++, obj);
             }
             result->SetValueAt(i++, fileTypesRef);
