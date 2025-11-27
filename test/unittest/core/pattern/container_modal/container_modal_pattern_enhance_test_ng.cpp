@@ -969,4 +969,35 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, AddPanEvent001, TestSize.Level1)
     containerModalPatternEnhance->AddPanEvent(frameNode);
     EXPECT_NE(containerModalPatternEnhance->panEvent_, nullptr);
 }
+
+/**
+ * @tc.name: NotifyButtonsRectChangeTest001
+ * @tc.desc: Test function about NotifyButtonsRectChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, NotifyButtonsRectChangeTest001, TestSize.Level1)
+{
+    RectF containerModalRect;
+    RectF buttonsRect;
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    containerModalNode->AddChild(buttonNode);
+    auto buttonNodeProperty = buttonNode->GetLayoutProperty();
+    buttonNodeProperty->UpdateVisibility(VisibleType::VISIBLE);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    bool callbackTriggered = false;
+    auto callback1 = [&callbackTriggered](const RectF&, const RectF&) { callbackTriggered = true; };
+    containerPattern->AddButtonsRectChangeListener(std::move(callback1));
+    containerPattern->NotifyButtonsRectChange(containerModalRect, buttonsRect);
+    EXPECT_FALSE(callbackTriggered);
+    
+    buttonNodeProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    auto callback2 = [&callbackTriggered](const RectF&, const RectF&) { callbackTriggered = true; };
+    containerPattern->AddButtonsRectChangeListener(std::move(callback2));
+    containerPattern->NotifyButtonsRectChange(containerModalRect, buttonsRect);
+    EXPECT_TRUE(callbackTriggered);
+}
 } // namespace OHOS::Ace::NG
