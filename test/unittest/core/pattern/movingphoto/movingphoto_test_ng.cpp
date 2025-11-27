@@ -158,6 +158,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest001, TestSize.Level1)
     auto frameNode = CreateMovingPhotoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    EXPECT_FALSE(frameNode->uiNodeGcEnable_);
 }
 
 /**
