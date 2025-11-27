@@ -56,6 +56,8 @@ import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { int32, int64 } from "@koalaui/common";
 import { KPointer } from '@koalaui/interop';
+import { TabsController } from 'arkui/component/tabs';
+import { Scroller } from 'arkui/component/scroll';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -724,6 +726,24 @@ export class UIContext {
 
     public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
         throw Error("closeBindSheet not implemented in UIContext!")
+    }
+
+    public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
+        throw Error("bindTabsToScrollable not implemented in UIContext!")
+    }
+
+    public unbindTabsFromScrollable(tabsController: TabsController, scroller: Scroller): void {
+        throw Error("unbindTabsFromScrollable not implemented in UIContext!")
+    }
+
+    public bindTabsToNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
+        childScroller: Scroller): void {
+        throw Error("bindTabsToNestedScrollable not implemented in UIContext!")
+    }
+
+    public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
+        childScroller: Scroller): void {
+        throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {

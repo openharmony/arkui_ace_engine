@@ -14127,6 +14127,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
+    void BindTabsToScrollableImpl(Ark_TabsController tabsController,
+                                  Ark_Scroller scroller)
+    {
+    }
+    void UnbindTabsFromScrollableImpl(Ark_TabsController tabsController,
+                                      Ark_Scroller scroller)
+    {
+    }
+    void BindTabsToNestedScrollableImpl(Ark_TabsController tabsController,
+                                        Ark_Scroller parentScroller,
+                                        Ark_Scroller scrollerchildScroller)
+    {
+    }
+    void UnbindTabsFromNestedScrollableImpl(Ark_TabsController tabsController,
+                                            Ark_Scroller parentScroller,
+                                            Ark_Scroller childScroller)
+    {
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -20274,6 +20292,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::OpenBindSheetImpl,
             IUIContextAccessor::UpdateBindSheetImpl,
             IUIContextAccessor::CloseBindSheetImpl,
+            IUIContextAccessor::BindTabsToScrollableImpl,
+            IUIContextAccessor::UnbindTabsFromScrollableImpl,
+            IUIContextAccessor::BindTabsToNestedScrollableImpl,
+            IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         };
         return &IUIContextAccessorImpl;
     }

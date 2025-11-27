@@ -27164,6 +27164,16 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                            Ark_AsyncWorkerPtr asyncWorker,
                            Ark_NativePointer bindSheetContent,
                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*bindTabsToScrollable)(Ark_TabsController tabsController,
+                                 Ark_Scroller scroller);
+    void (*unbindTabsFromScrollable)(Ark_TabsController tabsController,
+                                     Ark_Scroller scroller);
+    void (*bindTabsToNestedScrollable)(Ark_TabsController tabsController,
+                                       Ark_Scroller parentScroller,
+                                       Ark_Scroller scrollerchildScroller);
+    void (*unbindTabsFromNestedScrollable)(Ark_TabsController tabsController,
+                                           Ark_Scroller parentScroller,
+                                           Ark_Scroller childScroller);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
