@@ -377,13 +377,6 @@ typedef enum {
 } ArkUI_ImageRepeat;
 
 /**
- * @brief Defines the selected text recognition configuration.
- *
- * @since 22
- */
-typedef struct ArkUI_SelectedDataDetectorConfig ArkUI_SelectedDataDetectorConfig;
-
-/**
  * @brief Enumerates the font styles.
  *
  * @since 12
@@ -5925,50 +5918,6 @@ uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextColor(ArkUI_ShowCounterConfig*
  * @since 22
  */
 uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounterConfig* config);
-
-/**
- * @brief Creates a configuration object for selected text recognition.
- *
- * @return A pointer to the configuration object.
- * @since 22
- */
-ArkUI_SelectedDataDetectorConfig* OH_ArkUI_SelectedDataDetectorConfig_Create();
-
-/**
- * @brief Disposes a configuration object for selected text recognition.
- *
- * @param config Pointer to the configuration object to be disposed.
- * @since 22
- */
-void OH_ArkUI_SelectedDataDetectorConfig_Dispose(ArkUI_SelectedDataDetectorConfig* config);
-
-/**
- * @brief Sets the recognition types of a configuration object for selected text recognition.
- *
- * @param config Pointer to the configuration object to be modified.
- * @param types Array of entity types, parameter type is {@link ArkUI_TextDataDetectorType}.
- * @param length Length of the types array.
- * @since 22
- */
-void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
-
-/**
- * @brief Gets the recognition types of a configuration object for selected text recognition.
- *
- * @param config Pointer to the configuration object.
- * @param types Array of entity types to take the result, parameter type is {@link ArkUI_TextDataDetectorType}.
- * @param length Length of the types array.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
- *         If an error code is returned, it may be due to a failure in parameter validation;
- *         the parameter must not be null.
- * @since 22
- */
-int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
-    ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
 
 /**
  * @brief Create selection options.
