@@ -1299,8 +1299,14 @@ HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest02, TestSize.Level1)
     });
     FlexAlign childAlign;
     GridRowLayoutAlgorithm algorithm;
+    /**
+     * @tc.expected: when alignItems is set to Auto, it will follows parent alignment
+     */
     childAlign = algorithm.GetChildAlignment(Referenced::RawPtr(gridRow), gridCol1->GetLayoutProperty());
     EXPECT_EQ(childAlign, FlexAlign::CENTER);
+     /**
+     * @tc.expected: gridCols have correct alignment
+     */
     childAlign = algorithm.GetChildAlignment(Referenced::RawPtr(gridRow), gridCol2->GetLayoutProperty());
     EXPECT_EQ(childAlign, FlexAlign::FLEX_START);
     childAlign = algorithm.GetChildAlignment(Referenced::RawPtr(gridRow), gridCol3->GetLayoutProperty());
