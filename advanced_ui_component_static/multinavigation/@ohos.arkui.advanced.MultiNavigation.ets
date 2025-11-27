@@ -205,13 +205,22 @@ export class DeviceListenerManager {
   }
 
   public initListener(): void {
-    this.portraitListener.onChange(this.onPortraitChange);
-    this.drawableWidthLargeListener.onChange(this.onDrawableWidthLargeChange);
+    try {
+      this.portraitListener.onChange(this.onPortraitChange);
+      this.drawableWidthLargeListener.onChange(this.onDrawableWidthLargeChange);
+    } catch(err) {
+      console.log('multiNavigation initListener on err: ' + err);
+    }
   }
 
   public finalizeListener() {
-    this.portraitListener.offChange(this.onPortraitChange);
-    this.drawableWidthLargeListener.offChange(this.onDrawableWidthLargeChange);
+    try {
+      this.portraitListener.offChange(this.onPortraitChange);
+      this.drawableWidthLargeListener.offChange(this.onDrawableWidthLargeChange);
+    } catch(err) {
+      console.log('multiNavigation finalizeListener off err: ' + err);
+    }
+    
   }
 }
 
