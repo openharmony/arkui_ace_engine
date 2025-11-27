@@ -595,7 +595,7 @@ void ScrollablePattern::AddScrollEvent()
     }
     gestureHub->SetOnTouchTestDoneCallbackForInner(
         [weak = WeakClaim(this)](const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
-            const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers) {
+            const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
@@ -603,7 +603,7 @@ void ScrollablePattern::AddScrollEvent()
 }
 
 void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
-    const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers)
+    const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers)
 {
     CHECK_NULL_VOID(scrollableEvent_);
     const std::list<FingerInfo>& fingerInfos = baseGestureEvent->GetFingerList();
@@ -625,8 +625,11 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
     bool isChild = true;
     for (auto iter = activeRecognizers.begin(); iter != activeRecognizers.end(); ++iter) {
         auto recognizer = *iter;
-        CHECK_NULL_CONTINUE(recognizer);
-        auto frameNode = recognizer->GetAttachedNode().Upgrade();
+        if (recognizer.Invalid()) {
+            continue;
+        }
+        auto upgradeRecognizer = recognizer.Upgrade();
+        auto frameNode = upgradeRecognizer->GetAttachedNode().Upgrade();
         CHECK_NULL_CONTINUE(frameNode);
         if (frameNode == scrollableNode) {
             isChild = false;
@@ -634,8 +637,8 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
                 return;
             }
         }
-        if (IsNeedPreventRecognizer(recognizer, isChild, isHitTestBlock)) {
-            recognizer->SetPreventBegin(true);
+        if (IsNeedPreventRecognizer(upgradeRecognizer, isChild, isHitTestBlock)) {
+            upgradeRecognizer->SetPreventBegin(true);
         }
     }
 }

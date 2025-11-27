@@ -18,6 +18,7 @@
 
 #include <list>
 #include <vector>
+#include "ui/base/referenced.h"
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
@@ -53,7 +54,7 @@ using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
 using TouchTestDoneCallback = std::function<void(
-    const std::shared_ptr<BaseGestureEvent>&, const std::list<RefPtr<NGGestureRecognizer>>&)>;
+    const std::shared_ptr<BaseGestureEvent>&, const std::list<WeakPtr<NGGestureRecognizer>>&)>;
 
 struct TouchTestInfo {
     PointF windowPoint;

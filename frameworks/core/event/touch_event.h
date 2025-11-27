@@ -217,7 +217,7 @@ protected:
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
-using ResponseLinkResult = std::list<RefPtr<NG::NGGestureRecognizer>>;
+using ResponseLinkResult = std::list<WeakPtr<NG::NGGestureRecognizer>>;
 
 class ACE_EXPORT GestureEventResult : public AceType {
     DECLARE_ACE_TYPE(GestureEventResult, AceType);

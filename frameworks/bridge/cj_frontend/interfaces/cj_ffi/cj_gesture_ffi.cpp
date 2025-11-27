@@ -1003,7 +1003,7 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
     auto onGestureRecognizerJudgeFunc = [ffiCallback = CJLambda::Create(callback)](
         const std::shared_ptr<BaseGestureEvent>& info,
         const RefPtr<NG::NGGestureRecognizer>& current,
-        const std::list<RefPtr<NG::NGGestureRecognizer>>& others
+        const std::list<WeakPtr<NG::NGGestureRecognizer>>& others
     )-> GestureJudgeResult {
         ACE_SCORING_EVENT("onGestureRecognizerJudgeBegin");
         CJBaseGestureEvent baseGestureEvent;
@@ -1032,8 +1032,11 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
         auto currentObj = CreateRecognizerObject(current);
         auto gestureRecognizerArray = std::vector<OHOS::sptr<Framework::CJGestureRecognizer>>(others.size());
         size_t i = 0;
-        for (const RefPtr<NG::NGGestureRecognizer>& temp : others) {
-            gestureRecognizerArray[i] = CreateRecognizerObject(temp);
+        for (const WeakPtr<NG::NGGestureRecognizer>& temp : others) {
+            if (temp.Invalid()) {
+                continue;
+            }
+            gestureRecognizerArray[i] = CreateRecognizerObject(temp.Upgrade());
             i++;
         }
         auto ids = std::vector<int64_t>(gestureRecognizerArray.size());

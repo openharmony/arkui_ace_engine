@@ -52,7 +52,7 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
 }
 
 GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGestureEvent>& info,
-    const RefPtr<NG::NGGestureRecognizer>& current, const std::list<RefPtr<NG::NGGestureRecognizer>>& others)
+    const RefPtr<NG::NGGestureRecognizer>& current, const std::list<WeakPtr<NG::NGGestureRecognizer>>& others)
 {
     CHECK_NULL_RETURN(info, GestureJudgeResult::CONTINUE);
     auto gestureInfo = current->GetGestureInfo();
@@ -65,7 +65,10 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGes
     JSRef<JSArray> othersArr = JSRef<JSArray>::New();
     uint32_t othersIdx = 0;
     for (const auto& item : others) {
-        auto othersObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(item);
+        if (item.Invalid()) {
+            continue;
+        }
+        auto othersObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(item.Upgrade());
         othersArr->SetValueAt(othersIdx++, othersObj);
     }
 

@@ -1069,7 +1069,7 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
-        const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers);
+        const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
 

@@ -10096,7 +10096,7 @@ ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
         return ERROR_CODE_NO_ERROR;
     }
     auto callback = [node, userData, touchTestDone](const std::shared_ptr<BaseGestureEvent>& event,
-                        const std::list<RefPtr<NGGestureRecognizer>>& recognizers) {
+                        const std::list<WeakPtr<NGGestureRecognizer>>& recognizers) {
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, nullptr };
@@ -10112,7 +10112,10 @@ ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
         recognizerArray = new ArkUIGestureRecognizerHandle[count];
         int32_t index = 0;
         for (const auto& value : recognizers) {
-            recognizerArray[index] = NodeModifier::CreateGestureRecognizer(value);
+            if (value.Invalid()) {
+                continue;
+            }
+            recognizerArray[index] = NodeModifier::CreateGestureRecognizer(value.Upgrade());
             index++;
         }
         touchTestDone(&arkUIGestureEvent, recognizerArray, count, userData);

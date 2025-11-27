@@ -68,6 +68,7 @@
 #include "bridge/declarative_frontend/jsview/js_layoutable_view.h"
 #include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
+#include "ui/base/referenced.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "bridge/declarative_frontend/engine/functions/js_crown_function.h"
 #endif
@@ -11143,7 +11144,7 @@ void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
     auto onGestureRecognizerJudgefunc =
         [execCtx = info.GetExecutionContext(), func = jsOnGestureRecognizerJudgeFunc, node = frameNode](
             const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current,
-            const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+            const std::list<WeakPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
         ACE_SCORING_EVENT("onGestureRecognizerJudgeBegin");
         PipelineContext::SetCallBackNode(node);
@@ -11168,7 +11169,7 @@ void JSViewAbstract::JsOnTouchTestDone(const JSCallbackInfo& info)
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTouchTestDoneFunc = [execCtx = info.GetExecutionContext(), func = JsOnTouchTestDoneFunc, node = frameNode](
                                    const std::shared_ptr<BaseGestureEvent>& info,
-                                   const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> bool {
+                                   const std::list<WeakPtr<NG::NGGestureRecognizer>>& others) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onTouchTestDone");
         PipelineContext::SetCallBackNode(node);

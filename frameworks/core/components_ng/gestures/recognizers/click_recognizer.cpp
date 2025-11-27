@@ -455,8 +455,12 @@ void ClickRecognizer::ResetStatusInHandleOverdueDeadline()
     CHECK_NULL_VOID(refereeNG);
     if (refereeNG->QueryAllDone()) {
         for (const auto& recognizer : responseLinkRecognizer_) {
-            if (recognizer && recognizer != AceType::Claim(this)) {
-                recognizer->ResetResponseLinkRecognizer();
+            if (recognizer.Invalid()) {
+                continue;
+            }
+            auto upgradeRecognizer = recognizer.Upgrade();
+            if (upgradeRecognizer && upgradeRecognizer != AceType::Claim(this)) {
+                upgradeRecognizer->ResetResponseLinkRecognizer();
             }
         }
         ResetResponseLinkRecognizer();

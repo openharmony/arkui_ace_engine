@@ -19,6 +19,7 @@
 #include "jsnapi_expo.h"
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
@@ -9724,7 +9725,7 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureRecognizerJudgeBegin(ArkUIRunti
     auto onGestureRecognizerJudgeBegin =
         [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), node = AceType::WeakClaim(frameNode),
             containerId](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
-            const std::list<RefPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
+            const std::list<WeakPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
@@ -9739,7 +9740,10 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureRecognizerJudgeBegin(ArkUIRunti
         auto othersArr = panda::ArrayRef::New(vm);
         uint32_t othersIdx = 0;
         for (const auto& item : others) {
-            auto othersObj = CreateRecognizerObject(vm, item);
+            if (item.Invalid()) {
+                continue;
+            }
+            auto othersObj = CreateRecognizerObject(vm, item.Upgrade());
             othersArr->SetValueAt(vm, othersArr, othersIdx++, othersObj);
         }
         auto touchRecognizers = CreateTouchRecognizersObject(vm, info, current);
@@ -9780,7 +9784,7 @@ ArkUINativeModuleValue CommonBridge::SetOnTouchTestDone(ArkUIRuntimeCallInfo* ru
     auto onTouchTestDone = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
                                node = AceType::WeakClaim(frameNode),
                                containerId](const std::shared_ptr<BaseGestureEvent>& info,
-                               const std::list<RefPtr<NGGestureRecognizer>>& others) -> void {
+                               const std::list<WeakPtr<NGGestureRecognizer>>& others) -> void {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
@@ -9792,7 +9796,10 @@ ArkUINativeModuleValue CommonBridge::SetOnTouchTestDone(ArkUIRuntimeCallInfo* ru
         auto othersArr = panda::ArrayRef::New(vm);
         uint32_t othersIdx = 0;
         for (const auto& item : others) {
-            auto othersObj = CreateRecognizerObject(vm, item);
+            if (item.Invalid()) {
+                continue;
+            }
+            auto othersObj = CreateRecognizerObject(vm, item.Upgrade());
             othersArr->SetValueAt(vm, othersArr, othersIdx++, othersObj);
         }
         panda::Local<panda::JSValueRef> params[2] = { gestureEventObj, othersArr };

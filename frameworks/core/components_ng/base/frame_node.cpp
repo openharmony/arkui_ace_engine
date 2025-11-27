@@ -7005,29 +7005,36 @@ void FrameNode::TriggerShouldParallelInnerWith(
     std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
 
     for (const auto& item : responseLinkRecognizers) {
-        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (item.Invalid()) {
+            continue;
+        }
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item.Upgrade());
         if (!recognizer) {
             continue;
         }
         auto type = recognizer->GetRecognizerType();
-        sortedResponseLinkRecognizers[type].emplace_back(item);
+        sortedResponseLinkRecognizers[type].emplace_back(recognizer);
     }
 
     for (const auto& item : currentRecognizers) {
-        if (!item->IsSystemGesture() || item->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+        if (item.Invalid()) {
             continue;
         }
-        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(item);
+        auto recognizer = item.Upgrade();
+        if (!recognizer->IsSystemGesture() || recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+            continue;
+        }
+        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
         if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
             continue;
         }
-        auto iter = sortedResponseLinkRecognizers.find(item->GetRecognizerType());
+        auto iter = sortedResponseLinkRecognizers.find(recognizer->GetRecognizerType());
         if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
             continue;
         }
-        auto result = shouldBuiltInRecognizerParallelWithFunc(item, iter->second);
+        auto result = shouldBuiltInRecognizerParallelWithFunc(recognizer, iter->second);
         if (result && item != result) {
-            item->SetBridgeMode(true);
+            recognizer->SetBridgeMode(true);
             result->AddBridgeObj(item);
         }
     }

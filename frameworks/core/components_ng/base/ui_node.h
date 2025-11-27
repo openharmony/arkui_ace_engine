@@ -52,7 +52,7 @@ using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
 class AxisEventTarget;
 using AxisTestResult = std::list<RefPtr<AxisEventTarget>>;
 struct TouchRestrict;
-using ResponseLinkResult = std::list<RefPtr<NG::NGGestureRecognizer>>;
+using ResponseLinkResult = std::list<WeakPtr<NG::NGGestureRecognizer>>;
 }
 
 namespace OHOS::Ace::NG {
