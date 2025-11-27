@@ -239,7 +239,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
     }
 }
 export type GetItemMainSizeByIndex = (index: int32) => double;
-export interface SectionOptions {
+export class SectionOptions {
     itemsCount: int32;
     crossCount?: int32 | undefined;
     onGetItemMainSizeByIndex?: GetItemMainSizeByIndex | undefined;
