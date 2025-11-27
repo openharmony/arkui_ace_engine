@@ -6037,6 +6037,18 @@ void UIContentImpl::RestoreNavDestinationInfoInner(const std::string& navDestina
     navigationManager->RestoreNavDestinationInfo(navDestinationInfo, isColdStart);
 }
 
+int32_t UIContentImpl::RegisterNavigateChangeCallback(
+    const std::function<void(const std::string&, const std::string&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, -1);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, -1);
+    return navigationManager->RegisterNavigateChangeCallback(std::move(callback));
+}
+
 void UIContentImpl::RunIntentPageIfNeeded()
 {
     if (!intentInfoSerialized_.empty()) {

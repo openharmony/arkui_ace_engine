@@ -63,6 +63,10 @@ public:
 
     virtual void OnForceSplitConfigUpdate() {}
 
+    virtual bool GetIsSplit() {
+        return false;
+    }
+
 protected:
     std::function<void()> onRebuildFrameCallback_;
     int32_t currentPageIndex_ = 0;

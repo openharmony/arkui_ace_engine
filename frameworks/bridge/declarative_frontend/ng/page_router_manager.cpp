@@ -300,6 +300,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     }
     CleanPageOverlay();
     UpdateSrcPage();
+    FireNavigateChangeCallback(target.url);
     if (target.routerMode == RouterMode::SINGLE) {
         auto pageInfoByUrl = FindPageInStackByRouteName(target.url);
         if (pageInfoByUrl.second) {
@@ -379,6 +380,7 @@ void PageRouterManager::ReplaceNamedRouteInner(const RouterPageInfo& target)
     RouterOptScope scope(this);
     CleanPageOverlay();
     UpdateSrcPage();
+    FireNavigateChangeCallback(target.url);
     RouterPageInfo info = target;
     info.isNamedRouterMode = true;
     DealReplacePage(info);
@@ -564,6 +566,7 @@ bool PageRouterManager::StartPop()
     CHECK_NULL_RETURN(pagePattern, false);
     pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, false);
+    FireNavigateChangeCallback(pageInfo->GetPageUrl());
     std::string params = pageInfo->GetPageParams();
     pageInfo->ReplacePageParams("");
 
@@ -1241,6 +1244,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
                 pageRouterManager->UpdateSrcPage();
+                pageRouterManager->FireNavigateChangeCallback(target.url);
                 pageRouterManager->PushOhmUrl(target);
             };
         LoadOhmUrlPage(target.url, std::move(loadTask), target.errorCallback,
@@ -1271,10 +1275,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         }
         return;
     }
-
     CleanPageOverlay();
     UpdateSrcPage();
-
+    FireNavigateChangeCallback(info.url);
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
@@ -1352,6 +1355,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
                 pageRouterManager->UpdateSrcPage();
+                pageRouterManager->FireNavigateChangeCallback(target.url);
                 pageRouterManager->ReplaceOhmUrl(target);
             };
         LoadOhmUrlPage(target.url, std::move(loadTask), target.errorCallback,
@@ -1374,6 +1378,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
         return;
     }
     UpdateSrcPage();
+    FireNavigateChangeCallback(info.url);
     DealReplacePage(info);
 }
 
@@ -1381,6 +1386,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
 {
     CleanPageOverlay();
     UpdateSrcPage();
+    FireNavigateChangeCallback(target.url);
     if (target.url.empty()) {
         size_t pageRouteSize = pageRouterStack_.size();
         if (pageRouteSize <= 1) {
@@ -1496,6 +1502,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
         return;
     }
     UpdateSrcPage();
+    FireNavigateChangeCallback(pageInfo->GetPageUrl());
     StartBackToIndex(index, params);
 }
 
@@ -2703,5 +2710,34 @@ std::string PageRouterManager::GetTopNavDestinationInfo(bool onlyFullScreen, boo
         return serializedEmpty;
     }
     return navigationManager->GetTopNavDestinationInfo(currentPageNode->GetId(), onlyFullScreen, needParam);
+}
+
+void PageRouterManager::FireNavigateChangeCallback(const std::string& name)
+{
+    auto preNode = GetCurrentPageNode();
+    CHECK_NULL_VOID(preNode);
+    auto prePattern = preNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(prePattern);
+    auto preInfo = prePattern->GetPageInfo();
+    CHECK_NULL_VOID(preInfo);
+    auto context = PipelineContext::GetCurrentContextPtrSafely();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto stagePattern = stageNode->GetPattern<StagePattern>();
+    CHECK_NULL_VOID(stagePattern);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    NavigateChangeInfo from = {
+        .name = preInfo->GetPageUrl(),
+        .isSplit = stagePattern->GetIsSplit()
+    };
+    NavigateChangeInfo to = {
+        .name = name,
+        .isSplit = stagePattern->GetIsSplit()
+    };
+    navigationManager->FireNavigateChangeCallback(from, to);
 }
 } // namespace OHOS::Ace::NG

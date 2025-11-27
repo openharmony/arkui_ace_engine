@@ -268,6 +268,8 @@ public:
     RefPtr<FrameNode> CreatePage(int32_t pageId, const RouterPageInfo& target);
     RefPtr<FrameNode> CreateDynamicPage(int32_t pageId, const RouterPageInfo& target);
 
+    void FireNavigateChangeCallback(const std::string& name);
+
 protected:
     class RouterOptScope {
     public:

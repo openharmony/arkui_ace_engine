@@ -618,6 +618,9 @@ public:
     {
         return newSize != navigationSize_;
     }
+
+    void FireNavigateChangeCallback();
+
 private:
     void UpdateCanForceSplitLayout(const SizeF& frameSize);
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
@@ -802,6 +805,7 @@ private:
     RefPtr<NavDestinationContext> GetHomeDestinationContext();
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
     void TriggerPerformanceCheck(const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath);
+    NavigateChangeInfo ConvertNavDestinationContext(const RefPtr<NavDestinationContext>& context);
 
     //-------for force split------- begin------
     bool IsNavBarValid();
