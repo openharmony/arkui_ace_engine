@@ -6403,8 +6403,55 @@ void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetMetaViewport(enabled);
 }
 
-void JSWeb::ParseScriptItems(
-    const JSCallbackInfo& args, ScriptItems& scriptItems, ScriptItemsByOrder& scriptItemsByOrder)
+bool CheckScriptRulesValid(const JSRef<JSVal>& jsScriptRules, const JSRef<JSVal>& jsScriptRegexRules)
+{
+    if (!jsScriptRules->IsArray()) {
+        return false;
+    }
+    if (JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0 && jsScriptRegexRules->IsUndefined()) {
+        return false;
+    }
+    if (!jsScriptRegexRules->IsUndefined() && !jsScriptRegexRules->IsArray()) {
+        return false;
+    }
+    if (JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0 &&
+        JSRef<JSArray>::Cast(jsScriptRegexRules)->Length() == 0) {
+        return false;
+    }
+    return true;
+}
+
+bool ParseJsRegexStrArray(const JSRef<JSVal>& jsScriptRegexRules,
+                          std::vector<std::pair<std::string, std::string>>& scriptRegexRules)
+{
+    auto paramArray = JSRef<JSArray>::Cast(jsScriptRegexRules);
+    size_t length = paramArray->Length();
+    if (length == 0) {
+        return true;
+    }
+    std::string secondLevelDomain;
+    std::string rule;
+    for (size_t i = 0; i < length; i++) {
+        auto item = paramArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            return false;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        JSRef<JSVal> secondLevelDomainJsValue = itemObject->GetProperty("secondLevelDomain");
+        JSRef<JSVal> ruleJsValue = itemObject->GetProperty("rule");
+        if (!JSViewAbstract::ParseJsString(secondLevelDomainJsValue, secondLevelDomain)) {
+            return false;
+        }
+        if (!JSViewAbstract::ParseJsString(ruleJsValue, rule)) {
+            return false;
+        }
+        scriptRegexRules.push_back(std::make_pair(secondLevelDomain, rule));
+    }
+    return true;
+}
+
+void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
+                             ScriptRegexItems& scriptRegexItems, ScriptItemsByOrder& scriptItemsByOrder)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
@@ -6416,6 +6463,7 @@ void JSWeb::ParseScriptItems(
     }
     std::string script;
     std::vector<std::string> scriptRules;
+    std::vector<std::pair<std::string, std::string>> scriptRegexRules;
     for (size_t i = 0; i < length; i++) {
         auto item = paramArray->GetValueAt(i);
         if (!item->IsObject()) {
@@ -6424,19 +6472,28 @@ void JSWeb::ParseScriptItems(
         auto itemObject = JSRef<JSObject>::Cast(item);
         JSRef<JSVal> jsScript = itemObject->GetProperty("script");
         JSRef<JSVal> jsScriptRules = itemObject->GetProperty("scriptRules");
-        if (!jsScriptRules->IsArray() || JSRef<JSArray>::Cast(jsScriptRules)->Length() == 0) {
+        JSRef<JSVal> jsScriptRegexRules = itemObject->GetProperty("regexRules");
+        if (!CheckScriptRulesValid(jsScriptRules, jsScriptRegexRules)) {
             return;
         }
         if (!JSViewAbstract::ParseJsString(jsScript, script)) {
             return;
         }
         scriptRules.clear();
+        scriptRegexRules.clear();
         if (!JSViewAbstract::ParseJsStrArray(jsScriptRules, scriptRules)) {
+            return;
+        }
+        if (!jsScriptRegexRules->IsUndefined() &&
+            !ParseJsRegexStrArray(jsScriptRegexRules, scriptRegexRules)) {
             return;
         }
         if (scriptItems.find(script) == scriptItems.end()) {
             scriptItems.insert(std::make_pair(script, scriptRules));
             scriptItemsByOrder.emplace_back(script);
+            if (!scriptRegexRules.empty()) {
+                scriptRegexItems.insert(std::make_pair(script, scriptRegexRules));
+            }
         }
     }
 }
@@ -6444,8 +6501,9 @@ void JSWeb::ParseScriptItems(
 void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+    ParseScriptItems(args, scriptItems, scriptRegexItems, scriptItemsByOrder);
 
     WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
 }
@@ -6453,8 +6511,9 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
 void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+    ParseScriptItems(args, scriptItems, scriptRegexItems, scriptItemsByOrder);
 
     WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
 }
@@ -6462,28 +6521,31 @@ void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
 void JSWeb::RunJavaScriptOnDocumentStart(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+    ParseScriptItems(args, scriptItems, scriptRegexItems, scriptItemsByOrder);
 
-    WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void JSWeb::RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+    ParseScriptItems(args, scriptItems, scriptRegexItems, scriptItemsByOrder);
 
-    WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+    WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void JSWeb::RunJavaScriptOnHeadEnd(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+    ParseScriptItems(args, scriptItems, scriptRegexItems, scriptItemsByOrder);
 
-    WebModel::GetInstance()->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+    WebModel::GetInstance()->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)

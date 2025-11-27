@@ -1659,10 +1659,12 @@ HWTEST_F(WebModelTestNg, JavaScriptOnDocumentStart030, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
     ScriptItems scriptItems;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    webModelNG.JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    webModelNG.JavaScriptOnDocumentStartByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     EXPECT_NE(webPattern->onDocumentStartScriptItems_, std::nullopt);
+    EXPECT_NE(webPattern->onDocumentStartScriptRegexItems_, std::nullopt);
 #endif
 }
 
@@ -1676,10 +1678,12 @@ HWTEST_F(WebModelTestNg, JavaScriptOnDocumentEnd031, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
     ScriptItems scriptItemsEnd;
+    ScriptRegexItems scriptRegexItemsEnd;
     ScriptItemsByOrder scriptItemsByOrder;
-    webModelNG.JavaScriptOnDocumentEndByOrder(scriptItemsEnd, scriptItemsByOrder);
+    webModelNG.JavaScriptOnDocumentEndByOrder(scriptItemsEnd, scriptRegexItemsEnd, scriptItemsByOrder);
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     EXPECT_NE(webPattern->onDocumentEndScriptItems_, std::nullopt);
+    EXPECT_NE(webPattern->onDocumentEndScriptRegexItems_, std::nullopt);
 #endif
 }
 
@@ -1693,10 +1697,12 @@ HWTEST_F(WebModelTestNg, JavaScriptOnHeadReady032, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
     ScriptItems scriptItemsEnd;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    webModelNG.JavaScriptOnHeadReadyByOrder(scriptItemsEnd, scriptItemsByOrder);
+    webModelNG.JavaScriptOnHeadReadyByOrder(scriptItemsEnd, scriptRegexItems, scriptItemsByOrder);
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     EXPECT_NE(webPattern->onHeadReadyScriptItems_, std::nullopt);
+    EXPECT_NE(webPattern->onHeadReadyScriptRegexItems_, std::nullopt);
 #endif
 }
 
