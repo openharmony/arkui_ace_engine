@@ -8,6 +8,7 @@ import { ArkUIAniModule } from "arkui.ani"
 import { DrawContext } from "arkui.Graphics"
 import { KeyEventInternal, DragEventInternal } from "arkui/component/common"
 import { TypeChecker } from "#components"
+import { Bindable, Callback } from "#generated"
 
 export enum ModifierEventType {
     UI_STATE_NORMAL = 0,
@@ -1104,4 +1105,8 @@ export class ChildrenMainSize {
     public clearChanges(): void {
         this.changeArray.splice(0);
     }
+}
+
+export function makeBindable<T>(value: T, onChange: Callback<T>): Bindable<T> {
+    return { value, onChange } as Bindable<T>;
 }
