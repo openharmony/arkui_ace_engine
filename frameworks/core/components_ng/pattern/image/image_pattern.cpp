@@ -1861,6 +1861,14 @@ void ImagePattern::DumpRenderInfo()
     DumpBorderRadiusProperties(renderProp);
     DumpResizable(renderProp);
     DumpHdrBrightness(renderProp);
+    DumpAntiAlias(renderProp);
+}
+
+inline void ImagePattern::DumpAntiAlias(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
+    bool antiAlias = renderProp->GetAntiAliasValue(false);
+    DumpLog::GetInstance().AddDesc(
+        std::string("antiAlias: ").append(antiAlias ? "true" : "false"));
 }
 
 inline void ImagePattern::DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
@@ -2552,6 +2560,8 @@ void ImagePattern::DumpRenderInfo(std::unique_ptr<JsonValue>& json)
     }
     auto imageInterpolation = renderProp->GetImageInterpolation().value_or(interpolationDefault_);
     json->Put("imageInterpolation", GetImageInterpolation(imageInterpolation).c_str());
+    bool antiAlias = renderProp->GetAntiAlias().value_or(false);
+    json->Put("antiAlias", antiAlias);
 }
 
 void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

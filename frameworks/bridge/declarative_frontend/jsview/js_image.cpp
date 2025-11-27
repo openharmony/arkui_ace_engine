@@ -671,6 +671,19 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     ParseResizableLattice(resizableObject);
 }
 
+void JSImage::JsAntiAlias(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto infoObj = info[0];
+    bool antiAlias = false;
+    if (infoObj->IsBoolean()) {
+        antiAlias = infoObj->ToBoolean();
+    }
+    ImageModel::GetInstance()->SetAntiAlias(antiAlias);
+}
+
 void ApplySliceResource(ImageResizableSlice& sliceResult, const std::string& resKey,
     const RefPtr<ResourceObject>& resObj, BorderImageDirection direction)
 {
@@ -1115,6 +1128,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
     JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);
+    JSClass<JSImage>::StaticMethod("antialiased", &JSImage::JsAntiAlias);
 
     JSClass<JSImage>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSImage>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

@@ -1365,6 +1365,27 @@ void setAltError(ArkUINodeHandle node, const char* src, const char* bundleName, 
     ImageModelNG::SetAltError(frameNode, ImageSourceInfo { src, bundleName, moduleName });
 }
 
+void SetAntiAlias(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetAntiAlias(frameNode, value);
+}
+
+void ResetAntiAlias(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetAntiAlias(frameNode, false);
+}
+
+int32_t GetAntiAlias(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ImageModelNG::GetAntiAlias(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -1492,6 +1513,9 @@ const ArkUIImageModifier* GetImageModifier()
         .resetAltError = ResetAltError,
         .setAltPlaceholder = setAltPlaceholder,
         .setAltError = setAltError,
+        .setAntiAlias = SetAntiAlias,
+        .resetAntiAlias = ResetAntiAlias,
+        .getAntiAlias = GetAntiAlias,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

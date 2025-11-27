@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "image_painter_utils.h"
+#include <iterator>
 
 namespace {
 // The [GRAY_COLOR_MATRIX] is of dimension [4 x 5], which transforms a RGB source color (R, G, B, A) to the
@@ -30,6 +31,7 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // green
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
+const size_t BORDER_RADIUS_COUNT = 4;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -105,5 +107,29 @@ void ImagePainterUtils::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const
     radius[3] = RSPoint(radiusXY[2].GetX(), radiusXY[2].GetY());
     RSRoundRect rRect(dstRect, radius);
     canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
+}
+
+void ImagePainterUtils::ClipAdaptiveRRect(
+    RSRecordingCanvas& canvas, std::unique_ptr<RSPoint[]>& radii, bool antiAlias, RSPoint* outRadius)
+{
+    std::vector<RSPoint> radius;
+    bool setBorderRadius = false;
+    for (size_t ii = 0; ii < BORDER_RADIUS_COUNT; ii++) {
+        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
+        radius.emplace_back(point);
+        if (!NearZero(radii[ii].GetX()) || !NearZero(radii[ii].GetY())) {
+            setBorderRadius = true;
+        }
+    }
+    if (antiAlias && !setBorderRadius) {
+        canvas.ClipRect(
+            RSRect(0.0f, 0.0f, canvas.GetWidth(), canvas.GetHeight()),
+            RSClipOp::INTERSECT, true);
+    } else {
+        canvas.ClipAdaptiveRoundRect(radius);
+    }
+    for (size_t i = 0; i < BORDER_RADIUS_COUNT; i++) {
+        outRadius[i] = radius[i];
+    }
 }
 } // namespace OHOS::Ace::NG

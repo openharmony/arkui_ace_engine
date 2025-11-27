@@ -248,7 +248,14 @@ void DrawingImage::DrawToRSCanvas(
     if (isDrawAnimate_) {
         RSSamplingOptions options;
         ImagePainterUtils::ClipRRect(canvas, dstRect, radiusXY);
+        const auto& config = GetPaintConfig();
+        RSBrush brush;
+        if (config.antiAlias_) {
+            brush.SetAntiAlias(true);
+        }
+        canvas.AttachBrush(brush);
         canvas.DrawImageRect(*image, srcRect, dstRect, options);
+        canvas.DetachBrush();
     } else {
         const auto& config = GetPaintConfig();
         if (config.resizableLattice_ && DrawImageLattice(canvas, srcRect, dstRect, radiusXY)) {
@@ -281,23 +288,19 @@ bool DrawingImage::DrawImageLattice(
             break;
     }
 
+    if (config.antiAlias_) {
+        brush.SetAntiAlias(true);
+    }
     auto filter = brush.GetFilter();
     UpdateRSFilter(config, filter);
     brush.SetFilter(filter);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
-    std::vector<RSPoint> radius;
-    for (size_t ii = 0; ii < 4; ii++) {
-        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
-        radius.emplace_back(point);
-    }
-    recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
     RSPoint pointRadius[4] = {};
-    for (size_t i = 0; i < 4; i++) {
-        pointRadius[i] = radius[i];
-    }
+    ImagePainterUtils::ClipAdaptiveRRect(
+        recordingCanvas, radii, config.antiAlias_, pointRadius);
     auto lattice = *(*latticeSptrAddr);
     if (SystemProperties::GetDebugEnabled()) {
         PrintDrawingLatticeConfig(lattice);
@@ -328,23 +331,19 @@ bool DrawingImage::DrawImageNine(
             break;
     }
 
+    if (config.antiAlias_) {
+        brush.SetAntiAlias(true);
+    }
     auto filter = brush.GetFilter();
     UpdateRSFilter(config, filter);
     brush.SetFilter(filter);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
-    std::vector<RSPoint> radius;
-    for (int ii = 0; ii < 4; ii++) {
-        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
-        radius.emplace_back(point);
-    }
-    recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
     RSPoint pointRadius[4] = {};
-    for (int i = 0; i < 4; i++) {
-        pointRadius[i] = radius[i];
-    }
+    ImagePainterUtils::ClipAdaptiveRRect(
+        recordingCanvas, radii, config.antiAlias_, pointRadius);
     RSRectI rsCenterRect(centerRect.GetX(), centerRect.GetY(), centerRect.GetX() + centerRect.Width(),
         centerRect.GetY() + centerRect.Height());
     recordingCanvas.AttachBrush(brush);
@@ -357,22 +356,18 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
 {
     RSBrush brush;
     auto config = GetPaintConfig();
+    if (config.antiAlias_) {
+        brush.SetAntiAlias(true);
+    }
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
-    std::vector<RSPoint> radius;
-    for (int ii = 0; ii < 4; ii++) {
-        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
-        radius.emplace_back(point);
-    }
-    recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
     RSPoint pointRadius[4] = {};
-    for (int i = 0; i < 4; i++) {
-        pointRadius[i] = radius[i];
-    }
+    ImagePainterUtils::ClipAdaptiveRRect(
+        recordingCanvas, radii, config.antiAlias_, pointRadius);
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = {
         static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
         {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, GetUniqueID(),
@@ -389,6 +384,10 @@ void DrawingImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRec
 {
     auto& recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas&>(canvas);
     RSBrush brush;
+    const auto& config = GetPaintConfig();
+    if (config.antiAlias_) {
+        brush.SetAntiAlias(true);
+    }
     RSSamplingOptions options;
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
     RSRect src = RSRect(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetRight(), srcRect.GetBottom());

@@ -4481,6 +4481,10 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetContentTransition));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetContentTransition));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAntiAlias"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetAntiAlias));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAntiAlias"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetAntiAlias));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

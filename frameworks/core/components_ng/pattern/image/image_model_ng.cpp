@@ -1435,5 +1435,24 @@ void ImageModelNG::ResetImageAltError(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->ResetAltImageError();
 }
+
+void ImageModelNG::SetAntiAlias(bool antiAlias)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antiAlias);
+}
+
+void ImageModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antiAlias, frameNode);
+}
+
+bool ImageModelNG::GetAntiAlias(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), false);
+    return paintProperty->GetImagePaintStyle()->GetAntiAlias().value_or(false);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
