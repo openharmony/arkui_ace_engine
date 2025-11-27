@@ -735,6 +735,7 @@ void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, multu
  */
 HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -896,6 +897,7 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
  */
 HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::vector<Ark_TextCascadePickerRangeContent> subcategoryVector;
     subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_2));
     subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_3));

@@ -300,6 +300,7 @@ HWTEST_F(CommonMethodModifierTest6, setTransformTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -309,6 +310,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues2, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
 
 //////////// ClickEffect

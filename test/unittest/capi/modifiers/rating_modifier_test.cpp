@@ -402,6 +402,7 @@ HWTEST_F(RatingModifierTest, setStepSizeTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(RatingModifierTest, setStarStyleTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setStarStyle, nullptr);
     CheckDefaultStarStyle();
 }
 
@@ -489,6 +490,7 @@ HWTEST_F(RatingModifierTest, setStarStyleTestValidValues, TestSize.Level1)
  */
 HWTEST_F(RatingModifierTest, setStarStyleTestNullValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setStarStyle, nullptr);
     std::unique_ptr<JsonValue> jsonNode;
     modifier_->setStarStyle(node_, nullptr);
     CheckDefaultStarStyle();

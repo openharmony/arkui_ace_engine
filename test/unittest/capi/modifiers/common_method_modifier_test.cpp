@@ -1985,7 +1985,7 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest, DISABLED_setClipShapeValues, TestSize.Level1)
 {
-    // Ark_CircleAttribute, Ark_EllipseAttribute, Ark_PathAttribute, Ark_RectAttribute are not supported yet!
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -2488,6 +2488,6 @@ HWTEST_F(CommonMethodModifierTest, setAnimationInvalidValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationOnFinishEventValues, TestSize.Level1)
 {
-    // OnFinishEvent does not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 } // namespace OHOS::Ace::NG

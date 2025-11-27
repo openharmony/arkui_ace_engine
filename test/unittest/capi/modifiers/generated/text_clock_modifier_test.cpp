@@ -1308,6 +1308,6 @@ HWTEST_F(TextClockModifierTest, DISABLED_setFontFeatureTestFontFeatureInvalidVal
  */
 HWTEST_F(TextClockModifierTest, DISABLED_setDateTimeOptionsTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 } // namespace OHOS::Ace::NG

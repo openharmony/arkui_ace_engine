@@ -614,7 +614,7 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, DISABLED_setSelectionMenuHiddenTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -846,7 +846,7 @@ HWTEST_F(TextInputModifierTest, setWordBreakTestWordBreakInvalidValues, TestSize
  */
 HWTEST_F(TextInputModifierTest, DISABLED_setLineBreakStrategyTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

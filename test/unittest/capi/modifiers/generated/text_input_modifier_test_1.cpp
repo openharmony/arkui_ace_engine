@@ -2074,7 +2074,7 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionInvalidValues, 
  */
 HWTEST_F(TextInputModifierTest, DISABLED_setEnableKeyboardOnFocusTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

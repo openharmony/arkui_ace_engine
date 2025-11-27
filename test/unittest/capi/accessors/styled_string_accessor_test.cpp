@@ -743,7 +743,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorUrl, TestSize.Leve
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorGesture, TestSize.Level1)
 {
-    // not implement
+    FAIL() << "Test is not implemented yet";
 }
 
 /**
@@ -891,6 +891,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetStyles, TestSize.Le
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringSubStyledString, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
 
 /**

@@ -501,17 +501,17 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
 {
     constexpr auto defaultCaretColor = "#FF000000";
     constexpr auto defaultCaretWidth = "0.00px";
-    const std::string propName("caretStyle");
+    constexpr auto propName = "caretStyle";
     constexpr auto propColor = "color";
     constexpr auto propWidth = "width";
     ASSERT_NE(modifier_->setCaretStyle, nullptr);
 
     auto value = GetStringAttribute(node_, propName);
     auto caretStyleObj = JsonUtil::ParseJsonString(value);
-    auto defaultCaretColor = caretStyleObj->GetString(propColor);
-    auto defaultCaretWidth = caretStyleObj->GetString(propWidth);
-    EXPECT_EQ(defaultCaretColor, defaultCaretColor);
-    EXPECT_EQ(defaultCaretWidth, defaultCaretWidth);
+    auto caretColor = caretStyleObj->GetString(propColor);
+    auto caretWidth = caretStyleObj->GetString(propWidth);
+    EXPECT_EQ(caretColor, defaultCaretColor);
+    EXPECT_EQ(caretWidth, defaultCaretWidth);
 
     typedef std::pair<std::string, std::string> CheckCaretValue;
     typedef std::pair<Ark_CaretStyle, CheckCaretValue> TestCaretStyle;

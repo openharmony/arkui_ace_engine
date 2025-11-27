@@ -1173,7 +1173,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestValidValues, TestS
  */
 HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestInvalidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -1264,7 +1264,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle1TestValidValues, TestSize.L
  */
 HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestInvalidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*

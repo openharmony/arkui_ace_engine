@@ -1195,14 +1195,4 @@ HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestInvalidValues, TestSize.Level
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
-
-/*
- * @tc.name: setContentModifierTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GaugeModifierTest, DISABLED_setContentModifierTest, TestSize.Level1)
-{
-    // CustomObjects is not implemented yet!
-}
 } // namespace OHOS::Ace::NG

@@ -287,16 +287,6 @@ HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setContentModifierTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleModifierTest, DISABLED_setContentModifierTest, TestSize.Level1)
-{
-    // CustomObjects is not implemented yet!
-}
-
-/*
  * @tc.name: setSelectedColorTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC

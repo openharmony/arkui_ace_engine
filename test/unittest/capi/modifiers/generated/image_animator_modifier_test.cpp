@@ -66,7 +66,7 @@ public:
  */
 HWTEST_F(ImageAnimatorModifierTest, DISABLED_setImagesTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

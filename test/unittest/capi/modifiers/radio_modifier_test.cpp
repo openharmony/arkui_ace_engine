@@ -469,18 +469,6 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level
 }
 
 /**
- * @tc.name: RadioModifierTest008
- * @tc.desc: Test Radio ContentModifier.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioModifierTest, RadioModifierTest008, TestSize.Level1)
-{
-    LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not "
-                "implemented.");
-    EXPECT_EQ("true", "true");
-}
-
-/**
  * @tc.name: RadioEventTest001
  * @tc.desc: Test Radio onChange event.
  * @tc.type: FUNC

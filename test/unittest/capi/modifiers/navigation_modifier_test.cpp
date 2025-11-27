@@ -128,7 +128,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthTestValidValues, TestSize.Level1)
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthTestValidResourceValues, TestSize.Level1)
 {
-    // implement after Resource supporting
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -167,7 +167,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthTestInvalidValues, TestSize.Level
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthTestInvalidResourceValues, TestSize.Level1)
 {
-    // implement after Resource supporting
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -311,7 +311,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMaxValues, TestSize
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthRangeTestValidResourceValues, TestSize.Level1)
 {
-    // implement after Resource supporting
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -383,7 +383,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestInvalidMaxValues, TestSi
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthRangeTestInvalidResourceValues, TestSize.Level1)
 {
-    // implement after Resource supporting
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -433,7 +433,7 @@ HWTEST_F(NavigationModifierTest, setMinContentWidthTestValidValues, TestSize.Lev
  */
 HWTEST_F(NavigationModifierTest, DISABLED_MinContentWidthTestValidResourceValues, TestSize.Level1)
 {
-    // implement after Resource supporting
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -654,7 +654,7 @@ HWTEST_F(NavigationModifierTest, setHideTitleBar0TestValidValues, TestSize.Level
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideTitleBar1TestDefaultValues, TestSize.Level1)
 {
-    // create test when HideTitleBar1Impl implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -664,7 +664,7 @@ HWTEST_F(NavigationModifierTest, DISABLED_setHideTitleBar1TestDefaultValues, Tes
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideTitleBar1TestValidValues, TestSize.Level1)
 {
-    // create test when HideTitleBar1Impl implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -808,7 +808,7 @@ HWTEST_F(NavigationModifierTest, setHideToolBar0TestValidValues, TestSize.Level1
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideToolBar1TestDefaultValues, TestSize.Level1)
 {
-    // create test when HideToolBar1Impl implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -818,7 +818,7 @@ HWTEST_F(NavigationModifierTest, DISABLED_setHideToolBar1TestDefaultValues, Test
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideToolBar1TestValidValues, TestSize.Level1)
 {
-    // create test when HideToolBar1Impl implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*

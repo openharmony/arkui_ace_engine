@@ -536,7 +536,7 @@ HWTEST_F(TextModifierTest, DISABLED_setDataDetectorConfigTestValidValues, TestSi
  */
 HWTEST_F(TextModifierTest, DISABLED_setFontFeatureTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1285,7 +1285,7 @@ HWTEST_F(TextModifierTest, setTextSelectableTestTextSelectableInvalidValues, Tes
  */
 HWTEST_F(TextModifierTest, DISABLED_setHalfLeadingTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2019,6 +2019,6 @@ HWTEST_F(TextModifierTest, setFontWeightTestFontEnableVariableFontWeightInvalidV
  */
 HWTEST_F(TextModifierTest, DISABLED_setSelectionTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 } // namespace OHOS::Ace::NG

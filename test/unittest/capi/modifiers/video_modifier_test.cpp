@@ -327,7 +327,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestInvalidValues, TestSize
  */
 HWTEST_F(VideoModifierTest, DISABLED_setImageAIOptionsTestValidValues, TestSize.Level1)
 {
-    // imageAIOptions option is not supported
+    FAIL() << "Test is not implemented yet";
 }
 
 // Valid values for attribute 'muted' of method 'muted'
@@ -1036,7 +1036,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setEnableAnalyzerTestValidValues, TestSize.
  */
 HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestDefaultValues, TestSize.Level1)
 {
-    // analyzerConfig attribute is not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -1046,7 +1046,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestDefaultValues, TestSiz
  */
 HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestValidValues, TestSize.Level1)
 {
-    // analyzerConfig attribute is not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -1056,7 +1056,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestValidValues, TestSize.
  */
 HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestInvalidValues, TestSize.Level1)
 {
-    // analyzerConfig attribute is not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> enableShortcutKeyTesdtPlan = {
