@@ -78,7 +78,7 @@ const int32_t PARAM_TWO = 2;
 constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
 constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
-const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0f, 3.0f, 5.0f };
+const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 
 void EraseSpace(std::string& data)
 {
@@ -2436,6 +2436,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
     JSClass<JSWeb>::StaticMethod("onDetectedBlankScreen", &JSWeb::OnDetectedBlankScreen);
     JSClass<JSWeb>::StaticMethod("blankScreenDetectionConfig", &JSWeb::BlankScreenDetectionConfig);
+    JSClass<JSWeb>::StaticMethod("onFirstScreenPaint", &JSWeb::OnFirstScreenPaint);
     JSClass<JSWeb>::StaticMethod("onTextSelectionChange", &JSWeb::OnTextSelectionChange);
     JSClass<JSWeb>::StaticMethod("enableImageAnalyzer", &JSWeb::EnableImageAnalyzer);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
@@ -2596,6 +2597,15 @@ JSRef<JSVal> DetectedBlankScreenEventToJSValue(const DetectedBlankScreenEvent &e
         detailsObj->SetProperty("detectedContentfulNodesCount", eventInfo.GetDetectedContentfulNodesCount());
         obj->SetPropertyObject("blankScreenDetails", detailsObj);
     }
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> FirstScreenPaintEventToJSValue(const FirstScreenPaintEvent &eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("navigationStartTime", eventInfo.GetNavigationStartTime());
+    obj->SetProperty("firstScreenPaintTime", eventInfo.GetFirstScreenPaintTime());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -7111,6 +7121,34 @@ void JSWeb::OnDetectedBlankScreen(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnDetectedBlankScreen(jsCallback);
+}
+
+void JSWeb::OnFirstScreenPaint(const JSCallbackInfo& args)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnFirstScreenPaint, callback set");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstScreenPaintEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FirstScreenPaintEventToJSValue);
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        CHECK_NULL_VOID(func);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<FirstScreenPaintEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnFirstScreenPaint(jsCallback);
 }
 
 void JSWeb::GetDoubleVectorFromJSArray(const JSRef<JSArray>& jsArray, std::vector<double>& params)

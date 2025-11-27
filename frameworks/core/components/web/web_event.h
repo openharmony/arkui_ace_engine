@@ -986,8 +986,40 @@ public:
 
 private:
     std::string url_;
-    int32_t blankScreenReason_ = 0;
-    int32_t detectedContentfulNodesCount_ = 0;
+    int32_t blankScreenReason_;
+    int32_t detectedContentfulNodesCount_;
+};
+
+class ACE_EXPORT FirstScreenPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FirstScreenPaintEvent, BaseEventInfo);
+
+public:
+    FirstScreenPaintEvent(
+        const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime)
+        : BaseEventInfo("FirstScreenPaintEvent"), url_(url), navigationStartTime_(navigationStartTime),
+          firstScreenPaintTime_(firstScreenPaintTime)
+    {}
+    ~FirstScreenPaintEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    int64_t GetNavigationStartTime() const
+    {
+        return navigationStartTime_;
+    }
+
+    int64_t GetFirstScreenPaintTime() const
+    {
+        return firstScreenPaintTime_;
+    }
+
+private:
+    std::string url_;
+    int64_t navigationStartTime_;
+    int64_t firstScreenPaintTime_;
 };
 
 class ACE_EXPORT PdfLoadEvent : public BaseEventInfo {

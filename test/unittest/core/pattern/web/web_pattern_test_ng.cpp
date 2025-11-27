@@ -5291,6 +5291,57 @@ HWTEST_F(WebPatternTestNg, InitSnapshotGesture_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnBlankScreenDetectionConfigUpdate_001
+ * @tc.desc: OnBlankScreenDetectionConfigUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnBlankScreenDetectionConfigUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    BlankScreenDetectionConfig config { true, { 0.1 }, { 0 }, 0 };
+    webPattern->OnBlankScreenDetectionConfigUpdate(config);
+    webPattern->delegate_ = nullptr;
+    webPattern->OnBlankScreenDetectionConfigUpdate(config);
+#endif
+}
+
+/**
+ * @tc.name: UpdateBlankScreenDetectionConfig_001
+ * @tc.desc: UpdateBlankScreenDetectionConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, UpdateBlankScreenDetectionConfig_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    BlankScreenDetectionConfig config { true, { 0.1 }, { 0 }, 1 };
+    webPattern->UpdateBlankScreenDetectionConfig(config);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckBlankScreenDetectionConfig(config), true);
+#endif
+}
+
+/**
  * @tc.name: SnapshotTouchReporter_001
  * @tc.desc: SnapshotTouchReporter.
  * @tc.type: FUNC

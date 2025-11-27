@@ -189,6 +189,8 @@ public:
     static ArkUINativeModuleValue ResetOnDetectedBlankScreen(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBlankScreenDetectionConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBlankScreenDetectionConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnFirstScreenPaint(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnFirstScreenPaint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnContextMenuShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnContextMenuShow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static Local<panda::ObjectRef> CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info);

@@ -1499,6 +1499,7 @@ public:
     void OnDetectedBlankScreen(const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount);
     void UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold);
+    void OnFirstScreenPaint(const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime);
     void UpdateEnableImageAnalyzer(bool enable);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);

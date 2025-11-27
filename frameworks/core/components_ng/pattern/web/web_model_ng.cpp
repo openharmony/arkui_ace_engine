@@ -2616,7 +2616,7 @@ void WebModelNG::SetOnTextSelectionChange(std::function<void(const BaseEventInfo
 
 void WebModelNG::SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback)
 {
-    auto func = jsCallback;
+    auto func = std::move(jsCallback);
     auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
         CHECK_NULL_VOID(info);
         func(info.get());
@@ -2633,6 +2633,18 @@ void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<do
     CHECK_NULL_VOID(webPattern);
     BlankScreenDetectionConfig config{enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold};
     webPattern->UpdateBlankScreenDetectionConfig(config);
+}
+
+void WebModelNG::SetOnFirstScreenPaint(std::function<void(const BaseEventInfo *info)> &&jsCallback)
+{
+    auto func = std::move(jsCallback);
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstScreenPaintEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetEnableImageAnalyzer(bool isEnabled)
@@ -2660,6 +2672,19 @@ void WebModelNG::SetBlankScreenDetectionConfig(FrameNode* frameNode, const Blank
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateBlankScreenDetectionConfig(detectConfig);
+}
+
+void WebModelNG::SetOnFirstScreenPaint(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = std::move(jsCallback);
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstScreenPaintEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetEnableImageAnalyzer(FrameNode* frameNode,  bool isEnabled)

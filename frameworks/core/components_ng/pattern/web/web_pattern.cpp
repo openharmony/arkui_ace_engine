@@ -4300,10 +4300,9 @@ void WebPattern::OnModifyDone()
             delegate_->UpdateInitialScale(GetInitialScale().value());
         }
         if (GetBlankScreenDetectionConfig()) {
-            delegate_->UpdateBlankScreenDetectionConfig(GetBlankScreenDetectionConfig().value().enable,
-                GetBlankScreenDetectionConfig().value().detectionTiming,
-                GetBlankScreenDetectionConfig().value().detectionMethods,
-                GetBlankScreenDetectionConfig().value().contentfulNodesCountThreshold);
+            auto config = GetBlankScreenDetectionConfig().value();
+            delegate_->UpdateBlankScreenDetectionConfig(
+                config.enable, config.detectionTiming, config.detectionMethods, config.contentfulNodesCountThreshold);
         }
         delegate_->UpdateEnableImageAnalyzer(GetEnableImageAnalyzerValue(true));
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();

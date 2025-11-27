@@ -179,6 +179,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnLoadStarted, void);
     ACE_WEB_EVENT_PROPERTY(OnLoadFinished, void);
     ACE_WEB_EVENT_PROPERTY(OnDetectedBlankScreen, void);
+    ACE_WEB_EVENT_PROPERTY(OnFirstScreenPaint, void);
     ACE_WEB_EVENT_PROPERTY(OnPdfScrollAtBottom, void);
     ACE_WEB_EVENT_PROPERTY(OnPdfLoad, void);
     ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckFinish, void);

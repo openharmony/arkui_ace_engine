@@ -1647,6 +1647,15 @@ void WebClientImpl::OnDetectedBlankScreen(
     delegate->OnDetectedBlankScreen(url, blankScreenReason, detectedContentfulNodesCount);
 }
 
+void WebClientImpl::OnFirstScreenPaint(
+    const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnFirstScreenPaint(url, navigationStartTime, firstScreenPaintTime);
+}
+
 bool WebClientImpl::IsQuickMenuShow()
 {
     auto delegate = webDelegate_.Upgrade();

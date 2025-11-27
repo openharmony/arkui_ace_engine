@@ -32044,6 +32044,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebBlankScreenDetectionConfigModifier.identity, WebBlankScreenDetectionConfigModifier, detectConfig);
     return this;
   }
+  onFirstScreenPaint(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnFirstScreenPaintModifier.identity, WebOnFirstScreenPaintModifier, callback);
+    return this;
+  }
   onContextMenuShow(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnContextMenuShowModifier.identity, WebOnContextMenuShowModifier, callback);
     return this;
@@ -33629,7 +33633,24 @@ class WebBlankScreenDetectionConfigModifier extends ModifierWithKey {
   }
 }
 WebBlankScreenDetectionConfigModifier.identity = Symbol('webBlankScreenDetectionConfigModifier');
-  
+
+class WebOnFirstScreenPaintModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnFirstScreenPaint(node);
+    } else {
+      getUINativeModule().web.setOnFirstScreenPaint(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+WebOnFirstScreenPaintModifier.identity = Symbol('webOnFirstScreenPaintModifier');
+
 class WebOnContextMenuShowModifier extends ModifierWithKey {
   constructor(value) {
       super(value);
