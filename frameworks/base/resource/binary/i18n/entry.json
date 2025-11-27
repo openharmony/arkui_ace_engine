@@ -139,7 +139,9 @@
         "common":{
             "ok":"Tamam",
             "cancel":"İptal",
-            "more":"Diğer"
+            "more":"Diğer",
+            "prev":"Geri",
+            "next":"İleri"
         },
         "textoverlay":{
             "paste":"Yapıştır",
@@ -148,7 +150,7 @@
             "copy":"Kopyala",
             "search":"Ara",
             "share":"Paylaş",
-            "translate":"Çeviri"
+            "translate":"Çevir"
         },
         "refresh":{
             "last_updated":"Son güncelleme: %s"
@@ -171,6 +173,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Ay takvimini göster"
+        },
+        "window":{
+            "leftSide":"Solda göster",
+            "rightSide":"Sağda göster"
         }
     },
     "sl":{
@@ -281,7 +287,9 @@
         "common":{
             "ok":"OK",
             "cancel":"Cancel",
-            "more":"More"
+            "more":"More",
+            "prev":"Previous",
+            "next":"Next"
         },
         "textoverlay":{
             "paste":"Paste",
@@ -313,6 +321,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Show lunar calendar"
+        },
+        "window":{
+            "leftSide":"Show on left",
+            "rightSide":"Show on right"
         }
     },
     "az-AZ":{
@@ -895,7 +907,9 @@
         "common":{
             "ok":"OK",
             "cancel":"Batal",
-            "more":"Lainnya"
+            "more":"Lainnya",
+            "prev":"Sebelumnya",
+            "next":"Berikutnya"
         },
         "textoverlay":{
             "paste":"Tempel",
@@ -904,7 +918,7 @@
             "copy":"Salin",
             "search":"Cari",
             "share":"Berbagi",
-            "translate":"Terjemahkan"
+            "translate":"Terjemahan"
         },
         "refresh":{
             "last_updated":"Terakhir diperbarui: %s"
@@ -927,6 +941,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Tampilkan kalender bulan"
+        },
+        "window":{
+            "leftSide":"Tampilkan di kiri",
+            "rightSide":"Tampilkan di kanan"
         }
     },
     "mr":{
@@ -1187,11 +1205,13 @@
         "common":{
             "ok":"OK",
             "cancel":"Anuluj",
-            "more":"Więcej"
+            "more":"Więcej",
+            "prev":"Wstecz",
+            "next":"Dalej"
         },
         "textoverlay":{
             "paste":"Wklej",
-            "select_all":"Zaznacz wszystko",
+            "select_all":"Wybierz wszystkie",
             "cut":"Wytnij",
             "copy":"Kopiuj",
             "search":"Szukaj",
@@ -1202,13 +1222,13 @@
             "last_updated":"Ostatnia aktualizacja: %s"
         },
         "switch":{
-            "on":"Wł.",
-            "off":"Wył."
+            "on":"Włączono",
+            "off":"Wyłączono"
         },
         "stepper":{
             "skip":"Pomiń",
             "next":"Dalej",
-            "start":"Początek",
+            "start":"Rozpocznij",
             "back":"Wstecz"
         },
         "navigation":{
@@ -1219,6 +1239,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Pokaż kalendarz księżycowy"
+        },
+        "window":{
+            "leftSide":"Pokaż z lewej strony",
+            "rightSide":"Pokaż z prawej strony"
         }
     },
     "tl":{
@@ -1291,7 +1315,9 @@
         "common":{
             "ok":"ตกลง",
             "cancel":"ยกเลิก",
-            "more":"เพิ่มเติม"
+            "more":"เพิ่มเติม",
+            "prev":"ก่อนหน้า",
+            "next":"ถัดไป"
         },
         "textoverlay":{
             "paste":"วาง",
@@ -1323,6 +1349,10 @@
         },
         "datepicker":{
             "lunarSwitch":"แสดงปฏิทินจันทรคติ"
+        },
+        "window":{
+            "leftSide":"แสดงทางด้านซ้าย",
+            "rightSide":"แสดงทางด้านขวา"
         }
     },
     "si-LK":{
@@ -1543,7 +1573,9 @@
         "common":{
             "ok":"OK",
             "cancel":"Batalkan",
-            "more":"Lagi"
+            "more":"Lagi",
+            "prev":"Sebelumnya",
+            "next":"Seterusnya"
         },
         "textoverlay":{
             "paste":"Tampal",
@@ -1558,13 +1590,13 @@
             "last_updated":"Kemas kini terakhir: %s"
         },
         "switch":{
-            "on":"Dihidupkan",
-            "off":"Dimatikan"
+            "on":"Buka",
+            "off":"Tutup"
         },
         "stepper":{
             "skip":"Langkau",
             "next":"Seterusnya",
-            "start":"Mulakan",
+            "start":"Mula",
             "back":"Kembali"
         },
         "navigation":{
@@ -1575,6 +1607,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Tunjukkan kalendar lunar"
+        },
+        "window":{
+            "leftSide":"Tunjukkan di kiri",
+            "rightSide":"Tunjukkan di kanan"
         }
     },
     "be":{
@@ -1772,7 +1808,9 @@
         "common":{
             "ok":"OK",
             "cancel":"Abbrechen",
-            "more":"Mehr"
+            "more":"Mehr",
+            "prev":"Zurück",
+            "next":"Weiter"
         },
         "textoverlay":{
             "paste":"Einfügen",
@@ -1793,7 +1831,7 @@
         "stepper":{
             "skip":"Überspringen",
             "next":"Weiter",
-            "start":"Start",
+            "start":"Starten",
             "back":"Zurück"
         },
         "navigation":{
@@ -1804,6 +1842,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Mondkalender anzeigen"
+        },
+        "window":{
+            "leftSide":"Links anzeigen",
+            "rightSide":"Rechts anzeigen"
         }
     },
     "hi":{
@@ -1848,7 +1890,9 @@
         "common":{
             "ok":"အိုကေ",
             "cancel":"ပယ်ဖျက်မည်",
-            "more":"နောက်ထပ်"
+            "more":"နောက်ထပ်",
+            "prev":"ယခင်",
+            "next":"ရှေ့သို့"
         },
         "textoverlay":{
             "paste":"ကူးထည့်ရန်",
@@ -1857,17 +1901,17 @@
             "copy":"ကူးရန်",
             "search":"ရှာရန်",
             "share":"ဝေမျှရန်",
-            "translate":"ဘာသာပြန်"
+            "translate":"ဘာသာပြန်ရန်"
         },
         "refresh":{
-            "last_updated":"နောက်ဆုံးအပ်ဒိတ်လုပ်ခဲ့ချိန်- %s"
+            "last_updated":"နောက်ဆုံး အပ်ဒိတ်လုပ်ခဲ့မှု- %s"
         },
         "switch":{
             "on":"ဖွင့်",
             "off":"ပိတ်"
         },
         "stepper":{
-            "skip":"ကျော်ရန်",
+            "skip":"ကျော်မည်",
             "next":"ရှေ့သို့",
             "start":"စတင်ရန်",
             "back":"နောက်သို့"
@@ -1880,6 +1924,10 @@
         },
         "datepicker":{
             "lunarSwitch":"လ ပြက္ခဒိန် ပြရန်"
+        },
+        "window":{
+            "leftSide":"ဘယ်ဘက်တွင် ပြသရန်",
+            "rightSide":"ညာဘက်တွင် ပြသရန်"
         }
     },
     "da":{
@@ -2100,11 +2148,13 @@
         "common":{
             "ok":"OK",
             "cancel":"Cancelar",
-            "more":"Mais"
+            "more":"Mais",
+            "prev":"Anterior",
+            "next":"Seguinte"
         },
         "textoverlay":{
             "paste":"Colar",
-            "select_all":"Selecionar tudo",
+            "select_all":"Tudo",
             "cut":"Cortar",
             "copy":"Copiar",
             "search":"Procurar",
@@ -2132,6 +2182,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Mostrar calendário lunar"
+        },
+        "window":{
+            "leftSide":"Mostrar à esquerda",
+            "rightSide":"Mostrar à direita"
         }
     },
     "sk":{
@@ -2452,11 +2506,13 @@
         "common":{
             "ok":"OK",
             "cancel":"Annulla",
-            "more":"Altro"
+            "more":"Altro",
+            "prev":"Precedente",
+            "next":"Avanti"
         },
         "textoverlay":{
             "paste":"Incolla",
-            "select_all":"Seleziona tutto",
+            "select_all":"Seleziona tutte",
             "cut":"Taglia",
             "copy":"Copia",
             "search":"Cerca",
@@ -2467,8 +2523,8 @@
             "last_updated":"Ultimo aggiornamento: %s"
         },
         "switch":{
-            "on":"Attivato",
-            "off":"Disattivato"
+            "on":"Attivata",
+            "off":"Disattivata"
         },
         "stepper":{
             "skip":"Ignora",
@@ -2484,6 +2540,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Mostra calendario lunare"
+        },
+        "window":{
+            "leftSide":"Mostra a sinistra",
+            "rightSide":"Mostra a destra"
         }
     },
     "bn":{
@@ -2879,37 +2939,46 @@
     },
     "null":{
         "common":{
-            "cancel":"გაუქმება",
-            "ok":"კარგი",
-            "more":"მეტი"
+            "cancel":"ຍົກເລີກ",
+            "ok":"ຕົກລົງ",
+            "more":"ເພີ່ມເຕີມ",
+            "prev":"ຜ່ານມາ",
+            "next":"ຕໍ່ໄປ"
         },
         "textoverlay":{
-            "select_all":"ყველას არჩევა",
-            "copy":"კოპირება",
-            "cut":"ჭრა",
-            "paste":"ჩასმა"
+            "select_all":"ເລືອກທັງ​ໝົດ",
+            "copy":"ອັດສຳເນົາ",
+            "cut":"ຕັດ​",
+            "paste":"ວາງໃສ່",
+            "search":"ຊອກຫາ",
+            "share":"ແຊຣ໌",
+            "translate":"ແປ​ພາ​ສາ"
         },
         "refresh":{
-            "last_updated":"ბოლო განახლება: %s"
+            "last_updated":"ອັບເດດຫຼ້າສຸດ: %s"
         },
         "stepper":{
-            "skip":"გამოტოვება",
-            "next":"შემდეგი",
-            "start":"დაწყება",
-            "back":"უკან"
+            "skip":"ຂ້າມໄປ",
+            "next":"ຕໍ່ໄປ",
+            "start":"ເລີ່ມຕົ້ນ",
+            "back":"ກັບ​ຄືນ"
         },
         "navigation":{
-            "back":"უკან"
+            "back":"ກັບ​ຄືນ"
         },
         "sheet":{
-            "close":"დახურვა"
+            "close":"ປິດ"
         },
         "switch":{
-            "off":"გამორთული",
-            "on":"ჩართული"
+            "off":"ປິດ",
+            "on":"ເປີດ"
         },
         "datepicker":{
-            "lunarSwitch":"მთვარის კალენდრის ჩვენება"
+            "lunarSwitch":"ສະ​ແດງປະ​ຕິ​ທິນ​ດວງ​ຈັນ"
+        },
+        "window":{
+            "leftSide":"ສະ​ແດງ​ຢູ່​ຂ້າງ​ຊ້າຍ",
+            "rightSide":"ສະ​ແດງ​ຢູ່​ຂ້າງ​ຂວາ"
         }
     }
 }
