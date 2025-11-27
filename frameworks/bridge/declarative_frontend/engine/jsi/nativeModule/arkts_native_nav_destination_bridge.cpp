@@ -711,11 +711,12 @@ ArkUINativeModuleValue NavDestinationBridge::SetOnShown(ArkUIRuntimeCallInfo* ru
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> onShown = [vm, func = panda::CopyableGlobal(vm, func), frameNode]() {
+    std::function<void(int32_t)> onShown = [vm, func = panda::CopyableGlobal(vm, func), frameNode](int32_t reason) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::Claim(frameNode));
-        func->Call(vm, func.ToLocal(), nullptr, NUM_0);
+        panda::Local<panda::JSValueRef> params[1] = { panda::IntegerRef::New(vm, reason) };
+        func->Call(vm, func.ToLocal(), params, NUM_1);
     };
     nodeModifiers->getNavDestinationModifier()->setNavDestinationOnShown(nativeNode, reinterpret_cast<void*>(&onShown));
     return panda::JSValueRef::Undefined(vm);
@@ -751,11 +752,12 @@ ArkUINativeModuleValue NavDestinationBridge::SetOnHidden(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> OnHidden = [vm, func = panda::CopyableGlobal(vm, func), frameNode]() {
+    std::function<void(int32_t)> OnHidden = [vm, func = panda::CopyableGlobal(vm, func), frameNode](int32_t reason) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::Claim(frameNode));
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        panda::Local<panda::JSValueRef> params[1] = { panda::IntegerRef::New(vm, static_cast<int32_t>(reason)) };
+        func->Call(vm, func.ToLocal(), params, NUM_1);
     };
     nodeModifiers->getNavDestinationModifier()->setNavDestinationOnHidden(
         nativeNode, reinterpret_cast<void*>(&OnHidden));
