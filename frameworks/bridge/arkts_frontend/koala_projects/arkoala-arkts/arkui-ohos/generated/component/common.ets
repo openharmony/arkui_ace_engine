@@ -12777,13 +12777,13 @@ export class MotionBlurOptions_serializer {
     public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        valueSerializer.writeNumber(valueHolderForRadius)
+        valueSerializer.writeFloat64(valueHolderForRadius)
         const valueHolderForAnchor  = value.anchor
         MotionBlurAnchor_serializer.write(valueSerializer, valueHolderForAnchor)
     }
     public static read(buffer: DeserializerBase): MotionBlurOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const radiusTmpResult : double = (valueDeserializer.readNumber() as double)
         const anchorTmpResult : MotionBlurAnchor = MotionBlurAnchor_serializer.read(valueDeserializer)
         let value : MotionBlurOptions = ({radius: radiusTmpResult, anchor: anchorTmpResult} as MotionBlurOptions)
         return value
