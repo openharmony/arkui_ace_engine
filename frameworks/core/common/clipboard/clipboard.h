@@ -55,7 +55,9 @@ public:
     virtual void GetSpanStringData(
         const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
         bool syncMode = false) = 0;
-
+    virtual void GetSpanStringData(
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
+        bool syncMode = false) = 0;
 protected:
     explicit Clipboard(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}
     RefPtr<TaskExecutor> taskExecutor_;

@@ -8982,6 +8982,33 @@ void RichEditorPattern::InsertValueByPaste(const std::u16string& pasteStr)
     InsertValueByOperationType(pasteStr, OperationType::PASTE);
 }
 
+void RichEditorPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NotifyFillRequestSuccess, autoFillType:%{public}d, triggerType:%{public}d",
+        static_cast<int32_t>(autoFillType), static_cast<int32_t>(triggerType));
+    CHECK_NULL_VOID(GetHost() && viewDataWrap && nodeWrap);
+    IF_TRUE(triggerType == AceAutoFillTriggerType::PASTE_REQUEST, PasteStr(nodeWrap->GetValue()));
+}
+
+void RichEditorPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
+{
+    CHECK_NULL_VOID(viewDataWrap);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
+    CHECK_NULL_VOID(info);
+    info->SetId(host->GetId());
+    info->SetDepth(host->GetDepth());
+    info->SetTag(host->GetTag());
+    auto offsetToWindow = host->GetTransformRelativeOffset();
+    auto pageNodeRect = frameRect_;
+    pageNodeRect.SetOffset(offsetToWindow);
+    info->SetPageNodeRect(pageNodeRect);
+    info->SetIsFocus(HasFocus());
+    viewDataWrap->AddPageNodeInfoWrap(info);
+}
+
 void RichEditorPattern::HandleOnPaste()
 {
     if (IsPreviewTextInputting()) {
@@ -9017,12 +9044,55 @@ void RichEditorPattern::HandleOnPaste()
 #endif
 }
 
-std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>
+bool RichEditorPattern::ProcessAutoFill(AceAutoFillTriggerType triggerType)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto container = Container::Current();
+    if (container == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "Get current container is nullptr.");
+        return false;
+    }
+    auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "onUIExtNodeDestroy called.");
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pageNode = node->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(false);
+    };
+    auto onUIExtNodeBindingCompleted = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "onUIExtNodeBindingCompleted called.");
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pageNode = node->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(true);
+    };
+    bool isPopup = false;
+    uint32_t autoFillSessionId = 0;
+    auto resultCode = container->RequestAutoFill(host, AceAutoFillType::ACE_UNSPECIFIED, false, isPopup, autoFillSessionId, true,
+        onUIExtNodeDestroy, onUIExtNodeBindingCompleted, triggerType);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ProcessAutoFill, result = %{public}d", resultCode);
+    return resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+}
+
+void RichEditorPattern::ProcessAutoFillOnPaste()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ProcessAutoFillOnPaste");
+    ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
+}
+
+std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>
     RichEditorPattern::CreatePasteCallback()
 {
     auto isSpanStringMode = isSpanStringMode_;
     auto pasteCallback = [weak = WeakClaim(this), isSpanStringMode](std::vector<std::vector<uint8_t>>& arrs,
-                             const std::string& text, bool& isMulitiTypeRecord) {
+                             const std::string& text, bool& isMulitiTypeRecord, bool& isFromAutoFill) {
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
         std::list<RefPtr<SpanString>> spanStrings;
@@ -9034,8 +9104,12 @@ std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&
         }
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
             "pasteCallback callback, isMulitiTypeRecord : [%{public}d], isSpanStringMode : [%{public}d], "
-            "isFromStyledString : [%{public}d]",
-            isMulitiTypeRecord, isSpanStringMode, isFromStyledString);
+            "isFromStyledString : [%{public}d], isFromAutoFill : [%{public}d]",
+            isMulitiTypeRecord, isSpanStringMode, isFromStyledString, isFromAutoFill);
+        if (isFromAutoFill) {
+            richEditor->ProcessAutoFillOnPaste();
+            return;
+        }
         if (spanStrings.empty() || (!isSpanStringMode && !isFromStyledString)) {
             richEditor->PasteStr(text);
             return;

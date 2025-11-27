@@ -55,7 +55,9 @@ public:
     void GetSpanStringData(
         const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
         bool syncMode = false) override;
-
+    void GetSpanStringData(
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
+        bool syncMode = false) override;
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 private:
     void GetDataSync(const std::function<void(const std::string&, bool)>& callback);
@@ -72,10 +74,11 @@ private:
     void GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetSpanStringDataHelper(
-        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
         bool syncMode = false);
     void ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrays,
-        const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord);
+        const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord,
+        bool& isFromAutoFill);
     const std::string GetMimeType(
         std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap);
 #endif

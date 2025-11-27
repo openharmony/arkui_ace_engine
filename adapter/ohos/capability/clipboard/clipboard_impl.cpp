@@ -615,6 +615,19 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
 void ClipboardImpl::GetSpanStringData(
     const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {
+    CHECK_NULL_VOID(callback);
+    auto callbackWith4Args = [callback](std::vector<std::vector<uint8_t>>& arrs, const std::string& text,
+        bool& isMulitiTypeRecord, bool& isFromAutoFill) {
+        (void)isFromAutoFill;
+        callback(arrs, text, isMulitiTypeRecord);
+    };
+    GetSpanStringData(callbackWith4Args, syncMode);
+}
+
+void ClipboardImpl::GetSpanStringData(
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
+    bool syncMode)
+{
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     if (!taskExecutor_ || !callback) {
         return;
@@ -626,7 +639,8 @@ void ClipboardImpl::GetSpanStringData(
 
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 void ClipboardImpl::GetSpanStringDataHelper(
-    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
+    bool syncMode)
 {
     auto task = [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
         auto clip = weak.Upgrade();
@@ -641,14 +655,17 @@ void ClipboardImpl::GetSpanStringDataHelper(
         std::vector<std::vector<uint8_t>> arrays;
         std::string text;
         bool isMultiTypeRecord = false;
-        clip->ProcessSpanStringData(arrays, pasteData, text, isMultiTypeRecord);
+        bool isFromAutoFill = false;
+        clip->ProcessSpanStringData(arrays, pasteData, text, isMultiTypeRecord, isFromAutoFill);
         auto textData = pasteData.GetPrimaryText();
         if (textData && text.empty()) {
             text.append(*textData);
         }
         auto result = text;
         taskExecutor->PostTask(
-            [callback, arrays, result, isMultiTypeRecord]() mutable { callback(arrays, result, isMultiTypeRecord); },
+            [callback, arrays, result, isMultiTypeRecord, isFromAutoFill] () mutable {
+                callback(arrays, result, isMultiTypeRecord, isFromAutoFill);
+            },
             TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback");
     };
     if (syncMode) {
@@ -659,11 +676,17 @@ void ClipboardImpl::GetSpanStringDataHelper(
 }
 
 void ClipboardImpl::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrays,
-    const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord)
+    const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord, bool& isFromAutoFill)
 {
     for (const auto& pasteDataRecord : pasteData.AllRecords()) {
         if (pasteDataRecord == nullptr) {
             continue;
+        }
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "ProcessSpanStringData, mimeType:%{public}s",
+            pasteDataRecord->GetMimeType().c_str());
+        if (IsPasteFromAutoFill(pasteDataRecord->GetMimeTypes(), PASSWORDVAULT_BUNDLE_NAME)) {
+            isFromAutoFill = true;
+            return;
         }
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
         std::vector<std::string> types = { SPAN_STRING_TAG, OHOS::MiscServices::MIMETYPE_TEXT_URI,
