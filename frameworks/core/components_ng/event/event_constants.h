@@ -29,8 +29,8 @@ enum class MenuPreviewMode {
 };
 
 enum class MenuBindingType {
-    LONG_PRESS,
     RIGHT_CLICK,
+    LONG_PRESS,
 };
 
 namespace OHOS::Ace::NG {

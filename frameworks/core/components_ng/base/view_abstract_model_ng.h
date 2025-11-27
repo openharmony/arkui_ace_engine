@@ -1643,7 +1643,10 @@ public:
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) override;
+
+    void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
