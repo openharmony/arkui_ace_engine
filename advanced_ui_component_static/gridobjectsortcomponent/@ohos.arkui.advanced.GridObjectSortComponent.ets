@@ -49,7 +49,7 @@ import {
   GridItem, Grid, ForEach, TransitionType, VerticalAlign, TextAlign, Alignment, Position, ICurve, AnimateParam,
   TranslateOptions, $r, TransitionEffect
 } from '@ohos.arkui.component'
-import { State, Observed, Watch, Link } from '@ohos.arkui.stateManagement'
+import { State, Observed, Watch, Link, PropRef } from '@ohos.arkui.stateManagement'
 
 //  declaring Constants
 const COL_IMAGE_TEXT: number = 3;
@@ -168,7 +168,7 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
 @Component
 export struct GridObjectSortComponent {
   // component configuration data
-  @State options: GridObjectSortComponentOptions = {} as GridObjectSortComponentOptions;
+  @PropRef options: GridObjectSortComponentOptions = {} as GridObjectSortComponentOptions;
   // data
   dataList: GridObjectSortComponentItem[] = [] as GridObjectSortComponentItem[];
   // Drag and drop edit data,  selected === true
@@ -266,9 +266,9 @@ export struct GridObjectSortComponent {
 
   // component rendering
   aboutToAppear() {
-    this.dataList = this.dataList.slice(0, 50);
+    this.dataList.length = 50
     this.selected =
-      this.dataList && this.deduplicate(this.dataList).filter(val => val.selected !== undefined).sort(this.sortBy());
+      this.dataList && this.deduplicate(this.dataList).filter(val => val.selected).sort(this.sortBy());
     this.unSelected = this.dataList && this.deduplicate(this.dataList).filter(val => !val.selected).sort(this.sortBy());
     this.copySelected = this.selected.slice();
     this.copyUnSelected = this.unSelected.slice();
@@ -304,6 +304,10 @@ export struct GridObjectSortComponent {
     }, 500);
     this.bundleName =
       (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    accessibility.onScreenReaderStateChange((state: boolean) => {
+      // 上面的state  就是无障碍的状态
+      this.isOpenAccessibility = state;
+    });
   }
 
   // get adaptive for symbol font size
@@ -314,7 +318,7 @@ export struct GridObjectSortComponent {
     }
     fontScale = Math.min(MIN_SYMBOL_FONT_SCALE, fontScale);
     fontScale = Math.max(fontScale, MIN_FONT_SCALE);
-    return `${SYMBOL_SIZE_12FP}vp`;
+    return (fontScale * SYMBOL_SIZE_12FP).toString() + 'vp';
   }
 
   // translate option imageSize to symbol fontSize
@@ -856,7 +860,7 @@ export struct GridObjectSortComponent {
   }
 
   // Add area movement function
-  getAddAreaItemTranslate(index: number): PositionXY {
+  getAddAreaItemTranslate(index: Int): TranslateOptions {
     // When an item is removed, the added area is moved rightward.
     if (this.clickRemoveBtn) {
       let addItemRightMove = this.getAddItemRightMove(index);
@@ -886,7 +890,6 @@ export struct GridObjectSortComponent {
     return { x: 0, y: 0 };
   }
 
-
   @Builder
   PixelMapBuilder(url: ResourceStr | SymbolGlyphModifier | undefined, text: ResourceStr) {
     Stack({ alignContent: Alignment.Center }) {
@@ -901,8 +904,8 @@ export struct GridObjectSortComponent {
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
-              .height(this.getSymbolFontSizeFrom(this.options.imageSize)|| SYMBOL_DEFAULT)
-              .width(this.getSymbolFontSizeFrom(this.options.imageSize)|| SYMBOL_DEFAULT)
+              .height(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
+              .width(this.getSymbolFontSizeFrom(this.options.imageSize) || SYMBOL_DEFAULT)
               .attributeModifier(url as SymbolGlyphModifier)
               .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
               .symbolEffect(new SymbolEffect(), false)
@@ -980,6 +983,14 @@ export struct GridObjectSortComponent {
     .clip(false)
     .height(this.blockHeight * 1.5)
     .width(this.blockWidth * 1.2)
+  }
+
+  @Builder
+  PixelMapBuilderValue() {
+    if (this.dragContent) {
+      this.PixelMapBuilder(this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text ?? '');
+    }
+
   }
 
   @Builder
@@ -1098,6 +1109,24 @@ export struct GridObjectSortComponent {
             this.getStringByResourceToken(
               ACCESSIBILITY_UNSELECTED_BUTTON, this.getAccessibilityText(select.text))
           )
+        SymbolGlyph(this.imageTextRemoveIcon(select))
+          .fontSize(SYMBOL_SIZE_24VP)
+          .fontWeight(SYMBOL_WEIGHT)
+          .draggable(false)
+          .fontColor([$r('sys.color.ohos_id_color_secondary')])
+          .visibility(type === 'delete' && this.gridComState ? Visibility.Visible :
+            Visibility.Hidden)
+          .width(ICON_SIZE)
+          .height(ICON_SIZE)
+          .position({
+            x: this.blockWidth - 40,
+            y: -MARGIN_EIGHT
+          })
+          .onClick(() => this.handleDeleteClick(select))
+          .accessibilityLevel(YES)
+          .accessibilityText(
+            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(select.text))
+          )
       }
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
@@ -1137,7 +1166,7 @@ export struct GridObjectSortComponent {
           this.arrayUnSelectIsChange = 2;
           this.scaleIcon = 1;
           this.selected.push(content);
-          this.unSelected.splice(1);
+          this.unSelected.splice(index, 1);
           this.calcGridHeight();
           this.addItemMoveX = 0;
           this.addItemMoveY = 0;
@@ -1655,7 +1684,7 @@ export struct GridObjectSortComponent {
             )
           }
           .clip(false)
-
+          .translate(this.getAddAreaItemTranslate(index) as TranslateOptions)
           .animation({
             curve: this.isStartDrag ? DRAG_SPRING as ICurve :
               index === this.selectedIndex ? REMOVE_ADD_SPRING as ICurve : DRAG_SPRING as ICurve,
@@ -1735,7 +1764,7 @@ export struct GridObjectSortComponent {
         this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START,
           this.getAccessibilityText(this.dragContent?.text ?? ''));
         this.sendAccessibility();
-        this.PixelMapBuilder(this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text ?? '');
+        return this.PixelMapBuilderValue;
         return undefined
       })
       .onItemDrop((event: ItemDragInfo, itemIndex: Int, insertIndex: Int, isSuccess: Boolean) => {
