@@ -2760,6 +2760,7 @@ void TextFieldModelNG::DeleteBackward(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->HandleOnDelete(true);
 }
 
