@@ -346,6 +346,7 @@ void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
     auto onScrollBarUpdate = [execCtx = info.GetExecutionContext(),
                                  func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
                                      JSRef<JSFunc>::Cast(info[0]))](int32_t index, const Dimension& offset) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, std::pair<float, float>(0, 0));
         JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
         JSRef<JSVal> itemOffset = ConvertToJSValue(offset);
         JSRef<JSVal> params[2] = { itemIndex, itemOffset };
