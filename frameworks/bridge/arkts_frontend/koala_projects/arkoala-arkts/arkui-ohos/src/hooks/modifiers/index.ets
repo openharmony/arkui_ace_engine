@@ -844,7 +844,37 @@ export function hookSideBarContainerAttributeModifier(component: ArkSideBarConta
     applyAttributeModifierBase(modifier as Object as AttributeModifier<SideBarContainerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 export function hookBaseSpanAttributeModifier(componenet: ArkBaseSpanComponent, value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookStepperAttributeModifier(componenet: ArkStepperComponent, value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookStepperAttributeModifier(component: ArkStepperComponent, modifier: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): StepperModifier => {
+        let isStepperModifier: boolean = modifier instanceof StepperModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new StepperModifier();
+        if (isStepperModifier) {
+            let stepperModifier = modifier as object as StepperModifier;
+            initModifier.mergeModifier(stepperModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkStepperComponent => {
+        let componentNew: ArkStepperComponent = new ArkStepperComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<StepperAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookStepperItemAttributeModifier(component: ArkStepperItemComponent, modifier: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
         return;
