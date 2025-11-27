@@ -73,7 +73,7 @@ SliderModel::SliderShowStepOptions Convert(const Ark_SliderShowStepOptions& src)
     }
     for (int32_t i = 0; i < mapSize; i++) {
         uint32_t key = Converter::Convert<uint32_t>(stepItemMap.keys[i]);
-        if (key < 0 || key > UINT32_MAX) {
+        if (key < 0) {
             continue;
         }
         auto stepItem = Converter::Convert<Ark_SliderStepItemAccessibility>(stepItemMap.values[i]);

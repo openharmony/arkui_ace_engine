@@ -72,10 +72,10 @@ import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
-import { ComponentContent } from "arkui.ComponentContent";
+import { ComponentContent } from 'arkui.ComponentContent';
 import { ArkTextPickerComponent, ArkTextPickerPeer, DividerOptions } from "#generated";
 import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
-import { ArkSliderComponent, ArkSliderPeer, SliderExtender, SliderPrefixOptions, SliderSuffixOptions } from "#generated";
+import { ArkSliderComponent, ArkSliderPeer, SliderExtender, SliderPrefixOptions, SliderSuffixOptions } from '#generated';
 import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
 import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from '#generated';
@@ -677,8 +677,8 @@ export function hookSelectSetDividerMethod(
     SelectExtender.setDivider(selectPeer.peer.ptr, value_casted)
 }
 
-export function hookSliderSetPrefixMethod(
-  node: ArkSliderComponent | ArkSliderPeer, content: ComponentContent | undefined, options?: SliderPrefixOptions | undefined): void {
+export function hookSliderSetPrefixMethod(node: ArkSliderComponent | ArkSliderPeer,
+  content: ComponentContent | undefined, options?: SliderPrefixOptions | undefined): void {
     const sliderPeer: ArkSliderPeer = node instanceof ArkSliderComponent ? (node as ArkSliderComponent).getPeer() :
        (node as ArkSliderPeer);
     if (!sliderPeer || !sliderPeer.peer || !sliderPeer.peer.ptr) {
@@ -697,8 +697,8 @@ export function hookSliderSetPrefixMethod(
     SliderExtender.setPrefix(sliderPeer.peer.ptr, ptr, valueCasted);
 }
 
-export function hookSliderSetSuffixMethod(
-  node: ArkSliderComponent | ArkSliderPeer, content: ComponentContent | undefined, options?: SliderSuffixOptions | undefined): void {
+export function hookSliderSetSuffixMethod(node: ArkSliderComponent | ArkSliderPeer,
+  content: ComponentContent | undefined, options?: SliderSuffixOptions | undefined): void {
     const sliderPeer: ArkSliderPeer = node instanceof ArkSliderComponent ? (node as ArkSliderComponent).getPeer() :
        (node as ArkSliderPeer);
     if (!sliderPeer || !sliderPeer.peer || !sliderPeer.peer.ptr) {

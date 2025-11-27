@@ -29,7 +29,8 @@
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 
 namespace OHOS::Ace::NG {
-
+constexpr uint32_t MENU_OUTLINE_COLOR = 0x19FFFFFF;
+constexpr Dimension DEFAULT_OUTLINE_WIDTH = Dimension { -1 };
 namespace Converter {
 struct SelectDividerStyle {
     SelectDivider selectDivider;
@@ -165,16 +166,54 @@ SelectDividerStyle Convert(const Ark_DividerStyleOptions& src)
     };
 }
 
+void SetMenuOutlineWidthMultiValued(std::optional<Dimension>& dst, std::optional<Dimension>& dimensionOpt)
+{
+    CHECK_EQUAL_VOID(dimensionOpt.has_value(), false);
+    Validator::ValidateNonNegative(dimensionOpt);
+    Validator::ValidateNonPercent(dimensionOpt);
+    dst = dimensionOpt;
+}
+
 template<>
 MenuParam Convert(const Ark_MenuOutlineOptions& src)
 {
     MenuParam dst;
-    dst.outlineWidth = OptConvert<BorderWidthProperty>(src.width);
-    Validator::ValidateNonPercent(dst.outlineWidth->topDimen);
-    Validator::ValidateNonPercent(dst.outlineWidth->rightDimen);
-    Validator::ValidateNonPercent(dst.outlineWidth->bottomDimen);
-    Validator::ValidateNonPercent(dst.outlineWidth->leftDimen);
-    dst.outlineColor = OptConvert<BorderColorProperty>(src.color);
+    BorderWidthProperty outlineWidth;
+    auto outlineWidthOpt = OptConvert<BorderWidthProperty>(src.width);
+    if (outlineWidthOpt.has_value()) {
+        auto outlineWidthValue = outlineWidthOpt.value();
+        if (outlineWidthValue.multiValued) {
+            SetMenuOutlineWidthMultiValued(outlineWidth.leftDimen, outlineWidthValue.leftDimen);
+            SetMenuOutlineWidthMultiValued(outlineWidth.rightDimen, outlineWidthValue.rightDimen);
+            SetMenuOutlineWidthMultiValued(outlineWidth.topDimen, outlineWidthValue.topDimen);
+            SetMenuOutlineWidthMultiValued(outlineWidth.bottomDimen, outlineWidthValue.bottomDimen);
+        } else {
+            auto borderWidth = outlineWidthValue.topDimen.value_or(DEFAULT_OUTLINE_WIDTH);
+            auto validBorderWidth = (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT)
+                                        ? DEFAULT_OUTLINE_WIDTH
+                                        : borderWidth;
+            outlineWidth.SetBorderWidth(validBorderWidth);
+        }
+    } else {
+        outlineWidth.SetBorderWidth(DEFAULT_OUTLINE_WIDTH);
+    }
+    dst.outlineWidth = outlineWidth;
+
+    BorderColorProperty outlineColor;
+    auto outlineColorOpt = OptConvert<BorderColorProperty>(src.color);
+    if (outlineColorOpt.has_value()) {
+        outlineColor = outlineColorOpt.value();
+        if (outlineColor.multiValued) {
+            Color defaultColor = Color::TRANSPARENT;
+            outlineColor.leftColor = outlineColor.leftColor.value_or(defaultColor);
+            outlineColor.rightColor = outlineColor.rightColor.value_or(defaultColor);
+            outlineColor.topColor = outlineColor.topColor.value_or(defaultColor);
+            outlineColor.bottomColor = outlineColor.bottomColor.value_or(defaultColor);
+        }
+    } else {
+        outlineColor.SetColor(Color(MENU_OUTLINE_COLOR));
+    }
+    dst.outlineColor = outlineColor;
     return dst;
 }
 } // namespace Converter

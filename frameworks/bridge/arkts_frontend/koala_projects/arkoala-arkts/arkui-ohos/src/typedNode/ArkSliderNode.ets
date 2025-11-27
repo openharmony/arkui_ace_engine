@@ -22,9 +22,9 @@ import {
 } from "../framework";
 import { LinearGradient } from "../component/dataPanel";
 import { ContentModifier } from "#handwritten";
-import { ArkSliderComponent, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions } from "#generated"
-import { ContentModifier, hookSliderSetPrefixMethod,  hookSliderSetSuffixMethod} from "#handwritten";
-import { ComponentContent } from "arkui.ComponentContent"
+import { ArkSliderComponent, SliderShowStepOptions, SliderPrefixOptions, SliderSuffixOptions } from '#generated';
+import { ContentModifier, hookSliderSetPrefixMethod, hookSliderSetSuffixMethod} from '#handwritten';
+import { ComponentContent } from 'arkui.ComponentContent';
 
 export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
     constructParam(...param: Object[]): this {
@@ -45,12 +45,6 @@ export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
     initialize(options?: SliderOptions): this {
         const options_casted = options as (SliderOptions | undefined)
         this.getPeer()?.setSliderOptionsAttribute(options_casted)
-        this.markDirty();
-        return this;
-    }
-    blockColor(value: ResourceColor | undefined): this {
-        const value_casted = value as (ResourceColor | undefined);
-        this.getPeer()?.setBlockColorAttribute(value_casted);
         this.markDirty();
         return this;
     }
