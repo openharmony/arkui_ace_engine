@@ -79,3 +79,10 @@ HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 }
+
+HWTEST_F(UIContextAtomicServiceBarAccessorTest, atomicServiceBarFakeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+}
+
