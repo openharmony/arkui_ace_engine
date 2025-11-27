@@ -27,6 +27,9 @@ protected:
 
 public:
     virtual OHOS::Ace::BaseEventInfo* GetBaseInfo() = 0;
+    std::optional<Ark_Float64> pressure_;
+    std::optional<Ark_Float64> titleX_;
+    std::optional<Ark_Float64> titleY_;
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {
