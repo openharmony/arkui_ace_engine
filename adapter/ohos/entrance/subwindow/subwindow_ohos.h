@@ -247,6 +247,7 @@ public:
     }
     void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) override;
     Rosen::WindowAnchorInfo WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type);
+    void ResizeWindowForDialog(const DialogProperties& dialogProps);
 
     // ArkTS 1.2
     void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
