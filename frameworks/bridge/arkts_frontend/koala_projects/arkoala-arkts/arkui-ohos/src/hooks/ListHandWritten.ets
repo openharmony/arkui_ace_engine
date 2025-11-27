@@ -18,15 +18,11 @@ import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from "#
 
 export class ListHandWritten {
     static hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
-        if (value !== undefined) {
-            ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
-        }
+        ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
     }
 
     static hookListItemGroupChildrenMainSizeImpl(
         node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
-        if (value !== undefined) {
-            ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
-        }
+        ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
     }
 }
