@@ -19,7 +19,7 @@ import { PeerNode } from "./PeerNode";
 export type Initializer<T = void> = (...params: FixedArray<Object>) => T;
 
 export class AttributeUpdater<T> implements AttributeModifier<T> {
-
+    public isInit: boolean = true;
     initializeModifier(instance: T): void {
     }
     onComponentChanged(component: T): void {
