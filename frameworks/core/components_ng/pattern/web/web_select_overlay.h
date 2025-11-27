@@ -72,6 +72,7 @@ struct MenuAvoidStrategyMember {
     double keyboardInsetStart = 0.0;
     double keyboardHeight = 0.0;
     double avoidFromText = 0.0;
+    double avoidFromSingleHandle = 0.0;
     double avoidPositionX = 0.0;
     double avoidPositionY = 0.0;
     double defaultAvoidY = 0.0;
@@ -201,6 +202,7 @@ public:
     void InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void SetDefaultDownPaint(MenuAvoidStrategyMember& member);
+    void SingleHandlePosition(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
     void MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
     bool QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember &member);
     void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
