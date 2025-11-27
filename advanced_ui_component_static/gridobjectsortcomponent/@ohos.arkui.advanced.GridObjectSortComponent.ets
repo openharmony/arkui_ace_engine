@@ -322,7 +322,7 @@ export struct GridObjectSortComponent {
     if (imageSize === undefined) {
       return SYMBOL_DEFAULT;
     }
-    if (typeof imageSize === 'Int') {
+    if (typeof imageSize === 'number') {
       return `${imageSize as Int}vp`;
     }
     return imageSize as Resource;
