@@ -46,7 +46,7 @@ function watch<Value>(context: StateContext, id: KoalaCallsiteKey, modified: boo
     if (scope.unchanged) {
         scope.cached
     } else {
-        if (state.modified || modified) scheduleCallback(() => listener(value))
+        if (state.modified || modified) { scheduleCallback(() => listener(value)) }
         scope.recache()
     }
 }

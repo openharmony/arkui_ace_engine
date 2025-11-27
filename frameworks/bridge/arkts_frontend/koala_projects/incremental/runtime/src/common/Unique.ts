@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from '@koalaui/common'
+import { int32, int64to32 } from '@koalaui/common'
 
 export type UID = int32
 
@@ -32,7 +32,7 @@ export class UniqueSet<U extends Unique> {
     /**
      * @returns the number of unique elements
      */
-    get size(): number {
+    get size(): int32 {
         const array = this.array
         return array ? array.length : this.latest ? 1 : 0
     }
@@ -149,7 +149,7 @@ export class UniqueMap<U extends Unique, V> {
     /**
      * @returns the number of unique keys
      */
-    get size(): number {
+    get size(): int32 {
         const array = this.array
         return array ? array.length : this.latest ? 1 : 0
     }
@@ -295,7 +295,7 @@ class Entry<U extends Unique, V> implements Unique {
     }
 }
 
-function found<U extends Unique>(array: Array<U>, uid: UID, index: int): U | undefined {
+function found<U extends Unique>(array: Array<U>, uid: UID, index: int32): U | undefined {
     if (index < array.length) {
         const element = array[index]
         if (element.uid === uid) { return element }
@@ -303,11 +303,11 @@ function found<U extends Unique>(array: Array<U>, uid: UID, index: int): U | und
     return undefined
 }
 
-function find<U extends Unique>(array: Array<U>, uid: UID): int {
+function find<U extends Unique>(array: Array<U>, uid: UID): int32 {
     let left = 0
     let right = array.length
     while (left < right) {
-        const center = ((left + right) >>> 1) as int32
+        const center = int64to32((left + right) >>> 1)
         if (array[center].uid < uid) { left = center + 1 }
         else { right = center }
     }

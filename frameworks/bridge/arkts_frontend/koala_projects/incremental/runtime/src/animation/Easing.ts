@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, uint32 } from '@koalaui/common'
+import { float64, uint32, float64toInt32 } from '@koalaui/common'
 import { EasingSupport } from './EasingSupport'
 
 /**
@@ -114,7 +114,7 @@ export class Easing {
                 value *= easing.length
                 const index = Math.floor(value)
                 if (index < easing.length) {
-                    return easing[index as uint32](value - index)
+                    return easing[float64toInt32(index)](value - index)
                 }
             }
             return easing[easing.length - 1](1)
@@ -148,7 +148,7 @@ export class Easing {
      *                               displaying each stop for equal lengths of time
      * @see EasingStepJump
      */
-    static steps(stops: uint32, jump:EasingStepJump = EasingStepJump.None): EasingCurve {
+    static steps(stops: uint32, jump: EasingStepJump = EasingStepJump.None): EasingCurve {
         if (stops === 1) {
             switch (jump) {
                 case EasingStepJump.Start: return (value: float64) => 1.0

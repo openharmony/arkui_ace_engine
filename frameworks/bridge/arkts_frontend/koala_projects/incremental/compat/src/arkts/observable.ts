@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "./types"
-
-const OBSERVABLE_TARGET = "target"
+const OBSERVABLE_TARGET = 'target'
 
 export function getObservableTarget(proxy: Object): Object {
     try {
@@ -29,7 +27,7 @@ export function getObservableTarget(proxy: Object): Object {
  * Data class decorator that makes all child fields trackable.
  */
 export function Observed() {
-    throw new Error("TypeScript class decorators are not supported yet")
+    throw new Error('TypeScript class decorators are not supported yet')
 }
 
 /** @internal */
@@ -157,7 +155,7 @@ export class ObservableHandler implements Observable {
         if (count > 1) {
             parent.children.set(this, count - 1)
         }
-        else if (count == 1) {
+        else if (count === 1) {
             parent.children.delete(this)
             this.parents.delete(parent)
         }
@@ -196,7 +194,7 @@ export function observableProxyArray<Value>(...value: Value[]): Array<Value> {
 /** @internal */
 export function observableProxy<Value>(value: Value, parent?: ObservableHandler, observed?: boolean, strict: boolean = true): Value {
     if (value instanceof ObservableHandler) return value as Value // do not proxy a marker itself
-    if (value == null || !(value instanceof Object)) return value as Value // only non-null object can be observable
+    if (value === null || !(value instanceof Object)) return value as Value // only non-null object can be observable
     const observable = ObservableHandler.find(value as Object)
     if (observable) {
         if (parent) {
@@ -230,7 +228,7 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
     const valueType = Type.of(value)
     if (valueType instanceof ClassType && !(value instanceof BaseEnum)) {
         const meta = extractObservableMetadata(value)
-        if (meta == undefined) {
+        if (meta === undefined) {
             return value as Value
         }
         if (valueType.hasEmptyConstructor()) {

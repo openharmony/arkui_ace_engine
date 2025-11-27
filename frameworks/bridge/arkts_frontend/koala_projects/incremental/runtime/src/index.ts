@@ -14,10 +14,8 @@
  */
 
 export {
-    observableProxy,
-    ObservableClass,
-    TrackableProps,
-} from '@koalaui/compat'
+    observableProxy
+} from '@koalaui/common'
 
 export {
     AnimatedState,
@@ -73,6 +71,7 @@ export {
 
 export {
     RuntimeProfiler,
+    RuntimeTracer,
 } from './common/RuntimeProfiler'
 
 export {
@@ -144,6 +143,7 @@ export {
     mutableState,
     scheduleCallback,
     updateStateManager,
+    globalMutableState,
 } from './states/GlobalStateManager'
 export {
     ArrayState,
@@ -176,4 +176,3 @@ export { PrimeNumbers } from './tree/PrimeNumbers'
 export { ReadonlyTreeNode } from './tree/ReadonlyTreeNode'
 export { TreeNode } from './tree/TreeNode'
 export { TreePath } from './tree/TreePath'
-
