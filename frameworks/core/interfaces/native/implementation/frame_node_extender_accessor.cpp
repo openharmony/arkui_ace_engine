@@ -1139,6 +1139,13 @@ Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(renderContext, false);
     return renderContext->IsOnRenderTree();
 }
+Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto isOnMainTree = frameNode->IsOnMainTree();
+    return isOnMainTree;
+}
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
 {
@@ -1210,6 +1217,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::AdoptChildImpl,
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
         FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
+        FrameNodeExtenderAccessor::IsOnMainTreeImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

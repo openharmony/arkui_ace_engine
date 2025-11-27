@@ -31078,6 +31078,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("isOnMainTree(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // FrameNodeExtenderAccessor
     namespace FrictionMotionAccessor {
     void DestroyPeerImpl(Ark_FrictionMotion peer)
@@ -46414,6 +46427,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::AdoptChildImpl,
             FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
             FrameNodeExtenderAccessor::IsOnRendertreeImpl,
+            FrameNodeExtenderAccessor::IsOnMainTreeImpl,
         };
         return &FrameNodeExtenderAccessorImpl;
     }
