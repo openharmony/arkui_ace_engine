@@ -59,7 +59,7 @@ Ark_Matrix2D RotateImpl(Ark_Matrix2D peer,
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(degree, {});
-    auto angle = Converter::Convert<double>(*degree);
+    auto angle = static_cast<double>(Converter::Convert<float>(*degree));
     auto optX = Converter::OptConvertPtr<float>(rx);
     auto optY = Converter::OptConvertPtr<float>(ry);
     peer->Rotate(angle, optX, optY);
@@ -94,9 +94,9 @@ void SetScaleXImpl(Ark_Matrix2D peer,
                    const Opt_Number* scaleX)
 {
     CHECK_NULL_VOID(peer);
-    auto sx = Converter::OptConvertPtr<double>(scaleX);
+    auto sx = Converter::OptConvertPtr<float>(scaleX);
     CHECK_NULL_VOID(sx);
-    peer->SetScaleX(*sx);
+    peer->SetScaleX(static_cast<double>(*sx));
 }
 Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
@@ -107,9 +107,9 @@ void SetScaleYImpl(Ark_Matrix2D peer,
                    const Opt_Number* scaleY)
 {
     CHECK_NULL_VOID(peer);
-    auto sy = Converter::OptConvertPtr<double>(scaleY);
+    auto sy = Converter::OptConvertPtr<float>(scaleY);
     CHECK_NULL_VOID(sy);
-    peer->SetScaleY(*sy);
+    peer->SetScaleY(static_cast<double>(*sy));
 }
 Opt_Number GetRotateXImpl(Ark_Matrix2D peer)
 {
@@ -120,9 +120,9 @@ void SetRotateXImpl(Ark_Matrix2D peer,
                     const Opt_Number* rotateX)
 {
     CHECK_NULL_VOID(peer);
-    auto rx = Converter::OptConvertPtr<double>(rotateX);
+    auto rx = Converter::OptConvertPtr<float>(rotateX);
     CHECK_NULL_VOID(rx);
-    peer->SetRotateX(*rx);
+    peer->SetRotateX(static_cast<double>(*rx));
 }
 Opt_Number GetRotateYImpl(Ark_Matrix2D peer)
 {
@@ -133,9 +133,9 @@ void SetRotateYImpl(Ark_Matrix2D peer,
                     const Opt_Number* rotateY)
 {
     CHECK_NULL_VOID(peer);
-    auto ry = Converter::OptConvertPtr<double>(rotateY);
+    auto ry = Converter::OptConvertPtr<float>(rotateY);
     CHECK_NULL_VOID(ry);
-    peer->SetRotateY(*ry);
+    peer->SetRotateY(static_cast<double>(*ry));
 }
 Opt_Number GetTranslateXImpl(Ark_Matrix2D peer)
 {
@@ -146,9 +146,9 @@ void SetTranslateXImpl(Ark_Matrix2D peer,
                        const Opt_Number* translateX)
 {
     CHECK_NULL_VOID(peer);
-    auto tx = Converter::OptConvertPtr<double>(translateX);
+    auto tx = Converter::OptConvertPtr<float>(translateX);
     CHECK_NULL_VOID(tx);
-    peer->SetTranslateX(*tx);
+    peer->SetTranslateX(static_cast<double>(*tx));
 }
 Opt_Number GetTranslateYImpl(Ark_Matrix2D peer)
 {
@@ -159,9 +159,9 @@ void SetTranslateYImpl(Ark_Matrix2D peer,
                        const Opt_Number* translateY)
 {
     CHECK_NULL_VOID(peer);
-    auto ty = Converter::OptConvertPtr<double>(translateY);
+    auto ty = Converter::OptConvertPtr<float>(translateY);
     CHECK_NULL_VOID(ty);
-    peer->SetTranslateY(*ty);
+    peer->SetTranslateY(static_cast<double>(*ty));
 }
 } // Matrix2DAccessor
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
