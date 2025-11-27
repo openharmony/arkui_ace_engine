@@ -3159,4 +3159,25 @@ HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Lev
     offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
     EXPECT_EQ(offset, OffsetF(40.0f, 40.0f));
 }
+
+/**
+ * @tc.name: TextPatternGetWindowIdFromPipeline001
+ * @tc.desc: Test TextPattern GetWindowIdFromPipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldNode->SetParent(frameNode_);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto windowId = std::make_shared<uint32_t>(pattern->GetWindowIdFromPipeline());
+    ASSERT_NE(windowId, nullptr);
+}
 } // namespace OHOS::Ace::NG
