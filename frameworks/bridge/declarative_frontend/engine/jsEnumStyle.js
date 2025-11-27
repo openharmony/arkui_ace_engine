@@ -2599,7 +2599,6 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
-    this.preTopInfo = undefined;
   }
   getPathStack() {
     return this.nativeStack?.getPathStack(this);
@@ -2607,19 +2606,20 @@ class NavPathStack {
   setPathStack(pathStack, animated) {
     this.nativeStack?.setPathStack(this, pathStack, animated);
   }
-  updatePreTopInfo(preTopInfo) {
+  updatePreTopInfo() {
     if (this.pathArray.length === undefined || this.pathArray.length === 0) {
-        this.preTopInfo = undefined;
+        this.nativeStack.preTopInfo = undefined;
         return;
     }
-    this.preTopInfo = this.pathArray[this.pathArray.length - 1];
+    this.nativeStack.preTopInfo = this.pathArray[this.pathArray.length - 1];
   }
   isPushOperation() {
-    if (this.preTopInfo === undefined) {
+    const preTopInfo = this.nativeStack.preTopInfo;
+    if (preTopInfo === undefined) {
         return true;
     }
     return this.pathArray.findIndex((info)=>{ // If the top of the previous stack exists, the next stack operation is push.
-        return info === this.preTopInfo;
+        return info === preTopInfo;
     }) !== -1;
   }
   getJsIndexFromNativeIndex(index) {

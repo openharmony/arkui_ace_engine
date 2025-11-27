@@ -71,6 +71,8 @@ public:
     void GetPathStack(const JSCallbackInfo& info);
     void SetPathStack(const JSCallbackInfo& info);
     void IsHomeName(const JSCallbackInfo& info);
+    void GetPreTopInfo(const JSCallbackInfo& info);
+    void SetPreTopInfo(const JSCallbackInfo& info);
 
 private:
     static void Constructor(const JSCallbackInfo& info);
@@ -84,6 +86,7 @@ private:
 
     std::function<void()> onStateChangedCallback_;
     std::function<void(const JSRef<JSVal>)> onPopCallback_;
+    JSRef<JSVal> preTopInfo_;
     std::function<bool(const std::string&)> isHomeNameCallback_;
     int32_t containerCurrentId_;
 };
