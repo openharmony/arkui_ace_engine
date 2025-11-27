@@ -214,14 +214,16 @@ void ScrollBarProxy::StartScrollBarAnimator() const
     }
 }
 
-void ScrollBarProxy::StopScrollBarAnimator() const
+void ScrollBarProxy::StopScrollBarAnimator(bool isStopDisappearAnimator) const
 {
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
             continue;
         }
-        scrollBar->StopDisappearAnimator();
+        if (isStopDisappearAnimator) {
+            scrollBar->StopDisappearAnimator();
+        }
         scrollBar->StopMotion();
         // AccessibilityEventType::SCROLL_START
     }

@@ -87,7 +87,7 @@ public:
     /*
      * Stop animation of ScrollBar, and show ScrollBar if needed, when scrollable node is scrolling.
      */
-    void StopScrollBarAnimator() const;
+    void StopScrollBarAnimator(bool isStopDisappearAnimator = true) const;
 
     /*
      * Notify scrollable node to snap scroll, called by scroll bar.
