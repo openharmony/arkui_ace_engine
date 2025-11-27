@@ -230,7 +230,8 @@ export class ElementIdToCustomProperties {
     static _elementIdToCustomProperties = new Map<number, Map<string, CustomProperty>>();
     static _commonMethodModifierMap = new Map<CommonMethodModifier, Map<string, CustomProperty>>();
 }
-export function hookCustomPropertyImpl(component: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode, name: string, value: CustomProperty, modifier?: CommonMethodModifier | undefined): void {
+export function hookCustomPropertyImpl(component: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode,
+    name: string, value: CustomProperty, modifier?: CommonMethodModifier | undefined): void {
     let commonMethodModifier: CommonMethodModifier;
     if (component instanceof ArkCommonMethodComponent || component instanceof ArkBaseNode) {
         const nodeId = component.getPeer().getId();
