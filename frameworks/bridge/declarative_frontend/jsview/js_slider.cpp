@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 
+#include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/slider_model_impl.h"
@@ -72,6 +73,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("create", &JSSlider::Create, opt);
     JSClass<JSSlider>::StaticMethod("blockColor", &JSSlider::SetBlockColor);
     JSClass<JSSlider>::StaticMethod("trackColor", &JSSlider::SetTrackColor);
+    JSClass<JSSlider>::StaticMethod("trackColorMetrics", &JSSlider::SetTrackColorMetrics);
     JSClass<JSSlider>::StaticMethod("trackThickness", &JSSlider::SetThickness);
     JSClass<JSSlider>::StaticMethod("selectedColor", &JSSlider::SetSelectedColor);
     JSClass<JSSlider>::StaticMethod("minLabel", &JSSlider::SetMinLabel);
@@ -324,6 +326,52 @@ bool JSSlider::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient&
         NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
         gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
+}
+
+void JSSlider::SetTrackColorMetrics(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    NG::Gradient gradient;
+    if (ConvertColorMetricsLinearGradientColor(info[0], gradient)) {
+        SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, false);
+    } else {
+        SliderModel::GetInstance()->ResetTrackColor();
+    }
+}
+
+bool JSSlider::ConvertColorMetricsLinearGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
+{
+    if (param->IsNull() || param->IsUndefined() || !param->IsObject()) {
+        return false;
+    }
+
+    JSColorMetricsLinearGradient* jsColorMetricsLinearGradient =
+        JSRef<JSObject>::Cast(param)->Unwrap<JSColorMetricsLinearGradient>();
+    if (!jsColorMetricsLinearGradient || jsColorMetricsLinearGradient->GetColorMetricsGradient().empty()) {
+        return false;
+    }
+
+    size_t size = jsColorMetricsLinearGradient->GetColorMetricsGradient().size();
+    if (size == 1) {
+        // If there is only one color, then this color is used for both the begin and end side.
+        NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(
+            LinearColor(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().color));
+        gradientColor.SetDimension(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().offset);
+        gradient.AddColor(gradientColor);
+        return true;
+    }
+
+    for (size_t colorIndex = 0; colorIndex < size; colorIndex++) {
+        NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(
+            LinearColor(jsColorMetricsLinearGradient->GetColorMetricsGradient().at(colorIndex).color));
+        gradientColor.SetDimension(jsColorMetricsLinearGradient->GetColorMetricsGradient().at(colorIndex).offset);
         gradient.AddColor(gradientColor);
     }
     return true;

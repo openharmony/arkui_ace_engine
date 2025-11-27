@@ -24746,6 +24746,10 @@ class ArkSliderComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TrackColorModifier.identity, TrackColorModifier, value);
     return this;
   }
+  trackColorMetrics(value) {
+    modifierWithKey(this._modifiersWithKeys, TrackColorMetricsModifier.identity, TrackColorMetricsModifier, value);
+    return this;
+  }
   selectedColor(value) {
     modifierWithKey(this._modifiersWithKeys, SelectColorModifier.identity, SelectColorModifier, value);
     return this;
@@ -25059,6 +25063,23 @@ class TrackColorModifier extends ModifierWithKey {
   }
 }
 TrackColorModifier.identity = Symbol('sliderTrackColor');
+class TrackColorMetricsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetTrackColorMetrics(node);
+    }
+    else {
+      getUINativeModule().slider.setTrackColorMetrics(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TrackColorMetricsModifier.identity = Symbol('sliderTrackColorMetrics');
 class SelectColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

@@ -3645,6 +3645,10 @@ void ArkUINativeModule::RegisterSliderAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetTrackBackgroundColor));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTrackBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetTrackBackgroundColor));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTrackColorMetrics"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetTrackColorMetrics));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTrackColorMetrics"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetTrackColorMetrics));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSelectColor));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectColor"),
