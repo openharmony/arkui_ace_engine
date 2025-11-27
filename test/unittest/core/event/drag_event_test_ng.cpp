@@ -790,6 +790,23 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DragEventTestNg009
+ * @tc.desc: Invoke GetPreviewPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
+{
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
+}
+
+/**
  * @tc.name: DragEventTestNg008
  * @tc.desc: Create DragEventActuator and invoke HideTextAnimation function.
  * @tc.type: FUNC
@@ -835,23 +852,6 @@ HWTEST_F(DragEventTestNg, DragEventTestNg008, TestSize.Level1)
     gestureEventHub->SetTextDraggable(true);
     dragEventActuator->HideTextAnimation();
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), true);
-}
-
-/**
- * @tc.name: DragEventTestNg009
- * @tc.desc: Invoke GetPreviewPixelMap.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
-{
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
-
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
-    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
 }
 
 /**
