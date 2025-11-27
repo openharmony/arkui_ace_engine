@@ -158,6 +158,12 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.localStoragebackStore_) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: constructor: is setting LocalStorage instance twice. Application error.`);
     }
+    if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(instance)) {
+      const staticStorage = instance;
+      instance = new LocalStorage({});
+      instance.setProxy(staticStorage);
+      InteropExtractorModule.localStorageSetProxy(staticStorage, instance);
+    }
     this.localStoragebackStore_ = instance;
   }
 
