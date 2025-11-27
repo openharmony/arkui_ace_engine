@@ -226,11 +226,11 @@ void IsCoveredByBrother(const RefPtr<NG::FrameNode>& frameNode, bool& nodeAccess
     CHECK_EQUAL_VOID(nodeAccessibilityVisible, false);
     auto parentFrameNode = frameNode;
     do {
-        parentFrameNode = GetParentFrameNodeWithVirtualNode(frameNode);
+        parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
         CHECK_NULL_BREAK(parentFrameNode);
 
         auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        CHECK_NULL_BREAK(accessibilityProperty);
+        CHECK_NULL_CONTINUE(accessibilityProperty);
 
         NG::RectF parentRect;
         auto find = accessibilityProperty->GetAccessibilityInnerVisibleRect(parentRect);
