@@ -55,6 +55,7 @@ public:
 
 protected:
     void OnAttachToFrameNode() override;
+    void SetWindowSyncLoad(const RefPtr<FrameNode>& window);
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -123,6 +124,7 @@ protected:
     bool attachToFrameNodeFlag_ = false;
     bool isBlankForSnapshot_ = false;
     bool isPrelaunch_ = false;
+    bool syncStartingWindow_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();

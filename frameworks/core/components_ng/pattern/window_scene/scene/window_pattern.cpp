@@ -500,6 +500,7 @@ void WindowPattern::CreateASStartingWindow()
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
     CHECK_NULL_VOID(startingWindow_);
+    SetWindowSyncLoad(startingWindow_);
     auto asStartingLayoutProperty = startingWindow_->GetLayoutProperty<StackLayoutProperty>();
     CHECK_NULL_VOID(asStartingLayoutProperty);
     asStartingLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -566,6 +567,15 @@ bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
     return true;
 }
 
+void WindowPattern::SetWindowSyncLoad(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto imagePattern = node->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(syncStartingWindow_);
+    ACE_SCOPED_TRACE("WindowPattern::SetWindowSyncLoad set sync [%d]", syncStartingWindow_);
+}
+
 void WindowPattern::HideStartingWindow()
 {
     session_->SetHidingStartingWindow(true);
@@ -598,6 +608,7 @@ void WindowPattern::CreateStartingWindow()
         HideStartingWindow();
         startingWindow_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        SetWindowSyncLoad(startingWindow_);
         return;
     }
 
@@ -622,24 +633,28 @@ void WindowPattern::CreateStartingWindow()
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
+        SetWindowSyncLoad(startingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    SetWindowSyncLoad(startingWindow_);
     auto imageLayoutProperty = startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
-    auto sourceInfo = ImageSourceInfo(
-        startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_, sessionInfo.moduleName_);
-    auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
+    ImageSourceInfo sourceInfo;
     auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
     if (preLoadPixelMap != nullptr) {
         auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
         sourceInfo = ImageSourceInfo(pixelMap);
         Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
+    } else {
+        sourceInfo = ImageSourceInfo(startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_,
+            sessionInfo.moduleName_);
     }
+    auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
