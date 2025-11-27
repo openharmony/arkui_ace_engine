@@ -35,6 +35,11 @@ void ClipboardImpl::GetSpanStringData(
     const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {}
 
+void ClipboardImpl::GetSpanStringData(
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&, bool&)>& callback,
+    bool syncMode)
+{}
+
 RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
 {
     return AceType::MakeRefPtr<PasteDataMix>();
