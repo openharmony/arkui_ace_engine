@@ -1383,18 +1383,19 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto offset = geometryNode->GetFrameOffset();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    RectF paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
     if (indexInListItemGroup_ != -1) {
         auto parentFrameNode = GetParentFrameNode();
         CHECK_NULL_RETURN(parentFrameNode, false);
-        auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-        CHECK_NULL_RETURN(parentGeometryNode, false);
-        auto parentOffset = parentGeometryNode->GetFrameOffset();
+        auto parentRenderContext = parentFrameNode->GetRenderContext();
+        CHECK_NULL_RETURN(parentRenderContext, false);
+        auto parentOffset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
         offset = offset + parentOffset;
     }
-    auto size = geometryNode->GetFrameSize();
+    auto size = paintRect.GetSize();
     auto xOffset = localPoint.GetX() - offset.GetX();
     auto yOffset = localPoint.GetY() - offset.GetY();
     if (GetAxis() == Axis::VERTICAL) {
