@@ -216,6 +216,11 @@
       OHOS::Ace::PixelMapDrawableDescriptor::*;
       OHOS::Ace::LayeredDrawableDescriptor::*;
       OHOS::Ace::AnimatedDrawableDescriptor::*;
+      "OHOS::Ace::ControlledAnimator::Finish()";
+      "OHOS::Ace::ControlledAnimator::Pause()";
+      "OHOS::Ace::ControlledAnimator::Forward()";
+      "OHOS::Ace::ControlledAnimator::GetControlStatus() const";
+      OHOS::Ace::DrawableDescriptorInfo::DrawableDescriptorInfo*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
