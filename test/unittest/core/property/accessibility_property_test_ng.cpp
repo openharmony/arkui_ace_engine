@@ -23,6 +23,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/column_model.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
@@ -1304,5 +1305,97 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest043, TestSize.Lev
     accessibilityProperty.SetHost(hostBak);
     auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(true);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest044
+ * @tc.desc: NotConsumeByModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest044, TestSize.Level1)
+{
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->NotConsumeByModal(buttonNode));
+    NG::PointF hoverPoint(0, 0);
+    EXPECT_TRUE(accessibilityProperty->CheckHoverConsumeByComponent(buttonNode, hoverPoint));
+
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<BubblePattern>(ElementRegister::GetInstance()->MakeUniqueId(), "popupNode"));
+    ASSERT_NE(popupNode, nullptr);
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateIsModal(false);
+    accessibilityProperty = popupNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->NotConsumeByModal(popupNode));
+    EXPECT_FALSE(accessibilityProperty->CheckHoverConsumeByComponent(popupNode, hoverPoint));
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest045
+ * @tc.desc: eventHub branch of IsAccessibilityFocusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest045, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest046
+ * @tc.desc: gestureEventHub branch of IsAccessibilityFocusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest046, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, false);
+
+    auto gestureEventHubBak = eventHub->GetGestureEventHub();
+    auto gestureEventHubNew = eventHub->GetOrCreateGestureEventHub();
+    EXPECT_TRUE(gestureEventHubNew != nullptr);
+
+    gestureEventHubNew->longPressEventActuator_ =
+        AceType::MakeRefPtr<LongPressEventActuator>(gestureEventHubNew);
+    result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, true);
+
+    gestureEventHubNew->clickEventActuator_ =
+        AceType::MakeRefPtr<ClickEventActuator>(gestureEventHubNew);
+    result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, true);
+
+    gestureEventHubNew->longPressEventActuator_ = nullptr;
+    result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, true);
+
+    gestureEventHubNew->clickEventActuator_ = nullptr;
+    result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, false);
+
+    eventHub->SetGestureEventHub(gestureEventHubBak);
 }
 } // namespace OHOS::Ace::NG

@@ -473,10 +473,7 @@ bool AccessibilityProperty::IsTagInSubTreeComponent(const std::string& tag)
 bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
-    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, false);
-    auto isModal = accessibilityProperty->IsAccessibilityModal();
-    return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end() && isModal;
+    return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
 }
 
 bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node)
@@ -485,6 +482,15 @@ bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     return accessibilityProperty->IsAccessibilityHoverPriority();
+}
+
+bool AccessibilityProperty::NotConsumeByModal(const RefPtr<FrameNode>& node)
+{
+    CHECK_EQUAL_RETURN(IsTagInModalDialog(node), false, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto isModal = accessibilityProperty->IsAccessibilityModal(); // wrapper of not modal dialog, not force consume.
+    return !isModal;
 }
 
 bool AccessibilityProperty::CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node)
@@ -502,6 +508,7 @@ bool AccessibilityProperty::CheckHoverConsumeByComponent(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(node, true);
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, true);
+    CHECK_EQUAL_RETURN(NotConsumeByModal(node), true, false);
     return accessibilityProperty->IsAccessibilityHoverConsume(point);
 }
 
@@ -639,8 +646,6 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
     bool focusable = false;
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        bool isModalDialog = (TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) == TAGS_MODAL_DIALOG_COMPONENT.end()) ||
-            (accessibilityProperty == nullptr) || (accessibilityProperty->IsAccessibilityModal());
         if (accessibilityProperty != nullptr) {
             auto level = accessibilityProperty->GetAccessibilityLevel();
             if (level == AccessibilityProperty::Level::YES_STR) {
@@ -650,27 +655,25 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             if (level == AccessibilityProperty::Level::NO_STR) {
                 break;
             }
-            if ((accessibilityProperty->IsAccessibilityGroup() ||
+            if (accessibilityProperty->IsAccessibilityGroup() ||
                 accessibilityProperty->HasAccessibilityVirtualNode() ||
                 accessibilityProperty->HasAction() ||
                 accessibilityProperty->HasAccessibilityTextOrDescription() ||
-                !accessibilityProperty->GetText().empty()) &&
-                isModalDialog) {
+                !accessibilityProperty->GetText().empty()) {
                 focusable = true;
                 break;
             }
         }
 
         auto eventHub = node->GetEventHub<EventHub>();
-        if (!eventHub->IsEnabled() && isModalDialog) {
+        if (!eventHub->IsEnabled()) {
             focusable = true;
             break;
         }
         auto gestureEventHub = eventHub->GetGestureEventHub();
         if (gestureEventHub != nullptr) {
-            if ((gestureEventHub->IsAccessibilityClickable() ||
-                gestureEventHub->IsAccessibilityLongClickable()) &&
-                isModalDialog) {
+            if (gestureEventHub->IsAccessibilityClickable() ||
+                gestureEventHub->IsAccessibilityLongClickable()) {
                 focusable = true;
                 break;
             }

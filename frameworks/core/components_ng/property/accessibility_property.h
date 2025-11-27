@@ -735,6 +735,8 @@ private:
 
     bool HasAction() const;
 
+    static bool NotConsumeByModal(const RefPtr<FrameNode>& node);
+
     static bool CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node);
 
     static bool CheckHoverConsumeByComponent(const RefPtr<FrameNode>& node, const NG::PointF& point);

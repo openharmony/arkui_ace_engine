@@ -28,6 +28,8 @@ public:
 
     ~SheetWrapperAccessibilityProperty() override = default;
 
+    void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) override;
+
     bool IsAccessibilityModal() const override;
 
 private:
