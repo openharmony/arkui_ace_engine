@@ -266,11 +266,16 @@ const Monitor = function (key : string, ...keys: string[]): (target: any, _: any
 
 const SyncMonitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
   // Path can end with the star
+  const isValidPath = (typeof key === 'string') && keys.every(item => typeof item === 'string');
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor): void {
+    const monitorFunc = descriptor.value;
+    if (!isValidPath) {
+      const message = `@SyncMonitor '${monitorFunc.name}' owned by '${target.constructor.name}' - failed to initialize, path type not valid, path(s) must be of type string`;
+      throw new BusinessError(SYNC_MONITOR_FAIL_PATH_ILLEGAL, message);
+    }
     stateMgmtConsole.debug(`@SyncMonitor('${pathsUniqueString}')`);
     let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + target.constructor.name);
-    const monitorFunc = descriptor.value;
     target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc
                       : target[watchProp] = { [pathsUniqueString]: monitorFunc };
   };

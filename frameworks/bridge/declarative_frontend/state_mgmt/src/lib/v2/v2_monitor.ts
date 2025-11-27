@@ -28,11 +28,11 @@ class MonitorPathHelper {
     return path.endsWith('.*');
   }
 
-  public static isWildcardPath(path: string): boolean {
+  public static isWildcardSubPath(path: string): boolean {
     return path === '*';
   }
 
-  // "a.b.c.*" => "a.b.c";
+  // 'a.b.c.*' => 'a.b.c';
   public static pathBeforeWildcard(path: string): string {
     if (!MonitorPathHelper.hasWildcardEnding(path)) {
       return path;
@@ -42,9 +42,7 @@ class MonitorPathHelper {
 
   public static isValidForSyncMonitor(path: string): boolean {
     let count = path.split('*').length - 1;
-    // Allow top level '*'
-    return ((count <= 0)
-      || (count == 1 && (path.endsWith('.*') || (path == '*'))));
+    return ((count <= 0) || (count == 1 && path.endsWith('.*')));
   }
 
   public static isValidForMonitor(path: string): boolean {
@@ -56,6 +54,7 @@ class MonitorValueV2<T> {
   public before?: T;
   public now?: T;
   public path: string;
+  private reportedPath_: string;
   // properties on the path
   public props: string[];
   public id: number;
@@ -86,9 +85,10 @@ class MonitorValueV2<T> {
 
   constructor(path: string, id?: number) {
     this.path = path;
+    this.reportedPath_ = path;
     this.dirty = false;
     this.props = path.split('.');
-    this.wildCard_ = MonitorPathHelper.isWildcardPath(this.props[this.props.length - 1]);
+    this.wildCard_ = MonitorPathHelper.isWildcardSubPath(this.props[this.props.length - 1]);
     this.id = id ? id : -1;
     this.isAccessible = false;
     this.wildcardPath_ = undefined;
@@ -156,6 +156,13 @@ class MonitorValueV2<T> {
   setLastSureValuePath(path: MonitorValueV2<T> | undefined): void {
     this.lastSureValuePath_ = path;
   }
+
+  getReportedPath(): string {
+    return this.reportedPath_;
+  }
+  setReportedPath(path): void {
+    this.reportedPath_ = path;
+  }
 }
 
 /**
@@ -172,6 +179,7 @@ class MonitorV2 {
   public static readonly WATCH_INSTANCE_PREFIX = '___watch__obj_';
   public static readonly SYNC_MONITOR_PREFIX = '___sync_monitor_';
   public static readonly OB_ANY = '___observe_any_property';
+  public static readonly LSV_PREFIX = '000_lsv_';
 
   // start with high number to avoid same id as elmtId for components/Computed.
   // 0 --- 0x1000000000 ----- 0x1000000000000 --------- 0x1010000000000 -------- 0x1015000000000 ---- 0x1020000000000 ----
@@ -206,7 +214,7 @@ class MonitorV2 {
       this.watchId_ = ++MonitorV2.nextWatchId_;
       paths.forEach(path => {
         if (!MonitorPathHelper.isValidForMonitor(path)) {
-          stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
+          stateMgmtConsole.applicationError(this.errorMessage(path, 'not a valid path string'));
           return;
         }
         this.values_.set(path, new MonitorValueV2<unknown>(path));
@@ -231,27 +239,29 @@ class MonitorV2 {
 
   // path - path to monitored value separated with dots
   // @Monitor does not use addPath method
-  public addPath(path: string): MonitorValueV2<unknown> | undefined {
+  public addPath(path: string, lsv: boolean = false): MonitorValueV2<unknown> | undefined {
     if ((!this.isSyncDecorator() && !MonitorPathHelper.isValidForMonitor(path)) ||
       (this.isSyncDecorator() && !MonitorPathHelper.isValidForSyncMonitor(path))) {
-      stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
+      stateMgmtConsole.applicationError(this.errorMessage(path, 'not a valid path string'));
       return undefined;
     }
-    if (this.values_.has(path)) {
-      stateMgmtConsole.applicationError(`AddMonitor ${this.getMonitorFuncName()} failed when adding path ${path} because duplicate key`);
-      let monitorPath = this.values_.get(path)!;
+    const pathkey = (lsv? MonitorV2.LSV_PREFIX : '') + path;
+    if (this.values_.has(pathkey)) {
+      stateMgmtConsole.applicationError(this.errorMessage(path, 'failed when adding duplicate path'));
+      let monitorPath = this.values_.get(pathkey)!;
       return monitorPath;
     }
     let monitorValue = new MonitorValueV2<unknown>(path, this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_)
     if (this.isSyncDecorator() && MonitorPathHelper.hasWildcardEnding(path)) {
-      let lastSureValuePath = this.addPath(MonitorPathHelper.pathBeforeWildcard(path));
+      let lastSureValuePath = this.addPath(MonitorPathHelper.pathBeforeWildcard(path), true);
       lastSureValuePath?.setWildcardPath(monitorValue);
+      lastSureValuePath?.setReportedPath(path);
       monitorValue.setLastSureValuePath(lastSureValuePath);
     }
     // Add wildcard path after last sure value path
     // Path with last sure value will be processed before path
     // with the wildcard on initial evaluation.
-    this.values_.set(path, monitorValue);
+    this.values_.set(pathkey, monitorValue);
     return monitorValue;
   }
 
@@ -274,6 +284,10 @@ class MonitorV2 {
     return this.isSyncMonitorDecorator_;
   }
 
+  public isMonitorDecorator(): boolean {
+    return this.isMonitorDecorator_;
+  }
+
   public getWatchId(): number {
     return this.watchId_;
   }
@@ -294,7 +308,7 @@ class MonitorV2 {
     let ret = new Array<string>();
     this.values_.forEach(monitorValue => {
       if (monitorValue.isDirty()) {
-        ret.push(monitorValue.path);
+        ret.push(monitorValue.getReportedPath());
       }
     });
     return ret;
@@ -339,17 +353,17 @@ class MonitorV2 {
   // Called by ObserveV2 once if any monitored path was dirty.
   // Executes the monitor function.
   public runMonitorFunction(): void {
-    stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
+    stateMgmtConsole.debug(`${this.getDecoratorName()} function '${this.monitorFunction.name}' exec ...`);
     if (this.dirty.length === 0) {
       stateMgmtConsole.debug(`No dirty values! not firing!`);
       return;
     }
     try {
-      // exec @Monitor/AddMonitor function
+      // exec @Monitor/AddMonitor/@SyncMonitor function
       MonitorV2.runningCount++;
       this.monitorFunction.call(this.target_, this);
     } catch (e) {
-      stateMgmtConsole.applicationError(`AddMonitor exception caught for ${this.monitorFunction.name}`, e.toString());
+      stateMgmtConsole.applicationError(`${this.getDecoratorName()} exception caught for ${this.monitorFunction.name}`, e.toString());
       throw e;
     } finally {
       this.resetMonitor();
@@ -359,7 +373,7 @@ class MonitorV2 {
 
   public notifyChange(): void {
     if (this.bindRun(/* is init / first run */ false)) {
-      stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
+      stateMgmtConsole.debug(`${this.getDecoratorName()} function '${this.monitorFunction.name}' exec ...`);
       this.runMonitorFunction();
     }
   }
@@ -384,16 +398,12 @@ class MonitorV2 {
     let value = undefined;
     if (this.isSyncDecorator() && monitoredValue.isWildcard()) {
       let lastSureValue = monitoredValue.getLastSureValuePath()?.now
-      if (lastSureValue === undefined && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
-        // For single top level wildcard
-        lastSureValue = this.target_;
-      }
       if (lastSureValue !== undefined && (lastSureValue instanceof Object)) {
         ObserveV2.getObserve().startRecordDependencies(this, monitoredValue.id);
         if (ObserveV2.IsObservedObjectV2(lastSureValue)) {
           ObserveV2.getObserve().addRef(lastSureValue as unknown as Object, MonitorV2.OB_ANY);
         } else if (ObserveV2.IsProxiedObservedV2(lastSureValue) || ObserveV2.IsMakeObserved(lastSureValue)) {
-          // Proxy handler will add ref to "make observed" container object
+          // Proxy handler will add ref to 'make observed' container object
           lastSureValue[MonitorV2.OB_ANY];
         } else {
           // That should not happen
@@ -405,14 +415,14 @@ class MonitorV2 {
       }
     } else {
       ObserveV2.getObserve().startRecordDependencies(this, monitoredValue.id);
-      [success, value] = this.analysisProp(false, monitoredValue);
+      [success, value] = this.analysisProp(initRun, monitoredValue);
       ObserveV2.getObserve().stopRecordDependencies();
     }
     if (!success) {
-      stateMgmtConsole.debug(`AddMonitor input path no longer valid.`);
+      stateMgmtConsole.debug(this.errorMessage(monitoredValue.getReportedPath(), 'input path no longer valid.'));
       return monitoredValue.setNotFound(initRun);
     }
-    let retValue = monitoredValue.setValue(initRun, value); // dirty?
+    let retValue = monitoredValue.setValue(initRun, value);
 
     // Last sure value updated (that is path before '.*', fireChange called),
     // because of that we have to record dependency again for
@@ -461,15 +471,19 @@ class MonitorV2 {
       if (obj && typeof obj === 'object' && Reflect.has(obj, prop)) {
         obj = obj[prop];
       } else {
-        isInit && stateMgmtConsole.frequentApplicationError(`${this.debugInfo()} path ${monitoredValue.path} initialize not found, make sure it exists!`);
+        isInit && stateMgmtConsole.frequentApplicationError(this.errorMessage(monitoredValue.getReportedPath(), 'initialize not found, make sure it exists!'));
         return [false, undefined];
       }
     }
     return [true, obj as unknown as T];
   }
 
-  public debugInfo(): string {
-    return `@Monitor ${this.monitorFunction.name} owned by ${this.target_.constructor.name}`;
+  public getDecoratorName(): string {
+    return (this.isSyncDecorator()? '@SyncMonitor' : ((this.isMonitorDecorator()? '@Monitor': 'AddMonitor')));
+  }
+
+  public errorMessage(path: string, description: string): string {
+    return `${this.getDecoratorName()} '${this.monitorFunction.name}' owned by '${this.target_.constructor.name}' path: '${path}' - ${description}`;
   }
 
   public static getMonitorIds(target: Object): number[] {
@@ -484,6 +498,11 @@ class MonitorV2 {
       }
       // get AddMonitor id
       meta1 = target[ObserveV2.ADD_MONITOR_REFS];
+      if (meta1 && typeof meta1 === 'object') {
+        monitorIds = [...monitorIds, ...Array.from(Object.values(meta1)).map((monitor: MonitorV2) => monitor.watchId_)];
+      }
+      // get @SyncMonitor id
+      meta1 = target[ObserveV2.SYNC_MONITOR_REFS];
       if (meta1 && typeof meta1 === 'object') {
         monitorIds = [...monitorIds, ...Array.from(Object.values(meta1)).map((monitor: MonitorV2) => monitor.watchId_)];
       }
