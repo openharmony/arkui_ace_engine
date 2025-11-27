@@ -68,6 +68,12 @@ HWTEST_F(StateStylesOpsAccessorTest, onStateStyleChangeTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 }
 
+HWTEST_F(DatePickerDialogTest, datePickerDialogFakeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+}
+
 HWTEST_F(DimensionUnitTest, DimensionUnitFakeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
