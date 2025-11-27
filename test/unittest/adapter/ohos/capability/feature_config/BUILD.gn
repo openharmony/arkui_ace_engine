@@ -23,53 +23,30 @@ ohos_unittest("arkui_feature_param_manager_test") {
 
   public_configs = [ ":arkui_feature_param_manager_config" ]
   sources = [
-    "$ace_root/adapter/ohos/capability/feature_config/config_xml_parser_base.cpp",
-
-    # xml parser
-    "$ace_root/adapter/ohos/capability/feature_config/feature_param_manager.cpp",
-    "$ace_root/adapter/ohos/capability/feature_config/features/sync_load_parser.cpp",
-    "$ace_root/adapter/ohos/capability/feature_config/features/ui_correction_parser.cpp",
-    "$ace_root/adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.cpp",
     "arkui_feature_param_manager_test.cpp",
-
-    # mock
-    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-  ]
-
-  external_deps = [
-    "googletest:gmock",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-    "libxml2:libxml2",
-  ]
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-}
-
-ohos_unittest("parser_test") {
-  module_out_path = frameworks_test_output_path
-
-  public_configs = [ ":arkui_feature_param_manager_config" ]
-  sources = [
-    "$ace_root/adapter/ohos/capability/feature_config/config_xml_parser_base.cpp",
-
-    # xml parser
-    "$ace_root/adapter/ohos/capability/feature_config/feature_param_manager.cpp",
-    "$ace_root/adapter/ohos/capability/feature_config/features/sync_load_parser.cpp",
-    "$ace_root/adapter/ohos/capability/feature_config/features/ui_correction_parser.cpp",
-    "$ace_root/adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.cpp",
     "parser_test.cpp",
 
+    # xml parser
+    "$ace_root/adapter/ohos/capability/feature_config/config_parser_base.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/feature_param_manager.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/features/sync_load_parser.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/features/ui_correction_parser.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.cpp",
+
     # mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
   ]
+
   external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "libxml2:libxml2",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

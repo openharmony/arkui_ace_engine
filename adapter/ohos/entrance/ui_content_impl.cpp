@@ -2113,7 +2113,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
     SetDeviceProperties();
     // init xml config for performance feature
-    FeatureParamManager::GetInstance().Init(bundleName_);
+    FeatureParamManager::GetInstance().Init(bundleName_, metaData);
     bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
     });

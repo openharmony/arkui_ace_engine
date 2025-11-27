@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
+#include "adapter/ohos/capability/feature_config/config_parser_base.h"
 
 #include <array>
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "base/log/log.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
 
 namespace OHOS::Ace {
 
@@ -36,12 +37,12 @@ static constexpr char CONFIG_PATH[] = "/arkui/arkui_async_build_config.xml";
 static constexpr char UI_CORRECTION_CONFIG_PATH[] = "arkui/arkui_layout_config.xml";
 } // namespace
 
-ConfigXMLParserBase::~ConfigXMLParserBase()
+ConfigParserBase::~ConfigParserBase()
 {
     Destroy();
 }
 
-void ConfigXMLParserBase::Destroy()
+void ConfigParserBase::Destroy()
 {
     if (xmlSysDocument_ != nullptr) {
         xmlFreeDoc(xmlSysDocument_);
@@ -49,80 +50,80 @@ void ConfigXMLParserBase::Destroy()
     }
 }
 
-ParseErrCode ConfigXMLParserBase::LoadPerformanceConfigXML()
+ParseErrCode ConfigParserBase::LoadPerformanceConfigXML()
 {
     for (const std::string& configRootPath : SYS_PATH) {
         std::string graphicFilePath = configRootPath + CONFIG_PATH;
         xmlSysDocument_ = xmlReadFile(graphicFilePath.c_str(), nullptr, 0);
         if (xmlSysDocument_ != nullptr) {
-            LOGD("ConfigXMLParserBase success to get sys graphic config: %{public}s", graphicFilePath.c_str());
+            LOGD("ConfigParserBase success to get sys graphic config: %{public}s", graphicFilePath.c_str());
             break;
         }
     }
     if (!xmlSysDocument_) {
-        LOGE("ConfigXMLParserBase read system file failed");
+        LOGE("ConfigParserBase read system file failed");
         return PARSE_SYS_FILE_LOAD_FAIL;
     }
     return PARSE_EXEC_SUCCESS;
 }
 
-ParseErrCode ConfigXMLParserBase::LoadUICorrectionConfigXML()
+ParseErrCode ConfigParserBase::LoadUICorrectionConfigXML()
 {
     for (const std::string& configRootPath : SYS_PATH) {
         std::string uiCorrectionConfigPath = configRootPath + UI_CORRECTION_CONFIG_PATH;
         xmlSysDocument_ = xmlReadFile(uiCorrectionConfigPath.c_str(), nullptr, 0);
         if (xmlSysDocument_ != nullptr) {
-            LOGD("ConfigXMLParserBase success to get sys UI correction config: %{public}s",
+            LOGD("ConfigParserBase success to get sys UI correction config: %{public}s",
                 uiCorrectionConfigPath.c_str());
             break;
         }
     }
     if (!xmlSysDocument_) {
-        LOGE("ConfigXMLParserBase read system UI correction config file failed");
+        LOGE("ConfigParserBase read system UI correction config file failed");
         return PARSE_SYS_FILE_LOAD_FAIL;
     }
     return PARSE_EXEC_SUCCESS;
 }
 
-ParseErrCode ConfigXMLParserBase::ParsePerformanceConfigXMLWithBundleName(const std::string& bundleName)
+ParseErrCode ConfigParserBase::ParsePerformanceConfigXMLWithBundleName(const std::string& bundleName)
 {
     if (!xmlSysDocument_) {
-        LOGE("ConfigXMLParserBase xmlSysDocument is empty, LoadGraphicConfiguration first");
+        LOGE("ConfigParserBase xmlSysDocument is empty, LoadGraphicConfiguration first");
         return PARSE_SYS_FILE_LOAD_FAIL;
     }
     xmlNode* root = xmlDocGetRootElement(xmlSysDocument_);
     if (root == nullptr) {
-        LOGE("ConfigXMLParserBase xmlDocGetRootElement failed");
+        LOGE("ConfigParserBase xmlDocGetRootElement failed");
         return PARSE_GET_ROOT_FAIL;
     }
 
     auto ret = ParseInternalWithBundleName(*root, bundleName);
     if (ret != PARSE_EXEC_SUCCESS) {
-        LOGE("ConfigXMLParserBase ParseInternalWithBundleName failed");
+        LOGE("ConfigParserBase ParseInternalWithBundleName failed");
     }
     return ret;
 }
 
-ParseErrCode ConfigXMLParserBase::ParseUICorrectionConfigXMLWithBundleName(const std::string& bundleName)
+ParseErrCode ConfigParserBase::ParseUICorrectionConfigXMLWithBundleName(const std::string& bundleName)
 {
     if (!xmlSysDocument_) {
-        LOGE("ConfigXMLParserBase xmlSysDocument is empty, LoadUICorrectionConfiguration first");
+        LOGE("ConfigParserBase xmlSysDocument is empty, LoadUICorrectionConfiguration first");
         return PARSE_SYS_FILE_LOAD_FAIL;
     }
     xmlNode* root = xmlDocGetRootElement(xmlSysDocument_);
     if (root == nullptr) {
-        LOGE("ConfigXMLParserBase xmlDocGetRootElement failed");
+        LOGE("ConfigParserBase xmlDocGetRootElement failed");
         return PARSE_GET_ROOT_FAIL;
     }
 
     auto ret = ParseInternalWithBundleName(*root, bundleName, PARSE_XML_UI_CORRECTION);
     if (ret != PARSE_EXEC_SUCCESS) {
-        LOGE("ConfigXMLParserBase ParseInternalWithBundleName failed when parsing UI correction parameters");
+        LOGE("ConfigParserBase ParseInternalWithBundleName failed when parsing UI correction parameters");
     }
     return ret;
 }
 
-ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName,
+ParseErrCode ConfigParserBase::ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName,
     ParseXmlNodeIndex xmlNodeIndex)
 {
     // skip root node
@@ -163,7 +164,7 @@ ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, con
     return ret;
 }
 
-void ConfigXMLParserBase::ParseFeatures(xmlNode& node)
+void ConfigParserBase::ParseFeatures(xmlNode& node)
 {
     auto& featureMap = FeatureParamManager::GetInstance().featureParamMap_;
 
@@ -182,9 +183,9 @@ void ConfigXMLParserBase::ParseFeatures(xmlNode& node)
     }
 }
 
-std::string ConfigXMLParserBase::ExtractPropertyValue(const std::string& propName, xmlNode& node)
+std::string ConfigParserBase::ExtractPropertyValue(const std::string& propName, xmlNode& node)
 {
-    LOGD("ConfigXMLParserBase extracting value : %{public}s", propName.c_str());
+    LOGD("ConfigParserBase extracting value : %{public}s", propName.c_str());
     std::string propValue = "";
     xmlChar* tempValue = nullptr;
 
@@ -193,7 +194,7 @@ std::string ConfigXMLParserBase::ExtractPropertyValue(const std::string& propNam
     }
 
     if (tempValue != nullptr) {
-        LOGD("ConfigXMLParserBase not a empty tempValue");
+        LOGD("ConfigParserBase not a empty tempValue");
         propValue = reinterpret_cast<const char*>(tempValue);
         xmlFree(tempValue);
         tempValue = nullptr;
@@ -202,7 +203,7 @@ std::string ConfigXMLParserBase::ExtractPropertyValue(const std::string& propNam
     return propValue;
 }
 
-ParseErrCode ConfigXMLParserBase::ParseXmlNodeNameWithIndex(xmlNode& node, uint32_t nodeNameIndex)
+ParseErrCode ConfigParserBase::ParseXmlNodeNameWithIndex(xmlNode& node, uint32_t nodeNameIndex)
 {
     if (nodeNameIndex >= XML_NODE_NAME_ARRAY.size()) {
         return PARSE_SIZE_ERROR;
@@ -213,5 +214,17 @@ ParseErrCode ConfigXMLParserBase::ParseXmlNodeNameWithIndex(xmlNode& node, uint3
     }
 
     return PARSE_EXEC_SUCCESS;
+}
+
+ParseErrCode ConfigParserBase::ParseFeatureParam(xmlNode& node)
+{
+    LOGW("xml parsing is not yet supported");
+    return PARSE_NOT_SUPPORT;
+}
+
+ParseErrCode ConfigParserBase::ParseMetaData(const AppExecFwk::Metadata& metaData)
+{
+    LOGW("metadata %{public}s parsing is not yet supported", metaData.name.c_str());
+    return PARSE_NOT_SUPPORT;
 }
 } // namespace OHOS::Ace

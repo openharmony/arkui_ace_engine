@@ -16,12 +16,14 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
+#include "adapter/ohos/capability/feature_config/config_parser_base.h"
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #undef private
 #undef protected
 using namespace testing;
 using namespace testing::ext;
+
+#include "bundlemgr/bundle_mgr_proxy.h"
 
 namespace OHOS::Ace {
 class ArkUIFeatureParamManagerTest : public testing::Test {
@@ -43,6 +45,8 @@ public:
     const std::string SYNC_LOAD_VALUE = "value";
     const std::string SYNC_LOAD_VALUE_TIME = "50";
     const std::string TEST_UNDEFINE = "Undefine";
+
+    std::vector<OHOS::AppExecFwk::Metadata> metadata_ = { {"test", "test", "test"} };
 };
 
 /**
@@ -52,11 +56,13 @@ public:
  */
 HWTEST_F(ArkUIFeatureParamManagerTest, InitTest, TestSize.Level1)
 {
-    FeatureParamManager::GetInstance().Init(TEST1_HAP);
+    FeatureParamManager::GetInstance().Init(TEST1_HAP, metadata_);
     auto& featureParser = FeatureParamManager::GetInstance().featureParser_;
     EXPECT_NE(featureParser, nullptr);
 
-    FeatureParamManager::GetInstance().Init(TEST1_HAP);
+    OHOS::AppExecFwk::Metadata data = { "idle_delete", "true", "" };
+    metadata_.push_back(data);
+    FeatureParamManager::GetInstance().Init(TEST1_HAP, metadata_);
     EXPECT_NE(featureParser, nullptr);
 }
 
@@ -67,7 +73,7 @@ HWTEST_F(ArkUIFeatureParamManagerTest, InitTest, TestSize.Level1)
  */
 HWTEST_F(ArkUIFeatureParamManagerTest, ParseInternalWithBundleNameTest, TestSize.Level1)
 {
-    FeatureParamManager::GetInstance().Init(TEST1_HAP);
+    FeatureParamManager::GetInstance().Init(TEST1_HAP, metadata_);
     auto& featureParser = FeatureParamManager::GetInstance().featureParser_;
 
     xmlNode featureNode1 = {
@@ -141,7 +147,7 @@ HWTEST_F(ArkUIFeatureParamManagerTest, ParseInternalWithBundleNameTest, TestSize
  */
 HWTEST_F(ArkUIFeatureParamManagerTest, ParsePerformanceConfigXMLWithBundleNameTest, TestSize.Level1)
 {
-    auto featureParser = std::make_unique<ConfigXMLParserBase>();
+    auto featureParser = std::make_unique<ConfigParserBase>();
     auto ret = featureParser->ParsePerformanceConfigXMLWithBundleName(TEST1_HAP);
     EXPECT_EQ(ret, ParseErrCode::PARSE_SYS_FILE_LOAD_FAIL);
     auto doc = std::make_shared<xmlDoc>();
@@ -166,10 +172,10 @@ HWTEST_F(ArkUIFeatureParamManagerTest, ParsePerformanceConfigXMLWithBundleNameTe
  */
 HWTEST_F(ArkUIFeatureParamManagerTest, ParseXmlNodeNameWithIndexTest, TestSize.Level1)
 {
-    auto featureParser = std::make_unique<ConfigXMLParserBase>();
+    auto featureParser = std::make_unique<ConfigParserBase>();
     xmlNode node;
     auto ret = featureParser->ParseXmlNodeNameWithIndex(node, 5);
     EXPECT_EQ(ret, ParseErrCode::PARSE_SIZE_ERROR);
     featureParser = nullptr;
 }
-}
+} // namespace OHOS::Ace
