@@ -236,6 +236,7 @@ public:
     virtual void SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold) {}
+    virtual void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetEnableImageAnalyzer(bool isEnabled) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}

@@ -225,6 +225,7 @@ public:
     static void RotateRenderEffect(int32_t webRotateEffect);
     static void OnDetectedBlankScreen(const JSCallbackInfo& args);
     static void BlankScreenDetectionConfig(const JSCallbackInfo& args);
+    static void OnFirstScreenPaint(const JSCallbackInfo& args);
     static void OnTextSelectionChange(const JSCallbackInfo& args);
     static void EnableImageAnalyzer(const JSCallbackInfo& args);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);

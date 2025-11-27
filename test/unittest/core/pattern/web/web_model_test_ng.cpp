@@ -5371,6 +5371,77 @@ HWTEST_F(WebModelTestNg, SetEnableImageAnalyzer002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnDetectedBlankScreen001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnDetectedBlankScreen001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto onBlankScreenDetection = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+    };
+    webModelNG.SetOnDetectedBlankScreen(std::move(onBlankScreenDetection));
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnDetectedBlankScreenEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetBlankScreenDetectionConfig001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetBlankScreenDetectionConfig001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetBlankScreenDetectionConfig(true, {}, { 0 }, 1);
+    BlankScreenDetectionConfig config { true, {}, { 0 }, 1 };
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetBlankScreenDetectionConfigValue(), config);
+#endif
+}
+
+/**
+ * @tc.name: SetOnFirstScreenPaint001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnFirstScreenPaint001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto onFirstScreenPaint = [&callCount](const BaseEventInfo* info) { callCount++; };
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    webModelNG.SetOnFirstScreenPaint(std::move(onFirstScreenPaint));
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnFirstScreenPaintEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetForceEnableZoom001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

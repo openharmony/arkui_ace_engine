@@ -5600,6 +5600,8 @@ struct ArkUIWebModifier {
     void (*setBlankScreenDetectionConfig)(
         ArkUINodeHandle node, const struct ArkUIBlankScreenDetectionConfigStruct* arkUITextDetectConfig);
     void (*resetBlankScreenDetectionConfig)(ArkUINodeHandle node);
+    void (*setOnFirstScreenPaint)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFirstScreenPaint)(ArkUINodeHandle node);
     void (*setOnContextMenuShow)(ArkUINodeHandle node, void* callback);
     void (*resetOnContextMenuShow)(ArkUINodeHandle node);
     void (*setOnSafeBrowsingCheckResultCallBack)(ArkUINodeHandle node, void* callback);

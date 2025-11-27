@@ -9488,6 +9488,25 @@ void WebDelegate::OnDetectedBlankScreen(
         TaskExecutor::TaskType::JS, "ArkUIWebDetectedBlankScreen");
 }
 
+void WebDelegate::OnFirstScreenPaint(
+    const std::string& url, int64_t navigationStartTime, int64_t firstScreenPaintTime)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), url, navigationStartTime, firstScreenPaintTime]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnFirstScreenPaint, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnFirstScreenPaintEvent(
+                std::make_shared<FirstScreenPaintEvent>(url, navigationStartTime, firstScreenPaintTime));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebOnFirstScreenPaint");
+}
+
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
     const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold)
 {

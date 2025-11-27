@@ -145,11 +145,8 @@ struct BlankScreenDetectionConfig {
     int32_t contentfulNodesCountThreshold;
     bool operator==(const BlankScreenDetectionConfig& config) const
     {
-        if (enable == config.enable && contentfulNodesCountThreshold == config.contentfulNodesCountThreshold &&
-            detectionTiming == config.detectionTiming && detectionMethods == config.detectionMethods) {
-            return true;
-        }
-        return false;
+        return enable == config.enable && contentfulNodesCountThreshold == config.contentfulNodesCountThreshold &&
+               detectionTiming == config.detectionTiming && detectionMethods == config.detectionMethods;
     }
 };
 

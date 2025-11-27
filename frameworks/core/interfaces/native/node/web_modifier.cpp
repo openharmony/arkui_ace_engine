@@ -414,6 +414,36 @@ void ResetOnRequestSelectedCallBack(ArkUINodeHandle node)
     WebModelNG::SetOnRequestFocus(frameNode, nullptr);
 }
 
+void SetOnFirstScreenPaint(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (extraParam) {
+        auto* onFirstScreenPaintCallBackPtr =
+            reinterpret_cast<std::function<void(const FirstScreenPaintEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onFirstScreenPaintCallBackPtr);
+        auto onFirstScreenPaintCallBack = *onFirstScreenPaintCallBackPtr;
+        auto callback = [onFirstScreenPaintCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto firstScreenPaint = static_cast<const FirstScreenPaintEvent*>(event);
+            if (firstScreenPaint) {
+                auto& nonConstEvent = const_cast<FirstScreenPaintEvent&>(*firstScreenPaint);
+                onFirstScreenPaintCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnFirstScreenPaint(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnFirstScreenPaint(frameNode, nullptr);
+    }
+}
+
+void ResetOnFirstScreenPaint(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto callback = [](const BaseEventInfo* info) {};
+    WebModelNG::SetOnFirstScreenPaint(frameNode, callback);
+}
+
 void SetOnContextMenuHideCallBack(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2688,6 +2718,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
         .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
+        .setOnFirstScreenPaint = SetOnFirstScreenPaint,
+        .resetOnFirstScreenPaint = ResetOnFirstScreenPaint,
         .setEnableImageAnalyzer = SetEnableImageAnalyzer,
         .resetEnableImageAnalyzer = ResetEnableImageAnalyzer,
         .setOnContextMenuShow = SetOnContextMenuShow,
@@ -2927,6 +2959,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnDetectedBlankScreen = ResetOnDetectedBlankScreen,
         .setBlankScreenDetectionConfig = SetBlankScreenDetectionConfig,
         .resetBlankScreenDetectionConfig = ResetBlankScreenDetectionConfig,
+        .setOnFirstScreenPaint = SetOnFirstScreenPaint,
+        .resetOnFirstScreenPaint = ResetOnFirstScreenPaint,
         .setEnableImageAnalyzer = SetEnableImageAnalyzer,
         .resetEnableImageAnalyzer = ResetEnableImageAnalyzer,
         .setOnContextMenuShow = SetOnContextMenuShow,
