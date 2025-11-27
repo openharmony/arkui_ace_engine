@@ -95,12 +95,22 @@ void VideoModelNG::SetPosterSourceInfo(const std::string& posterUrl, const std::
 {
     ImageSourceInfo posterSourceInfo(posterUrl, bundleName, moduleName);
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->UpdateShowImagePreview(!posterUrl.empty());
 }
 
 void VideoModelNG::SetPosterSourceByPixelMap(RefPtr<PixelMap>& pixMap)
 {
     ImageSourceInfo posterSourceInfo(pixMap);
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->UpdateShowImagePreview(pixMap);
 }
 
 void VideoModelNG::SetMuted(bool muted)
