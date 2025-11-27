@@ -1743,4 +1743,10 @@ void ViewAbstractModelImpl::SetOnAccessibilityActionIntercept(
 
 void ViewAbstractModelImpl::SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc)
 {}
+
+void ViewAbstractModelImpl::SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions)
+{}
+
+void ViewAbstractModelImpl::ResetAccessibilityActionOptions()
+{}
 } // namespace OHOS::Ace::Framework

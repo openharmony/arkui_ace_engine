@@ -1412,4 +1412,19 @@ bool AccessibilityProperty::IsHeaderOrFooter() const
 {
     return isHeaderOrFooter_.value_or(false);
 }
+
+void AccessibilityProperty::SetAccessibilityActionOptions(const AccessibilityActionOptions& accessibilityActionOptions)
+{
+    accessibilityActionOptions_ = accessibilityActionOptions;
+}
+
+AccessibilityActionOptions AccessibilityProperty::GetAccessibilityActionOptions()
+{
+    return accessibilityActionOptions_.value_or(AccessibilityActionOptions {});
+}
+
+void AccessibilityProperty::ResetAccessibilityActionOptions()
+{
+    accessibilityActionOptions_.reset();
+}
 } // namespace OHOS::Ace::NG

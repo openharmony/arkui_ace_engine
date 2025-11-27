@@ -377,6 +377,8 @@ public:
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) override;
+    void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) override;
+    void ResetAccessibilityActionOptions() override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;

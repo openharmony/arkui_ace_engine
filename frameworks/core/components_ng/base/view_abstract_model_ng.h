@@ -1701,6 +1701,8 @@ public:
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void SetOnAccessibilityActionIntercept(
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
+    void SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions) override;
+    void ResetAccessibilityActionOptions() override;
     void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityGroupOptions(AccessibilityGroupOptions groupOptions) override;
@@ -1942,13 +1944,14 @@ public:
     {
         ViewAbstract::SetMonopolizeEvents(frameNode, monopolizeEvents);
     }
-
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
     static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
     static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
     static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
     static void SetAccessibilityGroupOptions(FrameNode* frameNode, AccessibilityGroupOptions groupOptions);
+    static void SetAccessibilityActionOptions(FrameNode* frameNode, AccessibilityActionOptions actionOptions);
+    static void ResetAccessibilityActionOptions(FrameNode* frameNode);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);

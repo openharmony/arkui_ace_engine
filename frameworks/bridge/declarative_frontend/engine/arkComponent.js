@@ -2584,6 +2584,20 @@ class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey {
   }
 }
 AccessibilityActionInterceptCallbackModifier.identity = Symbol('onAccessibilityActionIntercept');
+
+class AccessibilityActionOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityActionOptions(node);
+    } else {
+      getUINativeModule().common.setAccessibilityActionOptions(node, this.value);
+    }
+  }
+}
+AccessibilityActionOptionsModifier.identity = Symbol('accessibilityActionOptions');
 class AccessibilityHoverTransparentModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5306,6 +5320,11 @@ class ArkComponent {
 
   onAccessibilityActionIntercept(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
+    return this;
+  }
+
+  accessibilityActionOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
     return this;
   }
 
