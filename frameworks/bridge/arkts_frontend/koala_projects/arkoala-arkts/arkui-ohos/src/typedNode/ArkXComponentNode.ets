@@ -67,6 +67,10 @@ export class ArkXComponentNode extends ArkBaseNode implements XComponentAttribut
         this.getPeer()?.setEnableSecureAttribute(value);
         return this;
     }
+    enableTransparentLayer(value: boolean | undefined): this {
+        this.getPeer()?.setEnableTransparentLayerAttribute(value);
+        return this;
+    }
     hdrBrightness(value: number | undefined): this {
         this.getPeer()?.setHdrBrightnessAttribute(value);
         return this;
