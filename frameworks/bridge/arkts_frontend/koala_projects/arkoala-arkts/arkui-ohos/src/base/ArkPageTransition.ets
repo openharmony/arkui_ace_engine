@@ -87,7 +87,7 @@ function slideTransition(size: SizeOptions, value: SlideEffect) : TranslateOptio
 
         return { x: xOffset, y: yOffset, z: 0 } as TranslateOptions
     } else {
-        throw Error('Size is empty of has undefined components')
+        throw Error('Size is empty or has undefined components')
     }
 }
 

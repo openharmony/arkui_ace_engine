@@ -227,10 +227,10 @@ public:
         // Improve: implement
     }
 
-    void writeBuffer(InteropBuffer buffer) {
-        writeCallbackResource(buffer.resource);
-        writePointer(reinterpret_cast<void*>(buffer.data));
-        writeInt64(buffer.length);
+    void writeBuffer(InteropBuffer interopBuffer) {
+        writeCallbackResource(interopBuffer.resource);
+        writePointer(reinterpret_cast<void*>(interopBuffer.data));
+        writeInt64(interopBuffer.length);
     }
 
     KInteropReturnBuffer toReturnBuffer() {
