@@ -30,7 +30,8 @@ import {
     InteropWatchFunc,
     uiUtils,
     IObservedObject,
-    OBSERVE
+    OBSERVE,
+    LocalStorage
 } from '../stateManagement';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
@@ -188,6 +189,7 @@ function openInterop(): void {
     registerCreateCompatibleStaticState();
     registerTransferCompatibleUpdatableBuilderCallback();
     registerNavPathStackCallback();
+    registerLocalStorageSetProxy();
 }
 
 function closeInterop(): void {
@@ -1136,4 +1138,14 @@ export function staticStateBindObservedObject<T>(
         ESValue.wrap(onPropertyChange),
         ESValue.wrap(onTrackPropertyRead),
         ESValue.wrap(onTrackPropertyChange)) as Object as T;
+}
+
+function registerLocalStorageSetProxy(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerLocalStorageSetProxy');
+    registerCallback.invoke(localStorageSetProxy);
+}
+
+function localStorageSetProxy(storage: LocalStorage, proxy: Object): void {
+    storage.setProxy(ESValue.wrap(proxy));
 }
