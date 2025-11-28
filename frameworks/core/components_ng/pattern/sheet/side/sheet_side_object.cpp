@@ -75,7 +75,6 @@ void SheetSideObject::UpdateDragBarStatus()
     CHECK_NULL_VOID(dragBarLayoutProperty);
 
     dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SheetSideObject::UpdateSidePosition()
@@ -143,27 +142,49 @@ std::function<void()> SheetSideObject::GetSheetAnimationEvent(bool isTransitionI
     CHECK_NULL_RETURN(sheetNode, nullptr);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_RETURN(context, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
 
     std::function<void()> event;
-    if (isTransitionIn) {
-        event = [weak = WeakClaim(this)]() {
-            auto sheetObject = weak.Upgrade();
-            CHECK_NULL_VOID(sheetObject);
-            sheetObject->TransformTranslateEnter();
-        };
+    if (!sheetStyle.interactive.value_or(false)) {
+        if (isTransitionIn) {
+            event = [weak = WeakClaim(this)]() {
+                auto sheetObject = weak.Upgrade();
+                CHECK_NULL_VOID(sheetObject);
+                sheetObject->TransformTranslateEnter();
+            };
+        } else {
+            event = [context, weak = pattern_, objWeak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto sheetObject = objWeak.Upgrade();
+                CHECK_NULL_VOID(sheetObject);
+                sheetObject->TransformTranslateExit();
+                pattern->DismissSheetShadow(context);
+            };
+        }
     } else {
-        event = [context, weak = pattern_, objWeak = WeakClaim(this)]() {
+        CreatePropertyCallback();
+        auto property = sheetPattern->GetProperty();
+        CHECK_NULL_RETURN(property, nullptr);
+        context->AttachNodeAnimatableProperty(property);
+        property->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            property->Set(sheetWidth_ + currentOffset_);
+        } else {
+            property->Set(sheetWidth_ - currentOffset_);
+        }
+        event = [weak = pattern_, isTransitionIn, objWeak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto sheetObject = objWeak.Upgrade();
             CHECK_NULL_VOID(sheetObject);
-            sheetObject->TransformTranslateExit();
-            pattern->DismissSheetShadow(context);
+            pattern->GetProperty()->Set(isTransitionIn ? sheetObject->GetSideSheetWidth() : 0);
         };
     }
     return event;
 }
-
 
 void SheetSideObject::ClipSheetNode()
 {
@@ -211,8 +232,21 @@ void SheetSideObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstT
             sheetPattern->GetBuilderInitHeight();
         }
         sheetPattern->FireOnTypeDidChange();
-        FireHeightDidChange();
         ACE_SCOPED_TRACE("Side Sheet starts the entrance animation");
+    }
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.interactive.value_or(false)) {
+        CreatePropertyCallback();
+        auto property = sheetPattern->GetProperty();
+        CHECK_NULL_VOID(property);
+        auto renderContext = sheetNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->AttachNodeAnimatableProperty(property);
+        property->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+        sheetPattern->SetAnimationProcess(true);
+        property->Set(isTransitionIn ? 0 : sheetWidth_);
     }
 }
 
@@ -225,13 +259,16 @@ void SheetSideObject::SetFinishEventForAnimationOption(
     CHECK_NULL_VOID(sheetNode);
     if (isTransitionIn) {
         option.SetOnFinishEvent(
-            [sheetWK = WeakClaim(RawPtr(sheetNode)), isFirst = isFirstTransition] {
+            [sheetWK = WeakClaim(RawPtr(sheetNode)), isFirst = isFirstTransition, objWeak = WeakClaim(this)] {
+                auto sheetObject = objWeak.Upgrade();
+                CHECK_NULL_VOID(sheetObject);
                 auto sheetNode = sheetWK.Upgrade();
                 CHECK_NULL_VOID(sheetNode);
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
                 CHECK_NULL_VOID(pattern);
                 pattern->OnAppear();
                 pattern->AvoidAiBar();
+                sheetObject->FireHeightDidChange();
                 pattern->FireOnWidthDidChange();
             });
     } else {
@@ -304,22 +341,35 @@ std::function<void()> SheetSideObject::GetAnimationPropertyCallForOverlay(bool i
     CHECK_NULL_RETURN(sheetNode, nullptr);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_RETURN(context, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
 
     std::function<void()> event;
-    if (isTransitionIn) {
-        event = [weak = WeakClaim(this)]() {
-            auto sheetObject = weak.Upgrade();
-            CHECK_NULL_VOID(sheetObject);
-            sheetObject->TransformTranslateEnter();
-        };
+    if (!sheetStyle.interactive.value_or(false)) {
+        if (isTransitionIn) {
+            event = [weak = WeakClaim(this)]() {
+                auto sheetObject = weak.Upgrade();
+                CHECK_NULL_VOID(sheetObject);
+                sheetObject->TransformTranslateEnter();
+            };
+        } else {
+            event = [context, weak = pattern_, objWeak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto sheetObject = objWeak.Upgrade();
+                CHECK_NULL_VOID(sheetObject);
+                sheetObject->TransformTranslateExit();
+                pattern->DismissSheetShadow(context);
+            };
+        }
     } else {
-        event = [context, weak = pattern_, objWeak = WeakClaim(this)]() {
+        event = [weak = pattern_, isTransitionIn, objWeak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto sheetObject = objWeak.Upgrade();
             CHECK_NULL_VOID(sheetObject);
-            sheetObject->TransformTranslateExit();
-            pattern->DismissSheetShadow(context);
+            pattern->GetProperty()->Set(isTransitionIn ? sheetObject->GetSideSheetWidth() : 0);
         };
     }
     return event;
@@ -428,6 +478,9 @@ void SheetSideObject::HandleDragEnd(float dragVelocity)
     sheetPattern->SetIsNeedProcessHeight(true);
     sheetPattern->SetIsDragging(false);
 
+    if (NearEqual(currentOffset_, 0)) {
+        return;
+    }
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         HandleDragEndForRTL(dragVelocity);
     } else {
@@ -510,24 +563,29 @@ void SheetSideObject::ModifyFireSheetTransition(float dragVelocity)
     renderContext->AttachNodeAnimatableProperty(property);
     property->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
 
-    auto finishCallback = [weak = AceType::WeakClaim(RawPtr(sheetPattern))]() {
-        auto ref = weak.Upgrade();
-        CHECK_NULL_VOID(ref);
-        if (!ref->GetAnimationBreak()) {
-            ref->SetAnimationProcess(false);
-            ref->GetSheetObject()->SetCurrentOffset(0.0f);
-        } else {
-            ref->SetAnimationBreak(false);
-        }
-
-        ref->AvoidAiBar();
-        ref->SetSpringBack(false);
-    };
-
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto interactive = sheetStyle.interactive.value_or(false);
+    auto finishCallback =
+        [weak = AceType::WeakClaim(RawPtr(sheetPattern)), interactive, offsetX, objWeak = WeakClaim(this)]() {
+            auto ref = weak.Upgrade();
+            CHECK_NULL_VOID(ref);
+            if (!ref->GetAnimationBreak()) {
+                ref->SetAnimationProcess(false);
+                ref->GetSheetObject()->SetCurrentOffset(0.0f);
+            } else {
+                ref->SetAnimationBreak(false);
+            }
+            auto sheetObject = objWeak.Upgrade();
+            CHECK_NULL_VOID(sheetObject);
+            if (!interactive && !NearEqual(sheetObject->GetSideSheetWidth(), 0)) {
+                ref->onWidthDidChange(sheetObject->GetSideSheetWidth());
+            }
+            ref->AvoidAiBar();
+            ref->SetSpringBack(false);
+        };
+
     sheetPattern->SetAnimationProcess(true);
     property->Set(width - std::abs(currentOffset_));
     auto pipeline = host->GetContextRefPtr();
@@ -539,7 +597,7 @@ void SheetSideObject::ModifyFireSheetTransition(float dragVelocity)
             if (interactive) {
                 ref->GetProperty()->Set(width);
             }
-            if (renderContext) {
+            if (renderContext && !interactive) {
                 renderContext->UpdateTransformTranslate({ offsetX, 0.0, 0.0f });
             }
         },
@@ -554,10 +612,25 @@ void SheetSideObject::CreatePropertyCallback()
     if (sheetPattern->GetProperty()) {
         return;
     }
-    auto propertyCallback = [weak = AceType::WeakClaim(RawPtr(sheetPattern))](float position) {
+    auto propertyCallback = [weak = AceType::WeakClaim(RawPtr(sheetPattern)), objWeak = WeakClaim(this)](
+                                float position) {
+        // The position is the displayed size
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
         ref->onWidthDidChange(static_cast<int>(position));
+
+        auto sheetNode = ref->GetHost();
+        CHECK_NULL_VOID(sheetNode);
+        auto context = sheetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+        auto sheetObject = objWeak.Upgrade();
+        CHECK_NULL_VOID(sheetObject);
+        if (isRTL) {
+            context->UpdateTransformTranslate({ position - sheetObject->GetSideSheetWidth(), 0.0f, 0.0f });
+        } else {
+            context->UpdateTransformTranslate({ sheetObject->GetSideSheetMaxWidth() - position, 0.0f, 0.0f });
+        }
     };
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);

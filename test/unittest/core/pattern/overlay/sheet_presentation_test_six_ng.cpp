@@ -1308,4 +1308,108 @@ HWTEST_F(SheetPresentationTestSixNg, GetHeightBySheetStyleTest005, TestSize.Leve
     EXPECT_EQ(height, 320);
     SheetPresentationTestSixNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: GetSheetAnimationEvent003
+ * @tc.desc: Branch: if (!isTransitionIn)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, GetSheetAnimationEvent003, TestSize.Level1)
+{
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float offset = 100.0f;
+    object->sheetMaxWidth_ = 100.0f;
+    object->sheetWidth_ = 50.0f;
+    SheetStyle sheetStyle;
+    sheetStyle.interactive = true;
+    bool isTransitionIn = false;
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto event = object->GetSheetAnimationEvent(isTransitionIn, offset);
+    EXPECT_NE(event, nullptr);
+    ASSERT_NE(sheetPattern->GetProperty(), nullptr);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: InitAnimationForOverlay007
+ * @tc.desc: Branch: if (sheetStyle.interactive.value_or(false))
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, InitAnimationForOverlay007, TestSize.Level1)
+{
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    object->sheetMaxWidth_ = 100.0f;
+    object->sheetWidth_ = 50.0f;
+    const auto& transform = context->GetTransform();
+    auto translation = transform->GetTransformTranslate();
+    SheetStyle sheetStyle;
+    sheetStyle.interactive = true;
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    object->InitAnimationForOverlay(true, true);
+    ASSERT_NE(sheetPattern->GetProperty(), nullptr);
+    EXPECT_EQ(translation->x.Value(), 100.0f);
+    EXPECT_EQ(translation->y.Value(), 0.0f);
+    EXPECT_EQ(translation->z.Value(), 0.0f);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetAnimationPropertyCallForOverlay007
+ * @tc.desc: Branch: if (sheetStyle.interactive.value_or(false))
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, GetAnimationPropertyCallForOverlay007, TestSize.Level1)
+{
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    SheetStyle sheetStyle;
+    sheetStyle.interactive = true;
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    auto event = object->GetAnimationPropertyCallForOverlay(true);
+    ASSERT_NE(sheetPattern->GetProperty(), nullptr);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG
