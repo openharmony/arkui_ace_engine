@@ -1359,7 +1359,7 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
     instance->SetContext(context);
     instance->SetJSViewName(viewName);
     const int32_t instanceId = instance->GetInstanceId();
-    instance->SetLastestInstanceId(instanceId);
+    instance->SetLatestInstanceId(instanceId);
 
     //  The JS object owns the C++ object:
     // make sure the C++ is not destroyed when RefPtr thisObj goes out of scope
@@ -1384,10 +1384,10 @@ void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInf
         ACE_SCORING_EVENT("updateInstanceForEnvValueFunc");
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        if (self->GetLastestInstanceId() == instanceId) {
+        if (self->GetLatestInstanceId() == instanceId) {
             return;
         }
-        self->SetLastestInstanceId(instanceId);
+        self->SetLatestInstanceId(instanceId);
         JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
         JSRef<JSVal> param[1] = { newInstanceId };
         func->ExecuteJS(1, param);
@@ -1396,14 +1396,14 @@ void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInf
         std::move(updateInstanceForEnvValueFunc));
 }
 
-void JSViewPartialUpdate::SetLastestInstanceId(const int32_t instanceId)
+void JSViewPartialUpdate::SetLatestInstanceId(const int32_t instanceId)
 {
-    lastestInstanceId_ = instanceId;
+    latestInstanceId_ = instanceId;
 }
 
-int32_t JSViewPartialUpdate::GetLastestInstanceId() const
+int32_t JSViewPartialUpdate::GetLatestInstanceId() const
 {
-    return lastestInstanceId_;
+    return latestInstanceId_;
 }
 
 void JSViewPartialUpdate::DestructorCallback(JSViewPartialUpdate* view)
