@@ -33,6 +33,8 @@ class WantParamsWrap : public AceType {
 
 public:
     static RefPtr<WantParamsWrap> CreateWantWrap(napi_env env, napi_value value);
+    static RefPtr<WantParamsWrap> CreateWantWrap(const OHOS::AAFwk::WantParams& params);
+    virtual std::string ToString() const = 0;
 };
 
 class ACE_EXPORT WantWrap : public AceType {

@@ -22,5 +22,8 @@ ACE_WEAK_SYM RefPtr<WantWrap> WantWrap::CreateWantWrap(const std::string& bundle
 {
     return nullptr;
 }
-
+ACE_WEAK_SYM RefPtr<WantParamsWrap> WantParamsWrap::CreateWantWrap(const OHOS::AAFwk::WantParams& params)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

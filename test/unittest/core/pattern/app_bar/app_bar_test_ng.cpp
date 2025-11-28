@@ -1421,4 +1421,16 @@ HWTEST_F(AppBarTestNg, ExtensionHostParamsCallBack001, TestSize.Level1)
     EXPECT_EQ(name1, "test");
 }
 
+/**
+ * @tc.name: TestCreateServicePanelNotFirstTry
+ * @tc.desc: Test CreateServicePanel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestCreateServicePanelNotFirstTry, TestSize.Level1)
+{
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    appBar->CreateServicePanel(false);
+    appBar->GetModalUIExtensionCallbacks(false);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
 } // namespace OHOS::Ace::NG
