@@ -5186,32 +5186,31 @@ bool JSWeb::HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo)
     if (handler && !handler->IsFrist()) {
         int32_t parentId = -1;
         auto controller = JSWebWindowNewHandler::PopController(handler->GetId(), &parentId);
-        if (!controller.IsEmpty()) {
-            auto getWebIdFunction = controller->GetProperty("innerGetWebId");
-            if (getWebIdFunction->IsFunction()) {
-                auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
-                auto webId = func->Call(controller, 0, {});
-                webId->IsNumber() ? handler->SetWebController(webId->ToNumber<int32_t>()) : void();
-            }
-            auto completeWindowNewExtFunction = controller->GetProperty("innerCompleteWindowNew");
-            if (completeWindowNewExtFunction->IsFunction()) {
-                napi_env env = GetNapiEnv();
-                if (!env) {
-                    return;
-                }
-                napi_handle_scope scope = nullptr;
-                auto napi_status = napi_open_handle_scope(env, &scope);
-                if (napi_status != napi_ok) {
-                    return;
-                }
-
-                auto func = JSRef<JSFunc>::Cast(completeWindowNewExtFunction);
-                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(parentId)) };
-                func->Call(controller, 1, argv);
-                napi_close_handle_scope(env, scope);
-            }
+        if (controller.IsEmpty()) {
+            return false;
         }
-        return false;
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return false;
+        }
+        napi_handle_scope scope = nullptr;
+        auto napi_status = napi_open_handle_scope(env, &scope);
+        if (napi_status != napi_ok) {
+            return false;
+        }
+        auto getWebIdFunction = controller->GetProperty("innerGetWebId");
+        if (getWebIdFunction->IsFunction()) {
+            auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
+            auto webId = func->Call(controller, 0, {});
+            webId->IsNumber() ? handler->SetWebController(webId->ToNumber<int32_t>()) : void();
+        }
+        auto completeWindowNewExtFunction = controller->GetProperty("innerCompleteWindowNew");
+        if (completeWindowNewExtFunction->IsFunction()) {
+            auto func = JSRef<JSFunc>::Cast(completeWindowNewExtFunction);
+            JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(parentId)) };
+            func->Call(controller, 1, argv);
+        }
+        napi_close_handle_scope(env, scope);
     }
     return true;
 }
