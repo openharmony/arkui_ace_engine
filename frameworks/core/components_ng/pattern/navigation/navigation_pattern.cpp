@@ -1072,6 +1072,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     auto indexes = navigationStack_->GetAllPathIndex();
     auto toIndex = indexes.size() - 1;
     auto topNavPath = navigationStack_->GetTopNavPath();
+    FireNavigateChangeCallback();
     FireInterceptionBeforeLifeCycleEvent(topNavPath, toIndex);
     needSyncWithJsStack_ = false;
     SetStartTime(GetSysTimestamp());
@@ -1096,6 +1097,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         FireInterceptionEvent(true, newTopNavPath);
         if (needSyncWithJsStack_) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack in before interception");
+            FireNavigateChangeCallback();
             UpdateNavPathList();
             needSyncWithJsStack_ = false;
         }
@@ -5999,5 +6001,64 @@ void NavigationPattern::LoadCompleteManagerStopCollect()
     if (pipeline) {
         pipeline->GetLoadCompleteManager()->StopCollect();
     }
+}
+
+void NavigationPattern::FireNavigateChangeCallback()
+{
+    // only fire full page navigation
+    if (!isFullPageNavigation_) {
+        return;
+    }
+    CHECK_NULL_VOID(navigationStack_);
+    auto fromNavPath = navigationStack_->GetTopNavPath();
+    auto names = navigationStack_->GetAllPathName();
+    if (names.size() == 0 && !fromNavPath.has_value()) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    RefPtr<NavDestinationContext> fromContext;
+    if (fromNavPath.has_value()) {
+        auto topDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(fromNavPath->second));
+        if (topDestination) {
+            auto pattern = AceType::DynamicCast<NavDestinationPattern>(topDestination->GetPattern());
+            fromContext = pattern->GetNavDestinationContext();
+        }
+    }
+    NavigateChangeInfo from = ConvertNavDestinationContext(fromContext);
+    NavigateChangeInfo to;
+    to.isSplit = GetNavigationMode() == NavigationMode::SPLIT;
+    if (names.size() == 0) {
+        // get default navigate info
+        to = ConvertNavDestinationContext(nullptr);
+    } else {
+        to.name = names.back();
+    }
+    navigationManager->FireNavigateChangeCallback(from, to);
+}
+
+NavigateChangeInfo NavigationPattern::ConvertNavDestinationContext(const RefPtr<NavDestinationContext>& context)
+{
+    NavigateChangeInfo result;
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, result);
+    result.isSplit = GetNavigationMode() == NavigationMode::SPLIT;
+    RefPtr<NavDestinationContext> curContext = context;
+    if (curContext == nullptr) {
+        // navBar node is homeDestination
+        curContext = GetHomeDestinationContext();
+    }
+    if (curContext == nullptr) {
+        // current preNode is navBar
+        result.name = "navBar";
+    } else {
+        auto navPathInfo = curContext->GetNavPathInfo();
+        CHECK_NULL_RETURN(navPathInfo, result);
+        result.name = navPathInfo->GetName();
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

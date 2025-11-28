@@ -798,4 +798,23 @@ RefPtr<FrameNode> NavigationManager::GetNavigationByInspectorId(const std::strin
     }
     return nullptr;
 }
+
+int32_t NavigationManager::RegisterNavigateChangeCallback(TransitionCallback callback)
+{
+    int32_t id = navigateCallbackId_;
+    navigateCallbackId_++;
+    changeCallbacks_.insert(std::pair<int32_t, TransitionCallback>(id, callback));
+    return id;
+}
+
+void NavigationManager::FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to)
+{
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "fire inner navigate callback isSplit(%{public}d) transition callback:"
+        " %{public}s -> %{public}s",
+        from.isSplit, from.name.c_str(), to.name.c_str());
+    // full screen, fire all registered callback
+    for (auto callback : changeCallbacks_) {
+        callback.second(from.name, to.name);
+    }
+}
 } // namespace OHOS::Ace::NG

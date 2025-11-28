@@ -101,6 +101,7 @@ class IRemoteObject;
 
 namespace OHOS::Ace {
 struct AccessibilityParentRectInfo;
+struct NavigateChangeInfo;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Platform {
@@ -600,6 +601,11 @@ public:
         return "";
     }
     virtual void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) {}
+    virtual int32_t RegisterNavigateChangeCallback(const std::function<void(const std::string& from,
+        const std::string& to)>&& callback)
+    {
+        return -1;
+    }
     virtual UIContentErrorCode InitializeWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& url, ani_object storage)
     {
