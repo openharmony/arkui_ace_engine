@@ -179,7 +179,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
-    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
+    clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -205,7 +206,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
-    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
+    clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -226,7 +228,8 @@ PipelineContext::PipelineContext()
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
-    clickOptimizer_ = std::make_unique<ResSchedClickOptimizer>();
+    clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
@@ -7119,7 +7122,7 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
     return touchOptimizer_;
 }
 
-const std::unique_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
+const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
 }

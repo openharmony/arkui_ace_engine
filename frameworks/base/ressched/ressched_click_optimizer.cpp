@@ -22,9 +22,9 @@
 namespace OHOS::Ace {
 namespace {
 constexpr char DATA_IMAGE_PREFIX[] = "data:image";
-constexpr int32_t DEFAULT_MAX_DEEP = 20;
 constexpr int32_t DATA_IMAGE_PREFIX_LENGTH = 10;
 constexpr int32_t DATA_IMAGE_LENGTH = 32;
+constexpr int32_t MAX_UPDATE_TEXT_LENGTH = 1024;
 
 bool SafeConvertStringToInt32(const std::string& str, int32_t& result)
 {
@@ -87,31 +87,29 @@ void MergeNodeImageSource(const RefPtr<NG::FrameNode> node, std::string& imgSrc)
 }
 } // namespace
 
-ResSchedClickOptimizer::ResSchedClickOptimizer()
-{
-    Init();
-}
-
 void ResSchedClickOptimizer::Init()
 {
-    SetMaxDeep(DEFAULT_MAX_DEEP);
-    std::call_once(clickExtEnableFlag_, [this]() {
-        auto task = [this]() {
-            std::unordered_map<std::string, std::string> payload;
-            std::unordered_map<std::string, std::string> reply;
-            SetClickExtEnabled(ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply));
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "CLICK_EXT_ENABLE_CHECK Result: %{public}d",
-                static_cast<int32_t>(clickExtEnabled_));
+    CHECK_EQUAL_VOID(isInit_, true);
+    isInit_ = true;
+    std::weak_ptr<ResSchedClickOptimizer> weakThis = shared_from_this();
+    auto task = [weakThis]() {
+        auto optimizerRef = weakThis.lock();
+        CHECK_NULL_VOID(optimizerRef);
 
-            auto iter = reply.find("deep");
-            CHECK_EQUAL_VOID(iter, reply.end());
-            int32_t maxDeep = 0;
-            bool res = SafeConvertStringToInt32(iter->second, maxDeep);
-            CHECK_EQUAL_VOID(res, false);
-            SetMaxDeep(maxDeep);
-        };
-        BackgroundTaskExecutor::GetInstance().PostTask(task);
-    });
+        std::unordered_map<std::string, std::string> payload;
+        std::unordered_map<std::string, std::string> reply;
+        optimizerRef->SetClickExtEnabled(ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply));
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "CLICK_EXT_ENABLE_CHECK Result: %{public}d",
+            static_cast<int32_t>(optimizerRef->clickExtEnabled_));
+
+        auto iter = reply.find("depth");
+        CHECK_EQUAL_VOID(iter, reply.end());
+        int32_t depth = 0;
+        bool res = SafeConvertStringToInt32(iter->second, depth);
+        CHECK_EQUAL_VOID(res, false);
+        optimizerRef->SetDepth(depth);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
 
 void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, const GestureEvent& gestureEvent)
@@ -131,11 +129,11 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
     payload["abilityName"] = AceApplicationInfo::GetInstance().GetAbilityName();
     std::string text = "";
     std::string imgSrc = "";
-    GetComponentTextAndImageSourceRecursive(weakNode, text, imgSrc, GetMaxDeep());
+    GetComponentTextAndImageSourceRecursive(weakNode, text, imgSrc, GetDepth());
     CheckPayloadTextEmpty(weakNode, text);
 
-    payload["text"] = text;
-    payload["imgSrc"] = imgSrc;
+    payload["text"] = text.substr(0, MAX_UPDATE_TEXT_LENGTH);
+    payload["imgSrc"] = imgSrc.substr(0, MAX_UPDATE_TEXT_LENGTH);
     ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
 }
 
