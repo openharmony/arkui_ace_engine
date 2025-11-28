@@ -79,7 +79,6 @@ public:
     int32_t GetContainerModalTitleHeight() override;
     NG::OffsetF GetContainerModalButtonsOffset() override;
     NG::SizeF GetContainerModalButtonsSize() override;
-    LayoutConstraintInfo GetLayoutConstraint() const override;
 
     void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) override;
     int32_t GetMeasureWidth() override;

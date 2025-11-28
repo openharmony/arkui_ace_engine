@@ -17,18 +17,10 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_VIEW_H
 
 #include "ui/base/geometry/calc_dimension.h"
-#include "ui/base/geometry/ng/offset_t.h"
 #include "ui/base/macros.h"
 #include "ui/base/referenced.h"
-#include "ui/event/touch_event.h"
-#include "ui/gestures/gesture_event.h"
 #include "ui/properties/gradient_property.h"
-#include "ui/properties/ng/calc_length.h"
-#include "ui/properties/ng/transition_property.h"
 
-namespace OHOS::Rosen {
-class Filter;
-} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::Kit {
 
@@ -42,14 +34,7 @@ public:
 
     void SetWidth(const CalcDimension& width);
     void SetHeight(const CalcDimension& height);
-    void SetTranslate(const NG::TranslateOptions& options);
-    void SetOnTouch(TouchEventFunc&& touchEventFunc);
-    void SetOnClick(GestureEventFunc&& clickEventFunc);
-    void SetBorderRadius(const Dimension& radius);
-    void SetBackgroundColor(const Color& color);
-    void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
     void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
-    void SetOpacity(double opacity);
 
 protected:
     View();

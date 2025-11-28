@@ -16,6 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_TYPE_DEFINITION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_TYPE_DEFINITION_H
 
-#include "ui/base/utils/type_definition.h"
+#include <chrono>
+
+#ifndef ACE_NON_VIRTUAL
+#ifdef ACE_UNITTEST
+#define ACE_NON_VIRTUAL virtual // support gmock in unitest
+#else
+#define ACE_NON_VIRTUAL
+#endif
+#endif
+
+namespace OHOS::Ace {
+
+// nano seconds.
+using TimeStamp = std::chrono::high_resolution_clock::time_point;
+
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_TYPE_DEFINITION_H

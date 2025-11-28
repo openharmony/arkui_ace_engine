@@ -41,7 +41,6 @@ ohos_source_set("ace_kit") {
     "src/resource/resource_parser.cpp",
     "src/utils/measure_utils.cpp",
     "src/view/components/column.cpp",
-    "src/view/components/stack.cpp",
     "src/view/components/custom_node.cpp",
     "src/view/components/menu_view.cpp",
     "src/view/components/tabs.cpp",

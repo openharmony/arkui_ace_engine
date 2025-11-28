@@ -16,6 +16,84 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_OFFSET_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_OFFSET_H
 
-#include "ui/base/geometry/dimension_offset.h"
+#include <cmath>
+#include <limits>
+#include <optional>
+
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/offset.h"
+
+namespace OHOS::Ace {
+
+class DimensionOffset {
+public:
+    DimensionOffset() = default;
+    ~DimensionOffset() = default;
+    DimensionOffset(const Dimension& deltaX, const Dimension& deltaY) : deltaX_(deltaX), deltaY_(deltaY) {}
+    DimensionOffset(const Offset& offset) : deltaX_(Dimension(offset.GetX(), DimensionUnit::PX)),
+        deltaY_(Dimension(offset.GetY(), DimensionUnit::PX)) {}
+
+    explicit DimensionOffset(const NG::OffsetF& offset)
+        : deltaX_(Dimension(offset.GetX())), deltaY_(Dimension(offset.GetY()))
+    {}
+
+    const Dimension& GetX() const
+    {
+        return deltaX_;
+    }
+
+    const Dimension& GetY() const
+    {
+        return deltaY_;
+    }
+
+    const std::optional<Dimension>& GetZ() const
+    {
+        return deltaZ_;
+    }
+
+    void SetX(Dimension& x)
+    {
+        deltaX_ = x;
+    }
+
+    void SetY(Dimension& y)
+    {
+        deltaY_ = y;
+    }
+
+    void SetZ(const Dimension& z)
+    {
+        deltaZ_ = z;
+    }
+
+    DimensionOffset operator+(const DimensionOffset& dimensionOffset) const
+    {
+        return DimensionOffset(deltaX_ + dimensionOffset.deltaX_, deltaY_ + dimensionOffset.deltaY_);
+    }
+
+    DimensionOffset operator-(const DimensionOffset& dimensionOffset) const
+    {
+        return DimensionOffset(deltaX_ - dimensionOffset.deltaX_, deltaY_ - dimensionOffset.deltaY_);
+    }
+
+    DimensionOffset operator*(double value) const
+    {
+        return DimensionOffset(deltaX_ * value, deltaY_ * value);
+    }
+
+    bool operator==(const DimensionOffset& dimensionOffset) const
+    {
+        return deltaX_ == dimensionOffset.deltaX_ && deltaY_ == dimensionOffset.deltaY_ && deltaZ_ == deltaZ_;
+    }
+
+private:
+    Dimension deltaX_;
+    Dimension deltaY_;
+    std::optional<Dimension> deltaZ_;
+};
+
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_OFFSET_H

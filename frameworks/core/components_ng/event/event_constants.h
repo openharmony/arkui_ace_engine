@@ -20,8 +20,6 @@
 #include <cstdint>
 
 #include "base/geometry/dimension.h"
-#include "ui/event/event_constants.h"
-
 enum class MenuPreviewMode {
     NONE,
     IMAGE,
@@ -133,6 +131,36 @@ enum class GestureCallbackType {
 namespace OHOS::Ace {
 
 static const int32_t TOUCH_TOOL_BASE_ID = 100;
+
+enum class TouchType : size_t {
+    DOWN = 0,
+    UP,
+    MOVE,
+    CANCEL,
+    PULL_DOWN,
+    PULL_UP,
+    PULL_MOVE,
+    PULL_IN_WINDOW,
+    PULL_OUT_WINDOW,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
+    HOVER_CANCEL,
+    PROXIMITY_IN,
+    PROXIMITY_OUT,
+    UNKNOWN,
+};
+
+enum class UIInputEventType {
+    NONE = 0,
+    TOUCH,
+    AXIS,
+    KEY,
+    FOCUS_AXIS,
+    CROWN,
+    MOUSE,
+    TOUCHPAD_ACTIVE,
+};
 
 enum class KeyIntention : int32_t {
     INTENTION_UNKNOWN = -1,

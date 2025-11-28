@@ -18,13 +18,11 @@
 
 #include <functional>
 
-#include "ui/animation/animation_option.h"
 #include "ui/base/macros.h"
 #include "ui/base/type_info_base.h"
 #include "ui/properties/blur_style_option.h"
 #include "ui/properties/brightness_option.h"
 #include "ui/properties/color.h"
-#include "ui/properties/ng/transition_property.h"
 #include "ui/properties/tabs_effect_node_option.h"
 #include "ui/view/components/tabs/tabs_constants.h"
 #include "ui/view/components/tabs/tabs_data.h"
@@ -45,10 +43,6 @@ struct TabsItemDivider {
 class ACE_FORCE_EXPORT Tabs : public View {
 public:
     using OnChangeEvent = std::function<void(int32_t)>;
-    using OnTabBarClickEvent = std::function<void(int32_t)>;
-    using OnGestureSwipeEvent = std::function<void(int32_t, const AnimationCallbackInfo&)>;
-    using OnAnimationStartEvent =
-        std::function<void(int32_t ngIndex, int32_t ngTargetIndex, const AnimationCallbackInfo& info)>;
     Tabs();
     Tabs(RefPtr<FrameNode>& node);
     ~Tabs();
@@ -61,8 +55,6 @@ public:
     void SetEffectNodeOption(const TabsEffectNodeOption& option);
     void SetTabBarMode(const TabBarMode& barMode);
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option);
-    void SetTabBarTranslate(const NG::TranslateOptions& options);
-    void SetTabBarOpacity(float opacity);
     void UpdateDividerOpacity(const double opacity);
 
     void UpdateTabBarBrightness(const BrightnessOption& brightnessOption);
@@ -70,16 +62,11 @@ public:
     void SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption);
     void SetBarBackgroundColor(const Color& backgroundColor);
     void SetBarBackgroundEffect(const EffectOption& effectOption);
-    uint32_t GetAnimationDuration();
     double GetTabBarTop();
     double GetTabBarBottom();
-    std::size_t GetTabBarItemSize();
     RefPtr<FrameNode> GetTabBar();
     RefPtr<FrameNode> GetEffectNode();
     void SetOnChange(OnChangeEvent onChangeEvent);
-    void SetOnTabBarClick(OnTabBarClickEvent onTabBarClickEvent);
-    void SetOnGestureSwipe(OnGestureSwipeEvent onGestureSwipe);
-    void SetOnAnimationStart(OnAnimationStartEvent onAnimationStart);
 };
 
 } // namespace OHOS::Ace::Kit
