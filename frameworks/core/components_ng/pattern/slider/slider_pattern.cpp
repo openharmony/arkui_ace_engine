@@ -219,7 +219,7 @@ void SliderPattern::InitSliderEnds()
             pattern->UpdatePrefixPosition();
         }
 
-        if (pattern->HasPrefix()) {
+        if (pattern->HasSuffix()) {
             pattern->UpdateSuffixPosition();
         }
     };
