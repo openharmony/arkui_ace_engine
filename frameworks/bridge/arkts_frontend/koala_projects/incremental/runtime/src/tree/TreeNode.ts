@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { className, int32, uint32 } from '@koalaui/common'
+import { className, float64, int32, uint32 } from '@koalaui/common'
 import { RuntimeProfiler } from '../common/RuntimeProfiler'
 import { Disposable } from '../states/Disposable'
 import { ReadonlyTreeNode } from './ReadonlyTreeNode'
@@ -147,22 +147,25 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
     /**
      * Performs the specified action for each child node.
      */
-    forEach(action: (node: TreeNode, index: int32) => void): void {
-        this.myChildren.forEach(action)
+    forEach(action: (node: TreeNode, index: float64) => void): void {
+        // must be int32, but ArkTS array.forEach requires index to be float64
+        this.myChildren.forEach((n, i) => action(n, i))
     }
 
     /**
      * Determines whether all child nodes satisfy the specified predicate.
      */
-    every(predicate: (node: TreeNode, index: int32) => boolean): boolean {
-        return this.myChildren.every(predicate)
+    every(predicate: (node: TreeNode, index: float64) => boolean): boolean {
+        // must be int32, but ArkTS array.every requires index to be float64
+        return this.myChildren.every((n, i) => predicate(n, i))
     }
 
     /**
      * Determines whether any child node satisfies the specified predicate.
      */
-    some(predicate: (node: TreeNode, index: int32) => boolean): boolean {
-        return this.myChildren.some(predicate)
+    some(predicate: (node: TreeNode, index: float64) => boolean): boolean {
+        // must be int32, but ArkTS array.some requires index to be float64
+        return this.myChildren.some((n, i) => predicate(n, i))
     }
 
     /**
