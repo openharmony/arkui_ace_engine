@@ -328,6 +328,11 @@ auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
 
 auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     CHECK_NULL_VOID(popupParam);
+    auto placementOpt = OptConvert<Placement>(src.placement);
+    if (placementOpt.has_value()) {
+        popupParam->SetPlacement(placementOpt.value());
+        popupParam->SetHasPlacement(true);
+    }
     popupParam->SetEnableHoverMode(OptConvert<bool>(src.enableHoverMode).value_or(popupParam->EnableHoverMode()));
     popupParam->SetFollowTransformOfTarget(OptConvert<bool>(src.followTransformOfTarget)
         .value_or(popupParam->IsFollowTransformOfTarget()));
@@ -1916,7 +1921,6 @@ RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
     } else if (offsetOpt.has_value()) {
         popupParam->SetArrowOffset(offsetOpt.value());
     }
-    popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(Placement::BOTTOM));
     g_popupCommonParam(src, popupParam);
     g_popupCommonParamWithValidator(src, popupParam);
     return popupParam;
@@ -1934,7 +1938,6 @@ RefPtr<PopupParam> Convert(const Ark_CustomPopupOptions& src)
     } else if (offsetOpt.has_value()) {
         popupParam->SetArrowOffset(offsetOpt.value());
     }
-    popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(Placement::BOTTOM));
     g_popupCommonParam(src, popupParam);
     g_popupCommonParamWithValidator(src, popupParam);
     return popupParam;

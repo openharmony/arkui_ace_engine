@@ -390,7 +390,11 @@ auto g_getPopupDefaultShadow = []() -> ShadowStyle {
 
 void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
 {
-    popupParam->SetPlacement(Converter::OptConvert<Placement>(src.placement).value_or(Placement::BOTTOM));
+    auto placementOpt = OptConvert<Placement>(src.placement);
+    if (placementOpt.has_value()) {
+        popupParam->SetPlacement(placementOpt.value());
+        popupParam->SetHasPlacement(true);
+    }
     auto popupBackgroundColor = Converter::OptConvert<Color>(src.popupColor);
     if (popupBackgroundColor.has_value()) {
         popupParam->SetBackgroundColor(popupBackgroundColor.value());
