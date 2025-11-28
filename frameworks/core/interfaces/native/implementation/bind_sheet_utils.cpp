@@ -123,19 +123,41 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
 {
     sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::OVERLAY);
     std::vector<SheetHeight> detents;
-    auto detentsOpt = GetOpt(sheetOptions.detents);
-    if (detentsOpt) {
-        auto value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0);
-        if (value0) {
-            detents.emplace_back(value0.value());
-        }
-        auto value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1);
-        if (value1) {
-            detents.emplace_back(value1.value());
-        }
-        auto value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2);
-        if (value2) {
-            detents.emplace_back(value2.value());
+    std::optional<SheetHeight> value0;
+    std::optional<SheetHeight> value1;
+    std::optional<SheetHeight> value2;
+    if (auto detentsOpt = GetOpt(sheetOptions.detents)) {
+        switch (detentsOpt.value().selector) {
+            case DETENTS_SELECT_ZERO:
+                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0.value0);
+                if (value0) {
+                    detents.emplace_back(value0.value());
+                }
+                break;
+            case DETENTS_SELECT_ONE:
+                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value0);
+                if (value0) {
+                    detents.emplace_back(value0.value());
+                }
+                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value1);
+                if (value1) {
+                    detents.emplace_back(value1.value());
+                }
+                break;
+            case DETENTS_SELECT_TWO:
+                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value0);
+                if (value0) {
+                    detents.emplace_back(value0.value());
+                }
+                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value1);
+                if (value1) {
+                    detents.emplace_back(value1.value());
+                }
+                value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value2);
+                if (value2) {
+                    detents.emplace_back(value2.value());
+                }
+                break;
         }
         sheetStyle.detents = detents;
     }

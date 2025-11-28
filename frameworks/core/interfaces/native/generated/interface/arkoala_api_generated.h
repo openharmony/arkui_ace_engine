@@ -2899,6 +2899,8 @@ typedef struct Ark_DividerOptions Ark_DividerOptions;
 typedef struct Opt_DividerOptions Opt_DividerOptions;
 typedef struct Ark_DividerStyle Ark_DividerStyle;
 typedef struct Opt_DividerStyle Opt_DividerStyle;
+typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
+typedef struct Opt_DoubleLengthDetents Opt_DoubleLengthDetents;
 typedef struct Ark_EdgeOutlineWidths Ark_EdgeOutlineWidths;
 typedef struct Opt_EdgeOutlineWidths Opt_EdgeOutlineWidths;
 typedef struct Ark_Edges Ark_Edges;
@@ -2973,6 +2975,8 @@ typedef struct Ark_ScrollSnapOptions Ark_ScrollSnapOptions;
 typedef struct Opt_ScrollSnapOptions Opt_ScrollSnapOptions;
 typedef struct Ark_SearchButtonOptions Ark_SearchButtonOptions;
 typedef struct Opt_SearchButtonOptions Opt_SearchButtonOptions;
+typedef struct Ark_SingleLengthDetent Ark_SingleLengthDetent;
+typedef struct Opt_SingleLengthDetent Opt_SingleLengthDetent;
 typedef struct Ark_SizeOptions Ark_SizeOptions;
 typedef struct Opt_SizeOptions Opt_SizeOptions;
 typedef struct Ark_SubTabBarIndicatorStyle Ark_SubTabBarIndicatorStyle;
@@ -3080,6 +3084,8 @@ typedef struct Ark_Union_RectOptions_RoundedRectOptions Ark_Union_RectOptions_Ro
 typedef struct Opt_Union_RectOptions_RoundedRectOptions Opt_Union_RectOptions_RoundedRectOptions;
 typedef struct Ark_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle Ark_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle;
 typedef struct Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle;
+typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
 typedef struct Ark_Union_SizeOptions_ImageSize Ark_Union_SizeOptions_ImageSize;
 typedef struct Opt_Union_SizeOptions_ImageSize Opt_Union_SizeOptions_ImageSize;
 typedef struct Ark_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource Ark_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource;
@@ -18439,6 +18445,15 @@ typedef struct Opt_DividerStyle {
     Ark_Tag tag;
     Ark_DividerStyle value;
 } Opt_DividerStyle;
+typedef struct Ark_DoubleLengthDetents {
+    /* kind: Interface */
+    Ark_Union_SheetSize_Length value0;
+    Opt_Union_SheetSize_Length value1;
+} Ark_DoubleLengthDetents;
+typedef struct Opt_DoubleLengthDetents {
+    Ark_Tag tag;
+    Ark_DoubleLengthDetents value;
+} Opt_DoubleLengthDetents;
 typedef struct Ark_EdgeOutlineWidths {
     /* kind: Interface */
     Opt_Dimension top;
@@ -18800,6 +18815,14 @@ typedef struct Opt_SearchButtonOptions {
     Ark_Tag tag;
     Ark_SearchButtonOptions value;
 } Opt_SearchButtonOptions;
+typedef struct Ark_SingleLengthDetent {
+    /* kind: Interface */
+    Ark_Union_SheetSize_Length value0;
+} Ark_SingleLengthDetent;
+typedef struct Opt_SingleLengthDetent {
+    Ark_Tag tag;
+    Ark_SingleLengthDetent value;
+} Opt_SingleLengthDetent;
 typedef struct Ark_SizeOptions {
     /* kind: Interface */
     Opt_Length width;
@@ -19453,6 +19476,19 @@ typedef struct Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_Navigat
     Ark_Tag tag;
     Ark_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle value;
 } Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle;
+typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_SingleLengthDetent value0;
+        Ark_DoubleLengthDetents value1;
+        Ark_TripleLengthDetents value2;
+    };
+} Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents {
+    Ark_Tag tag;
+    Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents value;
+} Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
 typedef struct Ark_Union_SizeOptions_ImageSize {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -20252,7 +20288,7 @@ typedef struct Ark_SheetOptions {
     Opt_Union_SheetSize_Length height;
     Opt_Boolean dragBar;
     Opt_ResourceColor maskColor;
-    Opt_TripleLengthDetents detents;
+    Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents detents;
     Opt_BlurStyle blurStyle;
     Opt_Union_Boolean_Resource showClose;
     Opt_SheetType preferType;

@@ -779,6 +779,42 @@ SheetHeight Convert(const Ark_Resource& src)
 }
 
 template<>
+SheetHeight Convert(const Ark_Union_SheetSize_Length& src)
+{
+    SheetHeight result;
+    switch (src.selector) {
+        case SELECTOR_ID_0:
+            result = Convert<SheetHeight>(src.value0);
+            break;
+        case SELECTOR_ID_1:
+            result = SheetHeightFromDimension(OptConvert<Dimension>(src.value1));
+            break;
+        default:
+            LOGE("Unexpected src.selector: %{public}d\n", src.selector);
+            break;
+    }
+    return result;
+}
+
+template<>
+SheetHeight Convert(const Ark_SingleLengthDetent& src)
+{
+    return Convert<SheetHeight>(src.value0);
+}
+
+template<>
+SheetHeight Convert(const Ark_DoubleLengthDetents& src)
+{
+    return Convert<SheetHeight>(src.value0);
+}
+
+template<>
+SheetHeight Convert(const Ark_TripleLengthDetents& src)
+{
+    return Convert<SheetHeight>(src.value0);
+}
+
+template<>
 SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
 {
     SysOptions sysOptions;
