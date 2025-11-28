@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_model_static.h"
-#include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -262,8 +261,7 @@ void SetDescriptionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, false, frameNode);
-        frameNode->MarkModifyDone();
+        GaugeModelStatic::ReSetDescription(frameNode);
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
