@@ -140,6 +140,7 @@ public:
     OnControllerAttachedCallback GetOnControllerAttachedCallback();
     void SetSetWebIdCallback(std::function<void(int32_t)>&& SetIdCallback) {}
     void SetSetHapPathCallback(std::function<void(const std::string&)>&& callback) {}
+    void SetJsProxyCallback(std::function<void()>&& jsProxyCallback) {}
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
     {
