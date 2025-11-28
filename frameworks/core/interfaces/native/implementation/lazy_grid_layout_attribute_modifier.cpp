@@ -36,7 +36,9 @@ void SetRowsGapImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue =  Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(convValue);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
     LazyGridLayoutModelStatic::SetRowGap(frameNode, convValue);
 }
 void SetColumnsGapImpl(Ark_NativePointer node,
@@ -45,7 +47,9 @@ void SetColumnsGapImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue =  Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(convValue);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
     LazyGridLayoutModelStatic::SetColumnGap(frameNode, convValue);
 }
 } // LazyGridLayoutAttributeModifier
