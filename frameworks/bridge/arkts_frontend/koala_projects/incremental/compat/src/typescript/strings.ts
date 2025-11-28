@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { int32 } from "./types"
+import { TextEncoder, TextDecoder } from 'util'
+import { int32 } from './types'
 
 interface SystemTextEncoder {
     encode(input?: string): Uint8Array;
@@ -34,7 +35,7 @@ interface SystemTextDecoder {
 export class CustomTextEncoder {
     static readonly HeaderLen: int32 = Int32Array.BYTES_PER_ELEMENT
 
-    constructor(encoder: SystemTextEncoder|undefined = ((typeof TextEncoder != "undefined") ? new TextEncoder() : undefined)) {
+    constructor(encoder: SystemTextEncoder | undefined = ((typeof TextEncoder !== 'undefined') ? new TextEncoder() : undefined)) {
         this.encoder = encoder
     }
 
@@ -155,7 +156,7 @@ export class CustomTextEncoder {
 
 export class CustomTextDecoder {
     static cpArrayMaxSize = 128
-    constructor(decoder: SystemTextDecoder|undefined = ((typeof TextDecoder != "undefined") ? new TextDecoder() : undefined)) {
+    constructor(decoder: SystemTextDecoder|undefined = ((typeof TextDecoder !== 'undefined') ? new TextDecoder() : undefined)) {
         this.decoder = decoder
     }
 
@@ -169,7 +170,7 @@ export class CustomTextDecoder {
         let codePoints = new Int32Array(cpSize)
         let cpIndex = 0;
         let index = 0
-        let result = ""
+        let result = ''
         while (index < input.length) {
             let elem = input[index]
             let lead = elem & 0xff
@@ -178,20 +179,20 @@ export class CustomTextDecoder {
             if (lead < 0x80) {
                 count = 1
                 value = elem
-            } else if ((lead >> 5) == 0x6) {
+            } else if ((lead >> 5) === 0x6) {
                 value = ((elem << 6) & 0x7ff) + (input[index + 1] & 0x3f)
                 count = 2
-            } else if ((lead >> 4) == 0xe) {
+            } else if ((lead >> 4) === 0xe) {
                 value = ((elem << 12) & 0xffff) + ((input[index + 1] << 6) & 0xfff) +
                     (input[index + 2] & 0x3f)
                 count = 3
-            } else if ((lead >> 3) == 0x1e) {
+            } else if ((lead >> 3) === 0x1e) {
                 value = ((elem << 18) & 0x1fffff) + ((input[index + 1] << 12) & 0x3ffff) +
                     ((input[index + 2] << 6) & 0xfff) + (input[index + 3] & 0x3f)
                 count = 4
             }
             codePoints[cpIndex++] = value
-            if (cpIndex == cpSize) {
+            if (cpIndex === cpSize) {
                 cpIndex = 0
                 result += String.fromCodePoint(...codePoints)
             }

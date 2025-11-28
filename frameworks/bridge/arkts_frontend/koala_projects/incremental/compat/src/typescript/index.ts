@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
-export * from "./array"
-export * from "./atomic"
-export * from "./primitive"
-export * from "./finalization"
-export * from "./observable"
-export * from "./performance"
-export * from "./prop-deep-copy"
-export * from "./reflection"
-export * from "./strings"
-export * from "./ts-reflection"
-export * from "./types"
-export * from "./utils"
+export * from './atomic'
+export * from './primitive'
+export * from './finalization'
+export * from './observable'
+export * from './performance'
+export * from './prop-deep-copy'
+export * from './strings'
+export * from './ts-reflection'
+export * from './types'
+export * from './utils'

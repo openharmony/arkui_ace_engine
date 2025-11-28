@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, isFiniteNumber, uint32 } from '@koalaui/common'
+import { float64, int32toFloat64, int64to32, isFiniteNumber, uint32 } from '@koalaui/common'
 
 export class EasingSupport {
     private x: Float64Array
@@ -31,15 +31,15 @@ export class EasingSupport {
         this.x[last] = xSupplier(1)
         this.y[last] = ySupplier(1)
         for (let i = 1; i < last; i++) {
-            const value = (i as float64) / last
+            const value = int32toFloat64(i) / last
             this.x[i] = xSupplier(value)
             this.y[i] = ySupplier(value)
         }
     }
 
     convert(value: float64): float64 {
-        let last = (this.x.length - 1) as uint32
-        let left = 0 as uint32
+        let last = this.x.length - 1
+        let left = 0
         if (value < this.x[left]) {
             return this.y[left]
         }
@@ -48,7 +48,7 @@ export class EasingSupport {
             return this.y[right]
         }
         while (left <= right) {
-            const center = ((left + right) >>> 1) as uint32
+            const center = int64to32((left + right) >>> 1)
             if (value < this.x[center]) {
                 right = center - 1
             }

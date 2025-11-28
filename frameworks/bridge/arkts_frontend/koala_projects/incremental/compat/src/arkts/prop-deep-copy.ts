@@ -18,7 +18,15 @@
     @Prop makes a deep copy, during which all types,
     except primitive types, Map, Set, Date, and Array, will be lost.
  */
+import { getObservableTarget } from './observable.ts'
 
 export function propDeepCopy<T>(sourceObject: T): T {
-    return deepcopy<T>(sourceObject) as T
+    // at the moment of intergation deepcopy from the stdlib requires a default constructor
+    // but default constructor is not available for ObservableDate, so we
+    // add a special case for Date (a parent for ObservableDate)
+    if (sourceObject instanceof Date) {
+        const copy: Date = new Date(sourceObject.valueOf());
+        return copy as T;
+    }
+    return deepcopy<T>(getObservableTarget(sourceObject as Object) as T) as T
 }

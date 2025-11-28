@@ -24,7 +24,7 @@ interface FinalizationRegistry {
 
 interface FinalizationRegistryConstructor {
     readonly prototype: FinalizationRegistry;
-    new(callback: (value: any) => void): FinalizationRegistry;
+    new (callback: (value: any) => void): FinalizationRegistry
 }
 
 declare const FinalizationRegistry: FinalizationRegistryConstructor
@@ -34,7 +34,7 @@ const registry = new FinalizationRegistry((thunk: Thunk) => {
 })
 
 export function finalizerRegister(target: object, thunk: object) {
-    registry.register(target, thunk)
+    registry.register(target, thunk, target)
 }
 
 export function finalizerUnregister(target: object) {
