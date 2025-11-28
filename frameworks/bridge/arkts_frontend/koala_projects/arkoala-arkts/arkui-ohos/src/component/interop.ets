@@ -178,6 +178,7 @@ function openInterop(): void {
     }
     const openInterop = global.getProperty('openInterop');
     openInterop.invoke();
+    InteropState.getInstance().enable();
     registerCreateWatchFuncCallback();
     registerCreateStaticObservedCallback();
     registerCompatibleStaticComponentCallback();
@@ -196,6 +197,7 @@ function closeInterop(): void {
     const global = ESValue.getGlobal();
     const closeInterop = global.getProperty('closeInterop');
     closeInterop.invoke();
+    InteropState.getInstance().disable();
 }
 
 
@@ -311,6 +313,9 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
 }
 
 export function isDynamicObject<T>(value: T): boolean {
+    if (!InteropState.getInstance().isEnabled()) {
+        return false;
+    }
     if (value instanceof ESValue) {
         return false;
     }
@@ -1148,4 +1153,28 @@ function registerLocalStorageSetProxy(): void {
 
 function localStorageSetProxy(storage: LocalStorage, proxy: Object): void {
     storage.setProxy(ESValue.wrap(proxy));
+}
+
+class InteropState {
+    private static instance: InteropState | undefined = undefined;
+    private _opened = false;
+
+    static getInstance(): InteropState {
+        if (!InteropState.instance) {
+            InteropState.instance = new InteropState();
+        }
+        return InteropState.instance!;
+    }
+
+    public enable() {
+        this._opened = true;
+    }
+
+    public disable() {
+        this._opened = false;
+    }
+
+    public isEnabled() {
+        return this._opened;
+    }
 }
