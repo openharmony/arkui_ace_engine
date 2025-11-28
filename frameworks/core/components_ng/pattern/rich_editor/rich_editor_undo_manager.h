@@ -389,6 +389,7 @@ public:
     void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record) override;
     void ApplyRecord(const UndoRedoRecord& record, bool isUndo) override;
 private:
+    void ProcessDeleteOperation(int32_t length, bool isForward);
     void ProcessDragUndo(const UndoRedoRecord& record);
     void ProcessDragRedo(const UndoRedoRecord& record);
     void ProcessDragDeleteRecord(UndoRedoRecord& record);

@@ -1054,4 +1054,60 @@ HWTEST_F(RichEditorStringUndoCallBackTestNg, CallBackTest018, TestSize.Level0)
     eventHub->SetOnDidChange(std::move(onDidChange));
     richEditorPattern->HandleOnRedoAction();
 }
+
+/**
+ * @tc.name: CallBackTest019
+ * @tc.desc: Test redo delete forward after symbol.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStringUndoCallBackTestNg, CallBackTest019, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContent();
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    TextSpanOptions options;
+    options.value = PASTE_TEST_CONTENT;
+    richEditorPattern->AddTextSpan(options);
+    richEditorPattern->SetCaretPosition(16);
+    richEditorPattern->DeleteForward(1);
+    richEditorPattern->StartTwinkling();
+    int32_t step = 0;
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onWillChange = [&step](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(step, 0);
+        EXPECT_EQ(changeValue.GetRangeBefore().start, 16);
+        EXPECT_EQ(changeValue.GetRangeBefore().end, 16);
+        step++;
+        return true;
+    };
+    eventHub->SetOnWillChange(std::move(onWillChange));
+    auto onSelectionChange = [&step](const BaseEventInfo* info) {
+        EXPECT_EQ(step, 1);
+        const auto* selectionRange = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
+        ASSERT_NE(selectionRange, nullptr);
+        EXPECT_EQ(selectionRange->start_, 17);
+        EXPECT_EQ(selectionRange->end_, 17);
+        step++;
+    };
+    eventHub->SetOnSelectionChange(std::move(onSelectionChange));
+    auto onIMEInputComplete = [&step](const RichEditorAbstractSpanResult& info) {
+        EXPECT_EQ(step, 2);
+        EXPECT_EQ(info.OffsetInSpan(), 0);
+        EXPECT_EQ(info.GetEraseLength(), 1);
+        step++;
+    };
+    eventHub->SetOnIMEInputComplete(std::move(onIMEInputComplete));
+    auto onDidChange = [&step](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(step, 3);
+        EXPECT_EQ(changeValue.GetRangeBefore().start, 16);
+        EXPECT_EQ(changeValue.GetRangeBefore().end, 16);
+        EXPECT_EQ(changeValue.GetRangeAfter().start, 16);
+        EXPECT_EQ(changeValue.GetRangeAfter().end, 17);
+    };
+    eventHub->SetOnDidChange(std::move(onDidChange));
+    richEditorPattern->HandleOnUndoAction();
+}
 }

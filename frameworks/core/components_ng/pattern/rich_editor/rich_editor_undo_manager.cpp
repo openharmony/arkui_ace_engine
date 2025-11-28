@@ -774,11 +774,32 @@ void StringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
     // process delete forward when redo delete forward without selection or insert value with selection
     bool isDeleteForward = !isUndo && (isDelForwardWithoutSelection || isInsertWithSelection);
     pattern->SetCaretPosition(isDeleteForward ? record.rangeBefore.start : record.rangeBefore.end);
-    if (delLength > 0) {
-        isDeleteForward ? pattern->DeleteForwardOperation(delLength, false)
-            : pattern->DeleteBackwardOperation(delLength, false);
-    }
+    IF_TRUE(delLength > 0, ProcessDeleteOperation(delLength, isDeleteForward));
     IF_TRUE(record.rangeAfter.GetLength() > 0, pattern->InsertValueOperation(record.GetStringAfter()));
+}
+
+void StringUndoManager::ProcessDeleteOperation(int32_t length, bool isForward)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto contentLength = static_cast<int32_t>(pattern->GetTextContentLength());
+    int32_t currentPosition = pattern->caretPosition_;
+    int32_t delStart = isForward ? currentPosition : currentPosition - length;
+    int32_t delEnd = isForward ? currentPosition + length : currentPosition;
+    bool isOperationValid = (delStart >= 0) && (delEnd <= contentLength);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ProcessDelete range:[%{public}d-%{public}d] in %{public}d isForward:%{public}d",
+        delStart, delEnd, contentLength, isForward);
+    CHECK_NULL_VOID(isOperationValid);
+    auto direction = isForward ? RichEditorDeleteDirection::FORWARD : RichEditorDeleteDirection::BACKWARD;
+    RichEditorDeleteValue info;
+    info.SetRichEditorDeleteDirection(direction);
+    info.SetOffset(delStart);
+    info.SetLength(length);
+    if (!pattern->spans_.empty()) {
+        pattern->CalcDeleteValueObj(delStart, length, info);
+        pattern->DoDeleteActions(delStart, length, info, false);
+    }
+    pattern->ClearTextForDisplayIfEmpty();
 }
 
 void StringUndoManager::ProcessDragUndo(const UndoRedoRecord& record)
