@@ -22,16 +22,26 @@ import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
 import { OBSERVE } from "./stateManagement";
 import { PeerNode } from "./PeerNode"
 import { RecordData } from "@ohos.base"
+import { int32 } from '@koalaui/common';
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
     private peer?: PeerNode
+
+    private themeScopeId?: int32
 
     setPeer(peer: PeerNode): void {
         this.peer = peer
     }
     getPeer(): PeerNode | undefined {
         return this. peer
+    }
+
+    setThemeScopeId(themeScopeId: int32): void {
+        this.themeScopeId = themeScopeId
+    }
+    getThemeScopeId(): int32 | undefined {
+        return this.themeScopeId
     }
 
     onFormRecycle(): string {
