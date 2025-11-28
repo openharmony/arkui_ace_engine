@@ -3701,7 +3701,7 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
         return;
     }
     taskExecutor->PostTask(
