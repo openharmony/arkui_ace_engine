@@ -219,8 +219,10 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
     auto* viewStack = NG::ViewStackProcessor::GetInstance();
     viewStack->Push(Referenced::Claim(this));
 
-    ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start[%d]-end[%d], cacheStart[%d], cacheEnd[%d]. keep in [%d]-[%d]",
-        start, end, cacheStart, cacheEnd, nStart, nEnd);
+    ACE_SCOPED_TRACE(
+        "Repeat.DoSetActiveChildRange nodeId[%d], start[%d]-end[%d], cacheStart[%d], "
+        "cacheEnd[%d]. keep in [%d]-[%d]",
+        GetId(), start, end, cacheStart, cacheEnd, nStart, nEnd);
 
     // step 2. call TS side
     onActiveRange_(nStart, nEnd, start, end, isLoop_, forceRunDoSetActiveRange_);
@@ -451,8 +453,8 @@ RefPtr<UINode> RepeatVirtualScroll2Node::GetFrameChildByIndex(
         static_cast<int32_t>(GetId()), static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
         static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
-    ACE_SCOPED_TRACE("Repeat.GetFrameChildByIndex index[%d], needBuild[%d] isCache[%d] addToRenderTree[%d]",
-        static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
+    ACE_SCOPED_TRACE("Repeat.GetFrameChildByIndex nodeId[%d], index[%d], needBuild[%d] isCache[%d] addToRenderTree[%d]",
+        GetId(), static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
         static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
     if (prevRecycleFrom_ > 0 && prevRecycleFrom_ <= static_cast<IndexType>(index) &&
@@ -675,8 +677,8 @@ void RepeatVirtualScroll2Node::PostIdleTask()
     CHECK_NULL_VOID(context);
 
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t /*deadline*/, bool /*canUseLongPredictTask*/) {
-        ACE_SCOPED_TRACE("Repeat.IdleTask");
         auto node = weak.Upgrade();
+        ACE_SCOPED_TRACE("Repeat.IdleTask, nodeId[%d]", node->GetId());
         CHECK_NULL_VOID(node);
         node->postUpdateTaskHasBeenScheduled_ = false;
         TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).PostIdleTask idle task calls GetChildren",

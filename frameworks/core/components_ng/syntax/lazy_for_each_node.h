@@ -201,6 +201,8 @@ public:
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
 
     void EnablePreBuild(bool enable);
+    // list for nodes that should be released in idletask
+    std::list<RefPtr<UINode>> removingNodes_;
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
