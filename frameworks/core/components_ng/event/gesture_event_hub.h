@@ -232,6 +232,7 @@ public:
     bool IsClickEventsEmpty() const;
     GestureEventFunc GetClickEvent();
     void BindMenu(GestureEventFunc&& showMenu);
+    void RemoveBindMenu();
     void RegisterMenuOnTouch(TouchEventFunc&& callback);
     bool IsLongClickable() const;
     void SetRedirectClick(bool redirectClick);

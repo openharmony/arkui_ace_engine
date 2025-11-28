@@ -356,7 +356,8 @@ public:
     static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
 
 private:
-    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
+    static bool CheckMenuIsShow(
+        const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode,  bool isBuildFuncNull);
     static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
     static void CreateCustomMenuWithPreview(FrameNode* targetNode,

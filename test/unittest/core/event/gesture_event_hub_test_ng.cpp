@@ -2563,4 +2563,32 @@ HWTEST_F(GestureEventHubTestNg, GestureEventOnDragStartTest001, TestSize.Level1)
     EXPECT_EQ(dragDropManager->lastDragMovePosition_, OffsetF());
     EXPECT_EQ(dragDropManager->dragTotalMovePosition_, OffsetF());
 }
+
+/**
+ * @tc.name: RemoveBindMenu01
+ * @tc.desc: Test RemoveBindMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, RemoveBindMenu01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: showMenu_ is nullptr after RemoveBindMenu called.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipline = PipelineContext::GetCurrentContext();
+
+    auto func = [](GestureEvent& info) {};
+    guestureEventHub->BindMenu(func);
+    EXPECT_NE(guestureEventHub->showMenu_, nullptr);
+
+    guestureEventHub->RemoveBindMenu();
+    EXPECT_EQ(guestureEventHub->showMenu_, nullptr);
+}
 } // namespace OHOS::Ace::NG

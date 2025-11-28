@@ -5333,6 +5333,7 @@ void BindContextMenuBase(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(content);
     menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isShowInSubWindow = true;
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     std::function<void(MenuParam, std::function<void()> &&)> contentBuilder;
     if (!optValue) {
@@ -5397,6 +5398,7 @@ void SetBindContextMenu0Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
     menuParam.isShow = false;
+    menuParam.setShow = false;
     BindContextMenuBase(node, content, responseType, options, menuParam);
 }
 void SetBindContextMenu1Impl(Ark_NativePointer node,
@@ -5407,6 +5409,7 @@ void SetBindContextMenu1Impl(Ark_NativePointer node,
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
     menuParam.isShow = Converter::OptConvertPtr<bool>(isShown).value_or(menuParam.isShow);
+    menuParam.setShow = true;
     auto type = Converter::ArkValue<Opt_ResponseType>(ARK_RESPONSE_TYPE_LONG_PRESS);
     BindContextMenuBase(node, content, &type, options, menuParam);
 }
