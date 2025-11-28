@@ -676,6 +676,8 @@ void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto capitalization = Converter::OptConvertPtr<AutoCapitalizationMode>(value);
+    SearchModelStatic::SetAutoCapitalizationMode(frameNode, capitalization);
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)

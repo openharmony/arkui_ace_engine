@@ -682,6 +682,16 @@ void AssignCast(std::optional<CalcLength>& dst, const Ark_Resource& src)
 }
 
 template<>
+PreviewText Convert(const Ark_PreviewText& src)
+{
+    PreviewText previewText = {
+        .value = Convert<std::u16string>(src.value),
+        .offset = Convert<int32_t>(src.offset)
+    };
+    return previewText;
+}
+
+template<>
 ScaleOpt Convert(const Ark_ScaleOptions& src)
 {
     ScaleOpt scaleOptions;

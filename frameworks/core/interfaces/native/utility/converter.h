@@ -643,6 +643,7 @@ namespace Converter {
     template<> PickerValueType Convert(const Ark_String& src);
     template<> PickerValueType Convert(const Array_ResourceStr& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
+    template<> PreviewText Convert(const Ark_PreviewText& src);
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
     template<> Rect Convert(const Ark_RectResult& src);
@@ -734,6 +735,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
+    template<> void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src);
     template<> void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src);

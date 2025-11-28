@@ -77,6 +77,18 @@ void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& 
 }
 
 template<>
+void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
+{
+    switch (src) {
+        case ARK_AUTO_CAPITALIZATION_MODE_NONE: dst = AutoCapitalizationMode::NONE; break;
+        case ARK_AUTO_CAPITALIZATION_MODE_WORDS: dst = AutoCapitalizationMode::WORDS; break;
+        case ARK_AUTO_CAPITALIZATION_MODE_SENTENCES: dst = AutoCapitalizationMode::SENTENCES; break;
+        case ARK_AUTO_CAPITALIZATION_MODE_ALL_CHARACTERS: dst = AutoCapitalizationMode::ALL_CHARACTERS; break;
+        default: LOGE("Unexpected enum value in Ark_AutoCapitalizationMode: %{public}d", src); break;
+    }
+}
+
+template<>
 void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
 {
     switch (src) {

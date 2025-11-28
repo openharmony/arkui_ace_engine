@@ -63,6 +63,20 @@ void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAct
     }
 }
 
+void AssignArkValue(Ark_AutoCapitalizationMode& dst, const AutoCapitalizationMode& src)
+{
+    switch (src) {
+        case AutoCapitalizationMode::NONE: dst = ARK_AUTO_CAPITALIZATION_MODE_NONE; break;
+        case AutoCapitalizationMode::WORDS: dst = ARK_AUTO_CAPITALIZATION_MODE_WORDS; break;
+        case AutoCapitalizationMode::SENTENCES: dst = ARK_AUTO_CAPITALIZATION_MODE_SENTENCES; break;
+        case AutoCapitalizationMode::ALL_CHARACTERS: dst = ARK_AUTO_CAPITALIZATION_MODE_ALL_CHARACTERS; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_AutoCapitalizationMode>;
+            LOGE("Unexpected enum value in AutoCapitalizationMode: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
 {
     switch (src) {
