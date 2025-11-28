@@ -340,6 +340,12 @@ void SpanItem::SpanDumpInfoAdvance()
             .append(textStyle->GetTextColor().ColorToString())
             .append(" self: ")
             .append(fontStyle && fontStyle->HasTextColor() ? fontStyle->GetTextColorValue().ColorToString() : "Na"));
+    dumpLog.AddDesc(
+        std::string("fontFamily: ")
+            .append(GetFontFamilyInJson(textStyle->GetFontFamilies()))
+            .append(" self: ")
+            .append(
+            fontStyle && fontStyle->HasFontFamily() ? GetFontFamilyInJson(fontStyle->GetFontFamilyValue()) : "Na"));
     ADD_FONT_STYLE_DESC_UTILS(TextCase, TextCase);
     ADD_LINE_STYLE_DESC_UTILS(TextOverflow, TextOverflow);
     ADD_LINE_STYLE_DESC_UTILS(WordBreak, WordBreak);

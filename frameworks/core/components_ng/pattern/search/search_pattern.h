@@ -154,9 +154,11 @@ public:
 
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
+    void OnIconColorConfigrationUpdate(const RefPtr<SearchTheme>& searchTheme);
+    void OnSearchColorConfigrationUpdate(const RefPtr<FrameNode>& frameNode, const Color& color);
+    void OnCancelColorConfigrationUpdate(const RefPtr<FrameNode>& frameNode, const Color& color);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     bool ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
-    bool IconNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
     bool TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
         const RefPtr<TextFieldTheme>& textFieldTheme);
 
@@ -284,7 +286,6 @@ private:
 
     void UpdateSearchSymbolIconColor();
     void UpdateCancelSymbolIconColor();
-    void UpdateSearchSymbol();
     void UpdateTextFieldColor();
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
@@ -368,9 +369,6 @@ private:
     WeakPtr<FrameNode> cancelIcon_;
     WeakPtr<SearchNode> searchNode_;
     WeakPtr<SearchTheme> searchTheme_;
-
-    bool searchIconUsingThemeColor_ = false;
-    bool cancelIconUsingThemeColor_ = false;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

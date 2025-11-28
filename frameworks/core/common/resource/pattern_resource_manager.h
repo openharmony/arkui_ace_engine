@@ -132,6 +132,8 @@ public:
     }
 
     void ParsePropertyValue(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
+
+    const std::vector<std::string>& GetResKeyArray();
 private:
     struct ResourceUpdater {
         RefPtr<ResourceObject> obj;

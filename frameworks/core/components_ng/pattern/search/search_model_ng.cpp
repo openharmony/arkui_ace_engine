@@ -270,23 +270,9 @@ void SearchModelNG::SetSearchIconSize(const Dimension& value)
 
 void SearchModelNG::SetSearchIconColor(const Color& color)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColor, color);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchIconColor(color);
-}
-
-void SearchModelNG::ResetSearchIconColor()
-{
-    ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColor);
-    // need to reset to search icon color of SearchTheme
-    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    CHECK_NULL_VOID(frameNode);
-    auto theme = GetTheme(frameNode);
-    CHECK_NULL_VOID(theme);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSearchIconColor(theme->GetSearchIconColor());
 }
 
 void SearchModelNG::SetSearchSrcPath(
@@ -303,6 +289,7 @@ void SearchModelNG::SetSearchDefaultIcon()
     CHECK_NULL_VOID(pattern);
     pattern->InitSearchIconColorSize();
     pattern->CreateSearchIcon("");
+    ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColorSetByUser);
 }
 
 void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
@@ -310,6 +297,11 @@ void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchImageIcon(iconOptions);
+    if (iconOptions.GetColor().has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColorSetByUser, true);
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColorSetByUser);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(
         SearchLayoutProperty, SearchIconUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)));
@@ -342,33 +334,11 @@ void SearchModelNG::SetCancelButtonStyle(CancelButtonStyle style)
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, style);
 }
 
-void SearchModelNG::SetCancelIconSize(const Dimension& value)
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCancelIconSize(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, value);
-}
-
 void SearchModelNG::SetCancelIconColor(const Color& color)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColor, color);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelIconColor(color);
-}
-
-void SearchModelNG::ResetCancelIconColor()
-{
-    ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColor);
-    // need to reset to search icon color of SearchTheme
-    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    CHECK_NULL_VOID(frameNode);
-    auto theme = GetTheme(frameNode);
-    CHECK_NULL_VOID(theme);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCancelIconColor(theme->GetSearchIconColor());
 }
 
 void SearchModelNG::SetCancelDefaultIcon()
@@ -377,6 +347,7 @@ void SearchModelNG::SetCancelDefaultIcon()
     CHECK_NULL_VOID(pattern);
     pattern->InitCancelIconColorSize();
     pattern->CreateCancelIcon();
+    ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColorSetByUser);
 }
 
 void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
@@ -384,6 +355,11 @@ void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelImageIcon(iconOptions);
+    if (iconOptions.GetColor().has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColorSetByUser, true);
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColorSetByUser);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(
         SearchLayoutProperty, CancelButtonUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)));
@@ -486,7 +462,7 @@ void SearchModelNG::ResetPlaceholderColor()
         textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
     }
     textFieldPaintProperty->ResetPlaceholderColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SearchModelNG::SetPlaceholderFont(const Font& font)
@@ -588,7 +564,7 @@ void SearchModelNG::ResetTextColor()
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldLayoutProperty->ResetTextColor();
     textFieldPaintProperty->ResetTextColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SearchModelNG::SetBackgroundColor(const Color& color)
@@ -1449,20 +1425,17 @@ void SearchModelNG::SetSearchSrcPath(FrameNode* frameNode, const std::string& sr
     pattern->SetSearchSrcPath(src, "", "");
 }
 
-void SearchModelNG::SetSearchIconColor(FrameNode* frameNode, const Color& color)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSearchIconColor(color);
-}
-
 void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchImageIcon(iconOptions);
+    if (iconOptions.GetColor().has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColorSetByUser, true, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColorSetByUser, frameNode);
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
 }
@@ -1619,7 +1592,7 @@ void SearchModelNG::ResetPlaceholderColor(FrameNode* frameNode)
         textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
     }
     textFieldPaintProperty->ResetPlaceholderColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SearchModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden)
@@ -1691,23 +1664,6 @@ void SearchModelNG::SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, style, frameNode);
 }
 
-void SearchModelNG::SetCancelIconSize(FrameNode* frameNode, const Dimension& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCancelIconSize(value);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, value, frameNode);
-}
-
-void SearchModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& color)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCancelIconColor(color);
-}
-
 void SearchModelNG::SetRightIconSrcPath(FrameNode* frameNode, const std::string& src)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1722,6 +1678,11 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, IconOptions &iconOp
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelImageIcon(iconOptions);
+    if (iconOptions.GetColor().has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColorSetByUser, true, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColorSetByUser, frameNode);
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
 }

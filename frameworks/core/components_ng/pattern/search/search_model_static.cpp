@@ -132,6 +132,7 @@ void SearchModelStatic::SetSearchDefaultIcon(FrameNode *frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->InitSearchIconColorSize();
     pattern->CreateSearchIcon("");
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconColorSetByUser, frameNode);
 }
 
 void SearchModelStatic::SetAutoCapitalizationMode(
@@ -153,9 +154,6 @@ void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<I
     auto theme = SearchModelStatic::GetTheme(frameNode);
     CHECK_NULL_VOID(theme);
     if (iconOptions.has_value()) {
-        if (!iconOptions.value().GetColor().has_value()) {
-            iconOptions.value().UpdateColor(theme->GetSearchIconColor());
-        }
         if (!iconOptions.value().GetSize().has_value()) {
             iconOptions.value().UpdateSize(theme->GetIconHeight());
         }
@@ -163,7 +161,7 @@ void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<I
             iconOptions.value().UpdateSrc("", "", "");
         }
     } else {
-        iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
+        iconOptions = IconOptions(theme->GetIconHeight(), "", "", "");
     }
     SearchModelNG::SetSearchImageIcon(frameNode, iconOptions.value());
 }
@@ -354,10 +352,11 @@ void SearchModelStatic::SetCancelDefaultIcon(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     auto theme = SearchModelStatic::GetTheme(frameNode);
     CHECK_NULL_VOID(theme);
-    IconOptions iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
+    IconOptions iconOptions = IconOptions(theme->GetIconHeight(), "", "", "");
     pattern->SetCancelImageIcon(iconOptions);
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelIconColorSetByUser, frameNode);
 }
 
 void SearchModelStatic::SetCancelButtonStyle(FrameNode* frameNode, const std::optional<CancelButtonStyle>& style)
@@ -374,14 +373,11 @@ void SearchModelStatic::SetCancelImageIcon(FrameNode *frameNode, std::optional<N
     auto theme = SearchModelStatic::GetTheme(frameNode);
     CHECK_NULL_VOID(theme);
     if (iconOptions.has_value()) {
-        if (!iconOptions.value().GetColor().has_value()) {
-            iconOptions.value().UpdateColor(theme->GetSearchIconColor());
-        }
         if (!iconOptions.value().GetSize().has_value()) {
             iconOptions.value().UpdateSize(theme->GetIconHeight());
         }
     } else {
-        iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
+        iconOptions = IconOptions(theme->GetIconHeight(), "", "", "");
     }
     SearchModelNG::SetCancelImageIcon(frameNode, iconOptions.value());
 }

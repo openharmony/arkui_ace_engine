@@ -37,8 +37,7 @@ public:
     virtual void SetCaretColor(const Color& color);
     virtual void ResetCaretColor();
     virtual void SetSearchIconSize(const Dimension& value);
-    virtual void SetSearchIconColor(const Color& color);
-    virtual void ResetSearchIconColor();
+    virtual void SetSearchIconColor(const Color& color) {};
     virtual void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
     virtual void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol);
     virtual void SetSearchDefaultIcon();
@@ -48,9 +47,7 @@ public:
     virtual void SetCancelImageIcon(NG::IconOptions &iconOptions);
     virtual void SetRightIconSrcPath(const std::string& src);
     virtual void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle);
-    virtual void SetCancelIconSize(const Dimension& value);
-    virtual void SetCancelIconColor(const Color& color);
-    virtual void ResetCancelIconColor();
+    virtual void SetCancelIconColor(const Color& color) {};
     virtual void SetSearchButtonFontSize(const Dimension& value);
     virtual void SetSearchButtonFontColor(const Color& color);
     virtual void ResetSearchButtonFontColor();

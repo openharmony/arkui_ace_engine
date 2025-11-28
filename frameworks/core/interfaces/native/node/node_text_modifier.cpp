@@ -292,6 +292,8 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
         }
         if (resObj) {
             pattern->RegisterResource<Color>("TextColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("TextColor");
         }
     }
     TextModelNG::SetTextColor(frameNode, result);
@@ -755,11 +757,15 @@ void ResetTextMaxFontScale(ArkUINodeHandle node)
 void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Uint32 length, void* fontFamilyRawPtr)
 {
     CHECK_NULL_VOID(fontFamilies);
-    if (length <= 0) {
-        return;
-    }
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (length <= 0) {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontFamily");
+        return;
+    }
     std::vector<std::string> families;
     for (uint32_t i = 0; i < length; i++) {
         const char* family = *(fontFamilies + i);
@@ -1374,6 +1380,8 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
         }
         if (resObj) {
             pattern->RegisterResource<Color>("SelectedBackgroundColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("SelectedBackgroundColor");
         }
     }
     TextModelNG::SetSelectedBackgroundColor(frameNode, result);
@@ -2198,6 +2206,8 @@ void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorSh
         }
         if (resObj) {
             pattern->RegisterResource<Color>("ColorShaderStyle", resObj, result);
+        } else {
+            pattern->UnRegisterResource("ColorShaderStyle");
         }
     }
 }

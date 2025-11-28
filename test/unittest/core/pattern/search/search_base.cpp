@@ -29,6 +29,7 @@ void SearchBases::SetUpTestSuite()
     searchTheme->placeholderColor_ = Color::RED;
     searchTheme->symbolIconHeight_ = 16.0_fp;
     searchTheme->symbolIconColor_ = Color::RED;
+    searchTheme->searchIconColor_ = Color::RED;
     textFieldTheme->bgColor_ = Color::RED;
     auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {

@@ -169,10 +169,10 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
     auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
+    UnRegisterResource("FontFamily");
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         RefPtr<ResourceObject> fontFamiliesResObj;
-        UnRegisterResource("FontFamily");
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies, fontFamiliesResObj)) {
             font.fontFamilies = fontFamilies;
             if (SystemProperties::ConfigChangePerform() && fontFamiliesResObj) {
@@ -582,10 +582,9 @@ void JSText::SetLineHeightMultiply(const JSCallbackInfo& info)
     double value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
-
+    UnRegisterResource("LineHeightMultiply");
     if (!ParseJsDouble(args, value, resObj) || LessNotEqual(value, 0.0)) {
         TextModel::GetInstance()->ResetLineHeightMultiply();
-        UnRegisterResource("LineHeightMultiply");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -600,11 +599,9 @@ void JSText::SetMinimumLineHeight(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
-
+    UnRegisterResource("MinimumLineHeight");
     if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
-        value.Reset();
         TextModel::GetInstance()->ResetMinimumLineHeight();
-        UnRegisterResource("MinimumLineHeight");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -618,11 +615,9 @@ void JSText::SetMaximumLineHeight(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
-
+    UnRegisterResource("MaximumLineHeight");
     if (!ParseLengthMetricsToDimension(args, value, resObj) || value.IsNegative()) {
-        value.Reset();
         TextModel::GetInstance()->ResetMaximumLineHeight();
-        UnRegisterResource("MaximumLineHeight");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
