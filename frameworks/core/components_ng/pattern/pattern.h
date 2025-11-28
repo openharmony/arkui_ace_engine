@@ -228,6 +228,7 @@ public:
     void PropagateForegroundColorToChildren()
     {
         auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
