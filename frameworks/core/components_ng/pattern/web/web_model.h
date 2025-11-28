@@ -113,6 +113,7 @@ public:
     virtual void SetOnDrop(std::function<void(const RefPtr<DragEvent>&, const std::string&)>&& onDropId) = 0;
     virtual void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) = 0;
     virtual void SetWindowNewEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) = 0;
+    virtual void SetWindowNewExtEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback) = 0;
     virtual void SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetWindowExitEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 

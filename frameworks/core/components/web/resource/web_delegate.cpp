@@ -6685,6 +6685,10 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
             CHECK_NULL_VOID(webPattern);
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
+            auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
+            if (propOnWindowNewExtEvent) {
+                return;
+            }
             auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
             CHECK_NULL_VOID(propOnWindowNewEvent);
             propOnWindowNewEvent(param);
@@ -6695,6 +6699,10 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
                 CHECK_NULL_VOID(webPattern);
                 auto webEventHub = webPattern->GetWebEventHub();
                 CHECK_NULL_VOID(webEventHub);
+                auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
+                if (propOnWindowNewExtEvent) {
+                    return;
+                }
                 auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
                 CHECK_NULL_VOID(propOnWindowNewEvent);
                 propOnWindowNewEvent(param);
@@ -6702,10 +6710,60 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
             }
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
+            if (webCom->HasOnWindowNewExtEvent()) {
+                return;
+            }
             webCom->OnWindowNewEvent(param);
 #endif
         },
         TaskExecutor::TaskType::JS, "ArkUIWebWindowNewEvent");
+}
+
+void WebDelegate::OnWindowNewExt(std::shared_ptr<OHOS::NWeb::NWebWindowNewEventInfo> dataInfo)
+{
+    if (!dataInfo) {
+        return;
+    }
+
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostSyncTask(
+        [weak = WeakClaim(this), dataInfo]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+
+            NavigationPolicy policy = static_cast<NavigationPolicy>(dataInfo->GetNavigationPolicy());
+            int32_t parentNWebId = (delegate->nweb_ ? static_cast<int32_t>(delegate->nweb_->GetWebId()) : -1);
+            auto param = std::make_shared<WebWindowNewExtEvent>(dataInfo->GetUrl(), dataInfo->IsAlert(),
+                dataInfo->IsUserTrigger(),
+                AceType::MakeRefPtr<WebWindowNewHandlerOhos>(dataInfo->GetHandler(), parentNWebId), dataInfo->GetX(),
+                dataInfo->GetY(), dataInfo->GetWidth(), dataInfo->GetHeight(), policy);
+
+#ifdef NG_BUILD
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
+            CHECK_NULL_VOID(propOnWindowNewExtEvent);
+            propOnWindowNewExtEvent(param);
+            return;
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
+                CHECK_NULL_VOID(propOnWindowNewExtEvent);
+                propOnWindowNewExtEvent(param);
+                return;
+            }
+            auto webCom = delegate->webComponent_.Upgrade();
+            CHECK_NULL_VOID(webCom);
+            webCom->OnWindowNewExtEvent(param);
+#endif
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebWindowNewExtEvent");
 }
 
 void WebDelegate::OnActivateContent()

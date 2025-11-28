@@ -562,6 +562,13 @@ void WebModelImpl::SetWindowNewEvent(std::function<void(const std::shared_ptr<Ba
     webComponent->SetWindowNewEvent(std::move(jsCallback));
 }
 
+void WebModelImpl::SetWindowNewExtEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetWindowNewExtEvent(std::move(jsCallback));
+}
+
 void WebModelImpl::SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

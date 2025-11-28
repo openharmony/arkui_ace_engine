@@ -840,6 +840,16 @@ void WebClientImpl::OnWindowNewByJS(
     delegate->OnWindowNew(targetUrl, isAlert, isUserTrigger, handler);
 }
 
+void WebClientImpl::OnWindowNewExtByJS(std::shared_ptr<NWeb::NWebWindowNewEventInfo> dataInfo)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "zhengx WebClientImpl::OnWindowNewExtByJS");
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnWindowNewExt(dataInfo);
+    TAG_LOGI(AceLogTag::ACE_WEB, "zhengx WebClientImpl::OnWindowNewExtByJS end");
+}
+
 void WebClientImpl::OnActivateContentByJS()
 {
     auto delegate = webDelegate_.Upgrade();

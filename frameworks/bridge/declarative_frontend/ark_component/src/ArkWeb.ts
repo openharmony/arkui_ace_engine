@@ -1038,6 +1038,22 @@ class WebOnWindowNewModifier extends ModifierWithKey<(isAlert: boolean, isUserTr
   }
 }
 
+class WebOnWindowNewExtModifier extends ModifierWithKey<(isAlert: boolean, isUserTrigger: boolean, targetUrl: string,
+    handler: ControllerHandler, windowFeatures: WindowFeatures, navigationPolicy: NavigationPolicy) => void> {
+  constructor(value: (isAlert: boolean, isUserTrigger: boolean, targetUrl: string, handler: ControllerHandler,
+    windowFeatures: WindowFeatures, navigationPolicy: NavigationPolicy) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnWindowNewExtModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnWindowNewExt(node);
+    } else {
+      getUINativeModule().web.setOnWindowNewExt(node, this.value);
+    }
+  }
+}
+
 class WebOnGeolocationShowModifier extends ModifierWithKey<(origin: string, geolocation: JsGeolocation) => void>{
   constructor (value: (origin: string, geolocation: JsGeolocation) => void) {
     super(value);
@@ -1855,6 +1871,11 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onWindowNew(callback: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler; }) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnWindowNewModifier.identity, WebOnWindowNewModifier, callback);
+    return this;
+  }
+  onWindowNewExt(callback: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler;
+      windowFeatures: WindowFeatures; navigationPolicy: NavigationPolicy; }) => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnWindowNewExtModifier.identity, WebOnWindowNewExtModifier, callback);
     return this;
   }
   onWindowExit(callback: () => void): this {

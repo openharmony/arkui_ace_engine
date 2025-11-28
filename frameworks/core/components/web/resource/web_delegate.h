@@ -1235,6 +1235,7 @@ public:
     NWeb::NWebDragData::DragOperationsMask allowed_op_ = NWeb::NWebDragData::DragOperationsMask::DRAG_ALLOW_EVERY;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
+    void OnWindowNewExt(std::shared_ptr<OHOS::NWeb::NWebWindowNewEventInfo> dataInfo);
     void OnActivateContent();
     void OnWindowExit();
     void OnPageVisible(const std::string& url);

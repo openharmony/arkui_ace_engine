@@ -2129,6 +2129,8 @@ struct CJUIWebModifier {
     void (*resetOnRenderProcessRespondingCallBack)(ArkUINodeHandle node);
 	void (*setOnWindowNew)(ArkUINodeHandle node, void* callback);
     void (*resetOnWindowNew)(ArkUINodeHandle node);
+    void (*setOnWindowNewExt)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWindowNewExt)(ArkUINodeHandle node);
     void (*setOnGeolocationShow)(ArkUINodeHandle node, void* callback);
     void (*resetOnGeolocationShow)(ArkUINodeHandle node);
     void (*setOnPermissionRequest)(ArkUINodeHandle node, void* callback);

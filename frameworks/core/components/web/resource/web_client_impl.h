@@ -200,6 +200,7 @@ public:
         bool isAlert,
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
+    void OnWindowNewExtByJS(std::shared_ptr<NWeb::NWebWindowNewEventInfo> dataInfo) override;
     void OnActivateContentByJS() override;
     void OnWindowExitByJS() override;
     void OnPageVisible(const std::string& url) override;

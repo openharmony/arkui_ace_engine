@@ -1030,6 +1030,12 @@ public:
         transferValues_ = std::make_tuple(handler_);
     }
 
+    void SetEvent(const WebWindowNewExtEvent& eventInfo)
+    {
+        handler_ = eventInfo.GetWebWindowNewHandler();
+        transferValues_ = std::make_tuple(handler_);
+    }
+
     static JSRef<JSObject> PopController(int32_t id, int32_t* parentId = nullptr)
     {
         auto iter = controller_map_.find(id);
@@ -2351,6 +2357,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
+    JSClass<JSWeb>::StaticMethod("onWindowNewExt", &JSWeb::OnWindowNewExt);
     JSClass<JSWeb>::StaticMethod("onActivateContent", &JSWeb::OnActivateContent);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
@@ -5104,7 +5111,37 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("isAlert", eventInfo.IsAlert());
+    obj->SetProperty("isUserTrigger", eventInfo.IsUserTrigger());
+    obj->SetProperty("targetUrl", eventInfo.GetTargetUrl());
+    auto featuresObj = JSRef<JSObject>::New();
+    featuresObj->SetProperty("height", eventInfo.GetHeight());
+    featuresObj->SetProperty("width", eventInfo.GetWidth());
+    featuresObj->SetProperty("x", eventInfo.GetX());
+    featuresObj->SetProperty("y", eventInfo.GetY());
+    obj->SetPropertyObject("windowFeatures", featuresObj);
+    obj->SetProperty("navigationPolicy", static_cast<int>(eventInfo.GetNavigationPolicy()));
+    JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
+    auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
+    handler->SetEvent(eventInfo);
+
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void*>(handler.GetRawPtr()));
+    obj->SetPropertyObject("handler", handlerObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
 JSRef<JSVal> JSWeb::CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo)
+{
+    JSRef<JSObject> handlerObj = Framework::JSClass<JSWebWindowNewHandler>::NewInstance();
+    auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
+    handler->SetEvent(eventInfo);
+    return handlerObj;
+}
+
+JSRef<JSVal> JSWeb::CreateJSWindowNewExtHandler(const WebWindowNewExtEvent& eventInfo)
 {
     JSRef<JSObject> handlerObj = Framework::JSClass<JSWebWindowNewHandler>::NewInstance();
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
@@ -5140,6 +5177,45 @@ bool JSWeb::HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
     return true;
 }
 
+bool JSWeb::HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo)
+{
+    if (eventInfo == nullptr) {
+        return false;
+    }
+    auto handler = eventInfo->GetWebWindowNewHandler();
+    if (handler && !handler->IsFrist()) {
+        int32_t parentId = -1;
+        auto controller = JSWebWindowNewHandler::PopController(handler->GetId(), &parentId);
+        if (!controller.IsEmpty()) {
+            auto getWebIdFunction = controller->GetProperty("innerGetWebId");
+            if (getWebIdFunction->IsFunction()) {
+                auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
+                auto webId = func->Call(controller, 0, {});
+                webId->IsNumber() ? handler->SetWebController(webId->ToNumber<int32_t>()) : void();
+            }
+            auto completeWindowNewExtFunction = controller->GetProperty("innerCompleteWindowNew");
+            if (completeWindowNewExtFunction->IsFunction()) {
+                napi_env env = GetNapiEnv();
+                if (!env) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                auto napi_status = napi_open_handle_scope(env, &scope);
+                if (napi_status != napi_ok) {
+                    return;
+                }
+
+                auto func = JSRef<JSFunc>::Cast(completeWindowNewExtFunction);
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(parentId)) };
+                func->Call(controller, 1, argv);
+                napi_close_handle_scope(env, scope);
+            }
+        }
+        return false;
+    }
+    return true;
+}
+
 void JSWeb::OnWindowNew(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -5166,6 +5242,34 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetWindowNewEvent(jsCallback);
+}
+
+void JSWeb::OnWindowNewExt(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebWindowNewExtEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WindowNewExtEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ACE_SCORING_EVENT("OnWindowNewExt CallBack");
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewExtEvent>(info.get());
+        if (!func || !HandleWindowNewExtEvent(eventInfo)) {
+            return;
+        }
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetWindowNewExtEvent(jsCallback);
 }
 
 JSRef<JSVal> ActivateContentEventToJSValue(const WebActivateContentEvent& eventInfo)

@@ -371,6 +371,27 @@ public:
         }
     }
 
+    using OnWindowNewExtImpl = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
+    void SetWindowNewExtEvent(OnWindowNewExtImpl&& onWindowNewExtImpl)
+    {
+        if (onWindowNewExtImpl == nullptr) {
+            return;
+        }
+        onWindowNewExtImpl_ = std::move(onWindowNewExtImpl);
+    }
+
+    void OnWindowNewExtEvent(const std::shared_ptr<BaseEventInfo>& info) const
+    {
+        if (onWindowNewExtImpl_) {
+            onWindowNewExtImpl_(info);
+        }
+    }
+
+    bool HasOnWindowNewExtEvent() const
+    {
+        return onWindowNewExtImpl_ != nullptr;
+    }
+
     void SetActivateContentEventId(const EventMarker& activateContentEventId)
     {
         CHECK_NULL_VOID(declaration_);
@@ -1306,6 +1327,7 @@ private:
     OnOverrideErrorPageImpl onOverrideErrorPageImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;
     OnWindowNewImpl onWindowNewImpl_ = nullptr;
+    OnWindowNewExtImpl onWindowNewExtImpl_ = nullptr;
     OnVerifyPinRequestImpl onVerifyPinRequestImpl_;
 
     std::string type_;

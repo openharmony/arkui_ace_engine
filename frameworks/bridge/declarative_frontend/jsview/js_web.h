@@ -107,6 +107,7 @@ public:
     static void JsOnDrop(const JSCallbackInfo& info);
     static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void OnWindowNew(const JSCallbackInfo& args);
+    static void OnWindowNewExt(const JSCallbackInfo& args);
     static void OnActivateContent(const JSCallbackInfo& args);
     static void OnWindowExit(const JSCallbackInfo& args);
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
@@ -169,6 +170,8 @@ public:
     static void OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
+    static JSRef<JSVal> CreateJSWindowNewExtHandler(const WebWindowNewExtEvent& eventInfo);
+    static bool HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
     static JSRef<JSVal> CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
     static JSRef<JSVal> CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);

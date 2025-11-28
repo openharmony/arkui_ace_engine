@@ -822,6 +822,13 @@ void WebModelNG::SetWindowNewEvent(std::function<void(const std::shared_ptr<Base
     webEventHub->SetOnWindowNewEvent(std::move(jsCallback));
 }
 
+void WebModelNG::SetWindowNewExtEvent(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowNewExtEvent(std::move(jsCallback));
+}
+
 void WebModelNG::SetActivateContentEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -2244,6 +2251,15 @@ void WebModelNG::SetWindowNewEvent(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnWindowNewEvent(std::move(jsCallback));
+}
+
+void WebModelNG::SetWindowNewExtEvent(
+    FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowNewExtEvent(std::move(jsCallback));
 }
 
 void WebModelNG::SetOnFullScreenEnter(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
