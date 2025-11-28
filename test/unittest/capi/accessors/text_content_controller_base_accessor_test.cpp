@@ -89,12 +89,10 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetCaretOffsetTest, TestSize.Lev
 {
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetCaretPosition()).Times(1).WillOnce(Return(NG::OffsetF(0, 0)));
-    auto offset = accessor_->getCaretOffset(peer_);
-#ifdef WRONG_GEN
+    Opt_CaretOffset offsetOpt = accessor_->getCaretOffset(peer_);
     auto offsetArk = Converter::GetOpt(offsetOpt);
     ASSERT_TRUE(offsetArk.has_value());
     auto offset = offsetArk.value();
-#endif
     auto x = Converter::Convert<int32_t>(offset.x);
     auto y = Converter::Convert<int32_t>(offset.y);
     EXPECT_EQ(x, 0);
@@ -110,12 +108,10 @@ HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetTextContentRectTest,
 {
     ASSERT_NE(accessor_->getTextContentRect, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetTextContentRect()).Times(1).WillOnce(Return(Rect(0, 0, 1, 1)));
-    auto checkValue = accessor_->getTextContentRect(peer_);
-#ifdef WRONG_GEN
+    Opt_RectResult rectResultOpt = accessor_->getTextContentRect(peer_);
     auto rectResultArk = Converter::GetOpt(rectResultOpt);
     ASSERT_TRUE(rectResultArk.has_value());
     auto checkValue = rectResultArk.value();
-#endif
     EXPECT_EQ(&checkValue, nullptr); // fix after updating return value
 }
 

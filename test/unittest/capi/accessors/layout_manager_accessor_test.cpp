@@ -134,16 +134,12 @@ HWTEST_F(LayoutManagerAccessorTest, GetGlyphPositionAtCoordinate01, TestSize.Lev
     ON_CALL(*handlerKeeper_, GetGlyphPositionAtCoordinate(_, _)).WillByDefault(Return(targetError));
     EXPECT_CALL(*handlerKeeper_, GetGlyphPositionAtCoordinate(EXPECTED_X, EXPECTED_Y)).WillOnce(Return(target));
 
-    auto result = accessor_->getGlyphPositionAtCoordinate(peer_, actualX, actualY);
-#ifdef WRONG_GEN
-    auto resultArk = Converter::GetOpt(resultOpt);
-    ASSERT_TRUE(resultArk.has_value());
-    auto result = resultArk.value();
-#endif
+    Opt_PositionWithAffinity glyphPositionAtCoordinateOpt =
+        accessor_->getGlyphPositionAtCoordinate(peer_, actualX, actualY);
+    auto glyphPositionAtCoordinateArk = Converter::GetOpt(glyphPositionAtCoordinateOpt);
+    ASSERT_TRUE(glyphPositionAtCoordinateArk.has_value());
+    auto result = glyphPositionAtCoordinateArk.value();
     PositionWithAffinity position = Converter::Convert<PositionWithAffinity>(result);
     EXPECT_EQ(position.position_, target.position_);
-#ifdef WRONG_SDK
-    EXPECT_EQ(position.affinity_, target.affinity_);
-#endif
 }
 } // namespace OHOS::Ace::NG

@@ -31,10 +31,10 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 export interface LayoutManager {
-    getLineCount(): int32
-    getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity
-    getLineMetrics(lineNumber: int32): text.LineMetrics
-    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox>
+    getLineCount(): int32 | undefined
+    getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
+    getLineMetrics(lineNumber: int32): text.LineMetrics | undefined
+    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     peer?: Finalizable | undefined = undefined
@@ -57,52 +57,74 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     public static fromPtr(ptr: KPointer): LayoutManagerInternal {
         return new LayoutManagerInternal(ptr)
     }
-    public getLineCount(): int32 {
+    public getLineCount(): int32 | undefined {
         return this.getLineCount_serialize()
     }
-    public getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity {
+    public getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined {
         const x_casted = x as (double)
         const y_casted = y as (double)
         return this.getGlyphPositionAtCoordinate_serialize(x_casted, y_casted)
     }
-    public getLineMetrics(lineNumber: int32): text.LineMetrics {
+    public getLineMetrics(lineNumber: int32): text.LineMetrics | undefined {
         const lineNumber_casted = lineNumber as (int32)
         return this.getLineMetrics_serialize(lineNumber_casted)
     }
-    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
         const range_casted = range as (TextRange)
         const widthStyle_casted = widthStyle as (text.RectWidthStyle)
         const heightStyle_casted = heightStyle as (text.RectHeightStyle)
         return this.getRectsForRange_serialize(range_casted, widthStyle_casted, heightStyle_casted)
     }
-    getLineCount_serialize(): int32 {
+    getLineCount_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity {
+    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : PositionWithAffinity = PositionWithAffinity_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PositionWithAffinity | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PositionWithAffinity | undefined = buffer
         return returnResult
     }
-    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics {
+    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics | undefined {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : text.LineMetrics = text_LineMetrics_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : text.LineMetrics | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = text_LineMetrics_serializer.read(retvalDeserializer)
+        }
+        const returnResult : text.LineMetrics | undefined = buffer
         return returnResult
     }
-    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         TextRange_serializer.write(thisSerializer, range)
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<text.TextBox> = new Array<text.TextBox>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<text.TextBox> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<text.TextBox> = new Array<text.TextBox>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<text.TextBox> = buffer
+        const returnResult : Array<text.TextBox> | undefined = buffer
         return returnResult
     }
 }
