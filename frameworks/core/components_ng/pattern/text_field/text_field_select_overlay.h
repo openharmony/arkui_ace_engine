@@ -99,6 +99,7 @@ public:
     void BeforeOnPrepareMenu() override;
     void ProcessOverlayAfterLayout(const OverlayRequest& request);
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
+    void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
 
 protected:
     bool AllowTranslate() override;
