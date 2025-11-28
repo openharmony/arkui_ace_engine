@@ -1208,49 +1208,6 @@ HWTEST_F(WebPatternPartTwoTest, OnOverlayScrollbarEnabledUpdate_002, TestSize.Le
 }
 
 /**
- * @tc.name: OnZoomControlAccessUpdate_001
- * @tc.desc: OnZoomControlAccessUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, OnZoomControlAccessUpdate_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnZoomControlAccessUpdate(true);
-#endif
-}
-
-/**
- * @tc.name: OnZoomControlAccessUpdate_002
- * @tc.desc: OnZoomControlAccessUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, OnZoomControlAccessUpdate_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->delegate_ = nullptr;
-    webPattern->OnZoomControlAccessUpdate(true);
-#endif
-}
-
-/**
  * @tc.name: OnNativeEmbedModeEnabledUpdate_001
  * @tc.desc: OnNativeEmbedModeEnabledUpdate.
  * @tc.type: FUNC

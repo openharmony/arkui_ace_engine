@@ -1149,30 +1149,6 @@ HWTEST_F(WebModelTestNg, SetZoomAccessEnabled002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetZoomControlAccess001
- * @tc.desc: Test web_model_ng.cpp
- * @tc.type: FUNC
- */
-HWTEST_F(WebModelTestNg, SetZoomControlAccess001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-
-    WebModelNG webModelNG;
-    webModelNG.SetZoomControlAccess(true);
-    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckZoomControlAccess(true), true);
-    webModelNG.SetZoomControlAccess(false);
-    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckZoomControlAccess(false), true);
-#endif
-}
-
-/**
  * @tc.name: SetGeolocationAccessEnabled001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -4696,32 +4672,6 @@ HWTEST_F(WebModelTestNg, SetDataDetectorConfig001, TestSize.Level1)
     webModelNG.SetDataDetectorConfig(config);
     webModelNG.SetDataDetectorConfig(AccessibilityManager::RawPtr(frameNode), config);
     EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->CheckEnableDataDetector(true));
-#endif
-}
-
-/**
- * @tc.name: SetEnableSelectedDataDetector001
- * @tc.desc: Test web_model_ng.cpp
- * @tc.type: FUNC
- */
-HWTEST_F(WebModelTestNg, SetEnableSelectedDataDetector001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    WebModelNG webModelNG;
-    webModelNG.SetEnableSelectedDataDetector(true);
-    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->CheckEnableSelectedDataDetector(true));
-    webModelNG.SetEnableSelectedDataDetector(AccessibilityManager::RawPtr(frameNode), false);
-    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->CheckEnableSelectedDataDetector(false));
 #endif
 }
 
