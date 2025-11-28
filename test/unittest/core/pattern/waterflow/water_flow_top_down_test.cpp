@@ -2104,6 +2104,49 @@ HWTEST_F(WaterFlowTestNg, GetContentHeightWithContentEndOffsetChange, TestSize.L
 }
 
 /**
+ * @tc.name: BottomFinalPosWithContentEndOffset
+ * @tc.desc: Test BottomFinalPos with contentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, BottomFinalPosWithContentEndOffset, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    AnimateToIndexWithTicks(19, ScrollAlign::END);
+    EXPECT_EQ(pattern_->layoutInfo_->BottomFinalPos(WATER_FLOW_HEIGHT), -800);
+
+    layoutProperty_->UpdateContentEndOffset(CONTENT_END_OFFSET);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->BottomFinalPos(WATER_FLOW_HEIGHT), -800 - CONTENT_END_OFFSET);
+
+    layoutProperty_->UpdateContentEndOffset(CONTENT_END_OFFSET + 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->BottomFinalPos(WATER_FLOW_HEIGHT), -800 - CONTENT_END_OFFSET - 20);
+}
+
+/**
+ * @tc.name: OffsetEndWithContentStartOffset
+ * @tc.desc: Test offsetEnd_ with contentStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OffsetEndWithContentStartOffset, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    EXPECT_FALSE(pattern_->layoutInfo_->offsetEnd_);
+    AnimateToIndexWithTicks(19, ScrollAlign::END);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
+}
+
+/**
  * @tc.name: ScrollBarOverDrag001
  * @tc.desc: Test ScrollBar over drag with contentStartOffset and contentEndOffset.
  * @tc.type: FUNC
