@@ -29,16 +29,16 @@ static bool registerNatives(
     const ani_class clazz,
     const std::vector<std::tuple<std::string, std::string, void*, int>> impls)
 {
-    std::vector<ani_native_function> methods;
-    methods.reserve(impls.size());
+    std::vector<ani_native_function> staticMethods;
+    staticMethods.reserve(impls.size());
     bool result = true;
     for (const auto &[name, type, func, flag] : impls) {
-        ani_native_function method;
-        method.name = name.c_str();
-        method.pointer = func;
-        method.signature = nullptr;
+        ani_native_function staticMethod;
+        staticMethod.name = name.c_str();
+        staticMethod.pointer = func;
+        staticMethod.signature = nullptr;
         if (registerByOne) {
-            result &= env->Class_BindStaticNativeMethods(clazz, &method, 1) == ANI_OK;
+            result &= env->Class_BindStaticNativeMethods(clazz, &staticMethod, 1) == ANI_OK;
             ani_boolean isError = false;
             CHECK_ANI_FATAL(env->ExistUnhandledError(&isError));
             if (isError) {
@@ -47,11 +47,12 @@ static bool registerNatives(
             }
         }
         else {
-            methods.push_back(method);
+            staticMethods.push_back(staticMethod);
         }
     }
     if (!registerByOne) {
-        result = env->Class_BindStaticNativeMethods(clazz, methods.data(), static_cast<ani_size>(methods.size())) == ANI_OK;
+        result = env->Class_BindStaticNativeMethods(
+            clazz, staticMethods.data(), static_cast<ani_size>(staticMethods.size())) == ANI_OK;
     }
     return registerByOne ? true : result;
 }
