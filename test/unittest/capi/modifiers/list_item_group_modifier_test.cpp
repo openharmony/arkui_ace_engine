@@ -282,6 +282,6 @@ HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
  */
 HWTEST_F(ListItemGroupModifierTest, DISABLED_setChildrenMainSizeTest, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
-
 } // namespace OHOS::Ace::NG

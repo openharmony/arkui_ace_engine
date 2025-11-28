@@ -46,11 +46,11 @@ public:
  */
 HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestInvalid, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTabsOptions, nullptr);
     // assume nothing bad with invalid and undefined options
     modifier_->setTabsOptions(node_, nullptr);
     auto optionsUndef = Converter::ArkValue<Opt_TabsOptions>(Ark_Empty());
     modifier_->setTabsOptions(node_, &optionsUndef);
-    EXPECT_TRUE(true);
 }
 
 /**

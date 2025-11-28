@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 
 namespace OHOS::Ace::NG {
@@ -140,7 +141,6 @@ public:
     OnControllerAttachedCallback GetOnControllerAttachedCallback();
     void SetSetWebIdCallback(std::function<void(int32_t)>&& SetIdCallback) {}
     void SetSetHapPathCallback(std::function<void(const std::string&)>&& callback) {}
-    void SetJsProxyCallback(std::function<void()>&& jsProxyCallback) {}
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
     {
@@ -156,6 +156,7 @@ public:
     void SetSetWebDetachCallback(SetWebDetachCallback&& callback) {}
     void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent) {}
     void UpdateDataDetectorConfig(const TextDetectConfig& config) {}
+    void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}
 
 private:
     std::string GetMixedModeAsString() const;

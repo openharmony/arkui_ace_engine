@@ -1150,6 +1150,7 @@ HWTEST_F(TextModifierTest, setTextOptionsTestContentValidValues, TestSize.Level1
  */
 HWTEST_F(TextModifierTest, setTextOptionsTestContentNull, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTextOptions, nullptr);
     // no crash should happen
     auto textOptions = Converter::ArkValue<Opt_TextOptions>();
     modifier_->setTextOptions(node_, nullptr, &textOptions);
@@ -1162,6 +1163,7 @@ HWTEST_F(TextModifierTest, setTextOptionsTestContentNull, TestSize.Level1)
  */
 HWTEST_F(TextModifierTest, setTextOptionsTestContentEmpty, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTextOptions, nullptr);
     // no crash should happen
     auto textOptions = Converter::ArkValue<Opt_TextOptions>();
     auto emptyContent = Converter::ArkValue<Opt_Union_String_Resource>();
@@ -1204,6 +1206,7 @@ HWTEST_F(TextModifierTest, setTextOptionsTestValueValidValues, TestSize.Level1)
  */
 HWTEST_F(TextModifierTest, setTextOptionsTestValueNull, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTextOptions, nullptr);
     // no crash should happen
     auto text = ArkUnion<Opt_Union_String_Resource, Ark_String>("text");
     modifier_->setTextOptions(node_, &text, nullptr);
@@ -1608,6 +1611,7 @@ HWTEST_F(TextModifierTest, setOnMarqueeStateChangeTest, TestSize.Level1)
  */
 HWTEST_F(TextModifierTest, setMarqueeOptionsTestEmpty, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setMarqueeOptions, nullptr);
     // Check that there is no crash
 
     // Case 1

@@ -852,6 +852,7 @@ void checkExpandSafeArea(Ark_NodeHandle node, std::vector<std::string> vecTypes,
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setExpandSafeArea, nullptr);
     std::vector<std::string> vecTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.CUTOUT", "SafeAreaType.KEYBOARD"};
     std::vector<std::string> vecEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.BOTTOM", "SafeAreaEdge.START",
         "SafeAreaEdge.END"};
@@ -865,6 +866,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestDefaultValues,
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setExpandSafeArea, nullptr);
     std::vector<std::string> expectedTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.CUTOUT",
         "SafeAreaType.KEYBOARD"};
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.BOTTOM", "SafeAreaEdge.START",
@@ -888,6 +890,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestValidValues, T
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestValidValues2, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setExpandSafeArea, nullptr);
     std::vector<std::string> expectedTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.KEYBOARD"};
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.END"};
     std::vector<Ark_SafeAreaType> vecTypes = {ARK_SAFE_AREA_TYPE_SYSTEM, ARK_SAFE_AREA_TYPE_KEYBOARD};
@@ -907,6 +910,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestValidValues2, 
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestInvalidValues1, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setExpandSafeArea, nullptr);
     std::vector<std::string> expectedTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.KEYBOARD"};
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.END"};
     std::vector<Ark_SafeAreaType> vecTypes = {ARK_SAFE_AREA_TYPE_SYSTEM, ARK_SAFE_AREA_TYPE_SYSTEM,
@@ -927,6 +931,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestInvalidValues1
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestInvalidValues2, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setExpandSafeArea, nullptr);
     std::vector<std::string> expectedTypes = {"SafeAreaType.KEYBOARD"};
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.END"};
     std::vector<Ark_SafeAreaType> vecTypes = {static_cast<Ark_SafeAreaType>(-100), ARK_SAFE_AREA_TYPE_KEYBOARD,

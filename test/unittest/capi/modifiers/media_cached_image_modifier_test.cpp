@@ -152,7 +152,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestResource, T
  */
 HWTEST_F(MediaCachedImageModifierTest, DISABLED_setMediaCachedImageOptionsTestDrawableDescriptor, TestSize.Level1)
 {
-    // not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 
 /*

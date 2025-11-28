@@ -619,6 +619,7 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, DISABLED_setChainAnimationOptionsTest, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
 
 /**

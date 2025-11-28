@@ -195,23 +195,6 @@ public:
             EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
         }
     }
-
-    void checkDividerColorAttr(std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> styleArray)
-    {
-        std::unique_ptr<JsonValue> jsonValue;
-        std::unique_ptr<JsonValue> divJson;
-        std::string resultStr;
-        Ark_DividerStyle inputValue;
-        for (auto [passed, checkVal, expected]: styleArray) {
-            inputValue.color = checkVal;
-            auto divider = Converter::ArkValue<Opt_DividerStyle>(inputValue);
-            modifier_->setDivider(node_, &divider);
-            jsonValue = GetJsonValue(node_);
-            divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
-            resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_COLOR);
-            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
-        }
-    }
 };
 
 static std::vector<std::tuple<Ark_SideBarContainerType, Opt_SideBarContainerType, std::string>> sbTypeValidValues = {
@@ -318,6 +301,7 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestDefaultValue
  */
 HWTEST_F(SideBarContainerModifierTest, setControlButtonTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setControlButton, nullptr);
     static std::vector<std::tuple<std::string, Opt_Float64, std::string>> leftValues = {
         {"-1234", Converter::ArkValue<Opt_Float64>(-1234), "-1234.000000"},
         {"0", Converter::ArkValue<Opt_Float64>(0), "0.000000"},
@@ -809,6 +793,7 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerEndM
  */
 HWTEST_F(SideBarContainerModifierTest, setDividerTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setDivider, nullptr);
     checkDividerLengthAttr(dividerStrokeValidValues, ATTRIBUTE_DIVIDER_STROKE_WIDTH);
     checkDividerLengthAttr(dividerStartMarginValidValues, ATTRIBUTE_DIVIDER_START_MARGIN);
     checkDividerLengthAttr(dividerEndMarginValidValues, ATTRIBUTE_DIVIDER_END_MARGIN);
@@ -830,7 +815,16 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> divi
  */
 HWTEST_F(SideBarContainerModifierTest, DISABLED_setDividerTestColorValidValues, TestSize.Level1)
 {
-    checkDividerColorAttr(dividerColorValidValues);
+    Ark_DividerStyle inputValue;
+    for (auto [passed, checkVal, expected]: dividerColorValidValues) {
+        inputValue.color = checkVal;
+        auto divider = Converter::ArkValue<Opt_DividerStyle>(inputValue);
+        modifier_->setDivider(node_, &divider);
+        auto jsonValue = GetJsonValue(node_);
+        auto divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+        auto resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_COLOR);
+        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+    }
 }
 
 #ifdef WRONG_OLD_SDK

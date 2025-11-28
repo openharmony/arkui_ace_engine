@@ -126,6 +126,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestValidValues, Te
  */
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestInvalidValues, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -135,6 +136,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestInvalidValues, 
  */
 HWTEST_F(NavRouterModifierTest, DISABLED_setOnStateChangeTest, TestSize.Level1)
 {
+    FAIL() << "Test is not implemented yet";
 }
 
 /*

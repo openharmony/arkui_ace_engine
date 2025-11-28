@@ -558,7 +558,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestInvalidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -634,7 +634,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValu
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -644,7 +644,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidVa
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundTest, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -654,7 +654,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundTest, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundImageResizableTest, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -664,7 +664,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundImageResizableTest, Te
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBrightnessTest, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -674,7 +674,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBrightnessTest, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -684,7 +684,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestDefaultValues, TestSize.
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -694,7 +694,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestValidValues, TestSize.Le
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -704,7 +704,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -714,7 +714,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -724,7 +724,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -734,7 +734,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -744,7 +744,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -754,7 +754,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestDefaultValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*
@@ -764,7 +764,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestDefaultValues, Tes
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestValidValues, TestSize.Level1)
 {
-    EXPECT_TRUE(true); // not implemented
+    FAIL() << "Test is not implemented yet";
 }
 
 /*

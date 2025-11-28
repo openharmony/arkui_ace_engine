@@ -653,6 +653,6 @@ HWTEST_F(ImageAttachmentAccessorTest, getColorFilterTestColorFilter, TestSize.Le
  */
 HWTEST_F(ImageAttachmentAccessorTest, DISABLED_getColorFilterTestDrawingColorFilter, TestSize.Level1)
 {
-    // DrawingColorFilter is not supperted yet
+    FAIL() << "Test is not implemented yet";
 };
 } // namespace OHOS::Ace::NG

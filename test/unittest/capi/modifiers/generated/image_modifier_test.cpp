@@ -989,7 +989,7 @@ HWTEST_F(ImageModifierTest, setInterpolationTestInterpolationInvalidValues, Test
  */
 HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1070,7 +1070,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setSyncLoadTestSyncLoadInvalidValues, TestS
  */
 HWTEST_F(ImageModifierTest, DISABLED_setColorFilterTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1909,7 +1909,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomInvalidValu
  */
 HWTEST_F(ImageModifierTest, DISABLED_setEdgeAntialiasingTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1990,7 +1990,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setEnableAnalyzerTestEnableAnalyzerInvalidV
  */
 HWTEST_F(ImageModifierTest, DISABLED_setAnalyzerConfigTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2000,7 +2000,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setAnalyzerConfigTestPlaceholder, TestSize.
  */
 HWTEST_F(ImageModifierTest, DISABLED_setResizableTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2081,7 +2081,7 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveInvalidValues
  */
 HWTEST_F(ImageModifierTest, DISABLED_setEnhancedImageQualityTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

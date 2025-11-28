@@ -1554,7 +1554,7 @@ HWTEST_F(TextAreaModifierTest, setSelectedBackgroundColorTestSelectedBackgroundC
  */
 HWTEST_F(TextAreaModifierTest, DISABLED_setOnSubmitTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1636,7 +1636,7 @@ HWTEST_F(TextAreaModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSiz
  */
 HWTEST_F(TextAreaModifierTest, DISABLED_setEnableKeyboardOnFocusTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1864,7 +1864,7 @@ HWTEST_F(TextAreaModifierTest, setBarStateTestBarStateInvalidValues, TestSize.Le
  */
 HWTEST_F(TextAreaModifierTest, DISABLED_setSelectionMenuHiddenTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*

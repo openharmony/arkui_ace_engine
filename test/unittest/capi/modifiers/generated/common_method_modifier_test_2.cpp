@@ -58,7 +58,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMarkAnchorTestMarkAnchorPositionY
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setOffsetTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -68,7 +68,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setOffsetTestPlaceholder, TestSize.L
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setEnabledTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 void valueCheckResult(std::unique_ptr<JsonValue>& resultStart, std::unique_ptr<JsonValue>& resultEnd,
@@ -1283,7 +1283,7 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBiasVerticalInval
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAspectRatioTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1293,7 +1293,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAspectRatioTestPlaceholder, TestS
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setClickEffectTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1303,7 +1303,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setClickEffectTestPlaceholder, TestS
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAllowDropTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1313,7 +1313,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAllowDropTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setDraggableTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1323,7 +1323,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setDraggableTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setDragPreview0TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1333,7 +1333,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setDragPreview0TestPlaceholder, Test
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setLinearGradientTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1343,7 +1343,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setLinearGradientTestPlaceholder, Te
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setSweepGradientTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1353,7 +1353,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setSweepGradientTestPlaceholder, Tes
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setRadialGradientTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1363,7 +1363,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setRadialGradientTestPlaceholder, Te
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setMotionPathTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1373,7 +1373,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMotionPathTestPlaceholder, TestSi
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setShadowTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1383,7 +1383,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setShadowTestPlaceholder, TestSize.L
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setClipTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1393,7 +1393,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setClipTestPlaceholder, TestSize.Lev
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setClipShapeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1403,7 +1403,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setClipShapeTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setMaskTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1413,7 +1413,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMaskTestPlaceholder, TestSize.Lev
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setMaskShapeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1423,7 +1423,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMaskShapeTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setKeyTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1433,7 +1433,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setKeyTestPlaceholder, TestSize.Leve
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setIdTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1443,7 +1443,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setIdTestPlaceholder, TestSize.Level
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setGeometryTransition0TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1453,7 +1453,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setGeometryTransition0TestPlaceholde
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setRestoreIdTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1463,7 +1463,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setRestoreIdTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setSphericalEffectTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1473,7 +1473,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setSphericalEffectTestPlaceholder, T
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setLightUpEffectTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1483,7 +1483,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setLightUpEffectTestPlaceholder, Tes
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setPixelStretchEffectTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1493,7 +1493,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setPixelStretchEffectTestPlaceholder
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityGroup0TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1503,7 +1503,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityGroup0TestPlaceholde
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityText0TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1513,7 +1513,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityText0TestPlaceholder
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityNextFocusIdTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1523,7 +1523,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityNextFocusIdTestPlace
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityDefaultFocusTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1533,7 +1533,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityDefaultFocusTestPlac
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityUseSamePageTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1543,7 +1543,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityUseSamePageTestPlace
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityScrollTriggerableTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1553,7 +1553,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityScrollTriggerableTes
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityText1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1563,7 +1563,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityText1TestPlaceholder
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityRoleTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1573,7 +1573,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityRoleTestPlaceholder,
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityTextHintTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1583,7 +1583,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityTextHintTestPlacehol
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityDescription0TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1593,7 +1593,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityDescription0TestPlac
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityDescription1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1603,7 +1603,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityDescription1TestPlac
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityLevelTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1613,7 +1613,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityLevelTestPlaceholder
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityCheckedTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1623,7 +1623,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityCheckedTestPlacehold
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilitySelectedTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1633,7 +1633,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilitySelectedTestPlacehol
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setObscuredTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1643,7 +1643,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setObscuredTestPlaceholder, TestSize
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setReuseIdTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1725,7 +1725,7 @@ HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitInvalidValues, TestS
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundBrightnessTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1735,7 +1735,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundBrightnessTestPlacehold
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setMonopolizeEventsTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1745,7 +1745,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMonopolizeEventsTestPlaceholder, 
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityFocusDrawLevelTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1755,7 +1755,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityFocusDrawLevelTestPl
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setCustomPropertyTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1765,7 +1765,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setCustomPropertyTestPlaceholder, Te
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setExpandSafeAreaTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1775,7 +1775,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setExpandSafeAreaTestPlaceholder, Te
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1785,7 +1785,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestPlaceholder, 
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundImage1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1795,7 +1795,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundImage1TestPlaceholder, 
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundBlurStyleTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1805,7 +1805,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundBlurStyleTestPlaceholde
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundEffect1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1815,7 +1815,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBackgroundEffect1TestPlaceholder,
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setForegroundBlurStyleTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1825,7 +1825,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setForegroundBlurStyleTestPlaceholde
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setFocusScopeIdTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1986,7 +1986,7 @@ HWTEST_P(CommonMethodModifierTest, setFocusScopePriorityTestFocusScopePriorityIn
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setTransition1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -1996,7 +1996,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setTransition1TestPlaceholder, TestS
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setGestureTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2006,7 +2006,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setGestureTestPlaceholder, TestSize.
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setPriorityGestureTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2016,7 +2016,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setPriorityGestureTestPlaceholder, T
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setParallelGestureTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2026,7 +2026,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setParallelGestureTestPlaceholder, T
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBlurTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2036,7 +2036,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBlurTestPlaceholder, TestSize.Lev
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setLinearGradientBlurTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2046,7 +2046,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setLinearGradientBlurTestPlaceholder
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setUseEffect1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2056,7 +2056,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setUseEffect1TestPlaceholder, TestSi
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBackdropBlurTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2066,7 +2066,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBackdropBlurTestPlaceholder, Test
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setSharedTransitionTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2076,7 +2076,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setSharedTransitionTestPlaceholder, 
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setChainModeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2086,7 +2086,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setChainModeTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setDragPreview1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2096,7 +2096,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setDragPreview1TestPlaceholder, Test
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setDragPreviewOptionsTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2106,7 +2106,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setDragPreviewOptionsTestPlaceholder
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setOverlayTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2116,7 +2116,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setOverlayTestPlaceholder, TestSize.
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBlendModeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2126,7 +2126,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBlendModeTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAdvancedBlendModeTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2136,7 +2136,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAdvancedBlendModeTestPlaceholder,
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setGeometryTransition1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2146,7 +2146,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setGeometryTransition1TestPlaceholde
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBindTipsTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2156,7 +2156,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBindTipsTestPlaceholder, TestSize
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBindPopupTestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2166,7 +2166,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBindPopupTestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBindMenu0TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2176,7 +2176,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBindMenu0TestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setBindMenu1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 
 /*
@@ -2186,6 +2186,6 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setBindMenu1TestPlaceholder, TestSiz
  */
 HWTEST_P(CommonMethodModifierTest, DISABLED_setAccessibilityGroup1TestPlaceholder, TestSize.Level1)
 {
-    // This is placeholder to have disabled test
+    FAIL() << "This is placeholder to have disabled test";
 }
 } // namespace OHOS::Ace::NG
