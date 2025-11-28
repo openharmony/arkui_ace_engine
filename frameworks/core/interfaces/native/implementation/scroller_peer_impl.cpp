@@ -330,7 +330,6 @@ Ark_Boolean ScrollerPeerImpl::TriggerIsAtEnd(Ark_VMContext vmContext)
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerIsAtEnd Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return 0;
     }
     ContainerScope scope(instanceId_);
