@@ -499,6 +499,7 @@ public:
     virtual void SetAccessibilityText(const std::string& text) = 0;
     virtual void SetAccessibilityTextHint(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
+    virtual void SetAccessibilityStateDescription(const std::string& stateDescription) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
     virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;

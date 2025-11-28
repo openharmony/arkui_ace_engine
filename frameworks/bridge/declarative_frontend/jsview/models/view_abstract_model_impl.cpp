@@ -1700,6 +1700,9 @@ void ViewAbstractModelImpl::SetAccessibilityImportance(const std::string& import
     inspector->SetAccessibilityImportance(importance);
 }
 
+void ViewAbstractModelImpl::SetAccessibilityStateDescription(const std::string& stateDescription)
+{}
+
 void ViewAbstractModelImpl::SetAccessibilitySelected(bool selected, bool resetValue)
 {}
 

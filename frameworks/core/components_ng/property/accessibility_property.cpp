@@ -780,6 +780,19 @@ std::string AccessibilityProperty::GetAccessibilitySamePage()
     return accessibilityUseSamePage_.value_or("");
 }
 
+void AccessibilityProperty::SetAccessibilityStateDescription(const std::string& stateDescription)
+{
+    if (stateDescription == accessibilityStateDescription_.value_or("")) {
+        return;
+    }
+    accessibilityStateDescription_ = stateDescription;
+}
+
+std::string AccessibilityProperty::GetAccessibilityStateDescription() const
+{
+    return accessibilityStateDescription_.value_or("");
+}
+
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
 {
     actionsImpl_ = actionsImpl;

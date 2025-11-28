@@ -1712,6 +1712,7 @@ public:
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
     void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
+    void SetAccessibilityStateDescription(const std::string& stateDescription) override;
     void RemoveResObj(const std::string& key) override
     {
         ViewAbstract::RemoveResObj(key);
@@ -1964,6 +1965,7 @@ public:
     static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
     static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel);
+    static void SetAccessibilityStateDescription(FrameNode* frameNode, const std::string& stateDescription);
     static void RegisterRadiusesResObj(
         const std::string& key, NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& resObj);
     static void RegisterLocationPropsEdgesResObj(

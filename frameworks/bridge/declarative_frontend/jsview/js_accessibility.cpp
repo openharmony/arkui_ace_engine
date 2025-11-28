@@ -26,6 +26,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
     AccessibilitySamePageMode::FULL_SILENT };
+const std::string DEFAULT_STATE_DESCRIPTION = "";
 }
 
 void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
@@ -111,6 +112,17 @@ void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
     if (autoEventPair.first) {
         ViewAbstractModel::GetInstance()->SetAutoEventParam(autoEventPair.second);
     }
+}
+
+void JSViewAbstract::JsAccessibilityStateDescription(const JSCallbackInfo& info)
+{
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string stateDescription;
+    if (!ParseJsString(jsValue, stateDescription)) {
+        ViewAbstractModel::GetInstance()->SetAccessibilityStateDescription(DEFAULT_STATE_DESCRIPTION);
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityStateDescription(stateDescription);
 }
 
 void JSViewAbstract::ParseAccessibilityDescriptionJson(const std::string& description,
