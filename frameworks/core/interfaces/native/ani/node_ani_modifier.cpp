@@ -35,6 +35,8 @@
 #include "parallelize_ui_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
 #include "text_based_ani_modifier.h"
+#include "paste_button_ani_modifier.h"
+#include "save_button_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "stateMgmt_ani_modifier.h"
 #include "styled_string_ani_modifier.h"
@@ -87,6 +89,8 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getXBarAniModifier = OHOS::Ace::NG::GetXBarAniModifier,
         .getCommonNodeAniModifier = OHOS::Ace::NG::GetCommonNodeAniModifier,
         .getParallelizeUIModifier = OHOS::Ace::NG::GetParallelizeUIAniModifier,
+        .getSaveButtonAniModifier = OHOS::Ace::NG::GetSaveButtonAniModifier,
+        .getPasteButtonAniModifier = OHOS::Ace::NG::GetPasteButtonAniModifier,
     };
     return &impl;
 }

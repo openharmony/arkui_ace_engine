@@ -25,7 +25,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
-import { extractors, hookSaveButtonAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, hookSaveButtonAttributeModifier, hookSaveButtonOnClick, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { BusinessError } from "@ohos.base"
 import { Resource } from "global.resource"
@@ -308,8 +308,7 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     }
     public onClick(value: SaveButtonCallback | undefined): this {
         if (this.checkPriority("onClick")) {
-            const value_casted = value as (SaveButtonCallback | undefined)
-            this.getPeer()?.setOnClickAttribute(value_casted)
+            hookSaveButtonOnClick(this, value)
             return this
         }
         return this

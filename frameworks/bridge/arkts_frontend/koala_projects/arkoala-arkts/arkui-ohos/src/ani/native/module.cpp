@@ -53,6 +53,8 @@
 #include "UINode/uinode_module_methods.h"
 #include "node_adapter/node_adapter_module.h"
 #include "visual_effect/visual_effect_module.h"
+#include "security_component/paste_button_module.h"
+#include "security_component/save_button_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -1479,6 +1481,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ApplyThemeScopeId",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyThemeScopeId)
+        },
+        ani_native_function {
+            "_SaveButton_SetOnClickCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SaveButton_SetOnClickCallback)
+        },
+        ani_native_function {
+            "_PasteButton_SetOnClickCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PasteButton_SetOnClickCallback)
         },
     };
 
