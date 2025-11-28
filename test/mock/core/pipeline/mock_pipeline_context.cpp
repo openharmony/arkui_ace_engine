@@ -186,7 +186,7 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
     return touchOptimizer_;
 }
 
-const std::unique_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
+const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
 }

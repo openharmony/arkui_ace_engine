@@ -58,6 +58,32 @@ HWTEST_F(ResSchedClickOptimizerTest, GetClickExtEnabledTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDepthTest001
+ * @tc.desc: test SetDepth method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedClickOptimizerTest, SetDepthTest001, TestSize.Level1)
+{
+    optimizer_->SetDepth(100);
+    EXPECT_EQ(optimizer_->depth_, ResSchedClickOptimizer::MAX_DEPTH);
+
+    optimizer_->SetDepth(-1);
+    EXPECT_EQ(optimizer_->depth_, 0);
+
+    optimizer_->SetDepth(ResSchedClickOptimizer::MAX_DEPTH);
+    EXPECT_EQ(optimizer_->depth_, ResSchedClickOptimizer::MAX_DEPTH);
+
+    optimizer_->SetDepth(0);
+    EXPECT_EQ(optimizer_->depth_, 0);
+
+    optimizer_->SetDepth(10);
+    EXPECT_EQ(optimizer_->depth_, 10);
+
+    optimizer_->SetDepth(5);
+    EXPECT_EQ(optimizer_->depth_, 5);
+}
+
+/**
  * @tc.name: ReportClickTest001
  * @tc.desc: test ReportClick method
  * @tc.type: FUNC
@@ -86,10 +112,10 @@ HWTEST_F(ResSchedClickOptimizerTest, ReportClickTest001, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     optimizer_->SetClickExtEnabled(true);
-    optimizer_->SetMaxDeep(20);
+    optimizer_->SetDepth(20);
     optimizer_->ReportClick(host, info);
     EXPECT_EQ(optimizer_->GetClickExtEnabled(), true);
-    EXPECT_EQ(optimizer_->GetMaxDeep(), 20);
+    EXPECT_EQ(optimizer_->GetDepth(), 20);
 }
 
 /**

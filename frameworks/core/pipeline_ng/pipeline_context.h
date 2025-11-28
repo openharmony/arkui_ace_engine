@@ -1324,7 +1324,7 @@ public:
     }
 
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
-    const std::unique_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
+    const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1689,7 +1689,7 @@ private:
     RefPtr<MagnifierController> magnifierController_;
     std::shared_ptr<LoadCompleteManager> loadCompleteMgr_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
-    std::unique_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
 };
 
 /**

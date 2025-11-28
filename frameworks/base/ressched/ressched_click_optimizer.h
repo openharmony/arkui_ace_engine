@@ -16,16 +16,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_CLICK_OPTIMIZER_H
 
 #include <atomic>
-#include <mutex>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT ResSchedClickOptimizer final {
+class ACE_EXPORT ResSchedClickOptimizer final : public std::enable_shared_from_this<ResSchedClickOptimizer> {
 public:
-    ResSchedClickOptimizer();
+    ResSchedClickOptimizer() = default;
     ~ResSchedClickOptimizer() = default;
+
+    void Init();
 
     void ReportClick(const WeakPtr<NG::FrameNode> weakNode, const GestureEvent& gestureEvent);
 
@@ -34,29 +35,31 @@ public:
         return clickExtEnabled_;
     };
 
-    void SetClickExtEnabled(bool value) {
+    void SetClickExtEnabled(bool value)
+    {
         clickExtEnabled_ = value;
     };
 
-    int32_t GetMaxDeep()
+    int32_t GetDepth()
     {
-        return maxDeep_;
+        return depth_;
     }
 
-    void SetMaxDeep(int32_t value)
+    void SetDepth(int32_t value)
     {
-        maxDeep_ = value;
+        depth_ = std::clamp(value, 0, MAX_DEPTH);
     }
 
 private:
-    void Init();
-
     static void GetComponentTextAndImageSourceRecursive(
         const WeakPtr<NG::FrameNode> weakNode, std::string& text, std::string& imgSrc, const int32_t remain);
 
-    std::once_flag clickExtEnableFlag_;
+    bool isInit_ = false;
     std::atomic_bool clickExtEnabled_ = false;
-    std::atomic<int32_t> maxDeep_ = 0;
+    std::atomic<int32_t> depth_ = DEFAULT_DEPTH;
+
+    static constexpr int32_t MAX_DEPTH = 20;
+    static constexpr int32_t DEFAULT_DEPTH = 5;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_CLICK_OPTIMIZER_H
