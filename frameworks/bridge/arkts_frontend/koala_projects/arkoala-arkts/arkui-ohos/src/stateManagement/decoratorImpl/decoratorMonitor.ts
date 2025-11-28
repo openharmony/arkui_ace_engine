@@ -66,7 +66,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
     }
 
     public runMonitorFunction(): void {
-        if (this.dirty.length == 0) {
+        if (this.dirty.length === 0) {
             return;
         }
         try {
