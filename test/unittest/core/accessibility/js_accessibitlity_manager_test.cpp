@@ -128,6 +128,23 @@ public:
     }
 };
 
+class MockAccessibilityNodeManager : public Framework::AccessibilityNodeManager {
+    DECLARE_ACE_TYPE(MockAccessibilityNodeManager, AccessibilityNodeManager);
+    void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        int64_t uiExtensionOffset) override {}
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        const int64_t uiExtensionOffset = 0) override {}
+    void FindFocusedElementInfoNG(int64_t elementId, int32_t focusType,
+        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+        const int64_t uiExtensionOffset = 0) override {}
+    void FocusMoveSearchNG(int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) override {}
+    bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override { return false; }
+};
+
 class JsAccessibilityManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -4227,5 +4244,23 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
     frameNode->SetAccessibilityVirtualNodeParent(frameNode1);
     jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
     ASSERT_TRUE(nodeInfo1.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: NeedChangeToReadableNodeTest001
+ * @tc.desc: NeedChangeToReadableNode get false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, NeedChangeToReadableNodeTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityManager = AceType::MakeRefPtr<MockAccessibilityNodeManager>();
+    ASSERT_NE(accessibilityManager, nullptr);
+
+    RefPtr<FrameNode> frameNode2;
+    // vitural function need return false
+    auto ret = accessibilityManager->NeedChangeToReadableNode(frameNode, frameNode2);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace::NG
