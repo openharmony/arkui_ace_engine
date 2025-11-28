@@ -26,6 +26,8 @@ interface EnvTypeMap {
   'system.arkui.breakpoint': WindowSizeLayoutBreakpoint;
   'system.window.size': WindowSizeVpEnv;
   'system.window.size.px': WindowSizePxEnv;
+  'system.window.avoidarea': WindowAvoidAreaVpEnv;
+  'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
 }
 
 /**
@@ -68,5 +70,21 @@ const envFactoryMap: {
     }
     stateMgmtConsole.debug(`create WindowSizePxEnv.`);
     return new WindowSizePxEnv(context);
-  }
+  },
+  'system.window.avoidarea': (context: UIContext) => {
+    const WindowAvoidAreaVpEnv = requireNapi('window.windowavoidareaenv').WindowAvoidAreaVpEnv;
+    if (typeof WindowAvoidAreaVpEnv !== 'function') {
+      throw new Error('WindowAvoidAreaVpEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowAvoidAreaVpEnv.`);
+    return new WindowAvoidAreaVpEnv(context);
+  },
+  'system.window.avoidarea.px': (context: UIContext) => {
+    const WindowAvoidAreaPxEnv = requireNapi('window.windowavoidareaenv').WindowAvoidAreaPxEnv;
+    if (typeof WindowAvoidAreaPxEnv !== 'function') {
+      throw new Error('WindowAvoidAreaPxEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowAvoidAreaPxEnv.`);
+    return new WindowAvoidAreaPxEnv(context);
+  },
 };
