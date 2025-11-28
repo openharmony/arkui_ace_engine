@@ -204,6 +204,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
     void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src);
     void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src);
+    void AssignArkValue(Ark_AutoCapitalizationMode& dst, const AutoCapitalizationMode& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
@@ -823,6 +824,15 @@ namespace OHOS::Ace::NG::Converter {
     // Create Ark_CallbackResource with async callback.
     template <typename T,
         std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
+    T ArkCallback(decltype(T().call) callbackFunc, Ark_Int32 resId = 0)
+    {
+        return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
+            .call = callbackFunc, .callSync = nullptr
+        };
+    }
+
+    template <typename T,
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
     T ArkValue(decltype(T().call) callbackFunc, Ark_Int32 resId = 0)
     {
         return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
@@ -831,6 +841,15 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // Create Ark_CallbackResource with sync callback.
+    template <typename T,
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
+    T ArkCallback(decltype(T().callSync) callbackFunc, Ark_Int32 resId = 0)
+    {
+        return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
+            .call = nullptr, .callSync = callbackFunc
+        };
+    }
+
     template <typename T,
         std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
     T ArkValue(decltype(T().callSync) callbackFunc, Ark_Int32 resId = 0)
@@ -850,6 +869,13 @@ namespace OHOS::Ace::NG::Converter {
         };
     }
 
+    // Optional callback
+    template <typename T, typename... Args>
+    std::enable_if_t<IsOptional<T>::value, T> ArkCallback(Args... args)
+    {
+        return ArkValue<T>(ArkCallback<decltype(T().value)>(args...));
+    }
+    
     template<typename Ark_Type, typename Peer = std::remove_pointer_t<Ark_Type>,
         typename AceEvent = typename Peer::AceEventInfo>
     class SyncEvent {
