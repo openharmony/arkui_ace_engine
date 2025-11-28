@@ -1786,6 +1786,8 @@ struct ArkUIShowCountOptions {
     ArkUI_Bool highlightBorder;
     ArkUI_Uint32 counterTextColor;
     ArkUI_Uint32 counterTextOverflowColor;
+    ArkUI_Bool counterTextColorIsSet;
+    ArkUI_Bool counterTextOverflowColorIsSet;
 };
 
 struct ArkUICustomNodeEvent {

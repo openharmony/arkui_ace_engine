@@ -11408,4 +11408,35 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_DistanceThreshold_004, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_ON_CLICK_EVENT_DISTANCE_THRESHOLD), ARKUI_ERROR_CODE_NO_ERROR);
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: ShowCounterConfig
+ * @tc.desc: Test ShowCounterConfig function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ShowCounterConfigTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize.
+     */
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(nullptr), 0x00000000);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(nullptr), 0x00000000);
+
+    /**
+     * @tc.steps: step2. Create an showCounterConfig and configure the properties,
+     *            then set the color to the CounterTextColor.
+     */
+    auto config = OH_ArkUI_ShowCounterConfig_Create();
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(config), 0x00000000);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(config), 0x00000000);
+
+    /**
+     * @tc.steps: step3. Test attribute acquisition,
+     */
+    OH_ArkUI_ShowCounterConfig_SetCounterTextColor(config, 0xFF0000FF);
+    OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor(config, 0xFFFFFF00);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextColor(config), 0xFF0000FF);
+    EXPECT_EQ(OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(config), 0xFFFFFF00);
+    OH_ArkUI_ShowCounterConfig_Dispose(config);
+}
 } // namespace OHOS::Ace

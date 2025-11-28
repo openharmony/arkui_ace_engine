@@ -8056,8 +8056,6 @@ int32_t SetTextAreaShowCounter(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     showCountOptions.open = false;
     showCountOptions.thresholdPercentage = -1;
     showCountOptions.highlightBorder = true;
-    showCountOptions.counterTextColor = -1;
-    showCountOptions.counterTextOverflowColor = -1;
     if (item->size > NUM_0) {
         if (!InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
             return ERROR_CODE_PARAM_INVALID;
@@ -8078,9 +8076,11 @@ int32_t SetTextAreaShowCounter(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     }
     auto* config = reinterpret_cast<ArkUI_ShowCounterConfig*>(item->object);
     if (config && config->counterTextColor.isSet) {
+        showCountOptions.counterTextColorIsSet = config->counterTextColor.isSet;
         showCountOptions.counterTextColor = config->counterTextColor.value;
     }
     if (config && config->counterTextOverflowColor.isSet) {
+        showCountOptions.counterTextOverflowColorIsSet = config->counterTextOverflowColor.isSet;
         showCountOptions.counterTextOverflowColor = config->counterTextOverflowColor.value;
     }
     ArkUIShowCountOptions* options = &showCountOptions;
