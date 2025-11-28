@@ -427,6 +427,9 @@ HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeType_WindowSize09, TestSize.Le
     container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
     EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
     V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    /**
+     * @tc.expected: breakpoint is lg
+     */
     EXPECT_EQ(result, V2::GridSizeType::LG);
 }
 
@@ -453,6 +456,9 @@ HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeType_WindowSize_SelfDefine_01,
     container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
     EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
     V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    /**
+     * @tc.expected: breakpoint is xl
+     */
     EXPECT_EQ(result, V2::GridSizeType::XL);
 }
 } // namespace OHOS::Ace::NG
