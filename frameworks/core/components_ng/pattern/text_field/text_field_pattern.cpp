@@ -3632,6 +3632,9 @@ void TextFieldPattern::ProcessSelection()
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
         SetIsSingleHandle(!IsSelected());
         selectOverlay_->UpdateHandleColor();
+        if (!needToRefreshSelectOverlay_) {
+            selectOverlay_->UpdateAIMenu();
+        }
         if (isTextChangedAtCreation_ && textWidth == 0) {
             CloseSelectOverlay();
             StartTwinkling();

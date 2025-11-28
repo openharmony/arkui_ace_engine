@@ -840,4 +840,18 @@ void TextFieldSelectOverlay::UpdateAISelectMenu()
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
 }
+
+void TextFieldSelectOverlay::OnHandleMarkInfoChange(
+    const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    BaseTextSelectOverlay::OnHandleMarkInfoChange(info, flag);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if ((flag & DIRTY_SELECT_AI_MENU) == DIRTY_SELECT_AI_MENU) {
+        auto textFieldPattern = GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        info->menuInfo.showAIWrite = textFieldPattern->IsShowAIWrite();
+        manager->NotifyUpdateToolBar(true);
+    }
+}
 } // namespace OHOS::Ace::NG

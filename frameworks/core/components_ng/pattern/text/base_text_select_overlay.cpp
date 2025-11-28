@@ -1649,4 +1649,11 @@ void BaseTextSelectOverlay::UpdateIsSingleHandle(bool isSingleHandle)
     CHECK_NULL_VOID(manager);
     manager->UpdateIsSingleHandle(isSingleHandle);
 }
+
+void BaseTextSelectOverlay::UpdateAIMenu()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AI_MENU);
+}
 } // namespace OHOS::Ace::NG
