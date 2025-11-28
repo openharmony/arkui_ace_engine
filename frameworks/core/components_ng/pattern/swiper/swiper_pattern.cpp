@@ -519,6 +519,30 @@ void SwiperPattern::OnModifyDone()
     }
 }
 
+void SwiperPattern::OnHostChildUpdateDone()
+{
+    Pattern::OnHostChildUpdateDone();
+
+    auto swiperNode = GetHost();
+    CHECK_NULL_VOID(swiperNode);
+    if (HasLeftButtonNode()) {
+        auto leftArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(leftButtonId_.value())));
+        CHECK_NULL_VOID(leftArrowNode);
+        auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(leftArrowPattern);
+        leftArrowPattern->UpdateButtonNodeChildUpdateDone();
+    }
+    if (HasRightButtonNode()) {
+        auto rightArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(rightButtonId_.value())));
+        CHECK_NULL_VOID(rightArrowNode);
+        auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(rightArrowPattern);
+        rightArrowPattern->UpdateButtonNodeChildUpdateDone();
+    }
+}
+
 void SwiperPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
