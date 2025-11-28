@@ -808,18 +808,6 @@ SheetHeight Convert(const Ark_Union_SheetSize_Length& src)
 }
 
 template<>
-SheetHeight Convert(const Ark_SingleLengthDetent& src)
-{
-    return Convert<SheetHeight>(src.value0);
-}
-
-template<>
-SheetHeight Convert(const Ark_DoubleLengthDetents& src)
-{
-    return Convert<SheetHeight>(src.value0);
-}
-
-template<>
 SheetHeight Convert(const Ark_TripleLengthDetents& src)
 {
     return Convert<SheetHeight>(src.value0);
