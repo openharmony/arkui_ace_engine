@@ -1101,6 +1101,11 @@ void JsBindFormViews(
     }
 }
 
+void JsBindFormViewsForJsXNode(BindingTarget globalObj)
+{
+    JSScopeUtil::JSBind(globalObj);
+}
+
 void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSViewAbstract::JSBind(globalObj);

@@ -26,6 +26,17 @@ class NativeEngine;
 
 namespace OHOS::Ace {
 
+// ArkTsCard load config
+enum class FormJsXNodeLoadMode {
+    NONE,
+    LITE,
+    FULL
+};
+
+struct FormLoadConfig {
+    FormJsXNodeLoadMode jsXNodeLoadMode = FormJsXNodeLoadMode::NONE;
+};
+
 class ACE_FORCE_EXPORT DeclarativeModulePreloader {
 public:
     static void Preload(NativeEngine& runtime);
@@ -35,6 +46,7 @@ public:
         const std::map<std::string, std::string>& hapPathMap);
     static void ReloadCard(NativeEngine& runtime, const std::string &bundleName,
         const std::map<std::string, std::string>& hapPathMap); // For card upgrade condition
+    static void UpdateFormJsXNodeConfig(NativeEngine& runtime, const FormLoadConfig& config); // For card load JsXNode
     // ArkTsCard end
 
     static void PreloadWorker(NativeEngine& runtime);

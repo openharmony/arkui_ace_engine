@@ -43,6 +43,13 @@ public:
     static ArkUINativeModuleValue RequireDynamicSyncScene(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMarqueeFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+    // ArkTSCard start
+    static ArkUINativeModuleValue GetArkUINativeModuleForm(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void RegisterArkUINativeModuleFormLite(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterArkUINativeModuleFormFull(
+        Local<panda::ObjectRef> object, EcmaVM* vm, bool isLiteSetRegistered);
+    // ArkTSCard end
 private:
     static void RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -117,6 +124,13 @@ private:
     static void RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    // ArkTSCard start
+    static void RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCommonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterColumnAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterStackAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTextAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    // ArkTSCard end
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

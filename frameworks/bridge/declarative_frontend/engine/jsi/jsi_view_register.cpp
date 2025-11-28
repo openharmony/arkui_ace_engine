@@ -1818,6 +1818,8 @@ void JsRegisterFormViews(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetI18nResource));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$m"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetMediaResource));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModuleForm));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodes"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),
@@ -2006,6 +2008,66 @@ void JsRegisterFormViews(
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
+}
+
+void JsRegisterFormJsXNodeLite(BindingTarget globalObj)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        return;
+    }
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    if (globalObj.IsNull() || globalObj->IsUndefined()) {
+        return;
+    }
+    auto objRef = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getArkUINativeModuleForm__"));
+    if (objRef.IsNull() || objRef->IsUndefined() || !objRef->IsFunction(vm)) {
+        return;
+    }
+    auto obj = objRef->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto function = panda::CopyableGlobal(vm, func);
+    auto arkUINativeModuleRef = function->Call(vm, function.ToLocal(), nullptr, 0);
+    if (arkUINativeModuleRef.IsNull() || arkUINativeModuleRef->IsUndefined() || !arkUINativeModuleRef->IsObject(vm)) {
+        return;
+    }
+    auto arkUINativeModule = arkUINativeModuleRef->ToObject(vm);
+    NG::ArkUINativeModule::RegisterArkUINativeModuleFormLite(arkUINativeModule, vm);
+    JsBindFormViewsForJsXNode(globalObj);
+    TAG_LOGI(AceLogTag::ACE_FORM, "Form model loading JsXNode module Lite successfully.");
+}
+
+void JsRegisterFormJsXNodeFull(BindingTarget globalObj, bool isLiteSetRegistered)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        return;
+    }
+    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    if (globalObj.IsNull() || globalObj->IsUndefined()) {
+        return;
+    }
+    auto objRef = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getArkUINativeModuleForm__"));
+    if (objRef.IsNull() || objRef->IsUndefined() || !objRef->IsFunction(vm)) {
+        return;
+    }
+    auto obj = objRef->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto function = panda::CopyableGlobal(vm, func);
+    auto arkUINativeModuleRef = function->Call(vm, function.ToLocal(), nullptr, 0);
+    if (arkUINativeModuleRef.IsNull() || arkUINativeModuleRef->IsUndefined() || !arkUINativeModuleRef->IsObject(vm)) {
+        return;
+    }
+    auto arkUINativeModule = arkUINativeModuleRef->ToObject(vm);
+    NG::ArkUINativeModule::RegisterArkUINativeModuleFormFull(arkUINativeModule, vm, isLiteSetRegistered);
+    JsBindFormViewsForJsXNode(globalObj);
+    TAG_LOGI(AceLogTag::ACE_FORM, "Form model loading JsXNode module Full successfully.");
 }
 #endif
 
