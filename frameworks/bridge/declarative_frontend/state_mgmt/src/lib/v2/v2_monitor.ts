@@ -42,13 +42,13 @@ class MonitorPathHelper {
 
   public static isValidForSyncMonitor(path: string): boolean {
     let count = path.split('*').length - 1;
-    // Allow top level "*"
+    // Allow top level '*'
     return ((count <= 0)
-      || (count == 1 && (path.endsWith(".*") || (path == "*"))));
+      || (count == 1 && (path.endsWith('.*') || (path == '*'))));
   }
 
   public static isValidForMonitor(path: string): boolean {
-    return !path.includes("*");
+    return !path.includes('*');
   }
 }
 
@@ -232,7 +232,6 @@ class MonitorV2 {
   // path - path to monitored value separated with dots
   // @Monitor does not use addPath method
   public addPath(path: string): MonitorValueV2<unknown> | undefined {
-    console.error("### addPath: " + path);
     if ((!this.isSyncDecorator() && !MonitorPathHelper.isValidForMonitor(path)) ||
       (this.isSyncDecorator() && !MonitorPathHelper.isValidForSyncMonitor(path))) {
       stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
@@ -241,7 +240,6 @@ class MonitorV2 {
     if (this.values_.has(path)) {
       stateMgmtConsole.applicationError(`AddMonitor ${this.getMonitorFuncName()} failed when adding path ${path} because duplicate key`);
       let monitorPath = this.values_.get(path)!;
-      console.error("### addPath: PATH EXISTS, return");
       return monitorPath;
     }
     let monitorValue = new MonitorValueV2<unknown>(path, this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_)
@@ -258,7 +256,6 @@ class MonitorV2 {
   }
 
   public removePath(path: string): boolean {
-    console.log("### removePath: " + path);
     const monitorValue = this.values_.get(path);
     if (monitorValue) {
       if (!(this.target_ instanceof PUV2ViewBase)) {
@@ -417,7 +414,7 @@ class MonitorV2 {
     }
     let retValue = monitoredValue.setValue(initRun, value); // dirty?
 
-    // Last sure value updated (that is path before ".*", fireChange called),
+    // Last sure value updated (that is path before '.*', fireChange called),
     // because of that we have to record dependency again for
     // the linked path that ends with '*' for the new last sure value object.
     // Code inside of the if statement below is not executed on initialisation

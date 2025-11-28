@@ -1128,25 +1128,38 @@ class ObserveV2 {
       Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
         if (monitorFunc && pathString && typeof monitorFunc === 'function') {
             this.AddMonitorPath(owningObject, pathString,
-                monitorFunc as MonitorCallback, {isSynchronous: true}, true);
+                monitorFunc as MonitorCallback, {isSynchronous: true}, true, owningObjectName);
         }
       });
       delete owningObject[watchProp];
     }
   }
 
-  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions, decorator: boolean = false): void {
+  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions,
+    decorator: boolean = false, owningObjectName: string = ''): void {
     const funcName = monitorFunc.name;
     const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
     let monitor = refs[funcName] as MonitorV2;
     const pathsUniqueString = Array.isArray(path) ? path.join(' ') : path;
     const isSync: boolean = options ? options.isSynchronous : false;
     const paths = Array.isArray(path) ? path : [path];
-    if (monitor && monitor instanceof MonitorV2) {
-      if (monitor.isSyncDecorator()) {
-        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as @SyncMonitor, cannot add path(s)`);
+
+    if (monitor && monitor instanceof MonitorV2 && monitor.isSyncDecorator()) {
+      if (!decorator) {
+        // Attempt to redefine @SyncMonitor vai API addMonitor call, ignore
+        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} in ${owningObjectName} has already register as @SyncMonitor, cannot add path(s)`);
         return;
       }
+      // Derived class defines @SyncMonitor for the function with the same name
+      // as in the base class. Deleting MonitorV2 object of the base class here.
+      ObserveV2.getObserve().clearWatch(monitor.getWatchId());
+      delete refs[funcName];
+      monitor = undefined;
+      stateMgmtConsole.warn(`@Monitor ${monitorFunc.name} ${path} in ${owningObjectName} instance with same name already exists.
+        The new ${funcName} will override the previous one, and the old one will no longer take effect.`);
+    }
+
+    if (monitor && monitor instanceof MonitorV2) {
       if (isSync !== monitor.isSync()) {
         stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSync()? `sync`: `async`}, cannot change to ${isSync? `sync`: `async`} anymore`);
         return;
