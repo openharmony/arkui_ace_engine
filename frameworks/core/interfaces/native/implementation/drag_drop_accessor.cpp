@@ -85,11 +85,17 @@ void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuild
                                .onlyForLifting = onlyForLifting, .delayCreating = delayCreating });
         },
         [node, frameNode, onlyForLifting, delayCreating](const CustomNodeBuilder& val) {
+if !defined(PREVIEW)
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = CreateProxyNode(uiNode),
+                                                                       .onlyForLifting = onlyForLifting,
+                                                                       .delayCreating = delayCreating  });
+#else
             CallbackHelper(val).BuildAsync([frameNode, onlyForLifting, delayCreating](const RefPtr<UINode>& uiNode) {
                 ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode,
                                                                        .onlyForLifting = onlyForLifting,
                                                                        .delayCreating = delayCreating  });
                 }, node);
+#endif
         },
         [node, frameNode, onlyForLifting, delayCreating](const Ark_DragItemInfo& value) {
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
@@ -100,7 +106,11 @@ void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuild
                 CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
                     const RefPtr<UINode>& uiNode) {
                     DragDropInfo info;
+#if !defined(PREVIEW)
+                    info.customNode = CreateProxyNode(uiNode);
+#else
                     info.customNode = uiNode;
+#endif
                     info.onlyForLifting = dragDropInfo.onlyForLifting;
                     info.delayCreating = dragDropInfo.delayCreating;
                     ViewAbstract::SetDragPreview(frameNode, info);
