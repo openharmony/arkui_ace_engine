@@ -112,12 +112,6 @@ private:
     class FrameProxy;
 
 public:
-    enum class RsNodeDeleteFlag : uint8_t {
-        UNKNOWN,    // Deletion status is undefined or not initialized
-        ALLOWED,    // Explicitly permits deletion of the node
-        PROHIBITED  // Explicitly forbids deletion of the node
-    };
-
     // create a new child element with new element tree.
     static RefPtr<FrameNode> CreateFrameNodeWithTree(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
@@ -1242,13 +1236,11 @@ public:
         return changeInfoFlag_;
     }
 
-    void SetDeleteRsNode(RsNodeDeleteFlag deleteFlag)
-    {
-        isDeleteRsNode_ = deleteFlag;
+    void SetDeleteRsNode(bool isDelete) {
+        isDeleteRsNode_ = isDelete;
     }
 
-    RsNodeDeleteFlag GetIsDelete() const
-    {
+    bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
 
@@ -1771,7 +1763,7 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
-    RsNodeDeleteFlag isDeleteRsNode_ = RsNodeDeleteFlag::UNKNOWN;
+    bool isDeleteRsNode_ = false;
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
     bool isAncestorScrollable_ = false;
