@@ -484,4 +484,103 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans003, Tes
     EXPECT_NE(textIndex, PLACEHOLDER_LENGTH);
 }
 
+/**
+ * @tc.name: AddPlaceholderSpan006
+ * @tc.desc: test richEditor AddPlaceholderSpan function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan006, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto customNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+
+    BuilderSpanOptions options;
+    options.customNode = customNode;
+
+    richEditorPattern->AddPlaceholderSpan(options, true, TextChangeReason::PASTE);
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+    auto spanItem = richEditorPattern->spans_.front();
+    EXPECT_EQ(spanItem->spanItemType, SpanItemType::PLACEHOLDER);
+    EXPECT_EQ(spanItem->content, u" ");
+}
+
+/**
+ * @tc.name: AddPlaceholderSpan007
+ * @tc.desc: test richEditor AddPlaceholderSpan function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan007, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto customNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+
+    BuilderSpanOptions options;
+    options.customNode = nullptr;
+
+    richEditorPattern->AddPlaceholderSpan(options, true, TextChangeReason::PASTE);
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+    auto spanItem = richEditorPattern->spans_.front();
+    EXPECT_EQ(spanItem->spanItemType, SpanItemType::NORMAL);
+    EXPECT_EQ(spanItem->content, u" ");
+}
+
+/**
+ * @tc.name: AddPlaceholderSpan008
+ * @tc.desc: test richEditor AddPlaceholderSpan function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan008, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto customNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+
+    BuilderSpanOptions options;
+    options.customNode = customNode;
+
+    richEditorPattern->AddPlaceholderSpan(options, false, TextChangeReason::PASTE);
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+    auto spanItem = richEditorPattern->spans_.front();
+    EXPECT_EQ(spanItem->spanItemType, SpanItemType::NORMAL);
+    EXPECT_EQ(spanItem->content, u" ");
+}
+
+/**
+ * @tc.name: AddPlaceholderSpan009
+ * @tc.desc: test richEditor AddPlaceholderSpan function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan009, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto customNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+
+    BuilderSpanOptions options;
+    options.customNode = nullptr;
+
+    richEditorPattern->AddPlaceholderSpan(options, false, TextChangeReason::PASTE);
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+    auto spanItem = richEditorPattern->spans_.front();
+    EXPECT_EQ(spanItem->spanItemType, SpanItemType::NORMAL);
+    EXPECT_EQ(spanItem->content, u" ");
+}
 }

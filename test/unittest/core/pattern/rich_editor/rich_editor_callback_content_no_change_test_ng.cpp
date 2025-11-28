@@ -384,4 +384,24 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnBackPressed001, TestSize.Lev
     EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
 }
 
+/**
+ * @tc.name: OnWindowSizeChanged
+ * @tc.desc: Test OnWindowSizeChanged001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnWindowSizeChanged001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->OnWindowSizeChanged(100, 200, WindowSizeChangeReason::ROTATION);
+
+    auto context = richEditorNode_->GetContextRefPtr();
+    ASSERT_NE(context, nullptr);
+    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    EXPECT_EQ(textFieldManager->GetOptionalClickPosition(), std::nullopt);
+}
+
 } // namespace OHOS::Ace::NG

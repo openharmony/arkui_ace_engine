@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -795,4 +796,27 @@ HWTEST_F(RichEditorScrollTestOneNg, GetScrollBarColor001, TestSize.Level0)
     auto scrollBarColor = richEditorPattern->GetScrollBarColor();
     EXPECT_EQ(color, scrollBarColor);
 }
+
+/**
+ * @tc.name: SetScrollBarColor001
+ * @tc.desc: Test SetScrollBarColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollTestOneNg, SetScrollBarColor001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto color = Color::BLACK;
+
+    richEditorModel.SetScrollBarColor(color);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto scrollBarColor = property->GetScrollBarColorValue(Color());
+    EXPECT_EQ(scrollBarColor, Color::BLACK);
+}
+
 }
