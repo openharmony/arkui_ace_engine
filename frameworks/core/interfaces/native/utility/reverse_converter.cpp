@@ -1140,7 +1140,11 @@ void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationCont
         auto name = navPathInfo->GetName();
         dst.name.tag = InteropTag::INTEROP_TAG_STRING;
         dst.name.value = Converter::ArkValue<Ark_String>(name, Converter::FC);
-        dst.param = navPathInfo->GetParam()->data_;
+        if (navPathInfo->GetParam()) {
+            dst.param = navPathInfo->GetParam()->data_;
+        } else {
+            dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        }
     } else {
         dst.name.tag = InteropTag::INTEROP_TAG_UNDEFINED;
         dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
