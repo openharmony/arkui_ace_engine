@@ -16,7 +16,100 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_RECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_RECT_H
 
-#include "ui/base/geometry/dimension_rect.h"
-#include "base/utils/utils.h"
+#include <cmath>
+#include <limits>
+
+#include "base/geometry/dimension.h"
+#include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension_size.h"
+#include "base/json/json_util.h"
+
+namespace OHOS::Ace {
+
+class DimensionRect {
+public:
+    DimensionRect() = default;
+    ~DimensionRect() = default;
+
+    DimensionRect(const Dimension& width, const Dimension& height, const DimensionOffset& offset)
+        : width_(width), height_(height), offset_(offset)
+    {}
+
+    DimensionRect(const Dimension& width, const Dimension& height) : width_(width), height_(height) {}
+
+    const Dimension& GetWidth() const
+    {
+        return width_;
+    }
+
+    const Dimension& GetHeight() const
+    {
+        return height_;
+    }
+
+    const DimensionOffset& GetOffset() const
+    {
+        return offset_;
+    }
+
+    void SetOffset(const DimensionOffset& offset)
+    {
+        offset_ = offset;
+    }
+
+    void SetSize(const DimensionSize& size)
+    {
+        width_ = size.Width();
+        height_ = size.Height();
+    }
+
+    void SetWidth(const Dimension& width)
+    {
+        width_ = width;
+    }
+
+    void SetHeight(const Dimension& height)
+    {
+        height_ = height;
+    }
+
+    void Reset()
+    {
+        width_ = 0.0_vp;
+        height_ = 0.0_vp;
+        offset_ = DimensionOffset();
+    }
+
+    std::string ToString() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "Rect (" << std::fixed << std::setprecision(precision) << offset_.GetX().ToString() << ", "
+           << offset_.GetY().ToString() << ") - [";
+        ss << width_.ToString();
+        ss << " x ";
+        ss << height_.ToString();
+        ss << "]";
+        std::string output = ss.str();
+        return output;
+    }
+
+    std::string ToJsonString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("x", offset_.GetX().ToString().c_str());
+        jsonValue->Put("y", offset_.GetY().ToString().c_str());
+        jsonValue->Put("width", width_.ToString().c_str());
+        jsonValue->Put("height", height_.ToString().c_str());
+        return jsonValue->ToString();
+    }
+
+private:
+    Dimension width_ = 0.0_vp;
+    Dimension height_ = 0.0_vp;
+    DimensionOffset offset_;
+};
+
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_RECT_H

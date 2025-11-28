@@ -16,6 +16,78 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_ALIGNMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_ALIGNMENT_H
 
-#include "ui/properties/alignment.h"
+#include <string>
+
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/offset.h"
+#include "base/geometry/size.h"
+#include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
+
+namespace OHOS::Ace {
+
+class ACE_FORCE_EXPORT Alignment final {
+public:
+    Alignment() = default;
+    ~Alignment() = default;
+
+    double GetHorizontal() const
+    {
+        return horizontal_;
+    }
+
+    double GetVertical() const
+    {
+        return vertical_;
+    }
+
+    bool operator==(const Alignment& other) const
+    {
+        return NearEqual(horizontal_, other.horizontal_) && NearEqual(vertical_, other.vertical_);
+    }
+
+    bool operator!=(const Alignment& other) const
+    {
+        return !operator==(other);
+    }
+
+    static Offset GetAlignPosition(const Size& parentSize, const Size& childSize, const Alignment& alignment);
+    static NG::OffsetF GetAlignPosition(
+        const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
+    static NG::OffsetF GetAlignPositionWithDirection(const NG::SizeF& parentSize, const NG::SizeF& childSize,
+        const Alignment& alignment, TextDirection direction);
+    static const Alignment TOP_LEFT;
+    static const Alignment TOP_CENTER;
+    static const Alignment TOP_RIGHT;
+    static const Alignment CENTER_LEFT;
+    static const Alignment CENTER;
+    static const Alignment CENTER_RIGHT;
+    static const Alignment BOTTOM_LEFT;
+    static const Alignment BOTTOM_CENTER;
+    static const Alignment BOTTOM_RIGHT;
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "Alignment (" << std::fixed << std::setprecision(1) << horizontal_ << ", " << vertical_ << ")";
+        std::string output = ss.str();
+        return output;
+    }
+
+    std::string GetAlignmentStr(TextDirection direction) const;
+
+    static Alignment GetAlignment(TextDirection direction, const std::string& str);
+
+    static std::optional<Alignment> ParseAlignment(int32_t alignment);
+
+private:
+    friend class AlignCreator;
+    Alignment(double horizontal, double vertical) : horizontal_(horizontal), vertical_(vertical) {}
+    double horizontal_ = 0.0;
+    double vertical_ = 0.0;
+};
+
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_ALIGNMENT_H

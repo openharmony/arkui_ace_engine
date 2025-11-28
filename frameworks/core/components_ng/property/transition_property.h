@@ -22,14 +22,56 @@
 #include <sstream>
 #include <string>
 #include <functional>
+#include "base/geometry/calc_dimension.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/property/property.h"
-#include "ui/properties/ng/transition_property.h"
+#include "core/common/resource/resource_object.h"
 
 
 namespace OHOS::Ace::NG {
 
+struct TranslateOptions {
+    CalcDimension x;
+    CalcDimension y;
+    CalcDimension z;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, NG::TranslateOptions&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, NG::TranslateOptions&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
+    TranslateOptions() = default;
+    TranslateOptions(const CalcDimension& x, const CalcDimension& y, const CalcDimension& z) : x(x), y(y), z(z) {}
+    // for inner construct, default unit is PX
+    TranslateOptions(float x, float y, float z) : x(x), y(y), z(z) {}
+    bool operator==(const TranslateOptions& other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
+    std::string ToString() const
+    {
+        return "translate:[" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + "]";
+    }
+};
 struct ScaleOptions {
     float xScale = 1.0f;
     float yScale = 1.0f;

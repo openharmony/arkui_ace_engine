@@ -16,7 +16,6 @@
 #include "core/event/touch_event.h"
 
 #include "base/input_manager/input_manager.h"
-#include "base/utils/time_util.h"
 #include "core/common/ace_application_info.h"
 #include "core/event/mouse_event.h"
 #include "core/event/key_event.h"

@@ -27,8 +27,6 @@ struct LayoutConstraintInfo {
     float maxHeight;
     float percentReferWidth;
     float percentReferHeight;
-    std::optional<float> parentIdealSizeWidth;
-    std::optional<float> parentIdealSizeHeight;
 };
 
 } // namespace OHOS::Ace::Kit
