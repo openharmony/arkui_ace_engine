@@ -631,10 +631,12 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
-    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
+    int webId = GetWebId();
+    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", webId);
+    CleanupWebPatternResource(webId);
     UninitTouchEventListener();
     if (setWebDetachCallback_) {
-        auto setWebDetachTask = [callback = setWebDetachCallback_, webId = GetWebId()]() {
+        auto setWebDetachTask = [callback = setWebDetachCallback_, webId]() {
             CHECK_NULL_VOID(callback);
             callback(webId);
         };
@@ -651,7 +653,6 @@ WebPattern::~WebPattern()
         observer_->NotifyDestory();
     }
     if (isActive_) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
         SetActiveStatusInner(false, true);
     }
     if (imageAnalyzerManager_) {
@@ -4129,7 +4130,9 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
     int32_t nodeId = host->GetId();
     UninitializeAccessibility();
     UnInitSurfaceDensityCallback(context);
-    context->RemoveWindowStateChangedCallback(nodeId);
+    if (!offlineWebInited_) {
+        context->RemoveWindowStateChangedCallback(nodeId);
+    }
     context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
     context->RemoveVisibleAreaChangeNode(nodeId);
@@ -4588,6 +4591,10 @@ void WebPattern::InitInOfflineMode()
     isVisible_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowStateChangedCallback(host->GetId());
+    offlineWebNodeId_ = host->GetId();
     int width = 0;
     int height = 0;
     auto layoutProperty = host->GetLayoutProperty();
@@ -6696,8 +6703,19 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow WebId : %{public}d", GetWebId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int webId = GetWebId();
+    NodeStatus nodeStatus = host->GetNodeStatus();
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnWindowShow WebId: %{public}d, isOfflineWeb: %{public}d, nodeStatus: %{public}d",
+        webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
+    if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+        if (OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
+            delegate_->OnActive();
+        }
+        return;
+    }
     delegate_->OnRenderToForeground();
     delegate_->OnOnlineRenderToForeground();
 
@@ -6705,8 +6723,6 @@ void WebPattern::OnWindowShow()
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     componentVisibility_ = layoutProperty->GetVisibility().value_or(VisibleType::GONE);
@@ -6722,8 +6738,16 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide WebId : %{public}d", GetWebId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    NodeStatus nodeStatus = host->GetNodeStatus();
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnWindowHide WebId: %{public}d, isOfflineWeb: %{public}d, nodeStatus: %{public}d",
+        GetWebId(), offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
+    if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+        delegate_->OnInactive(true);
+        return;
+    }
     delegate_->OnRenderToBackground();
 
     if (!isWindowShow_) {
@@ -6731,7 +6755,7 @@ void WebPattern::OnWindowHide()
     }
 
     CHECK_NULL_VOID(delegate_);
-    SetActiveStatusInner(false);
+    SetActiveStatusInner(false, offlineWebInited_ && !isActive_);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
     needOnFocus_ = false;
@@ -9782,6 +9806,17 @@ void WebPattern::OnStatusBarClick()
         isBackToTopRunning_ = true;
         delegate_->WebScrollStopFling();
         delegate_->OnStatusBarClick();
+    }
+}
+
+void WebPattern::CleanupWebPatternResource(int32_t webId)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::CleanupWebPatternResource");
+    OHOS::NWeb::NWebHelper::Instance().RemoveNWebActiveStatus(webId);
+    if (offlineWebInited_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->RemoveWindowStateChangedCallback(offlineWebNodeId_);
     }
 }
 
