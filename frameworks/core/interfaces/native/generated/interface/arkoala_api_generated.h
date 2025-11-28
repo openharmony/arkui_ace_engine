@@ -8347,19 +8347,19 @@ typedef struct Opt_TextMenuItemId {
 } Opt_TextMenuItemId;
 typedef struct Ark_TextMetrics {
     /* kind: Interface */
-    Ark_Number actualBoundingBoxAscent;
-    Ark_Number actualBoundingBoxDescent;
-    Ark_Number actualBoundingBoxLeft;
-    Ark_Number actualBoundingBoxRight;
-    Ark_Number alphabeticBaseline;
-    Ark_Number emHeightAscent;
-    Ark_Number emHeightDescent;
-    Ark_Number fontBoundingBoxAscent;
-    Ark_Number fontBoundingBoxDescent;
-    Ark_Number hangingBaseline;
-    Ark_Number ideographicBaseline;
-    Ark_Number width;
-    Ark_Number height;
+    Ark_Float64 actualBoundingBoxAscent;
+    Ark_Float64 actualBoundingBoxDescent;
+    Ark_Float64 actualBoundingBoxLeft;
+    Ark_Float64 actualBoundingBoxRight;
+    Ark_Float64 alphabeticBaseline;
+    Ark_Float64 emHeightAscent;
+    Ark_Float64 emHeightDescent;
+    Ark_Float64 fontBoundingBoxAscent;
+    Ark_Float64 fontBoundingBoxDescent;
+    Ark_Float64 hangingBaseline;
+    Ark_Float64 ideographicBaseline;
+    Ark_Float64 width;
+    Ark_Float64 height;
 } Ark_TextMetrics;
 typedef struct Opt_TextMetrics {
     Ark_Tag tag;
@@ -26066,51 +26066,51 @@ typedef struct GENERATED_ArkUICanvasPathAccessor {
     Ark_CanvasPath (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*arc)(Ark_CanvasPath peer,
-                const Ark_Number* x,
-                const Ark_Number* y,
-                const Ark_Number* radius,
-                const Ark_Number* startAngle,
-                const Ark_Number* endAngle,
+                Ark_Float64 x,
+                Ark_Float64 y,
+                Ark_Float64 radius,
+                Ark_Float64 startAngle,
+                Ark_Float64 endAngle,
                 const Opt_Boolean* counterclockwise);
     void (*arcTo)(Ark_CanvasPath peer,
-                  const Ark_Number* x1,
-                  const Ark_Number* y1,
-                  const Ark_Number* x2,
-                  const Ark_Number* y2,
-                  const Ark_Number* radius);
+                  Ark_Float64 x1,
+                  Ark_Float64 y1,
+                  Ark_Float64 x2,
+                  Ark_Float64 y2,
+                  Ark_Float64 radius);
     void (*bezierCurveTo)(Ark_CanvasPath peer,
-                          const Ark_Number* cp1x,
-                          const Ark_Number* cp1y,
-                          const Ark_Number* cp2x,
-                          const Ark_Number* cp2y,
-                          const Ark_Number* x,
-                          const Ark_Number* y);
+                          Ark_Float64 cp1x,
+                          Ark_Float64 cp1y,
+                          Ark_Float64 cp2x,
+                          Ark_Float64 cp2y,
+                          Ark_Float64 x,
+                          Ark_Float64 y);
     void (*closePath)(Ark_CanvasPath peer);
     void (*ellipse)(Ark_CanvasPath peer,
-                    const Ark_Number* x,
-                    const Ark_Number* y,
-                    const Ark_Number* radiusX,
-                    const Ark_Number* radiusY,
-                    const Ark_Number* rotation,
-                    const Ark_Number* startAngle,
-                    const Ark_Number* endAngle,
+                    Ark_Float64 x,
+                    Ark_Float64 y,
+                    Ark_Float64 radiusX,
+                    Ark_Float64 radiusY,
+                    Ark_Float64 rotation,
+                    Ark_Float64 startAngle,
+                    Ark_Float64 endAngle,
                     const Opt_Boolean* counterclockwise);
     void (*lineTo)(Ark_CanvasPath peer,
-                   const Ark_Number* x,
-                   const Ark_Number* y);
+                   Ark_Float64 x,
+                   Ark_Float64 y);
     void (*moveTo)(Ark_CanvasPath peer,
-                   const Ark_Number* x,
-                   const Ark_Number* y);
+                   Ark_Float64 x,
+                   Ark_Float64 y);
     void (*quadraticCurveTo)(Ark_CanvasPath peer,
-                             const Ark_Number* cpx,
-                             const Ark_Number* cpy,
-                             const Ark_Number* x,
-                             const Ark_Number* y);
+                             Ark_Float64 cpx,
+                             Ark_Float64 cpy,
+                             Ark_Float64 x,
+                             Ark_Float64 y);
     void (*rect)(Ark_CanvasPath peer,
-                 const Ark_Number* x,
-                 const Ark_Number* y,
-                 const Ark_Number* w,
-                 const Ark_Number* h);
+                 Ark_Float64 x,
+                 Ark_Float64 y,
+                 Ark_Float64 w,
+                 Ark_Float64 h);
 } GENERATED_ArkUICanvasPathAccessor;
 
 typedef struct GENERATED_ArkUICanvasPatternAccessor {
@@ -26127,24 +26127,24 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*drawImage0)(Ark_CanvasRenderer peer,
                        const Ark_Union_ImageBitmap_PixelMap* image,
-                       const Ark_Number* dx,
-                       const Ark_Number* dy);
+                       Ark_Float64 dx,
+                       Ark_Float64 dy);
     void (*drawImage1)(Ark_CanvasRenderer peer,
                        const Ark_Union_ImageBitmap_PixelMap* image,
-                       const Ark_Number* dx,
-                       const Ark_Number* dy,
-                       const Ark_Number* dw,
-                       const Ark_Number* dh);
+                       Ark_Float64 dx,
+                       Ark_Float64 dy,
+                       Ark_Float64 dw,
+                       Ark_Float64 dh);
     void (*drawImage2)(Ark_CanvasRenderer peer,
                        const Ark_Union_ImageBitmap_PixelMap* image,
-                       const Ark_Number* sx,
-                       const Ark_Number* sy,
-                       const Ark_Number* sw,
-                       const Ark_Number* sh,
-                       const Ark_Number* dx,
-                       const Ark_Number* dy,
-                       const Ark_Number* dw,
-                       const Ark_Number* dh);
+                       Ark_Float64 sx,
+                       Ark_Float64 sy,
+                       Ark_Float64 sw,
+                       Ark_Float64 sh,
+                       Ark_Float64 dx,
+                       Ark_Float64 dy,
+                       Ark_Float64 dw,
+                       Ark_Float64 dh);
     void (*beginPath)(Ark_CanvasRenderer peer);
     void (*clip0)(Ark_CanvasRenderer peer,
                   const Opt_String* fillRule);
@@ -26159,109 +26159,87 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
     void (*stroke)(Ark_CanvasRenderer peer,
                    const Opt_Path2D* path);
     Ark_CanvasGradient (*createLinearGradient)(Ark_CanvasRenderer peer,
-                                               const Ark_Number* x0,
-                                               const Ark_Number* y0,
-                                               const Ark_Number* x1,
-                                               const Ark_Number* y1);
+                                               Ark_Float64 x0,
+                                               Ark_Float64 y0,
+                                               Ark_Float64 x1,
+                                               Ark_Float64 y1);
     Opt_CanvasPattern (*createPattern)(Ark_CanvasRenderer peer,
                                        Ark_ImageBitmap image,
                                        const Opt_String* repetition);
     Ark_CanvasGradient (*createRadialGradient)(Ark_CanvasRenderer peer,
-                                               const Ark_Number* x0,
-                                               const Ark_Number* y0,
-                                               const Ark_Number* r0,
-                                               const Ark_Number* x1,
-                                               const Ark_Number* y1,
-                                               const Ark_Number* r1);
+                                               Ark_Float64 x0,
+                                               Ark_Float64 y0,
+                                               Ark_Float64 r0,
+                                               Ark_Float64 x1,
+                                               Ark_Float64 y1,
+                                               Ark_Float64 r1);
     Ark_CanvasGradient (*createConicGradient)(Ark_CanvasRenderer peer,
-                                              const Ark_Number* startAngle,
-                                              const Ark_Number* x,
-                                              const Ark_Number* y);
-    Ark_ImageData (*createImageData0)(Ark_CanvasRenderer peer,
-                                      const Ark_Number* sw,
-                                      const Ark_Number* sh);
-    Ark_ImageData (*createImageData1)(Ark_CanvasRenderer peer,
-                                      Ark_ImageData imagedata);
-    Ark_ImageData (*getImageData)(Ark_CanvasRenderer peer,
-                                  const Ark_Number* sx,
-                                  const Ark_Number* sy,
-                                  const Ark_Number* sw,
-                                  const Ark_Number* sh);
+                                              Ark_Float64 startAngle,
+                                              Ark_Float64 x,
+                                              Ark_Float64 y);
     Ark_image_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
-                                      const Ark_Number* sx,
-                                      const Ark_Number* sy,
-                                      const Ark_Number* sw,
-                                      const Ark_Number* sh);
-    void (*putImageData0)(Ark_CanvasRenderer peer,
-                          Ark_ImageData imagedata,
-                          const Ark_Union_Number_String* dx,
-                          const Ark_Union_Number_String* dy);
-    void (*putImageData1)(Ark_CanvasRenderer peer,
-                          Ark_ImageData imagedata,
-                          const Ark_Union_Number_String* dx,
-                          const Ark_Union_Number_String* dy,
-                          const Ark_Union_Number_String* dirtyX,
-                          const Ark_Union_Number_String* dirtyY,
-                          const Ark_Union_Number_String* dirtyWidth,
-                          const Ark_Union_Number_String* dirtyHeight);
-    Array_Number (*getLineDash)(Ark_CanvasRenderer peer);
+                                      Ark_Float64 sx,
+                                      Ark_Float64 sy,
+                                      Ark_Float64 sw,
+                                      Ark_Float64 sh);
+    Array_Float64 (*getLineDash)(Ark_CanvasRenderer peer);
     void (*setLineDash)(Ark_CanvasRenderer peer,
-                        const Array_Number* segments);
+                        const Array_Float64* segments);
     void (*clearRect)(Ark_CanvasRenderer peer,
-                      const Ark_Number* x,
-                      const Ark_Number* y,
-                      const Ark_Number* w,
-                      const Ark_Number* h);
+                      Ark_Float64 x,
+                      Ark_Float64 y,
+                      Ark_Float64 w,
+                      Ark_Float64 h);
     void (*fillRect)(Ark_CanvasRenderer peer,
-                     const Ark_Number* x,
-                     const Ark_Number* y,
-                     const Ark_Number* w,
-                     const Ark_Number* h);
+                     Ark_Float64 x,
+                     Ark_Float64 y,
+                     Ark_Float64 w,
+                     Ark_Float64 h);
     void (*strokeRect)(Ark_CanvasRenderer peer,
-                       const Ark_Number* x,
-                       const Ark_Number* y,
-                       const Ark_Number* w,
-                       const Ark_Number* h);
+                       Ark_Float64 x,
+                       Ark_Float64 y,
+                       Ark_Float64 w,
+                       Ark_Float64 h);
     void (*restore)(Ark_CanvasRenderer peer);
     void (*save)(Ark_CanvasRenderer peer);
     void (*fillText)(Ark_CanvasRenderer peer,
                      const Ark_String* text,
-                     const Ark_Number* x,
-                     const Ark_Number* y,
-                     const Opt_Number* maxWidth);
+                     Ark_Float64 x,
+                     Ark_Float64 y,
+                     const Opt_Float64* maxWidth);
     Ark_TextMetrics (*measureText)(Ark_CanvasRenderer peer,
                                    const Ark_String* text);
     void (*strokeText)(Ark_CanvasRenderer peer,
                        const Ark_String* text,
-                       const Ark_Number* x,
-                       const Ark_Number* y,
-                       const Opt_Number* maxWidth);
+                       Ark_Float64 x,
+                       Ark_Float64 y,
+                       const Opt_Float64* maxWidth);
     Ark_Matrix2D (*getTransform)(Ark_CanvasRenderer peer);
     void (*resetTransform)(Ark_CanvasRenderer peer);
     void (*rotate)(Ark_CanvasRenderer peer,
-                   const Ark_Number* angle);
+                   Ark_Float64 angle);
     void (*scale)(Ark_CanvasRenderer peer,
-                  const Ark_Number* x,
-                  const Ark_Number* y);
+                  Ark_Float64 x,
+                  Ark_Float64 y);
     void (*setTransform0)(Ark_CanvasRenderer peer,
-                          const Ark_Number* a,
-                          const Ark_Number* b,
-                          const Ark_Number* c,
-                          const Ark_Number* d,
-                          const Ark_Number* e,
-                          const Ark_Number* f);
+                          Ark_Float64 a,
+                          Ark_Float64 b,
+                          Ark_Float64 c,
+                          Ark_Float64 d,
+                          Ark_Float64 e,
+                          Ark_Float64 f);
     void (*setTransform1)(Ark_CanvasRenderer peer,
                           const Opt_Matrix2D* transform);
     void (*transform)(Ark_CanvasRenderer peer,
-                      const Ark_Number* a,
-                      const Ark_Number* b,
-                      const Ark_Number* c,
-                      const Ark_Number* d,
-                      const Ark_Number* e,
-                      const Ark_Number* f);
+                      Ark_Float64 a,
+                      Ark_Float64 b,
+                      Ark_Float64 c,
+                      Ark_Float64 d,
+                      Ark_Float64 e,
+                      Ark_Float64 f);
     void (*translate)(Ark_CanvasRenderer peer,
-                      const Ark_Number* x,
-                      const Ark_Number* y);
+                      Ark_Float64 x,
+                      Ark_Float64 y);
     void (*setPixelMap)(Ark_CanvasRenderer peer,
                         const Opt_image_PixelMap* value);
     void (*transferFromImageBitmap)(Ark_CanvasRenderer peer,
@@ -26272,9 +26250,9 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
     Ark_Union_LengthMetrics_String (*getLetterSpacing)(Ark_CanvasRenderer peer);
     void (*setLetterSpacing)(Ark_CanvasRenderer peer,
                              const Ark_Union_LengthMetrics_String* letterSpacing);
-    Ark_Number (*getGlobalAlpha)(Ark_CanvasRenderer peer);
+    Ark_Float64 (*getGlobalAlpha)(Ark_CanvasRenderer peer);
     void (*setGlobalAlpha)(Ark_CanvasRenderer peer,
-                           const Ark_Number* globalAlpha);
+                           Ark_Float64 globalAlpha);
     Ark_String (*getGlobalCompositeOperation)(Ark_CanvasRenderer peer);
     void (*setGlobalCompositeOperation)(Ark_CanvasRenderer peer,
                                         const Ark_String* globalCompositeOperation);
@@ -26296,30 +26274,30 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
     Ark_String (*getLineCap)(Ark_CanvasRenderer peer);
     void (*setLineCap)(Ark_CanvasRenderer peer,
                        const Ark_String* lineCap);
-    Ark_Number (*getLineDashOffset)(Ark_CanvasRenderer peer);
+    Ark_Float64 (*getLineDashOffset)(Ark_CanvasRenderer peer);
     void (*setLineDashOffset)(Ark_CanvasRenderer peer,
-                              const Ark_Number* lineDashOffset);
+                              Ark_Float64 lineDashOffset);
     Ark_String (*getLineJoin)(Ark_CanvasRenderer peer);
     void (*setLineJoin)(Ark_CanvasRenderer peer,
                         const Ark_String* lineJoin);
-    Ark_Number (*getLineWidth)(Ark_CanvasRenderer peer);
+    Ark_Float64 (*getLineWidth)(Ark_CanvasRenderer peer);
     void (*setLineWidth)(Ark_CanvasRenderer peer,
-                         const Ark_Number* lineWidth);
-    Ark_Number (*getMiterLimit)(Ark_CanvasRenderer peer);
+                         Ark_Float64 lineWidth);
+    Ark_Float64 (*getMiterLimit)(Ark_CanvasRenderer peer);
     void (*setMiterLimit)(Ark_CanvasRenderer peer,
-                          const Ark_Number* miterLimit);
-    Ark_Number (*getShadowBlur)(Ark_CanvasRenderer peer);
+                          Ark_Float64 miterLimit);
+    Ark_Float64 (*getShadowBlur)(Ark_CanvasRenderer peer);
     void (*setShadowBlur)(Ark_CanvasRenderer peer,
-                          const Ark_Number* shadowBlur);
+                          Ark_Float64 shadowBlur);
     Ark_String (*getShadowColor)(Ark_CanvasRenderer peer);
     void (*setShadowColor)(Ark_CanvasRenderer peer,
                            const Ark_String* shadowColor);
-    Ark_Number (*getShadowOffsetX)(Ark_CanvasRenderer peer);
+    Ark_Float64 (*getShadowOffsetX)(Ark_CanvasRenderer peer);
     void (*setShadowOffsetX)(Ark_CanvasRenderer peer,
-                             const Ark_Number* shadowOffsetX);
-    Ark_Number (*getShadowOffsetY)(Ark_CanvasRenderer peer);
+                             Ark_Float64 shadowOffsetX);
+    Ark_Float64 (*getShadowOffsetY)(Ark_CanvasRenderer peer);
     void (*setShadowOffsetY)(Ark_CanvasRenderer peer,
-                             const Ark_Number* shadowOffsetY);
+                             Ark_Float64 shadowOffsetY);
     Ark_String (*getDirection)(Ark_CanvasRenderer peer);
     void (*setDirection)(Ark_CanvasRenderer peer,
                          const Ark_String* direction);
@@ -26341,7 +26319,7 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_CanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Number* quality);
+                            const Opt_Float64* quality);
     void (*startImageAnalyzer)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_CanvasRenderingContext2D peer,
@@ -26356,12 +26334,12 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
                      const VoidCallback* callback_);
     void (*offDetach)(Ark_CanvasRenderingContext2D peer,
                       const Opt_VoidCallback* callback_);
-    Ark_Number (*getHeight)(Ark_CanvasRenderingContext2D peer);
+    Ark_Float64 (*getHeight)(Ark_CanvasRenderingContext2D peer);
     void (*setHeight)(Ark_CanvasRenderingContext2D peer,
-                      const Ark_Number* height);
-    Ark_Number (*getWidth)(Ark_CanvasRenderingContext2D peer);
+                      Ark_Float64 height);
+    Ark_Float64 (*getWidth)(Ark_CanvasRenderingContext2D peer);
     void (*setWidth)(Ark_CanvasRenderingContext2D peer,
-                     const Ark_Number* width);
+                     Ark_Float64 width);
     Ark_FrameNode (*getCanvas)(Ark_CanvasRenderingContext2D peer);
     void (*setCanvas)(Ark_CanvasRenderingContext2D peer,
                       Ark_FrameNode canvas);
@@ -27398,33 +27376,33 @@ typedef struct GENERATED_ArkUIMatrix2DAccessor {
     Ark_Matrix2D (*identity)(Ark_Matrix2D peer);
     Ark_Matrix2D (*invert)(Ark_Matrix2D peer);
     Ark_Matrix2D (*rotate)(Ark_Matrix2D peer,
-                           const Ark_Number* degree,
-                           const Opt_Number* rx,
-                           const Opt_Number* ry);
+                           Ark_Float64 degree,
+                           const Opt_Float64* rx,
+                           const Opt_Float64* ry);
     Ark_Matrix2D (*translate)(Ark_Matrix2D peer,
-                              const Opt_Number* tx,
-                              const Opt_Number* ty);
+                              const Opt_Float64* tx,
+                              const Opt_Float64* ty);
     Ark_Matrix2D (*scale)(Ark_Matrix2D peer,
-                          const Opt_Number* sx,
-                          const Opt_Number* sy);
-    Opt_Number (*getScaleX)(Ark_Matrix2D peer);
+                          const Opt_Float64* sx,
+                          const Opt_Float64* sy);
+    Opt_Float64 (*getScaleX)(Ark_Matrix2D peer);
     void (*setScaleX)(Ark_Matrix2D peer,
-                      const Opt_Number* scaleX);
-    Opt_Number (*getScaleY)(Ark_Matrix2D peer);
+                      const Opt_Float64* scaleX);
+    Opt_Float64 (*getScaleY)(Ark_Matrix2D peer);
     void (*setScaleY)(Ark_Matrix2D peer,
-                      const Opt_Number* scaleY);
-    Opt_Number (*getRotateX)(Ark_Matrix2D peer);
+                      const Opt_Float64* scaleY);
+    Opt_Float64 (*getRotateX)(Ark_Matrix2D peer);
     void (*setRotateX)(Ark_Matrix2D peer,
-                       const Opt_Number* rotateX);
-    Opt_Number (*getRotateY)(Ark_Matrix2D peer);
+                       const Opt_Float64* rotateX);
+    Opt_Float64 (*getRotateY)(Ark_Matrix2D peer);
     void (*setRotateY)(Ark_Matrix2D peer,
-                       const Opt_Number* rotateY);
-    Opt_Number (*getTranslateX)(Ark_Matrix2D peer);
+                       const Opt_Float64* rotateY);
+    Opt_Float64 (*getTranslateX)(Ark_Matrix2D peer);
     void (*setTranslateX)(Ark_Matrix2D peer,
-                          const Opt_Number* translateX);
-    Opt_Number (*getTranslateY)(Ark_Matrix2D peer);
+                          const Opt_Float64* translateX);
+    Opt_Float64 (*getTranslateY)(Ark_Matrix2D peer);
     void (*setTranslateY)(Ark_Matrix2D peer,
-                          const Opt_Number* translateY);
+                          const Opt_Float64* translateY);
 } GENERATED_ArkUIMatrix2DAccessor;
 
 typedef struct GENERATED_ArkUIMeasurableAccessor {
@@ -27797,32 +27775,32 @@ typedef struct GENERATED_ArkUINodeContentExtenderAccessor {
 
 typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvas peer);
-    Ark_OffscreenCanvas (*construct)(const Ark_Number* width,
-                                     const Ark_Number* height,
+    Ark_OffscreenCanvas (*construct)(Ark_Float64 width,
+                                     Ark_Float64 height,
                                      const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
-    Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
+    Opt_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
     Ark_OffscreenCanvasRenderingContext2D (*getContext2d)(Ark_OffscreenCanvas peer,
                                                           const Opt_RenderingContextSettings* options);
-    Ark_Number (*getHeight)(Ark_OffscreenCanvas peer);
+    Ark_Float64 (*getHeight)(Ark_OffscreenCanvas peer);
     void (*setHeight)(Ark_OffscreenCanvas peer,
-                      const Ark_Number* height);
-    Ark_Number (*getWidth)(Ark_OffscreenCanvas peer);
+                      Ark_Float64 height);
+    Ark_Float64 (*getWidth)(Ark_OffscreenCanvas peer);
     void (*setWidth)(Ark_OffscreenCanvas peer,
-                     const Ark_Number* width);
+                     Ark_Float64 width);
 } GENERATED_ArkUIOffscreenCanvasAccessor;
 
 typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvasRenderingContext2D peer);
-    Ark_OffscreenCanvasRenderingContext2D (*construct)(const Ark_Number* width,
-                                                       const Ark_Number* height,
+    Ark_OffscreenCanvasRenderingContext2D (*construct)(Ark_Float64 width,
+                                                       Ark_Float64 height,
                                                        const Opt_RenderingContextSettings* settings,
                                                        const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Number* quality);
-    Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
+                            const Opt_Float64* quality);
+    Opt_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
 } GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor;
 
 typedef struct GENERATED_ArkUIPanGestureEventAccessor {

@@ -187,19 +187,19 @@ void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvCon
 
 void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
 {
-    dst.actualBoundingBoxAscent = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxAscent);
-    dst.actualBoundingBoxDescent = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxDescent);
-    dst.actualBoundingBoxLeft = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxLeft);
-    dst.actualBoundingBoxRight = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxRight);
-    dst.alphabeticBaseline = Converter::ArkValue<Ark_Number>(src.alphabeticBaseline);
-    dst.emHeightAscent = Converter::ArkValue<Ark_Number>(src.emHeightAscent);
-    dst.emHeightDescent = Converter::ArkValue<Ark_Number>(src.emHeightDescent);
-    dst.fontBoundingBoxAscent = Converter::ArkValue<Ark_Number>(src.fontBoundingBoxAscent);
-    dst.fontBoundingBoxDescent = Converter::ArkValue<Ark_Number>(src.fontBoundingBoxDescent);
-    dst.hangingBaseline = Converter::ArkValue<Ark_Number>(src.hangingBaseline);
-    dst.ideographicBaseline = Converter::ArkValue<Ark_Number>(src.ideographicBaseline);
-    dst.width = Converter::ArkValue<Ark_Number>(src.width);
-    dst.height = Converter::ArkValue<Ark_Number>(src.height);
+    dst.actualBoundingBoxAscent = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxAscent);
+    dst.actualBoundingBoxDescent = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxDescent);
+    dst.actualBoundingBoxLeft = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxLeft);
+    dst.actualBoundingBoxRight = Converter::ArkValue<Ark_Float64>(src.actualBoundingBoxRight);
+    dst.alphabeticBaseline = Converter::ArkValue<Ark_Float64>(src.alphabeticBaseline);
+    dst.emHeightAscent = Converter::ArkValue<Ark_Float64>(src.emHeightAscent);
+    dst.emHeightDescent = Converter::ArkValue<Ark_Float64>(src.emHeightDescent);
+    dst.fontBoundingBoxAscent = Converter::ArkValue<Ark_Float64>(src.fontBoundingBoxAscent);
+    dst.fontBoundingBoxDescent = Converter::ArkValue<Ark_Float64>(src.fontBoundingBoxDescent);
+    dst.hangingBaseline = Converter::ArkValue<Ark_Float64>(src.hangingBaseline);
+    dst.ideographicBaseline = Converter::ArkValue<Ark_Float64>(src.ideographicBaseline);
+    dst.width = Converter::ArkValue<Ark_Float64>(src.width);
+    dst.height = Converter::ArkValue<Ark_Float64>(src.height);
 }
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)

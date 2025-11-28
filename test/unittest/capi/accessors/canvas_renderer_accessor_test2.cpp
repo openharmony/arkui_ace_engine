@@ -585,10 +585,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0BitmapTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage0(peer_, &image, &dx, &dy);
+            accessor_->drawImage0(peer_, &image, dx, dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -604,10 +604,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0BitmapTest, TestSize.Level1)
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawImage(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage0(peer_, &image, &dx, &dy);
+            accessor_->drawImage0(peer_, &image, dx, dy);
 
             ASSERT_NE(target.image.imageData, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -636,10 +636,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0SvgTest, TestSize.Level1)
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_TRUE));
             EXPECT_CALL(*bitmap, GetSvgDom()).WillOnce(Return(svgDom));
             EXPECT_CALL(*bitmap, GetImageFit()).WillOnce(Return(IMAGE_FIT_CENTER));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage0(peer_, &image, &dx, &dy);
+            accessor_->drawImage0(peer_, &image, dx, dy);
 
             ASSERT_NE(target.svgDom, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -666,10 +666,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0PixelMapTest, TestSize.Level1)
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
-            accessor_->drawImage0(peer_, &image, &dx, &dy);
+            accessor_->drawImage0(peer_, &image, dx, dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -690,7 +690,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapXYTest, TestSize.Level1)
     ASSERT_NE(accessor_->drawImage1, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
 #if !defined(PREVIEW)
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -699,10 +699,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapXYTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage1(peer_, &image, &dx, &dy, &dv, &dv);
+            accessor_->drawImage1(peer_, &image, dx, dy, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -718,10 +718,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapXYTest, TestSize.Level1)
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawImage(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage1(peer_, &image, &dx, &dy, &dv, &dv);
+            accessor_->drawImage1(peer_, &image, dx, dy, dv, dv);
 
             ASSERT_NE(target.image.imageData, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -742,7 +742,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapWHTest, TestSize.Level1)
     ASSERT_NE(accessor_->drawImage1, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
 #if !defined(PREVIEW)
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -751,10 +751,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapWHTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage1(peer_, &image, &dv, &dv, &dx, &dy);
+            accessor_->drawImage1(peer_, &image, dv, dv, dx, dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -770,10 +770,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapWHTest, TestSize.Level1)
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawImage(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage1(peer_, &image, &dv, &dv, &dx, &dy);
+            accessor_->drawImage1(peer_, &image, dv, dv, dx, dy);
 
             ASSERT_NE(target.image.imageData, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -795,7 +795,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgXYTest, TestSize.Level1)
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
     const RefPtr<NG::SvgDomBase> svgDom = AceType::MakeRefPtr<MockSvgDom>();
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
@@ -803,10 +803,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgXYTest, TestSize.Level1)
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_TRUE));
             EXPECT_CALL(*bitmap, GetSvgDom()).WillOnce(Return(svgDom));
             EXPECT_CALL(*bitmap, GetImageFit()).WillOnce(Return(IMAGE_FIT_CENTER));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage1(peer_, &image, &dx, &dy, &dv, &dv);
+            accessor_->drawImage1(peer_, &image, dx, dy, dv, dv);
 
             ASSERT_NE(target.svgDom, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -828,7 +828,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgWHTest, TestSize.Level1)
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
     const RefPtr<NG::SvgDomBase> svgDom = AceType::MakeRefPtr<MockSvgDom>();
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
@@ -836,10 +836,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgWHTest, TestSize.Level1)
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_TRUE));
             EXPECT_CALL(*bitmap, GetSvgDom()).WillOnce(Return(svgDom));
             EXPECT_CALL(*bitmap, GetImageFit()).WillOnce(Return(IMAGE_FIT_CENTER));
-            auto dw = Converter::ArkValue<Ark_Number>(actualX);
-            auto dh = Converter::ArkValue<Ark_Number>(actualY);
+            auto dw = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dh = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage1(peer_, &image, &dv, &dv, &dw, &dh);
+            accessor_->drawImage1(peer_, &image, dv, dv, dw, dh);
 
             ASSERT_NE(target.svgDom, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -862,15 +862,15 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
-            accessor_->drawImage1(peer_, &image, &dx, &dy, &dv, &dv);
+            accessor_->drawImage1(peer_, &image, dx, dy, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -891,15 +891,15 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapWHTest, TestSize.Level1)
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            auto dw = Converter::ArkValue<Ark_Number>(actualX);
-            auto dh = Converter::ArkValue<Ark_Number>(actualY);
+            auto dw = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dh = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
-            accessor_->drawImage1(peer_, &image, &dv, &dv, &dw, &dh);
+            accessor_->drawImage1(peer_, &image, dv, dv, dw, dh);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -920,7 +920,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSXYTest, TestSize.Level1)
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
 #if !defined(PREVIEW)
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -929,10 +929,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSXYTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dx, &dy, &dv, &dv, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dx, dy, dv, dv, dv, dv, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.sx, actualX, FLT_PRECISION);
@@ -948,10 +948,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSXYTest, TestSize.Level1)
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawImage(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dx, &dy, &dv, &dv, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dx, dy, dv, dv, dv, dv, dv, dv);
 
             ASSERT_NE(target.image.imageData, nullptr);
             EXPECT_NEAR(target.image.sx, actualX, FLT_PRECISION);
@@ -972,7 +972,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSWHTest, TestSize.Level1)
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
 #if !defined(PREVIEW)
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -981,10 +981,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSWHTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dx, &dy, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dx, dy, dv, dv, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.sWidth, actualX, FLT_PRECISION);
@@ -1000,10 +1000,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSWHTest, TestSize.Level1)
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawImage(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dx, &dy, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dx, dy, dv, dv, dv, dv);
 
             ASSERT_NE(target.image.imageData, nullptr);
             EXPECT_NEAR(target.image.sWidth, actualX, FLT_PRECISION);
@@ -1024,7 +1024,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapXYTest, TestSize.Level1)
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
 #if !defined(PREVIEW)
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -1033,10 +1033,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapXYTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dx, &dy, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dx, dy, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -1052,10 +1052,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapXYTest, TestSize.Level1)
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawImage(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dx, &dy, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dx, dy, dv, dv);
 
             ASSERT_NE(target.image.imageData, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -1076,7 +1076,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapWHTest, TestSize.Level1)
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
 #if !defined(PREVIEW)
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -1085,10 +1085,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapWHTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dv, &dv, &dx, &dy);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dv, dv, dx, dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -1104,10 +1104,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapWHTest, TestSize.Level1)
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawImage(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_FALSE));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dv, &dv, &dx, &dy);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dv, dv, dx, dy);
 
             ASSERT_NE(target.image.imageData, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -1129,7 +1129,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSXYTest, TestSize.Level1)
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
     const RefPtr<NG::SvgDomBase> svgDom = AceType::MakeRefPtr<MockSvgDom>();
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
@@ -1137,10 +1137,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSXYTest, TestSize.Level1)
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_TRUE));
             EXPECT_CALL(*bitmap, GetSvgDom()).WillOnce(Return(svgDom));
             EXPECT_CALL(*bitmap, GetImageFit()).WillOnce(Return(IMAGE_FIT_CENTER));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dx, &dy, &dv, &dv, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dx, dy, dv, dv, dv, dv, dv, dv);
 
             ASSERT_NE(target.svgDom, nullptr);
             EXPECT_NEAR(target.image.sx, actualX, FLT_PRECISION);
@@ -1162,7 +1162,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSWHTest, TestSize.Level1)
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
     const RefPtr<NG::SvgDomBase> svgDom = AceType::MakeRefPtr<MockSvgDom>();
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
@@ -1170,10 +1170,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSWHTest, TestSize.Level1)
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_TRUE));
             EXPECT_CALL(*bitmap, GetSvgDom()).WillOnce(Return(svgDom));
             EXPECT_CALL(*bitmap, GetImageFit()).WillOnce(Return(IMAGE_FIT_CENTER));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dx, &dy, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dx, dy, dv, dv, dv, dv);
 
             ASSERT_NE(target.svgDom, nullptr);
             EXPECT_NEAR(target.image.sWidth, actualX, FLT_PRECISION);
@@ -1195,7 +1195,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgXYTest, TestSize.Level1)
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
     const RefPtr<NG::SvgDomBase> svgDom = AceType::MakeRefPtr<MockSvgDom>();
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
@@ -1203,10 +1203,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgXYTest, TestSize.Level1)
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_TRUE));
             EXPECT_CALL(*bitmap, GetSvgDom()).WillOnce(Return(svgDom));
             EXPECT_CALL(*bitmap, GetImageFit()).WillOnce(Return(IMAGE_FIT_CENTER));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dx, &dy, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dx, dy, dv, dv);
 
             ASSERT_NE(target.svgDom, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -1228,7 +1228,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgWHTest, TestSize.Level1)
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
     const RefPtr<NG::SvgDomBase> svgDom = AceType::MakeRefPtr<MockSvgDom>();
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
@@ -1236,10 +1236,10 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgWHTest, TestSize.Level1)
             EXPECT_CALL(*bitmap, IsSvg()).WillOnce(Return(EXPECTED_TRUE));
             EXPECT_CALL(*bitmap, GetSvgDom()).WillOnce(Return(svgDom));
             EXPECT_CALL(*bitmap, GetImageFit()).WillOnce(Return(IMAGE_FIT_CENTER));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_ImageBitmap>(arkBitmap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dv, &dv, &dx, &dy);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dv, dv, dx, dy);
 
             ASSERT_NE(target.svgDom, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -1262,15 +1262,15 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
-            accessor_->drawImage2(peer_, &image, &dx, &dy, &dv, &dv, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dx, dy, dv, dv, dv, dv, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.sx, actualX, FLT_PRECISION);
@@ -1291,15 +1291,15 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dx, &dy, &dv, &dv, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dx, dy, dv, dv, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.sWidth, actualX, FLT_PRECISION);
@@ -1320,15 +1320,15 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dx, &dy, &dv, &dv);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dx, dy, dv, dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dx, actualX, FLT_PRECISION);
@@ -1349,15 +1349,15 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapWHTest, TestSize.Level1)
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
-    const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    Ark_Float64 dv = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
             Ace::ImageInfo target;
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            auto dx = Converter::ArkValue<Ark_Number>(actualX);
-            auto dy = Converter::ArkValue<Ark_Number>(actualY);
+            auto dx = Converter::ArkValue<Ark_Float64>(actualX);
+            auto dy = Converter::ArkValue<Ark_Float64>(actualY);
             auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
-            accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dv, &dv, &dx, &dy);
+            accessor_->drawImage2(peer_, &image, dv, dv, dv, dv, dv, dv, dx, dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
             EXPECT_NEAR(target.image.dWidth, actualX, FLT_PRECISION);
@@ -1378,7 +1378,7 @@ HWTEST_F(CanvasRendererAccessorTest2, getLineDashTest, TestSize.Level1)
     ASSERT_NE(accessor_->getLineDash, nullptr);
     for (const auto& [actual, _] : ARRAY_LINE_DASH_TEST_PLAN) {
         EXPECT_CALL(*renderingModel_, GetLineDash()).WillOnce(Return(actual));
-        Array_Number result = accessor_->getLineDash(peer_);
+        Array_Float64 result = accessor_->getLineDash(peer_);
 
         const auto segments = Converter::Convert<std::vector<double>>(result);
         ASSERT_EQ(segments.size(), actual.size());
@@ -1391,7 +1391,7 @@ HWTEST_F(CanvasRendererAccessorTest2, getLineDashTest, TestSize.Level1)
     ChangeDensity(density);
     for (const auto& [actual, _] : ARRAY_LINE_DASH_TEST_PLAN) {
         EXPECT_CALL(*renderingModel_, GetLineDash()).WillOnce(Return(actual));
-        Array_Number result = accessor_->getLineDash(peer_);
+        Array_Float64 result = accessor_->getLineDash(peer_);
 
         const auto segments = Converter::Convert<std::vector<double>>(result);
         ASSERT_EQ(segments.size(), actual.size());
@@ -1667,6 +1667,26 @@ HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setStrokeStyleNumberTest, TestSiz
         accessor_->setStrokeStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_FALSE(targetFlag);
+    }
+}
+
+/**
+ * @tc.name: setStrokeStyleColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setStrokeStyle, nullptr);
+    for (const auto& [actual, expected] : STYLE_COLOR_TEST_PLAN) {
+        Ace::Color target;
+        bool targetFlag = false;
+        EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _))
+            .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
+        auto style = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_Color>(actual);
+        accessor_->setStrokeStyle(peer_, &style);
+        EXPECT_EQ(target, expected);
+        EXPECT_TRUE(targetFlag);
     }
 }
 

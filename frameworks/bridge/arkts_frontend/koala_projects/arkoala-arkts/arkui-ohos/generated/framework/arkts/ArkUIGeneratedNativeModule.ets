@@ -3462,24 +3462,24 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasPath_construct(): KPointer
     @ani.unsafe.Direct
     native static _CanvasPath_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasPath_arc(ptr: KPointer, x: number, y: number, radius: number, startAngle: number, endAngle: number, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasPath_arcTo(ptr: KPointer, x1: number, y1: number, x2: number, y2: number, radius: number): void
-    @ani.unsafe.Direct
-    native static _CanvasPath_bezierCurveTo(ptr: KPointer, cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_arc(ptr: KPointer, x: KDouble, y: KDouble, radius: KDouble, startAngle: KDouble, endAngle: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_arcTo(ptr: KPointer, x1: KDouble, y1: KDouble, x2: KDouble, y2: KDouble, radius: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_bezierCurveTo(ptr: KPointer, cp1x: KDouble, cp1y: KDouble, cp2x: KDouble, cp2y: KDouble, x: KDouble, y: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasPath_closePath(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _CanvasPath_ellipse(ptr: KPointer, x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasPath_lineTo(ptr: KPointer, x: number, y: number): void
-    @ani.unsafe.Direct
-    native static _CanvasPath_moveTo(ptr: KPointer, x: number, y: number): void
-    @ani.unsafe.Direct
-    native static _CanvasPath_quadraticCurveTo(ptr: KPointer, cpx: number, cpy: number, x: number, y: number): void
-    @ani.unsafe.Direct
-    native static _CanvasPath_rect(ptr: KPointer, x: number, y: number, w: number, h: number): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_ellipse(ptr: KPointer, x: KDouble, y: KDouble, radiusX: KDouble, radiusY: KDouble, rotation: KDouble, startAngle: KDouble, endAngle: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_lineTo(ptr: KPointer, x: KDouble, y: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_moveTo(ptr: KPointer, x: KDouble, y: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_quadraticCurveTo(ptr: KPointer, cpx: KDouble, cpy: KDouble, x: KDouble, y: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_rect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasPattern_construct(): KPointer
     @ani.unsafe.Direct
@@ -3490,12 +3490,12 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderer_construct(): KPointer
     @ani.unsafe.Direct
     native static _CanvasRenderer_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_drawImage0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, dx: number, dy: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_drawImage1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, dx: number, dy: number, dw: number, dh: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_drawImage2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_drawImage0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, dx: KDouble, dy: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_drawImage1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, dx: KDouble, dy: KDouble, dw: KDouble, dh: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_drawImage2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, sx: KDouble, sy: KDouble, sw: KDouble, sh: KDouble, dx: KDouble, dy: KDouble, dw: KDouble, dh: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_beginPath(ptr: KPointer): void
     @ani.unsafe.Direct
@@ -3508,62 +3508,52 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderer_fill1(ptr: KPointer, path: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_stroke(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_createLinearGradient(ptr: KPointer, x0: number, y0: number, x1: number, y1: number): KPointer
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_createLinearGradient(ptr: KPointer, x0: KDouble, y0: KDouble, x1: KDouble, y1: KDouble): KPointer
     @ani.unsafe.Quick
     native static _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_createRadialGradient(ptr: KPointer, x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_createConicGradient(ptr: KPointer, startAngle: number, x: number, y: number): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_createImageData0(ptr: KPointer, sw: number, sh: number): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_createImageData1(ptr: KPointer, imagedata: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getImageData(ptr: KPointer, sx: number, sy: number, sw: number, sh: number): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getPixelMap(ptr: KPointer, sx: number, sy: number, sw: number, sh: number): KPointer
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_putImageData0(ptr: KPointer, imagedata: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_putImageData1(ptr: KPointer, imagedata: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_createRadialGradient(ptr: KPointer, x0: KDouble, y0: KDouble, r0: KDouble, x1: KDouble, y1: KDouble, r1: KDouble): KPointer
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_createConicGradient(ptr: KPointer, startAngle: KDouble, x: KDouble, y: KDouble): KPointer
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getPixelMap(ptr: KPointer, sx: KDouble, sy: KDouble, sw: KDouble, sh: KDouble): KPointer
     @ani.unsafe.Quick
     native static _CanvasRenderer_getLineDash(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _CanvasRenderer_setLineDash(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_clearRect(ptr: KPointer, x: number, y: number, w: number, h: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_fillRect(ptr: KPointer, x: number, y: number, w: number, h: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_strokeRect(ptr: KPointer, x: number, y: number, w: number, h: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_clearRect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_fillRect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_strokeRect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_restore(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_save(ptr: KPointer): void
     @ani.unsafe.Quick
-    native static _CanvasRenderer_fillText(ptr: KPointer, text: KStringPtr, x: number, y: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CanvasRenderer_fillText(ptr: KPointer, text: KStringPtr, x: KDouble, y: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _CanvasRenderer_measureText(ptr: KPointer, text: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _CanvasRenderer_strokeText(ptr: KPointer, text: KStringPtr, x: number, y: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CanvasRenderer_strokeText(ptr: KPointer, text: KStringPtr, x: KDouble, y: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_getTransform(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _CanvasRenderer_resetTransform(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_rotate(ptr: KPointer, angle: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_scale(ptr: KPointer, x: number, y: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setTransform0(ptr: KPointer, a: number, b: number, c: number, d: number, e: number, f: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_rotate(ptr: KPointer, angle: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_scale(ptr: KPointer, x: KDouble, y: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setTransform0(ptr: KPointer, a: KDouble, b: KDouble, c: KDouble, d: KDouble, e: KDouble, f: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_setTransform1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_transform(ptr: KPointer, a: number, b: number, c: number, d: number, e: number, f: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_translate(ptr: KPointer, x: number, y: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_transform(ptr: KPointer, a: KDouble, b: KDouble, c: KDouble, d: KDouble, e: KDouble, f: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_translate(ptr: KPointer, x: KDouble, y: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_setPixelMap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3578,10 +3568,10 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderer_getLetterSpacing(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _CanvasRenderer_setLetterSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getGlobalAlpha(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setGlobalAlpha(ptr: KPointer, globalAlpha: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getGlobalAlpha(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setGlobalAlpha(ptr: KPointer, globalAlpha: KDouble): void
     @ani.unsafe.Quick
     native static _CanvasRenderer_getGlobalCompositeOperation(ptr: KPointer): string
     @ani.unsafe.Quick
@@ -3610,38 +3600,38 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderer_getLineCap(ptr: KPointer): KPointer
     @ani.unsafe.Quick
     native static _CanvasRenderer_setLineCap(ptr: KPointer, lineCap: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getLineDashOffset(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setLineDashOffset(ptr: KPointer, lineDashOffset: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getLineDashOffset(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setLineDashOffset(ptr: KPointer, lineDashOffset: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_getLineJoin(ptr: KPointer): KPointer
     @ani.unsafe.Quick
     native static _CanvasRenderer_setLineJoin(ptr: KPointer, lineJoin: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getLineWidth(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setLineWidth(ptr: KPointer, lineWidth: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getMiterLimit(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setMiterLimit(ptr: KPointer, miterLimit: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getShadowBlur(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setShadowBlur(ptr: KPointer, shadowBlur: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getLineWidth(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setLineWidth(ptr: KPointer, lineWidth: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getMiterLimit(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setMiterLimit(ptr: KPointer, miterLimit: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getShadowBlur(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setShadowBlur(ptr: KPointer, shadowBlur: KDouble): void
     @ani.unsafe.Quick
     native static _CanvasRenderer_getShadowColor(ptr: KPointer): string
     @ani.unsafe.Quick
     native static _CanvasRenderer_setShadowColor(ptr: KPointer, shadowColor: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getShadowOffsetX(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setShadowOffsetX(ptr: KPointer, shadowOffsetX: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_getShadowOffsetY(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderer_setShadowOffsetY(ptr: KPointer, shadowOffsetY: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getShadowOffsetX(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setShadowOffsetX(ptr: KPointer, shadowOffsetX: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getShadowOffsetY(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_setShadowOffsetY(ptr: KPointer, shadowOffsetY: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasRenderer_getDirection(ptr: KPointer): KPointer
     @ani.unsafe.Quick
@@ -3675,14 +3665,14 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderingContext2D_onDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_offDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderingContext2D_getHeight(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderingContext2D_setHeight(ptr: KPointer, height: number): void
-    @ani.unsafe.Direct
-    native static _CanvasRenderingContext2D_getWidth(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _CanvasRenderingContext2D_setWidth(ptr: KPointer, width: number): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderingContext2D_getHeight(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderingContext2D_setHeight(ptr: KPointer, height: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderingContext2D_getWidth(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _CanvasRenderingContext2D_setWidth(ptr: KPointer, width: KDouble): void
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_getCanvas(ptr: KPointer): KPointer
     @ani.unsafe.Direct
@@ -4710,8 +4700,8 @@ export class ArkUIGeneratedNativeModule {
     native static _Matrix2D_identity(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _Matrix2D_invert(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _Matrix2D_rotate(ptr: KPointer, degree: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _Matrix2D_rotate(ptr: KPointer, degree: KDouble, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _Matrix2D_translate(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -5061,30 +5051,30 @@ export class ArkUIGeneratedNativeModule {
     native static _NodeContentExtender_addFrameNode(content: KPointer, node: KPointer): int32
     @ani.unsafe.Direct
     native static _NodeContentExtender_removeFrameNode(content: KPointer, node: KPointer): boolean
-    @ani.unsafe.Direct
-    native static _OffscreenCanvas_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _OffscreenCanvas_construct(width: KDouble, height: KDouble, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _OffscreenCanvas_transferToImageBitmap(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _OffscreenCanvas_transferToImageBitmap(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getContext2d(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct
-    native static _OffscreenCanvas_getHeight(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _OffscreenCanvas_setHeight(ptr: KPointer, height: number): void
-    @ani.unsafe.Direct
-    native static _OffscreenCanvas_getWidth(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _OffscreenCanvas_setWidth(ptr: KPointer, width: number): void
-    @ani.unsafe.Direct
-    native static _OffscreenCanvasRenderingContext2D_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _OffscreenCanvas_getHeight(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _OffscreenCanvas_setHeight(ptr: KPointer, height: KDouble): void
+    @ani.unsafe.Quick
+    native static _OffscreenCanvas_getWidth(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _OffscreenCanvas_setWidth(ptr: KPointer, width: KDouble): void
+    @ani.unsafe.Quick
+    native static _OffscreenCanvasRenderingContext2D_construct(width: KDouble, height: KDouble, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _OffscreenCanvasRenderingContext2D_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _OffscreenCanvasRenderingContext2D_toDataURL(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): string
-    @ani.unsafe.Direct
-    native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _PanGestureEvent_construct(): KPointer
     @ani.unsafe.Direct

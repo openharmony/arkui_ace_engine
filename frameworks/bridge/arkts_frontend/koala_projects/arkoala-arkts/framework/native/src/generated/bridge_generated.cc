@@ -27560,7 +27560,7 @@ Ark_NativePointer impl_CanvasPath_getFinalizer() {
         return GetAccessors()->getCanvasPathAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(CanvasPath_getFinalizer, Ark_NativePointer)
-void impl_CanvasPath_arc(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y, KInteropNumber radius, KInteropNumber startAngle, KInteropNumber endAngle, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CanvasPath_arc(Ark_NativePointer thisPtr, KDouble x, KDouble y, KDouble radius, KDouble startAngle, KDouble endAngle, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto counterclockwiseValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -27570,25 +27570,25 @@ void impl_CanvasPath_arc(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNu
             counterclockwiseValueTempTmpBuf.value = thisDeserializer.readBoolean();
         }
         Opt_Boolean counterclockwiseValueTemp = counterclockwiseValueTempTmpBuf;;
-        GetAccessors()->getCanvasPathAccessor()->arc(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y), (const Ark_Number*) (&radius), (const Ark_Number*) (&startAngle), (const Ark_Number*) (&endAngle), static_cast<Opt_Boolean*>(&counterclockwiseValueTemp));
+        GetAccessors()->getCanvasPathAccessor()->arc(self, x, y, radius, startAngle, endAngle, static_cast<Opt_Boolean*>(&counterclockwiseValueTemp));
 }
-KOALA_INTEROP_DIRECT_V8(CanvasPath_arc, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
-void impl_CanvasPath_arcTo(Ark_NativePointer thisPtr, KInteropNumber x1, KInteropNumber y1, KInteropNumber x2, KInteropNumber y2, KInteropNumber radius) {
+KOALA_INTEROP_V8(CanvasPath_arc, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble, KDouble, KSerializerBuffer, int32_t)
+void impl_CanvasPath_arcTo(Ark_NativePointer thisPtr, KDouble x1, KDouble y1, KDouble x2, KDouble y2, KDouble radius) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
-        GetAccessors()->getCanvasPathAccessor()->arcTo(self, (const Ark_Number*) (&x1), (const Ark_Number*) (&y1), (const Ark_Number*) (&x2), (const Ark_Number*) (&y2), (const Ark_Number*) (&radius));
+        GetAccessors()->getCanvasPathAccessor()->arcTo(self, x1, y1, x2, y2, radius);
 }
-KOALA_INTEROP_DIRECT_V6(CanvasPath_arcTo, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-void impl_CanvasPath_bezierCurveTo(Ark_NativePointer thisPtr, KInteropNumber cp1x, KInteropNumber cp1y, KInteropNumber cp2x, KInteropNumber cp2y, KInteropNumber x, KInteropNumber y) {
+KOALA_INTEROP_V6(CanvasPath_arcTo, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble, KDouble)
+void impl_CanvasPath_bezierCurveTo(Ark_NativePointer thisPtr, KDouble cp1x, KDouble cp1y, KDouble cp2x, KDouble cp2y, KDouble x, KDouble y) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
-        GetAccessors()->getCanvasPathAccessor()->bezierCurveTo(self, (const Ark_Number*) (&cp1x), (const Ark_Number*) (&cp1y), (const Ark_Number*) (&cp2x), (const Ark_Number*) (&cp2y), (const Ark_Number*) (&x), (const Ark_Number*) (&y));
+        GetAccessors()->getCanvasPathAccessor()->bezierCurveTo(self, cp1x, cp1y, cp2x, cp2y, x, y);
 }
-KOALA_INTEROP_DIRECT_V7(CanvasPath_bezierCurveTo, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_V7(CanvasPath_bezierCurveTo, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble)
 void impl_CanvasPath_closePath(Ark_NativePointer thisPtr) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
         GetAccessors()->getCanvasPathAccessor()->closePath(self);
 }
 KOALA_INTEROP_DIRECT_V1(CanvasPath_closePath, Ark_NativePointer)
-void impl_CanvasPath_ellipse(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y, KInteropNumber radiusX, KInteropNumber radiusY, KInteropNumber rotation, KInteropNumber startAngle, KInteropNumber endAngle, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CanvasPath_ellipse(Ark_NativePointer thisPtr, KDouble x, KDouble y, KDouble radiusX, KDouble radiusY, KDouble rotation, KDouble startAngle, KDouble endAngle, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto counterclockwiseValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -27598,29 +27598,29 @@ void impl_CanvasPath_ellipse(Ark_NativePointer thisPtr, KInteropNumber x, KInter
             counterclockwiseValueTempTmpBuf.value = thisDeserializer.readBoolean();
         }
         Opt_Boolean counterclockwiseValueTemp = counterclockwiseValueTempTmpBuf;;
-        GetAccessors()->getCanvasPathAccessor()->ellipse(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y), (const Ark_Number*) (&radiusX), (const Ark_Number*) (&radiusY), (const Ark_Number*) (&rotation), (const Ark_Number*) (&startAngle), (const Ark_Number*) (&endAngle), static_cast<Opt_Boolean*>(&counterclockwiseValueTemp));
+        GetAccessors()->getCanvasPathAccessor()->ellipse(self, x, y, radiusX, radiusY, rotation, startAngle, endAngle, static_cast<Opt_Boolean*>(&counterclockwiseValueTemp));
 }
-KOALA_INTEROP_DIRECT_V10(CanvasPath_ellipse, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
-void impl_CanvasPath_lineTo(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y) {
+KOALA_INTEROP_V10(CanvasPath_ellipse, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble, KSerializerBuffer, int32_t)
+void impl_CanvasPath_lineTo(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
-        GetAccessors()->getCanvasPathAccessor()->lineTo(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y));
+        GetAccessors()->getCanvasPathAccessor()->lineTo(self, x, y);
 }
-KOALA_INTEROP_DIRECT_V3(CanvasPath_lineTo, Ark_NativePointer, KInteropNumber, KInteropNumber)
-void impl_CanvasPath_moveTo(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y) {
+KOALA_INTEROP_V3(CanvasPath_lineTo, Ark_NativePointer, KDouble, KDouble)
+void impl_CanvasPath_moveTo(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
-        GetAccessors()->getCanvasPathAccessor()->moveTo(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y));
+        GetAccessors()->getCanvasPathAccessor()->moveTo(self, x, y);
 }
-KOALA_INTEROP_DIRECT_V3(CanvasPath_moveTo, Ark_NativePointer, KInteropNumber, KInteropNumber)
-void impl_CanvasPath_quadraticCurveTo(Ark_NativePointer thisPtr, KInteropNumber cpx, KInteropNumber cpy, KInteropNumber x, KInteropNumber y) {
+KOALA_INTEROP_V3(CanvasPath_moveTo, Ark_NativePointer, KDouble, KDouble)
+void impl_CanvasPath_quadraticCurveTo(Ark_NativePointer thisPtr, KDouble cpx, KDouble cpy, KDouble x, KDouble y) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
-        GetAccessors()->getCanvasPathAccessor()->quadraticCurveTo(self, (const Ark_Number*) (&cpx), (const Ark_Number*) (&cpy), (const Ark_Number*) (&x), (const Ark_Number*) (&y));
+        GetAccessors()->getCanvasPathAccessor()->quadraticCurveTo(self, cpx, cpy, x, y);
 }
-KOALA_INTEROP_DIRECT_V5(CanvasPath_quadraticCurveTo, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-void impl_CanvasPath_rect(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y, KInteropNumber w, KInteropNumber h) {
+KOALA_INTEROP_V5(CanvasPath_quadraticCurveTo, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
+void impl_CanvasPath_rect(Ark_NativePointer thisPtr, KDouble x, KDouble y, KDouble w, KDouble h) {
         Ark_CanvasPath self = reinterpret_cast<Ark_CanvasPath>(thisPtr);
-        GetAccessors()->getCanvasPathAccessor()->rect(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y), (const Ark_Number*) (&w), (const Ark_Number*) (&h));
+        GetAccessors()->getCanvasPathAccessor()->rect(self, x, y, w, h);
 }
-KOALA_INTEROP_DIRECT_V5(CanvasPath_rect, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_V5(CanvasPath_rect, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
 Ark_NativePointer impl_CanvasPattern_construct() {
         return GetAccessors()->getCanvasPatternAccessor()->construct();
 }
@@ -27650,7 +27650,7 @@ Ark_NativePointer impl_CanvasRenderer_getFinalizer() {
         return GetAccessors()->getCanvasRendererAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(CanvasRenderer_getFinalizer, Ark_NativePointer)
-void impl_CanvasRenderer_drawImage0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber dx, KInteropNumber dy) {
+void impl_CanvasRenderer_drawImage0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KDouble dx, KDouble dy) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 imageValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
@@ -27666,10 +27666,10 @@ void impl_CanvasRenderer_drawImage0(Ark_NativePointer thisPtr, KSerializerBuffer
             INTEROP_FATAL("One of the branches for imageValueTempTmpBuf has to be chosen through deserialisation.");
         }
         Ark_Union_ImageBitmap_PixelMap imageValueTemp = static_cast<Ark_Union_ImageBitmap_PixelMap>(imageValueTempTmpBuf);;
-        GetAccessors()->getCanvasRendererAccessor()->drawImage0(self, static_cast<Ark_Union_ImageBitmap_PixelMap*>(&imageValueTemp), (const Ark_Number*) (&dx), (const Ark_Number*) (&dy));
+        GetAccessors()->getCanvasRendererAccessor()->drawImage0(self, static_cast<Ark_Union_ImageBitmap_PixelMap*>(&imageValueTemp), dx, dy);
 }
-KOALA_INTEROP_DIRECT_V5(CanvasRenderer_drawImage0, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber)
-void impl_CanvasRenderer_drawImage1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber dx, KInteropNumber dy, KInteropNumber dw, KInteropNumber dh) {
+KOALA_INTEROP_V5(CanvasRenderer_drawImage0, Ark_NativePointer, KSerializerBuffer, int32_t, KDouble, KDouble)
+void impl_CanvasRenderer_drawImage1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KDouble dx, KDouble dy, KDouble dw, KDouble dh) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 imageValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
@@ -27685,10 +27685,10 @@ void impl_CanvasRenderer_drawImage1(Ark_NativePointer thisPtr, KSerializerBuffer
             INTEROP_FATAL("One of the branches for imageValueTempTmpBuf has to be chosen through deserialisation.");
         }
         Ark_Union_ImageBitmap_PixelMap imageValueTemp = static_cast<Ark_Union_ImageBitmap_PixelMap>(imageValueTempTmpBuf);;
-        GetAccessors()->getCanvasRendererAccessor()->drawImage1(self, static_cast<Ark_Union_ImageBitmap_PixelMap*>(&imageValueTemp), (const Ark_Number*) (&dx), (const Ark_Number*) (&dy), (const Ark_Number*) (&dw), (const Ark_Number*) (&dh));
+        GetAccessors()->getCanvasRendererAccessor()->drawImage1(self, static_cast<Ark_Union_ImageBitmap_PixelMap*>(&imageValueTemp), dx, dy, dw, dh);
 }
-KOALA_INTEROP_DIRECT_V7(CanvasRenderer_drawImage1, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-void impl_CanvasRenderer_drawImage2(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber sx, KInteropNumber sy, KInteropNumber sw, KInteropNumber sh, KInteropNumber dx, KInteropNumber dy, KInteropNumber dw, KInteropNumber dh) {
+KOALA_INTEROP_V7(CanvasRenderer_drawImage1, Ark_NativePointer, KSerializerBuffer, int32_t, KDouble, KDouble, KDouble, KDouble)
+void impl_CanvasRenderer_drawImage2(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength, KDouble sx, KDouble sy, KDouble sw, KDouble sh, KDouble dx, KDouble dy, KDouble dw, KDouble dh) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 imageValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
@@ -27704,9 +27704,9 @@ void impl_CanvasRenderer_drawImage2(Ark_NativePointer thisPtr, KSerializerBuffer
             INTEROP_FATAL("One of the branches for imageValueTempTmpBuf has to be chosen through deserialisation.");
         }
         Ark_Union_ImageBitmap_PixelMap imageValueTemp = static_cast<Ark_Union_ImageBitmap_PixelMap>(imageValueTempTmpBuf);;
-        GetAccessors()->getCanvasRendererAccessor()->drawImage2(self, static_cast<Ark_Union_ImageBitmap_PixelMap*>(&imageValueTemp), (const Ark_Number*) (&sx), (const Ark_Number*) (&sy), (const Ark_Number*) (&sw), (const Ark_Number*) (&sh), (const Ark_Number*) (&dx), (const Ark_Number*) (&dy), (const Ark_Number*) (&dw), (const Ark_Number*) (&dh));
+        GetAccessors()->getCanvasRendererAccessor()->drawImage2(self, static_cast<Ark_Union_ImageBitmap_PixelMap*>(&imageValueTemp), sx, sy, sw, sh, dx, dy, dw, dh);
 }
-KOALA_INTEROP_DIRECT_V11(CanvasRenderer_drawImage2, Ark_NativePointer, KSerializerBuffer, int32_t, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_V11(CanvasRenderer_drawImage2, Ark_NativePointer, KSerializerBuffer, int32_t, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble)
 void impl_CanvasRenderer_beginPath(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         GetAccessors()->getCanvasRendererAccessor()->beginPath(self);
@@ -27777,11 +27777,11 @@ void impl_CanvasRenderer_stroke(Ark_NativePointer thisPtr, KSerializerBuffer thi
         GetAccessors()->getCanvasRendererAccessor()->stroke(self, static_cast<Opt_Path2D*>(&pathValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderer_stroke, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_CanvasRenderer_createLinearGradient(Ark_NativePointer thisPtr, KInteropNumber x0, KInteropNumber y0, KInteropNumber x1, KInteropNumber y1) {
+Ark_NativePointer impl_CanvasRenderer_createLinearGradient(Ark_NativePointer thisPtr, KDouble x0, KDouble y0, KDouble x1, KDouble y1) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->createLinearGradient(self, (const Ark_Number*) (&x0), (const Ark_Number*) (&y0), (const Ark_Number*) (&x1), (const Ark_Number*) (&y1));
+        return GetAccessors()->getCanvasRendererAccessor()->createLinearGradient(self, x0, y0, x1, y1);
 }
-KOALA_INTEROP_DIRECT_5(CanvasRenderer_createLinearGradient, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_5(CanvasRenderer_createLinearGradient, Ark_NativePointer, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
 KInteropReturnBuffer impl_CanvasRenderer_createPattern(Ark_NativePointer thisPtr, Ark_NativePointer image, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -27804,160 +27804,29 @@ KInteropReturnBuffer impl_CanvasRenderer_createPattern(Ark_NativePointer thisPtr
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_4(CanvasRenderer_createPattern, KInteropReturnBuffer, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_CanvasRenderer_createRadialGradient(Ark_NativePointer thisPtr, KInteropNumber x0, KInteropNumber y0, KInteropNumber r0, KInteropNumber x1, KInteropNumber y1, KInteropNumber r1) {
+Ark_NativePointer impl_CanvasRenderer_createRadialGradient(Ark_NativePointer thisPtr, KDouble x0, KDouble y0, KDouble r0, KDouble x1, KDouble y1, KDouble r1) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->createRadialGradient(self, (const Ark_Number*) (&x0), (const Ark_Number*) (&y0), (const Ark_Number*) (&r0), (const Ark_Number*) (&x1), (const Ark_Number*) (&y1), (const Ark_Number*) (&r1));
+        return GetAccessors()->getCanvasRendererAccessor()->createRadialGradient(self, x0, y0, r0, x1, y1, r1);
 }
-KOALA_INTEROP_DIRECT_7(CanvasRenderer_createRadialGradient, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-Ark_NativePointer impl_CanvasRenderer_createConicGradient(Ark_NativePointer thisPtr, KInteropNumber startAngle, KInteropNumber x, KInteropNumber y) {
+KOALA_INTEROP_7(CanvasRenderer_createRadialGradient, Ark_NativePointer, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble)
+Ark_NativePointer impl_CanvasRenderer_createConicGradient(Ark_NativePointer thisPtr, KDouble startAngle, KDouble x, KDouble y) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->createConicGradient(self, (const Ark_Number*) (&startAngle), (const Ark_Number*) (&x), (const Ark_Number*) (&y));
+        return GetAccessors()->getCanvasRendererAccessor()->createConicGradient(self, startAngle, x, y);
 }
-KOALA_INTEROP_DIRECT_4(CanvasRenderer_createConicGradient, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber)
-Ark_NativePointer impl_CanvasRenderer_createImageData0(Ark_NativePointer thisPtr, KInteropNumber sw, KInteropNumber sh) {
+KOALA_INTEROP_4(CanvasRenderer_createConicGradient, Ark_NativePointer, Ark_NativePointer, KDouble, KDouble, KDouble)
+Ark_NativePointer impl_CanvasRenderer_getPixelMap(Ark_NativePointer thisPtr, KDouble sx, KDouble sy, KDouble sw, KDouble sh) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->createImageData0(self, (const Ark_Number*) (&sw), (const Ark_Number*) (&sh));
+        return GetAccessors()->getCanvasRendererAccessor()->getPixelMap(self, sx, sy, sw, sh);
 }
-KOALA_INTEROP_DIRECT_3(CanvasRenderer_createImageData0, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber)
-Ark_NativePointer impl_CanvasRenderer_createImageData1(Ark_NativePointer thisPtr, Ark_NativePointer imagedata) {
-        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->createImageData1(self, static_cast<Ark_ImageData>(imagedata));
-}
-KOALA_INTEROP_DIRECT_2(CanvasRenderer_createImageData1, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_CanvasRenderer_getImageData(Ark_NativePointer thisPtr, KInteropNumber sx, KInteropNumber sy, KInteropNumber sw, KInteropNumber sh) {
-        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->getImageData(self, (const Ark_Number*) (&sx), (const Ark_Number*) (&sy), (const Ark_Number*) (&sw), (const Ark_Number*) (&sh));
-}
-KOALA_INTEROP_DIRECT_5(CanvasRenderer_getImageData, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-Ark_NativePointer impl_CanvasRenderer_getPixelMap(Ark_NativePointer thisPtr, KInteropNumber sx, KInteropNumber sy, KInteropNumber sw, KInteropNumber sh) {
-        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->getPixelMap(self, (const Ark_Number*) (&sx), (const Ark_Number*) (&sy), (const Ark_Number*) (&sw), (const Ark_Number*) (&sh));
-}
-KOALA_INTEROP_DIRECT_5(CanvasRenderer_getPixelMap, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-void impl_CanvasRenderer_putImageData0(Ark_NativePointer thisPtr, Ark_NativePointer imagedata, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const Ark_Int8 dxValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dxValueTempTmpBuf = {};
-        dxValueTempTmpBuf.selector = dxValueTempTmpBufUnionSelector;
-        if (dxValueTempTmpBufUnionSelector == 0) {
-            dxValueTempTmpBuf.selector = 0;
-            dxValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dxValueTempTmpBufUnionSelector == 1) {
-            dxValueTempTmpBuf.selector = 1;
-            dxValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dxValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dxValueTemp = static_cast<Ark_Union_Number_String>(dxValueTempTmpBuf);;
-        const Ark_Int8 dyValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dyValueTempTmpBuf = {};
-        dyValueTempTmpBuf.selector = dyValueTempTmpBufUnionSelector;
-        if (dyValueTempTmpBufUnionSelector == 0) {
-            dyValueTempTmpBuf.selector = 0;
-            dyValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dyValueTempTmpBufUnionSelector == 1) {
-            dyValueTempTmpBuf.selector = 1;
-            dyValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dyValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dyValueTemp = static_cast<Ark_Union_Number_String>(dyValueTempTmpBuf);;
-        GetAccessors()->getCanvasRendererAccessor()->putImageData0(self, static_cast<Ark_ImageData>(imagedata), static_cast<Ark_Union_Number_String*>(&dxValueTemp), static_cast<Ark_Union_Number_String*>(&dyValueTemp));
-}
-KOALA_INTEROP_DIRECT_V4(CanvasRenderer_putImageData0, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CanvasRenderer_putImageData1(Ark_NativePointer thisPtr, Ark_NativePointer imagedata, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const Ark_Int8 dxValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dxValueTempTmpBuf = {};
-        dxValueTempTmpBuf.selector = dxValueTempTmpBufUnionSelector;
-        if (dxValueTempTmpBufUnionSelector == 0) {
-            dxValueTempTmpBuf.selector = 0;
-            dxValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dxValueTempTmpBufUnionSelector == 1) {
-            dxValueTempTmpBuf.selector = 1;
-            dxValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dxValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dxValueTemp = static_cast<Ark_Union_Number_String>(dxValueTempTmpBuf);;
-        const Ark_Int8 dyValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dyValueTempTmpBuf = {};
-        dyValueTempTmpBuf.selector = dyValueTempTmpBufUnionSelector;
-        if (dyValueTempTmpBufUnionSelector == 0) {
-            dyValueTempTmpBuf.selector = 0;
-            dyValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dyValueTempTmpBufUnionSelector == 1) {
-            dyValueTempTmpBuf.selector = 1;
-            dyValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dyValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dyValueTemp = static_cast<Ark_Union_Number_String>(dyValueTempTmpBuf);;
-        const Ark_Int8 dirtyXValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dirtyXValueTempTmpBuf = {};
-        dirtyXValueTempTmpBuf.selector = dirtyXValueTempTmpBufUnionSelector;
-        if (dirtyXValueTempTmpBufUnionSelector == 0) {
-            dirtyXValueTempTmpBuf.selector = 0;
-            dirtyXValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dirtyXValueTempTmpBufUnionSelector == 1) {
-            dirtyXValueTempTmpBuf.selector = 1;
-            dirtyXValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dirtyXValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dirtyXValueTemp = static_cast<Ark_Union_Number_String>(dirtyXValueTempTmpBuf);;
-        const Ark_Int8 dirtyYValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dirtyYValueTempTmpBuf = {};
-        dirtyYValueTempTmpBuf.selector = dirtyYValueTempTmpBufUnionSelector;
-        if (dirtyYValueTempTmpBufUnionSelector == 0) {
-            dirtyYValueTempTmpBuf.selector = 0;
-            dirtyYValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dirtyYValueTempTmpBufUnionSelector == 1) {
-            dirtyYValueTempTmpBuf.selector = 1;
-            dirtyYValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dirtyYValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dirtyYValueTemp = static_cast<Ark_Union_Number_String>(dirtyYValueTempTmpBuf);;
-        const Ark_Int8 dirtyWidthValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dirtyWidthValueTempTmpBuf = {};
-        dirtyWidthValueTempTmpBuf.selector = dirtyWidthValueTempTmpBufUnionSelector;
-        if (dirtyWidthValueTempTmpBufUnionSelector == 0) {
-            dirtyWidthValueTempTmpBuf.selector = 0;
-            dirtyWidthValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dirtyWidthValueTempTmpBufUnionSelector == 1) {
-            dirtyWidthValueTempTmpBuf.selector = 1;
-            dirtyWidthValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dirtyWidthValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dirtyWidthValueTemp = static_cast<Ark_Union_Number_String>(dirtyWidthValueTempTmpBuf);;
-        const Ark_Int8 dirtyHeightValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String dirtyHeightValueTempTmpBuf = {};
-        dirtyHeightValueTempTmpBuf.selector = dirtyHeightValueTempTmpBufUnionSelector;
-        if (dirtyHeightValueTempTmpBufUnionSelector == 0) {
-            dirtyHeightValueTempTmpBuf.selector = 0;
-            dirtyHeightValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-        } else if (dirtyHeightValueTempTmpBufUnionSelector == 1) {
-            dirtyHeightValueTempTmpBuf.selector = 1;
-            dirtyHeightValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-        } else {
-            INTEROP_FATAL("One of the branches for dirtyHeightValueTempTmpBuf has to be chosen through deserialisation.");
-        }
-        Ark_Union_Number_String dirtyHeightValueTemp = static_cast<Ark_Union_Number_String>(dirtyHeightValueTempTmpBuf);;
-        GetAccessors()->getCanvasRendererAccessor()->putImageData1(self, static_cast<Ark_ImageData>(imagedata), static_cast<Ark_Union_Number_String*>(&dxValueTemp), static_cast<Ark_Union_Number_String*>(&dyValueTemp), static_cast<Ark_Union_Number_String*>(&dirtyXValueTemp), static_cast<Ark_Union_Number_String*>(&dirtyYValueTemp), static_cast<Ark_Union_Number_String*>(&dirtyWidthValueTemp), static_cast<Ark_Union_Number_String*>(&dirtyHeightValueTemp));
-}
-KOALA_INTEROP_DIRECT_V4(CanvasRenderer_putImageData1, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_5(CanvasRenderer_getPixelMap, Ark_NativePointer, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
 KInteropReturnBuffer impl_CanvasRenderer_getLineDash(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         const auto &retValue = GetAccessors()->getCanvasRendererAccessor()->getLineDash(self);
         SerializerBase _retSerializer {};
         _retSerializer.writeInt32(retValue.length);
         for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
-            const Ark_Number retValueTmpElement = retValue.array[retValueCounterI];
-            _retSerializer.writeNumber(retValueTmpElement);
+            const Ark_Float64 retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeFloat64(retValueTmpElement);
         }
         return _retSerializer.toReturnBuffer();
 }
@@ -27966,31 +27835,31 @@ void impl_CanvasRenderer_setLineDash(Ark_NativePointer thisPtr, KSerializerBuffe
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int32 segmentsValueTempTmpBufLength = thisDeserializer.readInt32();
-        Array_Number segmentsValueTempTmpBuf = {};
+        Array_Float64 segmentsValueTempTmpBuf = {};
         thisDeserializer.resizeArray<std::decay<decltype(segmentsValueTempTmpBuf)>::type,
         std::decay<decltype(*segmentsValueTempTmpBuf.array)>::type>(&segmentsValueTempTmpBuf, segmentsValueTempTmpBufLength);
         for (int segmentsValueTempTmpBufBufCounterI = 0; segmentsValueTempTmpBufBufCounterI < segmentsValueTempTmpBufLength; segmentsValueTempTmpBufBufCounterI++) {
-            segmentsValueTempTmpBuf.array[segmentsValueTempTmpBufBufCounterI] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            segmentsValueTempTmpBuf.array[segmentsValueTempTmpBufBufCounterI] = thisDeserializer.readFloat64();
         }
-        Array_Number segmentsValueTemp = segmentsValueTempTmpBuf;;
-        GetAccessors()->getCanvasRendererAccessor()->setLineDash(self, static_cast<Array_Number*>(&segmentsValueTemp));
+        Array_Float64 segmentsValueTemp = segmentsValueTempTmpBuf;;
+        GetAccessors()->getCanvasRendererAccessor()->setLineDash(self, static_cast<Array_Float64*>(&segmentsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setLineDash, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CanvasRenderer_clearRect(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y, KInteropNumber w, KInteropNumber h) {
+void impl_CanvasRenderer_clearRect(Ark_NativePointer thisPtr, KDouble x, KDouble y, KDouble w, KDouble h) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->clearRect(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y), (const Ark_Number*) (&w), (const Ark_Number*) (&h));
+        GetAccessors()->getCanvasRendererAccessor()->clearRect(self, x, y, w, h);
 }
-KOALA_INTEROP_DIRECT_V5(CanvasRenderer_clearRect, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-void impl_CanvasRenderer_fillRect(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y, KInteropNumber w, KInteropNumber h) {
+KOALA_INTEROP_V5(CanvasRenderer_clearRect, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
+void impl_CanvasRenderer_fillRect(Ark_NativePointer thisPtr, KDouble x, KDouble y, KDouble w, KDouble h) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->fillRect(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y), (const Ark_Number*) (&w), (const Ark_Number*) (&h));
+        GetAccessors()->getCanvasRendererAccessor()->fillRect(self, x, y, w, h);
 }
-KOALA_INTEROP_DIRECT_V5(CanvasRenderer_fillRect, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-void impl_CanvasRenderer_strokeRect(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y, KInteropNumber w, KInteropNumber h) {
+KOALA_INTEROP_V5(CanvasRenderer_fillRect, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
+void impl_CanvasRenderer_strokeRect(Ark_NativePointer thisPtr, KDouble x, KDouble y, KDouble w, KDouble h) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->strokeRect(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y), (const Ark_Number*) (&w), (const Ark_Number*) (&h));
+        GetAccessors()->getCanvasRendererAccessor()->strokeRect(self, x, y, w, h);
 }
-KOALA_INTEROP_DIRECT_V5(CanvasRenderer_strokeRect, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_V5(CanvasRenderer_strokeRect, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
 void impl_CanvasRenderer_restore(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         GetAccessors()->getCanvasRendererAccessor()->restore(self);
@@ -28001,19 +27870,19 @@ void impl_CanvasRenderer_save(Ark_NativePointer thisPtr) {
         GetAccessors()->getCanvasRendererAccessor()->save(self);
 }
 KOALA_INTEROP_DIRECT_V1(CanvasRenderer_save, Ark_NativePointer)
-void impl_CanvasRenderer_fillText(Ark_NativePointer thisPtr, const KStringPtr& text, KInteropNumber x, KInteropNumber y, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CanvasRenderer_fillText(Ark_NativePointer thisPtr, const KStringPtr& text, KDouble x, KDouble y, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto maxWidthValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number maxWidthValueTempTmpBuf = {};
+        Opt_Float64 maxWidthValueTempTmpBuf = {};
         maxWidthValueTempTmpBuf.tag = maxWidthValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((maxWidthValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            maxWidthValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            maxWidthValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number maxWidthValueTemp = maxWidthValueTempTmpBuf;;
-        GetAccessors()->getCanvasRendererAccessor()->fillText(self, (const Ark_String*) (&text), (const Ark_Number*) (&x), (const Ark_Number*) (&y), static_cast<Opt_Number*>(&maxWidthValueTemp));
+        Opt_Float64 maxWidthValueTemp = maxWidthValueTempTmpBuf;;
+        GetAccessors()->getCanvasRendererAccessor()->fillText(self, (const Ark_String*) (&text), x, y, static_cast<Opt_Float64*>(&maxWidthValueTemp));
 }
-KOALA_INTEROP_V6(CanvasRenderer_fillText, Ark_NativePointer, KStringPtr, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V6(CanvasRenderer_fillText, Ark_NativePointer, KStringPtr, KDouble, KDouble, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_CanvasRenderer_measureText(Ark_NativePointer thisPtr, const KStringPtr& text) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         const auto &retValue = GetAccessors()->getCanvasRendererAccessor()->measureText(self, (const Ark_String*) (&text));
@@ -28022,19 +27891,19 @@ KInteropReturnBuffer impl_CanvasRenderer_measureText(Ark_NativePointer thisPtr, 
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_2(CanvasRenderer_measureText, KInteropReturnBuffer, Ark_NativePointer, KStringPtr)
-void impl_CanvasRenderer_strokeText(Ark_NativePointer thisPtr, const KStringPtr& text, KInteropNumber x, KInteropNumber y, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CanvasRenderer_strokeText(Ark_NativePointer thisPtr, const KStringPtr& text, KDouble x, KDouble y, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto maxWidthValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number maxWidthValueTempTmpBuf = {};
+        Opt_Float64 maxWidthValueTempTmpBuf = {};
         maxWidthValueTempTmpBuf.tag = maxWidthValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((maxWidthValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            maxWidthValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            maxWidthValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number maxWidthValueTemp = maxWidthValueTempTmpBuf;;
-        GetAccessors()->getCanvasRendererAccessor()->strokeText(self, (const Ark_String*) (&text), (const Ark_Number*) (&x), (const Ark_Number*) (&y), static_cast<Opt_Number*>(&maxWidthValueTemp));
+        Opt_Float64 maxWidthValueTemp = maxWidthValueTempTmpBuf;;
+        GetAccessors()->getCanvasRendererAccessor()->strokeText(self, (const Ark_String*) (&text), x, y, static_cast<Opt_Float64*>(&maxWidthValueTemp));
 }
-KOALA_INTEROP_V6(CanvasRenderer_strokeText, Ark_NativePointer, KStringPtr, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V6(CanvasRenderer_strokeText, Ark_NativePointer, KStringPtr, KDouble, KDouble, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CanvasRenderer_getTransform(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getTransform(self);
@@ -28045,21 +27914,21 @@ void impl_CanvasRenderer_resetTransform(Ark_NativePointer thisPtr) {
         GetAccessors()->getCanvasRendererAccessor()->resetTransform(self);
 }
 KOALA_INTEROP_DIRECT_V1(CanvasRenderer_resetTransform, Ark_NativePointer)
-void impl_CanvasRenderer_rotate(Ark_NativePointer thisPtr, KInteropNumber angle) {
+void impl_CanvasRenderer_rotate(Ark_NativePointer thisPtr, KDouble angle) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->rotate(self, (const Ark_Number*) (&angle));
+        GetAccessors()->getCanvasRendererAccessor()->rotate(self, angle);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_rotate, Ark_NativePointer, KInteropNumber)
-void impl_CanvasRenderer_scale(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y) {
+KOALA_INTEROP_V2(CanvasRenderer_rotate, Ark_NativePointer, KDouble)
+void impl_CanvasRenderer_scale(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->scale(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y));
+        GetAccessors()->getCanvasRendererAccessor()->scale(self, x, y);
 }
-KOALA_INTEROP_DIRECT_V3(CanvasRenderer_scale, Ark_NativePointer, KInteropNumber, KInteropNumber)
-void impl_CanvasRenderer_setTransform0(Ark_NativePointer thisPtr, KInteropNumber a, KInteropNumber b, KInteropNumber c, KInteropNumber d, KInteropNumber e, KInteropNumber f) {
+KOALA_INTEROP_V3(CanvasRenderer_scale, Ark_NativePointer, KDouble, KDouble)
+void impl_CanvasRenderer_setTransform0(Ark_NativePointer thisPtr, KDouble a, KDouble b, KDouble c, KDouble d, KDouble e, KDouble f) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setTransform0(self, (const Ark_Number*) (&a), (const Ark_Number*) (&b), (const Ark_Number*) (&c), (const Ark_Number*) (&d), (const Ark_Number*) (&e), (const Ark_Number*) (&f));
+        GetAccessors()->getCanvasRendererAccessor()->setTransform0(self, a, b, c, d, e, f);
 }
-KOALA_INTEROP_DIRECT_V7(CanvasRenderer_setTransform0, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_V7(CanvasRenderer_setTransform0, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble)
 void impl_CanvasRenderer_setTransform1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -28073,16 +27942,16 @@ void impl_CanvasRenderer_setTransform1(Ark_NativePointer thisPtr, KSerializerBuf
         GetAccessors()->getCanvasRendererAccessor()->setTransform1(self, static_cast<Opt_Matrix2D*>(&transformValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setTransform1, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CanvasRenderer_transform(Ark_NativePointer thisPtr, KInteropNumber a, KInteropNumber b, KInteropNumber c, KInteropNumber d, KInteropNumber e, KInteropNumber f) {
+void impl_CanvasRenderer_transform(Ark_NativePointer thisPtr, KDouble a, KDouble b, KDouble c, KDouble d, KDouble e, KDouble f) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->transform(self, (const Ark_Number*) (&a), (const Ark_Number*) (&b), (const Ark_Number*) (&c), (const Ark_Number*) (&d), (const Ark_Number*) (&e), (const Ark_Number*) (&f));
+        GetAccessors()->getCanvasRendererAccessor()->transform(self, a, b, c, d, e, f);
 }
-KOALA_INTEROP_DIRECT_V7(CanvasRenderer_transform, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-void impl_CanvasRenderer_translate(Ark_NativePointer thisPtr, KInteropNumber x, KInteropNumber y) {
+KOALA_INTEROP_V7(CanvasRenderer_transform, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble, KDouble, KDouble)
+void impl_CanvasRenderer_translate(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->translate(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y));
+        GetAccessors()->getCanvasRendererAccessor()->translate(self, x, y);
 }
-KOALA_INTEROP_DIRECT_V3(CanvasRenderer_translate, Ark_NativePointer, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_V3(CanvasRenderer_translate, Ark_NativePointer, KDouble, KDouble)
 void impl_CanvasRenderer_setPixelMap(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -28151,16 +28020,16 @@ void impl_CanvasRenderer_setLetterSpacing(Ark_NativePointer thisPtr, KSerializer
         GetAccessors()->getCanvasRendererAccessor()->setLetterSpacing(self, static_cast<Ark_Union_LengthMetrics_String*>(&letterSpacingValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setLetterSpacing, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Number impl_CanvasRenderer_getGlobalAlpha(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_CanvasRenderer_getGlobalAlpha(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getGlobalAlpha(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderer_getGlobalAlpha, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderer_setGlobalAlpha(Ark_NativePointer thisPtr, KInteropNumber globalAlpha) {
+KOALA_INTEROP_1(CanvasRenderer_getGlobalAlpha, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderer_setGlobalAlpha(Ark_NativePointer thisPtr, KDouble globalAlpha) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setGlobalAlpha(self, (const Ark_Number*) (&globalAlpha));
+        GetAccessors()->getCanvasRendererAccessor()->setGlobalAlpha(self, globalAlpha);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_setGlobalAlpha, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_V2(CanvasRenderer_setGlobalAlpha, Ark_NativePointer, KDouble)
 Ark_String impl_CanvasRenderer_getGlobalCompositeOperation(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getGlobalCompositeOperation(self);
@@ -28323,16 +28192,16 @@ void impl_CanvasRenderer_setLineCap(Ark_NativePointer thisPtr, const KStringPtr&
         GetAccessors()->getCanvasRendererAccessor()->setLineCap(self, (const Ark_String*) (&lineCap));
 }
 KOALA_INTEROP_V2(CanvasRenderer_setLineCap, Ark_NativePointer, KStringPtr)
-Ark_Number impl_CanvasRenderer_getLineDashOffset(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_CanvasRenderer_getLineDashOffset(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getLineDashOffset(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderer_getLineDashOffset, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderer_setLineDashOffset(Ark_NativePointer thisPtr, KInteropNumber lineDashOffset) {
+KOALA_INTEROP_1(CanvasRenderer_getLineDashOffset, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderer_setLineDashOffset(Ark_NativePointer thisPtr, KDouble lineDashOffset) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setLineDashOffset(self, (const Ark_Number*) (&lineDashOffset));
+        GetAccessors()->getCanvasRendererAccessor()->setLineDashOffset(self, lineDashOffset);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_setLineDashOffset, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_V2(CanvasRenderer_setLineDashOffset, Ark_NativePointer, KDouble)
 void impl_CanvasRenderer_getLineJoin(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         GetAccessors()->getCanvasRendererAccessor()->getLineJoin(self);
@@ -28343,36 +28212,36 @@ void impl_CanvasRenderer_setLineJoin(Ark_NativePointer thisPtr, const KStringPtr
         GetAccessors()->getCanvasRendererAccessor()->setLineJoin(self, (const Ark_String*) (&lineJoin));
 }
 KOALA_INTEROP_V2(CanvasRenderer_setLineJoin, Ark_NativePointer, KStringPtr)
-Ark_Number impl_CanvasRenderer_getLineWidth(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_CanvasRenderer_getLineWidth(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getLineWidth(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderer_getLineWidth, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderer_setLineWidth(Ark_NativePointer thisPtr, KInteropNumber lineWidth) {
+KOALA_INTEROP_1(CanvasRenderer_getLineWidth, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderer_setLineWidth(Ark_NativePointer thisPtr, KDouble lineWidth) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setLineWidth(self, (const Ark_Number*) (&lineWidth));
+        GetAccessors()->getCanvasRendererAccessor()->setLineWidth(self, lineWidth);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_setLineWidth, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_CanvasRenderer_getMiterLimit(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_V2(CanvasRenderer_setLineWidth, Ark_NativePointer, KDouble)
+Ark_Int32 impl_CanvasRenderer_getMiterLimit(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getMiterLimit(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderer_getMiterLimit, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderer_setMiterLimit(Ark_NativePointer thisPtr, KInteropNumber miterLimit) {
+KOALA_INTEROP_1(CanvasRenderer_getMiterLimit, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderer_setMiterLimit(Ark_NativePointer thisPtr, KDouble miterLimit) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setMiterLimit(self, (const Ark_Number*) (&miterLimit));
+        GetAccessors()->getCanvasRendererAccessor()->setMiterLimit(self, miterLimit);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_setMiterLimit, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_CanvasRenderer_getShadowBlur(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_V2(CanvasRenderer_setMiterLimit, Ark_NativePointer, KDouble)
+Ark_Int32 impl_CanvasRenderer_getShadowBlur(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getShadowBlur(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderer_getShadowBlur, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderer_setShadowBlur(Ark_NativePointer thisPtr, KInteropNumber shadowBlur) {
+KOALA_INTEROP_1(CanvasRenderer_getShadowBlur, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderer_setShadowBlur(Ark_NativePointer thisPtr, KDouble shadowBlur) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setShadowBlur(self, (const Ark_Number*) (&shadowBlur));
+        GetAccessors()->getCanvasRendererAccessor()->setShadowBlur(self, shadowBlur);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_setShadowBlur, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_V2(CanvasRenderer_setShadowBlur, Ark_NativePointer, KDouble)
 Ark_String impl_CanvasRenderer_getShadowColor(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getShadowColor(self);
@@ -28383,26 +28252,26 @@ void impl_CanvasRenderer_setShadowColor(Ark_NativePointer thisPtr, const KString
         GetAccessors()->getCanvasRendererAccessor()->setShadowColor(self, (const Ark_String*) (&shadowColor));
 }
 KOALA_INTEROP_V2(CanvasRenderer_setShadowColor, Ark_NativePointer, KStringPtr)
-Ark_Number impl_CanvasRenderer_getShadowOffsetX(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_CanvasRenderer_getShadowOffsetX(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getShadowOffsetX(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderer_getShadowOffsetX, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderer_setShadowOffsetX(Ark_NativePointer thisPtr, KInteropNumber shadowOffsetX) {
+KOALA_INTEROP_1(CanvasRenderer_getShadowOffsetX, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderer_setShadowOffsetX(Ark_NativePointer thisPtr, KDouble shadowOffsetX) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setShadowOffsetX(self, (const Ark_Number*) (&shadowOffsetX));
+        GetAccessors()->getCanvasRendererAccessor()->setShadowOffsetX(self, shadowOffsetX);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_setShadowOffsetX, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_CanvasRenderer_getShadowOffsetY(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_V2(CanvasRenderer_setShadowOffsetX, Ark_NativePointer, KDouble)
+Ark_Int32 impl_CanvasRenderer_getShadowOffsetY(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         return GetAccessors()->getCanvasRendererAccessor()->getShadowOffsetY(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderer_getShadowOffsetY, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderer_setShadowOffsetY(Ark_NativePointer thisPtr, KInteropNumber shadowOffsetY) {
+KOALA_INTEROP_1(CanvasRenderer_getShadowOffsetY, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderer_setShadowOffsetY(Ark_NativePointer thisPtr, KDouble shadowOffsetY) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        GetAccessors()->getCanvasRendererAccessor()->setShadowOffsetY(self, (const Ark_Number*) (&shadowOffsetY));
+        GetAccessors()->getCanvasRendererAccessor()->setShadowOffsetY(self, shadowOffsetY);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderer_setShadowOffsetY, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_V2(CanvasRenderer_setShadowOffsetY, Ark_NativePointer, KDouble)
 void impl_CanvasRenderer_getDirection(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         GetAccessors()->getCanvasRendererAccessor()->getDirection(self);
@@ -28477,13 +28346,13 @@ Ark_String impl_CanvasRenderingContext2D_toDataURL(Ark_NativePointer thisPtr, KS
         }
         Opt_String typeValueTemp = typeValueTempTmpBuf;;
         const auto qualityValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number qualityValueTempTmpBuf = {};
+        Opt_Float64 qualityValueTempTmpBuf = {};
         qualityValueTempTmpBuf.tag = qualityValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((qualityValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            qualityValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            qualityValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number qualityValueTemp = qualityValueTempTmpBuf;;
-        return GetAccessors()->getCanvasRenderingContext2DAccessor()->toDataURL(self, static_cast<Opt_String*>(&typeValueTemp), static_cast<Opt_Number*>(&qualityValueTemp));
+        Opt_Float64 qualityValueTemp = qualityValueTempTmpBuf;;
+        return GetAccessors()->getCanvasRenderingContext2DAccessor()->toDataURL(self, static_cast<Opt_String*>(&typeValueTemp), static_cast<Opt_Float64*>(&qualityValueTemp));
 }
 KOALA_INTEROP_3(CanvasRenderingContext2D_toDataURL, KStringPtr, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CanvasRenderingContext2D_startImageAnalyzer(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -28539,26 +28408,26 @@ void impl_CanvasRenderingContext2D_offDetach(Ark_NativePointer thisPtr, KSeriali
         GetAccessors()->getCanvasRenderingContext2DAccessor()->offDetach(self, static_cast<Opt_VoidCallback*>(&callback_ValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_offDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Number impl_CanvasRenderingContext2D_getHeight(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_CanvasRenderingContext2D_getHeight(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
         return GetAccessors()->getCanvasRenderingContext2DAccessor()->getHeight(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderingContext2D_getHeight, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderingContext2D_setHeight(Ark_NativePointer thisPtr, KInteropNumber height) {
+KOALA_INTEROP_1(CanvasRenderingContext2D_getHeight, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderingContext2D_setHeight(Ark_NativePointer thisPtr, KDouble height) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
-        GetAccessors()->getCanvasRenderingContext2DAccessor()->setHeight(self, (const Ark_Number*) (&height));
+        GetAccessors()->getCanvasRenderingContext2DAccessor()->setHeight(self, height);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderingContext2D_setHeight, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_CanvasRenderingContext2D_getWidth(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_V2(CanvasRenderingContext2D_setHeight, Ark_NativePointer, KDouble)
+Ark_Int32 impl_CanvasRenderingContext2D_getWidth(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
         return GetAccessors()->getCanvasRenderingContext2DAccessor()->getWidth(self);
 }
-KOALA_INTEROP_DIRECT_1(CanvasRenderingContext2D_getWidth, KInteropNumber, Ark_NativePointer)
-void impl_CanvasRenderingContext2D_setWidth(Ark_NativePointer thisPtr, KInteropNumber width) {
+KOALA_INTEROP_1(CanvasRenderingContext2D_getWidth, Ark_Int32, Ark_NativePointer)
+void impl_CanvasRenderingContext2D_setWidth(Ark_NativePointer thisPtr, KDouble width) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
-        GetAccessors()->getCanvasRenderingContext2DAccessor()->setWidth(self, (const Ark_Number*) (&width));
+        GetAccessors()->getCanvasRenderingContext2DAccessor()->setWidth(self, width);
 }
-KOALA_INTEROP_DIRECT_V2(CanvasRenderingContext2D_setWidth, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_V2(CanvasRenderingContext2D_setWidth, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_CanvasRenderingContext2D_getCanvas(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
         return GetAccessors()->getCanvasRenderingContext2DAccessor()->getCanvas(self);
@@ -31979,64 +31848,64 @@ Ark_NativePointer impl_Matrix2D_invert(Ark_NativePointer thisPtr) {
         return GetAccessors()->getMatrix2DAccessor()->invert(self);
 }
 KOALA_INTEROP_DIRECT_1(Matrix2D_invert, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_Matrix2D_rotate(Ark_NativePointer thisPtr, KInteropNumber degree, KSerializerBuffer thisArray, int32_t thisLength) {
+Ark_NativePointer impl_Matrix2D_rotate(Ark_NativePointer thisPtr, KDouble degree, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto rxValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number rxValueTempTmpBuf = {};
+        Opt_Float64 rxValueTempTmpBuf = {};
         rxValueTempTmpBuf.tag = rxValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((rxValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            rxValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            rxValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number rxValueTemp = rxValueTempTmpBuf;;
+        Opt_Float64 rxValueTemp = rxValueTempTmpBuf;;
         const auto ryValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number ryValueTempTmpBuf = {};
+        Opt_Float64 ryValueTempTmpBuf = {};
         ryValueTempTmpBuf.tag = ryValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((ryValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            ryValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            ryValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number ryValueTemp = ryValueTempTmpBuf;;
-        return GetAccessors()->getMatrix2DAccessor()->rotate(self, (const Ark_Number*) (&degree), static_cast<Opt_Number*>(&rxValueTemp), static_cast<Opt_Number*>(&ryValueTemp));
+        Opt_Float64 ryValueTemp = ryValueTempTmpBuf;;
+        return GetAccessors()->getMatrix2DAccessor()->rotate(self, degree, static_cast<Opt_Float64*>(&rxValueTemp), static_cast<Opt_Float64*>(&ryValueTemp));
 }
-KOALA_INTEROP_DIRECT_4(Matrix2D_rotate, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_4(Matrix2D_rotate, Ark_NativePointer, Ark_NativePointer, KDouble, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Matrix2D_translate(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto txValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number txValueTempTmpBuf = {};
+        Opt_Float64 txValueTempTmpBuf = {};
         txValueTempTmpBuf.tag = txValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((txValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            txValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            txValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number txValueTemp = txValueTempTmpBuf;;
+        Opt_Float64 txValueTemp = txValueTempTmpBuf;;
         const auto tyValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number tyValueTempTmpBuf = {};
+        Opt_Float64 tyValueTempTmpBuf = {};
         tyValueTempTmpBuf.tag = tyValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((tyValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            tyValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            tyValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number tyValueTemp = tyValueTempTmpBuf;;
-        return GetAccessors()->getMatrix2DAccessor()->translate(self, static_cast<Opt_Number*>(&txValueTemp), static_cast<Opt_Number*>(&tyValueTemp));
+        Opt_Float64 tyValueTemp = tyValueTempTmpBuf;;
+        return GetAccessors()->getMatrix2DAccessor()->translate(self, static_cast<Opt_Float64*>(&txValueTemp), static_cast<Opt_Float64*>(&tyValueTemp));
 }
 KOALA_INTEROP_DIRECT_3(Matrix2D_translate, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Matrix2D_scale(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto sxValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number sxValueTempTmpBuf = {};
+        Opt_Float64 sxValueTempTmpBuf = {};
         sxValueTempTmpBuf.tag = sxValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((sxValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            sxValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            sxValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number sxValueTemp = sxValueTempTmpBuf;;
+        Opt_Float64 sxValueTemp = sxValueTempTmpBuf;;
         const auto syValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number syValueTempTmpBuf = {};
+        Opt_Float64 syValueTempTmpBuf = {};
         syValueTempTmpBuf.tag = syValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((syValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            syValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            syValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number syValueTemp = syValueTempTmpBuf;;
-        return GetAccessors()->getMatrix2DAccessor()->scale(self, static_cast<Opt_Number*>(&sxValueTemp), static_cast<Opt_Number*>(&syValueTemp));
+        Opt_Float64 syValueTemp = syValueTempTmpBuf;;
+        return GetAccessors()->getMatrix2DAccessor()->scale(self, static_cast<Opt_Float64*>(&sxValueTemp), static_cast<Opt_Float64*>(&syValueTemp));
 }
 KOALA_INTEROP_DIRECT_3(Matrix2D_scale, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_Matrix2D_getScaleX(Ark_NativePointer thisPtr) {
@@ -32046,7 +31915,7 @@ KInteropReturnBuffer impl_Matrix2D_getScaleX(Ark_NativePointer thisPtr) {
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
             const auto retValueTmpValue = retValue.value;
-            _retSerializer.writeNumber(retValueTmpValue);
+            _retSerializer.writeFloat64(retValueTmpValue);
         } else {
             _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
         }
@@ -32057,13 +31926,13 @@ void impl_Matrix2D_setScaleX(Ark_NativePointer thisPtr, KSerializerBuffer thisAr
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto scaleXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number scaleXValueTempTmpBuf = {};
+        Opt_Float64 scaleXValueTempTmpBuf = {};
         scaleXValueTempTmpBuf.tag = scaleXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((scaleXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            scaleXValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            scaleXValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number scaleXValueTemp = scaleXValueTempTmpBuf;;
-        GetAccessors()->getMatrix2DAccessor()->setScaleX(self, static_cast<Opt_Number*>(&scaleXValueTemp));
+        Opt_Float64 scaleXValueTemp = scaleXValueTempTmpBuf;;
+        GetAccessors()->getMatrix2DAccessor()->setScaleX(self, static_cast<Opt_Float64*>(&scaleXValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(Matrix2D_setScaleX, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_Matrix2D_getScaleY(Ark_NativePointer thisPtr) {
@@ -32073,7 +31942,7 @@ KInteropReturnBuffer impl_Matrix2D_getScaleY(Ark_NativePointer thisPtr) {
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
             const auto retValueTmpValue = retValue.value;
-            _retSerializer.writeNumber(retValueTmpValue);
+            _retSerializer.writeFloat64(retValueTmpValue);
         } else {
             _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
         }
@@ -32084,13 +31953,13 @@ void impl_Matrix2D_setScaleY(Ark_NativePointer thisPtr, KSerializerBuffer thisAr
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto scaleYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number scaleYValueTempTmpBuf = {};
+        Opt_Float64 scaleYValueTempTmpBuf = {};
         scaleYValueTempTmpBuf.tag = scaleYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((scaleYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            scaleYValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            scaleYValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number scaleYValueTemp = scaleYValueTempTmpBuf;;
-        GetAccessors()->getMatrix2DAccessor()->setScaleY(self, static_cast<Opt_Number*>(&scaleYValueTemp));
+        Opt_Float64 scaleYValueTemp = scaleYValueTempTmpBuf;;
+        GetAccessors()->getMatrix2DAccessor()->setScaleY(self, static_cast<Opt_Float64*>(&scaleYValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(Matrix2D_setScaleY, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_Matrix2D_getRotateX(Ark_NativePointer thisPtr) {
@@ -32100,7 +31969,7 @@ KInteropReturnBuffer impl_Matrix2D_getRotateX(Ark_NativePointer thisPtr) {
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
             const auto retValueTmpValue = retValue.value;
-            _retSerializer.writeNumber(retValueTmpValue);
+            _retSerializer.writeFloat64(retValueTmpValue);
         } else {
             _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
         }
@@ -32111,13 +31980,13 @@ void impl_Matrix2D_setRotateX(Ark_NativePointer thisPtr, KSerializerBuffer thisA
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto rotateXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number rotateXValueTempTmpBuf = {};
+        Opt_Float64 rotateXValueTempTmpBuf = {};
         rotateXValueTempTmpBuf.tag = rotateXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((rotateXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            rotateXValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            rotateXValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number rotateXValueTemp = rotateXValueTempTmpBuf;;
-        GetAccessors()->getMatrix2DAccessor()->setRotateX(self, static_cast<Opt_Number*>(&rotateXValueTemp));
+        Opt_Float64 rotateXValueTemp = rotateXValueTempTmpBuf;;
+        GetAccessors()->getMatrix2DAccessor()->setRotateX(self, static_cast<Opt_Float64*>(&rotateXValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(Matrix2D_setRotateX, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_Matrix2D_getRotateY(Ark_NativePointer thisPtr) {
@@ -32127,7 +31996,7 @@ KInteropReturnBuffer impl_Matrix2D_getRotateY(Ark_NativePointer thisPtr) {
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
             const auto retValueTmpValue = retValue.value;
-            _retSerializer.writeNumber(retValueTmpValue);
+            _retSerializer.writeFloat64(retValueTmpValue);
         } else {
             _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
         }
@@ -32138,13 +32007,13 @@ void impl_Matrix2D_setRotateY(Ark_NativePointer thisPtr, KSerializerBuffer thisA
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto rotateYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number rotateYValueTempTmpBuf = {};
+        Opt_Float64 rotateYValueTempTmpBuf = {};
         rotateYValueTempTmpBuf.tag = rotateYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((rotateYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            rotateYValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            rotateYValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number rotateYValueTemp = rotateYValueTempTmpBuf;;
-        GetAccessors()->getMatrix2DAccessor()->setRotateY(self, static_cast<Opt_Number*>(&rotateYValueTemp));
+        Opt_Float64 rotateYValueTemp = rotateYValueTempTmpBuf;;
+        GetAccessors()->getMatrix2DAccessor()->setRotateY(self, static_cast<Opt_Float64*>(&rotateYValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(Matrix2D_setRotateY, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_Matrix2D_getTranslateX(Ark_NativePointer thisPtr) {
@@ -32154,7 +32023,7 @@ KInteropReturnBuffer impl_Matrix2D_getTranslateX(Ark_NativePointer thisPtr) {
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
             const auto retValueTmpValue = retValue.value;
-            _retSerializer.writeNumber(retValueTmpValue);
+            _retSerializer.writeFloat64(retValueTmpValue);
         } else {
             _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
         }
@@ -32165,13 +32034,13 @@ void impl_Matrix2D_setTranslateX(Ark_NativePointer thisPtr, KSerializerBuffer th
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto translateXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number translateXValueTempTmpBuf = {};
+        Opt_Float64 translateXValueTempTmpBuf = {};
         translateXValueTempTmpBuf.tag = translateXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((translateXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            translateXValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            translateXValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number translateXValueTemp = translateXValueTempTmpBuf;;
-        GetAccessors()->getMatrix2DAccessor()->setTranslateX(self, static_cast<Opt_Number*>(&translateXValueTemp));
+        Opt_Float64 translateXValueTemp = translateXValueTempTmpBuf;;
+        GetAccessors()->getMatrix2DAccessor()->setTranslateX(self, static_cast<Opt_Float64*>(&translateXValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(Matrix2D_setTranslateX, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_Matrix2D_getTranslateY(Ark_NativePointer thisPtr) {
@@ -32181,7 +32050,7 @@ KInteropReturnBuffer impl_Matrix2D_getTranslateY(Ark_NativePointer thisPtr) {
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
             const auto retValueTmpValue = retValue.value;
-            _retSerializer.writeNumber(retValueTmpValue);
+            _retSerializer.writeFloat64(retValueTmpValue);
         } else {
             _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
         }
@@ -32192,13 +32061,13 @@ void impl_Matrix2D_setTranslateY(Ark_NativePointer thisPtr, KSerializerBuffer th
         Ark_Matrix2D self = reinterpret_cast<Ark_Matrix2D>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto translateYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number translateYValueTempTmpBuf = {};
+        Opt_Float64 translateYValueTempTmpBuf = {};
         translateYValueTempTmpBuf.tag = translateYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((translateYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            translateYValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            translateYValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number translateYValueTemp = translateYValueTempTmpBuf;;
-        GetAccessors()->getMatrix2DAccessor()->setTranslateY(self, static_cast<Opt_Number*>(&translateYValueTemp));
+        Opt_Float64 translateYValueTemp = translateYValueTempTmpBuf;;
+        GetAccessors()->getMatrix2DAccessor()->setTranslateY(self, static_cast<Opt_Float64*>(&translateYValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(Matrix2D_setTranslateY, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Measurable_construct() {
@@ -33726,7 +33595,7 @@ Ark_Boolean impl_NodeContentExtender_removeFrameNode(Ark_NativePointer content, 
         return GetAccessors()->getNodeContentExtenderAccessor()->removeFrameNode(content, node);
 }
 KOALA_INTEROP_DIRECT_2(NodeContentExtender_removeFrameNode, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_OffscreenCanvas_construct(KInteropNumber width, KInteropNumber height, KSerializerBuffer thisArray, int32_t thisLength) {
+Ark_NativePointer impl_OffscreenCanvas_construct(KDouble width, KDouble height, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto unitValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_LengthMetricsUnit unitValueTempTmpBuf = {};
@@ -33735,18 +33604,27 @@ Ark_NativePointer impl_OffscreenCanvas_construct(KInteropNumber width, KInteropN
             unitValueTempTmpBuf.value = static_cast<Ark_LengthMetricsUnit>(thisDeserializer.readInt32());
         }
         Opt_LengthMetricsUnit unitValueTemp = unitValueTempTmpBuf;;
-        return GetAccessors()->getOffscreenCanvasAccessor()->construct((const Ark_Number*) (&width), (const Ark_Number*) (&height), static_cast<Opt_LengthMetricsUnit*>(&unitValueTemp));
+        return GetAccessors()->getOffscreenCanvasAccessor()->construct(width, height, static_cast<Opt_LengthMetricsUnit*>(&unitValueTemp));
 }
-KOALA_INTEROP_DIRECT_4(OffscreenCanvas_construct, Ark_NativePointer, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_4(OffscreenCanvas_construct, Ark_NativePointer, KDouble, KDouble, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_OffscreenCanvas_getFinalizer() {
         return GetAccessors()->getOffscreenCanvasAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(OffscreenCanvas_getFinalizer, Ark_NativePointer)
-Ark_NativePointer impl_OffscreenCanvas_transferToImageBitmap(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_OffscreenCanvas_transferToImageBitmap(Ark_NativePointer thisPtr) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
-        return GetAccessors()->getOffscreenCanvasAccessor()->transferToImageBitmap(self);
+        const auto &retValue = GetAccessors()->getOffscreenCanvasAccessor()->transferToImageBitmap(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            ImageBitmap_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(OffscreenCanvas_transferToImageBitmap, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(OffscreenCanvas_transferToImageBitmap, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_OffscreenCanvas_getContext2d(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -33760,27 +33638,27 @@ Ark_NativePointer impl_OffscreenCanvas_getContext2d(Ark_NativePointer thisPtr, K
         return GetAccessors()->getOffscreenCanvasAccessor()->getContext2d(self, static_cast<Opt_RenderingContextSettings*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_3(OffscreenCanvas_getContext2d, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Number impl_OffscreenCanvas_getHeight(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_OffscreenCanvas_getHeight(Ark_NativePointer thisPtr) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
         return GetAccessors()->getOffscreenCanvasAccessor()->getHeight(self);
 }
-KOALA_INTEROP_DIRECT_1(OffscreenCanvas_getHeight, KInteropNumber, Ark_NativePointer)
-void impl_OffscreenCanvas_setHeight(Ark_NativePointer thisPtr, KInteropNumber height) {
+KOALA_INTEROP_1(OffscreenCanvas_getHeight, Ark_Int32, Ark_NativePointer)
+void impl_OffscreenCanvas_setHeight(Ark_NativePointer thisPtr, KDouble height) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
-        GetAccessors()->getOffscreenCanvasAccessor()->setHeight(self, (const Ark_Number*) (&height));
+        GetAccessors()->getOffscreenCanvasAccessor()->setHeight(self, height);
 }
-KOALA_INTEROP_DIRECT_V2(OffscreenCanvas_setHeight, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_OffscreenCanvas_getWidth(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_V2(OffscreenCanvas_setHeight, Ark_NativePointer, KDouble)
+Ark_Int32 impl_OffscreenCanvas_getWidth(Ark_NativePointer thisPtr) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
         return GetAccessors()->getOffscreenCanvasAccessor()->getWidth(self);
 }
-KOALA_INTEROP_DIRECT_1(OffscreenCanvas_getWidth, KInteropNumber, Ark_NativePointer)
-void impl_OffscreenCanvas_setWidth(Ark_NativePointer thisPtr, KInteropNumber width) {
+KOALA_INTEROP_1(OffscreenCanvas_getWidth, Ark_Int32, Ark_NativePointer)
+void impl_OffscreenCanvas_setWidth(Ark_NativePointer thisPtr, KDouble width) {
         Ark_OffscreenCanvas self = reinterpret_cast<Ark_OffscreenCanvas>(thisPtr);
-        GetAccessors()->getOffscreenCanvasAccessor()->setWidth(self, (const Ark_Number*) (&width));
+        GetAccessors()->getOffscreenCanvasAccessor()->setWidth(self, width);
 }
-KOALA_INTEROP_DIRECT_V2(OffscreenCanvas_setWidth, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_construct(KInteropNumber width, KInteropNumber height, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_V2(OffscreenCanvas_setWidth, Ark_NativePointer, KDouble)
+Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_construct(KDouble width, KDouble height, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto settingsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_RenderingContextSettings settingsValueTempTmpBuf = {};
@@ -33796,9 +33674,9 @@ Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_construct(KInteropNumbe
             unitValueTempTmpBuf.value = static_cast<Ark_LengthMetricsUnit>(thisDeserializer.readInt32());
         }
         Opt_LengthMetricsUnit unitValueTemp = unitValueTempTmpBuf;;
-        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->construct((const Ark_Number*) (&width), (const Ark_Number*) (&height), static_cast<Opt_RenderingContextSettings*>(&settingsValueTemp), static_cast<Opt_LengthMetricsUnit*>(&unitValueTemp));
+        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->construct(width, height, static_cast<Opt_RenderingContextSettings*>(&settingsValueTemp), static_cast<Opt_LengthMetricsUnit*>(&unitValueTemp));
 }
-KOALA_INTEROP_DIRECT_4(OffscreenCanvasRenderingContext2D_construct, Ark_NativePointer, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_4(OffscreenCanvasRenderingContext2D_construct, Ark_NativePointer, KDouble, KDouble, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_getFinalizer() {
         return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->getFinalizer();
 }
@@ -33814,20 +33692,29 @@ Ark_String impl_OffscreenCanvasRenderingContext2D_toDataURL(Ark_NativePointer th
         }
         Opt_String typeValueTemp = typeValueTempTmpBuf;;
         const auto qualityValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number qualityValueTempTmpBuf = {};
+        Opt_Float64 qualityValueTempTmpBuf = {};
         qualityValueTempTmpBuf.tag = qualityValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((qualityValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            qualityValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            qualityValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number qualityValueTemp = qualityValueTempTmpBuf;;
-        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->toDataURL(self, static_cast<Opt_String*>(&typeValueTemp), static_cast<Opt_Number*>(&qualityValueTemp));
+        Opt_Float64 qualityValueTemp = qualityValueTempTmpBuf;;
+        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->toDataURL(self, static_cast<Opt_String*>(&typeValueTemp), static_cast<Opt_Float64*>(&qualityValueTemp));
 }
 KOALA_INTEROP_3(OffscreenCanvasRenderingContext2D_toDataURL, KStringPtr, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_transferToImageBitmap(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_OffscreenCanvasRenderingContext2D_transferToImageBitmap(Ark_NativePointer thisPtr) {
         Ark_OffscreenCanvasRenderingContext2D self = reinterpret_cast<Ark_OffscreenCanvasRenderingContext2D>(thisPtr);
-        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->transferToImageBitmap(self);
+        const auto &retValue = GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->transferToImageBitmap(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            ImageBitmap_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(OffscreenCanvasRenderingContext2D_transferToImageBitmap, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(OffscreenCanvasRenderingContext2D_transferToImageBitmap, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_PanGestureEvent_construct() {
         return GetAccessors()->getPanGestureEventAccessor()->construct();
 }
