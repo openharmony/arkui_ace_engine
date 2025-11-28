@@ -189,7 +189,10 @@ void WaterFlowModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(WaterFlowLayoutProperty, RowsGap, PROPERTY_UPDATE_MEASURE, frameNode);
+        auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        layout->ResetRowsGap();
+        layout->OnRowsGapUpdate(Dimension(0.0));
     }
 }
 

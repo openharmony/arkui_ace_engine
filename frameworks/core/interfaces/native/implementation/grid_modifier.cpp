@@ -188,7 +188,9 @@ void SetColumnsGapImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
     GridModelStatic::SetColumnsGap(frameNode, convValue);
 }
 void SetRowsGapImpl(Ark_NativePointer node,
@@ -197,7 +199,9 @@ void SetRowsGapImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
     GridModelStatic::SetRowsGap(frameNode, convValue);
 }
 void SetScrollBarWidthImpl(Ark_NativePointer node,

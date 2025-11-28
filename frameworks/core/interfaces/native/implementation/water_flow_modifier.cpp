@@ -147,8 +147,9 @@ void SetColumnsGapImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
-    Validator::ValidateNonPercent(convValue);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
     WaterFlowModelStatic::SetColumnsGap(frameNode, convValue);
 }
 void SetRowsGapImpl(Ark_NativePointer node,
@@ -157,8 +158,9 @@ void SetRowsGapImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
-    Validator::ValidateNonPercent(convValue);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
     WaterFlowModelStatic::SetRowsGap(frameNode, convValue);
 }
 void SetLayoutDirectionImpl(Ark_NativePointer node,
