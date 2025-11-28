@@ -762,6 +762,8 @@ private:
     void InitFocusEvent();
     void SetCallBack();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
+    void HandleAmPmReorder();
+    void UpdateDialogButtons();
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     bool OnThemeScopeUpdateMultiThread();
 
