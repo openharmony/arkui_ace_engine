@@ -49,6 +49,14 @@ constexpr float TEST_DIVIDER_WIDTH = 3.0f;
 constexpr uint32_t TEST_DIVIDER_COLOR = 0xFF000000; // Black
 constexpr float TEST_MARGIN = 20.0f;
 constexpr uint32_t TEST_BACKGROUND_COLOR = 0xFFFF0000; // Red
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class ContainerPickerResourceTest : public TestNG {
@@ -77,7 +85,16 @@ void ContainerPickerResourceTest::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void ContainerPickerResourceTest::SetUp() {}
+void ContainerPickerResourceTest::SetUp()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+}
 
 void ContainerPickerResourceTest::TearDown() {}
 
@@ -535,6 +552,103 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerModelTest003, TestSize.Leve
     g_isConfigChangePerform = true;
     ContainerPickerModel::ProcessResourceObj(TEST_DIVIDER_WIDTH_KEY, mockResObj);
     EXPECT_FALSE(resMap.find(TEST_DIVIDER_WIDTH_KEY) == resMap.end());
+}
+
+/**
+ * @tc.name: ToJsonValueTest001
+ * @tc.desc: test ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create picker framenode and property.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.step: step2. call property's ToJsonValue method.
+     * @tc.expected: jsonValue->GetValue("type") is a name string.
+     */
+    const InspectorFilter filter;
+    auto jsonValue = JsonUtil::Create(true);
+    property->ToJsonValue(jsonValue, filter);
+    EXPECT_EQ(jsonValue->GetString("canLoop"), "true");
+    auto selectionIndicator = jsonValue->GetObject("selectionIndicator");
+    ASSERT_NE(selectionIndicator, nullptr);
+    EXPECT_EQ(selectionIndicator->GetString("type"), "PickerIndicatorType.BACKGROUND");
+}
+
+/**
+ * @tc.name: ToJsonValueTest002
+ * @tc.desc: test ToJsonValue with negative IndicatorType
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create picker framenode and property.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.step: step2. update property's IndicatorType to -1.
+     * @tc.expected: jsonValue->GetValue("type") is a name string.
+     */
+    property->UpdateIndicatorType(-1);
+
+    /**
+     * @tc.step: step3. call property's ToJsonValue method.
+     * @tc.expected: jsonValue->GetValue("type") is default name string.
+     */
+    const InspectorFilter filter;
+    auto jsonValue = JsonUtil::Create(true);
+    property->ToJsonValue(jsonValue, filter);
+    auto selectionIndicator = jsonValue->GetObject("selectionIndicator");
+    ASSERT_NE(selectionIndicator, nullptr);
+    EXPECT_EQ(selectionIndicator->GetString("type"), "PickerIndicatorType.BACKGROUND");
+}
+
+/**
+ * @tc.name: ToJsonValueTest003
+ * @tc.desc: test ToJsonValue with invalid IndicatorType
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create picker framenode and property.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.step: step2. update property's IndicatorType to 2.
+     * @tc.expected: jsonValue->GetValue("type") is a name string.
+     */
+    property->UpdateIndicatorType(2);
+
+    /**
+     * @tc.step: step3. call property's ToJsonValue method.
+     * @tc.expected: jsonValue->GetValue("type") is default name string.
+     */
+    const InspectorFilter filter;
+    auto jsonValue = JsonUtil::Create(true);
+    property->ToJsonValue(jsonValue, filter);
+    auto selectionIndicator = jsonValue->GetObject("selectionIndicator");
+    ASSERT_NE(selectionIndicator, nullptr);
+    EXPECT_EQ(selectionIndicator->GetString("type"), "PickerIndicatorType.BACKGROUND");
 }
 
 } // namespace OHOS::Ace::NG

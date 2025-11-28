@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -25,15 +26,11 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
-enum class PickerIndicatorType {
-    BACKGROUND = 0,
-    DIVIDER
-};
-
+enum class PickerIndicatorType { BACKGROUND = 0, DIVIDER };
+static const char* INDICATOR_TYPE_VALUE[] = { "PickerIndicatorType.BACKGROUND", "PickerIndicatorType.DIVIDER" };
 struct PickerIndicatorStyle {
     int32_t type;
     std::optional<Dimension> strokeWidth;
@@ -53,6 +50,7 @@ struct PickerIndicatorStyle {
 
 class ACE_EXPORT ContainerPickerLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ContainerPickerLayoutProperty, LayoutProperty);
+
 public:
     ContainerPickerLayoutProperty() = default;
     ~ContainerPickerLayoutProperty() override = default;
@@ -79,7 +77,7 @@ public:
         json->PutExtAttr("canLoop", V2::ConvertBoolToString(GetCanLoopValue(true)).c_str(), filter);
         json->PutExtAttr(
             "enableHapticFeedback", V2::ConvertBoolToString(GetEnableHapticFeedbackValue(true)).c_str(), filter);
-        
+
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
@@ -92,17 +90,19 @@ public:
         Dimension defaultIndicatorBorderRadius = 12.0_vp;
 
         auto pickerIndicatorStyle = JsonUtil::Create(true);
-        pickerIndicatorStyle->Put("type", std::to_string(GetIndicatorType().value_or(0)).c_str());
-        pickerIndicatorStyle->Put("strokeWidth",
-            GetIndicatorDividerWidth().value_or(defaultDividerWidth).ToString().c_str());
-        pickerIndicatorStyle->Put("dividerColor",
-            GetIndicatorDividerColor().value_or(defaultDividerColor).ColorToString().c_str());
+        int32_t typeIndex = GetIndicatorType().value_or(0);
+        typeIndex = (typeIndex < 0 || typeIndex >= std::size(INDICATOR_TYPE_VALUE)) ? 0 : typeIndex;
+        pickerIndicatorStyle->Put("type", INDICATOR_TYPE_VALUE[typeIndex]);
+        pickerIndicatorStyle->Put(
+            "strokeWidth", GetIndicatorDividerWidth().value_or(defaultDividerWidth).ToString().c_str());
+        pickerIndicatorStyle->Put(
+            "dividerColor", GetIndicatorDividerColor().value_or(defaultDividerColor).ColorToString().c_str());
         pickerIndicatorStyle->Put("startMargin", GetIndicatorStartMargin().value_or(Dimension()).ToString().c_str());
         pickerIndicatorStyle->Put("endMargin", GetIndicatorEndMargin().value_or(Dimension()).ToString().c_str());
         pickerIndicatorStyle->Put("backgroundColor",
             GetIndicatorBackgroundColor().value_or(defaultIndicatorBackgroundColor).ColorToString().c_str());
-        pickerIndicatorStyle->Put("borderRadius", GetIndicatorBorderRadius().value_or(
-            BorderRadiusProperty(defaultIndicatorBorderRadius)).ToString().c_str());
+        pickerIndicatorStyle->Put("borderRadius",
+            GetIndicatorBorderRadius().value_or(BorderRadiusProperty(defaultIndicatorBorderRadius)).ToString().c_str());
         json->PutExtAttr("selectionIndicator", pickerIndicatorStyle, filter);
     }
 
