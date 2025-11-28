@@ -166,7 +166,7 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
     auto keyboardInsert = safeAreaManager->GetKeyboardInsetImpl();
     auto keyboardY = maxHeight - keyboardInsert.Length();
-    uint32_t top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    uint32_t top = GetSafeAreaTop();
     if (GreatNotEqual(menuOffset.GetY() + menuSize.Height(), keyboardY)) {
         auto currentY = menuOffset.GetY();
         if (GreatOrEqual(currentY, menuSize.Height())) {
@@ -425,7 +425,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     if (safeAreaManager && !(info_->isSingleHandle &&
         IsMenuAreaSmallerHandleArea(singleHandle, menuHeight, menuSpacingBetweenText))) {
         // ignore status bar
-        auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+        auto top = GetSafeAreaTop();
         if (menuPosition.GetY() < top) {
             menuPosition.SetY(top);
         }
@@ -522,7 +522,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
         auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
         auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
-        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+        auto topArea = GetSafeAreaTop();
         if ((shouldAvoidKeyboard || shouldAvoidBottom) && GreatNotEqual(offsetY, 0)) {
             if (GreatNotEqual(topArea, offsetY)) {
                 offsetY = downPaint.Bottom() - spaceBetweenText - menuRect.Height();
@@ -563,7 +563,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffsetWhenHandlesUnshown(c
     CHECK_NULL_RETURN(pipeline, menuOffset);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
-    auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto topArea = GetSafeAreaTop();
     auto selectArea = info_->selectArea;
     selectArea += mainWindowOffset_ + containerModalOffset_;
     if (topArea > menuOffset.GetY()) {
@@ -672,7 +672,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     // 安全区域
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, OffsetF());
-    auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto topArea = GetSafeAreaTop();
     auto keyboardInsert = safeAreaManager->GetKeyboardInsetImpl();
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
@@ -716,7 +716,7 @@ void SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategyGetY(const AvoidStrategyM
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto topArea = GetSafeAreaTop();
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     // 顶部避让
     offsetY = upHandle.isShow ? (avoidStrategyMember.selectAreaTop - avoidStrategyMember.menuSpacing -
@@ -842,5 +842,24 @@ bool SelectOverlayLayoutAlgorithm::AdjustToInfo(LayoutWrapper *layoutWrapper, Of
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(info->computeMenuOffset, false);
     return info_->computeMenuOffset(layoutWrapper, menuOffset, menuRect, windowOffset, info);
+}
+
+uint32_t SelectOverlayLayoutAlgorithm::GetSafeAreaTop()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, 0);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    uint32_t topArea = 0;
+    if (safeAreaManager) {
+        topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    }
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    if (avoidInfoMgr && avoidInfoMgr->NeedAvoidContainerModal()) {
+        RectF containerModalRect;
+        RectF floatButtonRect;
+        avoidInfoMgr->GetContainerModalButtonsRect(containerModalRect, floatButtonRect);
+        topArea = std::max(topArea, (uint32_t)floatButtonRect.Height());
+    }
+    return topArea;
 }
 } // namespace OHOS::Ace::NG

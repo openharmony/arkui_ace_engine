@@ -875,7 +875,7 @@ void GetOptionsParamsHasSymbol(
             params.back().symbolId = theme->GetSearchSymbolId();
         }
     }
-    if (info->menuInfo.aiMenuOptionType != TextDataDetectType::INVALID) {
+    if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
         auto inheritFunc = ConvertToVoidFunction(info->menuCallback.onAIMenuOption, "From_Right_Click");
         params.emplace_back(theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType),
             GetMenuCallbackWithContainerId(inheritFunc), "", true);
