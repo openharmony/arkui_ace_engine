@@ -1291,7 +1291,10 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, OnFocusCustomKeyboardChange, TestSize
     ASSERT_NE(richEditorPattern, nullptr);
     auto pipeline = richEditorPattern->GetContext();
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    auto frameNode = FrameNode::CreateFrameNode("tag", 2, richEditorPattern, false);
+    auto refPattern = AceType::MakeRefPtr<RichEditorPattern>();
+    refPattern->customKeyboardBuilder_ = []() {};
+    refPattern->isCustomKeyboardAttached_ = true;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
     WeakPtr<FrameNode> weakNode(frameNode);
     textFieldManager->SetPreNode(weakNode);
     pipeline->SetTextFieldManager(textFieldManager);
@@ -1310,13 +1313,16 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, OnFocusCustomKeyboardChange, TestSize
     textFieldManager->SetPreNode(weakNode);
     pipeline->SetTextFieldManager(textFieldManager);
     richEditorPattern->OnFocusCustomKeyboardChange();
-    EXPECT_FALSE(richEditorPattern->isCustomKeyboardAttached_);
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    richEditorPattern->customKeyboardNode_ = nullptr;
+    auto customKeyboardId = richEditorPattern->GetTextFieldManager()->GetCustomKeyboardId();
+    EXPECT_EQ(customKeyboardId, richEditorPattern->customKeyboardNode_->GetId());
+    richEditorPattern->customKeyboardNode_ =
+        AceType::MakeRefPtr<FrameNode>("node", 2003, AceType::MakeRefPtr<Pattern>());
+    EXPECT_TRUE(richEditorPattern->customKeyboardBuilder_);
     textFieldManager->SetPreNode(weakNode);
     pipeline->SetTextFieldManager(textFieldManager);
     richEditorPattern->OnFocusCustomKeyboardChange();
-    EXPECT_FALSE(richEditorPattern->isCustomKeyboardAttached_);
+    customKeyboardId = richEditorPattern->GetTextFieldManager()->GetCustomKeyboardId();
+    EXPECT_NE(customKeyboardId, 2003);
 }
 
 /**
