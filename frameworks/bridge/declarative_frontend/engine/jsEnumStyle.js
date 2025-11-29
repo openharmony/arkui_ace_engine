@@ -5009,6 +5009,8 @@ let PresetFillType;
 let SystemProperties;
 (function (SystemProperties) {
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
+  SystemProperties.WINDOW_SIZE = 'system.window.size';
+  SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
 })(SystemProperties || (SystemProperties = {}));
 
 let ResolveStrategy;

@@ -24,6 +24,8 @@
  */
 interface EnvTypeMap {
   'system.arkui.breakpoint': WindowSizeLayoutBreakpoint;
+  'system.window.size': WindowSizeVpEnv;
+  'system.window.size.px': WindowSizePxEnv;
 }
 
 /**
@@ -50,5 +52,21 @@ const envFactoryMap: {
     }
     stateMgmtConsole.debug(`create WindowSizeLayoutBreakpoint.`);
     return new WindowSizeLayoutBreakpoint(context);
+  },
+  'system.window.size': (context: UIContext) => {
+    const WindowSizeVpEnv = requireNapi('window.windowsizeenv').WindowSizeVpEnv;
+    if (typeof WindowSizeVpEnv !== 'function') {
+      throw new Error('WindowSizeVpEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowSizeVpEnv.`);
+    return new WindowSizeVpEnv(context);
+  },
+  'system.window.size.px': (context: UIContext) => {
+    const WindowSizePxEnv = requireNapi('window.windowsizeenv').WindowSizePxEnv;
+    if (typeof WindowSizePxEnv !== 'function') {
+      throw new Error('WindowSizePxEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowSizePxEnv.`);
+    return new WindowSizePxEnv(context);
   }
 };
