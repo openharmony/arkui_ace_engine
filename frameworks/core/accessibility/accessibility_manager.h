@@ -410,7 +410,7 @@ public:
     virtual bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
         RefPtr<NG::FrameNode>& readableNode)
     {
-        return true;
+        return false;
     }
 
     virtual int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node)
