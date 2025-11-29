@@ -420,10 +420,6 @@ JSRef<JSObject> JSMeasureLayoutParamNG::GetSelfLayoutInfo()
 
 void JSMeasureLayoutParamNG::UpdateSize(int32_t index, const NG::SizeF& size)
 {
-    if (childArray_.IsEmpty()) {
-        return;
-    }
-
     auto vm = const_cast<EcmaVM*>(childArray_->GetEcmaVM());
     if (JsiDeclarativeEngineInstance::GetCurrentRuntime() != nullptr && vm != nullptr) {
         panda::LocalScope socpe(vm);
