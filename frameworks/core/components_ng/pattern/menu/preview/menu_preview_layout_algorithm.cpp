@@ -94,7 +94,7 @@ void MenuPreviewLayoutAlgorithm::UpdateLayoutConstraintForPreview(LayoutWrapper*
     CHECK_NULL_VOID(menuPattern);
     auto menuParam = menuWrapperPattern->GetMenuParam();
     if (menuParam.isPreviewContainScale) {
-        auto menuWindowRect = menuPattern->GetMenuWindowRect();
+        auto menuWindowRect = menuWrapperPattern->GetMenuWindowRect();
         auto maxWidth = menuWindowRect.Width();
         auto maxHeight = menuWindowRect.Height();
         auto targetSize = menuPattern->GetTargetSize();

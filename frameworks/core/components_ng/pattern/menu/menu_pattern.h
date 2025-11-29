@@ -612,14 +612,6 @@ public:
     {
         return isStackSubmenu_;
     }
-    void SetMenuWindowRect(const Rect& menuWindowRect)
-    {
-        menuWindowRect_ = menuWindowRect;
-    }
-    Rect GetMenuWindowRect() const
-    {
-        return menuWindowRect_;
-    }
 
     void SetMenuLayoutParam(const PreviewMenuParam& layoutParam)
     {
@@ -865,7 +857,6 @@ private:
     std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
-    Rect menuWindowRect_;
     PreviewMenuParam layoutParam_;
     WeakPtr<UINode> customNode_ = nullptr;
     std::optional<MenuPathParams> pathParams_ = std::nullopt;

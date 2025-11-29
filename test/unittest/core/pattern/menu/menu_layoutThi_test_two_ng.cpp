@@ -429,7 +429,6 @@ HWTEST_F(MenuLayout3TwoTestNg, InitWrapperRect002, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutAlgorithm->canExpandCurrentWindow_ = true;
     layoutAlgorithm->isExpandDisplay_ = true;
-    layoutAlgorithm->isTargetNodeInSubwindow_ = false;
     layoutAlgorithm->param_.menuWindowRect = Rect(ZERO, ZERO, WIDTH, HEIGHT);
     layoutAlgorithm->InitWrapperRect(property, menuPattern);
     EXPECT_EQ(layoutAlgorithm->wrapperSize_.width_, TEN);
@@ -456,7 +455,6 @@ HWTEST_F(MenuLayout3TwoTestNg, InitWrapperRect003, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutAlgorithm->canExpandCurrentWindow_ = true;
     layoutAlgorithm->isExpandDisplay_ = true;
-    layoutAlgorithm->isTargetNodeInSubwindow_ = true;
     layoutAlgorithm->param_.menuWindowRect = Rect(ZERO, ZERO, WIDTH, HEIGHT);
     layoutAlgorithm->InitWrapperRect(property, menuPattern);
     EXPECT_EQ(layoutAlgorithm->wrapperSize_.width_, TEN);
@@ -739,13 +737,13 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
 {
     MenuLayoutAlgorithm menuLayoutAlgorithm;
     RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
-    menuLayoutAlgorithm.canExpandCurrentWindow_ = false;
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = false;
     menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
     menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
     menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
     menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
-    menuLayoutAlgorithm.ModifyTargetOffset();
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_);
     auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
     ASSERT_NE(menuNode, nullptr);
     menuPattern->AttachToFrameNode(menuNode);
@@ -754,8 +752,7 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
  
     menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
     menuLayoutAlgorithm.isExpandDisplay_ = true;
-    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = false;
-    menuLayoutAlgorithm.ModifyTargetOffset();
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_);
     EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
 }
  
