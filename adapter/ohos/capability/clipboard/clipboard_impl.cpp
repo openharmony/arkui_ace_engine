@@ -25,7 +25,7 @@ namespace {
 std::string g_clipboard;
 RefPtr<PixelMap> g_pixmap;
 #else
-const std::string PASSWORDVAULT_BUNDLE_NAME = "com.autofill.ohos.passwordvault";
+const std::string AUTO_FILL_SECURE_PASTE = "autofill/secure";
 #endif
 } // namespace
 
@@ -489,7 +489,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
         return;
     }
     TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
-    if (IsPasteFromAutoFill(pasteDataRecord->GetMimeTypes(), PASSWORDVAULT_BUNDLE_NAME)) {
+    if (IsPasteFromAutoFill(pasteDataRecord->GetMimeTypes(), AUTO_FILL_SECURE_PASTE)) {
         isFromAutoFill = true;
         return;
     }
@@ -684,7 +684,7 @@ void ClipboardImpl::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arr
         }
         TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "ProcessSpanStringData, mimeType:%{public}s",
             pasteDataRecord->GetMimeType().c_str());
-        if (IsPasteFromAutoFill(pasteDataRecord->GetMimeTypes(), PASSWORDVAULT_BUNDLE_NAME)) {
+        if (IsPasteFromAutoFill(pasteDataRecord->GetMimeTypes(), AUTO_FILL_SECURE_PASTE)) {
             isFromAutoFill = true;
             return;
         }
