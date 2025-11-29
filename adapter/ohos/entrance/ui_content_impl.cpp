@@ -1912,8 +1912,9 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
     auto smartGesture = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_SMART_GESTURE_SWITCH);
     if (!smartGesture.empty()) {
-        SystemProperties::SetFocusCanBeActive(smartGesture ==
-            OHOS::AppExecFwk::ConfigurationInner::SMART_GESTURE_AUTO);
+        auto canActivate = (smartGesture == OHOS::AppExecFwk::ConfigurationInner::SMART_GESTURE_AUTO);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "StoreConfiguration SMART_GESTURE %{public}d", canActivate);
+        SystemProperties::SetFocusCanBeActive(canActivate);
     }
 }
 
