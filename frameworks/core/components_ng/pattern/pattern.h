@@ -856,6 +856,8 @@ public:
     {
         return nullptr;
     }
+    virtual void OnHoverWithHightLight(bool isHover) {}
+    virtual void OnPaintFocusState(bool isFocus) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}
