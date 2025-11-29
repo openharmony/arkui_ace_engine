@@ -2311,6 +2311,17 @@ void FormPattern::RemoveFormChildNode(FormChildNodeType formChildNodeType)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void FormPattern::SwitchRenderGroup(bool isRenderGroup)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    ACE_SCOPED_TRACE("%s id:%d isRenderGroup:%d", __func__, host->GetId(), isRenderGroup);
+    renderContext->UpdateRenderGroup(isRenderGroup);
+    renderContext->RequestNextFrame();
+}
+
 RefPtr<FrameNode> FormPattern::GetFormChildNode(FormChildNodeType formChildNodeType) const
 {
     auto iter = formChildrenNodeMap_.find(formChildNodeType);
@@ -2493,10 +2504,13 @@ void FormPattern::DoSkeletonAnimation()
         return;
     }
 
+    // Switch off render group of the form node before doing animation
+    SwitchRenderGroup(false);
     std::function<void()> finishCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+        pattern->SwitchRenderGroup(true);
         TAG_LOGD(AceLogTag::ACE_FORM, "DoSkeletonAnimation finishCallBack");
     };
 

@@ -267,6 +267,7 @@ private:
     void LoadDisableFormStyle(const RequestFormInfo& info, bool isRefresh = false);
     void RemoveDisableFormStyle(const RequestFormInfo& info);
     void RemoveFormChildNode(FormChildNodeType formChildNodeType);
+    void SwitchRenderGroup(bool isRenderGroup);
     int32_t GetFormDimensionHeight(int32_t dimension);
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
     RefPtr<FrameNode> CreateRowNode(FormChildNodeType formChildNodeType);
