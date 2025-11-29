@@ -898,4 +898,21 @@ HWTEST_F(RichEditorEventTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level
     EXPECT_NE(richEditorPattern->richEditorInstanceId_, -2);
 }
 
+/**
+ * @tc.name: OnFocusNodeChange001
+ * @tc.desc: Test OnFocusNodeChange when blockKbInFloatingWindow_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, OnFocusNodeChange001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->blockKbInFloatingWindow_ = true;
+
+    richEditorPattern->OnFocusNodeChange(FocusReason::DEFAULT);
+    EXPECT_FALSE(richEditorPattern->blockKbInFloatingWindow_);
+}
+
 }
