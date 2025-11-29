@@ -857,4 +857,127 @@ HWTEST_F(RadioPatternTwoTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetRadioUncheckedBorderColorValue(), radioTheme->GetUnCheckBorderColor());
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: IsJsonValid001
+ * @tc.desc: Test IsJsonValid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, IsJsonValid001, TestSize.Level1)
+{
+    EXPECT_EQ(RadioPattern::IsJsonValid(nullptr), false);
+    EXPECT_EQ(RadioPattern::IsJsonValid(JsonUtil::ParseJsonString("{}")), true);
+}
+
+/**
+ * @tc.name: IsJsonObject001
+ * @tc.desc: Test IsJsonObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, IsJsonObject001, TestSize.Level1)
+{
+    EXPECT_EQ(RadioPattern::IsJsonObject(nullptr), false);
+    EXPECT_EQ(RadioPattern::IsJsonObject(JsonUtil::ParseJsonString("{}")), true);
+}
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->OnInjectionEvent(""), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{}"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\"}"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":}"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":1}"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":a}"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"check\"}"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"checked\"}"), RET_SUCCESS);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"checked\",\"params\":"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"checked\",\"params\":{}"), RET_FAILED);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"checked\",\"params\":{}}"), RET_SUCCESS);
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"checked\",\"params\":{\"value\":a}}"), RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent002
+ * @tc.desc: Test OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, OnInjectionEvent002, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"checked\",\"params\":{\"value\":true}}"), RET_SUCCESS);
+    EXPECT_EQ(paintProperty->GetRadioCheck().value_or(false), true);
+
+    EXPECT_EQ(pattern->OnInjectionEvent("{\"cmd\":\"checked\",\"params\":{\"value\":false}}"), RET_SUCCESS);
+    EXPECT_EQ(paintProperty->GetRadioCheck().value_or(false), false);
+}
+
+/**
+ * @tc.name: ReportInitOnChangeEvent001
+ * @tc.desc: Test ReportInitOnChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, ReportInitOnChangeEvent001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->isFirstCreated_ = false;
+    EXPECT_EQ(pattern->ReportInitOnChangeEvent(frameNode->GetId(), false), false);
+
+    pattern->isFirstCreated_ = true;
+    EXPECT_EQ(pattern->ReportInitOnChangeEvent(frameNode->GetId(), false), false);
+    EXPECT_EQ(pattern->ReportInitOnChangeEvent(frameNode->GetId(), true), true);
+}
+
+/**
+ * @tc.name: ReportOnChangeEvent001
+ * @tc.desc: Test ReportOnChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, ReportOnChangeEvent001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->ReportOnChangeEvent(frameNode->GetId(), true, true), true);
+    EXPECT_EQ(pattern->ReportOnChangeEvent(frameNode->GetId(), false, true), true);
+
+    pattern->preCheck_ = false;
+    EXPECT_EQ(pattern->ReportOnChangeEvent(frameNode->GetId(), false, false), false);
+    EXPECT_EQ(pattern->ReportOnChangeEvent(frameNode->GetId(), true, false), true);
+}
 } // namespace OHOS::Ace::NG
