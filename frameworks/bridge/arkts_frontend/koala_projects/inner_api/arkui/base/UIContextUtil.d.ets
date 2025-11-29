@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-import {
-    __memo_context_type as __memo_context_type,
-    __memo_id_type as __memo_id_type,
-} from 'arkui.stateManagement.runtime';
-import { memo } from '@koalaui/runtime/annotations'
+import { int32 } from '@koalaui/compat';
 
-@memo
-export declare function remember<Value>(
-    compute: () => Value
-): Value;
+export declare class UIContextUtil {
+    static getCurrentInstanceId(): int32;
+}
