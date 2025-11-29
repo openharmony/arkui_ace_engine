@@ -1775,20 +1775,7 @@ import {
    * @returns resource size
    */
   function getNumberByResourceId(resourceId: long, defaultValue: number, allowZero?: boolean): number {
-    try {
-      let sourceValue: number = resourceManager.getSysResourceManager().getDouble(resourceId);
-      if (sourceValue > 0 || allowZero) {
-        return sourceValue;
-      } else {
-        return defaultValue;
-      }
-    } catch (error) {
-      let code: number | undefined = (error as ClassCastError).code;
-      let message: string | undefined = (error as ClassCastError).message;
-      hilog.error(0x3900, 'Ace',
-        `CustomContentDialog getNumberByResourceId error, code: ${code}, message: ${message}`);
-      return defaultValue;
-    }
+    return defaultValue;
   }
   
   /**
@@ -1799,20 +1786,7 @@ import {
    * @returns number
    */
   function getEnumNumberByResourceId(resourceId: long, defaultValue: number): number {
-    try {
-      let sourceValue: number = resourceManager.getSysResourceManager().getDouble(resourceId);
-      if (sourceValue > 0) {
-        return sourceValue;
-      } else {
-        return defaultValue;
-      }
-    } catch (error) {
-      let code: number | undefined = (error as ClassCastError).code;
-      let message: string | undefined = (error as ClassCastError).message;
-      hilog.error(0x3900, 'Ace',
-        `getEnumNumberByResourceId error, code: ${code}, message: ${message}`);
-      return defaultValue;
-    }
+    return defaultValue;
   }
   
   /**

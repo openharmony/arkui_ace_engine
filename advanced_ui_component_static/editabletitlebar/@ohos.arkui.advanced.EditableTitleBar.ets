@@ -446,6 +446,8 @@ struct EditableTitleBarMenuSection {
                 attribute: ItemType.Icon,
                 imageMenuItemId: `ImageMenuItem_${this.parentUniqueId}_${index}`
               })
+            }, (item: EditableTitleBarMenuItem, index: int) => {
+              return JSON.stringify(item.value + '_' + index)
             })
         }
         if (this.isSaveEnabled) {
