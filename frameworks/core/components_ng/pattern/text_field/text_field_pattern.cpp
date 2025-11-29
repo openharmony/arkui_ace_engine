@@ -1213,6 +1213,8 @@ void TextFieldPattern::SetFocusStyle()
     if (layoutProperty->GetPlaceholderTextColorValue(defaultPlaceholderColor) == defaultPlaceholderColor) {
         layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetFocusPlaceholderColor());
         isFocusPlaceholderColorSet_ = true;
+        std::string info = "TextFieldPattern::SetFocusStyle theme";
+        SetPlaceholderColorInfo(info);
     }
 }
 
@@ -1237,6 +1239,8 @@ void TextFieldPattern::ClearFocusStyle()
     }
     if (isFocusPlaceholderColorSet_ && !paintProperty->GetPlaceholderColorFlagByUserValue(false)) {
         layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
+        std::string info = "TextFieldPattern::ClearFocusStyle theme";
+        SetPlaceholderColorInfo(info);
     }
     isFocusBGColorSet_ = false;
     isFocusTextColorSet_ = false;
@@ -7914,6 +7918,8 @@ void TextFieldPattern::SetShowError()
             layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
             if (!layoutProperty->HasPlaceholderTextColor()) {
                 layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
+                std::string info = "TextFieldPattern::SetShowError theme";
+                SetPlaceholderColorInfo(info);
             }
         }
     }
@@ -8754,7 +8760,9 @@ void TextFieldPattern::DumpPlaceHolderInfo()
                                        .append(UtfUtils::Str16DebugToStr8(GetPlaceHolder()))
                                        .append(" [IsStyledPlaceholder:")
                                        .append(IsStyledPlaceholder() ? "true]" : "false]"));
-    DumpLog::GetInstance().AddDesc(std::string("placeholderColor: ").append(GetPlaceholderColor()));
+    DumpLog::GetInstance().AddDesc(std::string("placeholderColor: ").append(GetPlaceholderColor())
+        .append(" placeholderColorInfo:")
+        .append(placeholderColorInfo_));
     DumpLog::GetInstance().AddDesc(std::string("placeholderFont: ").append(GetPlaceholderFont()));
 }
 
@@ -12104,6 +12112,10 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, true, frameNode);
+                    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+                    CHECK_NULL_VOID(pattern);
+                    std::string info = "TextFieldPattern::UpdatePropertyImpl:" + (*realValue).ToString();
+                    pattern->SetPlaceholderColorInfo(info);
                 }
             }
         },

@@ -1082,6 +1082,10 @@ void SearchPattern::PaintSearchFocusState()
     if (textFieldLayoutProperty->GetPlaceholderTextColorValue(normalPlaceholderColor) == normalPlaceholderColor) {
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetFocusPlaceholderColor());
         isFocusPlaceholderColorSet_ = true;
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        std::string info = "SearchPattern::PaintSearch theme";
+        textFieldPattern->SetPlaceholderColorInfo(info);
     }
 }
 
@@ -1658,6 +1662,11 @@ void SearchPattern::HandleBlurEvent()
     }
     if (isFocusPlaceholderColorSet_ && !textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false)) {
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        if (textFieldPattern) {
+            std::string info = "SearchPattern::HandleBlur theme";
+            textFieldPattern->SetPlaceholderColorInfo(info);
+        }
     }
     isFocusTextColorSet_ = false;
     isFocusPlaceholderColorSet_ = false;
@@ -2211,6 +2220,11 @@ void SearchPattern::UpdateTextFieldColor()
         }
         if (!textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false)) {
             textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+            auto textFieldPattern = textField->GetPattern<TextFieldPattern>();
+            if (textFieldPattern) {
+                std::string info = "SearchPattern::UpdateTextField theme";
+                textFieldPattern->SetPlaceholderColorInfo(info);
+            }
         }
         textField->MarkModifyDone();
         textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -3401,6 +3415,10 @@ void SearchPattern::UpdatePlaceholderColorResource(const Color& value)
     textFieldLayoutProperty->UpdatePlaceholderTextColor(value);
     textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    std::string info = "SearchPattern::UpdateRe:" + value.ToString() ;
+    textFieldPattern->SetPlaceholderColorInfo(info);
 }
 
 void SearchPattern::UpdatePlaceholderFontSizeResource(const Dimension& value)

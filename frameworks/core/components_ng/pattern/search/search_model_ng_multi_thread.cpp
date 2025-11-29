@@ -74,6 +74,8 @@ void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentN
         if (!hasTextFieldNode) {
             textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
             textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+            std::string info = "ModelNG::Cre Mul isT";
+            pattern->SetPlaceholderColorInfo(info);
         }
     }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());

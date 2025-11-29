@@ -1799,6 +1799,13 @@ public:
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
     void CloseTextCustomKeyboard(int32_t nodeId) override;
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
+    void SetPlaceholderColorInfo(const std::string& info)
+    {
+        if (placeholderColorInfo_.length() > 2000) { // Clear when exceeding 2000 characters
+            placeholderColorInfo_.clear();
+        }
+        placeholderColorInfo_.append("[" + info + "]");
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -2365,6 +2372,7 @@ private:
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
     RelatedLPXInfo lpxInfo_;
+    std::string placeholderColorInfo_;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

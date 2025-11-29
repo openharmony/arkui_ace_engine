@@ -833,10 +833,13 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 }
 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleSetTextColor(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& frameNode, TextStyle& textStyle,
     bool isDisabled, bool isTextColorByUser)
 {
     CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    auto theme = textFieldPattern->GetTheme();
     CHECK_NULL_VOID(theme);
     if (isTextColorByUser) {
         auto textColor = layoutProperty->GetPlaceholderTextColorValue(theme->GetPlaceholderColor());
@@ -851,6 +854,8 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleSetTextColor(
             auto placeholderTextColor = theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor();
             layoutProperty->UpdatePlaceholderTextColor(placeholderTextColor);
             textStyle.SetTextColor(layoutProperty->GetPlaceholderTextColorValue(placeholderTextColor));
+            std::string info = "TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle";
+            textFieldPattern->SetPlaceholderColorInfo(info);
         }
     }
 }
@@ -959,7 +964,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
 
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(layoutProperty->GetPlaceholderFontWeightValue(theme->GetFontWeight()));
-    UpdatePlaceholderTextStyleSetTextColor(layoutProperty, theme, textStyle, isDisabled, isTextColorByUser);
+    UpdatePlaceholderTextStyleSetTextColor(layoutProperty, frameNode, textStyle, isDisabled, isTextColorByUser);
     if (layoutProperty->HasPlaceholderMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetPlaceholderMaxLines().value());
     }
