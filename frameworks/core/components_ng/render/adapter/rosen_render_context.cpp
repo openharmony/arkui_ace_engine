@@ -6253,6 +6253,10 @@ void RosenRenderContext::DumpInfo()
             + std::to_string(progressMaskPropertyPtr->GetEnableBreathe())
         );
     }
+
+    if (GetExcludeFromRenderGroupValue(false)) {
+        DumpLog::GetInstance().AddDesc(std::string("excludeRenderGroup:1"));
+    }
 }
 
 void RosenRenderContext::DumpAdvanceInfo()
@@ -6792,6 +6796,13 @@ void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bo
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkNodeGroup(isRenderGroup, isForced, includeProperty);
+}
+
+void RosenRenderContext::OnExcludeFromRenderGroupUpdate(bool exclude)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->ExcludedFromNodeGroup(exclude);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnNodeNameUpdate(const std::string& id)

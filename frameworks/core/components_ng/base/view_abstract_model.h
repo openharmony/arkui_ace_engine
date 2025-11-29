@@ -268,6 +268,7 @@ public:
         bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
+    virtual void SetExcludeFromRenderGroup(bool exclude) {}
     virtual void SetRenderFit(RenderFit renderFit) = 0;
     virtual void SetRenderStrategy(RenderStrategy renderStrategy) = 0;
 

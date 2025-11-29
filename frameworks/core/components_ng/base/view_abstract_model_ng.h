@@ -931,6 +931,11 @@ public:
         ViewAbstract::SetRenderGroup(isRenderGroup);
     }
 
+    void SetExcludeFromRenderGroup(bool exclude) override
+    {
+        ViewAbstract::SetExcludeFromRenderGroup(exclude);
+    }
+
     void SetRenderFit(RenderFit renderFit) override
     {
         ViewAbstract::SetRenderFit(renderFit);

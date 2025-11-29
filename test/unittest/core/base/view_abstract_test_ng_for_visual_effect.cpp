@@ -207,4 +207,68 @@ HWTEST_F(ViewAbstractTestNg, SetBlendApplyType, TestSize.Level1)
     ASSERT_TRUE(property.has_value());
     EXPECT_EQ(testType, property.value());
 }
+
+/**
+ * @tc.name: SetExcludeFromRenderGroup001
+ * @tc.desc: Test the SetExcludeFromRenderGroup function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetExcludeFromRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeInStack = stack->GetMainFrameNode();
+    ASSERT_NE(nodeInStack, nullptr);
+    auto renderContextInStack = nodeInStack->GetRenderContext();
+    ASSERT_NE(renderContextInStack, nullptr);
+    /**
+     * @tc.steps: step2. Set true to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step2. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(true);
+    ASSERT_TRUE(renderContextInStack->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextInStack->GetExcludeFromRenderGroup().value(), true);
+    /**
+     * @tc.steps: step3. Set false to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step3. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(false);
+    ASSERT_TRUE(renderContextInStack->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextInStack->GetExcludeFromRenderGroup().value(), false);
+}
+
+/**
+ * @tc.name: SetExcludeFromRenderGroup002
+ * @tc.desc: Test the SetExcludeFromRenderGroup function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetExcludeFromRenderGroup002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto node = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContextOfNode = node->GetRenderContext();
+    ASSERT_NE(renderContextOfNode, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+    /**
+     * @tc.steps: step2. Set true to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step2. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(nodePtr, true);
+    ASSERT_TRUE(renderContextOfNode->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextOfNode->GetExcludeFromRenderGroup().value(), true);
+    /**
+     * @tc.steps: step3. Set false to ExcludeFromRenderGroup property and get.
+     * @tc.expected: step3. ExcludeFromRenderGroup property value is same with the value set.
+     */
+    ViewAbstract::SetExcludeFromRenderGroup(nodePtr, false);
+    ASSERT_TRUE(renderContextOfNode->GetExcludeFromRenderGroup().has_value());
+    EXPECT_EQ(renderContextOfNode->GetExcludeFromRenderGroup().value(), false);
+}
 } // namespace OHOS::Ace::NG

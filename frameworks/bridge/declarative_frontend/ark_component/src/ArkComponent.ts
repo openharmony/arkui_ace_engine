@@ -1853,6 +1853,20 @@ class RenderGroupModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ExcludeFromRenderGroupModifier extends ModifierWithKey<boolean|undefined> {
+  constructor(value: boolean|undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('excludeFromRenderGroup');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetExcludeFromRenderGroup(node);
+    } else {
+      getUINativeModule().common.setExcludeFromRenderGroup(node, this.value);
+    }
+  }
+}
+
 class RenderFitModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -5108,6 +5122,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   renderGroup(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, RenderGroupModifier.identity, RenderGroupModifier, value);
+    return this;
+  }
+
+  excludeFromRenderGroup(value: boolean | undefined): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ExcludeFromRenderGroupModifier.identity, ExcludeFromRenderGroupModifier, value);
     return this;
   }
 

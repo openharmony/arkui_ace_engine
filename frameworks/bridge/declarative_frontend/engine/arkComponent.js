@@ -1754,6 +1754,20 @@ class RenderGroupModifier extends ModifierWithKey {
   }
 }
 RenderGroupModifier.identity = Symbol('renderGroup');
+class ExcludeFromRenderGroupModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetExcludeFromRenderGroup(node);
+    }
+    else {
+      getUINativeModule().common.setExcludeFromRenderGroup(node, this.value);
+    }
+  }
+}
+ExcludeFromRenderGroupModifier.identity = Symbol('excludeFromRenderGroup');
 class RenderFitModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4752,6 +4766,11 @@ class ArkComponent {
   }
   renderGroup(value) {
     modifierWithKey(this._modifiersWithKeys, RenderGroupModifier.identity, RenderGroupModifier, value);
+    return this;
+  }
+  excludeFromRenderGroup(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ExcludeFromRenderGroupModifier.identity, ExcludeFromRenderGroupModifier, value);
     return this;
   }
   translate(value) {

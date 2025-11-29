@@ -376,6 +376,8 @@ public:
     static void SetZIndex(int32_t value);
     // renderGroup
     static void SetRenderGroup(bool isRenderGroup);
+    // exclude self and children from renderGroup
+    static void SetExcludeFromRenderGroup(bool exclude);
     // renderFit, i.e. gravity
     static void SetRenderFit(RenderFit renderFit);
     // renderStrategy
@@ -770,6 +772,7 @@ public:
     static void SetLightUpEffect(FrameNode* frameNode, double radio);
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
+    static void SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);

@@ -6037,6 +6037,15 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
+void ViewAbstract::SetExcludeFromRenderGroup(bool exclude)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetExcludeFromRenderGroup(frameNode, exclude);
+}
+
 void ViewAbstract::SetRenderFit(RenderFit renderFit)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -6824,6 +6833,11 @@ void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
     ACE_UPDATE_NODE_RENDER_CONTEXT(RenderGroup, isRenderGroup, frameNode);
     CHECK_NULL_VOID(frameNode);
     frameNode->SetApplicationRenderGroupMarked(true);
+}
+
+void ViewAbstract::SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ExcludeFromRenderGroup, exclude, frameNode);
 }
 
 void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)

@@ -637,6 +637,7 @@ protected:
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
+    void OnExcludeFromRenderGroupUpdate(bool exclude) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
     void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
