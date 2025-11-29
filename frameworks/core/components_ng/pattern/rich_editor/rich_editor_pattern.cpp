@@ -6820,10 +6820,7 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length, bool i
             return u"";
         }
     }
-    auto host = GetContentHost();
-    if (host && host->GetChildren().empty()) {
-        textForDisplay_.clear();
-    }
+    ClearTextForDisplayIfEmpty();
     RequestKeyboardToEdit();
     return deleteText;
 }
@@ -6923,11 +6920,15 @@ void RichEditorPattern::DeleteContent(int32_t length)
             return;
         }
     }
-    auto host = GetContentHost();
-    if (host && host->GetChildren().empty()) {
-        textForDisplay_.clear();
-    }
+    ClearTextForDisplayIfEmpty();
     RequestKeyboardToEdit();
+}
+
+void RichEditorPattern::ClearTextForDisplayIfEmpty()
+{
+    auto host = GetContentHost();
+    CHECK_NULL_VOID(host && host->GetChildren().empty());
+    textForDisplay_.clear();
 }
 
 void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
