@@ -92,4 +92,18 @@ void View::SetOpacity(double opacity)
     NG::ViewAbstract::SetOpacity(reinterpret_cast<AceNode*>(node_->GetHandle()), opacity);
 }
 
+TextDirection View::GetDirection()
+{
+    return NG::ViewAbstract::GetDirection(reinterpret_cast<AceNode*>(node_->GetHandle()));
+}
+
+TextDirection View::GetNonAutoLayoutDirection()
+{
+    auto direction = GetDirection();
+    if (direction != TextDirection::AUTO) {
+        return direction;
+    }
+    return AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+}
+
 } // namespace OHOS::Ace::Kit

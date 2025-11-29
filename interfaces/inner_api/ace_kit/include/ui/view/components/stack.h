@@ -25,8 +25,10 @@ namespace OHOS::Ace::Kit {
 class ACE_FORCE_EXPORT Stack : public View {
 public:
     static RefPtr<Stack> Create();
+    static RefPtr<Stack> Create(RefPtr<FrameNode>& node);
     ~Stack() override;
     Stack();
+    Stack(RefPtr<FrameNode>& node);
 
     void SetAlignment(Ace::Alignment align);
 };

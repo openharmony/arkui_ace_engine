@@ -24,6 +24,7 @@
 #include "ui/base/geometry/ng/offset_t.h"
 #include "ui/base/geometry/ng/size_t.h"
 #include "ui/properties/dirty_flag.h"
+#include "ui/view/components/stack.h"
 #include "ui/view/frame_node.h"
 #include "ui/view_factory/abstract_view_factory.h"
 
@@ -948,5 +949,28 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest121, TestSize.Level1)
      */
     auto res = frameNodeImpl->GetLayoutConstraint();
     EXPECT_TRUE(NearEqual(res.maxWidth, 100.0f));
+}
+
+/**
+ * @tc.name: FrameNodeTestTest122
+ * @tc.desc: test create stack
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest122, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST122";
+    const int32_t id = 122;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps2: create stack node, validate result.
+     */
+    auto stack = Stack::Create(frameNode);
+    EXPECT_NE(stack, nullptr);
 }
 } // namespace OHOS::Ace
