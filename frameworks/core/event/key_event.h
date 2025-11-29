@@ -38,7 +38,7 @@ enum class ModifierKeyName {
     ModifierKeyFn = 1 << 3,
 };
 
-uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status);
+ACE_FORCE_EXPORT uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status);
 
 enum class KeyCode : int32_t {
     KEY_UNKNOWN = -1,
