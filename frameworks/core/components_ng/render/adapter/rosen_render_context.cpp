@@ -546,7 +546,8 @@ void RosenRenderContext::CreateNodeByType(
             break;
         case ContextType::SURFACE: {
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
+                .isTextureExportNode = isTextureExportNode,
+                .isSkipCheckInMultiInstance = true };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
             break;
         }
@@ -565,7 +566,8 @@ void RosenRenderContext::CreateNodeByType(
             break;
         case ContextType::COMPOSITE_COMPONENT: {
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
+                .isTextureExportNode = isTextureExportNode,
+                .isSkipCheckInMultiInstance = true };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
             break;
         }
@@ -597,7 +599,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(const s
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode, .isSync = true };
-    surfaceNodeConfig.isSkipCheckInMultiInstance = param->isSkipCheckInMultiInstance;
+    surfaceNodeConfig.isSkipCheckInMultiInstance = true;
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode;
     if (rsUIContext) {
         surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsUIContext);
@@ -622,7 +624,8 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
     const std::optional<ContextParam>& param, bool isTextureExportNode)
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-        .isTextureExportNode = isTextureExportNode };
+        .isTextureExportNode = isTextureExportNode,
+        .isSkipCheckInMultiInstance = true };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
     return surfaceNode;
 }
