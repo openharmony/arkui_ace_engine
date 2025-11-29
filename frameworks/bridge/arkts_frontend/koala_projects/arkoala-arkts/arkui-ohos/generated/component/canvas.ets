@@ -29,6 +29,7 @@ import { ModifierStateManager } from '../CommonModifier';
 import { default as drawing } from "@ohos.graphics.drawing"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { default as image } from "@ohos.multimedia.image"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ImageAIOptions_serializer, ImageAIOptions, ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -656,6 +657,7 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setCanvasOptionsAttribute(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (context !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

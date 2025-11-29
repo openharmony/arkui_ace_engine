@@ -21,6 +21,7 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { VoidCallback, Length, ResourceColor, VP, Font, Font_serializer } from "./units"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Bindable_I32_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { IndicatorComponentController_serializer, IndicatorComponentController } from "./indicatorcomponent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
@@ -282,6 +283,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setSwiperOptionsAttribute(controller?: SwiperController): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (controller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

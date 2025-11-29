@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"

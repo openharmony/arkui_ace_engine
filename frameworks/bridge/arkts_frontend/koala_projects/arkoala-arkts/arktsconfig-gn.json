@@ -135,6 +135,9 @@
             ],
             "@ohos.arkui.ArcScrollBar": [
                 "./@ohos.arkui.ArcScrollBar.ets"
+            ],
+            "#arktheme": [
+                "./arkui/theme"
             ]
         }
     },

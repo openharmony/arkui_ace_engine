@@ -21,6 +21,7 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_I32_serializer } from "./common"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { ComponentBase } from "./../ComponentBase"
@@ -200,6 +201,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTabsOptionsAttribute(options?: TabsOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

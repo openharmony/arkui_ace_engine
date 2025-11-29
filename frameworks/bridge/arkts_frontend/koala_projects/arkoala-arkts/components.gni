@@ -583,6 +583,7 @@ arkui_path_keys = [
   "@ohos.arkui.stateManagement",
   "@ohos.arkui.ArcList",
   "@ohos.arkui.ArcScrollBar",
+  "#arktheme",
 ]
 
 arkui_path_values = [
@@ -630,4 +631,5 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/stateManagement",
   "arkui-preprocessed/@ohos.arkui.ArcList.ets",
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
+  "arkui-preprocessed/arkui/theme",
 ]

@@ -23,6 +23,7 @@ import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDat
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { Font_serializer, ResourceColor, Length, Font, VoidCallback } from "./units"
@@ -140,10 +141,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
-        // instructive change begin
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        // instructive change end
-
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

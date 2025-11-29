@@ -26,6 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ShadowOptions_serializer, ShadowOpti
 import { LengthMetrics } from "arkui.Graphics"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, Font, ResourceColor, Length, Dimension, BorderRadiuses, BorderRadiuses_serializer } from "./units"
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
@@ -88,6 +89,7 @@ export class ArkSpanPeer extends PeerNode {
         return _peer
     }
     setSpanOptionsAttribute(value: string | Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof string) {
             thisSerializer.writeInt8((0).toByte())
