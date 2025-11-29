@@ -319,6 +319,9 @@ class ParallelizeUIAdapterNode<V, T> implements AdapterNode {
     }
 
     dispose() {
+        this.items.forEach((node, key, map) => {
+            node?.dispose()
+        })
         adapterUpdateSet.delete(this)
     }
 
