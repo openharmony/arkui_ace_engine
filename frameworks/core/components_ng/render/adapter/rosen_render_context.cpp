@@ -4521,7 +4521,7 @@ void RosenRenderContext::SetDrawNode()
 bool RosenRenderContext::AddNodeToRsTree()
 {
     auto node = GetHost();
-    if (!node || node->GetIsDelete() != FrameNode::RsNodeDeleteFlag::ALLOWED) {
+    if (!node || !node->GetIsDelete()) {
         return true;
     }
     if (SystemProperties::GetDebugEnabled()) {
@@ -4544,7 +4544,7 @@ bool RosenRenderContext::AddNodeToRsTree()
         rsNode->AddChild(childRsNode, rsNodeIndex);
         rsNodeIndex++;
     }
-    node->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::PROHIBITED);
+    node->SetDeleteRsNode(false);
     // rebuild parent node
     auto parentNode = node->GetParentFrameNode();
     CHECK_NULL_RETURN(parentNode, false);
@@ -4569,9 +4569,6 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetRsNodeByFrame(const RefPtr
 bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
 {
     CHECK_NULL_RETURN(node, false);
-    if (node->GetIsDelete() == FrameNode::RsNodeDeleteFlag::PROHIBITED) {
-        return false;
-    }
     auto rsNode = GetRsNodeByFrame(node);
     CHECK_NULL_RETURN(rsNode, false);
     std::list <RefPtr<FrameNode>> childChildrenList;
@@ -4581,7 +4578,6 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     if (rsNode->GetIsDrawn() || rsNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE
         || childChildrenList.empty() || node->GetTag() == V2::PAGE_ETS_TAG
         || node->GetTag() == V2::STAGE_ETS_TAG || node->GetTag() == V2::NODE_CONTAINER_ETS_TAG) {
-        node->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::PROHIBITED);
         return false;
     }
     return true;
@@ -4601,7 +4597,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
                 pipeline->AddPositionZNode(child->GetId());
             }
         } else {
-            child->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
+            child->SetDeleteRsNode(true);
             GetLiveChildren(child, childNodes);
         }
     }
@@ -4622,7 +4618,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
                 pipeline->AddPositionZNode(overlayNode->GetId());
             }
         } else {
-            overlayNode->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
+            overlayNode->SetDeleteRsNode(true);
             GetLiveChildren(overlayNode, childNodes);
         }
     }
@@ -4632,7 +4628,7 @@ void RosenRenderContext::AddRsNodeForCapture()
 {
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
-    if (host && host->GetIsDelete() == FrameNode::RsNodeDeleteFlag::ALLOWED) {
+    if (host && host->GetIsDelete()) {
         rsNode_->SetDrawNode();
         auto pipeline = host->GetContext();
         if (pipeline) {
@@ -4655,25 +4651,12 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     auto childNodesNew = children;
     if (SystemProperties::GetContainerDeleteFlag()) {
         auto frameNode = GetHost();
-        if (!frameNode || frameNode->GetIsDelete() == FrameNode::RsNodeDeleteFlag::ALLOWED) {
-            return;
-        }
-        if (CanNodeBeDeleted(frameNode)) {
-            frameNode->SetDeleteRsNode(FrameNode::RsNodeDeleteFlag::ALLOWED);
-            if (auto parentFrameNode = frameNode->GetParentFrameNode()) {
-                parentFrameNode->MarkNeedSyncRenderTree();
-                parentFrameNode->RebuildRenderContextTree();
-            }
+        if (!frameNode || frameNode->GetIsDelete()) {
             return;
         }
         childNodesNew.clear();
         GetLiveChildren(frameNode, childNodesNew);
     }
-    ReCreateRsNodeTreeInner(childNodesNew);
-}
-
-void RosenRenderContext::ReCreateRsNodeTreeInner(const std::list<RefPtr<FrameNode>>& childNodesNew)
-{
     // now rsNode's children, key is id of rsNode, value means whether the node exists in previous children of rsNode.
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
     auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);

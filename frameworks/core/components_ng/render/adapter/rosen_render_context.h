@@ -910,7 +910,6 @@ protected:
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 
 private:
-    void ReCreateRsNodeTreeInner(const std::list<RefPtr<FrameNode>>& childNodesNew);
     void ModifyCustomBackground();
     bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
 
