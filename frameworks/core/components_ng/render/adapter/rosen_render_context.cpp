@@ -813,14 +813,20 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
+    OffsetF paddingOffset;
+    auto&& padding = geometryNode->GetPadding();
+    if (padding && useContentRectForRSFrame_ && !adjustRSFrameByContentRect_ && host->GetTag() == V2::IMAGE_ETS_TAG) {
+        paddingOffset = OffsetF { padding->left.value_or(0), padding->top.value_or(0) };
+    }
     auto paintTask = [contentSize = geometryNode->GetFrameSize(), frameSize = geometryNode->GetMarginFrameSize(),
                          offset = geometryNode->GetMarginFrameOffset(), frameOffset = geometryNode->GetFrameOffset(),
-                         flag](RSCanvas& rsCanvas) mutable {
+                         flag, paddingOffset](RSCanvas& rsCanvas) mutable {
         if (!flag) {
             return;
         }
         DebugBoundaryPainter painter(contentSize, frameSize);
         painter.SetFrameOffset(frameOffset);
+        painter.SetPaddingOffset(paddingOffset);
         painter.DrawDebugBoundaries(rsCanvas, offset);
     };
 
