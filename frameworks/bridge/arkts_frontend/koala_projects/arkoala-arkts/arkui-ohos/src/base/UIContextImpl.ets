@@ -205,6 +205,12 @@ export class FocusControllerImpl extends FocusController {
         focusController.setKeyProcessingMode(mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+    public isActive(): boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = focusController.isActive();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
 }
 
 class ContextMenuControllerImpl extends ContextMenuController {

@@ -315,6 +315,7 @@ function fixNamespace(code: string) {
     code = code.replaceAll(/public static (activate\(isActive)/g, "export function $1")
     code = code.replaceAll(/public static (setAutoFocusTransfer\(isAutoFocusTransfer)/g, "export function $1")
     code = code.replaceAll(/public static (setKeyProcessingMode\(mode)/g, "export function $1")
+    code = code.replaceAll(/public static (isActive\()/g, 'export function $1')
     code = code.replaceAll(/public static (getRectangleById\(rectId)/g, "export function $1")
     code = code.replaceAll(/public static (getUIFontConfig\()/g, "export function $1")
     code = code.replaceAll(/public static (showToast|openToast|closeToast|showDialog1|showDialog|showActionMenu1|showActionMenu|openCustomDialog1|openCustomDialog|updateCustomDialog|closeCustomDialog1|closeCustomDialog)/g, "export function $1")

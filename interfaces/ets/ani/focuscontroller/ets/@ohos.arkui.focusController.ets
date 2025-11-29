@@ -23,4 +23,5 @@ export default namespace focusController {
     export native function activate(isActive: boolean, autoInactive?: boolean): void;
     export native function setAutoFocusTransfer(isAutoFocusTransfer: boolean): void;
     export native function setKeyProcessingMode(mode: KeyProcessingMode): void;
+    export native function isActive(): boolean;
 }
