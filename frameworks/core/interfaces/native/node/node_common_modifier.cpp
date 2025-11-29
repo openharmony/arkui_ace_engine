@@ -8853,6 +8853,15 @@ void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_
     ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
 }
 
+void SetBlendModeByBlenderNodeFix(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Rosen::Blender* rsBlender = reinterpret_cast<OHOS::Rosen::Blender*>(blender);
+    ViewAbstract::SetBlender(frameNode, rsBlender);
+    ViewAbstract::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
+}
+
 void SetTabStop(ArkUINodeHandle node, ArkUI_Bool tabstop)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10582,6 +10591,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetClickDistance = ResetClickDistance,
         .setDisAllowDrop = SetDisAllowDrop,
         .setBlendModeByBlender = SetBlendModeByBlender,
+        .setBlendModeByBlenderNodeFix = SetBlendModeByBlenderNodeFix,
         .setTabStop = SetTabStop,
         .resetTabStop = ResetTabStop,
         .getTabStop = GetTabStop,
