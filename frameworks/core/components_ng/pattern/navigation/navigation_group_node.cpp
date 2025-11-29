@@ -1595,7 +1595,9 @@ bool NavigationGroupNode::CheckNeedUpdateParentNode(const RefPtr<UINode>& curNod
 void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
 {
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
-    for (auto iter = hideNodes_.begin(); iter != hideNodes_.end(); ++iter) {
+    // Prevent crashes caused by modifying the container during traversal.
+    auto tempNodes = hideNodes_;
+    for (auto iter = tempNodes.begin(); iter != tempNodes.end(); ++iter) {
         auto navDestination = iter->first;
         if (!navDestination) {
             continue;
