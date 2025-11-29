@@ -535,7 +535,7 @@ int32_t ReadTouchAccelarateMode()
 int32_t ReadPageLoadTimeThreshold()
 {
     return system::GetIntParameter(
-        "const.arkui.pageload.timethreshold", 1000); // page load max timethreshold is 1000ms.
+        "const.arkui.pageload.timethreshold", 1500); // page load max timethreshold is 1500ms.
 }
 
 bool IsAscending(const std::vector<double>& nums)

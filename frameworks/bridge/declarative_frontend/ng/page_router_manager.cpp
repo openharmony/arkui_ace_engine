@@ -2251,6 +2251,7 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
     UiSessionManager::GetInstance()->OnRouterChange(info.url, "routerReplacePage");
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ReplacePageInNewLifecycle(info);
+        LoadCompleteManagerStopCollect();
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER,
@@ -2262,16 +2263,19 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         if (pageInfo.second) {
             // find page in stack, move position and update params.
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+            LoadCompleteManagerStopCollect();
             return;
         }
         auto index = FindPageInRestoreStack(info.url);
         if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP, false);
+            LoadCompleteManagerStopCollect();
             return;
         }
     }
     LoadPage(GenerateNextPageId(), info, false, false);
+    LoadCompleteManagerStopCollect();
 }
 
 bool PageRouterManager::CheckIndexValid(int32_t index) const
@@ -2739,5 +2743,13 @@ void PageRouterManager::FireNavigateChangeCallback(const std::string& name)
         .isSplit = stagePattern->GetIsSplit()
     };
     navigationManager->FireNavigateChangeCallback(from, to);
+}
+
+void PageRouterManager::LoadCompleteManagerStopCollect()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        context->GetLoadCompleteManager()->StopCollect();
+    }
 }
 } // namespace OHOS::Ace::NG

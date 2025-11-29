@@ -130,12 +130,15 @@ void LoadCompleteManager::FinishCollectTask()
     AceAsyncTraceEndCommercial(0, "APP_COMPONENT_LOAD");
     int64_t loadCost = GetSysTimestamp() - beginTime_;
     if (loadCost > (SystemProperties::GetPageLoadTimethreshold() * NANOSECOND_CONVERSION)) {
+        std::vector<std::string> array;
+        std::stringstream pageLoadCost;
+        pageLoadCost << pageUrl_ << ":" << loadCost << ";";
+        array.push_back(pageLoadCost.str());
         EventInfo eventInfo = {
-            .errorType = static_cast<int32_t>(OHOS::Ace::ComponentExcepType::COMPONENT_LOAD_TIMEOUT),
-            .pageUrl = pageUrl_.c_str(),
-            .loadCost = loadCost,
+            .errorType = static_cast<int32_t>(OHOS::Ace::PageRouterExcepType::PAGE_LOAD_TIMEOUT),
+            .pageLoadCost = array,
         };
-        EventReport::ReportComponentLoadTimeout(eventInfo);
+        EventReport::ReportPageLoadTimeout(eventInfo);
     }
 
     ResetManagerStatus();
