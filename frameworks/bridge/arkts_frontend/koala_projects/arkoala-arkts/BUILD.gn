@@ -106,7 +106,6 @@ action("arkui.abc") {
     ]
 
     deps = [
-      "$koala_root/ui2abc:ui2abc",
       "$koala_root/incremental:incremental"
     ]
 }
@@ -114,7 +113,6 @@ action("arkui.abc") {
 group("install_all") {
   deps = [
     ":arkoala_install",
-    "$koala_root/ui2abc:ui2abc_install",
     "$koala_root/incremental:incremental_install",
     "$koala_root/interop:interop_install"
   ]
