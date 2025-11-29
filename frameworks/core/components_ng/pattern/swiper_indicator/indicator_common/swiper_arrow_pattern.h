@@ -72,6 +72,11 @@ public:
         return swiperArrowLayoutProperty;
     }
 
+    void UpdateButtonNodeChildUpdateDone()
+    {
+        UpdateButtonNode(index_);
+    }
+
     void ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHovered);
     void SetButtonVisible(bool visible);
     void DumpAdvanceInfo() override;

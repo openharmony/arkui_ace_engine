@@ -959,6 +959,7 @@ protected:
 
 private:
     void OnModifyDone() override;
+    void OnHostChildUpdateDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
