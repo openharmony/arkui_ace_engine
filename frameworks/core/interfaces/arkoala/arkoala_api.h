@@ -7173,6 +7173,8 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setRichEditorEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetRichEditorEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*setRichEditorUndoStyle)(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue);
     void (*resetRichEditorUndoStyle)(ArkUINodeHandle node);
     void (*setRichEditorScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 color);

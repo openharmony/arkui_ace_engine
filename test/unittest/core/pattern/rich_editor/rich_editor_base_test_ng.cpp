@@ -932,6 +932,64 @@ HWTEST_F(RichEditorBaseTestNg, SetKeyboardAppearance001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetCompressLeadingPunctuation001
+ * @tc.desc: test SetCompressLeadingPunctuation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetCompressLeadingPunctuation001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create RichEditor node and Set compressLeadingPunctuation True
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetCompressLeadingPunctuation(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = richEditorNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Get compressLeadingPunctuation value
+     */
+    EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation(), true);
+    EXPECT_EQ(pattern->isCompressLeadingPunctuation_, true);
+
+    /**
+     * @tc.steps: step3. Set EnableAutoSpacing False
+     */
+    RichEditorModelNG::SetCompressLeadingPunctuation(richEditorNode, false);
+
+    /**
+     * @tc.steps: step4. Get compressLeadingPunctuation value
+     */
+    EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation(), false);
+    EXPECT_EQ(pattern->isCompressLeadingPunctuation_, false);
+}
+
+/**
+ * @tc.name: SetCompressLeadingPunctuation002
+ * @tc.desc: test SetCompressLeadingPunctuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetCompressLeadingPunctuation002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->SetCompressLeadingPunctuation(false);
+    EXPECT_EQ(richEditorPattern->isCompressLeadingPunctuation_, false);
+
+    richEditorPattern->SetCompressLeadingPunctuation(true);
+    EXPECT_EQ(richEditorPattern->isCompressLeadingPunctuation_, true);
+}
+
+/**
  * @tc.name: SetPlaceholder001
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC

@@ -708,6 +708,20 @@ void ResetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
     RichEditorModelNG::SetEnableAutoSpacing(frameNode, false);
 }
  
+void SetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, value);
+}
+
+void ResetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, false);
+}
+
 void SetRichEditorUndoStyle(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -809,6 +823,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
         .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
         .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
+        .setRichEditorCompressLeadingPunctuation = SetRichEditorCompressLeadingPunctuation,
+        .resetRichEditorCompressLeadingPunctuation = ResetRichEditorCompressLeadingPunctuation,
         .setRichEditorUndoStyle = SetRichEditorUndoStyle,
         .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
         .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,

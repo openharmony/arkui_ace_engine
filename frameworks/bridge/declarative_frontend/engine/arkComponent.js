@@ -10599,6 +10599,20 @@ class RichEditorEnableAutoSpacingModifier extends ModifierWithKey {
 }
 RichEditorEnableAutoSpacingModifier.identity = Symbol('richEditorEnableAutoSpacing');
 
+class RichEditorCompressLeadingPunctuationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().richEditor.setCompressLeadingPunctuation(node, this.value);
+    }
+  }
+}
+RichEditorCompressLeadingPunctuationModifier.identity = Symbol('richEditorCompressLeadingPunctuation');
+
 class RichEditorUndoStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10794,6 +10808,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   enableAutoSpacing(enable) {
     modifierWithKey(this._modifiersWithKeys, RichEditorEnableAutoSpacingModifier.identity, RichEditorEnableAutoSpacingModifier, enable);
+    return this;
+  }
+  compressLeadingPunctuation(enable) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorCompressLeadingPunctuationModifier.identity, RichEditorCompressLeadingPunctuationModifier, enable);
     return this;
   }
   undoStyle(style) {

@@ -740,6 +740,14 @@ void SetStopBackPressImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
 }
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
 void SetBindSelectionMenuImpl(Ark_NativePointer node,
                               const Opt_RichEditorSpanType* spanType,
                               const Opt_CustomNodeBuilder* content,
@@ -839,6 +847,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::SetMaxLinesImpl,
         RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
         RichEditorAttributeModifier::SetStopBackPressImpl,
+        RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
         RichEditorAttributeModifier::SetBindSelectionMenuImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,
