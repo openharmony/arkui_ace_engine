@@ -21,8 +21,8 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { PeerNode, findSiblingPeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker, ArkUINativeModule } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
 import { ContentModifier, AttributeModifier, hookToggleContentModifier, hookToggleAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
@@ -42,8 +42,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkTogglePeer {
         const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(peerId, flags)
-        const _peer  = new ArkTogglePeer(_peerPtr, peerId, 'Toggle', flags)
+        const _peer  = new ArkTogglePeer(nullptr, peerId, 'Toggle', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -221,6 +220,54 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
     public setToggleOptions(options: ToggleOptions): this {
         if (this.checkPriority("setToggleOptions")) {
             const options_casted = options as (ToggleOptions)
+            if (!this.getPeer().peer.ptr) {
+                if (options.type == ToggleType.SWITCH) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else if (options.type == ToggleType.CHECKBOX) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_checkbox_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else if (options.type == ToggleType.BUTTON) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_button_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else {
+                    throw new Error("Invalid Toggle Type")
+                    return this
+                }
+            } else {
+                if (!this.getPeer().parent || this.getPeer().parent == undefined) {
+                    console.log("Toggle's parent is null")
+                    return this
+                }
+
+                let sibling: PeerNode | undefined = findSiblingPeerNode(this.getPeer(), true)
+                const node = this.getPeer().parent! as PeerNode
+                const preNativePtr = this.getPeer().peer.ptr
+                node.peer.removeChild(this.getPeer().peer.ptr)
+                ArkUINativeModule._DisposeNode(preNativePtr)
+                
+                if (options.type == ToggleType.SWITCH) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr                   
+                } else if (options.type == ToggleType.CHECKBOX) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_checkbox_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else if (options.type == ToggleType.BUTTON) {
+                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_button_construct(this.getPeer().getId(), 0)
+                    this.getPeer().peer.ptr = _peerPtr
+                } else {
+                    throw new Error("Invalid Toggle Type")
+                    return this
+                }
+
+                if (sibling === undefined) {
+                    // Add to the end (common case!).
+                    node.peer.addChild(this.getPeer().peer.ptr)
+                } else {
+                    // Insert child in the middle.
+                    node.peer.insertChildBefore(this.getPeer().peer.ptr, sibling?.peer?.ptr ?? nullptr)
+                }
+            }
             this.getPeer()?.setToggleOptionsAttribute(options_casted)
             this.applyOptionsFinish('ToggleAttribute');
             return this

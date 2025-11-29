@@ -65,7 +65,6 @@ export class Finalizable {
         const handle = undefined
 
         if (managed) {
-            if (this.ptr == nullptr) throw new Error("Can't have nullptr ptr ${}")
             if (this.finalizer == nullptr) throw new Error("Managed finalizer is 0")
 
             const thunk = new NativeThunk(ptr, finalizer, handle)

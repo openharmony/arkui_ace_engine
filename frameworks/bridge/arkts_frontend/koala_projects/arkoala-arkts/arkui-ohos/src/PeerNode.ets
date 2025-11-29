@@ -300,7 +300,7 @@ export function findPeerNode(node: IncrementalNode): PeerNode | undefined {
     return undefined
 }
 
-function findSiblingPeerNode(node: IncrementalNode, forward: boolean): PeerNode | undefined {
+export function findSiblingPeerNode(node: IncrementalNode, forward: boolean): PeerNode | undefined {
     if (forward) {
         for (let sibling = node.nextSibling; sibling; sibling = sibling!.nextSibling) {
             if (sibling!.isKind(PeerNodeType)) {
