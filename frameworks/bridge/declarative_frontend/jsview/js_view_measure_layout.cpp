@@ -420,9 +420,21 @@ JSRef<JSObject> JSMeasureLayoutParamNG::GetSelfLayoutInfo()
 
 void JSMeasureLayoutParamNG::UpdateSize(int32_t index, const NG::SizeF& size)
 {
-    auto info = JSRef<JSObjTemplate>::Cast(childArray_->GetValueAt(index));
-    auto layoutWrapper = GetChildByIndex(index);
-    FillPlaceSizeProperty(info, size);
+    if (childArray_.IsEmpty()) {
+        return;
+    }
+
+    auto vm = const_cast<EcmaVM*>(childArray_->GetEcmaVM());
+    if (JsiDeclarativeEngineInstance::GetCurrentRuntime() != nullptr && vm != nullptr) {
+        panda::LocalScope socpe(vm);
+        auto info = JSRef<JSObjTemplate>::Cast(childArray_->GetValueAt(index));
+        auto layoutWrapper = GetChildByIndex(index);
+        FillPlaceSizeProperty(info, size);
+    } else {
+        auto info = JSRef<JSObjTemplate>::Cast(childArray_->GetValueAt(index));
+        auto layoutWrapper = GetChildByIndex(index);
+        FillPlaceSizeProperty(info, size);
+    }
 }
 
 void JSMeasureLayoutParamNG::Update(NG::LayoutWrapper* layoutWrapper)
