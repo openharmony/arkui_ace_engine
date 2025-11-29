@@ -77,26 +77,6 @@ const std::map<std::string, WrapAlignment> WrapAlignContentMap = {
     { DOM_ALIGN_CONTENT_AROUND, WrapAlignment::SPACE_AROUND }
 };
 
-const std::map<std::string, GridSizeType> GridSizeTypeMap = {
-    { DOM_GRID_SIZE_TYPE_XS, GridSizeType::XS },
-    { DOM_GRID_SIZE_TYPE_SM, GridSizeType::SM },
-    { DOM_GRID_SIZE_TYPE_MD, GridSizeType::MD },
-    { DOM_GRID_SIZE_TYPE_LG, GridSizeType::LG }
-};
-
-const std::map<std::string, GridTemplateType> GridTemplateMap = {
-    { DOM_GRID_TEMPLATE_TYPE_NORMAL, GridTemplateType::NORMAL },
-    { DOM_GRID_TEMPLATE_TYPE_GRID, GridTemplateType::GRID },
-};
-
-const std::map<std::string, GridColumnType> GridColumnTypeMap = {
-    { DOM_COLUMN_TYPE_NONE, GridColumnType::NONE },
-    { DOM_COLUMN_TYPE_BUBBLE, GridColumnType::BUBBLE_TYPE },
-    { DOM_COLUMN_TYPE_BUTTON, GridColumnType::BUTTON_TYPE },
-    { DOM_COLUMN_TYPE_CARD, GridColumnType::CARD_TYPE },
-    { DOM_COLUMN_TYPE_CONTENT, GridColumnType::CONTENT_TYPE },
-};
-
 } // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_REFLECT_MAP_H

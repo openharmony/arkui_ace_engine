@@ -38,13 +38,9 @@ public:
         const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase> &pipeline, bool userDefine);
     static GridSizeType ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size,
         const WindowMode& mode, const RefPtr<PipelineBase>& pipeline = nullptr);
-    static GridSizeType ProcessGridSizeType(
-        const RefPtr<BreakPoints>& breakpoints, const Size& size, const RefPtr<PipelineContext>& pipeline);
-    static std::pair<Dimension, Dimension> ProcessGutter(GridSizeType sizeType, const RefPtr<Gutter>& gutter);
     static std::pair<Dimension, Dimension> ProcessGutter(GridSizeType sizeType, const Gutter& gutter);
 
     static int32_t ProcessColumn(GridSizeType sizeType, const GridContainerSize& columnNum);
-    static int32_t ProcessColumn(GridSizeType sizeType, const RefPtr<GridContainerSize>& columnNum);
     static double ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double size);
     static void InheritGridRowColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
         int32_t *containerSizeArray, int32_t size);

@@ -19,7 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/grid_col_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 
 namespace OHOS::Ace {
@@ -33,8 +33,9 @@ GridColModel* GridColModel::GetInstance()
         static NG::GridColModelNG instance;
         return &instance;
     } else {
-        static Framework::GridColModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid_column");
+        static GridColModel* instance = loader ? reinterpret_cast<GridColModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }
