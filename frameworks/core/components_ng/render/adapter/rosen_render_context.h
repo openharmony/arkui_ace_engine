@@ -240,6 +240,7 @@ public:
     void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+    void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);

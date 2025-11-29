@@ -7115,6 +7115,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetCompositingFilter));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompositingFilter"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetCompositingFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaterialFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMaterialFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaterialFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMaterialFilter));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFreeze"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFreeze));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFreeze"),
