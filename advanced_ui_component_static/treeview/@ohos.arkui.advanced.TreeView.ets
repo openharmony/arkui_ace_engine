@@ -566,11 +566,11 @@ export class NodeInfo {
     return this.listItemHeight;
   }
 
-  getNodeCurrentNodeId(): number {
+  getNodeCurrentNodeId(): int {
     return this.node.currentNodeId;
   }
 
-  getNodeParentNodeId(): number {
+  getNodeParentNodeId(): int {
     return this.node.parentNodeId;
   }
 
@@ -1439,7 +1439,7 @@ export struct TreeView {
         this.listNodeDataSource.getData(index as int)?.setIsOverBorder(false);
       }
       let currentNodeInfo: NodeInfo | undefined = this.listNodeDataSource.getData(index as int);
-      let currentNodeId: number | undefined = currentNodeInfo?.getNodeCurrentNodeId();
+      let currentNodeId: int | undefined = currentNodeInfo?.getNodeCurrentNodeId();
 
       /**
        * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId";
@@ -1508,7 +1508,7 @@ export struct TreeView {
           insertNodeIndex = params.insertIndex
         }
       }
-      let currentNodeIndex: number = this.dropSelectedIndex;
+      let currentNodeIndex: number = this.dropSelectedIndex ;
 
       if (currentNodeIndex - 1 > this.listNodeDataSource.totalCount() || currentNodeIndex === undefined) {
         hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found');
@@ -1537,14 +1537,14 @@ export struct TreeView {
         return;
       }
       let currentNodeInfo: NodeInfo | null = this.listNodeDataSource.getCurrentNodeInfo();
-      let insertNodeParentNodeId: number = insertNodeInfo.getNodeParentNodeId();
-      let draggingCurrentNodeId: number = this.listNodeDataSource.getDraggingCurrentNodeId();
-      let draggingParentNodeId: number = this.listNodeDataSource.getDraggingParentNodeId();
+      let insertNodeParentNodeId: number = insertNodeInfo.getNodeParentNodeId() as int;
+      let draggingCurrentNodeId: number = this.listNodeDataSource.getDraggingCurrentNodeId() as int;
+      let draggingParentNodeId: number = this.listNodeDataSource.getDraggingParentNodeId() as int;
       /**
        * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId".
        * drag is fail.
        */
-      let isParentNodeOfInsertNode: boolean = this.listNodeDataSource.getIsParentOfInsertNode(insertNodeCurrentNodeId);
+      let isParentNodeOfInsertNode: boolean = this.listNodeDataSource.getIsParentOfInsertNode(insertNodeCurrentNodeId as int);
       if (isParentNodeOfInsertNode) {
         this.listNodeDataSource.clearLastTimeoutHighLight();
         this.listNodeDataSource.setIsInnerDrag(false);
@@ -1631,8 +1631,8 @@ export struct TreeView {
       }
       this.listNodeDataSource.lastIndex = currentFocusIndex;
 
-      let parentNodeId: number | undefined = currentNodeInfo?.getNodeParentNodeId();
-      this.listNodeDataSource.judgeImageCollapse(parentNodeId);
+      let parentNodeId: int | undefined = currentNodeInfo?.getNodeParentNodeId();
+      this.listNodeDataSource.judgeImageCollapse(parentNodeId as int);
       const context = this.getUIContext().getHostContext();
       let bundleName: string | undefined = 'defaultBundle';
       if (context) {
@@ -1681,7 +1681,7 @@ export interface CallbackParam {
    * @atomicservice
    * @since 11
    */
-  currentNodeId: number,
+  currentNodeId: int,
 
   /**
    * Get the parentNodeId.
@@ -1696,7 +1696,7 @@ export interface CallbackParam {
    * @atomicservice
    * @since 11
    */
-  parentNodeId?: number,
+  parentNodeId?: int,
 
   /**
    * Get the childIndex.
@@ -1711,7 +1711,7 @@ export interface CallbackParam {
    * @atomicservice
    * @since 11
    */
-  childIndex?: number,
+  childIndex?: int,
 }
 
 /**
@@ -1741,7 +1741,7 @@ export interface NodeParam {
    * @atomicservice
    * @since 11
    */
-  parentNodeId?: number,
+  parentNodeId?: int,
 
   /**
    * Set currentNodeId.
@@ -1756,7 +1756,7 @@ export interface NodeParam {
    * @atomicservice
    * @since 11
    */
-  currentNodeId?: number,
+  currentNodeId?: int,
 
   /**
    * Set catalog whether is floder.
@@ -1982,7 +1982,7 @@ export class TreeController {
     let newNodeParam: NodeParam = this.listNodeDataSource.getNewNodeParam(clickNodeId);
     this.nodeIdList.push(this.nodeIdList[this.nodeIdList.length - 1].toInt() + 1);
     let newNodeId: number = this.nodeIdList[this.nodeIdList.length - 1].toInt();
-    let addNodeResult: boolean = this.listNodeDataSource.addNode(clickNodeId, newNodeId,
+    let addNodeResult: boolean = this.listNodeDataSource.addNode(clickNodeId as int, newNodeId as int,
       {
         isFolder: newNodeParam.isFolder,
         icon: newNodeParam.icon,
@@ -2061,6 +2061,15 @@ export class TreeController {
         }
       }
       let addNodeResult: boolean = false;
+      let primaryTitle: string = "";
+      if(nodeParam.primaryTitle !== undefined){
+        if (typeof nodeParam.primaryTitle === 'string') {
+          primaryTitle = nodeParam.primaryTitle as string;
+        } else {
+
+          primaryTitle = resourceManager.getSysResourceManager().getStringSync((nodeParam.primaryTitle as Resource).id as Long);
+        }
+      }
       if (nodeParam.primaryTitle !== undefined &&
         !this.listNodeDataSource.checkMainTitleIsValid(nodeParam.primaryTitle as String)) {
         throw new Error('ListTreeNode[addNode]: ' +
@@ -2077,12 +2086,12 @@ export class TreeController {
         return this;
       }
       if (nodeParam.currentNodeId !== undefined) {
-        this.nodeIdList.push(Double.toInt(nodeParam.currentNodeId as number));
+        this.nodeIdList.push(nodeParam.currentNodeId as int);
       }
       if (nodeParam.parentNodeId !== undefined) {
         if (nodeParam.currentNodeId !== undefined) {
           addNodeResult =
-            this.listNodeDataSource.addNode(nodeParam.parentNodeId as Double, nodeParam.currentNodeId as Double,
+            this.listNodeDataSource.addNode(nodeParam.parentNodeId as int, nodeParam.currentNodeId as int,
               nodeParam as NodeParam, this.initBuild);
         }
       }
@@ -2093,7 +2102,7 @@ export class TreeController {
         let newNodeId: number = this.nodeIdList[this.nodeIdList.length - 1].toInt();
         this.listNodeDataSource.refreshData(
           MenuOperation.ADD_NODE as MenuOperation,
-          nodeParam.parentNodeId as Double,
+          nodeParam.parentNodeId as int,
           [newNodeId] as Array<Double>
         );
       }
@@ -2122,7 +2131,7 @@ export class TreeController {
    * @atomicservice
    * @since 11
    */
-  public refreshNode(parentId: number, parentSubTitle: ResourceStr, CurrentSubtitle: ResourceStr): void {
+  public refreshNode(parentId: int, parentSubTitle: ResourceStr, CurrentSubtitle: ResourceStr): void {
     this.listNodeDataSource.setNodeSubtitlePara(parentId, parentSubTitle, CurrentSubtitle);
   }
 
@@ -2295,7 +2304,7 @@ export class ListNodeDataSource extends BasicDataSource {
   private currentNodeInfo: NodeInfo | null = null; // To solve the problem of currentIndex missed in onDrop event.
   private listItemOpacity: number = 1; // It is used to set the opacity of the node when dragged.
   private lastPassIndex: number = this.INITIAL_INVALID_VALUE; // record the last passing node index in drag.
-  private lastPassId?: number = this.INITIAL_INVALID_VALUE; // record the last passing node Id in drag.
+  private lastPassId?: int = this.INITIAL_INVALID_VALUE as int; // record the last passing node Id in drag.
   private thisPassIndex: number = this.INITIAL_INVALID_VALUE; // record the current passing node in drag.
   // record last passing node in delay expand event.
   private lastDelayExpandIndex: number = this.INITIAL_INVALID_VALUE;
@@ -2722,7 +2731,7 @@ export class ListNodeDataSource extends BasicDataSource {
     if (operation === MenuOperation.MODIFY_NODE) {
       let modifyNodeInfo: NodeInfo = this.listNode[this.modifyNodeIndex.toInt()];
       let backParamModify: CallbackParam = {
-        currentNodeId: modifyNodeInfo!.getNodeCurrentNodeId(),
+        currentNodeId: modifyNodeInfo!.getNodeCurrentNodeId() as int,
         parentNodeId: modifyNodeInfo?.getNodeParentNodeId(),
       };
       this.appEventBus.emit(TreeListenType.NODE_MODIFY, backParamModify);
@@ -2738,7 +2747,7 @@ export class ListNodeDataSource extends BasicDataSource {
       let editIcon: ResourceStr | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
         addNodeInfo.getNodeItem().imageNode?.editSource : undefined;
       let callbackParam: CallbackParam = {
-        currentNodeId: addNodeInfo!.getNodeCurrentNodeId(),
+        currentNodeId: addNodeInfo!.getNodeCurrentNodeId() as int,
         parentNodeId: addNodeInfo?.getNodeParentNodeId(),
       };
       this.appEventBus.emit(TreeListenType.NODE_ADD, callbackParam);
@@ -2932,7 +2941,7 @@ export class ListNodeDataSource extends BasicDataSource {
     return this.currentNodeInfo;
   }
 
-  public setDraggingParentNodeId(draggingParentNodeId: number | undefined): void {
+  public setDraggingParentNodeId(draggingParentNodeId: int | undefined): void {
     if (draggingParentNodeId === undefined) {
       return;
     }
@@ -2947,11 +2956,11 @@ export class ListNodeDataSource extends BasicDataSource {
     return this.draggingCurrentNodeId;
   }
 
-  public setDraggingCurrentNodeId(draggingCurrentNodeId: number | undefined): void {
+  public setDraggingCurrentNodeId(draggingCurrentNodeId: int | undefined): void {
     if (draggingCurrentNodeId === undefined) {
       return;
     }
-    this.draggingCurrentNodeId = draggingCurrentNodeId;
+    this.draggingCurrentNodeId = draggingCurrentNodeId as int;
   }
 
   public setListItemOpacity(listItemOpacity: number): void {
@@ -2974,13 +2983,13 @@ export class ListNodeDataSource extends BasicDataSource {
     return this.lastPassIndex;
   }
 
-  public getIsParentOfInsertNode(insertNodeId: number | undefined): boolean {
+  public getIsParentOfInsertNode(insertNodeId: int | undefined): boolean {
     if (this.currentNodeInfo === null || insertNodeId === undefined) {
       return false;
     }
     let selectedNodeItem: NodeItem = this.currentNodeInfo?.getNodeInfoNode() as NodeItem;
     let parentId: number = selectedNodeItem.currentNodeId;
-    let insertParentId: number | undefined = this.nodeIdNodeItemMap.get(insertNodeId as number)?.parentNodeId;
+    let insertParentId: int | undefined = this.nodeIdNodeItemMap.get(insertNodeId as number)?.parentNodeId;
     while (insertParentId !== undefined && insertParentId !== -1) {
       if (parentId === insertParentId) {
         return true;
@@ -3135,9 +3144,9 @@ export class ListNodeDataSource extends BasicDataSource {
     }
   }
 
-  getDraggingAccessible(allParentNode: number[], insertNodeCurrentNodeId: number | undefined,
-    insertNodeId: number | undefined): void {
-    this.getAccessibleTitle(insertNodeId)
+  getDraggingAccessible(allParentNode: number[], insertNodeCurrentNodeId: int | undefined,
+    insertNodeId: int | undefined): void {
+    this.getAccessibleTitle(insertNodeId as int)
     if (insertNodeCurrentNodeId === undefined || insertNodeId === undefined) {
       return;
     }
@@ -3208,7 +3217,7 @@ export class ListNodeDataSource extends BasicDataSource {
     this.thisPassIndex = index;
     if ((isChanged || isOverBorder) && this.isInnerDrag) {
       this.flag = flag;
-      let currentNodeId: number | undefined = this.getData(index as int)?.getNodeCurrentNodeId();
+      let currentNodeId: int | undefined = this.getData(index as int)?.getNodeCurrentNodeId();
       let currentNodeLevel: number | undefined = this.getData(index as int)?.getNodeLevel();
       if (currentNodeId !== undefined) {
         currentNodeLevel = (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.EXPAND &&
@@ -3223,9 +3232,9 @@ export class ListNodeDataSource extends BasicDataSource {
           })
           this.notifyDataChange(lastIndex);
         }
-        let insertNodeUpNodeId: number | undefined = this.getData(Double.toInt(index) - 1)?.getNodeCurrentNodeId();
-        let insertNodeDownNodeId: number | undefined = this.getData(Double.toInt(index) + 2)?.getNodeCurrentNodeId();
-        let insertNodeCurrentNodeId: number | undefined = this.getData(Double.toInt(index) + 1)?.getNodeCurrentNodeId();
+        let insertNodeUpNodeId: int | undefined = this.getData(Double.toInt(index) - 1)?.getNodeCurrentNodeId();
+        let insertNodeDownNodeId: int | undefined = this.getData(Double.toInt(index) + 2)?.getNodeCurrentNodeId();
+        let insertNodeCurrentNodeId: int | undefined = this.getData(Double.toInt(index) + 1)?.getNodeCurrentNodeId();
         let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
         if (this.flag === Flag.DOWN_FLAG && index < this.totalCount() - 1) {
           this.getData(Double.toInt(index))?.setCanShowFlagLine(false);
@@ -3315,7 +3324,7 @@ export class ListNodeDataSource extends BasicDataSource {
       /* alter flagLine and expand node time-out. */
       if (!isOverBorder && this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.COLLAPSE) {
         let firstChildNodeId: number | undefined =
-          this.getData(Double.toInt(showIndex))?.getNodeInfoNode().children[0]?.currentNodeId;
+          this.getData(Double.toInt(showIndex))?.getNodeInfoNode().children[0]?.currentNodeId as int;
         let delayAlterFlagLineAndExpandNodeTime: number = 2000; // ms
         this.timeoutExpandId = setTimeout(() => {
           this.clearHighLight(this.lastDelayHighLightIndex);
@@ -3363,7 +3372,7 @@ export class ListNodeDataSource extends BasicDataSource {
     })
     this.changeNodeStatus(currentIndex);
     this.handleExpandAndCollapse(currentIndex, true);
-    this.lastPassId = firstChildNodeId;
+    this.lastPassId = firstChildNodeId as int;
   }
 
   public hideLastLine(): void {
@@ -3458,7 +3467,7 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public setLastPassId(lastPassId: number): void {
-    this.lastPassId = lastPassId;
+    this.lastPassId = lastPassId as int;
   }
 
   public setLastDelayHighLightIndex(lastDelayHighLightIndex: number): void {
@@ -3474,7 +3483,7 @@ export class ListNodeDataSource extends BasicDataSource {
   public alterDragNode(rearParentNodeId: number, rearCurrentNodeId: number,
     dragParentNodeId: number, dragCurrentNodeId: number, frontNodeInfoItem: NodeInfo): void {
     let dragNodeParam: DragNodeParam[] = [];
-    let parentNodeId: number = rearParentNodeId;
+    let parentNodeId: int = rearParentNodeId as int;
     let currentNodeId: number = dragCurrentNodeId;
     let nodeParam: NodeParam = frontNodeInfoItem.getNodeInfoData();
     let nodeInfo: NodeInfo | null = null;
@@ -3502,15 +3511,15 @@ export class ListNodeDataSource extends BasicDataSource {
       if (this.listNode[i].getNodeCurrentNodeId() === rearCurrentNodeId) {
         isHighLight = this.listNode[i].getIsHighLight();
         if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.EXPAND) {
-          parentNodeId = rearCurrentNodeId;
+          parentNodeId = rearCurrentNodeId as int;
           insertChildIndex = 0;
         } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) ===
         NodeStatus.EXPAND &&
           this.listNode[i].getCanShowFlagLine() === false) {
-          parentNodeId = rearCurrentNodeId;
+          parentNodeId = rearCurrentNodeId as int;
           insertChildIndex = 0;
         } else if (isHighLight) {
-          parentNodeId = rearCurrentNodeId;
+          parentNodeId = rearCurrentNodeId as int;
           insertChildIndex = 0;
         }
         break;
@@ -3518,9 +3527,9 @@ export class ListNodeDataSource extends BasicDataSource {
     }
 
     let callbackParam: CallbackParam = {
-      currentNodeId: currentNodeId,
+      currentNodeId: currentNodeId as int,
       parentNodeId: parentNodeId,
-      childIndex: insertChildIndex,
+      childIndex: insertChildIndex as int,
     }
 
     /* export inner drag node Id. */
@@ -3583,7 +3592,7 @@ export class ListNodeDataSource extends BasicDataSource {
     }
 
     let addDragNodeResult: boolean =
-      this.addDragNode(dragNodeParam[0].parentId, dragNodeParam[0].currentId, insertCurrentNodeId,
+      this.addDragNode(dragNodeParam[0].parentId as int, dragNodeParam[0].currentId, insertCurrentNodeId,
         isAfter, dragNodeParam[0].data);
 
     if (!addDragNodeResult) {
@@ -3592,7 +3601,7 @@ export class ListNodeDataSource extends BasicDataSource {
     /* Add remaining node. */
     for (let j: int = 1; j < dragNodeParam.length; j++) {
       let addNodeResult: boolean =
-        this.addNode(dragNodeParam[j].parentId, dragNodeParam[j].currentId, dragNodeParam[j].data, false);
+        this.addNode(dragNodeParam[j].parentId as int, dragNodeParam[j].currentId  as int, dragNodeParam[j].data, false);
       if (!addNodeResult) {
         return;
       }
@@ -3839,8 +3848,8 @@ export class ListNodeDataSource extends BasicDataSource {
       this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()));
     }
     let callbackParam: CallbackParam = {
-      currentNodeId: parentNodeInfo.getNodeCurrentNodeId(),
-      parentNodeId: parentNodeInfo.getNodeParentNodeId(),
+      currentNodeId: parentNodeInfo.getNodeCurrentNodeId() as int,
+      parentNodeId: parentNodeInfo.getNodeParentNodeId() as int,
     };
     this.loadedListNodeFunction();
     this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
@@ -3933,7 +3942,7 @@ export class ListNodeDataSource extends BasicDataSource {
         }
         let node: NodeItem[] | null = parent.children.splice(index as int, 1);
         node = null;
-        this.judgeImageCollapse(parentNodeId);
+        this.judgeImageCollapse(parentNodeId as int);
       }
       parent.getChildNodeInfo().childNum = parent.children.length;
       parent.getChildNodeInfo().allChildNum -= (deleteNodeAllChildNum);
@@ -3955,7 +3964,7 @@ export class ListNodeDataSource extends BasicDataSource {
    * @param data  node param
    * @param initBuild whether in initialization process
    */
-  public addNode(parentNodeId: number, currentNodeId: number, data: NodeParam, initBuild: boolean): boolean {
+  public addNode(parentNodeId: int, currentNodeId: int, data: NodeParam, initBuild: boolean): boolean {
     if (this._root === null) {
       this._root = new NodeItem(emptyNodeInfo);
       this._root.nodeLevel = -1;
@@ -3999,7 +4008,7 @@ export class ListNodeDataSource extends BasicDataSource {
     }
   }
 
-  public judgeImageCollapse(parentNodeId: number | undefined): void {
+  public judgeImageCollapse(parentNodeId: int | undefined): void {
     if (parentNodeId === undefined) {
       return;
     }
@@ -4275,7 +4284,7 @@ export class ListNodeDataSource extends BasicDataSource {
    * Add the first dragging node in dragging nodes
    * 1.the first dragging node needs to distinguish the position to insert
    */
-  private addDragNode(parentNodeId: number,
+  private addDragNode(parentNodeId: int,
     currentNodeId: number,
     insertCurrentNodeId: number,
     isAfter: boolean,
@@ -4295,9 +4304,9 @@ export class ListNodeDataSource extends BasicDataSource {
       }
       currentNode.nodeLevel = parent.nodeLevel + 1;
       currentNode.parentNodeId = parentNodeId;
-      currentNode.currentNodeId = currentNodeId;
+      currentNode.currentNodeId = currentNodeId as int;
       data.parentNodeId = parentNodeId;
-      data.currentNodeId = currentNodeId;
+      data.currentNodeId = currentNodeId as int;
       let insertIndex: number = this.INITIAL_INVALID_VALUE;
       if (parent.children.length) {
         for (let i: int = 0; i < parent.children.length; i++) {
@@ -4578,7 +4587,7 @@ export struct TreeViewInner {
       }
 
       this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
-      let callParam: CallbackParam = { currentNodeId: currentId };
+      let callParam: CallbackParam = { currentNodeId: currentId as int };
       this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
 
       this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
@@ -4626,7 +4635,7 @@ export struct TreeViewInner {
     }
 
     this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
-    let callParam: CallbackParam = { currentNodeId: currentId };
+    let callParam: CallbackParam = { currentNodeId: currentId as int};
     this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
 
     this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
@@ -4936,7 +4945,7 @@ export struct TreeViewInner {
             .width('100%')
             .height(this.item.getNodeHeight())
             .padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) } as LocalizedPadding)
-            .bindContextMenu(this.builder, ResponseType.RightClick)
+            // .bindContextMenu(this.builder, ResponseType.RightClick)
           }.focusable(true)
         }
         .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
@@ -4972,13 +4981,13 @@ export struct TreeViewInner {
           event.stopPropagation();
         })
         .padding({ top: LengthMetrics.vp(0), bottom: LengthMetrics.vp(0) } as LocalizedPadding)
-        .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
-          builder: this.popupBuilder,
-          placement: Placement.BottomLeft,
-          popupColor: this.propColor(this.item),
-          autoCancel: true,
-          enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
-        } as CustomPopupOptions)
+        // .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
+        //   builder: this.popupBuilder,
+        //   placement: Placement.BottomLeft,
+        //   popupColor: this.propColor(this.item),
+        //   autoCancel: true,
+        //   enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
+        // } as CustomPopupOptions)
         .onAreaChange((oldValue: Area, newValue: Area) => {
           let columnWidthNum: number = Number.parseInt(newValue.width.toString());
           this.columnWidth = columnWidthNum;
@@ -5009,8 +5018,8 @@ export class NodeItem {
   public nodeLevel: number;
   public children: NodeItem[];
   public indexOfParent: number;
-  public parentNodeId: number;
-  public currentNodeId: number;
+  public parentNodeId: int;
+  public currentNodeId: int;
   public isFolder?: boolean;
 
   constructor(nodeParam: NodeParam) {
