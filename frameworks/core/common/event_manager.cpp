@@ -2253,6 +2253,7 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
     falsifyEvent.sourceType = SourceType::TOUCH;
+    falsifyEvent.sourceTool = lastTouchEvent_.sourceTool;
     falsifyEvent.isInterpolated = true;
     auto downFingerIds = downFingerIds_;
     for (const auto& iter : downFingerIds) {
