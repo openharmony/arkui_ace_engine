@@ -174,6 +174,8 @@ public:
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
 
+    void EnableAlertBeforeBackPageExtender(const std::string& message, std::function<void(int32_t)>&& callback);
+
     void DisableAlertBeforeBackPage();
 
     // router operation

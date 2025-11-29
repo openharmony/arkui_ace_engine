@@ -86,6 +86,7 @@ public:
     int32_t mode_ = 0;
     bool needDelete_ = false;
     std::function<void(int32_t errorCode, std::string errorMessage)> promise_;
+    bool isFromSingleToNMoved_ = false;
 
     void InvokeOnPop(const PopInfo& popInfo);
 };
@@ -128,6 +129,11 @@ public:
         }
         param_ = tsPathInfo->GetParam();
         onPop_ = tsPathInfo->GetOnPop();
+    }
+
+    bool IsStatic() override
+    {
+        return true;
     }
 
     ParamType param_;
@@ -320,6 +326,8 @@ public:
         nodes_.clear();
     }
     ParamType GetParamByIndex(int32_t index) const;
+
+    bool IsTopFromSingletonMoved() override;
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
