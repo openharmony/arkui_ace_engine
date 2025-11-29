@@ -97,8 +97,6 @@ ScrollableStatus ListItemGroupAccessibilityProperty::GetScrollableStatus() const
     } else {
         return ScrollableStatus::AT_NEITHER_TOP_BOTTOM;
     }
-
-    return ScrollableStatus::NOT_SUPPORT;
 }
 
 } // namespace OHOS::Ace::NG

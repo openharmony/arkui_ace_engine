@@ -1554,5 +1554,273 @@ HWTEST_F(ListItemGroupPatternTestNg, AdjustMountTreeSequence001, TestSize.Level1
     ASSERT_NE(curFrame->GetLastChild(), nullptr);
     EXPECT_EQ(curFrame->GetLastChild()->GetId(), 1);
 }
+
+/**
+ * @tc.name: GetAccessibilityInnerVisibleRect001
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetAccessibilityInnerVisibleRect.
+ * @tc.desc: headerFrameNode == true && headerContext == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetAccessibilityInnerVisibleRect001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    RefPtr<ShallowBuilder> shallowBuilder1 = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern1 =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder1, V2::ListItemGroupStyle::CARD);
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 3, listItemGroupPattern1);
+    ASSERT_NE(frameNode1, nullptr);
+    listItemPattern->header_ = frameNode1;
+    auto headerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemPattern->GetHeaderNode());
+    ASSERT_NE(headerFrameNode, nullptr);
+
+    RectF rect = RectF(100.f, 100.f, 100.f, 100.f);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityInnerVisibleRect(rect));
+}
+
+/**
+ * @tc.name: GetAccessibilityInnerVisibleRect002
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetAccessibilityInnerVisibleRect.
+ * @tc.desc: headerFrameNode == true && headerContext == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetAccessibilityInnerVisibleRect002, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    RefPtr<ShallowBuilder> shallowBuilder1 = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern1 =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder1, V2::ListItemGroupStyle::CARD);
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 3, listItemGroupPattern1);
+    ASSERT_NE(frameNode1, nullptr);
+    listItemPattern->header_ = frameNode1;
+    auto headerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemPattern->GetHeaderNode());
+    ASSERT_NE(headerFrameNode, nullptr);
+
+    headerFrameNode->renderContext_ = nullptr;
+    auto headerContext = headerFrameNode->GetRenderContext();
+    ASSERT_EQ(headerContext, nullptr);
+
+    RectF rect = RectF(100.f, 100.f, 100.f, 100.f);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityInnerVisibleRect(rect));
+}
+
+/**
+ * @tc.name: GetAccessibilityInnerVisibleRect003
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetAccessibilityInnerVisibleRect.
+ * @tc.desc: footerFrameNode == true && footerContext == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetAccessibilityInnerVisibleRect003, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    RefPtr<ShallowBuilder> shallowBuilder1 = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern1 =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder1, V2::ListItemGroupStyle::CARD);
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 3, listItemGroupPattern1);
+    ASSERT_NE(frameNode1, nullptr);
+    listItemPattern->footer_ = frameNode1;
+    auto footerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemPattern->GetFooterNode());
+    ASSERT_NE(footerFrameNode, nullptr);
+
+    RectF rect = RectF(100.f, 100.f, 100.f, 100.f);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityInnerVisibleRect(rect));
+}
+
+/**
+ * @tc.name: GetAccessibilityInnerVisibleRect004
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetAccessibilityInnerVisibleRect.
+ * @tc.desc: footerFrameNode == true && footerContext == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetAccessibilityInnerVisibleRect004, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    RefPtr<ShallowBuilder> shallowBuilder1 = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern1 =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder1, V2::ListItemGroupStyle::CARD);
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 3, listItemGroupPattern1);
+    ASSERT_NE(frameNode1, nullptr);
+    listItemPattern->footer_ = frameNode1;
+    auto footerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemPattern->GetFooterNode());
+    ASSERT_NE(footerFrameNode, nullptr);
+
+    footerFrameNode->renderContext_ = nullptr;
+    auto footerContext = footerFrameNode->GetRenderContext();
+    ASSERT_EQ(footerContext, nullptr);
+
+    RectF rect = RectF(100.f, 100.f, 100.f, 100.f);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityInnerVisibleRect(rect));
+}
+
+/**
+ * @tc.name: GetAccessibilityInnerVisibleRect005
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetAccessibilityInnerVisibleRect.
+ * @tc.desc: headerFrameNode == false && footerFrameNode == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetAccessibilityInnerVisibleRect005, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    auto headerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemPattern->GetHeaderNode());
+    ASSERT_EQ(headerFrameNode, nullptr);
+
+    auto footerFrameNode = AceType::DynamicCast<NG::FrameNode>(listItemPattern->GetFooterNode());
+    ASSERT_EQ(footerFrameNode, nullptr);
+
+    RectF rect = RectF(100.f, 100.f, 100.f, 100.f);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityInnerVisibleRect(rect));
+}
+
+/**
+ * @tc.name: GetScrollableStatus001
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetScrollableStatus.
+ * @tc.desc: isDisplayStart == false && isDisplayEnd == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetScrollableStatus001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+    listItemPattern->IsDisplayStart();
+    listItemPattern->IsDisplayEnd();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto scrollableStatus = accessibilityProperty->GetScrollableStatus();
+    EXPECT_EQ(scrollableStatus, ScrollableStatus::AT_NEITHER_TOP_BOTTOM);
+}
+
+/**
+ * @tc.name: GetScrollableStatus002
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetScrollableStatus.
+ * @tc.desc: isDisplayStart == true && isDisplayEnd == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetScrollableStatus002, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+    listItemPattern->itemDisplayStartIndex_ = 0;
+    listItemPattern->itemTotalCount_ = 0;
+    EXPECT_TRUE(listItemPattern->IsDisplayStart());
+    EXPECT_TRUE(listItemPattern->IsDisplayEnd());
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto scrollableStatus = accessibilityProperty->GetScrollableStatus();
+    EXPECT_EQ(scrollableStatus, ScrollableStatus::AT_BOTH_TOP_BOTTOM);
+}
+
+/**
+ * @tc.name: GetScrollableStatus003
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetScrollableStatus.
+ * @tc.desc: isDisplayStart == true && isDisplayEnd == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetScrollableStatus003, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+    listItemPattern->itemDisplayStartIndex_ = 0;
+    EXPECT_TRUE(listItemPattern->IsDisplayStart());
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto scrollableStatus = accessibilityProperty->GetScrollableStatus();
+    EXPECT_EQ(scrollableStatus, ScrollableStatus::AT_TOP);
+}
+
+/**
+ * @tc.name: GetScrollableStatus004
+ * @tc.desc: Test ListItemGroupAccessibilityProperty GetScrollableStatus.
+ * @tc.desc: isDisplayStart == false && isDisplayEnd == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, GetScrollableStatus004, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto listItemPattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+    listItemPattern->itemTotalCount_ = 0;
+    EXPECT_TRUE(listItemPattern->IsDisplayEnd());
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto scrollableStatus = accessibilityProperty->GetScrollableStatus();
+    EXPECT_EQ(scrollableStatus, ScrollableStatus::AT_BOTTOM);
+}
+
 } // namespace OHOS::Ace::NG
 

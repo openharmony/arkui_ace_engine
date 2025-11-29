@@ -818,6 +818,139 @@ HWTEST_F(AccessibilityFocusStrategyTest, IsFindNextReadableNode001, TestSize.Lev
 }
 
 /**
+ * @tc.name: IsFindNextReadableNode002
+ * @tc.desc: Test the method IsFindNextReadableNode.
+ * brotherIt != end && ++brotherIt == end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindNextReadableNode002, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto frameNode = NG::FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto currentNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    auto frameNode2 = NG::FrameNode::CreateFrameNode("framenode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+
+    auto parentNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode2, frameNode->GetAccessibilityId());
+    ASSERT_NE(parentNode, nullptr);
+    frameNode2->AddChild(frameNode);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+
+    auto NextResult = focusStrategy.IsFindNextReadableNode(currentNode, parentNode, targetNode);
+    EXPECT_EQ(NextResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: IsFindNextReadableNode003
+ * @tc.desc: Test the method IsFindNextReadableNode.
+ * brotherIt != end && ++brotherIt != end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindNextReadableNode003, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode1 = NG::FrameNode::CreateFrameNode("currentNode1", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode1, nullptr);
+    auto current1 = std::make_shared<FrameNodeRulesCheckNode>(currentNode1, currentNode1->GetAccessibilityId());
+
+    auto currentNode2 = NG::FrameNode::CreateFrameNode("currentNode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode2, nullptr);
+    auto current2 = std::make_shared<FrameNodeRulesCheckNode>(currentNode2, currentNode2->GetAccessibilityId());
+
+    auto parentNode = NG::FrameNode::CreateFrameNode("parentNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    auto parent = std::make_shared<FrameNodeRulesCheckNode>(parentNode, parentNode->GetAccessibilityId());
+
+    parentNode->AddChild(currentNode1);
+    parentNode->AddChild(currentNode2);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto NextResult = focusStrategy.IsFindNextReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(NextResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: IsFindNextReadableNode004
+ * @tc.desc: Test the method IsFindNextReadableNode.
+ * (brotherIt != end) && (++brotherIt != end) && (IsHeaderFooterInScroll = true) && (IsAccessibiltyVisible = false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindNextReadableNode004, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode1 = NG::FrameNode::CreateFrameNode("currentNode1", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode1, nullptr);
+    auto current1 = std::make_shared<FrameNodeRulesCheckNode>(currentNode1, currentNode1->GetAccessibilityId());
+
+    auto currentNode2 = NG::FrameNode::CreateFrameNode("currentNode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode2, nullptr);
+
+    //IsHeaderFooterInScroll = true
+    auto accessibilityProperty = currentNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetIsHeaderOrFooter(true);
+
+    //IsAccessibiltyVisible = false
+    currentNode1->SetAccessibilityVisible(false);
+
+    auto current2 = std::make_shared<FrameNodeRulesCheckNode>(currentNode2, currentNode2->GetAccessibilityId());
+    auto parentNode = NG::FrameNode::CreateFrameNode("parentNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    auto parent = std::make_shared<FrameNodeRulesCheckNode>(parentNode, parentNode->GetAccessibilityId());
+
+    parentNode->AddChild(currentNode1);
+    parentNode->AddChild(currentNode2);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto NextResult = focusStrategy.IsFindNextReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(NextResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: IsFindNextReadableNode005
+ * @tc.desc: Test the method IsFindNextReadableNode.
+ * (brotherIt != end) && (++brotherIt != end) && (IsHeaderFooterInScroll = false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindNextReadableNode005, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode1 = NG::FrameNode::CreateFrameNode("currentNode1", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode1, nullptr);
+    auto current1 = std::make_shared<FrameNodeRulesCheckNode>(currentNode1, currentNode1->GetAccessibilityId());
+
+    auto currentNode2 = NG::FrameNode::CreateFrameNode("currentNode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode2, nullptr);
+
+    //IsHeaderFooterInScroll = false
+    auto accessibilityProperty = currentNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetIsHeaderOrFooter(false);
+
+    auto current2 = std::make_shared<FrameNodeRulesCheckNode>(currentNode2, currentNode2->GetAccessibilityId());
+    auto parentNode = NG::FrameNode::CreateFrameNode("parentNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    auto parent = std::make_shared<FrameNodeRulesCheckNode>(parentNode, parentNode->GetAccessibilityId());
+
+    parentNode->AddChild(currentNode1);
+    parentNode->AddChild(currentNode2);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto NextResult = focusStrategy.IsFindNextReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(NextResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
  * @tc.name: IsFindPrevReadableNode001
  * @tc.desc: Test the method IsFindPrevReadableNode.
  * @tc.type: FUNC
@@ -834,6 +967,155 @@ HWTEST_F(AccessibilityFocusStrategyTest, IsFindPrevReadableNode001, TestSize.Lev
 
     auto prevResult = focusStrategy.IsFindPrevReadableNode(currentNode, parentNode, targetNode);
     EXPECT_EQ(prevResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: IsFindPrevReadableNode002
+ * @tc.desc: Test the method IsFindPrevReadableNode.
+ * (currentIt != end) && (++currentIt == rbegin).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindPrevReadableNode002, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode1 = NG::FrameNode::CreateFrameNode("currentNode1", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode1, nullptr);
+    auto current1 = std::make_shared<FrameNodeRulesCheckNode>(currentNode1, currentNode1->GetAccessibilityId());
+
+    auto currentNode2 = NG::FrameNode::CreateFrameNode("currentNode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode2, nullptr);
+    auto current2 = std::make_shared<FrameNodeRulesCheckNode>(currentNode2, currentNode2->GetAccessibilityId());
+
+    auto parentNode = NG::FrameNode::CreateFrameNode("parentNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    auto parent = std::make_shared<FrameNodeRulesCheckNode>(parentNode, parentNode->GetAccessibilityId());
+
+    parentNode->AddChild(currentNode1);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto prevResult = focusStrategy.IsFindPrevReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(prevResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: IsFindPrevReadableNode003
+ * @tc.desc: Test the method IsFindPrevReadableNode.
+ * (currentIt != end) && (++currentIt != rbegin) && (IsHeaderFooterInScroll = true) && (IsAccessibiltyVisible = false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsFindPrevReadableNode003, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode1 = NG::FrameNode::CreateFrameNode("currentNode1", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode1, nullptr);
+    auto current1 = std::make_shared<FrameNodeRulesCheckNode>(currentNode1, currentNode1->GetAccessibilityId());
+
+    auto currentNode2 = NG::FrameNode::CreateFrameNode("currentNode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode2, nullptr);
+    auto current2 = std::make_shared<FrameNodeRulesCheckNode>(currentNode2, currentNode2->GetAccessibilityId());
+
+    auto parentNode = NG::FrameNode::CreateFrameNode("parentNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    auto parent = std::make_shared<FrameNodeRulesCheckNode>(parentNode, parentNode->GetAccessibilityId());
+
+    //IsHeaderFooterInScroll = true
+    auto accessibilityProperty = currentNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetIsHeaderOrFooter(true);
+
+    //IsAccessibiltyVisible = false
+    currentNode1->SetAccessibilityVisible(false);
+
+    parentNode->AddChild(currentNode2);
+    parentNode->AddChild(currentNode1);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto prevResult = focusStrategy.IsFindPrevReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(prevResult, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: CanScroll001
+ * @tc.desc: Test the method CanScroll.
+ * parentCanScroll == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, CanScroll001, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode1 = NG::FrameNode::CreateFrameNode("currentNode1", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode1, nullptr);
+    auto current1 = std::make_shared<FrameNodeRulesCheckNode>(currentNode1, currentNode1->GetAccessibilityId());
+
+    auto currentNode2 = NG::FrameNode::CreateFrameNode("currentNode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode2, nullptr);
+
+    auto accessibilityProperty = currentNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetIsHeaderOrFooter(true);
+    currentNode1->SetAccessibilityVisible(true);
+    EXPECT_TRUE(accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_BOTTOM);
+    EXPECT_TRUE(accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_BOTH_TOP_BOTTOM);
+
+    auto current2 = std::make_shared<FrameNodeRulesCheckNode>(currentNode2, currentNode2->GetAccessibilityId());
+    auto parentNode = NG::FrameNode::CreateFrameNode("parentNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    auto parent = std::make_shared<FrameNodeRulesCheckNode>(parentNode, parentNode->GetAccessibilityId());
+
+    parentNode->AddChild(currentNode1);
+    parentNode->AddChild(currentNode2);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto result = focusStrategy.IsFindNextReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: CanScroll002
+ * @tc.desc: Test the method CanScroll.
+ * parentCanScroll == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, CanScroll002, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode1 = NG::FrameNode::CreateFrameNode("currentNode1", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode1, nullptr);
+    auto current1 = std::make_shared<FrameNodeRulesCheckNode>(currentNode1, currentNode1->GetAccessibilityId());
+
+    auto currentNode2 = NG::FrameNode::CreateFrameNode("currentNode2", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(currentNode2, nullptr);
+
+    //IsHeaderFooterInScroll = true
+    auto accessibilityProperty = currentNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetIsHeaderOrFooter(true);
+
+    //IsAccessibiltyVisible = true
+    currentNode1->SetAccessibilityVisible(true);
+
+    //parentCanScroll == false
+    EXPECT_FALSE(accessibilityProperty->GetScrollableStatus() == NG::ScrollableStatus::AT_BOTTOM);
+
+    auto current2 = std::make_shared<FrameNodeRulesCheckNode>(currentNode2, currentNode2->GetAccessibilityId());
+    auto parentNode = NG::FrameNode::CreateFrameNode("parentNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    auto parent = std::make_shared<FrameNodeRulesCheckNode>(parentNode, parentNode->GetAccessibilityId());
+
+    parentNode->AddChild(currentNode1);
+    parentNode->AddChild(currentNode2);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto result = focusStrategy.IsFindNextReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
 }
 
 } // namespace OHOS::Ace::NG
