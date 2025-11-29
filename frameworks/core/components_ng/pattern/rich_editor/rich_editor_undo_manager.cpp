@@ -781,7 +781,7 @@ void StringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
 void StringUndoManager::ProcessDeleteOperation(int32_t length, bool isForward)
 {
     auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern && !pattern->spans_.empty());
     auto contentLength = static_cast<int32_t>(pattern->GetTextContentLength());
     int32_t currentPosition = pattern->caretPosition_;
     int32_t delStart = isForward ? currentPosition : currentPosition - length;
@@ -795,10 +795,8 @@ void StringUndoManager::ProcessDeleteOperation(int32_t length, bool isForward)
     info.SetRichEditorDeleteDirection(direction);
     info.SetOffset(delStart);
     info.SetLength(length);
-    if (!pattern->spans_.empty()) {
-        pattern->CalcDeleteValueObj(delStart, length, info);
-        pattern->DoDeleteActions(delStart, length, info, false);
-    }
+    pattern->CalcDeleteValueObj(delStart, length, info);
+    pattern->DoDeleteActions(delStart, length, info, false);
     pattern->ClearTextForDisplayIfEmpty();
 }
 
