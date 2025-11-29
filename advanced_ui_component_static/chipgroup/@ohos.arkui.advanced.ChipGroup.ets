@@ -74,7 +74,7 @@ import {
   PrefixIconOptions,
   SuffixIconOptions,
   ChipOptions,
-  LabelOptions as ChipLabelOptions
+  LabelOptions
 } from '@ohos.arkui.advanced.Chip';
 import resourceManager from '@ohos.resourceManager';
 import hilog from '@ohos.hilog';
@@ -143,7 +143,7 @@ interface ChipGroupStyleTheme {
   selectedFillColor: ResourceColor;
 }
 
-interface LabelOptions {
+export interface ChipItemLabelOptions {
   text: string;
 }
 
@@ -157,7 +157,7 @@ export interface SuffixImageIconOptions extends IconOptions {
 export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
   prefixSymbol?: ChipSymbolGlyphOptions;
-  label: LabelOptions;
+  label: ChipItemLabelOptions;
   suffixImageIcon?: SuffixImageIconOptions;
   suffixSymbol?: ChipSymbolGlyphOptions;
   suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions;
@@ -668,7 +668,7 @@ export struct ChipGroup {
                     text: chipItem?.label?.text ?? ' ',
                     fontColor: this.getFontColor(),
                     activatedFontColor: this.getSelectedFontColor(),
-                  } as ChipLabelOptions,
+                  } as LabelOptions,
                   suffixIcon: this.getSuffixIcon(chipItem),
                   suffixSymbol: chipItem?.suffixSymbol,
                   suffixSymbolOptions: chipItem.suffixSymbolOptions,
