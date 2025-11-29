@@ -59,14 +59,13 @@ FRAMEWORK_PAGE_ROUTER_EXCEPTION:
   ERROR_TYPE: { type: INT32, desc: error type }
   PACKAGE_NAME: { type: STRING, desc: package name }
   PAGE_NAME: { type: STRING, desc: page name }
+  ABILITY_NAME: { type: STRING, desc: ability name }
+  PAGE_LOAD_COST: {type: STRING, arrsize: 5, desc: pages loading cost too long }
 
 COMPONENT_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: component exception }
   ERROR_TYPE: { type: INT32, desc: error type }
   PACKAGE_NAME: { type: STRING, desc: package name }
-  ABILITY_NAME: { type: STRING, desc: ability name }
-  PAGE_URL: { type: STRING, desc: page name }
-  LOAD_COST: { type: INT64, desc: Indicates component loading in nanosecond. }
 
 API_CHANNEL_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: API channel exception }

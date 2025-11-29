@@ -35,7 +35,7 @@ void EventReport::SendPageRouterException(PageRouterExcepType type, const std::s
 
 void EventReport::SendComponentException(ComponentExcepType type) {}
 
-void EventReport::ReportComponentLoadTimeout(const EventInfo& eventInfo) {}
+void EventReport::ReportPageLoadTimeout(const EventInfo& eventInfo) {}
 
 void EventReport::SendAPIChannelException(APIChannelExcepType type) {}
 

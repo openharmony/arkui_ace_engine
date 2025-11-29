@@ -383,6 +383,7 @@ protected:
     RouterIntentInfo ParseRouterIntentInfo(const std::string& intentInfoSerialized);
     // only for @normalized ohmUrl
     std::string ParseUrlNameFromOhmUrl(const std::string& ohmUrl);
+    void LoadCompleteManagerStopCollect();
 
     RefPtr<Framework::ManifestParser> manifestParser_;
 
