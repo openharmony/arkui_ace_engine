@@ -103,6 +103,7 @@ class Window;
 class FontManager;
 class ManagerInterface;
 class NavigationController;
+class StatisticEventReporter;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
@@ -1666,6 +1667,10 @@ public:
     {
         asyncEventsHookListener_ = asyncEventsExecution;
     }
+    const std::shared_ptr<StatisticEventReporter>& GetStatisticEventReporter() const
+    {
+        return statisticEventReporter_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1880,6 +1885,7 @@ private:
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
     ConfigurationChange configurationChange_;
+    std::shared_ptr<StatisticEventReporter> statisticEventReporter_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

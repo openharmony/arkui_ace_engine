@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -64,6 +64,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_mouse_style.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
+    "$ace_root/test/mock/base/mock_statistic_event_reporter.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/accessibility/accessibility_manager_ng.cpp",
