@@ -5103,7 +5103,7 @@ void impl_CommonMethod_setOverlay(Ark_NativePointer thisPtr, KSerializerBuffer t
                 valueValueTempTmpBuf_.value1 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
             } else if (valueValueTempTmpBuf_UnionSelector == 2) {
                 valueValueTempTmpBuf_.selector = 2;
-                valueValueTempTmpBuf_.value2 = static_cast<Ark_ComponentContent>(thisDeserializer.readObject());
+                valueValueTempTmpBuf_.value2 = static_cast<Ark_ComponentContent>(ComponentContent_serializer::read(thisDeserializer));
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
@@ -19067,7 +19067,7 @@ void impl_TabContentAttribute_setTabBar(Ark_NativePointer thisPtr, KSerializerBu
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
-                valueValueTempTmpBuf_.value0 = static_cast<Ark_ComponentContent>(thisDeserializer.readObject());
+                valueValueTempTmpBuf_.value0 = static_cast<Ark_ComponentContent>(ComponentContent_serializer::read(thisDeserializer));
             } else if (valueValueTempTmpBuf_UnionSelector == 1) {
                 valueValueTempTmpBuf_.selector = 1;
                 valueValueTempTmpBuf_.value1 = SubTabBarStyle_serializer::read(thisDeserializer);

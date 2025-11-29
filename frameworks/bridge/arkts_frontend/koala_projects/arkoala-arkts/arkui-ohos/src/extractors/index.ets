@@ -1,5 +1,5 @@
 import { int32 } from "@koalaui/common";
-import { KPointer } from "@koalaui/interop";
+import { KPointer, nullptr } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
@@ -80,6 +80,7 @@ import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
 import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
+import { ComponentContent } from 'arkui.ComponentContent';
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -581,5 +582,18 @@ export namespace extractors {
   export function fromEnvironmentPtr(ptr: KPointer): Environment {
     const x: Object = {};
     return x as Environment;
+  }
+
+  export function toComponentContentPtr(value: ComponentContent): KPointer {
+    const pointer = value.getNodePtr();
+    if (pointer === undefined) {
+      return nullptr;
+    }
+    return pointer;
+  }
+
+  export function fromComponentContentPtr(ptr: KPointer): ComponentContent {
+    const x: Object = {};
+    return x as ComponentContent;
   }
 }

@@ -33,3 +33,14 @@ export class ComponentContentBase_serializer {
         return extractors.fromComponentContentBasePtr(ptr)
     }
 }
+export class ComponentContent_serializer {
+    public static write(buffer: SerializerBase, value: ComponentContent): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toComponentContentPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ComponentContent {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return extractors.fromComponentContentPtr(ptr)
+    }
+}
