@@ -1435,6 +1435,7 @@ void SubwindowOhos::ResizeWindowForDialog(const DialogProperties& dialogProps)
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
         auto parentWindowRect = GetUIExtensionHostWindowRect();
         // keep consistent with the size and position of the parent window in first frame.
+        CHECK_NULL_VOID(window_);
         window_->MoveTo(parentWindowRect.GetOffset().GetX(), parentWindowRect.GetOffset().GetY());
         window_->Resize(parentWindowRect.Width(), parentWindowRect.Height());
         window_->SetFollowParentWindowLayoutEnabled(true);
