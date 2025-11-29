@@ -1824,7 +1824,15 @@ void AssignCast(std::optional<PopupKeyboardAvoidMode> &dst, const Ark_KeyboardAv
         default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
     }
 }
-
+template<>
+void AssignCast(std::optional<TipsAnchorType> &dst, const Ark_TipsAnchorType& src)
+{
+    switch (src) {
+        case ARK_TIPS_ANCHOR_TYPE_TARGET: dst = TipsAnchorType::TARGET; break;
+        case ARK_TIPS_ANCHOR_TYPE_CURSOR: dst = TipsAnchorType::CURSOR; break;
+        default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
+    }
+}
 template<>
 RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
 {
@@ -1870,6 +1878,10 @@ RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
                 popupParam->SetArrowHeight(arrowHeightOpt.value());
             }
         }
+    }
+    auto showAtAnchorOpt = Converter::OptConvert<TipsAnchorType>(src.showAtAnchor);
+    if (showAtAnchorOpt.has_value()) {
+        popupParam->SetAnchorType(showAtAnchorOpt.value());
     }
     return popupParam;
 }

@@ -6835,6 +6835,14 @@ typedef struct Opt_TimePickerFormat {
     Ark_Tag tag;
     Ark_TimePickerFormat value;
 } Opt_TimePickerFormat;
+typedef enum Ark_TipsAnchorType {
+    ARK_TIPS_ANCHOR_TYPE_TARGET = 0,
+    ARK_TIPS_ANCHOR_TYPE_CURSOR = 1,
+} Ark_TipsAnchorType;
+typedef struct Opt_TipsAnchorType {
+    Ark_Tag tag;
+    Ark_TipsAnchorType value;
+} Opt_TipsAnchorType;
 typedef enum Ark_TitleHeight {
     ARK_TITLE_HEIGHT_MAIN_ONLY = 0,
     ARK_TITLE_HEIGHT_MAIN_WITH_SUB = 1,
@@ -19926,6 +19934,7 @@ typedef struct Ark_TipsOptions {
     Opt_ArrowPointPosition arrowPointPosition;
     Opt_Dimension arrowWidth;
     Opt_Dimension arrowHeight;
+    Opt_TipsAnchorType showAtAnchor;
 } Ark_TipsOptions;
 typedef struct Opt_TipsOptions {
     Ark_Tag tag;
