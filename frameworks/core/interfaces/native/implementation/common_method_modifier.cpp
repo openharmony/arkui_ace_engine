@@ -5160,6 +5160,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
                 return uiNode;
 #endif
             };
+            ViewAbstract::SetIsBuilderBackground(frameNode, true);
             ViewAbstractModelStatic::BindBackground(frameNode, builder, optAlign);
         }, node);
 }

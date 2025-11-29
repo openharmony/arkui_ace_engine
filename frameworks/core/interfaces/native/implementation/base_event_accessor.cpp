@@ -163,7 +163,7 @@ Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    return Converter::ArkValue<Opt_Float64>(peer->GetBaseInfo()->GetRollAngle());
+    return Converter::ArkValue<Opt_Float64>(peer->GetBaseInfo()->GetRollAngle().value_or(0.0f));
 }
 void SetRollAngleImpl(Ark_BaseEvent peer,
                       const Opt_Float64* rollAngle)
