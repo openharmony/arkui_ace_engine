@@ -1161,7 +1161,7 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage001, TestSize.Level1)
     auto target = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    auto overlayManager = SheetManager::GetOverlayFromPage(-1, RootNodeType::PAGE_ETS_TAG, target);
+    auto overlayManager = SheetManager::GetOverlayFromPage(-1, RootNodeType::PAGE_ETS_TAG, target->GetId());
     EXPECT_EQ(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
@@ -1183,7 +1183,7 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage002, TestSize.Level1)
     auto target = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::PAGE_ETS_TAG, target);
+    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::PAGE_ETS_TAG, target->GetId());
     EXPECT_NE(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
@@ -1207,7 +1207,7 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage003, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto overlayManager =
-        SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::NAVDESTINATION_VIEW_ETS_TAG, target);
+        SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::NAVDESTINATION_VIEW_ETS_TAG, target->GetId());
     EXPECT_NE(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
@@ -1230,7 +1230,8 @@ HWTEST_F(SheetOthersTestNg, GetOverlayFromPage004, TestSize.Level1)
     auto target = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    auto overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::WINDOW_SCENE_ETS_TAG, target);
+    auto overlayManager =
+        SheetManager::GetOverlayFromPage(rootNodeId, RootNodeType::WINDOW_SCENE_ETS_TAG, target->GetId());
     EXPECT_EQ(overlayManager, nullptr);
     SheetOthersTestNg::TearDownTestCase();
 }
