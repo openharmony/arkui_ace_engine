@@ -63,7 +63,7 @@ OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 
 RefPtr<PopupTheme> GetPopupTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
