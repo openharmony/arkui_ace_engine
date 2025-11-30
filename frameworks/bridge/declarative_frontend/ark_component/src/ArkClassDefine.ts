@@ -890,6 +890,14 @@ class ArkSafeAreaExpandOpts {
   }
 }
 
+class ArkBorderRadiusOpts {
+  value: Length | BorderRadiuses | LocalizedBorderRadius = undefined;
+  type: RenderStrategy = undefined;
+  isEqual(another: ArkBorderRadiusOpts) {
+    return (this.value === another.value) && (this.type === another.type);
+  }
+}
+
 class ArkEnableStatusBar {
   enable: boolean | undefined = undefined;
   animated?: boolean | undefined = undefined;

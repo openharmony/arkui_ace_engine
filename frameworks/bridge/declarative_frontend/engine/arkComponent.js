@@ -320,36 +320,48 @@ class BorderRadiusModifier extends ModifierWithKey {
       getUINativeModule().common.resetBorderRadius(node);
     }
     else {
-      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        getUINativeModule().common.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      if (isNumber(this.value.value) || isString(this.value.value) || isResource(this.value.value)) {
+        getUINativeModule().common.setBorderRadius(node, this.value.value, this.value.value,
+           this.value.value, this.value.value, this.value.type);
       }
       else {
-        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
-            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
-            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
-            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
-          getUINativeModule().common.setBorderRadius(node, this.value.topStart, this.value.topEnd, this.value.bottomStart, this.value.bottomEnd);
+        if (isUndefined(this.value.value)) {
+          getUINativeModule().common.setBorderRadius(node, undefined, undefined, undefined, undefined, this.value.type);
+          return;
+        }
+        if ((Object.keys(this.value.value).indexOf('topStart') >= 0) ||
+            (Object.keys(this.value.value).indexOf('topEnd') >= 0) ||
+            (Object.keys(this.value.value).indexOf('bottomStart') >= 0) ||
+            (Object.keys(this.value.value).indexOf('bottomEnd') >= 0)) {
+          getUINativeModule().common.setBorderRadius(node, this.value.value.topStart,
+             this.value.value.topEnd, this.value.value.bottomStart, this.value.value.bottomEnd, this.value.type);
         } else {
-          getUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+          getUINativeModule().common.setBorderRadius(node, this.value.value.topLeft,
+             this.value.value.topRight, this.value.value.bottomLeft, this.value.value.bottomRight, this.value.type);
         }
       }
     }
   }
   checkObjectDiff() {
-    if (!isResource(this.stageValue) && !isResource(this.value)) {
-      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
-          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
-          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
-          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
-        return !(this.stageValue.topStart === this.value.topStart &&
-          this.stageValue.topEnd === this.value.topEnd &&
-          this.stageValue.bottomStart === this.value.bottomStart &&
-          this.stageValue.bottomEnd === this.value.bottomEnd);
+    if (isUndefined(this.value.value)) {
+      return this.stageValue.value !== undefined;
+    }
+    if (!isResource(this.stageValue.value) && !isResource(this.value.value)) {
+      if ((Object.keys(this.value.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value.value).indexOf('bottomEnd') >= 0)) {
+        return !(this.stageValue.value.topStart === this.value.value.topStart &&
+          this.stageValue.value.topEnd === this.value.value.topEnd &&
+          this.stageValue.value.bottomStart === this.value.value.bottomStart &&
+          this.stageValue.value.bottomEnd === this.value.value.bottomEnd &&
+          this.stageValue.type === this.value.type);
       }
-      return !(this.stageValue.topLeft === this.value.topLeft &&
-        this.stageValue.topRight === this.value.topRight &&
-        this.stageValue.bottomLeft === this.value.bottomLeft &&
-        this.stageValue.bottomRight === this.value.bottomRight);
+      return !(this.stageValue.value.topLeft === this.value.value.topLeft &&
+        this.stageValue.value.topRight === this.value.value.topRight &&
+        this.stageValue.value.bottomLeft === this.value.value.bottomLeft &&
+        this.stageValue.value.bottomRight === this.value.value.bottomRight &&
+        this.stageValue.type === this.value.type);
     }
     else {
       return true;
@@ -4496,8 +4508,11 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BorderColorModifier.identity, BorderColorModifier, value);
     return this;
   }
-  borderRadius(value) {
-    modifierWithKey(this._modifiersWithKeys, BorderRadiusModifier.identity, BorderRadiusModifier, value);
+  borderRadius(value, type) {
+    let opts = new ArkBorderRadiusOpts();
+    opts.value = value;
+    opts.type = type;
+    modifierWithKey(this._modifiersWithKeys, BorderRadiusModifier.identity, BorderRadiusModifier, opts);
     return this;
   }
   borderImage(value) {
@@ -20077,6 +20092,15 @@ class ArkSafeAreaExpandOpts {
   }
   isEqual(another) {
     return (this.type === another.type) && (this.edges === another.edges);
+  }
+}
+class ArkBorderRadiusOpts {
+  constructor() {
+    this.value = undefined;
+    this.type = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value) && (this.type === another.type);
   }
 }
 class ArkEnableStatusBar {
