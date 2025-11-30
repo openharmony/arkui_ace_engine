@@ -7020,7 +7020,7 @@ export interface PopupMaskType {
 }
 export interface PopupBorderLinearGradient {
     direction?: GradientDirection;
-    colors: Array<[ ResourceColor, double ]>;
+    colors: Array<[ ResourceColor | undefined, double ]>;
 }
 export interface PopupCommonOptions {
     placement?: Placement;
@@ -12998,24 +12998,30 @@ export class PopupBorderLinearGradient_serializer {
         const valueHolderForColors  = value.colors
         valueSerializer.writeInt32((valueHolderForColors.length).toInt())
         for (let valueHolderForColorsCounterI = 0; valueHolderForColorsCounterI < valueHolderForColors.length; valueHolderForColorsCounterI++) {
-            const valueHolderForColorsTmpElement : [ ResourceColor, double ] = valueHolderForColors[valueHolderForColorsCounterI]
+            const valueHolderForColorsTmpElement : [ ResourceColor | undefined, double ] = valueHolderForColors[valueHolderForColorsCounterI]
             const valueHolderForColorsTmpElement_0  = valueHolderForColorsTmpElement[0]
-            if (valueHolderForColorsTmpElement_0 instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorsTmpElement_0ForIdx0  = valueHolderForColorsTmpElement_0 as Color
-                valueSerializer.writeInt32(valueHolderForColorsTmpElement_0ForIdx0.getOrdinal())
-            } else if (valueHolderForColorsTmpElement_0 instanceof number) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorsTmpElement_0ForIdx1  = valueHolderForColorsTmpElement_0 as number
-                valueSerializer.writeNumber(valueHolderForColorsTmpElement_0ForIdx1)
-            } else if (valueHolderForColorsTmpElement_0 instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderForColorsTmpElement_0ForIdx2  = valueHolderForColorsTmpElement_0 as string
-                valueSerializer.writeString(valueHolderForColorsTmpElement_0ForIdx2)
-            } else if (valueHolderForColorsTmpElement_0 instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorsTmpElement_0ForIdx3  = valueHolderForColorsTmpElement_0 as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0ForIdx3)
+            if (valueHolderForColorsTmpElement_0 !== undefined) {
+                valueSerializer.writeInt8(RuntimeType.OBJECT)
+                const valueHolderForColorsTmpElement_0TmpValue  = valueHolderForColorsTmpElement_0!
+                if (valueHolderForColorsTmpElement_0TmpValue instanceof Color) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForColorsTmpElement_0TmpValueForIdx0  = valueHolderForColorsTmpElement_0TmpValue as Color
+                    valueSerializer.writeInt32(valueHolderForColorsTmpElement_0TmpValueForIdx0.getOrdinal())
+                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof number) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForColorsTmpElement_0TmpValueForIdx1  = valueHolderForColorsTmpElement_0TmpValue as number
+                    valueSerializer.writeNumber(valueHolderForColorsTmpElement_0TmpValueForIdx1)
+                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof string) {
+                    valueSerializer.writeInt8((2).toByte())
+                    const valueHolderForColorsTmpElement_0TmpValueForIdx2  = valueHolderForColorsTmpElement_0TmpValue as string
+                    valueSerializer.writeString(valueHolderForColorsTmpElement_0TmpValueForIdx2)
+                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof Resource) {
+                    valueSerializer.writeInt8((3).toByte())
+                    const valueHolderForColorsTmpElement_0TmpValueForIdx3  = valueHolderForColorsTmpElement_0TmpValue as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0TmpValueForIdx3)
+                }
+            } else {
+                valueSerializer.writeInt8(RuntimeType.UNDEFINED)
             }
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
             valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
@@ -13030,26 +13036,31 @@ export class PopupBorderLinearGradient_serializer {
         }
         const directionTmpResult : GradientDirection | undefined = directionTmpBuf
         const colorsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf : Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
+        let colorsTmpBuf : Array<[ ResourceColor | undefined, double ]> = new Array<[ ResourceColor | undefined, double ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
-            const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-            let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
-            if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readNumber() as number)
-            } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string)
-            } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (3).toChar()) {
-                colorsTmpBufTempBufValue0TempBuf = Resource_serializer.read(valueDeserializer)
-            } else {
-                throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
+            const colorsTmpBufTempBufValue0TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+            let colorsTmpBufTempBufValue0TempBuf : ResourceColor | undefined = undefined
+            if ((colorsTmpBufTempBufValue0TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                const colorsTmpBufTempBufValue0TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+                let colorsTmpBufTempBufValue0TempBuf_ : Color | number | string | Resource | undefined
+                if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (0).toChar()) {
+                    colorsTmpBufTempBufValue0TempBuf_ = Color.values()[valueDeserializer.readInt32()]
+                } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (1).toChar()) {
+                    colorsTmpBufTempBufValue0TempBuf_ = (valueDeserializer.readNumber() as number)
+                } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (2).toChar()) {
+                    colorsTmpBufTempBufValue0TempBuf_ = (valueDeserializer.readString() as string)
+                } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (3).toChar()) {
+                    colorsTmpBufTempBufValue0TempBuf_ = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf_ has to be chosen through deserialisation.")
+                }
+                colorsTmpBufTempBufValue0TempBuf = (colorsTmpBufTempBufValue0TempBuf_ as Color | number | string | Resource)
             }
-            const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
+            const colorsTmpBufTempBufValue0 : ResourceColor | undefined = colorsTmpBufTempBufValue0TempBuf
             const colorsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
+            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor | undefined, double ])
         }
-        const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
+        const colorsTmpResult : Array<[ ResourceColor | undefined, double ]> = colorsTmpBuf
         let value : PopupBorderLinearGradient = ({direction: directionTmpResult, colors: colorsTmpResult} as PopupBorderLinearGradient)
         return value
     }
