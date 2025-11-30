@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,11 +13,17 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-group("adapter_unittest") {
+config("dm_config") {
+  include_dirs = [ "$ace_root/test/mock/ohos_mock/dm" ]
+}
+
+ohos_source_set("mock_dm") {
   testonly = true
-  deps = [
-    "ohos/capability:capability_unittest",
-    "ohos/entrance:entrance_unittest",
-    "ohos/osal/system_properties:system_properties_unittest",
+  sources = [
+    "$ace_root/test/mock/ohos_mock/dm/display_info.cpp",
+    "$ace_root/test/mock/ohos_mock/dm/display_manager.cpp",
   ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  public_configs = [ ":dm_config" ]
+  deps = [ "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils" ]
 }

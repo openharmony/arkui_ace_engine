@@ -405,7 +405,7 @@ void ArktsDynamicUIContentImpl::CommonInitializeDeviceInfo(
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
     }
-
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(
         deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
 }
