@@ -79,7 +79,6 @@ enum class ComponentExcepType {
     LIST_ITEM_ERR,
     MARQUEE_ERR,
     NAVIGATION_BAR_ERR,
-    COMPONENT_LOAD_TIMEOUT,
 };
 
 // EXCEPTION_API_CHANNEL

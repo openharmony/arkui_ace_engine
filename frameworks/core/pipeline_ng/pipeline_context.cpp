@@ -236,13 +236,24 @@ PipelineContext::PipelineContext()
 
 std::string PipelineContext::GetCurrentPageNameCallback()
 {
-    CHECK_NULL_RETURN(stageManager_, "");
+    auto pageInfo = GetLastPageInfo();
+    CHECK_NULL_RETURN(pageInfo, "");
+    return GetNavDestinationPageName(pageInfo);
+}
+
+const RefPtr<PageInfo> PipelineContext::GetLastPageInfo()
+{
+    CHECK_NULL_RETURN(stageManager_, nullptr);
     RefPtr<FrameNode> pageNode = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(pageNode, "");
+    CHECK_NULL_RETURN(pageNode, nullptr);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, "");
-    CHECK_NULL_RETURN(pagePattern->GetPageInfo(), "");
-    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    CHECK_NULL_RETURN(pagePattern, nullptr);
+    return pagePattern->GetPageInfo();
+}
+
+std::string PipelineContext::GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo)
+{
+    int32_t pageId = pageInfo->GetPageId();
     RefPtr<NavigationGroupNode> navigationNode = nullptr;
     CHECK_RUN_ON(UI);
     auto it = pageToNavigationNodes_.find(pageId);
@@ -266,6 +277,18 @@ std::string PipelineContext::GetCurrentPageNameCallback()
     auto pageNameObj = navDestinationNodes.back();
     std::string pageName = std::get<0>(pageNameObj);
     return pageName;
+}
+
+std::string PipelineContext::GetCurrentPageName()
+{
+    auto pageInfo = GetLastPageInfo();
+    CHECK_NULL_RETURN(pageInfo, "");
+    std::string url = pageInfo->GetPageUrl();
+    std::string pageName = GetNavDestinationPageName(pageInfo);
+    if (!pageName.empty()) {
+        url += "," + pageName;
+    }
+    return url;
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()

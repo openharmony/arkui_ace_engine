@@ -35,6 +35,16 @@ std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 namespace {
 constexpr char EMPTY_PAGE_INFO[] = "NA";
 
+std::string GetPageUrl(const RefPtr<PagePattern>& pagePattern)
+{
+    auto pageInfo = pagePattern->GetPageInfo();
+    std::string url = "";
+    if (pageInfo) {
+        url = pageInfo->GetPageUrl();
+    }
+    return url;
+}
+
 void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transitionType)
 {
     CHECK_NULL_VOID(page);
@@ -68,7 +78,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-    context->GetLoadCompleteManager()->StartCollect("");
+    context->GetLoadCompleteManager()->StartCollect(GetPageUrl(pagePattern));
     pagePattern->TriggerPageTransition(
         [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId(), transitionType]() {
             auto pagePattern = weak.Upgrade();
