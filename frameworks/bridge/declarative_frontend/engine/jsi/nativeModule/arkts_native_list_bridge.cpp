@@ -525,6 +525,38 @@ ArkUINativeModuleValue ListBridge::ResetListSyncLoad(ArkUIRuntimeCallInfo* runti
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> argOptions = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (argOptions->IsObject(vm)) {
+        ArkUI_EditModeOptions options;
+        JSRef<JSVal> gather = JSRef<JSObject>::Make(argOptions)->GetProperty("enableGatherSelectedItemsAnimation");
+        if (gather->IsBoolean()) {
+            options.enableGatherSelectedItemsAnimation = gather->ToBoolean();
+        }
+        GetArkUINodeModifiers()->getListModifier()->setEditModeOptions(nativeNode, &options);
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetEditModeOptions(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetEditModeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetEditModeOptions(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetListNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

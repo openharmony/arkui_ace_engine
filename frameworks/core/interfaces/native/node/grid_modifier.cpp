@@ -519,6 +519,31 @@ ArkUI_Bool GetGridSyncLoad(ArkUINodeHandle node)
     return GridModelNG::GetSyncLoad(frameNode);
 }
 
+void SetGridEditModeOptions(ArkUINodeHandle node, ArkUIEditModeOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions newOptions;
+    newOptions.enableGatherSelectedItemsAnimation = options->enableGatherSelectedItemsAnimation;
+    GridModelNG::SetEditModeOptions(frameNode, newOptions);
+}
+
+void ResetGridEditModeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions newOptions;
+    GridModelNG::SetEditModeOptions(frameNode, newOptions);
+}
+
+void GetGridEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[1])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions options = GridModelNG::GetEditModeOptions(frameNode);
+    (*values)[0] = options.enableGatherSelectedItemsAnimation ? 1 : 0;
+}
+
 ArkUI_CharPtr GetColumnsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -799,6 +824,9 @@ const ArkUIGridModifier* GetGridModifier()
         .setSyncLoad = SetGridSyncLoad,
         .resetSyncLoad = ResetGridSyncLoad,
         .getSyncLoad = GetGridSyncLoad,
+        .setEditModeOptions = SetGridEditModeOptions,
+        .resetEditModeOptions = ResetGridEditModeOptions,
+        .getEditModeOptions = GetGridEditModeOptions,
         .setGridFadingEdge = SetGridFadingEdge,
         .resetGridFadingEdge = ResetGridFadingEdge,
         .setOnGridScrollIndexCallBack = SetOnGridScrollIndexCallBack,

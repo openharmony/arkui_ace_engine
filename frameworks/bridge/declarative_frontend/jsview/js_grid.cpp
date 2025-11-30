@@ -431,6 +431,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onScrollBarUpdate", &JSGrid::JsOnScrollBarUpdate);
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
+    JSClass<JSGrid>::StaticMethod("editModeOptions", &JSGrid::SetEditModeOptions);
     JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);
     JSClass<JSGrid>::StaticMethod("maxCount", &JSGrid::SetMaxCount, opt);
     JSClass<JSGrid>::StaticMethod("minCount", &JSGrid::SetMinCount, opt);
@@ -520,6 +521,22 @@ void JSGrid::SetEditMode(const JSCallbackInfo& info)
         ParseJsBool(info[0], editMode);
     }
     GridModel::GetInstance()->SetEditable(editMode);
+}
+
+void JSGrid::SetEditModeOptions(const JSCallbackInfo& info)
+{
+    NG::EditModeOptions options;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
+            auto gatherAnimation = obj->GetProperty("enableGatherSelectedItemsAnimation");
+            if (gatherAnimation->IsBoolean()) {
+                options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
+            }
+        }
+    }
+    GridModel::GetInstance()->SetEditModeOptions(options);
 }
 
 void JSGrid::SetMaxCount(const JSCallbackInfo& info)

@@ -740,7 +740,7 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridItemOptions, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID_ITEM);
     ASSERT_NE(rootNode, nullptr);
 
     //set get and reset

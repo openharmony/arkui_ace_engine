@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,10 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_v2/list/list_properties.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -73,6 +73,7 @@ public:
     virtual void SetMaintainVisibleContentPosition(bool enabled) = 0;
     virtual void SetStackFromEnd(bool enabled) = 0;
     virtual void SetSyncLoad(bool enabled) = 0;
+    virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {}
     virtual void SetOnScroll(OnScrollEvent&& onScroll) = 0;
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) = 0;

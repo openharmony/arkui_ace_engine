@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -523,7 +524,8 @@ static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, st
     });
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
     auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
-    gestureHub->SetLongPressEvent(longPress, false, true, longPressDuration);
+    gestureHub->SetLongPressEvent(
+        longPress, false, true, longPressDuration, SelectableUtils::IsSelectableItem(targetNode));
     gestureHub->SetLongPressEventType(GestureTypeName::CONTEXT_MENU_HOVER);
 
     BindGestureForContextMenu(targetNode, menuParam, contextMenuShow);

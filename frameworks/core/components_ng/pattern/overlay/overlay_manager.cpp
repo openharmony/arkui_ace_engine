@@ -30,12 +30,12 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
-#include "base/ressched/ressched_report.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
@@ -59,10 +59,10 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -80,6 +80,7 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -4242,6 +4243,7 @@ void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>&
     // notify drag manager the menu show status
     if (!menuNode) {
         DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow);
+        SelectableUtils::GetInstance().PublishMenuStatus(isMenuShow, menuNode);
         return;
     }
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -4253,6 +4255,7 @@ void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>&
     auto targetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(targetNode);
     DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow, targetNode);
+    SelectableUtils::GetInstance().PublishMenuStatus(isMenuShow, targetNode);
 }
 
 void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode)

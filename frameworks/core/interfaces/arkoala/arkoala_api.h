@@ -112,6 +112,9 @@ struct _ArkUIRenderNode;
 struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
 struct ArkUI_GridLayoutOptions;
+struct ArkUI_EditModeOptions {
+    ArkUI_Bool enableGatherSelectedItemsAnimation;
+};
 
 typedef ArkUIGestureRecognizer* ArkUIGestureRecognizerHandle;
 typedef ArkUIGestureRecognizerHandle* ArkUIGestureRecognizerHandleArray;
@@ -124,6 +127,12 @@ typedef _ArkUIPaint* ArkUIPaintHandle;
 typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
+typedef ArkUI_WaterFlowSectionOption* ArkUIWaterFlowSectionOption;
+typedef ArkUI_ListItemSwipeActionOption* ArkUIListItemSwipeActionOptionHandle;
+typedef ArkUI_ListItemSwipeActionItem* ArkUIListItemSwipeActionItemHandle;
+typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
+typedef ArkUI_GridLayoutOptions* ArkUIGridLayoutOptions;
+typedef ArkUI_EditModeOptions* ArkUIEditModeOptions;
 typedef _ArkUINodeContent* ArkUINodeContentHandle;
 typedef _ArkUIRSNode* ArkUIRSNodeHandle;
 typedef _ArkUI_OEMVisualEffectFunc* ArkUIOEMVisualEffectFuncHandle;
@@ -150,11 +159,6 @@ struct ArkUICanvasArcOptions {
     ArkUI_Float32 endAngle;
     ArkUI_Bool counterclockwise;
 };
-typedef ArkUI_WaterFlowSectionOption* ArkUIWaterFlowSectionOption;
-typedef ArkUI_ListItemSwipeActionOption* ArkUIListItemSwipeActionOptionHandle;
-typedef ArkUI_ListItemSwipeActionItem* ArkUIListItemSwipeActionItemHandle;
-typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
-typedef ArkUI_GridLayoutOptions* ArkUIGridLayoutOptions;
 
 typedef ArkUI_TextPickerRangeContentArray* ArkUITextPickerRangeContentArray;
 typedef ArkUI_TextCascadePickerRangeContentArray* ArkUITextCascadePickerRangeContentArray;
@@ -3834,6 +3838,9 @@ struct ArkUIListModifier {
     void (*setListSyncLoad)(ArkUINodeHandle node, ArkUI_Bool enabled);
     void (*resetListSyncLoad)(ArkUINodeHandle node);
     ArkUI_Bool (*getListSyncLoad)(ArkUINodeHandle node);
+    void (*setEditModeOptions)(ArkUINodeHandle node, ArkUIEditModeOptions options);
+    void (*resetEditModeOptions)(ArkUINodeHandle node);
+    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[1]);
     void (*setListFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetListFadingEdge)(ArkUINodeHandle node);
@@ -4290,6 +4297,9 @@ struct ArkUIGridModifier {
     void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool syncLoad);
     void (*resetSyncLoad)(ArkUINodeHandle node);
     ArkUI_Bool (*getSyncLoad)(ArkUINodeHandle node);
+    void (*setEditModeOptions)(ArkUINodeHandle node, ArkUIEditModeOptions options);
+    void (*resetEditModeOptions)(ArkUINodeHandle node);
+    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[1]);
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetGridFadingEdge)(ArkUINodeHandle node);

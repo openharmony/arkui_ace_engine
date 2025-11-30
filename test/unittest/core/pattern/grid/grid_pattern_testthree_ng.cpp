@@ -62,7 +62,7 @@ HWTEST_F(GridTestThreeNg, SkipRegularLinesForward, TestSize.Level1)
 {
     GridLayoutInfo gridLayoutInfo;
     gridLayoutInfo.lineHeightMap_[0] = 60.0f;
-    gridLayoutInfo.lineHeightMap_[0] = 60.0f;
+    gridLayoutInfo.lineHeightMap_[1] = 60.0f;
     gridLayoutInfo.startIndex_ = 30;
     gridLayoutInfo.currentOffset_ = 240.0f;
     gridLayoutInfo.childrenCount_ = 100;
@@ -70,9 +70,9 @@ HWTEST_F(GridTestThreeNg, SkipRegularLinesForward, TestSize.Level1)
     RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
     ASSERT_NE(layout, nullptr);
     layout->mainGap_ = 0;
-    layout->info_.crossCount_ = 3;
     layout->SkipRegularLines(true);
     EXPECT_EQ(layout->info_.currentOffset_, 0.0f);
+    EXPECT_EQ(layout->info_.startIndex_, 18);
 }
 /**
  * @tc.name: SkipIrregularLines001

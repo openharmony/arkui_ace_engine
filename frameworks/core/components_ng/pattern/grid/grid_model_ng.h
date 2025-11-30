@@ -75,6 +75,7 @@ public:
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetSyncLoad(bool syncLoad) override;
+    void SetEditModeOptions(EditModeOptions& editModeOptions) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) override;
@@ -150,6 +151,8 @@ public:
 
     static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
     static bool GetSyncLoad(FrameNode* frameNode);
+    static void SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions);
+    static EditModeOptions GetEditModeOptions(FrameNode* frameNode);
 
     static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
 

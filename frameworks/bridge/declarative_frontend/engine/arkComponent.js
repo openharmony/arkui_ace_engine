@@ -7633,6 +7633,10 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridSyncLoadModifier.identity, GridSyncLoadModifier, value);
     return this;
   }
+  editModeOptions(options) {
+    modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
+    return this;
+  }
   onWillScroll(callback) {
     modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
     return this;
@@ -8215,6 +8219,20 @@ class GridSyncLoadModifier extends ModifierWithKey {
   }
 }
 GridSyncLoadModifier.identity = Symbol('gridSyncLoad');
+class GridEditModeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetEditModeOptions(node);
+    }
+    else {
+      getUINativeModule().grid.setEditModeOptions(node, this.value);
+    }
+  }
+}
+GridEditModeOptionsModifier.identity = Symbol('gridEditModeOptions');
 // @ts-ignore
 if (globalThis.Grid !== undefined) {
   globalThis.Grid.attributeModifier = function (modifier) {
@@ -36288,6 +36306,19 @@ class ListSyncLoadModifier extends ModifierWithKey {
   }
 }
 ListSyncLoadModifier.identity = Symbol('listSyncLoad');
+class ListEditModeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetEditModeOptions(node);
+    } else {
+      getUINativeModule().list.setEditModeOptions(node, this.value);
+    }
+  }
+}
+ListEditModeOptionsModifier.identity = Symbol('listEditModeOptions');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -36781,6 +36812,10 @@ class ArkListComponent extends ArkScrollable {
   syncLoad(value) {
     modifierWithKey(this._modifiersWithKeys, ListSyncLoadModifier.identity,
       ListSyncLoadModifier, value);
+    return this;
+  }
+  editModeOptions(options) {
+    modifierWithKey(this._modifiersWithKeys, ListEditModeOptionsModifier.identity, ListEditModeOptionsModifier, options);
     return this;
   }
   clip(value) {
