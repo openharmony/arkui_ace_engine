@@ -3662,7 +3662,7 @@ export class SystemOps {
     static resourceManagerReset_serialize(): void {
         ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
     }
-    static setFrameCallback_serialize(onFrameCallback: ((value0: number) => void), onIdleCallback: ((value0: number) => void), delayTime: number): void {
+    static setFrameCallback_serialize(onFrameCallback: Callback_Long_Void, onIdleCallback: Callback_Long_Void, delayTime: int64): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(onFrameCallback)
         thisSerializer.holdAndWriteCallback(onIdleCallback)
@@ -3730,10 +3730,10 @@ export class SystemOps {
         SystemOps.resourceManagerReset_serialize()
         return
     }
-    public static setFrameCallback(onFrameCallback: ((value0: number) => void), onIdleCallback: ((value0: number) => void), delayTime: number): void {
-        const onFrameCallback_casted = onFrameCallback as (((value0: number) => void))
-        const onIdleCallback_casted = onIdleCallback as (((value0: number) => void))
-        const delayTime_casted = delayTime as (number)
+    public static setFrameCallback(onFrameCallback: Callback_Long_Void, onIdleCallback: Callback_Long_Void, delayTime: int64): void {
+        const onFrameCallback_casted = onFrameCallback as (Callback_Long_Void)
+        const onIdleCallback_casted = onIdleCallback as (Callback_Long_Void)
+        const delayTime_casted = delayTime as (int64)
         SystemOps.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
         return
     }
@@ -4090,6 +4090,7 @@ export interface LengthMetricsCustom {
     unit: number;
     value: number;
 }
+export type Callback_Long_Void = (value: int64) => void;
 export interface CustomColors {
     brand?: ResourceColor;
     warning?: ResourceColor;

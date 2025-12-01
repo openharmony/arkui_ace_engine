@@ -17106,9 +17106,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void ResourceManagerResetImpl()
     {
     }
-    void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
-                              const Callback_Number_Void* onIdleCallback,
-                              const Ark_Number* delayTime)
+    void SetFrameCallbackImpl(const Callback_Long_Void* onFrameCallback,
+                              const Callback_Long_Void* onIdleCallback,
+                              Ark_Int64 delayTime)
     {
     }
     Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)

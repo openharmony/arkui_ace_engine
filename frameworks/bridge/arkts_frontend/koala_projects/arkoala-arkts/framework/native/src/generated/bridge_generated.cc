@@ -35959,13 +35959,13 @@ void impl_SystemOps_resourceManagerReset() {
         GetAccessors()->getSystemOpsAccessor()->resourceManagerReset();
 }
 KOALA_INTEROP_DIRECT_V0(SystemOps_resourceManagerReset)
-void impl_SystemOps_setFrameCallback(KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber delayTime) {
+void impl_SystemOps_setFrameCallback(KSerializerBuffer thisArray, int32_t thisLength, KLong delayTime) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Number_Void onFrameCallbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};;
-        Callback_Number_Void onIdleCallbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};;
-        GetAccessors()->getSystemOpsAccessor()->setFrameCallback(static_cast<Callback_Number_Void*>(&onFrameCallbackValueTemp), static_cast<Callback_Number_Void*>(&onIdleCallbackValueTemp), (const Ark_Number*) (&delayTime));
+        Callback_Long_Void onFrameCallbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Long_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Long_Void))))};;
+        Callback_Long_Void onIdleCallbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Long_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Long_Void))))};;
+        GetAccessors()->getSystemOpsAccessor()->setFrameCallback(static_cast<Callback_Long_Void*>(&onFrameCallbackValueTemp), static_cast<Callback_Long_Void*>(&onIdleCallbackValueTemp), delayTime);
 }
-KOALA_INTEROP_DIRECT_V3(SystemOps_setFrameCallback, KSerializerBuffer, int32_t, KInteropNumber)
+KOALA_INTEROP_DIRECT_V3(SystemOps_setFrameCallback, KSerializerBuffer, int32_t, KLong)
 KInteropReturnBuffer impl_SystemOps_colorMetricsResourceColor(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Resource colorValueTemp = Resource_serializer::read(thisDeserializer);;
