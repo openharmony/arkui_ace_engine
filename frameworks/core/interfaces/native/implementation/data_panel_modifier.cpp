@@ -26,6 +26,7 @@ namespace {
 constexpr float DATA_PANEL_VALUE_MIN = 0.0;
 constexpr double DATA_PANEL_VALUE_MAX = 100.0;
 constexpr size_t DATA_PANEL_COUNT_MAX = 9;
+constexpr double DATA_PANEL_DEFAULT_TRACK_SHADOW_RADIUS = 20.0;
 }
 
 namespace OHOS::Ace::NG::Validator {
@@ -105,6 +106,7 @@ template<>
 DataPanelShadow Convert(const Ark_DataPanelShadowOptions& src)
 {
     DataPanelShadow shadow;
+    shadow.radius = DATA_PANEL_DEFAULT_TRACK_SHADOW_RADIUS;
     auto radiusOpt = Converter::OptConvert<float>(src.radius);
     Validator::ValidatePositive(radiusOpt);
     if (radiusOpt.has_value()) {

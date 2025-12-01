@@ -18588,6 +18588,7 @@ typedef struct Opt_LeadingMarginPlaceholder {
 typedef struct Ark_LinearStyleOptions {
     /* kind: Interface */
     Opt_Boolean enableScanEffect;
+    Opt_Boolean enableSmoothEffect;
     Opt_Length strokeWidth;
     Opt_Union_String_F64_Resource strokeRadius;
 } Ark_LinearStyleOptions;
@@ -18777,6 +18778,7 @@ typedef struct Opt_RichEditorSymbolSpanOptions {
 typedef struct Ark_RingStyleOptions {
     /* kind: Interface */
     Opt_Boolean enableScanEffect;
+    Opt_Boolean enableSmoothEffect;
     Opt_Length strokeWidth;
     Opt_Boolean shadow;
     Opt_ProgressStatus status;
@@ -19810,6 +19812,7 @@ typedef struct Opt_CancelButtonOptions {
 typedef struct Ark_CapsuleStyleOptions {
     /* kind: Interface */
     Opt_Boolean enableScanEffect;
+    Opt_Boolean enableSmoothEffect;
     Opt_ResourceColor borderColor;
     Opt_Length borderWidth;
     Opt_String content;
