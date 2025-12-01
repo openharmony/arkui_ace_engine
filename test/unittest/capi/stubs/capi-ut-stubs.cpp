@@ -50,6 +50,14 @@ RefPtr<NG::FrameNode> NG::FormModelNG::CreateFrameNode(int32_t nodeId)
     return nullptr;
 }
 
+std::optional<NG::SizeF> NG::PathLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    return {};
+}
+
+void NG::PathLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper) {}
+
 void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve,
     const PropertyCallback& callback, const RefPtr<PipelineBase>& context) {}
 

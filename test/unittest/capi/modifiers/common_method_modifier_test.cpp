@@ -1711,7 +1711,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestRepeatValidVa
  */
 HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage0TestPixelmapValues, TestSize.Level1)
 {
-    // pixelmap attribute is not supported yet
+    FAIL() << "Test is not implemented yet";
 }
 
 /*

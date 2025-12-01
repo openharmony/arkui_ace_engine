@@ -437,7 +437,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
  */
 HWTEST_F(ImageAttachmentAccessorTest, DISABLED_ctorTestDrawingColorFilter, TestSize.Level1)
 {
-    // DrawingColorFilter is not supperted yet
+    FAIL() << "Test is not implemented yet";
 };
 
 /**
