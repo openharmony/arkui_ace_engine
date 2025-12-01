@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1109,12 +1109,17 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, Tes
         V2::SAVE_BUTTON_ETS_TAG);
     SaveButtonModelNG saveSc;
     saveSc.SetTextIconSpace(Dimension(15.0)); // 15.0vp
+    saveSc.SetBackgroundBorderRadius(Dimension(3.0), std::nullopt, std::nullopt, std::nullopt);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 15.0);
+    NG::BorderRadiusProperty borderRadiusSetted;
+    borderRadiusSetted.radiusTopLeft = Dimension(3.0);
+    NG::BorderRadiusProperty borderRadiusEmpty;
+    EXPECT_EQ(property->GetBackgroundBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
 }
 
 /**
@@ -1135,8 +1140,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, Tes
     SaveButtonModelNG sc;
     std::optional<NG::CalcLength> width(Dimension(15.0));
     std::optional<NG::CalcLength> height(Dimension(15.0));
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG);
     sc.SetIconSize(CalcSize(width, height));
     sc.SetIconBorderRadius(Dimension(3.0));
+    sc.SetIcon(imageSourceInfo);
     sc.SetText(CUSTOMIZE_TEXT);
     sc.SetStateEffect(false);
     sc.SetTipPosition(TipPosition::BELOW_TOP);
@@ -1152,6 +1160,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, Tes
     EXPECT_EQ(property->GetIconCalcSize().value_or(CalcSize(widthDefault, heightDefault)), CalcSize(width, height));
     EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
     EXPECT_EQ(property->GetTextContent().value_or(""), CUSTOMIZE_TEXT);
+    EXPECT_EQ(property->GetImageSourceInfo().has_value(), true);
     EXPECT_EQ(property->GetStateEffect().value_or(true), false);
     EXPECT_EQ(property->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM), TipPosition::BELOW_TOP);
 
@@ -1181,9 +1190,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, Tes
     SaveButtonModelNG sc;
     std::optional<NG::CalcLength> width(Dimension(15.0));
     std::optional<NG::CalcLength> height(Dimension(15.0));
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG);
     sc.SetIconSize(CalcSize(width, height));
     sc.SetIconBorderRadius(Dimension(3.0));
     sc.SetText(CUSTOMIZE_TEXT);
+    sc.SetIcon(imageSourceInfo);
     sc.SetStateEffect(false);
     sc.SetTipPosition(TipPosition::BELOW_TOP);
 
@@ -1199,6 +1211,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, Tes
         CalcSize(width, height));
     EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusEmpty);
     EXPECT_EQ(property->GetTextContent().value_or(""), "");
+    EXPECT_EQ(property->GetImageSourceInfo().has_value(), false);
     EXPECT_EQ(property->GetStateEffect().value_or(true), true);
     EXPECT_EQ(property->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM), TipPosition::ABOVE_BOTTOM);
 
@@ -2722,88 +2735,5 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
         TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     ASSERT_EQ(property->GetUserCancelEvent().value_or(false), true);
     ASSERT_EQ(property->GetFocusBoxFlag().value_or(false), true);
-}
-
-/**
- * @tc.name: SetQiangjiProperty002
- * @tc.desc: Test set security component property with customize permission for arkts 1.2
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty002, TestSize.Level0)
-{
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
-        V2::SAVE_BUTTON_ETS_TAG);
-    ASSERT_NE(frameNode, nullptr);
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    property->UpdateHasCustomPermissionForSecComp(true);
-    NG::BorderRadiusProperty borderRadiusSetted;
-    borderRadiusSetted.radiusTopLeft = Dimension(3.0);
-    borderRadiusSetted.radiusTopRight = Dimension(3.0);
-    borderRadiusSetted.radiusBottomLeft = Dimension(3.0);
-    borderRadiusSetted.radiusBottomRight = Dimension(3.0);
-    SecurityComponentModelNG::SetIconBorderRadius(frameNode.GetRawPtr(), borderRadiusSetted);
-    SecurityComponentModelNG::SetText(frameNode.GetRawPtr(), CUSTOMIZE_TEXT);
-    SecurityComponentModelNG::SetStateEffect(frameNode.GetRawPtr(), false);
-
-    NG::BorderRadiusProperty borderRadiusEmpty;
-    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
-    EXPECT_EQ(property->GetTextContent().value_or(""), CUSTOMIZE_TEXT);
-    EXPECT_EQ(property->GetStateEffect().value_or(true), false);
-}
-
-/**
- * @tc.name: SetQiangjiProperty003
- * @tc.desc: Test set security component property without customize permission for arkts 1.2
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty003, TestSize.Level0)
-{
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
-        V2::SAVE_BUTTON_ETS_TAG);
-    ASSERT_NE(frameNode, nullptr);
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    property->UpdateHasCustomPermissionForSecComp(false);
-    NG::BorderRadiusProperty borderRadiusSetted;
-    borderRadiusSetted.radiusTopLeft = Dimension(3.0);
-    borderRadiusSetted.radiusTopRight = Dimension(3.0);
-    borderRadiusSetted.radiusBottomLeft = Dimension(3.0);
-    borderRadiusSetted.radiusBottomRight = Dimension(3.0);
-    SecurityComponentModelNG::SetIconBorderRadius(frameNode.GetRawPtr(), borderRadiusSetted);
-    SecurityComponentModelNG::SetText(frameNode.GetRawPtr(), CUSTOMIZE_TEXT);
-    SecurityComponentModelNG::SetStateEffect(frameNode.GetRawPtr(), false);
-
-    NG::BorderRadiusProperty borderRadiusEmpty;
-    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusEmpty);
-    EXPECT_EQ(property->GetTextContent().value_or(""), "");
-    EXPECT_EQ(property->GetStateEffect().value_or(true), true);
-}
-
-/**
- * @tc.name: SetQiangjiProperty004
- * @tc.desc: Test set security component property when text is null for arkts 1.2
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty004, TestSize.Level0)
-{
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(-1, 0, static_cast<int32_t>(ButtonType::CAPSULE),
-        V2::SAVE_BUTTON_ETS_TAG);
-    ASSERT_NE(frameNode, nullptr);
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    property->UpdateHasCustomPermissionForSecComp(true);
-
-    std::optional<std::string> textEmpty;
-    SecurityComponentModelNG::SetText(frameNode.GetRawPtr(), textEmpty);
-    EXPECT_EQ(property->GetTextContent().value_or(""), "");
-
-    SecurityComponentModelNG::SetText(frameNode.GetRawPtr(), CUSTOMIZE_TEXT);
-    std::optional<NG::BorderRadiusProperty> iconBorderRadius;
-    SecurityComponentModelNG::SetIconBorderRadius(frameNode.GetRawPtr(), iconBorderRadius);
-
-    EXPECT_EQ(property->GetTextContent().value_or(""), CUSTOMIZE_TEXT);
-    NG::BorderRadiusProperty borderRadiusEmpty;
-    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusEmpty);
 }
 } // namespace OHOS::Ace::NG
