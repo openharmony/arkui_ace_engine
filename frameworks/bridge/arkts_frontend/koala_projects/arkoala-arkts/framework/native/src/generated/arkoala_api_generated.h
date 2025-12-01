@@ -1106,6 +1106,8 @@ typedef struct Array_Tuple_ResourceColor_Number Array_Tuple_ResourceColor_Number
 typedef struct Opt_Array_Tuple_ResourceColor_Number Opt_Array_Tuple_ResourceColor_Number;
 typedef struct Array_Tuple_Union_ResourceColor_LinearGradient_F64 Array_Tuple_Union_ResourceColor_LinearGradient_F64;
 typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_F64 Opt_Array_Tuple_Union_ResourceColor_LinearGradient_F64;
+typedef struct Array_Tuple_Union_ResourceColor_Undefined_F64 Array_Tuple_Union_ResourceColor_Undefined_F64;
+typedef struct Opt_Array_Tuple_Union_ResourceColor_Undefined_F64 Opt_Array_Tuple_Union_ResourceColor_Undefined_F64;
 typedef struct Array_uniformTypeDescriptor_UniformDataType Array_uniformTypeDescriptor_UniformDataType;
 typedef struct Opt_Array_uniformTypeDescriptor_UniformDataType Opt_Array_uniformTypeDescriptor_UniformDataType;
 typedef struct Array_Union_ResourceColor_LinearGradient Array_Union_ResourceColor_LinearGradient;
@@ -2911,6 +2913,8 @@ typedef struct Ark_Tuple_Length_Length Ark_Tuple_Length_Length;
 typedef struct Opt_Tuple_Length_Length Opt_Tuple_Length_Length;
 typedef struct Ark_Tuple_Union_ResourceColor_LinearGradient_F64 Ark_Tuple_Union_ResourceColor_LinearGradient_F64;
 typedef struct Opt_Tuple_Union_ResourceColor_LinearGradient_F64 Opt_Tuple_Union_ResourceColor_LinearGradient_F64;
+typedef struct Ark_Tuple_Union_ResourceColor_Undefined_F64 Ark_Tuple_Union_ResourceColor_Undefined_F64;
+typedef struct Opt_Tuple_Union_ResourceColor_Undefined_F64 Opt_Tuple_Union_ResourceColor_Undefined_F64;
 typedef struct Ark_UnderlineColor Ark_UnderlineColor;
 typedef struct Opt_UnderlineColor Opt_UnderlineColor;
 typedef struct Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions;
@@ -10005,6 +10009,15 @@ typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_F64 {
     Ark_Tag tag;
     Array_Tuple_Union_ResourceColor_LinearGradient_F64 value;
 } Opt_Array_Tuple_Union_ResourceColor_LinearGradient_F64;
+typedef struct Array_Tuple_Union_ResourceColor_Undefined_F64 {
+    /* kind: ContainerType */
+    Ark_Tuple_Union_ResourceColor_Undefined_F64* array;
+    Ark_Int32 length;
+} Array_Tuple_Union_ResourceColor_Undefined_F64;
+typedef struct Opt_Array_Tuple_Union_ResourceColor_Undefined_F64 {
+    Ark_Tag tag;
+    Array_Tuple_Union_ResourceColor_Undefined_F64 value;
+} Opt_Array_Tuple_Union_ResourceColor_Undefined_F64;
 typedef struct Array_uniformTypeDescriptor_UniformDataType {
     /* kind: ContainerType */
     Ark_uniformTypeDescriptor_UniformDataType* array;
@@ -15403,7 +15416,7 @@ typedef struct Opt_PopInfo {
 typedef struct Ark_PopupBorderLinearGradient {
     /* kind: Interface */
     Opt_GradientDirection direction;
-    Array_Tuple_ResourceColor_F64 colors;
+    Array_Tuple_Union_ResourceColor_Undefined_F64 colors;
 } Ark_PopupBorderLinearGradient;
 typedef struct Opt_PopupBorderLinearGradient {
     Ark_Tag tag;
@@ -18802,6 +18815,15 @@ typedef struct Opt_Tuple_Union_ResourceColor_LinearGradient_F64 {
     Ark_Tag tag;
     Ark_Tuple_Union_ResourceColor_LinearGradient_F64 value;
 } Opt_Tuple_Union_ResourceColor_LinearGradient_F64;
+typedef struct Ark_Tuple_Union_ResourceColor_Undefined_F64 {
+    /* kind: Interface */
+    Opt_ResourceColor value0;
+    Ark_Float64 value1;
+} Ark_Tuple_Union_ResourceColor_Undefined_F64;
+typedef struct Opt_Tuple_Union_ResourceColor_Undefined_F64 {
+    Ark_Tag tag;
+    Ark_Tuple_Union_ResourceColor_Undefined_F64 value;
+} Opt_Tuple_Union_ResourceColor_Undefined_F64;
 typedef struct Ark_UnderlineColor {
     /* kind: Interface */
     Opt_ResourceColor typing;

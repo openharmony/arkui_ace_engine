@@ -6237,6 +6237,9 @@ export class TypeChecker {
     static isArray_ParticleOptionsInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_Tuple_Union_ResourceColor_Undefined_F64(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_Union_String_I32_I64_F64_Resource(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
             const array = value as Array<Object>
