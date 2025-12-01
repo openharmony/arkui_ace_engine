@@ -41,6 +41,7 @@ ani_long ConstructCustomNode(ani_int id, ArkUICustomNodeInfo&& customNodeInfo)
     customNode->SetOnCleanupFunc(std::move(customNodeInfo.onCleanupFunc));
     customNode->SetOnDumpInspectorFunc(std::move(customNodeInfo.onDumpInspectorFunc));
     customNode->SetSetActiveFunc(std::move(customNodeInfo.setActiveFunc));
+    customNode->SetDestroyFunction(std::move(customNodeInfo.onCleanupFunc));
 
     if (customNode) {
         return reinterpret_cast<ani_long>(AceType::RawPtr(customNode));
