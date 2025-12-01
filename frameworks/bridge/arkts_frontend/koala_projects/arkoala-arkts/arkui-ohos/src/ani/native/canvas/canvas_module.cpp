@@ -147,7 +147,7 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
     }
     if (!gUint8ClampedArrayCtor) {
         arkts::ani_signature::SignatureBuilder signatureBuilder {};
-        signatureBuilder.AddClass("escompat.ArrayBuffer").AddInt();
+        signatureBuilder.AddClass("std.core.ArrayBuffer").AddInt();
         if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gUint8ClampedArray), "<ctor>",
             signatureBuilder.BuildSignatureDescriptor().c_str(), &gUint8ClampedArrayCtor)) {
             return nullptr;
