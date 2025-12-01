@@ -35,6 +35,7 @@ public:
     RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) override;
     RefPtr<DataLoadParams> TransformDataLoadParamsForNative(void* rawData) override;
     void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) override;
+    std::shared_ptr<void> TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl) override;
     napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) override;
     napi_value TransformSummary(std::map<std::string, int64_t>& summary) override;
     int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) override;
