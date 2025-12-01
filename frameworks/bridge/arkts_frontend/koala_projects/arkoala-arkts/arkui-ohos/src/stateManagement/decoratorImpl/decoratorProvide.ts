@@ -54,6 +54,18 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             owningView.__addProvide__Internal(varName, this, allowOverride);
         }
     }
+    // initialize fake Provide source
+    constructor(
+        varName: string,
+        initValue: T,
+        owningView?: IVariableOwner,
+        watchFunc?: WatchFuncType
+    ) {
+        super('Provide', owningView, varName, watchFunc);
+        this.provideAlias_ = varName;
+        this.allowOverride_ = false;
+        this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
+    }
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provide ${this.getTraceInfo()}`);
         const shouldAddRef = this.shouldAddRef();
@@ -62,6 +74,11 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefAnyKey(value);
         }
+        return value;
+    }
+    // only get value
+    public get(check: boolean): T {
+        const value = this.backing_.get(false);
         return value;
     }
     public set(newValue: T): void {
@@ -84,6 +101,11 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.backing_.get(false));
         this.execWatchFuncs();
+    }
+    // only set value
+    public set(newValue: T, check: boolean): void {
+        let value: T = uiUtils.makeV1Observed(newValue);
+        this.backing_.setNoCheck(value);
     }
 
     private proxy?: ESValue;

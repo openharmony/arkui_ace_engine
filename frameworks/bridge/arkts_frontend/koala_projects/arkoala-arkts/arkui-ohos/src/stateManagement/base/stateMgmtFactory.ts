@@ -23,6 +23,7 @@ import {
     IProviderDecoratedVariable,
     IStateMgmtFactory,
     IVariableOwner,
+    ConsumeOptions
 } from '../decorator';
 import {
     IStateDecoratedVariable,
@@ -471,6 +472,16 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         watchFunc?: WatchFuncType
     ): IConsumeDecoratedVariable<T> {
         return new ConsumeDecoratedVariable<T>(owningView, varName, provideAlias, watchFunc);
+    }
+
+    makeConsume<T>(
+        owningView: IVariableOwner,
+        varName: string,
+        provideAlias: string,
+        watchFunc?: WatchFuncType,
+        consumeOptions?: ConsumeOptions<T>
+    ): IConsumeDecoratedVariable<T> {
+        return new ConsumeDecoratedVariable<T>(owningView, varName, provideAlias, watchFunc, consumeOptions);
     }
 
     makeStorageLink<T>(
