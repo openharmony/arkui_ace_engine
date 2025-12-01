@@ -1161,6 +1161,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     if (!(scrollEffect_ && (scrollEffect_->IsSpringEffect() && HasEdgeEffect(offset)) &&
             (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION ||
                 source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_CROWN ||
+                source == SCROLL_FROM_BAR_OVER_DRAG ||
                 (source == SCROLL_FROM_ANIMATION_CONTROLLER && animateCanOverScroll_)))) {
         if (isAtTop && Positive(offset)) {
             animateOverScroll_ = false;
@@ -1260,6 +1261,47 @@ void ScrollablePattern::RegisterScrollBarEventTask()
 
     InitScrollBarGestureEvent();
     InitScrollBarMouseEvent();
+    RegisterScrollBarOverDragEventTask();
+}
+
+bool ScrollablePattern::CanOverScrollWithDelta(double delta, bool isNestScroller)
+{
+    if (isNestScroller && GetNestedScroll().NeedParent()) {
+        return GetCanOverScroll();
+    }
+    return IsOutOfBoundary() || (IsAtTopWithDelta() && NonPositive(delta)) ||
+           (IsAtBottomWithDelta() && NonNegative(delta));
+}
+
+void ScrollablePattern::RegisterScrollBarOverDragEventTask()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    scrollBar_->SetReachBarEdgeOverScroll([weak = WeakClaim(this), this](double velocity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ProcessScrollOverDrag(velocity, false);
+    });
+    scrollBar_->SetCanOverScrollWithDeltaFunc([weak = WeakClaim(this)](double delta) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->CanOverScrollWithDelta(delta);
+    });
+}
+
+void ScrollablePattern::ProcessScrollOverDrag(double velocity, bool isNestScroller)
+{
+    auto vel = std::clamp(velocity, -maxFlingVelocity_, maxFlingVelocity_);
+    if (!isNestScroller) {
+        CHECK_NULL_VOID(scrollEffect_);
+        if (scrollEffect_->IsSpringEffect()) {
+            scrollEffect_->ProcessScrollOver(vel);
+        }
+        return;
+    }
+    auto scrollable = GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    SetCanOverScroll(true);
+    HandleOverScroll(static_cast<float>(vel));
 }
 
 void ScrollablePattern::InitScrollBarGestureEvent()
@@ -2540,7 +2582,7 @@ ScrollState ScrollablePattern::GetScrollState(int32_t scrollSource)
 {
     // with event
     if (scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_AXIS || scrollSource == SCROLL_FROM_BAR ||
-        scrollSource == SCROLL_FROM_CROWN) {
+        scrollSource == SCROLL_FROM_CROWN || scrollSource == SCROLL_FROM_BAR_OVER_DRAG) {
         return ScrollState::SCROLL;
     }
     // without event
@@ -2568,6 +2610,7 @@ ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
         { SCROLL_FROM_BAR_FLING, ScrollSource::SCROLL_BAR_FLING },
         { SCROLL_FROM_CROWN, ScrollSource::OTHER_USER_INPUT },
         { SCROLL_FROM_STATUSBAR, ScrollSource::OTHER_USER_INPUT },
+        { SCROLL_FROM_BAR_OVER_DRAG, ScrollSource::SCROLL_BAR },
     };
     ScrollSource sourceType = ScrollSource::OTHER_USER_INPUT;
     int64_t idx = BinarySearchFindIndex(scrollSourceMap, ArraySize(scrollSourceMap), source);
@@ -3990,7 +4033,7 @@ void ScrollablePattern::CheckRestartSpring(bool sizeDiminished, bool needNestedS
     if (AnimateRunning() || !IsOutOfBoundary()) {
         return;
     }
-    if (needNestedScrolling && !ScrollableIdle()) {
+    if (needNestedScrolling && (!ScrollableIdle() || !ScrollBarIdle())) {
         return;
     }
     if (!needNestedScrolling && !IsScrollableAnimationNotRunning()) {

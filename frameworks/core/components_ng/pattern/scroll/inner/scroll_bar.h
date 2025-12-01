@@ -461,6 +461,14 @@ public:
     {
         return IsPressed() ? arcForegroundColor_.BlendColor(PRESSED_BLEND_COLOR) : arcForegroundColor_;
     }
+    void SetReachBarEdgeOverScroll(std::function<void(double)>&& func)
+    {
+        reachBarEdgeOverScroll_ = std::move(func);
+    }
+    void SetCanOverScrollWithDeltaFunc(std::function<bool(double)>&& func)
+    {
+        canOverScrollWithDelta_ = std::move(func);
+    }
 
 protected:
     void InitTheme();
@@ -666,6 +674,8 @@ private:
         double& inactiveMainOffset, double& inactiveSize);
     void GetRadiusAndPadding(
         float& startRadius, float& endRadius, float& padding, const RefPtr<PipelineContext>& context = nullptr);
+    void CalcFlingVelocity(float offset);
+    void DragEndOverScroll();
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
@@ -761,6 +771,14 @@ private:
     Dimension arcActiveScrollBarWidth_;
     Color arcBackgroundColor_;
     Color arcForegroundColor_;
+
+    // ScrollBar over drag
+    std::function<void(double)> reachBarEdgeOverScroll_;
+    std::function<bool(double)> canOverScrollWithDelta_;
+    uint64_t lastVsyncTime_ = 0;
+    float scrollBarFlingVelocity_ = 0.0f;
+    bool isTouchScreen_ = false;
+    bool dragEndReachEdge_ = false;
 };
 
 } // namespace OHOS::Ace::NG

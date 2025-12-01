@@ -217,6 +217,7 @@ constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
 constexpr int32_t SCROLL_FROM_CROWN = 14;
 constexpr int32_t SCROLL_FROM_STATUSBAR = 15;
 constexpr int32_t SCROLL_FROM_LAYOUT = 16;
+constexpr int32_t SCROLL_FROM_BAR_OVER_DRAG = 17;
 
 inline std::string GetSourceStr(int32_t scrollSource)
 {
@@ -249,6 +250,8 @@ inline std::string GetSourceStr(int32_t scrollSource)
             return "SCROLL_FROM_ANIMATION_CONTROLLER";
         case SCROLL_FROM_BAR_FLING:
             return "SCROLL_FROM_BAR_FLING";
+        case SCROLL_FROM_BAR_OVER_DRAG:
+            return "SCROLL_FROM_BAR_OVER_DRAG";
         default:
             return "";
     }
@@ -461,7 +464,7 @@ struct SnapAnimationOptions {
     float dragDistance = 0.f;
     SnapDirection snapDirection = SnapDirection::NONE;
     int32_t source = SCROLL_FROM_NONE;
-    bool fromScrollBar = false;
+    bool fromScrollBar = false; // stop spring animation? true: stop spring animation,false: continue spring animation
 };
 
 // app tail animation

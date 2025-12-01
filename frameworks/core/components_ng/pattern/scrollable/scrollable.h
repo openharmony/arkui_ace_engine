@@ -841,6 +841,7 @@ private:
 
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
     bool snapAnimationFromScrollBar_ = false;
+    int32_t snapAnimationSource_ = 0;
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
     bool nestedScrolling_ = false;

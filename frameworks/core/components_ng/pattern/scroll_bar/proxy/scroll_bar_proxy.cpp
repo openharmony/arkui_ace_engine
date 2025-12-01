@@ -90,8 +90,8 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scroll
     }
 }
 
-void ScrollBarProxy::NotifyScrollableNode(
-    float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar, bool isMouseWheelScroll) const
+void ScrollBarProxy::NotifyScrollableNode(float distance, int32_t source,
+    const WeakPtr<ScrollBarPattern>& weakScrollBar, bool isMouseWheelScroll, bool originOffset) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
     CHECK_NULL_VOID(scrollBar);
@@ -103,7 +103,7 @@ void ScrollBarProxy::NotifyScrollableNode(
         return;
     }
     float controlDistance = scrollBar->GetControlDistance();
-    float value = CalcPatternOffset(controlDistance, barScrollableDistance, distance);
+    float value = originOffset ? distance : CalcPatternOffset(controlDistance, barScrollableDistance, distance);
     node.onPositionChanged(value, source, IsNestScroller(), isMouseWheelScroll);
     if (node.scrollbarFRcallback) {
         node.scrollbarFRcallback(0, SceneStatus::RUNNING);
@@ -230,7 +230,7 @@ void ScrollBarProxy::StopScrollBarAnimator(bool isStopDisappearAnimator) const
 }
 
 bool ScrollBarProxy::NotifySnapScroll(
-    float delta, float velocity, float barScrollableDistance, float dragDistance) const
+    float delta, float velocity, float barScrollableDistance, float dragDistance, bool isTouchScreen) const
 {
     auto scrollable = scorllableNode_.scrollableNode.Upgrade();
     if (!scrollable || !CheckScrollable(scrollable) || !scorllableNode_.startSnapAnimationCallback) {
@@ -243,7 +243,7 @@ bool ScrollBarProxy::NotifySnapScroll(
         .dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance),
         .snapDirection = SnapDirection::NONE,
         .source = SCROLL_FROM_BAR,
-        .fromScrollBar = true,
+        .fromScrollBar = !isTouchScreen,
     };
     return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
 }
@@ -392,5 +392,33 @@ void ScrollBarProxy::MarkScrollBarDirty() const
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
+}
+
+void ScrollBarProxy::NotifyScrollOverDrag(float velocity)
+{
+    auto scrollablePattern = scorllableNode_.scrollableNode.Upgrade();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->ProcessScrollOverDrag(velocity, IsNestScroller());
+}
+
+bool ScrollBarProxy::CanOverScrollWithDelta(double delta) const
+{
+    auto scrollablePattern = scorllableNode_.scrollableNode.Upgrade();
+    CHECK_NULL_RETURN(scrollablePattern, false);
+    return scrollablePattern->CanOverScrollWithDelta(delta, IsNestScroller());
+}
+
+bool ScrollBarProxy::Idle()
+{
+    for (const auto& weakScrollBar : scrollBars_) {
+        auto scrollBar = weakScrollBar.Upgrade();
+        if (!scrollBar) {
+            continue;
+        }
+        if (!scrollBar->Idle()) {
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

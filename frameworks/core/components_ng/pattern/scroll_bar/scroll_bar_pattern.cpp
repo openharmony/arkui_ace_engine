@@ -28,6 +28,9 @@ constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 120;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
+constexpr uint32_t MILLIS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
+constexpr uint64_t MIN_VSYNC_DIFF_TIME = 1000 * 1000; // min is 1ms
+constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -341,7 +344,7 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
         if (source == SCROLL_FROM_START) {
             pattern->ScrollPositionCallback(0.0, SCROLL_FROM_START);
         }
-        return true;
+        return !pattern->CanOverScrollWithDelta(.0f);
     };
     scrollBar_->SetScrollPositionCallback(std::move(scrollCallback));
 
@@ -365,6 +368,7 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
     };
     scrollBar_->SetStartSnapAnimationCallback(std::move(startSnapAnimationCallback));
     InitScrollBarGestureEvent();
+    RegisterScrollBarOverDragEventTask();
 }
 
 void ScrollBarPattern::InitScrollBarGestureEvent()
@@ -393,6 +397,23 @@ void ScrollBarPattern::InitScrollBarGestureEvent()
     auto onHoverFunc = MakeRefPtr<InputEvent>(std::move(onHover));
     inputHub->AddOnHoverEvent(onHoverFunc);
     inputHub->AddOnHoverEvent(scrollBar_->GetHoverEvent());
+}
+
+void ScrollBarPattern::RegisterScrollBarOverDragEventTask()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    scrollBar_->SetReachBarEdgeOverScroll([weak = WeakClaim(this)](double velocity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->scrollBarProxy_);
+        pattern->scrollBarProxy_->NotifyScrollOverDrag(static_cast<float>(velocity));
+    });
+    scrollBar_->SetCanOverScrollWithDeltaFunc([weak = WeakClaim(this)](double delta) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        CHECK_NULL_RETURN(pattern->scrollBarProxy_, false);
+        return pattern->scrollBarProxy_->CanOverScrollWithDelta(delta);
+    });
 }
 
 bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -507,7 +528,8 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source, bool isM
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
-        scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this), isMouseWheelScroll);
+        scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this), isMouseWheelScroll,
+            isTouchScreen_ && CanOverScrollWithDelta(delta));
     }
     AddScrollBarLayoutInfo();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -781,6 +803,7 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
     if (scrollBarProxy_) {
         scrollBarProxy_->SetScrollSnapTrigger_(true);
     }
+    firstAtEdge_ = true;
     ScrollPositionCallback(0, SCROLL_FROM_START);
 }
 
@@ -790,6 +813,8 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
     if (IsReverse()) {
         offset = -offset;
     }
+    isTouchScreen_ = info.GetInputEventType() == InputEventType::TOUCH_SCREEN;
+    bool canOverScroll = isTouchScreen_ && CanOverScrollWithDelta(offset);
     // The offset of the mouse wheel and gesture is opposite.
     if (info.GetInputEventType() == InputEventType::AXIS && !NearZero(controlDistance_)) {
         offset = - offset * scrollableDistance_ / controlDistance_;
@@ -797,7 +822,9 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
     ACE_SCOPED_TRACE("outer scrollBar HandleDragUpdate offset:%f", offset);
     auto isMouseWheelScroll =
         info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
-    ScrollPositionCallback(offset, SCROLL_FROM_BAR, isMouseWheelScroll);
+    CalcFlingVelocity(offset);
+    int source = isTouchScreen_ && canOverScroll ? SCROLL_FROM_BAR_OVER_DRAG : SCROLL_FROM_BAR;
+    ScrollPositionCallback(offset, source, isMouseWheelScroll);
 }
 
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
@@ -819,9 +846,10 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
         CHECK_NULL_VOID(scrollBarProxy_);
         if (info.GetInputEventType() != InputEventType::AXIS) {
             isWillFling = scrollBarProxy_->NotifySnapScroll(
-                0, 0, GetScrollableDistance(), static_cast<float>(GetDragOffset()));
+                0, 0, GetScrollableDistance(), static_cast<float>(GetDragOffset()), isTouchScreen_);
         }
         scrollBarProxy_->NotifyScrollBarOnDidStopDragging(isWillFling);
+        DragEndOverScroll();
         return;
     }
     frictionPosition_ = 0.0;
@@ -836,9 +864,10 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
         });
     }
     if (scrollBarProxy_ && scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
-        velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset()))) {
+        velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset()), isTouchScreen_)) {
         scrollBarProxy_->SetScrollSnapTrigger_(false);
         scrollBarProxy_->NotifyScrollBarOnDidStopDragging(true);
+        DragEndOverScroll();
         return;
     }
     if (!frictionController_) {
@@ -856,13 +885,25 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     if (scrollBarProxy_) {
         scrollBarProxy_->NotifyScrollBarOnDidStopDragging(true);
     }
-    frictionController_->PlayMotion(frictionMotion_);
+    if (isTouchScreen_ && CanOverScrollWithDelta(.0f)) {
+        DragEndOverScroll();
+    } else {
+        frictionController_->PlayMotion(frictionMotion_);
+    }
 }
 
 void ScrollBarPattern::ProcessFrictionMotion(double value)
 {
     auto offset = value - frictionPosition_;
-    ScrollPositionCallback(offset, SCROLL_FROM_BAR_FLING);
+    CalcFlingVelocity(offset);
+    if (isTouchScreen_ && firstAtEdge_ && CanOverScrollWithDelta(.0f)) {
+        firstAtEdge_ = false;
+        if (scrollBarProxy_) {
+            scrollBarProxy_->NotifyScrollOverDrag(scrollBarFlingVelocity_);
+        }
+    } else {
+        ScrollPositionCallback(offset, SCROLL_FROM_BAR_FLING);
+    }
     frictionPosition_ = value;
 }
 
@@ -877,6 +918,8 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
     CHECK_NULL_VOID(scrollBarProxy_);
     scrollBarProxy_->SetScrollSnapTrigger_(false);
     scrollBarProxy_->NotifyScrollBarOnDidStopFling();
+    isTouchScreen_ = false;
+    scrollBarFlingVelocity_ = .0f;
 }
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
@@ -1184,5 +1227,45 @@ void ScrollBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     }
 
     json->PutExtAttr("enableNestedScroll", enableNestedSorll_ ? "true" : "false", filter);
+}
+
+void ScrollBarPattern::CalcFlingVelocity(float offset)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    uint64_t currentVsync = context->GetVsyncTime();
+    if (lastVsyncTime_ == 0) {
+        lastVsyncTime_ = currentVsync;
+        return;
+    }
+    uint64_t diff = currentVsync - lastVsyncTime_;
+    if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_VSYNC_DIFF_TIME) {
+        scrollBarFlingVelocity_ = -offset / diff * MILLIS_PER_NANO_SECONDS;
+    }
+    lastVsyncTime_ = currentVsync;
+}
+
+void ScrollBarPattern::DragEndOverScroll()
+{
+    if (isTouchScreen_ && scrollBarProxy_ && CanOverScrollWithDelta(.0f)) {
+        scrollBarProxy_->NotifyScrollOverDrag(.0f);
+    }
+}
+
+bool ScrollBarPattern::CanOverScrollWithDelta(double delta) const
+{
+    CHECK_NULL_RETURN(scrollBarProxy_, false);
+    return scrollBarProxy_->CanOverScrollWithDelta(delta);
+}
+
+bool ScrollBarPattern::Idle()
+{
+    if (UseInnerScrollBar()) {
+        return !scrollBar_->IsDriving();
+    }
+    if (isTouchScreen_ || !frictionController_) {
+        return false;
+    }
+    return !frictionController_->IsRunning();
 }
 } // namespace OHOS::Ace::NG

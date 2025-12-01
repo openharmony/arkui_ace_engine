@@ -1513,10 +1513,11 @@ bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
     auto fromScrollBar = snapAnimationOptions.fromScrollBar;
-    if (!fromScrollBar && scrollBar && scrollBar->IsDriving()) {
+    auto source = snapAnimationOptions.source;
+    if (source != SCROLL_FROM_BAR && scrollBar && scrollBar->IsDriving()) {
         return false;
     }
-    if (!fromScrollBar && scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
+    if (source != SCROLL_FROM_BAR && scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
         return false;
     }
     auto predictSnapOffset = CalcPredictSnapOffset(snapAnimationOptions.snapDelta, snapAnimationOptions.dragDistance,
