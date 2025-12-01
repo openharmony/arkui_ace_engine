@@ -354,7 +354,7 @@ void WebModelStatic::JavaScriptOnDocumentStartByOrder(FrameNode* frameNode, cons
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
+    webPatternStatic->JavaScriptOnDocumentStartByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::JavaScriptOnDocumentEndByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
@@ -363,7 +363,7 @@ void WebModelStatic::JavaScriptOnDocumentEndByOrder(FrameNode* frameNode, const 
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
+    webPatternStatic->JavaScriptOnDocumentEndByOrder(scriptItems, scriptRegexItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems& scriptItems,

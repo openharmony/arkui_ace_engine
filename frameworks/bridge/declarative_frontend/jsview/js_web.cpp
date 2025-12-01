@@ -6482,7 +6482,7 @@ void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItem
         auto itemObject = JSRef<JSObject>::Cast(item);
         JSRef<JSVal> jsScript = itemObject->GetProperty("script");
         JSRef<JSVal> jsScriptRules = itemObject->GetProperty("scriptRules");
-        JSRef<JSVal> jsScriptRegexRules = itemObject->GetProperty("regexRules");
+        JSRef<JSVal> jsScriptRegexRules = itemObject->GetProperty("urlRegexRules");
         if (!CheckScriptRulesValid(jsScriptRules, jsScriptRegexRules)) {
             return;
         }
