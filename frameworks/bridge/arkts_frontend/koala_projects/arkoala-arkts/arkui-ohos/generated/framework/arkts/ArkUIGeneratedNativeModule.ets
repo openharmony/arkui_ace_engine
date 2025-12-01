@@ -4073,6 +4073,14 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getPositionToScreenWithTransform(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
+    native static _FrameNodeExtender_getUserConfigBorderWidth(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getUserConfigPadding(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getUserConfigMargin(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getUserConfigSize(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
     native static _FrameNodeExtender_getFrameNodeByKey(name: KStringPtr): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getIdByFrameNode(node: KPointer): number

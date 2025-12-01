@@ -451,26 +451,22 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getOpacity(this);
     }
     public getPositionToWindowWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToWindowWithTransform(this);
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToWindowWithTransform(this);
     }
     public getPositionToParent(): NodePosition {
         return FrameNodeExtender.getPositionToParent(this);
     }
     public getPositionToScreen(): NodePosition {
-        // return FrameNodeExtender.getPositionToScreen(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToScreen(this);
     }
     public getPositionToWindow(): NodePosition {
         return FrameNodeExtender.getPositionToWindow(this);
     }
     public getPositionToParentWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToParentWithTransform(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToParentWithTransform(this);
     }
     public getPositionToScreenWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToScreenWithTransform(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToScreenWithTransform(this);
     }
     public getMeasuredSize(): Size {
         return FrameNodeExtender.getMeasuredSize(this)
@@ -535,8 +531,7 @@ export class FrameNode implements MaterializedBase {
         return;
     }
     public setLayoutPosition(position: NodePosition): void {
-        // const position_casted = position as (NodePosition);
-        // FrameNodeExtender.setLayoutPosition_serialize(this, position_casted);
+        FrameNodeExtender.setLayoutPosition(this, position);
         return;
     }
     public measure(constraint: LayoutConstraint): void {
@@ -548,10 +543,9 @@ export class FrameNode implements MaterializedBase {
         return;
     }
     public layout(position: NodePosition): void {
-        const position_casted = position as (NodePosition);
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-        // FrameNodeExtender.layout_serialize(this, position_casted);
+        FrameNodeExtender.layout(this, position);
         ArkUIAniModule._Common_Restore_InstanceId();
         return;
     }

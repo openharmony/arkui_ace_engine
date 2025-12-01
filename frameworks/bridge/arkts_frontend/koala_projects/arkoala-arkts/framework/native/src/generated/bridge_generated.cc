@@ -29435,8 +29435,8 @@ void impl_FrameNodeExtender_setMeasuredSize(Ark_NativePointer peer, KSerializerB
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_setMeasuredSize, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_FrameNodeExtender_setLayoutPosition(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_Position positionValueTemp = Position_serializer::read(thisDeserializer);;
-        GetAccessors()->getFrameNodeExtenderAccessor()->setLayoutPosition(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Position*>(&positionValueTemp));
+        Ark_Vector2 positionValueTemp = Vector2_serializer::read(thisDeserializer);;
+        GetAccessors()->getFrameNodeExtenderAccessor()->setLayoutPosition(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Vector2*>(&positionValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_setLayoutPosition, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_FrameNodeExtender_measure(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -29447,8 +29447,8 @@ void impl_FrameNodeExtender_measure(Ark_NativePointer peer, KSerializerBuffer th
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_measure, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_FrameNodeExtender_layout(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_Position positionValueTemp = Position_serializer::read(thisDeserializer);;
-        GetAccessors()->getFrameNodeExtenderAccessor()->layout(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Position*>(&positionValueTemp));
+        Ark_Vector2 positionValueTemp = Vector2_serializer::read(thisDeserializer);;
+        GetAccessors()->getFrameNodeExtenderAccessor()->layout(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Vector2*>(&positionValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_layout, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_FrameNodeExtender_setNeedsLayout(Ark_NativePointer peer) {
@@ -29458,31 +29458,59 @@ KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_setNeedsLayout, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNodeExtender_getPositionToScreen(Ark_NativePointer peer) {
         const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToScreen(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
-        Position_serializer::write(_retSerializer, retValue);
+        Vector2_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToScreen, KInteropReturnBuffer, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNodeExtender_getPositionToWindowWithTransform(Ark_NativePointer peer) {
         const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToWindowWithTransform(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
-        Position_serializer::write(_retSerializer, retValue);
+        Vector2_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToWindowWithTransform, KInteropReturnBuffer, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNodeExtender_getPositionToParentWithTransform(Ark_NativePointer peer) {
         const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToParentWithTransform(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
-        Position_serializer::write(_retSerializer, retValue);
+        Vector2_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToParentWithTransform, KInteropReturnBuffer, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNodeExtender_getPositionToScreenWithTransform(Ark_NativePointer peer) {
         const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToScreenWithTransform(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
-        Position_serializer::write(_retSerializer, retValue);
+        Vector2_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToScreenWithTransform, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNodeExtender_getUserConfigBorderWidth(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getUserConfigBorderWidth(static_cast<Ark_FrameNode>(peer));
+        SerializerBase _retSerializer {};
+        NodeEdgesLengthMetrics_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNodeExtender_getUserConfigBorderWidth, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNodeExtender_getUserConfigPadding(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getUserConfigPadding(static_cast<Ark_FrameNode>(peer));
+        SerializerBase _retSerializer {};
+        NodeEdgesLengthMetrics_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNodeExtender_getUserConfigPadding, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNodeExtender_getUserConfigMargin(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getUserConfigMargin(static_cast<Ark_FrameNode>(peer));
+        SerializerBase _retSerializer {};
+        NodeEdgesLengthMetrics_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNodeExtender_getUserConfigMargin, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNodeExtender_getUserConfigSize(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getUserConfigSize(static_cast<Ark_FrameNode>(peer));
+        SerializerBase _retSerializer {};
+        SizeTLengthMetrics_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNodeExtender_getUserConfigSize, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_FrameNodeExtender_getFrameNodeByKey(const KStringPtr& name) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeByKey((const Ark_String*) (&name));
 }
