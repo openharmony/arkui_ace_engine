@@ -120,6 +120,7 @@ public:
         LRUMap<uint64_t, RefPtr<Paragraph>>* paraMapPtr,
         std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder,
         const AISpanLayoutInfo& aiSpanLayoutInfo);
+    RichEditorLayoutAlgorithm(const RefPtr<RichEditorPattern>& pattern);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -191,6 +192,7 @@ private:
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const AISpanLayoutInfo& aiSpanLayoutInfo);
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap);
     void HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize);
+    std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpans(std::list<RefPtr<SpanItem>> spans);
     std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
@@ -207,6 +209,7 @@ private:
     bool needShowPlaceholder_ = false;
     int32_t cacheHitCount_ = 0;
     std::unordered_set<uint64_t> paragraphKeySet_;
+    bool isSingleLineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

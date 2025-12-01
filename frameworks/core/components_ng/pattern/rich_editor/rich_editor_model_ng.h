@@ -71,6 +71,7 @@ public:
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
     void SetScrollBarColor(std::optional<Color> value) override;
+    void SetSingleLine(bool isEnable) override;
 
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
@@ -124,6 +125,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
+    static void SetSingleLine(FrameNode* frameNode, bool isEnable);
 
 private:
     void SetDraggable(bool draggable);

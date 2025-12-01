@@ -719,6 +719,16 @@ void RichEditorModelNG::SetScrollBarColor(std::optional<Color> value)
     richEditorPattern->UpdateScrollBarColor(value, true);
 }
 
+void RichEditorModelNG::SetSingleLine(bool isEnable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable);
+}
+
+void RichEditorModelNG::SetSingleLine(FrameNode* frameNode, bool isEnable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable, frameNode);
+}
+
 void RichEditorModelNG::SetSelectDetectEnable(const bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

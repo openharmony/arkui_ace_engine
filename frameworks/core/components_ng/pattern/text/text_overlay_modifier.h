@@ -54,6 +54,7 @@ public:
     }
 
     void SetShowSelect(bool value);
+    void SetSingleLine(bool value);
 
     std::vector<RectF> GetSelectedRects() const;
 protected:
@@ -71,6 +72,7 @@ private:
     std::vector<RectF> selectedRects_;
     std::vector<RectF> selectedUrlRects_;
     RefPtr<PropertyInt> selectedUrlColor_;
+    bool isSingleLineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

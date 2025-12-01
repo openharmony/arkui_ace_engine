@@ -98,6 +98,7 @@ public:
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetUndoStyle(const JSCallbackInfo& info);
     static void SetScrollBarColor(const JSCallbackInfo& info);
+    static void SetSingleLine(const JSCallbackInfo& info);
     static bool ParseJsColorWithResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsSymbolColorWithResource(const JSRef<JSVal>& jsValue, std::vector<Color>& result,

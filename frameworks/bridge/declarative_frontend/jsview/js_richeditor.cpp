@@ -1246,6 +1246,17 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetPlaceholder(options);
 }
 
+void JSRichEditor::SetSingleLine(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() >= 1);
+    bool isEnable = false;
+    const auto& jsIsEnable = info[0];
+    if (jsIsEnable->IsBoolean()) {
+        isEnable = jsIsEnable->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetSingleLine(isEnable);
+}
+
 void JSRichEditor::ParseJsFont(const JSRef<JSObject>& fontObject, Font& font)
 {
     if (fontObject->IsUndefined()) {
@@ -1649,6 +1660,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
     JSClass<JSRichEditor>::StaticMethod("scrollBarColor", &JSRichEditor::SetScrollBarColor);
+    JSClass<JSRichEditor>::StaticMethod("singleLine", &JSRichEditor::SetSingleLine);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

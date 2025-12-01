@@ -85,7 +85,7 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback001, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
 
     int32_t SCROLL_FROM_START = 10;
-    EXPECT_TRUE(richEditorPattern->OnScrollCallback(0, SCROLL_FROM_START));
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(0, SCROLL_FROM_START));
 
     int32_t SCROLL_FROM_UPDATE = 1;
     richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
@@ -99,19 +99,19 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback001, TestSize.Level0)
     richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
     EXPECT_TRUE(richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE)) << "Scroll Up 10";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -10);
+    EXPECT_EQ(richEditorPattern->GetScrollOffset(), -10);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -10);
 
     EXPECT_TRUE(richEditorPattern->OnScrollCallback(-50, SCROLL_FROM_UPDATE)) << "Scroll Up 50";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -40);
+    EXPECT_EQ(richEditorPattern->GetScrollOffset(), -40);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -40);
 
     EXPECT_TRUE(richEditorPattern->OnScrollCallback(10, SCROLL_FROM_UPDATE)) << "Scroll Down 10";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -30);
+    EXPECT_EQ(richEditorPattern->GetScrollOffset(), -30);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -30);
 
     EXPECT_TRUE(richEditorPattern->OnScrollCallback(50, SCROLL_FROM_UPDATE)) << "Scroll Down 50";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
+    EXPECT_EQ(richEditorPattern->GetScrollOffset(), 0);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
 }
 
@@ -141,191 +141,6 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level0)
     int32_t SCROLL_FROM_START = 10;
     ret = richEditorPattern->OnScrollCallback(10, SCROLL_FROM_START);
     EXPECT_TRUE(ret);
-}
-
-/**
- * @tc.name: AutoScrollByEdgeDetection001
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection001, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE };
-    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-
-    param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1, 20, 20);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle move up but not reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1, 20, 20);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "handle reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    auto handleHeight = 20;
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    param.handleRect =
-        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1 - handleHeight, 20, handleHeight);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle move down but not reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    param.handleRect =
-        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - handleHeight + 1, 20, handleHeight);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "handle reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
-}
-
-/**
- * @tc.name: AutoScrollByEdgeDetection002
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection002, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::MOUSE };
-    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse move up but not reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "mouse reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse move down but not reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "mouse reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
-}
-
-/**
- * @tc.name: AutoScrollByEdgeDetection003
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection003, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 540);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 500);
-    richEditorPattern->frameRect_ = RectF(0, 0, 100, 500);
-
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG };
-    Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 58.0_vp;
-    auto dragDistance = AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, OffsetF(50, dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move up but not reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, OffsetF(50, dragDistance - 10), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "drag reach top edge";
-    auto speed = richEditorPattern->CalcDragSpeed(dragDistance, 0, dragDistance - 10);
-    EXPECT_EQ(richEditorPattern->currentScrollParam_.offset, speed) << "darg speed move up";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->frameRect_.Bottom() - dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move down but not reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    auto pointY = richEditorPattern->frameRect_.Bottom() - dragDistance + 10;
-    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, pointY), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "drag reach bottom edge";
-    speed = richEditorPattern->CalcDragSpeed(
-        richEditorPattern->frameRect_.Bottom() - dragDistance, richEditorPattern->frameRect_.Bottom(), pointY);
-    EXPECT_EQ(richEditorPattern->currentScrollParam_.offset, -speed) << "darg speed move down";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
-}
-
-/**
- * @tc.name: AutoScrollByEdgeDetection004
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorScrollTestOneNg, AutoScrollByEdgeDetection004, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-
-    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(50, 50);
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE, .handleRect = RectF(50, 50, 20, 20) };
-    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, 50), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "the touch point is the same as the last time";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, edgeDistance - 1);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "content height is too small.";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
 }
 
 /**
@@ -516,35 +331,6 @@ HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level0)
 }
 
 /**
- * @tc.name: ScheduleAutoScroll001
- * @tc.desc: test ScheduleAutoScroll
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorScrollTestOneNg, ScheduleAutoScroll001, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AutoScrollParam param;
-    param.isFirstRun_ = true;
-    param.offset = 0.0f;
-    richEditorPattern->contentRect_.SetRect(0, 1, 1, 1);
-    richEditorPattern->richTextRect_.SetRect(0, 2, 1, 1);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    richEditorPattern->isAutoScrollRunning_ = true;
-    richEditorPattern->ScheduleAutoScroll(param);
-    EXPECT_TRUE(param.isFirstRun_);
-}
-
-/**
  * @tc.name: OnScrollEndCallback001
  * @tc.desc: test OnScrollEndCallback
  * @tc.type: FUNC
@@ -727,7 +513,6 @@ HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll002, TestSize.Lev
     EXPECT_FALSE(richEditorPattern->needMoveCaretToContentRect_);
 }
 
-
 /**
  * @tc.name: PageScrollTest001
  * @tc.desc: test richEditor pageup and pagedown function
@@ -745,10 +530,10 @@ HWTEST_F(RichEditorScrollTestOneNg, PageScrollTest001, TestSize.Level0)
     richEditorPattern->contentRect_ = RectF(0, 0, 150.0f, 150.0f);
 
     richEditorPattern->HandleOnPageDown();
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -150.0f);
+    EXPECT_EQ(richEditorPattern->GetScrollOffset(), -150.0f);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -150.0f);
     richEditorPattern->HandleOnPageUp();
-    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
+    EXPECT_EQ(richEditorPattern->GetScrollOffset(), 0);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
 }
 

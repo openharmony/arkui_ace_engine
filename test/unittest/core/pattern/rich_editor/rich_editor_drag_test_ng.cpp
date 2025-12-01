@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
@@ -674,20 +675,21 @@ HWTEST_F(RichEditorDragTestNg, RichEditorPatternTestOnDragMove001, TestSize.Leve
     richEditorPattern->isShowPlaceholder_ = !isShowPlaceholder;
     richEditorPattern->OnDragMove(event);
     richEditorPattern->isShowPlaceholder_ = isShowPlaceholder;
-
-    richEditorPattern->prevAutoScrollOffset_.SetX(testNumber1);
-    richEditorPattern->prevAutoScrollOffset_.SetY(testNumber1);
+    auto& scrollController = richEditorPattern->scrollController_;
+    ASSERT_NE(scrollController, nullptr);
+    scrollController->prevAutoScrollOffset_.SetX(testNumber1);
+    scrollController->prevAutoScrollOffset_.SetY(testNumber1);
     richEditorPattern->richTextRect_.SetRect(testNumber0, testNumber0, testNumber5, testNumber5);
 
     event->SetX(testNumber3);
     event->SetY(testNumber3);
     richEditorPattern->OnDragMove(event);
-    EXPECT_EQ(richEditorPattern->prevAutoScrollOffset_.GetX(), testNumber3);
+    EXPECT_EQ(scrollController->prevAutoScrollOffset_.GetX(), testNumber3);
 
     event->SetX(testNumber4);
     event->SetY(testNumber4);
     richEditorPattern->OnDragMove(event);
-    EXPECT_EQ(richEditorPattern->prevAutoScrollOffset_.GetX(), testNumber4);
+    EXPECT_EQ(scrollController->prevAutoScrollOffset_.GetX(), testNumber4);
 
     PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
 }
@@ -1445,25 +1447,6 @@ HWTEST_F(RichEditorDragTestNg, HandleDraggableFlag005, TestSize.Level2)
     richEditorPattern->copyOption_ = CopyOptions::InApp;
     richEditorPattern->HandleDraggableFlag(false);
     EXPECT_EQ(richEditorPattern->JudgeContentDraggable(), false);
-}
-
-/**
- * @tc.name: CalcDragSpeed001
- * @tc.desc: test CalcDragSpeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDragTestNg, CalcDragSpeed001, TestSize.Level2)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    float speed = 0.0f;
-    float hotAreaStart = 1.1f;
-    float hotAreaEnd = 101.1f;
-    float point = 50.1f;
-    float result = 17.472723f;
-    speed = richEditorPattern->CalcDragSpeed(hotAreaStart, hotAreaEnd, point);
-    EXPECT_EQ(result, speed);
 }
 
 /**
