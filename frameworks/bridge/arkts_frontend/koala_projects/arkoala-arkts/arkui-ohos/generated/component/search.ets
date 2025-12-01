@@ -760,6 +760,30 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setDividerColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setIncludeFontPaddingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setIncludeFontPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFallbackLineSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSearchButtonAttribute(value: string | undefined, option?: SearchButtonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1006,6 +1030,12 @@ export interface SearchAttribute extends CommonMethod {
     dividerColor(value: ColorMetrics | undefined): this {
         throw new Error("Unimplemented method dividerColor")
     }
+    includeFontPadding(value: boolean | undefined): this {
+        throw new Error("Unimplemented method includeFontPadding")
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fallbackLineSpacing")
+    }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         throw new Error("Unimplemented method searchButton")
     }
@@ -1065,6 +1095,8 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     compressLeadingPunctuation_value?: boolean | undefined
+    includeFontPadding_value?: boolean | undefined
+    fallbackLineSpacing_value?: boolean | undefined
     dividerColor_value?: ColorMetrics | undefined
     attributeModifier_value?: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined
     setSearchOptions(options?: SearchOptions): this {
@@ -1206,6 +1238,12 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
         return this
     }
     dividerColor(value: ColorMetrics | undefined): this {
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
         return this
     }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
@@ -1602,6 +1640,22 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         if (this.checkPriority("compressLeadingPunctuation")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public includeFontPadding(value: boolean | undefined): this {
+        if (this.checkPriority("includeFontPadding")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setIncludeFontPaddingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fallbackLineSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("fallbackLineSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
             return this
         }
         return this

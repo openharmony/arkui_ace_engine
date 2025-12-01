@@ -649,6 +649,22 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+}
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_Font* fontValue,
                  const Opt_FontSettingOptions* options)
@@ -792,6 +808,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetHalfLeadingImpl,
         TextAttributeModifier::SetEnableHapticFeedbackImpl,
         TextAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextAttributeModifier::SetIncludeFontPaddingImpl,
+        TextAttributeModifier::SetFallbackLineSpacingImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetSelectionImpl,

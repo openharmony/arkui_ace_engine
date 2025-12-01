@@ -24303,6 +24303,10 @@ typedef struct GENERATED_ArkUISearchModifier {
                                         const Opt_Boolean* value);
     void (*setDividerColor)(Ark_NativePointer node,
                         const Opt_ColorMetrics* value);
+    void (*setIncludeFontPadding)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
+    void (*setFallbackLineSpacing)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);
     void (*setSearchButton)(Ark_NativePointer node,
                             const Opt_String* value,
                             const Opt_SearchButtonOptions* option);
@@ -24947,6 +24951,10 @@ typedef struct GENERATED_ArkUITextModifier {
                                     const Opt_Boolean* value);
     void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
                                           const Opt_Boolean* value);
+    void (*setIncludeFontPadding)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
+    void (*setFallbackLineSpacing)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -25084,6 +25092,10 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                                   const Opt_KeyboardAppearance* value);
     void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
                                           const Opt_Boolean* value);
+    void (*setIncludeFontPadding)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
+    void (*setFallbackLineSpacing)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);
@@ -25267,6 +25279,10 @@ typedef struct GENERATED_ArkUITextInputModifier {
                                   const Opt_KeyboardAppearance* value);
     void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
                                           const Opt_Boolean* value);
+    void (*setIncludeFontPadding)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
+    void (*setFallbackLineSpacing)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);

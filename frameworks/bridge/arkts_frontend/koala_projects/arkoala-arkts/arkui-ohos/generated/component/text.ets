@@ -808,6 +808,30 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setIncludeFontPaddingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setIncludeFontPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFallbackLineSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -1036,6 +1060,12 @@ export interface TextAttribute extends CommonMethod {
     compressLeadingPunctuation(value: boolean | undefined): this {
         throw new Error("Unimplemented method compressLeadingPunctuation")
     }
+    includeFontPadding(value: boolean | undefined): this {
+        throw new Error("Unimplemented method includeFontPadding")
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fallbackLineSpacing")
+    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method font")
     }
@@ -1093,6 +1123,8 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     halfLeading_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
     compressLeadingPunctuation_value?: boolean | undefined
+    includeFontPadding_value?: boolean | undefined
+    fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined
     setTextOptions(content?: string | Resource, value?: TextOptions): this {
         return this
@@ -1215,6 +1247,12 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
         return this
     }
     compressLeadingPunctuation(value: boolean | undefined): this {
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
         return this
     }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
@@ -1600,6 +1638,22 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         if (this.checkPriority("compressLeadingPunctuation")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public includeFontPadding(value: boolean | undefined): this {
+        if (this.checkPriority("includeFontPadding")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setIncludeFontPaddingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fallbackLineSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("fallbackLineSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
             return this
         }
         return this

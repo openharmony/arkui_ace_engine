@@ -737,6 +737,22 @@ void SetDividerColorImpl(Ark_NativePointer node, const Opt_ColorMetrics* value)
     CHECK_NULL_VOID(frameNode);
     SearchModelStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SearchModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SearchModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+}
 void SetSearchButtonImpl(Ark_NativePointer node,
                          const Opt_String* value,
                          const Opt_SearchButtonOptions* option)
@@ -842,6 +858,8 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SetKeyboardAppearanceImpl,
         SearchAttributeModifier::SetCompressLeadingPunctuationImpl,
         SearchAttributeModifier::SetDividerColorImpl,
+        SearchAttributeModifier::SetIncludeFontPaddingImpl,
+        SearchAttributeModifier::SetFallbackLineSpacingImpl,
         SearchAttributeModifier::SetSearchButtonImpl,
         SearchAttributeModifier::SetInputFilterImpl,
         SearchAttributeModifier::SetCustomKeyboardImpl,
