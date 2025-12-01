@@ -1436,7 +1436,7 @@ void NativeRichEditorController::SetTypingStyle(NativeRichEditorTextStyle12 valu
 NativeRichEditorTextStyleResult12 NativeRichEditorController::GetTypingStyle()
 {
     auto controller = controller_.Upgrade();
-    NativeRichEditorTextStyleResult12 result;
+    NativeRichEditorTextStyleResult12 result = {};
     if (controller) {
         auto typingStyle = controller->GetTypingStyle();
         NativeRichEditorTextStyleResult12 result;

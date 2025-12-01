@@ -3056,7 +3056,7 @@ ExternalString FFIGetResourceMedia(NativeResourceObject obj)
 
 uint32_t FFIGetResourceSymbolId(NativeResourceObject obj)
 {
-    uint32_t symbolId;
+    uint32_t symbolId = 0;
     if (!ViewAbstract::ParseCjSymbolId(obj, symbolId)) {
         LOGE("Parse symbol id failed.");
     }
