@@ -103,6 +103,24 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class VaultPlainTextImpl : public OHOS::NWeb::NWebVaultPlainTextCallback {
+public:
+    VaultPlainTextImpl() = default;
+    explicit VaultPlainTextImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~VaultPlainTextImpl() = default;
+
+    bool ProcessAutoFillOnPaste() override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
+};
+
 class WebClientImpl :
     public std::enable_shared_from_this<WebClientImpl>,
     public OHOS::NWeb::NWebHandler {

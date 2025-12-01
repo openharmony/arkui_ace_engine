@@ -149,6 +149,16 @@ std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<u
     return delegate->SpanstringConvertHtml(content);
 }
 
+bool VaultPlainTextImpl::ProcessAutoFillOnPaste()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->ProcessAutoFillOnPaste();
+}
+
 void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();

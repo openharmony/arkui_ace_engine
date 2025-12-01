@@ -1084,7 +1084,8 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
     }
     return -1;
 }
-void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr) {}
+void WebDelegate::NotifyAutoFillViewData(
+    const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type) {}
 void WebDelegate::AutofillCancel(const std::string& fillContent) {}
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
@@ -1354,6 +1355,10 @@ void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::st
 std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t>& content)
 {
     return "";
+}
+bool WebDelegate::ProcessAutoFillOnPaste()
+{
+    return false;
 }
 bool WebDelegate::CloseImageOverlaySelection()
 {

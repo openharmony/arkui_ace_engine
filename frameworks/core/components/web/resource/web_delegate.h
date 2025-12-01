@@ -1144,7 +1144,7 @@ public:
     }
     void HandleAccessibilityHoverEvent(
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
-    void NotifyAutoFillViewData(const std::string& jsonStr);
+    void NotifyAutoFillViewData(const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
@@ -1296,6 +1296,7 @@ public:
     void SetDragResizeStartFlag(bool isDragResizeStart);
     void SetDragResizePreSize(const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
+    bool ProcessAutoFillOnPaste();
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();

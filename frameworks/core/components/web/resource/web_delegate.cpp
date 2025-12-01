@@ -3093,6 +3093,10 @@ void WebDelegate::InitWebViewWithWindow()
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
 
+            auto vaultPlainTextImpl = std::make_shared<VaultPlainTextImpl>(Container::CurrentId());
+            vaultPlainTextImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutVaultPlainTextCallback(vaultPlainTextImpl);
+
             std::optional<std::string> src;
             auto isNewPipe = Container::IsCurrentUseNewPipeline();
             delegate->UpdateSettting(isNewPipe);
@@ -3622,6 +3626,9 @@ void WebDelegate::InitWebViewWithSurface()
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
+            auto vaultPlainTextImpl = std::make_shared<VaultPlainTextImpl>(Container::CurrentId());
+            vaultPlainTextImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutVaultPlainTextCallback(vaultPlainTextImpl);
             auto pattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->InitDataDetector();
@@ -7288,18 +7295,23 @@ void WebDelegate::HandleAccessibilityHoverEvent(
     nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
 }
 
-void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
+void WebDelegate::NotifyAutoFillViewData(
+    const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), jsonStr]() {
+        [weak = WeakClaim(this), jsonStr, type]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
             auto romMessage = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
             romMessage->SetType(NWebRomValue::Type::STRING);
             romMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillDataFromTriggerType(romMessage, type);
+            if (ArkWebGetErrno() == RESULT_OK) {
+                return;
+            }
             delegate->nweb_->FillAutofillDataV2(romMessage);
             if (ArkWebGetErrno() != RESULT_OK) {
                 auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
@@ -9107,6 +9119,15 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &conte
     TAG_LOGD(AceLogTag::ACE_WEB, "pasteboard spasntring convert html success,"
         " string length = %{public}u", static_cast<int32_t>(htmlStr.length()));
     return htmlStr;
+}
+
+bool WebDelegate::ProcessAutoFillOnPaste()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "ProcessAutoFillOnPaste");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    bool isPopup = false;
+    return webPattern->RequestAutoFill(isPopup, false, AceAutoFillTriggerType::PASTE_REQUEST);
 }
 
 void WebDelegate::StartVibraFeedback(const std::string& vibratorType)

@@ -696,6 +696,7 @@ public:
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos);
+    bool RequestAutoFill(bool& isPopup, bool isNewPassWord, const AceAutoFillTriggerType& triggerType);
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();
     bool CloseAutoFillPopup();
@@ -1022,6 +1023,7 @@ private:
     friend class WebDataDetectorAdapter;
     friend class WebAccessibilityEventReport;
 
+    void FakePageNodeInfo();
     bool Pip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     napi_env CreateEnv();
     bool CreatePip(int status, napi_env env, bool& init, uint32_t &pipController, const PipInfo &pipInfo);
