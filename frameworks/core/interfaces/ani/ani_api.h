@@ -596,6 +596,7 @@ struct ArkUIAniListModifier {
         ArkUI_Int32 deleteCount, std::vector<float>& newSizeArr);
     void (*resizeChildrenSize)(ArkUINodeHandle node, int32_t size);
     void (*syncChildrenSizeOver)(ArkUINodeHandle node);
+    void (*resetListChildrenMainSize)(ArkUINodeHandle node);
 };
 struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(

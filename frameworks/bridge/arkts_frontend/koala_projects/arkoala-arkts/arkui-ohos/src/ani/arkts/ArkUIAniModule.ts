@@ -120,7 +120,7 @@ export class ArkUIAniModule {
     native static _ResetWaterFlowFooter(ptr: KPointer): void
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
-    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
+    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize | undefined): void
     native static _LazyForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
