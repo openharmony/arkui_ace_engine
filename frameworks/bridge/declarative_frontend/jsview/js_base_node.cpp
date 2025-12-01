@@ -135,7 +135,9 @@ void JSBaseNode::SetUpdateNodeFunc(const JSCallbackInfo& info)
         CHECK_NULL_VOID(updateTsNodeBuilder->IsFunction());
         EcmaVM* vm = info.GetVm();
         auto updateTsFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeBuilder));
-        auto updateNodeFunc = [updateTsFunc, vm](int32_t instanceId, RefPtr<NG::UINode>& node) mutable {
+        auto updateNodeFunc = [execCtx = info.GetExecutionContext(), updateTsFunc, vm](
+                                  int32_t instanceId, RefPtr<NG::UINode>& node) mutable {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             JSRef<JSVal> param[2];
             param[0] = JSRef<JSVal>::Make(ToJSValue(instanceId));
             param[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(node)));
@@ -166,7 +168,10 @@ void JSBaseNode::SetNodeFunc(RefPtr<NG::UINode> newNode, const JSCallbackInfo& i
         }
         EcmaVM* vm = info.GetVm();
         auto updateTsConfig = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeConfig));
-        auto updateNodeConfig = [updateTsConfig, vm]() mutable { updateTsConfig->ExecuteJS(); };
+        auto updateNodeConfig = [execCtx = info.GetExecutionContext(), updateTsConfig, vm]() mutable {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            updateTsConfig->ExecuteJS();
+        };
         newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
     }
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
