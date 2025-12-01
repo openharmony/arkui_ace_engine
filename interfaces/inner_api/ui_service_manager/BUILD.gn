@@ -59,6 +59,7 @@ ohos_shared_library("ui_service_mgr") {
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_xcollie.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_statistic_event.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
   output_values = get_target_outputs(":uiservice_manager_interface")
