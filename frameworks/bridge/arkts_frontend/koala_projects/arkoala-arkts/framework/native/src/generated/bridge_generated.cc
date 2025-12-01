@@ -29833,10 +29833,10 @@ Ark_String impl_FrameNodeExtender_getId(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getId(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_1(FrameNodeExtender_getId, KStringPtr, Ark_NativePointer)
-Ark_Number impl_FrameNodeExtender_getUniqueId(Ark_NativePointer peer) {
+Ark_Int32 impl_FrameNodeExtender_getUniqueId(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getUniqueId(static_cast<Ark_FrameNode>(peer));
 }
-KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getUniqueId, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getUniqueId, Ark_Int32, Ark_NativePointer)
 Ark_String impl_FrameNodeExtender_getNodeType(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getNodeType(static_cast<Ark_FrameNode>(peer));
 }
@@ -29989,10 +29989,10 @@ Ark_NativePointer impl_FrameNodeExtender_getFrameNodeById(KInteropNumber id) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeById((const Ark_Number*) (&id));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getFrameNodeById, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_FrameNodeExtender_getFrameNodeByUniqueId(KInteropNumber id) {
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeByUniqueId((const Ark_Number*) (&id));
+Ark_NativePointer impl_FrameNodeExtender_getFrameNodeByUniqueId(Ark_Int32 id) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeByUniqueId(id);
 }
-KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getFrameNodeByUniqueId, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getFrameNodeByUniqueId, Ark_NativePointer, Ark_Int32)
 void impl_FrameNodeExtender_reuse(Ark_NativePointer peer) {
         GetAccessors()->getFrameNodeExtenderAccessor()->reuse(static_cast<Ark_FrameNode>(peer));
 }

@@ -499,7 +499,7 @@ export class FrameNode implements MaterializedBase {
     public getId(): string {
         return FrameNodeExtender.getId(this);
     }
-    public getUniqueId(): number {
+    public getUniqueId(): int {
         return FrameNodeExtender.getUniqueId(this);
     }
     public isVisible(): boolean {

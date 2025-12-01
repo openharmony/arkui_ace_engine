@@ -745,6 +745,10 @@ export class UIContext {
         childScroller: Scroller): void {
         throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
     }
+    
+    public getPageInfoByUniqueId(id: int): PageInfo {
+        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}
@@ -969,7 +973,10 @@ export class UIObserver {
         }
     }
 }
-export interface PageInfo {}
+export interface PageInfo {
+        routerPageInfo?: uiObserver.RouterPageInfo;
+        navDestinationInfo?: uiObserver.NavDestinationInfo;
+}
 export interface ContentCoverController {}
 export class DynamicSyncScene {
     private range: ExpectedFrameRateRange;
