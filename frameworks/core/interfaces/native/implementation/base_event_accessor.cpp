@@ -130,34 +130,49 @@ void SetAxisVerticalImpl(Ark_BaseEvent peer,
 Ark_Float64 GetPressureImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
-    return Converter::ArkValue<Ark_Float64>(static_cast<float>(peer->GetBaseInfo()->GetForce()));
+    if (peer->pressure_.has_value()) {
+        return peer->pressure_.value();
+    }
+    auto pressure = Converter::ArkValue<Ark_Float64>(peer->GetBaseInfo()->GetForce());
+    peer->pressure_ = pressure;
+    return pressure;
 }
 void SetPressureImpl(Ark_BaseEvent peer, Ark_Float64 pressure)
 {
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    peer->GetBaseInfo()->SetForce(Converter::Convert<float>(pressure));
+    CHECK_NULL_VOID(peer);
+    peer->pressure_ = pressure;
 }
 Ark_Float64 GetTiltXImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    if (peer->titleX_.has_value()) {
+        return peer->titleX_.value();
+    }
     auto value = peer->GetBaseInfo()->GetTiltX();
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
+    auto titleX = Converter::ArkValue<Ark_Float64>(value.value_or(0));
+    peer->titleX_ = titleX;
+    return titleX;
 }
 void SetTiltXImpl(Ark_BaseEvent peer, Ark_Float64 tiltX)
 {
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    peer->GetBaseInfo()->SetTiltX(Converter::Convert<float>(tiltX));
+    CHECK_NULL_VOID(peer);
+    peer->titleX_ = tiltX;
 }
 Ark_Float64 GetTiltYImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    if (peer->titleY_.has_value()) {
+        return peer->titleY_.value();
+    }
     auto value = peer->GetBaseInfo()->GetTiltY();
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value.value_or(0)));
+    auto titleY = Converter::ArkValue<Ark_Float64>(value.value_or(0));
+    peer->titleY_ = titleY;
+    return titleY;
 }
 void SetTiltYImpl(Ark_BaseEvent peer, Ark_Float64 tiltY)
 {
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(tiltY));
+    CHECK_NULL_VOID(peer);
+    peer->titleY_ = tiltY;
 }
 Opt_Float64 GetRollAngleImpl(Ark_BaseEvent peer)
 {
