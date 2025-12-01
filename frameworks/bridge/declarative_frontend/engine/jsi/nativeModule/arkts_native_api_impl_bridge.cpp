@@ -279,7 +279,12 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
 
     auto routerPageResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetRouterPageState(nodePtr);
     if (routerPageResult) {
-        auto jsContext = Framework::JsConverter::ConvertNapiValueToJsVal(routerPageResult->context);
+        auto container = Container::CurrentSafely();
+        napi_value context = nullptr;
+        if (container && container->GetFrontend()) {
+            context = container->GetFrontend()->GetContextValue();
+        }
+        auto jsContext = Framework::JsConverter::ConvertNapiValueToJsVal(context);
         Local<JSValueRef> routerPageValues[] = { jsContext->GetLocalHandle(),
             panda::NumberRef::New(vm, routerPageResult->index),
             panda::StringRef::NewFromUtf8(vm, routerPageResult->name.c_str()),

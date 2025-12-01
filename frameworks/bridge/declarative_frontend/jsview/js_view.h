@@ -457,6 +457,8 @@ public:
 
     void SetLatestInstanceId(const int32_t instanceId);
 
+    JSRef<JSVal> GetJsContext();
+
     int32_t GetLatestInstanceId() const;
 private:
     void MarkNeedUpdate() override;

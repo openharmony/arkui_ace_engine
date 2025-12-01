@@ -4734,6 +4734,8 @@ void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)
     CHECK_NULL_VOID(navDestinationPattern);
     auto navPathInfo = navDestinationPattern->GetNavPathInfo();
     CHECK_NULL_VOID(navPathInfo);
+    std::shared_ptr<NavPathInfoScope> scope = nullptr;
+    scope = navPathInfo->Scope();
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     bool isStatic = navPathInfo->IsStatic();

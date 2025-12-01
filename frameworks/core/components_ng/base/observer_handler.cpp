@@ -152,7 +152,6 @@ void UIObserverHandler::NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>
         LOGW("notify router event failed, current UI instance invalid");
         return;
     }
-    napi_value context = GetUIContextValue();
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
@@ -162,7 +161,7 @@ void UIObserverHandler::NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
-    RouterPageInfoNG routerPageInfo(context, index, name, path, state, pageId);
+    RouterPageInfoNG routerPageInfo(index, name, path, state, pageId);
     routerPageHandleFuncForAni_(info, routerPageInfo);
 }
 
@@ -176,7 +175,6 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
         LOGW("notify router event failed, current UI instance invalid");
         return;
     }
-    napi_value context = GetUIContextValue();
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
@@ -186,7 +184,7 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
-    RouterPageInfoNG routerPageInfo(context, index, name, path, state, pageId);
+    RouterPageInfoNG routerPageInfo(index, name, path, state, pageId);
     routerPageHandleFunc_(info, routerPageInfo);
 }
 
@@ -468,7 +466,6 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
     return std::make_shared<RouterPageInfoNG>(
-        GetUIContextValue(),
         index,
         name,
         path,
@@ -511,7 +508,7 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
         AceApplicationInfo::GetInstance().GetProcessName(),
         container->GetModuleName()
     };
-    NavDestinationSwitchInfo switchInfo(GetUIContextValue(), std::forward<std::optional<NavDestinationInfo>>(from),
+    NavDestinationSwitchInfo switchInfo(std::forward<std::optional<NavDestinationInfo>>(from),
         std::forward<std::optional<NavDestinationInfo>>(to), operation);
     navDestinationSwitchHandleFunc_(info, switchInfo);
 }
@@ -526,7 +523,7 @@ void UIObserverHandler::NotifyNavDestinationSwitchForAni(
         return;
     }
     NavDestinationSwitchInfo switchInfo(
-        GetUIContextValue(), std::optional<NavDestinationInfo>(from), std::optional<NavDestinationInfo>(to), operation);
+        std::optional<NavDestinationInfo>(from), std::optional<NavDestinationInfo>(to), operation);
     navDestinationSwitchHandleFuncForAni_(switchInfo);
 }
 
