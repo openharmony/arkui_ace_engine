@@ -123,20 +123,6 @@ ErrCode UIServiceMgrClientIdl::UpdateDialog(int32_t id, const std::string& data)
     return GET_UI_SERVICE_FAILED;
 }
 
-ErrCode UIServiceMgrClientIdl::ReportStatisticEvents(const AppInfoParcel& appInfo,
-    const std::vector<StatisticEventInfoParcel>& events)
-{
-    if (remoteObject_ == nullptr) {
-        ErrCode err = Connect();
-        if (err != ERR_OK) {
-            LOGW("%{private}s:fail to connect UIMgrService", __func__);
-            return UI_SERVICE_NOT_CONNECTED;
-        }
-    }
-    sptr<IUIServiceMgrNew> doms = iface_cast<IUIServiceMgrNew>(remoteObject_);
-    return doms->ReportStatisticEvents(appInfo, events);
-}
-
 /**
  * Connect ui_service manager service.
  *

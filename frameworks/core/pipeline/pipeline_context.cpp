@@ -36,7 +36,6 @@
 #include "core/animation/shared_transition_controller.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
-#include "core/common/statistic_event_reporter.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/dialog/dialog_component.h"
@@ -67,7 +66,6 @@ constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
 constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
 constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
-constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 2 millisecond
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -2046,9 +2044,6 @@ void PipelineContext::OnIdle(int64_t deadline)
         hasIdleTasks_ = false;
     }
     FlushPageUpdateTasks();
-    if (deadline - GetSysTimestamp() > TIME_THRESHOLD) {
-        GetStatisticEventReporter()->TryReportStatisticEvents(this);
-    }
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,

@@ -50,7 +50,6 @@
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
-#include "core/common/statistic_event_reporter.h"
 #include "core/image/image_file_cache.h"
 
 namespace OHOS {
@@ -510,7 +509,6 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             context->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
             context->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
         }
-        context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FA_APP_START);
     }
 
     // get url

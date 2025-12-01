@@ -13,7 +13,6 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 # build static
@@ -85,7 +84,6 @@ template("ace_osal_ohos_source_set") {
       "perf_interfaces.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
-      "statistic_event_adapter.cpp",
       "stylus_detector_callback.cpp",
       "stylus_detector_default.cpp",
       "stylus_detector_loader.cpp",
@@ -248,15 +246,6 @@ template("ace_osal_ohos_source_set") {
 
     if (ability_runtime_graphics) {
       external_deps += [ "image_framework:image_native" ]
-    }
-
-    if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
-      if (ace_engine_enable_uiservice_idl) {
-        deps += [
-          "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-          "$ace_root/interfaces/inner_api/ui_service_manager:uiservice_manager_interface_set",
-        ]
-      }
     }
   }
 }

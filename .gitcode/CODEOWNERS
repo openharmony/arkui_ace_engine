@@ -1951,8 +1951,6 @@ frameworks/core/common/rosen/ @arkui_framework_xnode
 frameworks/core/common/router_recover_record.h @arkui_navigation
 frameworks/core/common/settings.h @arkui_framework_xnode
 frameworks/core/common/sharedata/ @arkui_framework_xnode
-frameworks/core/common/statistic_event_reporter.cpp @arkui_framework_xnode
-frameworks/core/common/statistic_event_reporter.h @arkui_framework_xnode
 frameworks/core/common/storage/ @arkui_statemgmt
 frameworks/core/common/stylus/stylus_detector_default.h @ArkUI_Event
 frameworks/core/common/stylus/stylus_detector_loader.h @ArkUI_Event
