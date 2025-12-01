@@ -1768,6 +1768,40 @@ bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     return value;
 }
 
+void TextModelNG::SetIncludeFontPadding(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, IncludeFontPadding, enabled);
+}
+
+void TextModelNG::SetIncludeFontPadding(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IncludeFontPadding, enabled, frameNode);
+}
+
+bool TextModelNG::GetIncludeFontPadding(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, IncludeFontPadding, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetFallbackLineSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FallbackLineSpacing, enabled);
+}
+
+void TextModelNG::SetFallbackLineSpacing(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FallbackLineSpacing, enabled, frameNode);
+}
+
+bool TextModelNG::GetFallbackLineSpacing(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FallbackLineSpacing, value, frameNode, value);
+    return value;
+}
+
 void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

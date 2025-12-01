@@ -1534,6 +1534,42 @@ class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey<boolea
   }
 }
 
+class TextInputIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputIncludeFontPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().textInput.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputFallbackLineSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputFallbackLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().textInput.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
   constructor(value: (client: IMEClient) => void) {
     super(value);
@@ -2014,6 +2050,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  includeFontPadding(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputIncludeFontPaddingModifier.identity, TextInputIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputFallbackLineSpacingModifier.identity, TextInputFallbackLineSpacingModifier, value);
     return this;
   }
   onSecurityStateChange(callback: Callback<boolean>): this {

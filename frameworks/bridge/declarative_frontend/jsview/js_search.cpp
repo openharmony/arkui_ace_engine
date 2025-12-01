@@ -176,6 +176,8 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onWillAttachIME", &JSSearch::SetOnWillAttachIME);
     JSClass<JSSearch>::StaticMethod("enableSelectedDataDetector", &JSSearch::SetSelectDetectEnable);
     JSClass<JSSearch>::StaticMethod("compressLeadingPunctuation", &JSSearch::SetCompressLeadingPunctuation);
+    JSClass<JSSearch>::StaticMethod("includeFontPadding", &JSSearch::SetIncludeFontPadding);
+    JSClass<JSSearch>::StaticMethod("fallbackLineSpacing", &JSSearch::SetFallbackLineSpacing);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1797,6 +1799,24 @@ void JSSearch::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
         enabled = info[0]->ToBoolean();
     }
     SearchModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
+}
+
+void JSSearch::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetIncludeFontPadding(enabled);
+}
+
+void JSSearch::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetFallbackLineSpacing(enabled);
 }
 
 void JSSearch::SetOnWillAttachIME(const JSCallbackInfo& info)

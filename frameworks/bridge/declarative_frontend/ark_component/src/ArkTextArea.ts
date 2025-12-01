@@ -1496,6 +1496,42 @@ class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey<boolean
   }
 }
 
+class TextAreaIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaIncludeFontPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetIncludeFontPadding(node);
+    }
+    else {
+      getUINativeModule().textArea.setIncludeFontPadding(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaFallbackLineSpacingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaFallbackLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetFallbackLineSpacing(node);
+    }
+    else {
+      getUINativeModule().textArea.setFallbackLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
   constructor(value: (client: IMEClient) => void) {
     super(value);
@@ -1892,6 +1928,14 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  includeFontPadding(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaIncludeFontPaddingModifier.identity, TextAreaIncludeFontPaddingModifier, value);
+    return this;
+  }
+  fallbackLineSpacing(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaFallbackLineSpacingModifier.identity, TextAreaFallbackLineSpacingModifier, value);
     return this;
   }
   scrollBarColor(value: ColorMetrics): this {

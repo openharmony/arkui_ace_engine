@@ -133,6 +133,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStylesAppend(const RefPtr<FrameNode>
     }
     textStyle.SetEnableAutoSpacing(textFieldLayoutProperty->GetEnableAutoSpacingValue(false));
     textStyle.SetCompressLeadingPunctuation(textFieldLayoutProperty->GetCompressLeadingPunctuationValue(false));
+    textStyle.SetIncludeFontPadding(textFieldLayoutProperty->GetIncludeFontPaddingValue(false));
+    textStyle.SetFallbackLineSpacing(textFieldLayoutProperty->GetFallbackLineSpacingValue(false));
     // use for modifier.
     auto contentModifier = pattern->GetContentModifier();
     CHECK_NULL_VOID(contentModifier);
@@ -879,6 +881,8 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderProperty(LayoutWrapper* la
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(TextAlign, TextAlign);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(EnableAutoSpacing, EnableAutoSpacing);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(CompressLeadingPunctuation, CompressLeadingPunctuation);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(IncludeFontPadding, IncludeFontPadding);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(FallbackLineSpacing, FallbackLineSpacing);
     textLayoutProperty->UpdateLayoutDirection(direction_);
     textLayoutProperty->UpdateTextDirection(textDirection_);
     if (!isInlineFocus_) {
@@ -1080,7 +1084,9 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .fontSize = fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
-        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation()
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .includeFontPadding = textStyle.GetIncludeFontPadding(),
+        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
     };
 }
 
@@ -1126,7 +1132,9 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .fontSize = paragraphData.fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
-        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation() };
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .includeFontPadding = textStyle.GetIncludeFontPadding(),
+        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing() };
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = style->GetTextAlign();
     }

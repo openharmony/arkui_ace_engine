@@ -1415,6 +1415,34 @@ void ResetSearchCompressLeadingPunctuation(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCompressLeadingPunctuation(frameNode, DEFAULT_LEADING_PUNCTUATION);
 }
+
+void SetIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIncludeFontPadding(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIncludeFontPadding(frameNode, false);
+}
+
+void SetFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetFallbackLineSpacing(frameNode, static_cast<bool>(includeFontPadding));
+}
+
+void ResetFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetFallbackLineSpacing(frameNode, false);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
@@ -1549,6 +1577,10 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSearchDirection = SetSearchDirection,
         .getSearchDirection = GetSearchDirection,
         .resetSearchDirection = ResetSearchDirection,
+        .setIncludeFontPadding = SetIncludeFontPadding,
+        .resetIncludeFontPadding = ResetIncludeFontPadding,
+        .setFallbackLineSpacing = SetFallbackLineSpacing,
+        .resetFallbackLineSpacing = ResetFallbackLineSpacing,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

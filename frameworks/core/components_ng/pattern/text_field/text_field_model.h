@@ -444,6 +444,8 @@ public:
     virtual void ResetTextAreaScrollBarColor() {};
     virtual void SetTextDirection(TextDirection value) {}
     virtual void ResetTextDirection() {}
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

@@ -252,6 +252,8 @@ public:
     virtual void SetMaximumLineHeight(const Dimension& value) {};
     virtual void SetTextDirection(TextDirection value) {}
     virtual void ResetTextDirection() {}
+    virtual void SetIncludeFontPadding(bool enabled) {};
+    virtual void SetFallbackLineSpacing(bool enabled) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

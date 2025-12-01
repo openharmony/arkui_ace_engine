@@ -13344,6 +13344,142 @@ void ResetTextBindSelectionMenu(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextModifier()->resetTextBindSelectionMenu(node->uiNodeHandle);
 }
 
+int32_t SetIncludeFontPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == NUM_0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetIncludeFontPadding(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->setIncludeFontPadding(
+                node->uiNodeHandle, item->value[0].i32);
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            fullImpl->getNodeModifiers()->getTextInputModifier()->setIncludeFontPadding(
+                node->uiNodeHandle, item->value[0].i32);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            fullImpl->getNodeModifiers()->getTextAreaModifier()->setIncludeFontPadding(
+                node->uiNodeHandle, item->value[0].i32);
+            break;
+        default:
+            return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetIncludeFontPadding(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_TEXT) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetIncludeFontPadding(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->resetIncludeFontPadding(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->resetIncludeFontPadding(node->uiNodeHandle);
+    }
+}
+
+const ArkUI_AttributeItem* GetIncludeFontPadding(ArkUI_NodeHandle node)
+{
+    ArkUI_Bool resultValue = DEFAULT_FALSE;
+
+    auto fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            resultValue = fullImpl->getNodeModifiers()->getTextModifier()->
+                getIncludeFontPadding(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            resultValue = fullImpl->getNodeModifiers()->getTextInputModifier()->
+                getIncludeFontPadding(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            resultValue = fullImpl->getNodeModifiers()->getTextAreaModifier()->
+                getIncludeFontPadding(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+int32_t SetFallbackLineSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == NUM_0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetFallbackLineSpacing(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->setFallbackLineSpacing(
+                node->uiNodeHandle, item->value[0].i32);
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            fullImpl->getNodeModifiers()->getTextInputModifier()->setFallbackLineSpacing(
+                node->uiNodeHandle, item->value[0].i32);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            fullImpl->getNodeModifiers()->getTextAreaModifier()->setFallbackLineSpacing(
+                node->uiNodeHandle, item->value[0].i32);
+            break;
+        default:
+            return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetFallbackLineSpacing(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_TEXT) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetFallbackLineSpacing(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->resetFallbackLineSpacing(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->resetFallbackLineSpacing(node->uiNodeHandle);
+    }
+}
+
+const ArkUI_AttributeItem* GetFallbackLineSpacing(ArkUI_NodeHandle node)
+{
+    ArkUI_Bool resultValue = DEFAULT_FALSE;
+
+    auto fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            resultValue = fullImpl->getNodeModifiers()->getTextModifier()->
+                getFallbackLineSpacing(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            resultValue = fullImpl->getNodeModifiers()->getTextInputModifier()->
+                getFallbackLineSpacing(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            resultValue = fullImpl->getNodeModifiers()->getTextAreaModifier()->
+                getFallbackLineSpacing(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
 int32_t SetSpanContent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -18877,7 +19013,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign, SetTextContentAlign, SetTextMinLines,
         SetSelectDetectorEnable, nullptr, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
         nullptr, SetEditMenuOption, SetTextBindSelectionMenu, SetTextTextSelection, nullptr,
-        SetCompressLeadingPunctuation, nullptr, nullptr, nullptr, SetTextDirection };
+        SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, nullptr, SetTextDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -18895,8 +19031,8 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace, GetTextLinearGradient,
         GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines, GetSelectDetectorEnable,
         nullptr, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager,
-        nullptr, nullptr, GetTextTextSelection, nullptr, GetCompressLeadingPunctuation, nullptr, nullptr, nullptr,
-        GetTextDirection };
+        nullptr, nullptr, GetTextTextSelection, nullptr, GetCompressLeadingPunctuation, GetIncludeFontPadding,
+        GetFallbackLineSpacing, nullptr, GetTextDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -18917,7 +19053,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextRadialGradient, ResetTextVerticalAlign, ResetTextContentAlign, ResetTextMinLines,
         ResetSelectDetectorEnable, nullptr, ResetMinLineHeight, ResetMaxLineHeight,
         ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu, ResetTextTextSelection,
-        nullptr, ResetCompressLeadingPunctuation, nullptr, nullptr, nullptr, ResetTextDirection };
+        nullptr, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing, nullptr,
+        ResetTextDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19158,8 +19295,8 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
         SetTextInputHalfLeading, SetTextInputKeyboardAppearance, SetTextInputEnableAutoFillAnimation,
         SetTextInputLineHeight, SetSelectDetectorEnable, nullptr, SetTextInputShowCounter,
-        TextInputBaseControllerAttribute, nullptr, nullptr, SetCompressLeadingPunctuation, nullptr, nullptr,
-        SetTextInputDirection };
+        TextInputBaseControllerAttribute, nullptr, nullptr, SetCompressLeadingPunctuation, SetIncludeFontPadding,
+        SetFallbackLineSpacing, SetTextInputDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19179,7 +19316,7 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
         GetTextInputHalfLeading, GetTextInputKeyboardAppearance, GetTextInputEnableAutoFillAnimation, GetTextInputLineHeight,
         GetSelectDetectorEnable, nullptr, GetTextInputShowCounter, nullptr, nullptr, nullptr, GetCompressLeadingPunctuation,
-        nullptr, nullptr, GetTextInputDirection };
+        GetIncludeFontPadding, GetFallbackLineSpacing, GetTextInputDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19199,7 +19336,8 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
         ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextInputEnableAutoFillAnimation,
         ResetTextInputLineHeight, ResetSelectDetectorEnable, nullptr, ResetTextInputShowCounter, nullptr, nullptr,
-        nullptr, ResetCompressLeadingPunctuation, nullptr, nullptr, ResetTextInputDirection };
+        nullptr, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
+        ResetTextInputDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19220,7 +19358,7 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetTextAreaMaxLines, SetTextAreaLineSpacing, SetTextAreaMinLines, SetTextAreaMaxLinesWithScroll,
         SetTextAreaLineHeight, SetTextAreaBarState, SetSelectDetectorEnable, nullptr,
         SetTextAreaScrollBarColor, SetTextAreaCustomKeyboard, TextAreaBaseControllerAttribute, nullptr, nullptr,
-        SetCompressLeadingPunctuation, nullptr, nullptr, nullptr, SetTextAreaDirection };
+        SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, nullptr, SetTextAreaDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19239,7 +19377,7 @@ const ArkUI_AttributeItem* GetTextAreaAttribute(ArkUI_NodeHandle node, int32_t s
         GetTextInputKeyboardAppearance, GetTextAreaMaxLines, GetTextAreaLineSpacing, GetTextAreaMinLines,
         GetTextAreaMaxLines, GetTextAreaLineHeight, GetTextAreaBarState, GetSelectDetectorEnable,
         nullptr, GetTextAreaScrollBarColor, GetTextAreaCustomKeyboard, nullptr, nullptr, nullptr,
-        GetCompressLeadingPunctuation, nullptr, nullptr, nullptr, GetTextAreaDirection };
+        GetCompressLeadingPunctuation, GetIncludeFontPadding, GetFallbackLineSpacing, nullptr, GetTextAreaDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19261,7 +19399,8 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextAreaMaxLines, ResetTextAreaLineSpacing,
         ResetTextAreaMinLines, ResetTextAreaMaxLinesWithScroll, ResetTextAreaLineHeight, ResetTextAreaBarState,
         ResetSelectDetectorEnable, nullptr, ResetTextAreaScrollBarColor, ResetTextAreaCustomKeyboard, nullptr, nullptr,
-        nullptr, ResetCompressLeadingPunctuation, nullptr, nullptr, nullptr, ResetTextAreaDirection };
+        nullptr, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing, nullptr,
+        ResetTextAreaDirection };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

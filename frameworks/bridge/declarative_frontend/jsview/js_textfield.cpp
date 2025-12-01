@@ -2487,6 +2487,24 @@ void JSTextField::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
 }
 
+void JSTextField::SetIncludeFontPadding(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetIncludeFontPadding(enabled);
+}
+
+void JSTextField::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetFallbackLineSpacing(enabled);
+}
+
 void JSTextField::SetStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

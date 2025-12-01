@@ -2900,6 +2900,46 @@ typedef enum {
     NODE_TEXT_TEXT_SELECTION = 1046,
 
     /**
+     * @brief Whether to compress punctuation at the beginning of line.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, true means enable this feature, false means disable.
+     * The default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether compress punctuation at the beginning of line.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_COMPRESS_LEADING_PUNCTUATION = 1048,
+
+    /*
+     * @brief Determines whether the layout adds extra padding at the top and bottom to make space for characters.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable include the font padding, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether include the font padding.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INCLUDE_FONT_PADDING = 1049,
+
+    /*
+     * @brief Whether to include ascent/descent from fallback fonts to prevent overlapping lines.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether fallback line spacing.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_FALLBACK_LINE_SPACING = 1050,
+
+    /**
      * @brief Writing direction of the text.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3977,6 +4017,46 @@ typedef enum {
     NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE = 7041,
 
     /**
+     * @brief Whether to compress punctuation at the beginning of line.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, true means enable this feature, false means disable.
+     * The default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether compress punctuation at the beginning of line.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INPUT_COMPRESS_LEADING_PUNCTUATION = 7044,
+
+    /*
+     * @brief Determines whether the layout adds extra padding at the top and bottom to make space for characters.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable include the font padding, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether include the font padding.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INPUT_INCLUDE_FONT_PADDING = 7045,
+
+    /*
+     * @brief Whether to include ascent/descent from fallback fonts to prevent overlapping lines.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether fallback line spacing.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_INPUT_FALLBACK_LINE_SPACING = 7046,
+
+    /**
      * @brief Writing direction of the text.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4486,6 +4566,46 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE = 8037,
+
+    /**
+     * @brief Whether to compress punctuation at the beginning of line.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, true means enable this feature, false means disable.
+     * The default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether compress punctuation at the beginning of line.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_AREA_COMPRESS_LEADING_PUNCTUATION = 8040,
+
+    /*
+     * @brief Determines whether the layout adds extra padding at the top and bottom to make space for characters.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable include the font padding, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether include the font padding.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_AREA_INCLUDE_FONT_PADDING = 8041,
+
+    /*
+     * @brief Whether to include ascent/descent from fallback fonts to prevent overlapping lines.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32:  Whether enable the feature, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether fallback line spacing.\n
+     *
+     * @since 23
+     */
+    NODE_TEXT_AREA_FALLBACK_LINE_SPACING = 8042,
 
     /**
      * @brief Writing direction of the text.

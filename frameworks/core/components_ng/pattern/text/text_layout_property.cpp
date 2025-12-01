@@ -203,6 +203,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     }
     json->PutExtAttr("maxLineHeight", GetMaximumLineHeight().value_or(0.0_fp).ToString().c_str(), filter);
     json->PutExtAttr("minLineHeight", GetMinimumLineHeight().value_or(0.0_fp).ToString().c_str(), filter);
+    json->PutExtAttr("includeFontPadding", std::to_string(GetIncludeFontPadding().value_or(false)).c_str(), filter);
+    json->PutExtAttr("fallbackLineSpacing", std::to_string(GetFallbackLineSpacing().value_or(false)).c_str(), filter);
 
     if (GetTextEffectStrategyValue(TextEffectStrategy::NONE) != TextEffectStrategy::NONE) {
         auto jsonNumericTransiton = JsonUtil::Create(true);
