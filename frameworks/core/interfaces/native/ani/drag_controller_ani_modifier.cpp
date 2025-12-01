@@ -532,6 +532,8 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (result != 0) {
         return false;
     }
+    Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
+        Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
         asyncCtx->isSwitchedToSubWindow = true;
     }
@@ -730,6 +732,8 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (result != 0) {
         return false;
     }
+    Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
+        Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
         asyncCtx->isSwitchedToSubWindow = true;
     }
