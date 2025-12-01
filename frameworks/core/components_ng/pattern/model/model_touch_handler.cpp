@@ -123,6 +123,9 @@ Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent
         case TouchType::HOVER_CANCEL:
         case TouchType::PROXIMITY_IN:
         case TouchType::PROXIMITY_OUT:
+        case TouchType::LEVITATE_MOVE:
+        case TouchType::LEVITATE_IN_WINDOW:
+        case TouchType::LEVITATE_OUT_WINDOW:
         case TouchType::UNKNOWN:
             break;
     }

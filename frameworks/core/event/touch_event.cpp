@@ -498,8 +498,9 @@ TouchEvent TouchEvent::UpdatePointers() const
 
 bool TouchEvent::IsPenHoverEvent() const
 {
-    return sourceTool == SourceTool::PEN && (type == TouchType::PROXIMITY_IN || type == TouchType::PROXIMITY_OUT ||
-                                                (type == TouchType::MOVE && NearZero(force)));
+    return sourceTool == SourceTool::PEN &&
+           (type == TouchType::LEVITATE_IN_WINDOW || type == TouchType::LEVITATE_MOVE ||
+               type == TouchType::LEVITATE_OUT_WINDOW);
 }
 
 int32_t TouchEvent::GetTargetDisplayId() const

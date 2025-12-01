@@ -327,4 +327,88 @@ HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode009, TestSize.Level1)
     EXPECT_FALSE(eventManager->curPenHoverResultsMap_.empty());
     EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
 }
+
+/**
+ * @tc.name: UpdatePenHoverMoveNode010
+ * @tc.desc: Test UpdatePenHoverNode function.
+ */
+HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode010, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    const int nodeId1 = 1001;
+    const int nodeId2 = 999;
+    touchEvent.SetOriginalId(eventId).SetId(eventId);
+    touchEvent.SetType(TouchType::LEVITATE_IN_WINDOW);
+    TouchTestResult testResult;
+    auto eventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId1);
+    const OnHoverFunc onHover = [](bool, HoverInfo) {};
+    eventTarget->SetPenHoverCallback(onHover);
+    testResult.push_back(eventTarget);
+    auto oldTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId2);
+    eventManager->lastPenHoverResultsMap_[eventId].push_back(oldTarget);
+    eventManager->curPenHoverResultsMap_[eventId].push_back(oldTarget);
+    eventManager->UpdatePenHoverNode(touchEvent, testResult);
+    EXPECT_TRUE(eventManager->lastPenHoverResultsMap_[eventId].empty());
+    EXPECT_FALSE(eventManager->curPenHoverResultsMap_[eventId].empty());
+    EXPECT_EQ(eventManager->curPenHoverResultsMap_[eventId].size(), 1U);
+    EXPECT_EQ(eventManager->curPenHoverResultsMap_[eventId].front(), eventTarget);
+}
+
+/**
+ * @tc.name: UpdatePenHoverMoveNode011
+ * @tc.desc: Test UpdatePenHoverNode function.
+ */
+HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode011, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    const int nodeId1 = 1002;
+    touchEvent.SetOriginalId(eventId).SetId(eventId);
+    touchEvent.SetType(TouchType::LEVITATE_OUT_WINDOW);
+    TouchTestResult testResult;
+    auto eventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId1);
+    const OnHoverFunc onHover = [](bool, HoverInfo) {};
+    eventTarget->SetPenHoverCallback(onHover);
+    eventManager->curPenHoverResultsMap_[eventId].push_back(eventTarget);
+    eventManager->UpdatePenHoverNode(touchEvent, testResult);
+    EXPECT_FALSE(eventManager->lastPenHoverResultsMap_[eventId].empty());
+    EXPECT_TRUE(eventManager->curPenHoverResultsMap_[eventId].empty());
+    EXPECT_EQ(eventManager->lastPenHoverResultsMap_[eventId].size(), 1U);
+    EXPECT_EQ(eventManager->lastPenHoverResultsMap_[eventId].front(), eventTarget);
+}
+
+/**
+ * @tc.name: UpdatePenHoverMoveNode012
+ * @tc.desc: Test UpdatePenHoverNode function.
+ */
+HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode012, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    const int nodeId1 = 1003;
+    touchEvent.SetOriginalId(eventId).SetId(eventId);
+    touchEvent.SetType(TouchType::LEVITATE_MOVE);
+    TouchTestResult testResult;
+    auto eventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId1);
+    const OnHoverFunc onHover = [](bool, HoverInfo) {};
+    eventTarget->SetPenHoverCallback(onHover);
+    eventManager->curPenHoverResultsMap_[eventId].push_back(eventTarget);
+    auto newTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, 1004);
+    newTarget->SetPenHoverCallback(onHover);
+    testResult.push_back(newTarget);
+    eventManager->UpdatePenHoverNode(touchEvent, testResult);
+    EXPECT_FALSE(eventManager->lastPenHoverResultsMap_[eventId].empty());
+    EXPECT_FALSE(eventManager->curPenHoverResultsMap_[eventId].empty());
+    EXPECT_EQ(eventManager->lastPenHoverResultsMap_[eventId].size(), 1U);
+    EXPECT_EQ(eventManager->curPenHoverResultsMap_[eventId].size(), 1U);
+    EXPECT_EQ(eventManager->lastPenHoverResultsMap_[eventId].front(), eventTarget);
+    EXPECT_EQ(eventManager->curPenHoverResultsMap_[eventId].front(), newTarget);
+}
 } // namespace OHOS::Ace::NG

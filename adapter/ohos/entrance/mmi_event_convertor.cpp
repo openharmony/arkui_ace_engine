@@ -49,6 +49,9 @@ TouchType ConvertTouchEventType(int32_t originAction)
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_MOVE, TouchType::LEVITATE_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_IN_WINDOW, TouchType::LEVITATE_IN_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_LEVITATE_OUT_WINDOW, TouchType::LEVITATE_OUT_WINDOW },
     };
     auto typeIter = actionMap.find(originAction);
     if (typeIter == actionMap.end()) {
