@@ -95,6 +95,33 @@ ScriptItemsByOrder Convert(const Array_ScriptItem& src)
 }
 
 template<>
+ScriptRegexItems Convert(const Array_ScriptItem& src)
+{
+    ScriptRegexItems scriptRegexItems;
+    auto convScriptItem = Converter::OptConvert<std::vector<Ark_ScriptItem>>(src);
+    if (!convScriptItem) {
+        // Implement Reset value
+        return scriptRegexItems;
+    }
+    for (auto scriptItem : *convScriptItem) {
+        auto script = Converter::Convert<std::string>(scriptItem.script);
+        std::vector<std::pair<std::string, std::string>> regexRules;
+        auto urlRegexRules = Converter::OptConvert<std::vector<Ark_UrlRegexRule>>(scriptItem.urlRegexRules)
+            .value_or(std::vector<Ark_UrlRegexRule>{});
+        for (auto regexRule : urlRegexRules) {
+            auto secondLevelDomain = Converter::Convert<std::string>(regexRule->secondLevelDomain);
+            auto rule = Converter::Convert<std::string>(regexRule->rule);
+            regexRules.push_back(std::make_pair(secondLevelDomain, rule));
+        }
+        if (scriptRegexItems.find(script) == scriptRegexItems.end()) {
+            scriptRegexItems.insert(std::make_pair(script, regexRules));
+        }
+    }
+ 
+    return scriptRegexItems;
+}
+
+template<>
 NestedScrollOptionsExt Convert(const Ark_NestedScrollOptionsExt& src)
 {
     NestedScrollOptionsExt nestedOpt = {
@@ -2249,7 +2276,19 @@ void SetRunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnDocumentStart(frameNode, *convValue);
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+
+    auto convRegexRulesValue = Converter::OptConvert<ScriptRegexItems>(*value);
+    if (!convRegexRulesValue) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnDocumentStartByOrder(
+        frameNode, *convValue, *convRegexRulesValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetRunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
@@ -2263,7 +2302,19 @@ void SetRunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnDocumentEnd(frameNode, *convValue);
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+
+    auto convRegexRulesValue = Converter::OptConvert<ScriptRegexItems>(*value);
+    if (!convRegexRulesValue) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnDocumentEndByOrder(
+        frameNode, *convValue, *convRegexRulesValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
@@ -2282,7 +2333,13 @@ void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue, *convValueByOrder);
+    auto convRegexRulesValue = Converter::OptConvert<ScriptRegexItems>(*value);
+    if (!convRegexRulesValue) {
+        // Implement Reset value
+        return;
+    }
+
+    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue, *convRegexRulesValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetNativeEmbedOptionsImpl(Ark_NativePointer node,

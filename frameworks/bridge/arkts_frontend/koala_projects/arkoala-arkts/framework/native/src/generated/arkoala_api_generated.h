@@ -849,6 +849,8 @@ typedef struct Ark_Union_SwiperAnimationMode_Boolean Ark_Union_SwiperAnimationMo
 typedef struct Opt_Union_SwiperAnimationMode_Boolean Opt_Union_SwiperAnimationMode_Boolean;
 typedef struct Ark_Union_TextInputStyle_TextContentStyle Ark_Union_TextInputStyle_TextContentStyle;
 typedef struct Opt_Union_TextInputStyle_TextContentStyle Opt_Union_TextInputStyle_TextContentStyle;
+typedef struct Ark_UrlRegexRule Ark_UrlRegexRule;
+typedef struct Opt_UrlRegexRule Opt_UrlRegexRule;
 typedef struct UrlStylePeer UrlStylePeer;
 typedef struct UrlStylePeer* Ark_UrlStyle;
 typedef struct Opt_UrlStyle Opt_UrlStyle;
@@ -1116,6 +1118,8 @@ typedef struct Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Ar
 typedef struct Opt_Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Opt_Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult;
 typedef struct Array_Union_String_I32_I64_F64_Resource Array_Union_String_I32_I64_F64_Resource;
 typedef struct Opt_Array_Union_String_I32_I64_F64_Resource Opt_Array_Union_String_I32_I64_F64_Resource;
+typedef struct Array_UrlRegexRule Array_UrlRegexRule;
+typedef struct Opt_Array_UrlRegexRule Opt_Array_UrlRegexRule;
 typedef struct AsyncCallback_image_PixelMap_Void AsyncCallback_image_PixelMap_Void;
 typedef struct Opt_AsyncCallback_image_PixelMap_Void Opt_AsyncCallback_image_PixelMap_Void;
 typedef struct AsyncCallback_Void AsyncCallback_Void;
@@ -8973,6 +8977,15 @@ typedef struct Opt_Union_TextInputStyle_TextContentStyle {
     Ark_Tag tag;
     Ark_Union_TextInputStyle_TextContentStyle value;
 } Opt_Union_TextInputStyle_TextContentStyle;
+typedef struct Ark_UrlRegexRule {
+    /* kind: Interface */
+    Ark_String secondLevelDomain;
+    Ark_String rule;
+} Ark_UrlRegexRule;
+typedef struct Opt_UrlRegexRule {
+    Ark_Tag tag;
+    Ark_UrlRegexRule value;
+} Opt_UrlRegexRule;
 typedef struct Opt_UrlStyle {
     Ark_Tag tag;
     Ark_UrlStyle value;
@@ -10050,6 +10063,15 @@ typedef struct Opt_Array_Union_String_I32_I64_F64_Resource {
     Ark_Tag tag;
     Array_Union_String_I32_I64_F64_Resource value;
 } Opt_Array_Union_String_I32_I64_F64_Resource;
+typedef struct Array_UrlRegexRule {
+    /* kind: ContainerType */
+    Ark_UrlRegexRule* array;
+    Ark_Int32 length;
+} Array_UrlRegexRule;
+typedef struct Opt_Array_UrlRegexRule {
+    Ark_Tag tag;
+    Array_UrlRegexRule value;
+} Opt_Array_UrlRegexRule;
 typedef struct AsyncCallback_image_PixelMap_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15779,6 +15801,7 @@ typedef struct Ark_ScriptItem {
     /* kind: Interface */
     Ark_String script;
     Array_String scriptRules;
+    Opt_Array_UrlRegexRule urlRegexRules;
 } Ark_ScriptItem;
 typedef struct Opt_ScriptItem {
     Ark_Tag tag;

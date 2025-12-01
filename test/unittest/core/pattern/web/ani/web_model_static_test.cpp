@@ -1541,8 +1541,10 @@ HWTEST_F(WebModelStaticTest, JavaScriptOnHeadEnd001, TestSize.Level1)
     stack->Push(frameNode);
 
     ScriptItems scriptItemsEnd;
+    ScriptRegexItems scriptRegexItems;
     ScriptItemsByOrder scriptItemsByOrder;
-    WebModelStatic::JavaScriptOnHeadEnd(AccessibilityManager::RawPtr(frameNode), scriptItemsEnd, scriptItemsByOrder);
+    WebModelStatic::JavaScriptOnHeadEnd(AccessibilityManager::RawPtr(frameNode),
+        scriptItemsEnd, scriptRegexItems, scriptItemsByOrder);
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
     EXPECT_EQ(webPatternStatic->onDocumentEndScriptItems_, std::nullopt);
