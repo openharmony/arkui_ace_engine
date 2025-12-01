@@ -548,6 +548,7 @@ bool PageRouterManager::StartPop()
 
     if (pageRouterStack_.size() <= 1) {
         if (!restorePageStack_.empty()) {
+            FireNavigateChangeCallback(restorePageStack_.back().url);
             StartRestore(RouterPageInfo());
             return true;
         }
@@ -555,6 +556,8 @@ bool PageRouterManager::StartPop()
         return false;
     }
     UpdateSrcPage();
+    // get back target page and fire navigate callback
+    FireNavigateChangeCallback(GetBackTargetName());
     // pop top page in page stack
     auto preWeakNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
@@ -566,7 +569,6 @@ bool PageRouterManager::StartPop()
     CHECK_NULL_RETURN(pagePattern, false);
     pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, false);
-    FireNavigateChangeCallback(pageInfo->GetPageUrl());
     std::string params = pageInfo->GetPageParams();
     pageInfo->ReplacePageParams("");
 
@@ -1386,13 +1388,13 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
 {
     CleanPageOverlay();
     UpdateSrcPage();
-    FireNavigateChangeCallback(target.url);
     if (target.url.empty()) {
         size_t pageRouteSize = pageRouterStack_.size();
         if (pageRouteSize <= 1) {
             if (!restorePageStack_.empty()) {
                 auto newInfo = RouterPageInfo();
                 newInfo.params = target.params;
+                FireNavigateChangeCallback(restorePageStack_.back().url);
                 StartRestore(newInfo);
                 return;
             }
@@ -1401,10 +1403,11 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
             return;
         }
         TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back start PopPage");
+        FireNavigateChangeCallback(GetBackTargetName());
         PopPage(target.params, true, true);
         return;
     }
-
+    FireNavigateChangeCallback(target.url);
     auto pageInfo = FindPageInStack(target.url, true);
     if (pageInfo.second) {
         // find page in stack, pop to specified index.
@@ -2751,5 +2754,24 @@ void PageRouterManager::LoadCompleteManagerStopCollect()
     if (context) {
         context->GetLoadCompleteManager()->StopCollect();
     }
+}
+
+std::string PageRouterManager::GetBackTargetName()
+{
+    if (pageRouterStack_.size() <= 1) {
+        return "";
+    }
+    auto pageIter = pageRouterStack_.rbegin();
+    std::advance(pageIter, 1);
+    if (pageIter == pageRouterStack_.rend()) {
+        return "";
+    }
+    auto backNode = (*pageIter).Upgrade();
+    CHECK_NULL_RETURN(backNode, "");
+    auto pattern = backNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto pageInfo = pattern->GetPageInfo();
+    CHECK_NULL_RETURN(pageInfo, "");
+    return pageInfo->GetPageUrl();
 }
 } // namespace OHOS::Ace::NG
