@@ -3241,7 +3241,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     if (showSelect_) {
         SetIsSingleHandle(true);
     }
-    if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::DOUBLE_CLICK)) {
+    if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::DOUBLE_CLICK, info.GetSourceDevice())) {
         NotifyOnEditChanged(true);
     }
     if (CanChangeSelectState()) {
@@ -4897,7 +4897,7 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
     leftMouseCanMove_ = false;
-    if (HasFocus() && RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::MOUSE_RELEASE)) {
+    if (HasFocus() && RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::MOUSE_RELEASE, info.GetSourceDevice())) {
         NotifyOnEditChanged(true);
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -6514,8 +6514,9 @@ bool TextFieldPattern::RequestKeyboardNotByFocusSwitch(RequestKeyboardReason rea
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d requestKeyboard With Reason %{public}s",
-        tmpHost->GetId(), TextFieldPattern::RequestKeyboardReasonToString(reason).c_str());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d requestKeyboard With Reason %{public}s, sourceType %{public}d",
+        tmpHost->GetId(), TextFieldPattern::RequestKeyboardReasonToString(reason).c_str(),
+        static_cast<int32_t>(sourceType));
     if (!RequestKeyboard(false, true, true, sourceType)) {
         return false;
     }
