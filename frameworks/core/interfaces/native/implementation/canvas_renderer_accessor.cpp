@@ -581,7 +581,13 @@ void ResetImpl(Ark_CanvasRenderer peer)
 }
 Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
 {
-    return {};
+    auto defaultValue = Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(
+        Converter::ArkValue<Ark_LengthMetrics>(0.0_vp));
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(
+        Converter::ArkValue<Ark_LengthMetrics>(peerImpl->GetLetterSpacing()));
 }
 void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_LengthMetrics_String* letterSpacing)
@@ -604,9 +610,11 @@ void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
 }
 Ark_Float64 GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetGlobalAlphaImpl there is no implementation in controller "
-        "for getter method of GlobalAlpha.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(1.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetGlobalAlpha());
 }
 void SetGlobalAlphaImpl(Ark_CanvasRenderer peer,
                         Ark_Float64 globalAlpha)
@@ -620,9 +628,11 @@ void SetGlobalAlphaImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetGlobalCompositeOperationImpl method should return "
-        "object with specific type");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("source-over");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetGlobalCompositeOperation());
 }
 void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)
@@ -636,9 +646,27 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
 }
 Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetFillStyleImpl there is no implementation in controller "
-        "for getter method of FillStyle.");
-    return {};
+    auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+        Converter::ArkValue<Ark_String>("#000000"));
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    auto type = peerImpl->GetFillStyleType();
+    switch (type) {
+        case ParamType::STRING:
+        case ParamType::COLOR:
+        case ParamType::INT32:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+                Converter::ArkValue<Ark_String>(peerImpl->GetFillStyleString()));
+        case ParamType::CANVAS_GRADIENT:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
+                peerImpl->GetFillStyleGradient());
+        case ParamType::CANVAS_PATTERN:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+                peerImpl->GetFillStylePattern());
+        default:
+            return defaultValue;
+    }
 }
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
                       const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* fillStyle)
@@ -664,20 +692,36 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
             }
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
-            CHECK_NULL_VOID(gradient);
-            peerImpl->SetFillStyle(gradient->GetGradient());
+            peerImpl->SetFillStyle(gradient);
         },
         [peerImpl](const Ark_CanvasPattern& pattern) {
-            CHECK_NULL_VOID(pattern);
-            peerImpl->SetFillStylePattern(pattern->GetId());
+            peerImpl->SetFillStyle(pattern);
         },
         []() {});
 }
 Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetStrokeStyleImpl there is no implementation in controller "
-        "for getter method of StrokeStyle.");
-    return {};
+    auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+        Converter::ArkValue<Ark_String>("#000000"));
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    auto type = peerImpl->GetStrokeStyleType();
+    switch (type) {
+        case ParamType::STRING:
+        case ParamType::COLOR:
+        case ParamType::INT32:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+                Converter::ArkValue<Ark_String>(peerImpl->GetStrokeStyleString()));
+        case ParamType::CANVAS_GRADIENT:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
+                peerImpl->GetStrokeStyleGradient());
+        case ParamType::CANVAS_PATTERN:
+            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+                peerImpl->GetStrokeStylePattern());
+        default:
+            return defaultValue;
+    }
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                         const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* strokeStyle)
@@ -703,19 +747,20 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
             }
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
-            CHECK_NULL_VOID(gradient);
-            peerImpl->SetStrokeStyle(gradient->GetGradient());
+            peerImpl->SetStrokeStyle(gradient);
         },
         [peerImpl](const Ark_CanvasPattern& pattern) {
-            CHECK_NULL_VOID(pattern);
-            peerImpl->SetStrokeStylePattern(pattern->GetId());
+            peerImpl->SetStrokeStyle(pattern);
         },
         []() {});
 }
 Ark_String GetFilterImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetFilterImpl method should return object with specific type");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("none");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetFilter());
 }
 void SetFilterImpl(Ark_CanvasRenderer peer,
                    const Ark_String* filter)
@@ -730,9 +775,11 @@ void SetFilterImpl(Ark_CanvasRenderer peer,
 }
 Ark_Boolean GetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingEnabledImpl there is no implementation in controller "
-        "for getter method of ImageSmoothingEnabled.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Boolean>(peerImpl->GetImageSmoothingEnabled());
 }
 void SetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer,
                                   Ark_Boolean imageSmoothingEnabled)
@@ -746,9 +793,11 @@ void SetImageSmoothingEnabledImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetImageSmoothingQualityImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingQualityImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("low");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetImageSmoothingQuality());
 }
 void SetImageSmoothingQualityImpl(Ark_CanvasRenderer peer,
                                   const Ark_String* imageSmoothingQuality)
@@ -762,9 +811,11 @@ void SetImageSmoothingQualityImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetLineCapImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl there is no implementation in controller "
-        "for getter method of LineCap.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("butt");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetLineCap());
 }
 void SetLineCapImpl(Ark_CanvasRenderer peer,
                     const Ark_String* lineCap)
@@ -778,9 +829,11 @@ void SetLineCapImpl(Ark_CanvasRenderer peer,
 }
 Ark_Float64 GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl there is no implementation in controller "
-        "for getter method of LinewDashOffset.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetLineDashOffset());
 }
 void SetLineDashOffsetImpl(Ark_CanvasRenderer peer,
                            Ark_Float64 lineDashOffset)
@@ -793,9 +846,11 @@ void SetLineDashOffsetImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetLineJoinImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineJoinImpl there is no implementation in controller "
-        "for getter method of LineJoin.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("miter");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetLineJoin());
 }
 void SetLineJoinImpl(Ark_CanvasRenderer peer,
                      const Ark_String* lineJoin)
@@ -809,9 +864,11 @@ void SetLineJoinImpl(Ark_CanvasRenderer peer,
 }
 Ark_Float64 GetLineWidthImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineWidthImpl there is no implementation in controller "
-        "for getter method of LinewWidth.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(1.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetLineWidth());
 }
 void SetLineWidthImpl(Ark_CanvasRenderer peer,
                       Ark_Float64 lineWidth)
@@ -824,9 +881,11 @@ void SetLineWidthImpl(Ark_CanvasRenderer peer,
 }
 Ark_Float64 GetMiterLimitImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetMiterLimitImpl there is no implementation in controller "
-        "for getter method of MiterLimit.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetMiterLimit());
 }
 void SetMiterLimitImpl(Ark_CanvasRenderer peer,
                        Ark_Float64 miterLimit)
@@ -840,9 +899,11 @@ void SetMiterLimitImpl(Ark_CanvasRenderer peer,
 }
 Ark_Float64 GetShadowBlurImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowBlurImpl there is no implementation in controller "
-        "for getter method of ShadowBlur.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetShadowBlur());
 }
 void SetShadowBlurImpl(Ark_CanvasRenderer peer,
                        Ark_Float64 shadowBlur)
@@ -856,9 +917,11 @@ void SetShadowBlurImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetShadowColorImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowColorImpl there is no implementation in controller "
-        "for getter method of ShadowColor.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("#00000000");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetShadowColor());
 }
 void SetShadowColorImpl(Ark_CanvasRenderer peer,
                         const Ark_String* shadowColor)
@@ -873,9 +936,11 @@ void SetShadowColorImpl(Ark_CanvasRenderer peer,
 }
 Ark_Float64 GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetXImpl there is no implementation in controller "
-        "for getter method of ShadowOffsetXImpl.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetShadowOffsetX());
 }
 void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
                           Ark_Float64 shadowOffsetX)
@@ -888,9 +953,11 @@ void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
 }
 Ark_Float64 GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetShadowOffsetYImpl there is no implementation in controller "
-        "for getter method of ShadowOffsetYImpl.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_Float64>(0.0);
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_Float64>(peerImpl->GetShadowOffsetY());
 }
 void SetShadowOffsetYImpl(Ark_CanvasRenderer peer,
                           Ark_Float64 shadowOffsetY)
@@ -903,9 +970,11 @@ void SetShadowOffsetYImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetDirectionImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl there is no implementation in controller "
-        "for getter method of Direction.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("inherit");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetDirection());
 }
 void SetDirectionImpl(Ark_CanvasRenderer peer,
                       const Ark_String* direction)
@@ -919,9 +988,11 @@ void SetDirectionImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetFontImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetFontImpl there is no implementation in controller "
-        "for getter method of Font.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("normal normal 14px sans-serif");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetFont());
 }
 void SetFontImpl(Ark_CanvasRenderer peer,
                  const Ark_String* font)
@@ -935,9 +1006,11 @@ void SetFontImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetTextAlignImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl there is no implementation in controller "
-        "for getter method of TextAlign.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("left");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetTextAlign());
 }
 void SetTextAlignImpl(Ark_CanvasRenderer peer,
                       const Ark_String* textAlign)
@@ -951,9 +1024,11 @@ void SetTextAlignImpl(Ark_CanvasRenderer peer,
 }
 Ark_String GetTextBaselineImpl(Ark_CanvasRenderer peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl there is no implementation in controller "
-        "for getter method of TextBaseline.");
-    return {};
+    auto defaultValue = Converter::ArkValue<Ark_String>("alphabetic");
+    CHECK_NULL_RETURN(peer, defaultValue);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, defaultValue);
+    return Converter::ArkValue<Ark_String>(peerImpl->GetTextBaseline());
 }
 void SetTextBaselineImpl(Ark_CanvasRenderer peer,
                          const Ark_String* textBaseline)

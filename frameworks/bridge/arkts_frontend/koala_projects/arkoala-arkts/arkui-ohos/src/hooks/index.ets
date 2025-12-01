@@ -466,16 +466,26 @@ export function getCanvasDensity(peerPtr: CanvasRenderer): number {
 export function getSystemDensity(): number {
     return ArkUIAniModule._GetSystemDensity()
 }
-export function convertDimensionStrToNumber(value: string): number {
+export function convertDimensionStrToNumber(value: string, density: number): number {
     const regex : RegExp = new RegExp('(-?\\d+\\.?\\d+)(px|vp)?$', 'i')
     const match: RegExpMatchArray | null = value.match(regex)
     if (!match) {
         return 0
     }
     let numericValue : number = 0
+    let unitPart : string = ''
     if (match.length > 1 && match[1] !== undefined) {
         numericValue = Number.parseFloat(match[1] as string);
         return numericValue
+    }
+    if (match.length > 2 && match[2] !== undefined) {
+        unitPart = match[2] as string;
+    }
+    if (unitPart === 'px') {
+        return numericValue;
+    }
+    if (unitPart === 'vp' || !unitPart) {
+        return numericValue * density;
     }
     return 0;
 }
@@ -533,8 +543,9 @@ export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, 
     let dy_type: int = RuntimeType.UNDEFINED
     dx_type = runtimeType(dx)
     dy_type = runtimeType(dy)
-    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string) : (dx as number)
-    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string) : (dy as number)
+    const density = getCanvasDensity(peerPtr)
+    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string, density) : (dx as number)
+    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string, density) : (dy as number)
     ArkUIAniModule._CanvasRenderer_PutImageData0(peerPtr.peer!.ptr, imagedata.data, dx_val, dy_val, imagedata.width as int, imagedata.height as int)
 }
 export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
@@ -551,12 +562,13 @@ export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, 
     dirtyY_type = runtimeType(dirtyY)
     dirtyWidth_type = runtimeType(dirtyWidth)
     dirtyHeight_type = runtimeType(dirtyHeight)
-    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string) : (dx as number)
-    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string) : (dy as number)
-    let dirtyX_val: number = (dirtyX_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyX as string) : (dirtyX as number)
-    let dirtyY_val: number = (dirtyY_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyY as string) : (dirtyY as number)
-    let dirtyWidth_val: number = (dirtyWidth_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyWidth as string) : (dirtyWidth as number)
-    let dirtyHeight_val: number = (dirtyHeight_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyHeight as string) : (dirtyHeight as number)
+    const density = getCanvasDensity(peerPtr)
+    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string, density) : (dx as number)
+    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string, density) : (dy as number)
+    let dirtyX_val: number = (dirtyX_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyX as string, density) : (dirtyX as number)
+    let dirtyY_val: number = (dirtyY_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyY as string, density) : (dirtyY as number)
+    let dirtyWidth_val: number = (dirtyWidth_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyWidth as string, density) : (dirtyWidth as number)
+    let dirtyHeight_val: number = (dirtyHeight_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyHeight as string, density) : (dirtyHeight as number)
     ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data, dx_val, dy_val, imagedata.width as int, imagedata.height as int, dirtyX_val, dirtyY_val, dirtyWidth_val, dirtyHeight_val)
 }
 export function hookGetContext(

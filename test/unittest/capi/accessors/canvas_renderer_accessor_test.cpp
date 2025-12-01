@@ -61,14 +61,32 @@ std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_TEST_PLAN = {
     { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
     { Converter::ArkValue<Ark_Float64>(-56.73), -56.73 },
 };
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_LINE_WIDTH_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(0), 1 },
+    { Converter::ArkValue<Ark_Float64>(-100), 1 },
+    { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
+};
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_MITER_LIMIT_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(0), 10 },
+    { Converter::ArkValue<Ark_Float64>(-100), 10 },
+    { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
+};
+std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_SHADOW_BLUR_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Float64>(100), 100 },
+    { Converter::ArkValue<Ark_Float64>(0), 0 },
+    { Converter::ArkValue<Ark_Float64>(-100), 0 },
+    { Converter::ArkValue<Ark_Float64>(12.34), 12.34 },
+};
 std::vector<std::tuple<Ark_Float64, double>> ARK_FLOAT64_ALPHA_TEST_PLAN = {
     { Converter::ArkValue<Ark_Float64>(100), 100 },
     { Converter::ArkValue<Ark_Float64>(0), 0 },
-    { Converter::ArkValue<Ark_Float64>(-0.54), -0.54 },
+    { Converter::ArkValue<Ark_Float64>(-0.54), 0.0 },
     { Converter::ArkValue<Ark_Float64>(0.98), 0.98 },
     { Converter::ArkValue<Ark_Float64>(1.00), 1.00 },
-    { Converter::ArkValue<Ark_Float64>(1.01), 1.01 },
-    { Converter::ArkValue<Ark_Float64>(-100), -100 },
+    { Converter::ArkValue<Ark_Float64>(1.01), 1.0 },
+    { Converter::ArkValue<Ark_Float64>(-100), 0.0 },
 };
 std::vector<std::pair<std::vector<double>, std::vector<double>>> ARRAY_LINE_DASH_TEST_PLAN = {
     { { 100, 10.25, 2.35 }, { 100, 10.25, 2.35, 100, 10.25, 2.35 } },
@@ -93,26 +111,26 @@ std::vector<std::tuple<Opt_Float64, std::optional<double>>> OPT_MAX_WIDTH_TEST_P
     { Converter::ArkValue<Opt_Float64>(-56.73), -56.73 },
     { Converter::ArkValue<Opt_Float64>(Ark_Empty()), FLT_MAX },
 };
-std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("source-over"), CompositeOperation::SOURCE_OVER },
-    { Converter::ArkValue<Ark_String>("source-atop"), CompositeOperation::SOURCE_ATOP },
-    { Converter::ArkValue<Ark_String>("source-in"), CompositeOperation::SOURCE_IN },
-    { Converter::ArkValue<Ark_String>("source-out"), CompositeOperation::SOURCE_OUT },
-    { Converter::ArkValue<Ark_String>("destination-over"), CompositeOperation::DESTINATION_OVER },
-    { Converter::ArkValue<Ark_String>("destination-atop"), CompositeOperation::DESTINATION_ATOP },
-    { Converter::ArkValue<Ark_String>("destination-in"), CompositeOperation::DESTINATION_IN },
-    { Converter::ArkValue<Ark_String>("destination-out"), CompositeOperation::DESTINATION_OUT },
-    { Converter::ArkValue<Ark_String>("lighter"), CompositeOperation::LIGHTER },
-    { Converter::ArkValue<Ark_String>("copy"), CompositeOperation::COPY },
-    { Converter::ArkValue<Ark_String>("xor"), CompositeOperation::XOR },
-    { Converter::ArkValue<Ark_String>(""), CompositeOperation::SOURCE_OVER},
-    { Converter::ArkValue<Ark_String>("unknown value"), CompositeOperation::SOURCE_OVER },
+std::vector<std::tuple<Ark_String, CompositeOperation, std::string>> ARK_COMPOSITE_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("source-over"), CompositeOperation::SOURCE_OVER, "source-over" },
+    { Converter::ArkValue<Ark_String>("source-atop"), CompositeOperation::SOURCE_ATOP, "source-atop" },
+    { Converter::ArkValue<Ark_String>("source-in"), CompositeOperation::SOURCE_IN, "source-in" },
+    { Converter::ArkValue<Ark_String>("source-out"), CompositeOperation::SOURCE_OUT, "source-out" },
+    { Converter::ArkValue<Ark_String>("destination-over"), CompositeOperation::DESTINATION_OVER, "destination-over" },
+    { Converter::ArkValue<Ark_String>("destination-atop"), CompositeOperation::DESTINATION_ATOP, "destination-atop" },
+    { Converter::ArkValue<Ark_String>("destination-in"), CompositeOperation::DESTINATION_IN, "destination-in" },
+    { Converter::ArkValue<Ark_String>("destination-out"), CompositeOperation::DESTINATION_OUT, "destination-out" },
+    { Converter::ArkValue<Ark_String>("lighter"), CompositeOperation::LIGHTER, "lighter" },
+    { Converter::ArkValue<Ark_String>("copy"), CompositeOperation::COPY, "copy" },
+    { Converter::ArkValue<Ark_String>("xor"), CompositeOperation::XOR, "xor" },
+    { Converter::ArkValue<Ark_String>(""), CompositeOperation::SOURCE_OVER, "source-over" },
+    { Converter::ArkValue<Ark_String>("unknown value"), CompositeOperation::SOURCE_OVER, "source-over" },
 };
-std::vector<std::tuple<Ark_String, Color>> ARK_STRING_COLOR_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff) },
-    { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000) },
-    { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff) },
-    { Converter::ArkValue<Ark_String>(""), Color(0x00000000) },
+std::vector<std::tuple<Ark_String, Color, std::string>> ARK_STRING_COLOR_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff), "#ff0000ff" },
+    { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000), "#00000000" },
+    { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff), "#80ffffff" },
+    { Converter::ArkValue<Ark_String>(""), Color(0x00000000), "#00000000" },
     { Converter::ArkValue<Ark_String>("invalid color"), Color::BLACK },
 };
 std::vector<std::tuple<Ark_Boolean, bool>> ARK_BOOL_TEST_PLAN = {
@@ -623,18 +641,20 @@ HWTEST_F(CanvasRendererAccessorTest, resetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setGlobalAlphaTest
+ * @tc.name: globalAlphaSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setGlobalAlphaTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, globalAlphaSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGlobalAlpha, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_ALPHA_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetGlobalAlpha(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setGlobalAlpha(peer_, actual);
-        EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto globalAlpha = accessor_->getGlobalAlpha(peer_);
+        auto alpha = Converter::Convert<double>(globalAlpha);
+        EXPECT_EQ(alpha, expected);
     }
 }
 
@@ -823,16 +843,19 @@ HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setGlobalCompositeOperationTest
+ * @tc.name: globalCompositeOperationSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setGlobalCompositeOperationTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, globalCompositeOperationSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGlobalCompositeOperation, nullptr);
-    for (const auto& [actual, expected] : ARK_COMPOSITE_TEST_PLAN) {
+    for (const auto& [actual, expected, expectedStr] : ARK_COMPOSITE_TEST_PLAN) {
         EXPECT_CALL(*renderingModel_, SetCompositeType(expected)).Times(1);
         accessor_->setGlobalCompositeOperation(peer_, &actual);
+        auto globalCompositeOperation = accessor_->getGlobalCompositeOperation(peer_);
+        auto compositeStr = Converter::Convert<std::string>(globalCompositeOperation);
+        EXPECT_EQ(alpha, expectedStr);
     }
 }
 
@@ -852,25 +875,28 @@ HWTEST_F(CanvasRendererAccessorTest, setFilterTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setImageSmoothingEnabledTest
+ * @tc.name: imageSmoothingEnabledSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingEnabledTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, imageSmoothingEnabledSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setImageSmoothingEnabled, nullptr);
     for (const auto& [actual, expected] : ARK_BOOL_TEST_PLAN) {
         EXPECT_CALL(*renderingModel_, SetSmoothingEnabled(expected)).Times(1);
         accessor_->setImageSmoothingEnabled(peer_, actual);
+        auto imageSmoothingEnabled = accessor_->getImageSmoothingEnabled(peer_);
+        auto enabled = Converter::Convert<bool>(imageSmoothingEnabled);
+        EXPECT_EQ(enabled, expected);
     }
 }
 
 /**
- * @tc.name: setLineDashOffsetTest
+ * @tc.name: lineDashOffsetSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setLineDashOffsetTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, lineDashOffsetSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setLineDashOffset, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
@@ -878,54 +904,68 @@ HWTEST_F(CanvasRendererAccessorTest, setLineDashOffsetTest, TestSize.Level1)
         EXPECT_CALL(*renderingModel_, SetLineDashOffset(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setLineDashOffset(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto lineDashOffset = accessor_->getLineDashOffset(peer_);
+        auto offset = Converter::Convert<double>(lineDashOffset);
+        EXPECT_EQ(offset, expected);
     }
 }
 
 /**
- * @tc.name: setLineWidthTest
+ * @tc.name: lineWidthSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setLineWidthTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, lineWidthSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setLineWidth, nullptr);
-    for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
+    ChangeDensity(DEFAULT_DENSITY);
+    for (const auto& [actual, expected] : ARK_FLOAT64_LINE_WIDTH_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetLineWidth(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setLineWidth(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto lineWidth = accessor_->getLineWidth(peer_);
+        auto width = Converter::Convert<double>(lineWidth);
+        EXPECT_EQ(width, expected);
     }
 }
 
 /**
- * @tc.name: setMiterLimitTest
+ * @tc.name: miterLimitSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasRendererAccessorTest, setMiterLimitTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setMiterLimit, nullptr);
-    for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
+    ChangeDensity(DEFAULT_DENSITY);
+    for (const auto& [actual, expected] : ARK_FLOAT64_MITER_LIMIT_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetMiterLimit(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setMiterLimit(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto miterLimit = accessor_->getMiterLimit(peer_);
+        auto limit = Converter::Convert<double>(miterLimit);
+        EXPECT_EQ(limit, expected);
     }
 }
 
 /**
- * @tc.name: setShadowBlurTest
+ * @tc.name: shadowBlurSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setShadowBlurTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, shadowBlurSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowBlur, nullptr);
-    for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
+    for (const auto& [actual, expected] : ARK_FLOAT64_SHADOW_BLUR_TEST_PLAN) {
         double target;
         EXPECT_CALL(*renderingModel_, SetShadowBlur(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setShadowBlur(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto shadowBlur = accessor_->getShadowBlur(peer_);
+        auto blur = Converter::Convert<double>(shadowBlur);
+        EXPECT_EQ(blur, expected);
     }
 }
 
@@ -944,11 +984,11 @@ HWTEST_F(CanvasRendererAccessorTest, setShadowColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setShadowOffsetXTest
+ * @tc.name: shadowOffsetXSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetXTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, shadowOffsetXSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowOffsetX, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
@@ -956,15 +996,18 @@ HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetXTest, TestSize.Level1)
         EXPECT_CALL(*renderingModel_, SetShadowOffsetX(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setShadowOffsetX(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto shadowOffsetX = accessor_->getShadowOffsetX(peer_);
+        auto offsetX = Converter::Convert<double>(shadowOffsetX);
+        EXPECT_EQ(offsetX, expected);
     }
 }
 
 /**
- * @tc.name: setShadowOffsetYTest
+ * @tc.name: shadowOffsetYSetterGetterTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, shadowOffsetYSetterGetterTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowOffsetY, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
@@ -972,6 +1015,9 @@ HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetYTest, TestSize.Level1)
         EXPECT_CALL(*renderingModel_, SetShadowOffsetY(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setShadowOffsetY(peer_, actual);
         EXPECT_NEAR(target, expected, FLT_PRECISION);
+        auto shadowOffsetY = accessor_->getShadowOffsetY(peer_);
+        auto offsetY = Converter::Convert<double>(shadowOffsetY);
+        EXPECT_EQ(offsetY, expected);
     }
 }
 
