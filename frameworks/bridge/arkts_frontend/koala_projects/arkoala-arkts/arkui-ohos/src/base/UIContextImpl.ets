@@ -81,7 +81,6 @@ import { IUIContext, SystemOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
-import { PathStackUtils } from './ArkNavPathStack';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1453,10 +1452,6 @@ export class UIContextImpl extends UIContext {
      public getPageInfoByUniqueId(id: int): PageInfo {
         const navDestinationInfo = ArkUIAniModule._CustomNode_QueryNavDestinationInfo1(id);
         const routerPageInfo = ArkUIAniModule._CustomNode_QueryRouterPageInfo1(id);
-        if (navDestinationInfo) {
-            let param = PathStackUtils.getParamByNavDestinationId(navDestinationInfo.navDestinationId);
-            navDestinationInfo.param = param ? param! : undefined;
-        }
         if (routerPageInfo) {
             routerPageInfo.context = this;
         }
