@@ -2229,6 +2229,8 @@ void SliderPattern::UpdatePrefixPosition()
 
     prefixNodeStack_->MarkDirtyNode(
         PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    CHECK_NULL_VOID(parentAccessibilityNode_);
+    parentAccessibilityNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SliderPattern::UpdateSuffixPosition()
@@ -2268,6 +2270,8 @@ void SliderPattern::UpdateSuffixPosition()
 
     suffixNodeStack_->MarkDirtyNode(
         PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    CHECK_NULL_VOID(parentAccessibilityNode_);
+    parentAccessibilityNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SliderPattern::UpdateEndsNotShowStepsPosition(
