@@ -198,6 +198,8 @@ export struct TabTitleBar {
                       }
                     })
                   }
+                }, (item: TabTitleBarTabItem, index: int) => {
+                  return JSON.stringify(item.title + '-' + index)
                 })
               }
               .width('100%')
@@ -368,11 +370,15 @@ export struct CollapsibleMenuSection {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
           ForEach(this.menuItems, (item: TabTitleBarMenuItem, index: int) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
+          }, (item: TabTitleBarMenuItem, index: int) => {
+            return JSON.stringify(item.value + '' + index)
           })
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems.toInt() - 1),
             (item: TabTitleBarMenuItem, index: int) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
+            }, (item: TabTitleBarMenuItem, index: int) => {
+              return JSON.stringify(item.value + '' + index)
             })
           Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
             SymbolGlyph(this.PUBLIC_MORE)
@@ -473,6 +479,8 @@ export struct CollapsibleMenuSection {
             item: item as TabTitleBarMenuItem, index: this.index * 1000 +
             CollapsibleMenuSection.maxCountOfVisibleItems + index
           });
+        }, (item: TabTitleBarMenuItem, index: int) => {
+          return JSON.stringify(item.value + '' + index)
         })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
@@ -805,7 +813,7 @@ struct ImageMenuItem {
       return '' as string;
     } else {
       let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-      getStringSync((resource as Resource).id)
+      getStringSync((this.item.accessibilityText as Resource).id as Long)
       return str as string;
     }
   }
@@ -826,7 +834,7 @@ struct ImageMenuItem {
         return '' as string;
       } else {
         let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((this.item.accessibilityText as Resource).id)
+        getStringSync((this.item.accessibilityText as Resource).id as Long)
         return str as string;
       }
     } else if (this.item.label) {
@@ -836,7 +844,7 @@ struct ImageMenuItem {
         return '' as string;
       } else {
         let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((this.item.label as Resource).id)
+        getStringSync((this.item.label as Resource).id as Long)
         return str as string;
       }
     }

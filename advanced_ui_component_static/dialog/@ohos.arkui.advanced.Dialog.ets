@@ -1822,19 +1822,7 @@ function isDefaultFocus(singleButton: ButtonOptions, isHasDefaultFocus: boolean,
  * @returns resource size
  */
 function getNumberByResourceId(resourceId: long, defaultValue: number, allowZero?: boolean): number {
-  try {
-    let sourceValue: number = resourceManager.getSysResourceManager().getDouble(resourceId);
-    if (sourceValue > 0 || allowZero) {
-      return sourceValue;
-    } else {
-      return defaultValue;
-    }
-  } catch (error) {
-    let code: number = (error as ClassCastError).code;
-    let message: string = (error as ClassCastError).message;
-    hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${code}, message: ${message}`);
-    return defaultValue;
-  }
+  return defaultValue;
 }
 
 /**
