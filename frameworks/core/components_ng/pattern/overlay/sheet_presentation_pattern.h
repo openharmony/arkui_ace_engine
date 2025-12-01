@@ -1233,7 +1233,7 @@ private:
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
     bool typeChanged_ = false;
-    bool isOnAppearing_ = false;
+    bool isOnAppearing_ = true;
     bool isOnDisappearing_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;

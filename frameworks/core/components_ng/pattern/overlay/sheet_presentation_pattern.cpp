@@ -3790,7 +3790,7 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
 
 void SheetPresentationPattern::OnWillAppear()
 {
-    isOnAppearing_ = true;
+    // isOnAppearing_ should be true in  OnWillAppear, so the initial value of isOnAppearing_ is true
     TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillAppear state.");
     if (onWillAppear_) {
         onWillAppear_();
