@@ -37,14 +37,14 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     // Called to perform measure current render node.
-    static void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    static void PerformMeasureSelf(LayoutWrapper* layoutWrapper, bool isEnableChildrenMatchParent = false);
 
     // Called to perform layout render node.
     static void PerformLayout(LayoutWrapper* layoutWrapper);
 
     // Called to perform measure current render node.
-    static void PerformMeasureSelfWithChildList(
-        LayoutWrapper* layoutWrapper, const std::list<RefPtr<LayoutWrapper>>& childList);
+    static void PerformMeasureSelfWithChildList(LayoutWrapper* layoutWrapper,
+        const std::list<RefPtr<LayoutWrapper>>& childList, bool isEnableChildrenMatchParent = false);
 
     static std::optional<SizeF> PerformMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
