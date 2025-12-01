@@ -5013,6 +5013,19 @@ let SystemProperties;
   SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
 })(SystemProperties || (SystemProperties = {}));
 
+let PinVerifyResult;
+(function (PinVerifyResult) {
+  PinVerifyResult[PinVerifyResult.PIN_VERIFICATION_SUCCESS = 0] = 'PIN_VERIFICATION_SUCCESS';
+  PinVerifyResult[PinVerifyResult.PIN_VERIFICATION_FAILED = 1] = 'PIN_VERIFICATION_FAILED';
+})(PinVerifyResult || (PinVerifyResult = {}));
+
+let CredentialType;
+(function (CredentialType) {
+  CredentialType[CredentialType.CREDENTIAL_USER = 2] = 'CREDENTIAL_USER';
+  CredentialType[CredentialType.CREDENTIAL_APP = 3] = 'CREDENTIAL_APP';
+  CredentialType[CredentialType.CREDENTIAL_UKEY = 4] = 'CREDENTIAL_UKEY';
+})(CredentialType || (CredentialType = {}));
+
 let ResolveStrategy;
 (function (ResolveStrategy) {
     ResolveStrategy[ResolveStrategy.CALLING_SCOPE = 0] = 'CALLING_SCOPE';
