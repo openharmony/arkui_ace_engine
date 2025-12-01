@@ -32,6 +32,7 @@ adapter/ohos/capability/environment/ @arkui_statemgmt
 adapter/ohos/capability/html/ @huawei_g_five
 adapter/ohos/capability/interaction/ @ArkUI_Event
 adapter/ohos/capability/preference/ @arkui_statemgmt
+adapter/ohos/capability/statusbar/ @arkuiscroll
 adapter/ohos/capability/time/ @arkui001
 adapter/ohos/capability/udmf/ @ArkUI_Event
 adapter/ohos/capability/window_connection_ng/ @arkuilayout1
