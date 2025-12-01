@@ -1553,4 +1553,19 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo003, TestSize.Lev
     textSelectOverlay->OnHandleMarkInfoChange(info, DIRTY_ALL_MENU_ITEM);
     ASSERT_EQ(info->menuInfo.showAIWrite, false);
 }
+
+/**
+ * @tc.name: SetPlaceholderColorInfo001
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetPlaceholderColorInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->SetPlaceholderColorInfo("TextFieldPattern");
+    EXPECT_EQ(pattern_->placeholderColorInfo_, "[TextFieldPattern]");
+}
 } // namespace OHOS::Ace::NG

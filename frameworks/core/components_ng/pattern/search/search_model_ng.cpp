@@ -445,7 +445,16 @@ void SearchModelNG::SetPlaceholderColor(const Color& color)
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
     textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    std::string info;
+    if (color.GetValue() == 0x99000000) {
+        info = "ModelNG::Set: 99000000";
+    } else {
+        info = "ModelNG::Set";
+    }
+    textFieldPattern->SetPlaceholderColorInfo(info);
 }
 
 void SearchModelNG::ResetPlaceholderColor()
@@ -1011,6 +1020,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
         if (!hasTextFieldNode) {
             textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
             textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
+            std::string info = "ModelNG::Cre isT";
+            pattern->SetPlaceholderColorInfo(info);
         }
     }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
@@ -1577,6 +1588,15 @@ void SearchModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& color
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
     textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    std::string info;
+    if (color.GetValue() == 0x99000000) {
+        info = "ModelNG::Set F: 99000000";
+    } else {
+        info = "ModelNG::Set F";
+    }
+    textFieldPattern->SetPlaceholderColorInfo(info);
 }
 
 void SearchModelNG::ResetPlaceholderColor(FrameNode* frameNode)
@@ -1593,6 +1613,10 @@ void SearchModelNG::ResetPlaceholderColor(FrameNode* frameNode)
     }
     textFieldPaintProperty->ResetPlaceholderColorFlagByUser();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    std::string info = "ModelNG::Re F";
+    textFieldPattern->SetPlaceholderColorInfo(info);
 }
 
 void SearchModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden)
