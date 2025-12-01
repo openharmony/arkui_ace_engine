@@ -109,8 +109,8 @@ ScriptRegexItems Convert(const Array_ScriptItem& src)
         auto urlRegexRules = Converter::OptConvert<std::vector<Ark_UrlRegexRule>>(scriptItem.urlRegexRules)
             .value_or(std::vector<Ark_UrlRegexRule>{});
         for (auto regexRule : urlRegexRules) {
-            auto secondLevelDomain = Converter::Convert<std::string>(regexRule->secondLevelDomain);
-            auto rule = Converter::Convert<std::string>(regexRule->rule);
+            auto secondLevelDomain = Converter::Convert<std::string>(regexRule.secondLevelDomain);
+            auto rule = Converter::Convert<std::string>(regexRule.rule);
             regexRules.push_back(std::make_pair(secondLevelDomain, rule));
         }
         if (scriptRegexItems.find(script) == scriptRegexItems.end()) {
