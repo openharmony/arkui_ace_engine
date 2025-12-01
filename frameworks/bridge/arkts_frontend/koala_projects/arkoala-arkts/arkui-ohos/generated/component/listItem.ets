@@ -35,6 +35,7 @@ import { Length } from "./units"
 import { Resource } from "global.resource"
 import { ListItemModifier } from "./../ListItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemModifier;
@@ -298,7 +299,7 @@ export class SwipeActionItem_serializer {
         if (valueHolderForBuilderComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBuilderComponentTmpValue  = valueHolderForBuilderComponent!
-            valueSerializer.holdAndWriteObject(valueHolderForBuilderComponentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForBuilderComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -377,7 +378,7 @@ export class SwipeActionItem_serializer {
         const builderComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let builderComponentTmpBuf : ComponentContent | undefined = undefined
         if ((builderComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            builderComponentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            builderComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const builderComponentTmpResult : ComponentContent | undefined = builderComponentTmpBuf
         const actionAreaDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

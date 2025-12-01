@@ -320,6 +320,9 @@ typedef struct Opt_CommonMethod Opt_CommonMethod;
 typedef struct CommonShapePeer CommonShapePeer;
 typedef struct CommonShapePeer* Ark_CommonShape;
 typedef struct Opt_CommonShape Opt_CommonShape;
+typedef struct ComponentContentPeer ComponentContentPeer;
+typedef struct ComponentContentPeer* Ark_ComponentContent;
+typedef struct Opt_ComponentContent Opt_ComponentContent;
 typedef struct ComponentContentBasePeer ComponentContentBasePeer;
 typedef struct ComponentContentBasePeer* Ark_ComponentContentBase;
 typedef struct Opt_ComponentContentBase Opt_ComponentContentBase;
@@ -3457,8 +3460,6 @@ typedef struct Ark_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Ark_
 typedef struct Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult;
 typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
-typedef Ark_Object Ark_ComponentContent;
-typedef Opt_Object Opt_ComponentContent;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
 typedef Ark_Object Ark_UserDataSpan;
@@ -7457,6 +7458,10 @@ typedef struct Opt_CommonShape {
     Ark_Tag tag;
     Ark_CommonShape value;
 } Opt_CommonShape;
+typedef struct Opt_ComponentContent {
+    Ark_Tag tag;
+    Ark_ComponentContent value;
+} Opt_ComponentContent;
 typedef struct Opt_ComponentContentBase {
     Ark_Tag tag;
     Ark_ComponentContentBase value;

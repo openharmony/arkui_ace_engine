@@ -34,6 +34,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ComponentContent } from "arkui.ComponentContent"
 import { UIExtensionComponentModifier } from "./../UIExtensionComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 export interface UIExtensionProxy {
     send(data: Record<string, RecordData>): void
     sendSync(data: Record<string, RecordData>): Record<string, RecordData>
@@ -403,7 +404,7 @@ export class UIExtensionOptions_serializer {
         if (valueHolderForPlaceholder !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
-            valueSerializer.holdAndWriteObject(valueHolderForPlaceholderTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -416,7 +417,7 @@ export class UIExtensionOptions_serializer {
                 const valueHolderForAreaChangePlaceholderTmpValueKeyVar = pair[0]
                 const valueHolderForAreaChangePlaceholderTmpValueValueVar = pair[1]
                 valueSerializer.writeString(valueHolderForAreaChangePlaceholderTmpValueKeyVar)
-                valueSerializer.holdAndWriteObject(valueHolderForAreaChangePlaceholderTmpValueValueVar)
+                ComponentContent_serializer.write(valueSerializer, valueHolderForAreaChangePlaceholderTmpValueValueVar)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)

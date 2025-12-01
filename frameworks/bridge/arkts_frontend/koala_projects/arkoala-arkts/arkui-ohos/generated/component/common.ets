@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
@@ -38,11 +38,12 @@ import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { default as matrix4 } from "@ohos.matrix4"
-import { CustomBuilder, CustomBuilderT } from "./builder"
+import { CustomBuilder } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
@@ -53,7 +54,6 @@ import { default as colorSpaceManager } from "@ohos.graphics.colorSpaceManager"
 import { default as rpc } from "@ohos.rpc"
 import { default as curves } from "@ohos.curves"
 import { UIContext } from "@ohos.arkui.UIContext"
-import { BuildOptions } from "arkui.BuilderNode"
 import { AvoidanceMode } from "./select"
 import { ImageModifier } from "./../ImageModifier"
 import { ImageModifier_serializer } from "./../ImageModifier"
@@ -5265,7 +5265,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             } else if (valueTmpValue instanceof ComponentContent) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as ComponentContent
-                thisSerializer.holdAndWriteObject(valueTmpValueForIdx2)
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
