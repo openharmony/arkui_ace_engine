@@ -36,11 +36,24 @@ Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int32 id)
     CHECK_NULL_RETURN(result, retVal);
     return Converter::ArkValue<Opt_uiObserver_NavigationInfo>(result);
 }
+
+void EnableSwipeBackImpl(const Opt_Boolean* enabled)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto enabledVal = Converter::OptConvertPtr<bool>(enabled);
+    if (!enabledVal) {
+        pipeline->SetEnableSwipeBack(true);
+        return;
+    }
+    pipeline->SetEnableSwipeBack(*enabledVal);
+}
 } // UIContextGetInfoAccessor
 const GENERATED_ArkUIUIContextGetInfoAccessor* GetUIContextGetInfoAccessor()
 {
     static const GENERATED_ArkUIUIContextGetInfoAccessor UIContextGetInfoAccessorImpl {
         UIContextGetInfoAccessor::GetNavigationInfoByUniqueIdImpl,
+        UIContextGetInfoAccessor::EnableSwipeBackImpl,
     };
     return &UIContextGetInfoAccessorImpl;
 }

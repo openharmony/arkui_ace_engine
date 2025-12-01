@@ -27763,6 +27763,7 @@ typedef struct GENERATED_ArkUIUIExtensionProxyAccessor {
 
 typedef struct GENERATED_ArkUIUIContextGetInfoAccessor {
     Opt_uiObserver_NavigationInfo (*getNavigationInfoByUniqueId)(Ark_Int32 id);
+    void (*enableSwipeBack)(const Opt_Boolean* enabled);
 } GENERATED_ArkUIUIContextGetInfoAccessor;
 
 typedef struct GENERATED_ArkUIUrlStyleAccessor {

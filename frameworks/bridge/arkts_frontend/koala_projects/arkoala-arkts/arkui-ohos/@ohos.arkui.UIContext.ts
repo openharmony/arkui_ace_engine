@@ -669,6 +669,10 @@ export class UIContext {
         throw Error("freezeUINode not implemented in UIContext!")
     }
 
+    public enableSwipeBack(enabled: boolean | undefined): void {
+        throw Error("enableSwipeBack not implemented in UIContext!")
+    }
+
     public getWindowName(): string | undefined {
         throw Error("getWindowName not implemented in UIContext!")
     }

@@ -3895,9 +3895,26 @@ export class UIContextGetInfo {
         const returnResult : uiObserver.NavigationInfo | undefined = buffer
         return returnResult
     }
+    static enableSwipeBack_serialize(enabled: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (enabled !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enabledTmpValue  = enabled!
+            thisSerializer.writeBoolean(enabledTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIContextGetInfo_enableSwipeBack(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     public static getNavigationInfoByUniqueId(id: int32): uiObserver.NavigationInfo | undefined {
         const id_casted = id as (int32)
         return UIContextGetInfo.getNavigationInfoByUniqueId_serialize(id_casted)
+    }
+    public static enableSwipeBack(enabled: boolean | undefined): void {
+        const enabled_cast = enabled as (boolean | undefined)
+        UIContextGetInfo.enableSwipeBack_serialize(enabled_cast)
+        return
     }
 }
 export class ArkRootPeer extends PeerNode {
