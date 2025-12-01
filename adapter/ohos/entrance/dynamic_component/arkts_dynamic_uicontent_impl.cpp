@@ -159,6 +159,7 @@ void AddResConfigInfo(
     auto resourceManager = context->GetResourceManager();
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     resourceManager->GetResConfig(*resConfig);
+    CHECK_NULL_VOID(resConfig);
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
@@ -421,6 +422,10 @@ void ArktsDynamicUIContentImpl::CommonInitializeResourceManager(ColorMode &color
     auto resourceManager = context->GetResourceManager();
     if (resourceManager != nullptr) {
         resourceManager->GetResConfig(*resConfig);
+        if (resConfig == nullptr) {
+            TAG_LOGE(aceLogTag_, "init resConfig failed!");
+            return;
+        }
         auto localeInfo = resConfig->GetLocaleInfo();
         Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(resourceManager);
         if (localeInfo != nullptr) {
