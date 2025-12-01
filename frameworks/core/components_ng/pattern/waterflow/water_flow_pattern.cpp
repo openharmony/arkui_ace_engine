@@ -814,14 +814,7 @@ WeakPtr<FocusHub> WaterFlowPattern::GetNextFocusNode(FocusStep step, const WeakP
     int32_t footerOffset = layoutInfo_->footerIndex_ + 1; // 1 if footer present, 0 if not
     while (idx - footerOffset >= 0 && idx < GetChildrenCount()) {
         int32_t itemIdx = idx - footerOffset;
-        if (itemIdx >= layoutInfo_->endIndex_ || itemIdx <= layoutInfo_->startIndex_) {
-            ScrollToIndex(itemIdx, false, ScrollAlign::AUTO);
-            host->SetActive();
-            auto context = host->GetContext();
-            if (context) {
-                context->FlushUITaskWithSingleDirtyNode(host);
-            }
-        }
+        ScrollToFocusItem(itemIdx);
         auto next = host->GetChildByIndex(idx);
         CHECK_NULL_RETURN(next, nullptr);
         auto focus = next->GetHostNode()->GetFocusHub();
@@ -977,5 +970,18 @@ void WaterFlowPattern::OnColorModeChange(uint32_t colorMode)
         SetScrollBar(paintProperty->GetScrollBarProperty());
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void WaterFlowPattern::ScrollToFocusItem(int32_t itemIdx)
+{
+    ScrollAlign align = ScrollAlign::AUTO;
+    ScrollToIndex(itemIdx, false, align);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetActive();
+    auto context = host->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(host);
+    }
 }
 } // namespace OHOS::Ace::NG
