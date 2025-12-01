@@ -102,6 +102,7 @@ void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int3
 {
     LOGI("Dialog IsCurrentUseNewPipeline.");
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     dialogProperties.onCancel = [callback, taskExecutor = context->GetTaskExecutor()] {
         taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
             TaskExecutor::TaskType::JS, "CJFroentendShowDialogInner");
