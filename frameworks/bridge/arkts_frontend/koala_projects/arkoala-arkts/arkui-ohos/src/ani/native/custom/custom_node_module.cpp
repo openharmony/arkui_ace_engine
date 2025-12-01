@@ -41,6 +41,11 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
             nullptr,
             reinterpret_cast<void*>(ConstructCustomNode)
         },
+        ani_native_function {
+            "_CustomNode_SetBuildFunction",
+            nullptr,
+            reinterpret_cast<void*>(CustomNodeSetBuildFunction)
+        },
     };
 
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
@@ -49,6 +54,49 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
         return ANI_ERROR;
     };
     return ANI_OK;
+}
+
+void NativeCustomComponent::CustomNodeSetBuildFunction(
+    ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object buildFunc)
+{
+    ani_vm *vm = nullptr;
+    env->GetVM(&vm);
+
+    std::shared_ptr<ani_wref> weakRef(new ani_wref, [vm](ani_wref *wref) {
+        ani_env *env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        env->WeakReference_Delete(*wref);
+    });
+
+    env->WeakReference_Create(buildFunc, weakRef.get());
+
+    auto node = AceType::Claim(reinterpret_cast<NG::CustomNode *>(ptr));
+    node->SetRenderFunction([vm, weakRef](int64_t, bool&) -> RefPtr<NG::UINode> {
+        ACE_SCOPED_TRACE("CustomNode renderFunction");
+
+        ani_env *env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return nullptr;
+        }
+
+        ani_boolean released;
+        ani_ref localRef;
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef) || released) {
+            return nullptr;
+        }
+
+        ani_ref resRef;
+        if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(localRef), 0, nullptr, &resRef)) {
+            return nullptr;
+        }
+
+        ani_long ptr;
+        if (ANI_OK != env->Object_CallMethodByName_Long(static_cast<ani_object>(resRef), "toLong", ":l", &ptr)) {
+            return nullptr;
+        }
+
+        return AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    });
 }
 
 ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
