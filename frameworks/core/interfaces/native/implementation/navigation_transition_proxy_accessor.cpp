@@ -137,7 +137,7 @@ void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
 Opt_VoidCallback GetCancelTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<VoidCallback>([peer]() {
+    auto callback = CallbackKeeper::ReturnReverseCallback<VoidCallback>([peer]() {
         CHECK_NULL_VOID(peer && peer->handler);
         peer->handler->FireCancelAnimation();
     });
@@ -160,7 +160,7 @@ void SetCancelTransitionImpl(Ark_NavigationTransitionProxy peer,
 }
 Opt_UpdateTransitionCallback GetUpdateTransitionImpl(Ark_NavigationTransitionProxy peer)
 {
-    auto callback = CallbackKeeper::RegisterReverseCallback<UpdateTransitionCallback,
+    auto callback = CallbackKeeper::ReturnReverseCallback<UpdateTransitionCallback,
         std::function<void(Ark_Float64)>>([peer](Ark_Float64 progress) {
         CHECK_NULL_VOID(peer && peer->handler);
         if (peer->handler->GetInteractive()) {

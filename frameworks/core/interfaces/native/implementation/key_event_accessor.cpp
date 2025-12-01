@@ -130,7 +130,7 @@ void SetTimestampImpl(Ark_KeyEvent peer, Ark_Int64 timestamp)
 Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_Void>([peer]() {
         KeyEventInfo* info = peer->GetEventInfo();
         CHECK_NULL_VOID(info);
         info->SetStopPropagation(true);
@@ -161,7 +161,7 @@ Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
     CHECK_NULL_RETURN(peer, invalid);
     auto info = peer->GetBaseInfo();
     CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::RegisterReverseCallback<ModifierKeyStateGetter,
+    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
             std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
             (const Array_String keys, const Callback_Boolean_Void continuation) {
         auto eventKeys = info->GetPressedKeyCodes();

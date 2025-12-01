@@ -86,6 +86,14 @@ inline void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFr
     ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
     dst = ret;
 }
+
+template<>
+std::pair<std::optional<float>, std::optional<float>> Convert(const Ark_ComputedBarAttribute& src)
+{
+    auto totalOffset = Convert<Dimension>(src.totalOffset).ConvertToPx();
+    auto totalLength = Convert<Dimension>(src.totalLength).ConvertToPx();
+    return {totalOffset, totalLength};
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -246,11 +254,8 @@ void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
         [callback = CallbackHelper(*optValue)](int32_t index, const Dimension& offset) -> ResType {
         auto arkIndex = ArkValue<Ark_Int32>(index);
         auto arkOffset = ArkValue<Ark_Float64>(offset);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
+        return callback.InvokeWithConvertResult<ResType, Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
             arkIndex, arkOffset);
-        auto totalOffset = Convert<Dimension>(arkResult.totalOffset).ConvertToPx();
-        auto totalLength = Convert<Dimension>(arkResult.totalLength).ConvertToPx();
-        return ResType(totalOffset, totalLength);
     };
     GridModelStatic::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
 }
