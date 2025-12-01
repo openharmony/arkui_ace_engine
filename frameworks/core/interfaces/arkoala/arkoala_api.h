@@ -2792,6 +2792,8 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityScrollTriggerable)(ArkUINodeHandle node);
     void (*setAccessibilityFocusDrawLevel)(ArkUINodeHandle node, ArkUI_Int32 drawLevel);
     void (*resetAccessibilityFocusDrawLevel)(ArkUINodeHandle node);
+    void (*setAccessibilityStateDescription)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityStateDescription)(ArkUINodeHandle node);
     void (*setHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);

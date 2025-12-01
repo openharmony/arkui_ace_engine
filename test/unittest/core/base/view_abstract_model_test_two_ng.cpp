@@ -48,6 +48,7 @@ namespace {
     RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
     int32_t flag = 0;
     const std::string TEST_TEXT_HINT = "testTextHint";
+    const std::string TEST_STATE_DESCRIPTION = "testStateDescription";
     constexpr int32_t TEST_NODE_ID = 1;
     const std::string VALUE_TAB = "TAB";
 }; // namespace
@@ -496,6 +497,47 @@ HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityGroupOptions002, TestSize.L
         accessibilityGroupOptions2.actionControllerByType);
     EXPECT_EQ(valueAccessibilityGroupOptions.actionControllerByInspector,
         accessibilityGroupOptions2.actionControllerByInspector);
+}
+
+/**
+ * @tc.name: SetAccessibilityStateDescription001
+ * @tc.desc: Test the SetAccessibilitySelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityStateDescription001, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    auto frameNode = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
+
+    auto frameNodeMain = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNodeMain, nullptr);
+    EXPECT_FALSE(
+        frameNodeMain->accessibilityProperty_->accessibilityStateDescription_.has_value());
+    viewAbstractModelNG.SetAccessibilityStateDescription(TEST_STATE_DESCRIPTION);
+    EXPECT_EQ(
+        frameNodeMain->accessibilityProperty_->accessibilityStateDescription_, TEST_STATE_DESCRIPTION);
+}
+
+/**
+ * @tc.name: SetAccessibilityStateDescription002
+ * @tc.desc: Test the SetAccessibilityStateDescription
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestTwoNg, SetAccessibilityStateDescription002, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    auto accessibilityProperty = frameNode.GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityStateDescription(TEST_STATE_DESCRIPTION);
+
+    viewAbstractModelNG.SetAccessibilityStateDescription(&frameNode, "");
+    EXPECT_EQ(accessibilityProperty->accessibilityStateDescription_, "");
+    viewAbstractModelNG.SetAccessibilityStateDescription(&frameNode, TEST_STATE_DESCRIPTION);
+    EXPECT_EQ(accessibilityProperty->accessibilityStateDescription_, TEST_STATE_DESCRIPTION);
 }
 
 /**

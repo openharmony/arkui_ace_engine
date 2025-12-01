@@ -5646,6 +5646,21 @@ void ResetAccessibilityFocusDrawLevel(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, 0);
 }
 
+void SetAccessibilityStateDescription(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string stateDescription = value;
+    ViewAbstractModelNG::SetAccessibilityStateDescription(frameNode, stateDescription);
+}
+
+void ResetAccessibilityStateDescription(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityStateDescription(frameNode, "");
+}
+
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10419,6 +10434,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityScrollTriggerable = ResetAccessibilityScrollTriggerable,
         .setAccessibilityFocusDrawLevel = SetAccessibilityFocusDrawLevel,
         .resetAccessibilityFocusDrawLevel = ResetAccessibilityFocusDrawLevel,
+        .setAccessibilityStateDescription = SetAccessibilityStateDescription,
+        .resetAccessibilityStateDescription = ResetAccessibilityStateDescription,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
         .setClickEffect = SetClickEffect,

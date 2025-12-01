@@ -3422,6 +3422,20 @@ class AccessibilityFocusDrawLevelModifier extends ModifierWithKey {
   }
 }
 AccessibilityFocusDrawLevelModifier.identity = Symbol('accessibilityFocusDrawLevel');
+class AccessibilityStateDescriptionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityStateDescription(node);
+    }
+    else {
+      getUINativeModule().common.setAccessibilityStateDescription(node, this.value);
+    }
+  }
+}
+AccessibilityStateDescriptionModifier.identity = Symbol('accessibilityStateDescription');
 class HoverEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5398,6 +5412,10 @@ class ArkComponent {
   }
   accessibilityFocusDrawLevel(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusDrawLevelModifier.identity, AccessibilityFocusDrawLevelModifier, value);
+    return this;
+  }
+  accessibilityStateDescription(value) {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityStateDescriptionModifier.identity, AccessibilityStateDescriptionModifier, value);
     return this;
   }
   obscured(reasons) {

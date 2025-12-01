@@ -624,6 +624,7 @@ public:
     static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
     static void JsAccessibilityScrollTriggerable(const JSCallbackInfo& info);
     static void JsAccessibilityFocusDrawLevel(const JSCallbackInfo& info);
+    static void JsAccessibilityStateDescription(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);

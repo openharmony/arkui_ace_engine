@@ -9682,6 +9682,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
                                           &JSViewAbstract::JsOnAccessibilityActionIntercept);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHoverTransparent",
                                           &JSViewAbstract::JsOnAccessibilityHoverTransparent);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityStateDescription",
+                                          &JSViewAbstract::JsAccessibilityStateDescription);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);

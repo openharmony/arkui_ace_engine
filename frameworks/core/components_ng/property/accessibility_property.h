@@ -619,6 +619,9 @@ public:
     bool HasAccessibilitySamePage();
     std::string GetAccessibilitySamePage();
 
+    void SetAccessibilityStateDescription(const std::string& stateDescription);
+    std::string GetAccessibilityStateDescription() const;
+
     void SetActions(const ActionsImpl& actionsImpl);
     bool ActionsDefined(uint32_t action);
 
@@ -811,6 +814,7 @@ protected:
     std::optional<std::string> accessibilityRole_;
     std::optional<std::string> accessibilityCustomRole_;
     std::optional<std::string> accessibilityUseSamePage_;
+    std::optional<std::string> accessibilityStateDescription_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 
     std::optional<bool> isDisabled_;

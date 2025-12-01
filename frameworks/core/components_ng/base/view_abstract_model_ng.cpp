@@ -1154,6 +1154,15 @@ void ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(TouchEventFunc&& to
     accessibilityManager->AddHoverTransparentCallback(AceType::Claim(frameNode));
 }
 
+void ViewAbstractModelNG::SetAccessibilityStateDescription(const std::string& stateDescription)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityStateDescription(stateDescription);
+}
+
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1349,6 +1358,14 @@ void ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(FrameNode* frameNod
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->AddHoverTransparentCallback(AceType::Claim(frameNode));
+}
+
+void ViewAbstractModelNG::SetAccessibilityStateDescription(FrameNode* frameNode, const std::string& stateDescription)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityStateDescription(stateDescription);
 }
 
 std::string ViewAbstractModelNG::PopupTypeStr(const PopupType& type)
