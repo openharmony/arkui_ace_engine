@@ -5144,6 +5144,36 @@ void SetAccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
 }
+void SetOnTouchTestDoneImpl(Ark_NativePointer node,
+                            const Opt_TouchTestDoneCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstract::SetOnTouchTestDone(frameNode, nullptr);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onTouchTestDoneFunc = [callback = CallbackHelper(*optValue), node = weakNode](
+        const std::shared_ptr<BaseGestureEvent>& info,
+        const std::list<WeakPtr<NG::NGGestureRecognizer>>& others) {
+        CHECK_NULL_VOID(info);
+        PipelineContext::SetCallBackNode(node);
+        auto basePeer = CreateArkBaseGestureEvent(info, OHOS::Ace::GestureTypeName::UNKNOWN);
+        CHECK_NULL_VOID(basePeer);
+        std::list<RefPtr<NG::NGGestureRecognizer>> othersRecognizer;
+        for (const auto& item : others) {
+            if (item.Invalid()) {
+                continue;
+            }
+            othersRecognizer.emplace_back(item.Upgrade());
+        }
+        auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(othersRecognizer, Converter::FC);
+        callback.InvokeSync(basePeer, arkValOthers);
+    };
+    ViewAbstract::SetOnTouchTestDone(frameNode, std::move(onTouchTestDoneFunc));
+}
 void SetSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6540,6 +6570,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnTouchInterceptImpl,
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+        CommonMethodModifier::SetOnTouchTestDoneImpl,
         CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,

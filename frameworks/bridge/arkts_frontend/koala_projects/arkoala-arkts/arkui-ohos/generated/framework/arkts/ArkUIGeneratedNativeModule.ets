@@ -547,6 +547,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setAccessibilityFocusDrawLevel(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setOnTouchTestDone(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setSystemMaterial(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setAccessibilityStateDescription(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -4505,6 +4507,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureRecognizer_getFingerCount(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _GestureRecognizer_isFingerCountLimit(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _GestureRecognizer_preventBegin(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _GestureStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
