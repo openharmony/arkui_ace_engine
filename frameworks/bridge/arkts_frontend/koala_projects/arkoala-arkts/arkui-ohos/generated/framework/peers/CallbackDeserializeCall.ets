@@ -48,7 +48,7 @@ import { ImageLoadResult_serializer, ImageCompleteCallback, ImageLoadResult } fr
 import { ImageError_serializer, ImageCompleteEvent_serializer, ImageErrorCallback, ImageError, ImageOnCompleteCallback, ImageCompleteEvent } from "./../../component/image"
 import { LoadingProgressConfiguration_serializer, LoadingProgressConfiguration } from "./../../component/loadingProgress"
 import { MenuItemConfiguration_serializer, MenuItemConfiguration, OnSelectCallback } from "./../../component/select"
-import { CheckboxGroupResult_serializer, OnCheckboxGroupChangeCallback, CheckboxGroupResult } from "./../../component/checkboxgroup"
+import { CheckBoxGroupConfiguration_serializer, CheckboxGroupResult_serializer, CheckBoxGroupConfiguration, OnCheckboxGroupChangeCallback, CheckboxGroupResult } from "./../../component/checkboxgroup"
 import { OnFoldStatusChangeInfo_serializer, HoverEventParam_serializer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam } from "./../../component/folderStack"
 import { VisibleListContentInfo_serializer, ScrollState, OnScrollVisibleContentChangeCallback, VisibleListContentInfo } from "./../../component/list"
 import { SubmitEvent_serializer, OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback } from "./../../component/textInput"
@@ -1925,6 +1925,27 @@ export function deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeseriali
     let value : WebKeyboardOptions = WebKeyboardOptions_serializer.read(thisDeserializer)
     _call(value)
 }
+export function deserializeAndCallCheckBoxGroupModifierBuilder(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: CheckBoxGroupConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : CheckBoxGroupConfiguration = (CheckBoxGroupConfiguration_serializer.read(thisDeserializer) as CheckBoxGroupConfiguration)
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writePointer(value);
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(parentNode, config)
+    continuationResult(_callResult)
+}
 export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer))
@@ -3723,6 +3744,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallCallback_VisibilityChangeReason_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Void: return deserializeAndCallCallback_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer);
+        case CallbackKind.Kind_CheckBoxGroupModifierBuilder: return deserializeAndCallCheckBoxGroupModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisDeserializer);
         case CallbackKind.Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisDeserializer);

@@ -30,6 +30,7 @@ import { ArkSliderComponent, SliderConfiguration } from "#generated"
 import { ArkTextClockComponent, ArkTextClockPeer, TextClockConfiguration } from "#generated"
 import { ArkTextTimerComponent, ArkTextTimerPeer, TextTimerConfiguration } from "#generated"
 import { ArkToggleComponent, ToggleConfiguration } from "#generated"
+import { ArkCheckboxGroupComponent, CheckBoxGroupConfiguration } from "#generated"
 import { CustomBuilder } from "#generated"
 import { CallbackTransformer } from "../../CallbackTransformer"
 
@@ -341,5 +342,25 @@ export function hookToggleContentModifier(
     }
     if (value) {
         ContentModifierHelper.contentModifierToggle(ptr, value!, toggleBuilder)
+    }
+}
+
+export function hookCheckBoxGroupContentModifier(
+    receiver: ArkCheckboxGroupComponent, value?: ContentModifier<CheckBoxGroupConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierCheckBoxGroup(ptr)
+        return
+    }
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
+    }
+    const checkboxGroupBuilder = (parentNode: KPointer, config: CheckBoxGroupConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierCheckBoxGroup(ptr, value!, checkboxGroupBuilder)
     }
 }

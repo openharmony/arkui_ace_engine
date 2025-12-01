@@ -4122,6 +4122,28 @@ void deserializeAndCallSyncCallback_WebKeyboardOptions_Void(Ark_VMContext vmCont
     Ark_WebKeyboardOptions value = WebKeyboardOptions_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, value);
 }
+void deserializeAndCallCheckBoxGroupModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxGroupConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CheckBoxGroupModifierBuilder))));
+    thisDeserializer.readPointer();
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_CheckBoxGroupConfiguration config = static_cast<Ark_CheckBoxGroupConfiguration>(CheckBoxGroupConfiguration_serializer::read(thisDeserializer));
+    Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _call(_resourceId, parentNode, config, continuationResult);
+}
+void deserializeAndCallSyncCheckBoxGroupModifierBuilder(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxGroupConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CheckBoxGroupModifierBuilder))));
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_CheckBoxGroupConfiguration config = static_cast<Ark_CheckBoxGroupConfiguration>(CheckBoxGroupConfiguration_serializer::read(thisDeserializer));
+    Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    callSyncMethod(vmContext, resourceId, parentNode, config, continuationResult);
+}
 void deserializeAndCallCheckBoxModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7273,6 +7295,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallCallback_VisibilityChangeReason_Void(thisArray, thisLength);
         case Kind_Callback_Void: return deserializeAndCallCallback_Void(thisArray, thisLength);
         case Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisArray, thisLength);
+        case Kind_CheckBoxGroupModifierBuilder: return deserializeAndCallCheckBoxGroupModifierBuilder(thisArray, thisLength);
         case Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisArray, thisLength);
         case Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisArray, thisLength);
         case Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisArray, thisLength);
@@ -7597,6 +7620,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallSyncCallback_VisibilityChangeReason_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Void: return deserializeAndCallSyncCallback_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallSyncCallback_WebKeyboardOptions_Void(vmContext, thisArray, thisLength);
+        case Kind_CheckBoxGroupModifierBuilder: return deserializeAndCallSyncCheckBoxGroupModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_CheckBoxModifierBuilder: return deserializeAndCallSyncCheckBoxModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_ContentDidScrollCallback: return deserializeAndCallSyncContentDidScrollCallback(vmContext, thisArray, thisLength);
         case Kind_ContentWillScrollCallback: return deserializeAndCallSyncContentWillScrollCallback(vmContext, thisArray, thisLength);

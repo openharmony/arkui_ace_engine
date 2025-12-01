@@ -32,6 +32,9 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_static.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
+#include "core/interfaces/native/implementation/checkbox_group_configuration_peer.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -478,6 +481,44 @@ void ResetContentModifierToggleImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::SetBuilderFunc(frameNode, nullptr);
 }
+void ContentModifierCheckBoxGroupImpl(Ark_NativePointer node,
+                                    const Ark_Object* contentModifier,
+                                    const CheckBoxGroupModifierBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(contentModifier);
+    CHECK_NULL_VOID(builder);
+    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
+    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
+        CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+        Ark_ContentModifier contentModifier = (*objectKeeper).get();
+        Ark_CheckBoxGroupConfiguration arkConfig = PeerUtils::CreatePeer<CheckBoxGroupConfigurationPeer>();
+        arkConfig->contentModifier_ = contentModifier;
+        arkConfig->enabled_ = config.enabled_;
+        arkConfig->name_ = config.name_;
+        arkConfig->status_ = Converter::ArkValue<Ark_SelectStatus>(static_cast<int>(config.status_));
+        arkConfig->node_ = node;
+        auto handler = [frameNode](Ark_Boolean retValue) {
+            CheckBoxGroupModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
+        };
+        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
+        arkConfig->triggerChange_ = triggerCallback.ArkValue();
+        auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            boxNode->AddChild(uiNode);
+            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            }, node, arkConfig);
+        return boxNode;
+    };
+    CheckBoxGroupModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+}
+void ResetContentModifierCheckBoxGroupImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetBuilderFunc(frameNode, nullptr);
+}
 } // ContentModifierHelperAccessor
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()
 {
@@ -508,6 +549,8 @@ const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAcce
         ContentModifierHelperAccessor::ResetContentModifierTextTimerImpl,
         ContentModifierHelperAccessor::ContentModifierToggleImpl,
         ContentModifierHelperAccessor::ResetContentModifierToggleImpl,
+        ContentModifierHelperAccessor::ContentModifierCheckBoxGroupImpl,
+        ContentModifierHelperAccessor::ResetContentModifierCheckBoxGroupImpl,
     };
     return &ContentModifierHelperAccessorImpl;
 }

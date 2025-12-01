@@ -31,6 +31,7 @@ public:
     static void SetCheckboxGroupStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxGroupStyle);
     static void SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent);
     static void SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange);
+    static void TriggerChange(FrameNode* frameNode, bool value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_STATIC_H

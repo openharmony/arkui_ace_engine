@@ -28498,6 +28498,64 @@ void impl_CanvasRenderingContext2D_setCanvas(Ark_NativePointer thisPtr, Ark_Nati
         GetAccessors()->getCanvasRenderingContext2DAccessor()->setCanvas(self, static_cast<Ark_FrameNode>(canvas));
 }
 KOALA_INTEROP_DIRECT_V2(CanvasRenderingContext2D_setCanvas, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_CheckBoxGroupConfiguration_construct() {
+        return GetAccessors()->getCheckBoxGroupConfigurationAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(CheckBoxGroupConfiguration_construct, Ark_NativePointer)
+Ark_NativePointer impl_CheckBoxGroupConfiguration_getFinalizer() {
+        return GetAccessors()->getCheckBoxGroupConfigurationAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(CheckBoxGroupConfiguration_getFinalizer, Ark_NativePointer)
+void impl_CheckBoxGroupConfiguration_triggerChange(Ark_NativePointer thisPtr, Ark_Boolean isSelect) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        GetAccessors()->getCheckBoxGroupConfigurationAccessor()->triggerChange(self, isSelect);
+}
+KOALA_INTEROP_DIRECT_V2(CheckBoxGroupConfiguration_triggerChange, Ark_NativePointer, Ark_Boolean)
+Ark_Boolean impl_CheckBoxGroupConfiguration_getEnabled(Ark_NativePointer thisPtr) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        return GetAccessors()->getCheckBoxGroupConfigurationAccessor()->getEnabled(self);
+}
+KOALA_INTEROP_DIRECT_1(CheckBoxGroupConfiguration_getEnabled, Ark_Boolean, Ark_NativePointer)
+void impl_CheckBoxGroupConfiguration_setEnabled(Ark_NativePointer thisPtr, Ark_Boolean enabled) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        GetAccessors()->getCheckBoxGroupConfigurationAccessor()->setEnabled(self, enabled);
+}
+KOALA_INTEROP_DIRECT_V2(CheckBoxGroupConfiguration_setEnabled, Ark_NativePointer, Ark_Boolean)
+KInteropReturnBuffer impl_CheckBoxGroupConfiguration_getContentModifier(Ark_NativePointer thisPtr) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        const auto &retValue = GetAccessors()->getCheckBoxGroupConfigurationAccessor()->getContentModifier(self);
+        SerializerBase _retSerializer {};
+        _retSerializer.writeObject(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(CheckBoxGroupConfiguration_getContentModifier, KInteropReturnBuffer, Ark_NativePointer)
+void impl_CheckBoxGroupConfiguration_setContentModifier(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifierValueTemp = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
+        GetAccessors()->getCheckBoxGroupConfigurationAccessor()->setContentModifier(self, static_cast<Ark_Object*>(&contentModifierValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CheckBoxGroupConfiguration_setContentModifier, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_String impl_CheckBoxGroupConfiguration_getName(Ark_NativePointer thisPtr) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        return GetAccessors()->getCheckBoxGroupConfigurationAccessor()->getName(self);
+}
+KOALA_INTEROP_1(CheckBoxGroupConfiguration_getName, KStringPtr, Ark_NativePointer)
+void impl_CheckBoxGroupConfiguration_setName(Ark_NativePointer thisPtr, const KStringPtr& name) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        GetAccessors()->getCheckBoxGroupConfigurationAccessor()->setName(self, (const Ark_String*) (&name));
+}
+KOALA_INTEROP_V2(CheckBoxGroupConfiguration_setName, Ark_NativePointer, KStringPtr)
+Ark_Int32 impl_CheckBoxGroupConfiguration_getStatus(Ark_NativePointer thisPtr) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        return GetAccessors()->getCheckBoxGroupConfigurationAccessor()->getStatus(self);
+}
+KOALA_INTEROP_DIRECT_1(CheckBoxGroupConfiguration_getStatus, Ark_Int32, Ark_NativePointer)
+void impl_CheckBoxGroupConfiguration_setStatus(Ark_NativePointer thisPtr, Ark_Int32 status) {
+        Ark_CheckBoxGroupConfiguration self = reinterpret_cast<Ark_CheckBoxGroupConfiguration>(thisPtr);
+        GetAccessors()->getCheckBoxGroupConfigurationAccessor()->setStatus(self, static_cast<Ark_SelectStatus>(status));
+}
+KOALA_INTEROP_DIRECT_V2(CheckBoxGroupConfiguration_setStatus, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_ChildrenMainSize_construct(KDouble childDefaultSize) {
         return GetAccessors()->getChildrenMainSizeAccessor()->construct(childDefaultSize);
 }
@@ -28928,6 +28986,17 @@ void impl_ContentModifierHelper_resetContentModifierToggle(Ark_NativePointer nod
         GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierToggle(node);
 }
 KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierToggle, Ark_NativePointer)
+void impl_ContentModifierHelper_contentModifierCheckBoxGroup(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifierValueTemp = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
+        CheckBoxGroupModifierBuilder builderValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxGroupConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CheckBoxGroupModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxGroupConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CheckBoxGroupModifierBuilder))))};;
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierCheckBoxGroup(node, static_cast<Ark_Object*>(&contentModifierValueTemp), static_cast<CheckBoxGroupModifierBuilder*>(&builderValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierCheckBoxGroup, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ContentModifierHelper_resetContentModifierCheckBoxGroup(Ark_NativePointer node) {
+        GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierCheckBoxGroup(node);
+}
+KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierCheckBoxGroup, Ark_NativePointer)
 Ark_NativePointer impl_ControllerHandler_construct() {
         return GetAccessors()->getControllerHandlerAccessor()->construct();
 }

@@ -4892,6 +4892,36 @@ void callManagedCallback_WebKeyboardOptions_VoidSync(Ark_VMContext vmContext, Ar
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCheckBoxGroupModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_CheckBoxGroupConfiguration config, Callback_Pointer_Void continuation)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_CheckBoxGroupModifierBuilder);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writePointer(parentNode);
+    CheckBoxGroupConfiguration_serializer::write(argsSerializer, config);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCheckBoxGroupModifierBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_CheckBoxGroupConfiguration config, Callback_Pointer_Void continuation)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_CheckBoxGroupModifierBuilder);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writePointer(parentNode);
+    CheckBoxGroupConfiguration_serializer::write(argsSerializer, config);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedType_WebAttribute_onInterceptRequest(Ark_Int32 resourceId, Ark_OnInterceptRequestEvent value0, Callback_Opt_WebResourceResponse_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8549,6 +8579,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_Void);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Void);
         case Kind_Callback_WebKeyboardOptions_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebKeyboardOptions_Void);
+        case Kind_CheckBoxGroupModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxGroupModifierBuilder);
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilder);
         case Kind_ContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentDidScrollCallback);
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallback);
@@ -8872,6 +8903,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_VoidSync);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VoidSync);
         case Kind_Callback_WebKeyboardOptions_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebKeyboardOptions_VoidSync);
+        case Kind_CheckBoxGroupModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxGroupModifierBuilderSync);
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilderSync);
         case Kind_ContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentDidScrollCallbackSync);
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallbackSync);
