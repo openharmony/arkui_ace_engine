@@ -452,8 +452,8 @@ public:
         const std::function<void()>&& loadPageCallback, bool isColdStart) override;
     std::string GetTopNavDestinationInfo(bool onlyFullScreen = false, bool needParam = true) override;
     void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) override;
-    int32_t RegisterNavigateChangeCallback(const std::function<void(const std::string&,
-        const std::string&)>&& callback) override;
+    int32_t RegisterNavigateChangeCallback(const std::function<void(const NavigateChangeInfo&,
+        const NavigateChangeInfo&)>&& callback) override;
     UIContentErrorCode InitializeWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
 

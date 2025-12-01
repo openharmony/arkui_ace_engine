@@ -51,6 +51,11 @@ struct FrameMetrics {
     uint64_t layoutMeasureDuration =
         0; // Indicates the number of nanoseconds elapsed in the layout measure stage of a frame.
 };
+
+struct NavigateChangeInfo {
+    std::string name; // the navigate page name
+    bool isSplit; // Indicates page is split or not
+};
 } // namespace Ace
 } // namespace OHOS
 

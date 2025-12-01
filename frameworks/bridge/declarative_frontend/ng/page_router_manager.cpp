@@ -34,6 +34,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 namespace OHOS::Ace::NG {
 

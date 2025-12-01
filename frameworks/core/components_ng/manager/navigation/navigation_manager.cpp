@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
@@ -814,7 +815,7 @@ void NavigationManager::FireNavigateChangeCallback(const NavigateChangeInfo& fro
         from.isSplit, from.name.c_str(), to.name.c_str());
     // full screen, fire all registered callback
     for (auto callback : changeCallbacks_) {
-        callback.second(from.name, to.name);
+        callback.second(from, to);
     }
 }
 } // namespace OHOS::Ace::NG

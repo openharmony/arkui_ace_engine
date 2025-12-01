@@ -27,11 +27,8 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-    struct NavigateChangeInfo {
-        std::string name;
-        bool isSplit;
-    };
-};
+    struct NavigateChangeInfo;
+}
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
@@ -81,7 +78,7 @@ struct NavdestinationRecoveryInfo {
 
 using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
 
-using TransitionCallback = std::function<void(const std::string&, const std::string&)>;
+using TransitionCallback = std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&)>;
 
 const std::pair<bool, int32_t> DEFAULT_EXIST_FORCESPLIT_NAV_VALUE = {false, -1};
 

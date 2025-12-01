@@ -6038,7 +6038,7 @@ void UIContentImpl::RestoreNavDestinationInfoInner(const std::string& navDestina
 }
 
 int32_t UIContentImpl::RegisterNavigateChangeCallback(
-    const std::function<void(const std::string&, const std::string&)>&& callback)
+    const std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&)>&& callback)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, -1);

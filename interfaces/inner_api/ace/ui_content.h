@@ -601,8 +601,8 @@ public:
         return "";
     }
     virtual void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart) {}
-    virtual int32_t RegisterNavigateChangeCallback(const std::function<void(const std::string& from,
-        const std::string& to)>&& callback)
+    virtual int32_t RegisterNavigateChangeCallback(const std::function<void(const NavigateChangeInfo& from,
+        const NavigateChangeInfo& to)>&& callback)
     {
         return -1;
     }
