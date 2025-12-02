@@ -3334,6 +3334,7 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
     CHECK_NULL_VOID(engine);
     auto vm = engine->GetEcmaVm();
     CHECK_NULL_VOID(vm);
+    LocalScope jsScope(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
 
@@ -3374,6 +3375,7 @@ void JsiDeclarativeEngine::JsSetAceDebugMode()
     CHECK_NULL_VOID(engine);
     auto vm = engine->GetEcmaVm();
     CHECK_NULL_VOID(vm);
+    LocalScope jsScope(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
     const JSRef<JSVal> setAceDebugMode = globalObject->GetProperty("setAceDebugMode");
@@ -3396,6 +3398,7 @@ void JsiDeclarativeEngine::JsUnregisterInstanceId()
     CHECK_NULL_VOID(engine);
     auto vm = engine->GetEcmaVm();
     CHECK_NULL_VOID(vm);
+    LocalScope jsScope(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
     const JSRef<JSVal> unregisterInstanceIdFun = globalObject->GetProperty("unregisterInstanceIdForEnv");
