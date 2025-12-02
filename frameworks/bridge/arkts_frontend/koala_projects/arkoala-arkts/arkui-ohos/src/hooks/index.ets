@@ -55,7 +55,6 @@ import { InteropNativeModule } from "@koalaui/interop"
 import { ErrorCallback } from "@ohos.base";
 import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
-import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent  } from "#generated";
@@ -417,34 +416,6 @@ export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {
     TabsOpsHandWritten.hookTabsApplyAttributesFinish(node);
 }
 
-export function hookPushPathMethod(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | NavigationOptions | undefined): void {
-  PathStackUtils.pushPath(pathStack, info, animated);
-}
-
-export function hookPushPathByNameMethod(pathStack: NavPathStack, name: string, param: Object | null | undefined, onPop?: ((parameter: PopInfo) => void) | boolean | undefined, animated?: boolean): void {
-  PathStackUtils.pushPathByName(pathStack, name, param, onPop, animated);
-}
-export function hookReplacePathMethod(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | NavigationOptions | undefined): void {
-  PathStackUtils.replacePath(pathStack, info, animated);
-}
-export function hookReplacePathByNameMethod(pathStack: NavPathStack, name: string, param: Object, animated?: boolean): void {
-  PathStackUtils.replacePathByName(pathStack, name, param, animated);
-}
-export function hookPopMethod(pathStack: NavPathStack, result?: boolean | undefined | Object, animated?: boolean): NavPathInfo | undefined {
-  return PathStackUtils.pop(pathStack, result, animated);
-}
-export function hookPopToNameMethod(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): int32 {
-  return PathStackUtils.popToName(pathStack, name, result, animated);
-}
-export function hookPopToIndexMethod(pathStack: NavPathStack, index: int32, result?: boolean | undefined | Object, animated?: boolean) {
-  PathStackUtils.popToIndex(pathStack, index, result, animated);
-}
-export function hookGetParamByIndexMethod(pathStack: NavPathStack, index: int32): Object | undefined {
-  return PathStackUtils.getParamByIndex(pathStack, index);
-}
-export function hookGetParamByNameMethod(pathStack: NavPathStack, name: string): Array<Object | null | undefined> {
-  return PathStackUtils.getParamByName(pathStack, name);
-}
 export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
   NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, moduleInfo);
 }

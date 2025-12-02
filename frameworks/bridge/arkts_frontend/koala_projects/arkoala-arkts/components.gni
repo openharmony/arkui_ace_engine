@@ -187,7 +187,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/annotations/index.ets",
   "arkui-preprocessed/arkui/base/AceTrace.ets",
   "arkui-preprocessed/arkui/base/ArkAnimation.ets",
-  "arkui-preprocessed/arkui/base/ArkNavPathStack.ets",
   "arkui-preprocessed/arkui/base/ArkPageTransition.ets",
   "arkui-preprocessed/arkui/base/ArkPageTransitionData.ets",
   "arkui-preprocessed/arkui/base/ArkStateStyle.ets",
