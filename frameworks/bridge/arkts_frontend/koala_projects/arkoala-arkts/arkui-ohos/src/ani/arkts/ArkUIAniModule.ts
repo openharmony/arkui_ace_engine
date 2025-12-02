@@ -24,7 +24,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from 'arkui.Graphics';
 import { AnimatableArithmetic, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
-import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from '#generated';
+import { SectionChangeInfo, WaterFlowSections, OverlayOptions } from '#generated';
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
 import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
@@ -118,6 +118,7 @@ export class ArkUIAniModule {
     native static _ResetWaterFlowFooter(ptr: KPointer): void
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
+    native static _UpdateWaterFlowSection(ptr: KPointer, changeInfo: SectionChangeInfo): void
     native static _SetListItemGroupSpace(ptr: KPointer, value: KDouble | string): void
     native static _SetListItemGroupStyle(ptr: KPointer, value: KInt): void
     native static _SetListItemGroupHeaderContent(ptr: KPointer, footerContent: KPointer): void
