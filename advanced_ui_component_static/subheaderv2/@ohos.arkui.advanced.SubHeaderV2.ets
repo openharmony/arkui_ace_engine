@@ -657,7 +657,7 @@ export struct SubHeaderV2 {
   }
 
   getText(content: SubHeaderV2OperationItemType): ResourceStr {
-    if (typeof content === 'SymbolGlyphModifier' || typeof content === 'undefined') {
+    if (content instanceof SymbolGlyphModifier || typeof content === 'undefined') {
       return '';
     }
     return content as ResourceStr;
@@ -1500,7 +1500,7 @@ struct TextArrowLayout {
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[],
     constraint: ConstraintSizeOptions): SizeResult {
-    if (children.length <= 0) {
+    if (children.length <= 1) {
       hilog.error(0x3900, 'Ace', 'TextArrowLayout onMeasureSize children is null');
       return { width: 0, height: 0 };
     }
