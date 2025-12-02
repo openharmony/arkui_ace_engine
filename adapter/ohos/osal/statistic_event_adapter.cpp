@@ -26,8 +26,7 @@ void StatisticEventAdapter::ReportStatisticEvents(
     const StatisticAppInfo& appInfo, const std::map<StatisticEventType, StatisticEventInfo>& events)
 {
 #ifdef UI_SERVICE_WITH_IDL
-    AppInfoParcel appInfoParcel(
-        appInfo.bundleName, appInfo.abilityName, appInfo.versionName, appInfo.versionCode);
+    AppInfoParcel appInfoParcel(appInfo.bundleName);
     std::vector<StatisticEventInfoParcel> eventParcelList;
     for (auto& [eventType, eventInfo] : events) {
         eventParcelList.emplace_back(eventInfo.eventName, eventInfo.eventCount);

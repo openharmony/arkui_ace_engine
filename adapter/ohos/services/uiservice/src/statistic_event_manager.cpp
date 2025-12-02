@@ -22,39 +22,34 @@
 namespace OHOS {
 namespace Ace {
 namespace {
-constexpr int32_t MAX_PENDING_EVENT_COUNT = 10;
+constexpr int32_t MAX_PENDING_EVENT_COUNT = 50;
 constexpr int32_t DEFAULT_INTERVAL = 24;
 constexpr int32_t ONE_HOUR_INTERVAL = 60* 60* 1000;
 const char* STATISTIC_EVENT_FA_APP_START = "FA_APP_START";
 const char* EVENT_NAME = "EVENT_NAME";
 const char* EVENT_COUNT = "EVENT_COUNT";
 const char* BUNDLE_NAME = "BUNDLE_NAME";
-const char* ABILITY_NAME = "ABILITY_NAME";
-const char* VERSION_NAME = "VERSION_NAME";
-const char* VERSION_CODE = "VERSION_CODE";
 } // namespace
 
 StatisticEventManager::StatisticEventManager() {}
 
 StatisticEventManager::~StatisticEventManager() {}
 
-void StatisticEventManager::AggregateEvent(std::vector<StatisticEvent>& events,
+void StatisticEventManager::AggregateEvent(StatisticEvent& event,
     const AppInfoParcel& newAppInfo, const StatisticEventInfoParcel& newEventInfo)
 {
-    for (auto& event : events) {
-        if (!event.appInfo.EqualTo(newAppInfo)) {
+    for (size_t i = 0; i < event.bundleNames.size(); ++i) {
+        if (event.bundleNames[i] != newAppInfo.GetBundleName()) {
             continue;
         }
-        event.eventInfo.SetEventCount(event.eventInfo.GetEventCount() + newEventInfo.GetEventCount());
+        event.eventCounts[i] += newEventInfo.GetEventCount();
         return;
     }
-    StatisticEvent statisticEvent;
-    statisticEvent.appInfo = newAppInfo;
-    statisticEvent.eventInfo = newEventInfo;
-    events.push_back(statisticEvent);
+    event.bundleNames.push_back(newAppInfo.GetBundleName());
+    event.eventCounts.push_back(newEventInfo.GetEventCount());
 
-    if (events.size() >= MAX_PENDING_EVENT_COUNT) {
-        ReportStatisticEvent(newEventInfo.GetEventName());
+    if (event.bundleNames.size() >= MAX_PENDING_EVENT_COUNT) {
+        ReportStatisticEvent(event.eventName);
     }
 }
 
@@ -67,10 +62,8 @@ void StatisticEventManager::SendStatisticEvents(const AppInfoParcel& appInfo,
             eventName.c_str(), eventInfo.GetEventCount(), appInfo.GetBundleName().c_str());
         auto iter = eventMap_.find(eventName);
         if (iter == eventMap_.end()) {
-            StatisticEvent statisticEvent;
-            statisticEvent.appInfo = appInfo;
-            statisticEvent.eventInfo = eventInfo;
-            eventMap_[eventName] = { statisticEvent };
+            StatisticEvent statisticEvent = { eventName, { eventInfo.GetEventCount() }, { appInfo.GetBundleName() } };
+            eventMap_[eventName] = statisticEvent;
         } else {
             AggregateEvent(iter->second, appInfo, eventInfo);
         }
@@ -114,23 +107,18 @@ void StatisticEventManager::ReportStatisticEvent(const std::string& eventName)
     if (iter == eventMap_.end()) {
         return;
     }
-    auto events = iter->second;
-    for (auto& event : events) {
-        (this->*requestFunc)(event);
-    }
+    auto event = iter->second;
+    (this->*requestFunc)(event);
     eventMap_.erase(iter);
 }
 
 void StatisticEventManager::ReportFaAppStartEvent(StatisticEvent& event)
 {
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, "UI_SERVICE_STATISTIC_EVENT",
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, "UI_STATISTIC_EVENT",
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        EVENT_NAME, event.eventInfo.GetEventName(),
-        EVENT_COUNT, event.eventInfo.GetEventCount(),
-        BUNDLE_NAME, event.appInfo.GetBundleName(),
-        ABILITY_NAME, event.appInfo.GetAbilityName(),
-        VERSION_NAME, event.appInfo.GetVersionName(),
-        VERSION_CODE, event.appInfo.GetVersionCode());
+        EVENT_NAME, event.eventName,
+        EVENT_COUNT, event.eventCounts,
+        BUNDLE_NAME, event.bundleNames);
 }
 
 void StatisticEventManager::InitTimedMap()

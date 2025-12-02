@@ -27,9 +27,6 @@ constexpr int32_t MAX_PENDING_EVENT_COUNT = 20;
 StatisticEventReporter::StatisticEventReporter()
 {
     appInfo_.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-    appInfo_.abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
-    appInfo_.versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
-    appInfo_.versionCode = AceApplicationInfo::GetInstance().GetAppVersionCode();
 }
 
 std::string StatisticEventReporter::ConvertToEventName(StatisticEventType eventType)

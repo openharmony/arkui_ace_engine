@@ -259,12 +259,9 @@ GENERAL_INTERACTION_ERROR:
   FINGER_ID: {type: INT32, desc: finger id}
   TAG: {type: STRING, desc: frame tag}
 
-UI_SERVICE_STATISTIC_EVENT:
+UI_STATISTIC_EVENT:
   __BASE: {type: STATISTIC, level: CRITICAL, desc: ui service statistic event}
   EVENT_NAME: {type: STRING, desc: event name}
-  EVENT_COUNT: {type: INT32, desc: event count}
-  BUNDLE_NAME: {type: STRING, desc: bundle name}
-  ABILITY_NAME: {type: STRING, desc: ability name}
-  VERSION_NAME: {type: STRING, desc: version name}
-  VERSION_CODE: {type: STRING, desc: version code}
+  EVENT_COUNT: {type: INT32, arrsize: 100, desc: event count}
+  BUNDLE_NAME: {type: STRING, arrsize: 100, desc: bundle name}
 
