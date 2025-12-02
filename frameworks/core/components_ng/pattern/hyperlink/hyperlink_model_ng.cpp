@@ -50,10 +50,14 @@ void HyperlinkModelNG::SetTextStyle(
     CHECK_NULL_VOID(hyperlinkNode);
     auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
+    auto pipeline = hyperlinkNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    auto textStyle = textTheme->GetTextStyle();
     textLayoutProperty->UpdateContent(content.empty() ? address : content);
     textLayoutProperty->UpdateAddress(address);
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());

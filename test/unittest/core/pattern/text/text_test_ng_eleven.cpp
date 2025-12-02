@@ -656,12 +656,13 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest030, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     SelectMenuParam menuParam;
     TextResponseType textResponseType = TextResponseType::LONG_PRESS;
     TextSpanType textSpanType = TextSpanType::TEXT;
+
     TextModelStatic::BindSelectionMenu(
         frameNode.GetRawPtr(), textSpanType, textResponseType, nullptr, menuParam);
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
@@ -677,11 +678,12 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest031, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     TextModelStatic::SetSelectedBackgroundColor(frameNode.GetRawPtr(), std::make_optional(Color::BLUE));
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+
     TextModelStatic::SetSelectedBackgroundColor(frameNode.GetRawPtr(), std::nullopt);
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
 }
@@ -696,9 +698,9 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest032, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     TextModelStatic::SetHalfLeading(frameNode.GetRawPtr(), std::make_optional(true));
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
 }
@@ -713,9 +715,9 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest033, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-
     TextModelStatic::SetEnableHapticFeedback(frameNode.GetRawPtr(), std::make_optional(true));
     EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
 }
