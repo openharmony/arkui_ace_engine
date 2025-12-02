@@ -130,8 +130,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength amount of elements.
      * @param initialValue initial value of elements.
      */
-    public static create<T>(arrayLength: number, initialValue: T): WrappedArray<T> {
-        let other = new Array<T>(arrayLength as int);
+    public static create<T>(arrayLength: int, initialValue: T): WrappedArray<T> {
+        let other = new Array<T>(arrayLength);
         other.fill(initialValue);
         return new WrappedArray<T>(other);
     }
@@ -167,9 +167,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength The length of the array to be created (optional).
      * @returns A new Array instance with the specified length
      */
-    public static $_invoke<T>(arrayLength?: number): WrappedArray<T> {
+    public static $_invoke<T>(arrayLength?: int): WrappedArray<T> {
         if (arrayLength) {
-            return new WrappedArray<T>(new Array<T>(arrayLength.toInt()));
+            return new WrappedArray<T>(new Array<T>(arrayLength));
         } else {
             return new WrappedArray<T>(new Array<T>());
         }
@@ -372,7 +372,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterator over all indices
      */
-    public override keys(): IterableIterator<Number> {
+    public override keys(): IterableIterator<int> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.keys();
     }
@@ -943,7 +943,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterable of key, value pairs for every entry in the array
      */
-    public override entries(): IterableIterator<[number, T]> {
+    public override entries(): IterableIterator<[int, T]> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }

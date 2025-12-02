@@ -51,7 +51,7 @@ export class ObservableHandler implements Observable {
     private static handlers: WeakMap<Object, ObservableHandler> | undefined = undefined
 
     private parents = new Set<ObservableHandler>()
-    private children = new Map<ObservableHandler, number>()
+    private children = new Map<ObservableHandler, int>()
 
     private readonly observables = new Set<Observable>()
     private _modified = false
@@ -170,7 +170,7 @@ export class ObservableHandler implements Observable {
         if (guards.has(this)) return guards // already collected
         guards.add(this) // handler is already guarded
         this.parents.forEach((handler: ObservableHandler) => { handler.collect(all, guards) })
-        if (all) this.children.forEach((_count: number, handler: ObservableHandler) => { handler.collect(all, guards) })
+        if (all) this.children.forEach((_count: int, handler: ObservableHandler) => { handler.collect(all, guards) })
         return guards
     }
 
@@ -407,7 +407,7 @@ class ObservableArray<T> extends Array<T> {
         return super.unshift(...items)
     }
 
-    override keys(): IterableIterator<Number> {
+    override keys(): IterableIterator<int> {
         this.handler?.onAccess()
         return super.keys()
     }
@@ -551,7 +551,7 @@ class ObservableArray<T> extends Array<T> {
         return super.values()
     }
 
-    override entries(): IterableIterator<[number, T]> {
+    override entries(): IterableIterator<[int, T]> {
         this.handler?.onAccess()
         return super.entries()
     }
