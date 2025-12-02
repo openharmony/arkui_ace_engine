@@ -62,7 +62,7 @@ void SvgFilter::OnAsPaint()
         filterEffectsRegion.Height() * filterAttr_.height.Value()
     };
 
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (filterAttr_.filterUnits == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
         if (filterAttr_.x.Unit() != DimensionUnit::PERCENT) {
             effectFilterArea.SetLeft(filterAttr_.x.Value());
         }

@@ -3544,4 +3544,28 @@ HWTEST_F(SvgNodeTestNg, SvgGraphicTest048, TestSize.Level1)
     EXPECT_EQ(result.value(), Color::BLACK);
 }
 
+/**
+ * @tc.name: svgFilterTest002
+ * @tc.desc: test g
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, svgFilterTest002, TestSize.Level1)
+{
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(SvgFilter::Create());
+    CHECK_NULL_VOID(svgFilter);
+    auto svgFeOffset = AceType::DynamicCast<SvgFeOffset>(SvgFeOffset::Create());
+    svgFilter->AppendChild(svgFeOffset);
+    svgFilter->ParseAndSetSpecializedAttr("width", "300");
+    svgFilter->ParseAndSetSpecializedAttr("height", "300");
+    svgFilter->ParseAndSetSpecializedAttr("x", "30");
+    svgFilter->ParseAndSetSpecializedAttr("y", "30");
+    Size size(300, 400);
+    svgFilter->AsPath(size);
+    Testing::MockCanvas rSCanvas;
+    svgFilter->Draw(rSCanvas, size, std::nullopt);
+    EXPECT_FLOAT_EQ(svgFilter->filterAttr_.width.Value(), 300);
+    EXPECT_FLOAT_EQ(svgFilter->filterAttr_.height.Value(), 300);
+    EXPECT_FLOAT_EQ(svgFilter->filterAttr_.x.Value(), 30);
+    EXPECT_FLOAT_EQ(svgFilter->filterAttr_.y.Value(), 30);
+}
 } // namespace OHOS::Ace::NG
