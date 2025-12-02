@@ -61,8 +61,12 @@ public:
     static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
-    static void JavaScriptOnHeadEnd(
-        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnDocumentStartByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnDocumentEndByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems& scriptItems,
+        const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     static void SetNativeEmbedOptions(
         FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange);
     static void SetBypassVsyncCondition(FrameNode *frameNode, const std::optional<WebBypassVsyncCondition>& condition);

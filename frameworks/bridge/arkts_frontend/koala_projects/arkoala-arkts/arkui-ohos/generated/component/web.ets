@@ -3287,9 +3287,14 @@ export interface WebOptions {
     sharedRenderProcessToken?: string;
     emulateTouchFromMouseEvent?: boolean;
 }
+export interface UrlRegexRule {
+    secondLevelDomain: string;
+    rule: string;
+}
 export interface ScriptItem {
     script: string;
     scriptRules: Array<string>;
+    urlRegexRules?: Array<UrlRegexRule>;
 }
 export interface LoadCommittedDetails {
     isMainFrame: boolean;
@@ -6105,6 +6110,22 @@ export class SslErrorHandler_serializer {
         return SslErrorHandlerInternal.fromPtr(ptr)
     }
 }
+export class UrlRegexRule_serializer {
+    public static write(buffer: SerializerBase, value: UrlRegexRule): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForSecondLevelDomain  = value.secondLevelDomain
+        valueSerializer.writeString(valueHolderForSecondLevelDomain)
+        const valueHolderForRule  = value.rule
+        valueSerializer.writeString(valueHolderForRule)
+    }
+    public static read(buffer: DeserializerBase): UrlRegexRule {
+        let valueDeserializer : DeserializerBase = buffer
+        const secondLevelDomainTmpResult : string = (valueDeserializer.readString() as string)
+        const ruleTmpResult : string = (valueDeserializer.readString() as string)
+        let value : UrlRegexRule = ({secondLevelDomain: secondLevelDomainTmpResult, rule: ruleTmpResult} as UrlRegexRule)
+        return value
+    }
+}
 export class WebContextMenuParam_serializer {
     public static write(buffer: SerializerBase, value: WebContextMenuParam): void {
         let valueSerializer : SerializerBase = buffer
@@ -7398,6 +7419,18 @@ export class ScriptItem_serializer {
             const valueHolderForScriptRulesTmpElement : string = valueHolderForScriptRules[valueHolderForScriptRulesCounterI]
             valueSerializer.writeString(valueHolderForScriptRulesTmpElement)
         }
+        const valueHolderForUrlRegexRules  = value.urlRegexRules
+        if (valueHolderForUrlRegexRules !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUrlRegexRulesTmpValue  = valueHolderForUrlRegexRules!
+            valueSerializer.writeInt32((valueHolderForUrlRegexRulesTmpValue.length).toInt())
+            for (let valueHolderForUrlRegexRulesTmpValueCounterI = 0; valueHolderForUrlRegexRulesTmpValueCounterI < valueHolderForUrlRegexRulesTmpValue.length; valueHolderForUrlRegexRulesTmpValueCounterI++) {
+                const valueHolderForUrlRegexRulesTmpValueTmpElement : UrlRegexRule = valueHolderForUrlRegexRulesTmpValue[valueHolderForUrlRegexRulesTmpValueCounterI]
+                UrlRegexRule_serializer.write(valueSerializer, valueHolderForUrlRegexRulesTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ScriptItem {
         let valueDeserializer : DeserializerBase = buffer
@@ -7408,7 +7441,18 @@ export class ScriptItem_serializer {
             scriptRulesTmpBuf[scriptRulesTmpBufBufCounterI] = (valueDeserializer.readString() as string)
         }
         const scriptRulesTmpResult : Array<string> = scriptRulesTmpBuf
-        let value : ScriptItem = ({script: scriptTmpResult, scriptRules: scriptRulesTmpResult} as ScriptItem)
+        const urlRegexRulesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let urlRegexRulesTmpBuf : Array<UrlRegexRule> | undefined = undefined
+        if ((urlRegexRulesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const urlRegexRulesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let urlRegexRulesTmpBuf_ : Array<UrlRegexRule> = new Array<UrlRegexRule>(urlRegexRulesTmpBuf_Length)
+            for (let urlRegexRulesTmpBuf_BufCounterI = 0; urlRegexRulesTmpBuf_BufCounterI < urlRegexRulesTmpBuf_Length; urlRegexRulesTmpBuf_BufCounterI++) {
+                urlRegexRulesTmpBuf_[urlRegexRulesTmpBuf_BufCounterI] = UrlRegexRule_serializer.read(valueDeserializer)
+            }
+            urlRegexRulesTmpBuf = urlRegexRulesTmpBuf_
+        }
+        const urlRegexRulesTmpResult : Array<UrlRegexRule> | undefined = urlRegexRulesTmpBuf
+        let value : ScriptItem = ({script: scriptTmpResult, scriptRules: scriptRulesTmpResult, urlRegexRules: urlRegexRulesTmpResult} as ScriptItem)
         return value
     }
 }
