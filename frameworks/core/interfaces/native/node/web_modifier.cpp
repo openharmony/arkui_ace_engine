@@ -1533,9 +1533,9 @@ void SetOnWindowNewExt(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto* originalCallbackPtr = reinterpret_cast<std::function<void(WebWindowNewExtEvent&)>*>(extraParam);
-    CHECK_NULL_VOID(originalCallbackPtr);
     if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(WebWindowNewExtEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
         auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
             auto* onWindowNewExt = static_cast<WebWindowNewExtEvent*>(event.get());
             if (onWindowNewExt != nullptr) {
