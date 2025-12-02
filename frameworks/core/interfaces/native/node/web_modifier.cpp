@@ -1529,6 +1529,32 @@ void ResetOnWindowNew(ArkUINodeHandle node)
     WebModelNG::SetWindowNewEvent(frameNode, nullptr);
 }
 
+void SetOnWindowNewExt(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* originalCallbackPtr = reinterpret_cast<std::function<void(WebWindowNewExtEvent&)>*>(extraParam);
+    CHECK_NULL_VOID(originalCallbackPtr);
+    if (extraParam) {
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* onWindowNewExt = static_cast<WebWindowNewExtEvent*>(event.get());
+            if (onWindowNewExt != nullptr) {
+                originalCallback(*onWindowNewExt);
+            }
+        };
+        WebModelNG::SetWindowNewExtEvent(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetWindowNewExtEvent(frameNode, nullptr);
+    }
+}
+
+void ResetOnWindowNewExt(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWindowNewExtEvent(frameNode, nullptr);
+}
+
 void SetOnPermissionRequest(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2694,6 +2720,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnRenderProcessRespondingCallBack = ResetOnRenderProcessRespondingCallBack,
         .setOnWindowNew = SetOnWindowNew,
         .resetOnWindowNew = ResetOnWindowNew,
+        .setOnWindowNewExt = SetOnWindowNewExt,
+        .resetOnWindowNewExt = ResetOnWindowNewExt,
         .setOnGeolocationShow = SetOnGeolocationShow,
         .resetOnGeolocationShow = ResetOnGeolocationShow,
         .setOnPermissionRequest = SetOnPermissionRequest,
@@ -2935,6 +2963,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnRenderProcessRespondingCallBack = ResetOnRenderProcessRespondingCallBack,
         .setOnWindowNew = SetOnWindowNew,
         .resetOnWindowNew = ResetOnWindowNew,
+        .setOnWindowNewExt = SetOnWindowNewExt,
+        .resetOnWindowNewExt = ResetOnWindowNewExt,
         .setOnGeolocationShow = SetOnGeolocationShow,
         .resetOnGeolocationShow = ResetOnGeolocationShow,
         .setOnPermissionRequest = SetOnPermissionRequest,

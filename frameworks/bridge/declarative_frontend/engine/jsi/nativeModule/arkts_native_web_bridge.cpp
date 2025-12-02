@@ -2668,6 +2668,61 @@ ArkUINativeModuleValue WebBridge::ResetOnWindowNew(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue WebBridge::SetOnWindowNewExt(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getWebModifier()->resetOnWindowNewExt(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(WebWindowNewExtEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                              func = panda::CopyableGlobal(vm, func)](
+                                                              WebWindowNewExtEvent& event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(weak);
+        const char* keys[] = { "isAlert", "isUserTrigger", "targetUrl", "handler", "windowFeatures",
+            "navigationPolicy" };
+        Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateJSWindowNewExtHandler(event);
+
+        const char* featureKeys[] = { "height", "width", "x", "y" };
+        Local<JSValueRef> featureValues[] = { panda::NumberRef::New(vm, static_cast<int32_t>(event.GetHeight())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(event.GetWidth())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(event.GetX())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(event.GetY())) };
+        auto windowFeaturesObj =
+            panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(featureKeys), featureKeys, featureValues);
+        Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, event.IsAlert()),
+            panda::BooleanRef::New(vm, event.IsUserTrigger()),
+            panda::StringRef::NewFromUtf8(vm, event.GetTargetUrl().c_str()), handlerObj->GetLocalHandle(),
+            windowFeaturesObj, panda::NumberRef::New(vm, static_cast<int32_t>(event.GetNavigationPolicy())) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
+        eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setOnWindowNewExt(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetOnWindowNewExt(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetOnWindowNewExt(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue WebBridge::SetOnGeolocationShow(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

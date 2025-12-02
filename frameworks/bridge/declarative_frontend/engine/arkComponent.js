@@ -32283,6 +32283,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnWindowNewModifier.identity, WebOnWindowNewModifier, callback);
     return this;
   }
+  onWindowNewExt(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnWindowNewExtModifier.identity, WebOnWindowNewExtModifier, callback);
+    return this;
+  }
   onWindowExit(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnWindowExitModifier.identity, WebOnWindowExitModifier, callback);
     return this;
@@ -33663,6 +33667,20 @@ class WebOnWindowNewModifier extends ModifierWithKey {
   }
 }
 WebOnWindowNewModifier.identity = Symbol('webOnWindowNewModifier');
+
+class WebOnWindowNewExtModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnWindowNewExt(node);
+    } else {
+      getUINativeModule().web.setOnWindowNewExt(node, this.value);
+    }
+  }
+}
+WebOnWindowNewExtModifier.identity = Symbol('webOnWindowNewExtModifier');
 
 class WebOnPermissionRequestModifier extends ModifierWithKey {
   constructor(value) {

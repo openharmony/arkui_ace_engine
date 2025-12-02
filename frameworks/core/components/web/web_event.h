@@ -74,6 +74,13 @@ enum class ViewportFit {
     COVER,
 };
 
+enum class NavigationPolicy {
+    NEW_POPUP = 0,
+    NEW_WINDOW = 1,
+    NEW_BACKGROUND_TAB = 2,
+    NEW_FOREGROUND_TAB = 3,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType);
 public:
@@ -1840,6 +1847,77 @@ private:
     bool isAlert_;
     bool isUserTrigger_;
     RefPtr<WebWindowNewHandler> handler_;
+};
+
+class ACE_EXPORT WebWindowNewExtEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebWindowNewExtEvent, BaseEventInfo);
+
+public:
+    WebWindowNewExtEvent(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
+        const RefPtr<WebWindowNewHandler>& handler, int x, int y, int width, int height,
+        NavigationPolicy navigationPolicy)
+        : BaseEventInfo("WebWindowNewExtEvent"), targetUrl_(targetUrl), isAlert_(isAlert),
+          isUserTrigger_(isUserTrigger), handler_(handler), x_(x), y_(y), width_(width), height_(height),
+          navigationPolicy_(navigationPolicy)
+    {}
+
+    ~WebWindowNewExtEvent() = default;
+
+    const std::string& GetTargetUrl() const
+    {
+        return targetUrl_;
+    }
+
+    bool IsAlert() const
+    {
+        return isAlert_;
+    }
+
+    bool IsUserTrigger() const
+    {
+        return isUserTrigger_;
+    }
+
+    const RefPtr<WebWindowNewHandler>& GetWebWindowNewHandler() const
+    {
+        return handler_;
+    }
+
+    int GetHeight() const
+    {
+        return height_;
+    }
+
+    int GetWidth() const
+    {
+        return width_;
+    }
+
+    int GetX() const
+    {
+        return x_;
+    }
+
+    int GetY() const
+    {
+        return y_;
+    }
+
+    NavigationPolicy GetNavigationPolicy() const
+    {
+        return navigationPolicy_;
+    }
+
+private:
+    std::string targetUrl_;
+    bool isAlert_;
+    bool isUserTrigger_;
+    RefPtr<WebWindowNewHandler> handler_;
+    int x_;
+    int y_;
+    int width_;
+    int height_;
+    NavigationPolicy navigationPolicy_;
 };
 
 class ACE_EXPORT WebWindowExitEvent : public BaseEventInfo {

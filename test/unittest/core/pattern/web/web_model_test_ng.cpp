@@ -263,6 +263,25 @@ HWTEST_F(WebModelTestNg, SetWindowNewEvent004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWindowNewEventExt001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWindowNewEventExt001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebModelNG webModelNG;
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    webModelNG.SetWindowNewExtEvent(
+        [&callbackCalled](const std::shared_ptr<BaseEventInfo> info) { callbackCalled = true; });
+    webEventHub->FireOnWindowNewExtEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
  * @tc.name: SetOnLoadIntercept005
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
