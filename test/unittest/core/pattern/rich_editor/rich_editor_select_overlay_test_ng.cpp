@@ -1471,15 +1471,19 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ToggleMenu001, TestSize.Level0)
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, SetSelectDetectEnable001, TestSize.Level0)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
+    
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorModel.SetSelectDetectEnable(false);
-    EXPECT_FALSE(richEditorPattern->selectDetectEnabledIsUserSet_);
+    EXPECT_TRUE(richEditorPattern->selectDetectEnabledIsUserSet_);
+    EXPECT_FALSE(richEditorPattern->selectDetectEnabled_);
+
+    richEditorModel.SetSelectDetectEnable(true);
     EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
 }
 
@@ -1490,16 +1494,20 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SetSelectDetectEnable001, TestSize.Level
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, SetSelectDetectEnable002, TestSize.Level0)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
 
-    richEditorModel.SetSelectDetectEnable(AceType::RawPtr(richEditorNode_), true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSelectDetectEnable(richEditorNode, true);
     EXPECT_TRUE(richEditorPattern->selectDetectEnabledIsUserSet_);
     EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
+
+    richEditorModel.SetSelectDetectEnable(richEditorNode, false);
+    EXPECT_FALSE(richEditorPattern->selectDetectEnabled_);
 }
 
 /**
@@ -1509,15 +1517,17 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SetSelectDetectEnable002, TestSize.Level
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectDetectEnable001, TestSize.Level0)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
 
-    richEditorModel.SetSelectDetectEnable(AceType::RawPtr(richEditorNode_), true);
-    EXPECT_TRUE(richEditorModel.GetSelectDetectEnable(AceType::RawPtr(richEditorNode_)));
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetSelectDetectEnable(richEditorNode, true);
+
+    EXPECT_TRUE(richEditorModel.GetSelectDetectEnable(richEditorNode));
 }
 
 /**
@@ -1527,14 +1537,16 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectDetectEnable001, TestSize.Level
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, ResetSelectDetectEnable001, TestSize.Level0)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
 
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
     richEditorModel.ResetSelectDetectEnable();
+
     EXPECT_FALSE(richEditorPattern->selectDetectEnabledIsUserSet_);
     EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
 }
@@ -1546,14 +1558,16 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ResetSelectDetectEnable001, TestSize.Lev
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, ResetSelectDetectEnable002, TestSize.Level0)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
 
-    richEditorModel.ResetSelectDetectEnable(AceType::RawPtr(richEditorNode_));
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.ResetSelectDetectEnable(richEditorNode);
+
     EXPECT_FALSE(richEditorPattern->selectDetectEnabledIsUserSet_);
     EXPECT_TRUE(richEditorPattern->selectDetectEnabled_);
 }

@@ -1361,4 +1361,26 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleDelKeyOnDragging, TestSize.Leve
     richEditorPattern->OnKeyEvent(keyEvent);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
 }
+
+/**
+ * @tc.name: SetEnterKeyType001
+ * @tc.desc: test SetEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetEnterKeyType001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorModel.SetEnterKeyType(richEditorNode, TextInputAction::NEW_LINE);
+    richEditorNode->MarkModifyDone();
+    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
+        TextInputAction::NEW_LINE);
+    ClearSpan();
+}
 } // namespace OHOS::Ace::NG
