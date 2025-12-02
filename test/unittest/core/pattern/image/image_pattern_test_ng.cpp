@@ -2894,4 +2894,32 @@ HWTEST_F(ImagePatternTestNg, ImageConfigurationChange001, TestSize.Level0)
     imagePattern->OnConfigurationUpdate();
     EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
 }
+
+/**
+ * @tc.name: TestImagePatternLoadImageTest001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestImagePatternLoadImageTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ;
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call callbacks.
+     * @tc.expected:
+     */
+    imagePattern->isImageReloadNeeded_ = true;
+    imagePattern->isOrientationChange_ = true;
+    imagePattern->renderedImageInfo_.renderSuccess = true;
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
+    EXPECT_FALSE(imagePattern->isImageReloadNeeded_);
+    EXPECT_FALSE(imagePattern->isOrientationChange_);
+    EXPECT_FALSE(imagePattern->renderedImageInfo_.renderSuccess);
+}
 } // namespace OHOS::Ace::NG
