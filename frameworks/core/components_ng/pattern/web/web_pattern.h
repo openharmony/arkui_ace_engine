@@ -620,6 +620,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
 
     bool IsFocus() const
     {
@@ -1137,6 +1138,7 @@ private:
     void OnRotateRenderEffectUpdate(WebRotateEffect effect);
     void WebRotateRenderEffect(WindowSizeChangeReason type);
     void OnForceEnableZoomUpdate(bool value);
+    void OnEnableAutoFillUpdate(bool isEnabled);
 
     int GetWebId();
 

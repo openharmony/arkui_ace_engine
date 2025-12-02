@@ -1456,6 +1456,7 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
+void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
 void WebDelegate::OnStatusBarClick() {}
 bool WebDelegate::IsQuickMenuShow() { return false; }
 void WebDelegate::WebScrollStopFling() {}

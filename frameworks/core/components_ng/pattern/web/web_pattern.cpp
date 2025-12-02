@@ -4416,6 +4416,7 @@ void WebPattern::OnModifyDone()
         }
         UpdateScrollBarWithBorderRadius();
         OnBackToTopUpdate(backToTop_);
+        delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -5256,6 +5257,13 @@ void WebPattern::OnEnableImageAnalyzerUpdate(bool isEnabled)
     }
     if (!isEnabled) {
         DestroyAnalyzerOverlay();
+    }
+}
+
+void WebPattern::OnEnableAutoFillUpdate(bool isEnabled)
+{
+    if (delegate_) {
+        delegate_->SetEnableAutoFill(isEnabled);
     }
 }
 

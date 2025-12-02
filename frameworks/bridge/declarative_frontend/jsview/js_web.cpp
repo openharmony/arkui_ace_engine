@@ -2439,6 +2439,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onFirstScreenPaint", &JSWeb::OnFirstScreenPaint);
     JSClass<JSWeb>::StaticMethod("onTextSelectionChange", &JSWeb::OnTextSelectionChange);
     JSClass<JSWeb>::StaticMethod("enableImageAnalyzer", &JSWeb::EnableImageAnalyzer);
+    JSClass<JSWeb>::StaticMethod("enableAutoFill", &JSWeb::EnableAutoFill);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
@@ -7414,6 +7415,16 @@ void JSWeb::OnVerifyPinRequest(const JSCallbackInfo& args)
         return true;
     };
     WebModel::GetInstance()->SetOnVerifyPinRequest(jsCallback);
+}
+
+void JSWeb::EnableAutoFill(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableAutoFill(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableAutoFill(isEnabled);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)
