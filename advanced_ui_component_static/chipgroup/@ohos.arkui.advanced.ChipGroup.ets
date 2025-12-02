@@ -60,7 +60,8 @@ import {
   State,
   Provide,
   Prop,
-  PropRef
+  PropRef,
+  UIUtils
 } from '@ohos.arkui.stateManagement';
 
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
@@ -382,7 +383,13 @@ export struct IconGroupSuffix {
         })
         .borderRadius(iconGroupSuffixTheme.borderRadius)
       }, (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions, index: int) => {
-        return JSON.stringify(suffixItem) + index;
+        let actualItem = UIUtils.getTarget(suffixItem)
+        if (actualItem instanceof SymbolGlyphModifier) {
+          return `${((reflect.Value.of(actualItem) as ClassValue).getFieldByName('_setSymbolGlyphOptions0_value').getData() as Resource).id}_${index}`;
+        } else if (actualItem instanceof SymbolItemOptions) {
+          return `${((reflect.Value.of(actualItem.symbol) as ClassValue).getFieldByName('_setSymbolGlyphOptions0_value').getData() as Resource).id}_${index}`;
+        }
+        return JSON.stringify(actualItem) + index;
       })
     }
   }
