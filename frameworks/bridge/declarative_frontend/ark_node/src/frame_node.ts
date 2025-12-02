@@ -1250,8 +1250,10 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
       })
     }],
     ['TextClock', (context: UIContext): FrameNode => {
-      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
-        return new ArkTextClockComponent(node, type);
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
+        getUINativeModule().loadNativeModule('TextClock');
+        let module = globalThis.requireNapi('arkui.components.arktextclock');
+        return module.createComponent(node, type);
       })
     }],
     ['TextTimer', (context: UIContext): FrameNode => {

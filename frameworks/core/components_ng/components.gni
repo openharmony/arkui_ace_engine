@@ -208,8 +208,6 @@ template("build_component_ng") {
           "${ace_root}/interfaces/native/node",
           "${ace_root}/interfaces/native/runtime",
         ]
-
-
         
         if (is_arkui_x) {
           configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
