@@ -80,6 +80,13 @@ constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 
+constexpr int32_t CREDENTIAL_UKEY = 4;
+constexpr int CAPABILITY_NOT_SUPPORTED_ERROR = 801;
+const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
+const char* HUKS_CRYPTO_EXTENSION_CAPABILITY = "SystemCapability.Security.Huks.CryptoExtension";
+
+bool g_huksCryptoExtensionAbility = false;
+
 void EraseSpace(std::string& data)
 {
     auto iter = data.begin();
@@ -120,6 +127,16 @@ namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
 bool JSWeb::webDebuggingAccess_ = false;
 int32_t JSWeb::webDebuggingPort_ = 0;
+
+napi_env GetNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
+
 class JSWebDialog : public WebTransferBase<RefPtr<Result>> {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -519,10 +536,18 @@ public:
         } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsNumber()) {
             std::string identity = args[0]->ToString();
             int32_t type = args[1]->ToNumber<int32_t>();
-            if (result_) {
-                result_->HandleConfirm(identity, type);
+            if (type == CREDENTIAL_UKEY && !g_huksCryptoExtensionAbility) {
+                napi_throw_error(GetNapiEnv(), std::to_string(CAPABILITY_NOT_SUPPORTED_ERROR).c_str(),
+                                 CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
+                if (result_) {
+                    result_->HandleCancel();
+                }
                 return;
             }
+            if (result_) {
+                result_->HandleConfirm(identity, type);
+            }
+            return;
         } else {
             return;
         }
@@ -2470,15 +2495,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebNativeMessageCallback::JSBind(globalObj);
 }
 
-napi_env GetNapiEnv()
-{
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    auto nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, nullptr);
-    return reinterpret_cast<napi_env>(nativeEngine);
-}
-
 napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValue)
 {
     napi_value undefined;
@@ -3193,6 +3209,20 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
     WebModel::GetInstance()->SetWebNativeMessageConnectFunction(std::move(webNativeMessageManagerFunctionCallback));
     WebModel::GetInstance()->SetWebNativeMessageDisconnectFunction(
         std::move(webNativeMessageDisconnectFunctionCallback));
+
+    auto canIUseFunc = controller->GetProperty("canIUse");
+    if (canIUseFunc->IsFunction()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::canIUse");
+        auto func = JSRef<JSFunc>::Cast(canIUseFunc);
+        JSRef<JSVal> syscap = JSRef<JSVal>::Make(ToJSValue(HUKS_CRYPTO_EXTENSION_CAPABILITY));
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetPropertyObject("syscap", syscap);
+        JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+        JSRef<JSVal> result = func->Call(controller, 1, argv);
+        if (result->IsBoolean()) {
+            g_huksCryptoExtensionAbility = result->ToBoolean();
+        }
+    }
 }
 
 void JSWeb::Create(const JSCallbackInfo& info)
