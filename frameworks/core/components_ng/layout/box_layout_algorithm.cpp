@@ -46,7 +46,7 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         child->Measure(layoutConstraint);
     }
-    PerformMeasureSelf(layoutWrapper);
+    PerformMeasureSelf(layoutWrapper, isEnableChildrenMatchParent);
     if (isEnableChildrenMatchParent) {
         auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         MeasureAdaptiveLayoutChildren(layoutWrapper, frameSize);
@@ -68,7 +68,7 @@ std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
 }
 
 void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
-    LayoutWrapper* layoutWrapper, const std::list<RefPtr<LayoutWrapper>>& childList)
+    LayoutWrapper* layoutWrapper, const std::list<RefPtr<LayoutWrapper>>& childList, bool isEnableChildrenMatchParent)
 {
     const auto& hostLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(hostLayoutProperty);
@@ -137,7 +137,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
                     auto margin = layoutProperty->CreateMargin();
                     CalcSingleSideMarginFrame(margin, singleSideFrame, maxWidth, maxHeight);
                 }
-                auto childSize = (layoutPolicy.has_value() && layoutPolicy->IsMatch())
+                auto childSize = (isEnableChildrenMatchParent && layoutPolicy.has_value() && layoutPolicy->IsMatch())
                                      ? SizeF()
                                      : child->GetGeometryNode()->GetMarginFrameSize();
                 if (maxWidth < childSize.Width()) {
@@ -193,10 +193,11 @@ void BoxLayoutAlgorithm::CalcSingleSideMarginFrame(
 }
 
 // Called to perform measure current render node.
-void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
+void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper, bool isEnableChildrenMatchParent)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    PerformMeasureSelfWithChildList(layoutWrapper, layoutWrapper->GetAllChildrenWithBuild());
+    PerformMeasureSelfWithChildList(
+        layoutWrapper, layoutWrapper->GetAllChildrenWithBuild(), isEnableChildrenMatchParent);
 }
 
 void BoxLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& frameSize)

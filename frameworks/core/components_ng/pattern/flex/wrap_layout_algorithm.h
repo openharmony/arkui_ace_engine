@@ -111,6 +111,11 @@ private:
         const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
 
     void UpdatePercentSensitive(LayoutWrapper *layoutWrapper, bool usingWidthPercent, bool usingHeightPercent);
+    void UpdateFixLengthLimit(const RefPtr<LayoutProperty>& layoutProp,
+        const std::optional<LayoutConstraintF>& layoutConstraint, bool& isMainAxisAdaptive);
+    void UpdateFrameSizeWhenAdaptive(const RefPtr<LayoutProperty>& layoutProp, bool needFillMainAxis);
+    void UpdateChildPositionWidthIgnoreLayoutSafeArea(
+        const RefPtr<LayoutWrapper>& childlayoutWrapper, const OffsetF& originOffset);
     WrapDirection direction_ = WrapDirection::VERTICAL;
     WrapAlignment alignment_ = WrapAlignment::START;
     WrapAlignment mainAlignment_ = WrapAlignment::START;
