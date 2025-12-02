@@ -19,6 +19,7 @@ component_modules = [
   "data_panel",
   "gauge",
   "hyperlink",
+  "text_clock",
   "checkbox",
   "patternlock",
   "qrcode",

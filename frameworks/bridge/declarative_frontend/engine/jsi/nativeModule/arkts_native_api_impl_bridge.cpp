@@ -58,7 +58,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_resource_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_clock_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
@@ -484,6 +483,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         {"PatternLock"},
         {"Sidebar"},
         {"Indexer"},
+        { "TextClock" },
         {"Checkbox"},
         {"CheckboxGroup"},
         {"QRCode"},
@@ -1990,7 +1990,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterGridAttributes(object, vm);
     RegisterListItemGroupAttributes(object, vm);
     RegisterLoadingProgressAttributes(object, vm);
-    RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
     RegisterRefreshAttributes(object, vm);
@@ -4435,58 +4434,6 @@ void ArkUINativeModule::RegisterLoadingProgressAttributes(Local<panda::ObjectRef
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadingProgress"), loadingProgress);
 }
 
-void ArkUINativeModule::RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto textClock = panda::ObjectRef::New(vm);
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFormat"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFormat));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFormat"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFormat));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontColor));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontColor));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontSize));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontSize));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontStyle));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontStyle));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontWeight));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontWeight));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontFamily));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontFamily));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextShadow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetTextShadow));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextShadow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetTextShadow));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontFeature));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontFeature));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetContentModifierBuilder));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDateTimeOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetDateTimeOptions));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDateTimeOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetDateTimeOptions));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextClockTimeZoneOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetTextClockTimeZoneOffset));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextClockController"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetTextClockController));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextClockOnDateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetTextClockOnDateChange));
-    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextClockOnDateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetTextClockOnDateChange));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textClock"), textClock);
-}
-
 void ArkUINativeModule::RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto textTimer = panda::ObjectRef::New(vm);
@@ -5518,7 +5465,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterShapeAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSymbolSpanAttributes(object, vm);
-    RegisterTextClockAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
     auto frameNodeValue = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"));

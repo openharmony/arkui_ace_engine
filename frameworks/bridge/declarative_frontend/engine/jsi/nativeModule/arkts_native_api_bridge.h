@@ -93,7 +93,6 @@ private:
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
