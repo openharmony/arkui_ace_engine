@@ -220,25 +220,32 @@ RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
 void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, NotificationType type)
 {
     // temp: naive data reset
+    bool needSync = false;
     for (const auto& [index, node] : node4Index_) {
         if (index >= changeIndex) {
-            RemoveChild(node);
+            if (node->OnRemoveFromParent(true)) { // can be removed from tree immediately.
+                RemoveDisappearingChild(node);
+            } else {
+                AddDisappearingChild(node);
+            }
+            needSync = true;
         }
     }
     node4Index_.RemoveIf([changeIndex](const uint32_t& k, const auto& _) {
         const auto idx = static_cast<int32_t>(k);
         return idx >= changeIndex;
     });
+    if (needSync) {  // order a resync from layout
+        RequestSyncTree();
+    }
 
     auto parent = GetParent();
     int64_t accessibilityId = GetAccessibilityId();
     if (parent) {
         parent->NotifyChange(changeIndex, count, accessibilityId, type);
-        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        MarkNeedSyncRenderTree(true);
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
-
-    // do not call when visible items have not changed
-    MarkNeedSyncRenderTree(true);
 }
 
 void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)

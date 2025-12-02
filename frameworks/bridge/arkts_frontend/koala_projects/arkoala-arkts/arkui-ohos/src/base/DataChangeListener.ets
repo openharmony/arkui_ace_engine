@@ -21,16 +21,16 @@ import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation
 import { ILocalDecoratedVariable } from '../stateManagement/decorator'
 
 export class InternalListener implements DataChangeListener {
-    private startIndex: int32; // Tracks the minimum item index that has changed
-    private endIndex: int32;
-    private changeCount: int32; // Tracks the number of items added or deleted
-    public version: ILocalDecoratedVariable<int32>; // reference to mark LazyForEach dirty
+    private startIndex: int32 // Tracks the minimum item index that has changed
+    private endIndex: int32
+    private changeCount: int32 // Tracks the number of items added or deleted
+    public version: ILocalDecoratedVariable<int32> // reference to mark LazyForEach dirty
 
     constructor(version: ILocalDecoratedVariable<int32>) {
-        this.startIndex = Number.POSITIVE_INFINITY.toInt();
-        this.endIndex = Number.NEGATIVE_INFINITY.toInt();
-        this.changeCount = 0;
-        this.version = version;
+        this.startIndex = Number.POSITIVE_INFINITY.toInt()
+        this.endIndex = Number.NEGATIVE_INFINITY.toInt()
+        this.changeCount = 0
+        this.version = version
     }
 
     /**
@@ -46,12 +46,12 @@ export class InternalListener implements DataChangeListener {
             this.startIndex,
             this.endIndex,
             this.changeCount
-        );
+        )
         const firstAffected = this.startIndex
         // Reset the cache after flushing
-        this.startIndex = Number.POSITIVE_INFINITY.toInt();
-        this.endIndex = Number.NEGATIVE_INFINITY.toInt();
-        this.changeCount = 0;
+        this.startIndex = Number.POSITIVE_INFINITY.toInt()
+        this.endIndex = Number.NEGATIVE_INFINITY.toInt()
+        this.changeCount = 0
         return firstAffected
     }
 
@@ -113,35 +113,35 @@ export class InternalListener implements DataChangeListener {
         for (const operation of dataOperations) {
             switch (operation.type) {
                 case DataOperationType.ADD: {
-                    startIndex = Math.min(startIndex, (operation as DataAddOperation).index).toInt();
+                    startIndex = Math.min(startIndex, (operation as DataAddOperation).index).toInt()
                     ++changeCount
-                    break;
+                    break
                 }
                 case DataOperationType.DELETE: {
-                    startIndex = Math.min(startIndex, (operation as DataDeleteOperation).index).toInt();
+                    startIndex = Math.min(startIndex, (operation as DataDeleteOperation).index).toInt()
                     --changeCount
-                    break;
+                    break
                 }
                 case DataOperationType.CHANGE: {
-                    startIndex = Math.min(startIndex, (operation as DataChangeOperation).index).toInt();
-                    break;
+                    startIndex = Math.min(startIndex, (operation as DataChangeOperation).index).toInt()
+                    break
                 }
                 case DataOperationType.MOVE: {
-                    const moveOp = operation as DataMoveOperation;
-                    startIndex = Math.min(startIndex, Math.min(moveOp.index.from, moveOp.index.to)).toInt();
-                    endIndex = Math.max(endIndex, Math.max(moveOp.index.from, moveOp.index.to)).toInt();
-                    break;
+                    const moveOp = operation as DataMoveOperation
+                    startIndex = Math.min(startIndex, Math.min(moveOp.index.from, moveOp.index.to)).toInt()
+                    endIndex = Math.max(endIndex, Math.max(moveOp.index.from, moveOp.index.to)).toInt()
+                    break
                 }
                 case DataOperationType.EXCHANGE: {
-                    const exchangeOp = operation as DataExchangeOperation;
-                    startIndex = Math.min(startIndex, Math.min(exchangeOp.index.start, exchangeOp.index.end)).toInt();
-                    endIndex = Math.max(endIndex, Math.max(exchangeOp.index.start, exchangeOp.index.end)).toInt();
-                    break;
+                    const exchangeOp = operation as DataExchangeOperation
+                    startIndex = Math.min(startIndex, Math.min(exchangeOp.index.start, exchangeOp.index.end)).toInt()
+                    endIndex = Math.max(endIndex, Math.max(exchangeOp.index.start, exchangeOp.index.end)).toInt()
+                    break
                 }
                 case DataOperationType.RELOAD: {
-                    startIndex = 0;
+                    startIndex = 0
                     endIndex = Number.POSITIVE_INFINITY.toInt()
-                    break;
+                    break
                 }
             }
         }

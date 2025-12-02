@@ -57,6 +57,11 @@ public:
         return AceType::MakeRefPtr<TestUINode>(nodeId);
     }
 
+    RefPtr<FrameNode> CreateTestFrameNode(int32_t nodeId)
+    {
+        return FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    }
+
     std::string DumpUINode(const RefPtr<UINode>& node) const
     {
         return (node == nullptr) ? "null" : node->GetTag() + "(" + std::to_string(node->GetId()) + ")";
@@ -120,5 +125,25 @@ TEST_F(ArkoalaForEachNodeTest, ArkoalaForEachNodeTest002)
     auto repeatNode = CreateRepeatNode(GetNextId());
     EXPECT_NE(repeatNode, nullptr);
     repeatNode->DumpInfo();
+}
+
+/**
+ * @tc.name: SetOnMoveTest001
+ * @tc.desc: Test ArkoalaForEachNode SetOnMove.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaForEachNodeTest, SetOnMoveTest001)
+{
+    auto forEachNode = CreateForEachNode(GetNextId());
+    EXPECT_NE(forEachNode, nullptr);
+    auto setOnMoveCbFunc = [](int32_t from, int32_t to) {};
+    forEachNode->SetOnMove(setOnMoveCbFunc);
+
+    forEachNode->onMainTree_ = true;
+    auto node = CreateTestFrameNode(GetNextId());
+    forEachNode->SetParent(node);
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->SetOnMove(setOnMoveCbFunc);
+    forEachNode->SetOnMove(nullptr);
 }
 } // namespace OHOS::Ace::NG
