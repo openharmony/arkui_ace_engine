@@ -5924,6 +5924,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _UIContextGetInfo_getNavigationInfoByUniqueId(id: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
+    native static _UIContextGetInfo_enableSwipeBack(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
     native static _UIExtensionProxy_construct(): KPointer
     @ani.unsafe.Direct
     native static _UIExtensionProxy_getFinalizer(): KPointer

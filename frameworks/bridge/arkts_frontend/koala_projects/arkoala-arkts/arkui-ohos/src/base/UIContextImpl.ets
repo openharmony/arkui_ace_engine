@@ -1748,6 +1748,12 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId()
     }
 
+    public enableSwipeBack(enabled: boolean | undefined): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        UIContextGetInfo.enableSwipeBack(enabled);
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
+
     public setUIStates(callback: () => void): void {
         if (this.checkThread(this.instanceId_)) {
             callback();
