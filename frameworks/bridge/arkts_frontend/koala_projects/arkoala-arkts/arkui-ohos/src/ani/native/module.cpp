@@ -499,6 +499,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
+            "_UpdateWaterFlowSection",
+            "lC{arkui.component.waterFlow.SectionChangeInfo}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UpdateWaterFlowSection)
+        },
+        ani_native_function {
             "_SetWaterFlowFooterContent",
             "ll:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowFooterContent)

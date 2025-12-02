@@ -29,7 +29,9 @@ export class WaterFlowHandWritten {
         }
 
         if (options.sections !== undefined) {
-            ArkUIAniModule._SetWaterFlowSection(node.getPeer().peer.ptr, options.sections!);
+            const waterFlowNodePtr = node.getPeer().peer.ptr;
+            options.sections!.waterFlowNodePtr = waterFlowNodePtr;
+            ArkUIAniModule._SetWaterFlowSection(waterFlowNodePtr, options.sections!);
             options.footer = undefined;
             options.footerContent = undefined;
         } else {
