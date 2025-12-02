@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, PasteEvent, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorAttribute, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle } from "./component/richEditor"
@@ -30,6 +30,7 @@ import { CopyOptions, Color, BarState, ResponseType } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./component/textInput"
 import { CustomBuilder } from "./component/builder"
+import { ComponentContent } from "arkui.ComponentContent"
 export class RichEditorModifier extends CommonMethodModifier implements RichEditorAttribute,AttributeModifier<RichEditorAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -108,7 +109,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _bindSelectionMenu_0_2value?: ResponseType | RichEditorResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customKeyboard_0_0value?: CustomBuilder | undefined
+    _customKeyboard_0_0value?: CustomBuilder | ComponentContent | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     _placeholder_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _placeholder_0_0value?: ResourceStr | undefined
@@ -679,7 +680,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContent | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -689,7 +690,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
                 default: {
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContent | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -1127,7 +1128,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                     break;
                 }
                 default: {
-                    this.customKeyboard((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    this.customKeyboard((undefined as CustomBuilder | ComponentContent | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -1489,7 +1490,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
         if (((this._customKeyboard_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE

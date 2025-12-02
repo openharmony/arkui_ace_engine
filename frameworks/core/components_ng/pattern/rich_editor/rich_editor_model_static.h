@@ -38,6 +38,8 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,
         const std::optional<bool>& supportAvoidance);
+    static void SetCustomKeyboardWithNode(
+        FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
