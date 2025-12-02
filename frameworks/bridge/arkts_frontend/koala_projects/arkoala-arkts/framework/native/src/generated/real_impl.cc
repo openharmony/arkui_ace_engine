@@ -17962,6 +17962,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_TextMenuItemId GetAutoFillImpl()
+    {
+        return {};
+    }
     } // TextMenuItemIdAccessor
     namespace TextPickerDialogAccessor {
     void DestroyPeerImpl(Ark_TextPickerDialog peer)

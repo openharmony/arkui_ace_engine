@@ -241,6 +241,7 @@ export class TextMenuItemId implements MaterializedBase {
     static readonly TRANSLATE: TextMenuItemId = TextMenuItemId.getTRANSLATE()
     static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
     static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
+    static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextMenuItemId.getFinalizer())
     }
@@ -320,6 +321,11 @@ export class TextMenuItemId implements MaterializedBase {
         const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
+    private static getAutoFill_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getAutoFill()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
     public static of(id: ResourceStr): TextMenuItemId {
         const id_casted = id as (ResourceStr)
         return TextMenuItemId.of_serialize(id_casted)
@@ -357,6 +363,9 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getSHARE(): TextMenuItemId {
         return TextMenuItemId.getSHARE_serialize()
+    }
+    private static getAutoFill(): TextMenuItemId {
+        return TextMenuItemId.getAutoFill_serialize()
     }
     equals_serialize(id: TextMenuItemId): boolean {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, toPeerPtr(id))

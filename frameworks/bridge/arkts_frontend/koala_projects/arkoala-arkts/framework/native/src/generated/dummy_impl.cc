@@ -43123,6 +43123,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
+    Ark_TextMenuItemId GetAutoFillImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
+        }
+        string out("getAutoFill(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
+    }
     } // TextMenuItemIdAccessor
     namespace TextPickerDialogAccessor {
     void DestroyPeerImpl(Ark_TextPickerDialog peer)

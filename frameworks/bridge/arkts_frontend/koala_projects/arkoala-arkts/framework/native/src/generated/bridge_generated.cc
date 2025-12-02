@@ -37527,6 +37527,10 @@ Ark_NativePointer impl_TextMenuItemId_getSHARE() {
         return GetAccessors()->getTextMenuItemIdAccessor()->getSHARE();
 }
 KOALA_INTEROP_DIRECT_0(TextMenuItemId_getSHARE, Ark_NativePointer)
+Ark_NativePointer impl_TextMenuItemId_getAutoFill() {
+        return GetAccessors()->getTextMenuItemIdAccessor()->getAutoFill();
+}
+KOALA_INTEROP_DIRECT_0(TextMenuItemId_getAutoFill, Ark_NativePointer)
 Ark_NativePointer impl_TextPickerDialog_construct() {
         return GetAccessors()->getTextPickerDialogAccessor()->construct();
 }
