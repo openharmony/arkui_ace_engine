@@ -31805,16 +31805,22 @@ class ArkTextTimerComponent extends ArkComponent {
       getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
+    this.needRebuild = false;
+    this.applyContent = modifier.applyContent();
+    if (this.builder !== this.applyContent) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context, textTimerConfiguration) {
     textTimerConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.textTimerNode)) {
+    if (isUndefined(this.textTimerNode) || this.needRebuild) {
       let xNode = globalThis.requireNapi('arkui.node');
       this.textTimerNode = new xNode.BuilderNode(context);
       this.textTimerNode.build(this.builder, textTimerConfiguration);
+      this.needRebuild = false;
     } else {
       this.textTimerNode.update(textTimerConfiguration);
     }
