@@ -3102,6 +3102,19 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getPixelRound)(ArkUINodeHandle node, ArkUI_Int32* result);
     void (*setSystemMaterial)(ArkUINodeHandle node, void* material);
     void (*resetSystemMaterial)(ArkUINodeHandle node);
+    void (*setChainWeight)(ArkUINodeHandle node, ArkUI_Float32 horizontal, ArkUI_Float32 vertical);
+    void (*resetChainWeight)(ArkUINodeHandle node);
+    void (*getChainWeight)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2]);
+    void (*setDashGap)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, void* rawPtr);
+    void (*resetDashGap)(ArkUINodeHandle node);
+    void (*getDashGap)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 unit);
+    void (*setDashWidth)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, void* rawPtr);
+    void (*resetDashWidth)(ArkUINodeHandle node);
+    void (*getDashWidth)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 unit);
+    ArkUI_Int32 (*getLayoutGravity)(ArkUINodeHandle node);
+    void (*setBorderRadiusType)(ArkUINodeHandle node, ArkUI_Int32 type);
+    void (*resetBorderRadiusType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getBorderRadiusType)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -3644,6 +3657,8 @@ struct ArkUIColumnModifier {
     void (*resetColumnSpace)(ArkUINodeHandle node);
     void (*setColumnReverse)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetColumnReverse)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getColumnSpace)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getColumnReverse)(ArkUINodeHandle node);
 };
 
 struct ArkUIRowModifier {
@@ -3657,6 +3672,8 @@ struct ArkUIRowModifier {
     void (*resetRowSpace)(ArkUINodeHandle node);
     void (*setRowReverse)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetRowReverse)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getRowSpace)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRowReverse)(ArkUINodeHandle node);
 };
 
 struct ArkUIDividerModifier {
@@ -3676,6 +3693,8 @@ struct ArkUIFlexModifier {
     void (*getFlexOptions)(ArkUINodeHandle node, ArkUIFlexOptions* options);
     void (*setFlexCrossSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setFlexMainSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetFlexSpace)(ArkUINodeHandle node);
+    void (*getFlexSpace)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2]);
 };
 
 struct ArkUIListModifier {

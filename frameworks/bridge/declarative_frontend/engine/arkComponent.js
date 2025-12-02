@@ -3758,6 +3758,22 @@ class OnChildTouchTestModifier extends ModifierWithKey {
   }
 }
 OnChildTouchTestModifier.identity = Symbol('onChildTouchTest');
+class ChainWeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetChainWeight(node);
+    } else {
+      getUINativeModule().common.setChainWeight(node, this.value.horizontal, this.value.vertical);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ChainWeightModifier.identity = Symbol('chainWeight');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -5510,6 +5526,21 @@ class ArkComponent {
   }
   systemMaterial(material) {
     modifierWithKey(this._modifiersWithKeys, SystemMaterialModifier.identity, SystemMaterialModifier, material);
+    return this;
+  }
+  chainWeight(value) {
+    let weight = new ArkChainWeight();
+    if (!isUndefined(value?.horizontal) && value?.horizontal !== null) {
+      if (isNumber(value.horizontal)) {
+        weight.horizontal = value.horizontal;
+      }  
+    }
+    if (!isUndefined(value?.vertical) && value?.vertical !== null) {
+      if (isNumber(value.vertical)) {
+        weight.vertical = value.vertical;
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, ChainWeightModifier.identity, ChainWeightModifier, weight);
     return this;
   }
 }
@@ -20796,6 +20827,18 @@ class ArkFocusScopePriority {
   }
   isEqual(another) {
     return (this.scopeId === another.scopeId) && (this.priority === another.priority);
+  }
+}
+class ArkChainWeight {
+  constructor() {
+    this.horizontal = undefined;
+    this.vertical = undefined;
+  }
+  isEqual(another) {
+    return (
+      this.horizontal === another.horizontal &&
+      this.vertical === another.vertical
+    );
   }
 }
 /// <reference path='./import.ts' />

@@ -83,6 +83,7 @@ constexpr int NUM_13 = 13;
 constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int NUM_16 = 16;
+constexpr int NUM_18 = 18;
 constexpr int NUM_24 = 24;
 constexpr int NUM_36 = 36;
 constexpr int DEFAULT_LENGTH = 4;
@@ -8728,15 +8729,11 @@ void SetBorderDashParamsDirection(const ArkUI_Bool isRightToLeft, NG::BorderWidt
     }
 }
 
-void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, void* rawPtr)
+void SetDashGap(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, void* rawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesSize != NUM_36)) {
-        return;
-    }
     ViewAbstract::ResetResObj(frameNode, "border.dashGap");
-    ViewAbstract::ResetResObj(frameNode, "border.dashWidth");
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderDashGap;
@@ -8756,7 +8753,15 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
     } else {
         ViewAbstract::SetDashGap(frameNode, Dimension(DEFAULT_DASH_DIMENSION));
     }
+}
 
+void SetDashWidth(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, void* rawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetResObj(frameNode, "border.dashWidth");
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    int32_t offset = NUM_0;
     NG::BorderWidthProperty borderDashWidth;
     SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
@@ -8774,6 +8779,15 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
     } else {
         ViewAbstract::SetDashWidth(frameNode, Dimension(DEFAULT_DASH_DIMENSION));
     }
+}
+
+void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, void* rawPtr)
+{
+    if ((values == nullptr) || (valuesSize != NUM_36)) {
+        return;
+    }
+    SetDashGap(node, values, valuesSize, rawPtr);
+    SetDashWidth(node, values + NUM_18, valuesSize, rawPtr);
 }
 
 ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
@@ -10213,15 +10227,105 @@ ArkUIIgnoreLayoutSafeAreaOpts GetIgnoreLayoutSafeArea(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ignoreOpts);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, ignoreOpts);
-    if (!layoutProperty->IsIgnoreOptsValid()) {
-        return ignoreOpts;
-    }
     NG::IgnoreLayoutSafeAreaOpts& opts = *(layoutProperty->GetIgnoreLayoutSafeAreaOpts());
     ignoreOpts = {
         .type = opts.type,
-        .edges = opts.edges,
+        .edges = opts.rawEdges,
     };
     return ignoreOpts;
+}
+
+void SetChainWeight(ArkUINodeHandle node, ArkUI_Float32 horizontal, ArkUI_Float32 vertical)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ChainWeightPair chainWeightPair(0.0f, 0.0f);
+    chainWeightPair.first = horizontal;
+    chainWeightPair.second = vertical;
+    ViewAbstract::SetChainWeight(frameNode, chainWeightPair);
+}
+
+void ResetChainWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ChainWeightPair chainWeightPair(0.0f, 0.0f);
+    ViewAbstract::SetChainWeight(frameNode, chainWeightPair);
+}
+
+void GetChainWeight(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto chainWeightPair = ViewAbstract::GetChainWeight(frameNode);
+    (*values)[NUM_0] = static_cast<ArkUI_Float32>(chainWeightPair.first.value());
+    (*values)[NUM_1] = static_cast<ArkUI_Float32>(chainWeightPair.second.value());
+}
+
+ArkUI_Int32 GetLayoutGravity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ConvertAlignmentToInt(ViewAbstract::GetLayoutGravity(frameNode));
+}
+
+void ResetDashGap(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDashGap(frameNode, Dimension(-1));
+}
+
+void ResetDashWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDashWidth(frameNode, Dimension(-1));
+}
+
+void GetDashGap(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto dashGap = ViewAbstract::GetDashGap(frameNode);
+    (*values)[NUM_0] = dashGap.topDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = dashGap.rightDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = dashGap.bottomDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = dashGap.leftDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+void GetDashWidth(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto dashWidth = ViewAbstract::GetDashWidth(frameNode);
+    (*values)[NUM_0] = dashWidth.topDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = dashWidth.rightDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = dashWidth.bottomDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = dashWidth.leftDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+void SetBorderRadiusType(ArkUINodeHandle node, ArkUI_Int32 renderStrategy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto type = static_cast<OHOS::Ace::RenderStrategy>(renderStrategy);
+    ViewAbstract::SetRenderStrategy(frameNode, type);
+}
+
+void ResetBorderRadiusType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetRenderStrategy(frameNode, RenderStrategy::FAST);
+}
+
+ArkUI_Int32 GetBorderRadiusType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto type = ViewAbstract::GetRenderStrategy(frameNode);
+    return static_cast<ArkUI_Int32>(type);
 }
 } // namespace
 
@@ -10753,6 +10857,19 @@ const ArkUICommonModifier* GetCommonModifier()
         .getPixelRound = GetPixelRound,
         .setSystemMaterial = SetSystemMaterial,
         .resetSystemMaterial = ResetSystemMaterial,
+        .setChainWeight = SetChainWeight,
+        .resetChainWeight = ResetChainWeight,
+        .getChainWeight = GetChainWeight,
+        .getLayoutGravity = GetLayoutGravity,
+        .setDashGap = SetDashGap,
+        .resetDashGap = ResetDashGap,
+        .getDashGap = GetDashGap,
+        .setDashWidth = SetDashWidth,
+        .resetDashWidth = ResetDashWidth,
+        .getDashWidth = GetDashWidth,
+        .setBorderRadiusType = SetBorderRadiusType,
+        .resetBorderRadiusType = ResetBorderRadiusType,
+        .getBorderRadiusType = GetBorderRadiusType,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

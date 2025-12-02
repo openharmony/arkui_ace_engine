@@ -1133,6 +1133,11 @@ public:
     static void AllowForceDark(UINode* node, bool forceDarkAllowed);
     static void ResetAllowForceDark(UINode* node);
     static bool GetAllowForceDark(UINode* node);
+    static Alignment GetLayoutGravity(FrameNode* frameNode);
+    static ChainWeightPair GetChainWeight(FrameNode* frameNode);
+    static BorderWidthProperty GetDashGap(FrameNode* frameNode);
+    static BorderWidthProperty GetDashWidth(FrameNode* frameNode);
+    static RenderStrategy GetRenderStrategy(FrameNode* frameNode);
 
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,

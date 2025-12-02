@@ -1309,6 +1309,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExcludeFromRenderGroup));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExcludeFromRenderGroup"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExcludeFromRenderGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setChainWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetChainWeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetChainWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetChainWeight));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);

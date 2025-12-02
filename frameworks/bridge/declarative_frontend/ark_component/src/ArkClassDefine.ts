@@ -2134,3 +2134,18 @@ class ArkWebScriptItem {
     );
   }
 }
+
+class ArkChainWeight {
+  horizontal?: number;
+  vertical?: number;
+  constructor() {
+    this.horizontal = undefined;
+    this.vertical = undefined;
+  }
+  isEqual(another: ArkChainWeight): boolean {
+    return (
+      this.horizontal === another.horizontal &&
+      this.vertical === another.vertical
+    );
+  }
+}

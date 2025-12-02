@@ -101,6 +101,20 @@ void ResetRowReverse(ArkUINodeHandle node)
     RowModelNG::SetIsReverse(frameNode, false);
 }
 
+ArkUI_Float32 GetRowSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return static_cast<ArkUI_Float32>(RowModelNG::GetSpace(frameNode));
+}
+
+ArkUI_Int32 GetRowReverse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RowModelNG::GetIsReverse(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIRowModifier* GetRowModifier()
 {
@@ -116,6 +130,8 @@ const ArkUIRowModifier* GetRowModifier()
         .resetRowSpace = ResetRowSpace,
         .setRowReverse = SetRowReverse,
         .resetRowReverse = ResetRowReverse,
+        .getRowSpace = GetRowSpace,
+        .getRowReverse = GetRowReverse,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -783,6 +783,12 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest013, TestSize.Level1)
     ViewAbstract::GetPadding(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetConfigSize(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetEnabled(AceType::RawPtr(FRAME_NODE_REGISTER));
+    
+    ViewAbstract::GetChainWeight(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::GetLayoutGravity(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::GetDashGap(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::GetDashWidth(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::GetRenderStrategy(AceType::RawPtr(FRAME_NODE_REGISTER));
 
     /**
      * @tc.expected: Return expected results.

@@ -40,6 +40,8 @@ public:
     static FlexAlign GetJustifyContent(FrameNode* frameNode);
     static FlexAlign GetAlignItems(FrameNode* frameNode);
     static void ResetResObj(FrameNode* frameNode, const std::string& key);
+    static double GetSpace(FrameNode* frameNode);
+    static bool GetIsReverse(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG
