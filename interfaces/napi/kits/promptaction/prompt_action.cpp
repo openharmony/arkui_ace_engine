@@ -2467,7 +2467,8 @@ std::function<void()> GetCustomBuilder(napi_env env, const std::shared_ptr<Promp
             auto status = napi_open_handle_scope(env, &scope);
             if ((status != napi_ok) || (scope == nullptr)) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
-                         "customBuilder of the PromptDialogAttr failed to open the scope of the handle.");
+                    "customBuilder of the PromptDialogAttr failed to open the scope of the handle.");
+                napi_delete_reference(env, builderRef);
                 return;
             }
             napi_value builderFunc = nullptr;
@@ -2489,7 +2490,8 @@ std::function<void(const int32_t& dialogId)> GetCustomBuilderWithId(
             auto status = napi_open_handle_scope(env, &scope);
             if ((status != napi_ok) || (scope == nullptr)) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
-                         "customBuilderWithId of the PromptDialogAttr failed to open the scope of the handle.");
+                    "customBuilderWithId of the PromptDialogAttr failed to open the scope of the handle.");
+                napi_delete_reference(env, builderRef);
                 return;
             }
             napi_value builderFunc = nullptr;
