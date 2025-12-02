@@ -85,6 +85,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_configuration.h"
+#include "base/i18n/localization.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -392,6 +393,19 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, co
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
 }
 
+std::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision)
+{
+    auto localization = Localization::GetInstance();
+    if (!localization) {
+        return numStr;
+    }
+
+    std::string result = numStr;
+    std::string backup = numStr;
+
+    return localization->LocalizeNumber(result, precision) ? result : backup;
+}
+
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
 {
     auto index = pos + containCount;
@@ -402,11 +416,13 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     JSRef<JSVal> item = params->GetValueAt(static_cast<size_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber<int32_t>());
+            std::string numStr = std::to_string(item->ToNumber<int32_t>());
+            return TryLocalizeNumberStr(numStr, 0);
         } else if (item->IsObject()) {
             int32_t result = 0;
             JSViewAbstract::ParseJsInteger(item, result);
-            return std::to_string(result);
+            std::string numStr = std::to_string(result);
+            return TryLocalizeNumberStr(numStr, 0);
         }
     } else if (type == "s") {
         if (item->IsString()) {
@@ -418,11 +434,13 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
         }
     } else if (type == "f") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber<float>());
+            std::string numStr = std::to_string(item->ToNumber<float>());
+            return TryLocalizeNumberStr(numStr, -1);
         } else if (item->IsObject()) {
             double result = 0.0;
             JSViewAbstract::ParseJsDouble(item, result);
-            return std::to_string(result);
+            std::string numStr = std::to_string(result);
+            return TryLocalizeNumberStr(numStr, -1);
         }
     }
     return std::string();

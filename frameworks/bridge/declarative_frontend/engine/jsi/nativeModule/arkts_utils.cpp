@@ -30,6 +30,7 @@
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
+#include "base/i18n/localization.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1575,6 +1576,26 @@ bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValu
     return false;
 }
 
+std::string ArkTSUtils::GetLocalizedNumberStr(const EcmaVM* vm, Local<panda::ArrayRef> item, const std::string& type)
+{
+    auto localization = Localization::GetInstance();
+    if (!localization) {
+        return std::string();
+    }
+
+    if (type == "d" && item->IsNumber()) {
+        std::string numStr = std::to_string(item->Int32Value(vm));
+        return localization->LocalizeNumber(numStr, 0) ? numStr : std::string();
+    }
+
+    if (type == "f" && item->IsNumber()) {
+        std::string numStr = std::to_string(item->ToNumber(vm)->Value());
+        return localization->LocalizeNumber(numStr, -1) ? numStr : std::string();
+    }
+
+    return std::string();
+}
+
 std::string GetReplaceContentStr(
     const EcmaVM* vm, int32_t pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
 {
@@ -1585,7 +1606,8 @@ std::string GetReplaceContentStr(
     auto item = panda::ArrayRef::GetValueAt(vm, params, static_cast<uint32_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            return std::to_string(item->Int32Value(vm));
+            std::string result = ArkTSUtils::GetLocalizedNumberStr(vm, item, type);
+            return result.empty() ? std::to_string(item->Int32Value(vm)) : result;
         }
     } else if (type == "s") {
         if (item->IsString(vm)) {
@@ -1593,7 +1615,8 @@ std::string GetReplaceContentStr(
         }
     } else if (type == "f") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber(vm)->Value());
+            std::string result = ArkTSUtils::GetLocalizedNumberStr(vm, item, type);
+            return result.empty() ? std::to_string(item->ToNumber(vm)->Value()) : result;
         }
     }
     return std::string();
