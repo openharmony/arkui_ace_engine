@@ -16,6 +16,9 @@
 
 #include <securec.h>
 
+#include "node_extened.h"
+#include "node_model.h"
+
 #include "base/utils/utils.h"
 
 #ifdef __cplusplus
@@ -437,6 +440,22 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
     selectionMenuOptions->onMenuHide = reinterpret_cast<void*>(callback);
     selectionMenuOptions->onMenuHideUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_TextContentBaseController_ScrollToVisible(
+    ArkUI_TextContentBaseController* controller, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(controller);
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (controller->textFieldType == NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->scrollToVisible(
+            controller->node->uiNodeHandle, start, end);
+        return;
+    }
+    if (controller->textFieldType == NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->scrollToVisible(
+            controller->node->uiNodeHandle, start, end);
+    }
 }
 #ifdef __cplusplus
 }

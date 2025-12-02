@@ -1675,6 +1675,14 @@ void TextFieldModelNG::SetTextFieldPlaceHolder(FrameNode* frameNode, const std::
     textFieldLayoutProperty->UpdatePlaceholder(placeholder);
 }
 
+void TextFieldModelNG::ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnScrollToVisible({ .start = start, .end = end });
+}
+
 void TextFieldModelNG::StopTextFieldEditing(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);

@@ -86,6 +86,7 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 
 void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 {
+    FlushAfterOverlayShowTask();
     CHECK_NULL_VOID(latestReqeust_);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);

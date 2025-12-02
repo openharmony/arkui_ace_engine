@@ -6634,6 +6634,15 @@ void OH_ArkUI_TextContentBaseController_Dispose(ArkUI_TextContentBaseController*
  */
 void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseController* controller);
 
+/**
+ * @brief Scroll the input field component to make the specified content visible.
+ *
+ * @param controller Pointer to the configuration object to be modified.
+ * @since 23
+ */
+void OH_ArkUI_TextContentBaseController_ScrollToVisible(
+    ArkUI_TextContentBaseController* controller, int32_t start, int32_t end);
+
 #ifdef __cplusplus
 };
 #endif

@@ -2667,6 +2667,13 @@ void ResetEnableAutoSpacing(ArkUINodeHandle node)
     TextFieldModelNG::SetEnableAutoSpacing(frameNode, false);
 }
 
+void ScrollToVisible(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ScrollToVisible(frameNode, start, end);
+}
+
 void SetTextInputOnWillAttachIME(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2947,6 +2954,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
         .getTextInputShowCounterOptions = GetTextInputShowCounterOptions,
+        .scrollToVisible = ScrollToVisible,
         .setTextInputOnWillAttachIME = SetTextInputOnWillAttachIME,
         .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME,
         .textInputDeleteBackward = TextInputDeleteBackward,

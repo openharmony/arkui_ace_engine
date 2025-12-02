@@ -24,7 +24,10 @@ namespace OHOS::Ace::NG {
 
 void TextSelectControllerTest::SetUp() {}
 
-void TextSelectControllerTest::TearDown() {}
+void TextSelectControllerTest::TearDown()
+{
+    MockParagraph::TearDown();
+}
 
 /**
  * @tc.name: FitCaretMetricsToContentRect001
@@ -44,6 +47,68 @@ HWTEST_F(TextSelectControllerTest, FitCaretMetricsToContentRect001, TestSize.Lev
     textSelectController->contentRect_.height_ = 1.0;
     textSelectController->FitCaretMetricsToContentRect(caretMetrics);
     EXPECT_EQ(caretMetrics.height, textSelectController->contentRect_.Height());
+}
+
+/**
+ * @tc.name: GetSelectedRects
+ * @tc.desc: Test GetSelectedRects
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextSelectControllerTest, GetSelectedRects, TestSize.Level1)
+{
+    auto refPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    ASSERT_NE(refPattern, nullptr);
+    WeakPtr<Pattern> pattern = refPattern;
+    auto textSelectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    ASSERT_NE(textSelectController, nullptr);
+    textSelectController->contentController_ = AceType::MakeRefPtr<ContentController>(textSelectController->pattern_);
+    ASSERT_NE(textSelectController->contentController_, nullptr);
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    textSelectController->paragraph_ = mockParagraph;
+    ASSERT_NE(textSelectController->paragraph_, nullptr);
+    textSelectController->pattern_ = refPattern;
+
+    std::vector<RectF> expectedRects = { RectF(0, 0, 5, 5), RectF(0, 6, 10, 5) };
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(expectedRects));
+    std::vector<RectF> selectRects = textSelectController->GetSelectedRects(5, 6);
+    EXPECT_EQ(selectRects.size(), expectedRects.size());
+    for (size_t i = 0; i < selectRects.size(); ++i) {
+        EXPECT_EQ(selectRects[i], expectedRects[i]);
+    }
+}
+
+/**
+ * @tc.name: GetCaretRectByIndex
+ * @tc.desc: Test GetCaretRectByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextSelectControllerTest, GetCaretRectByIndex, TestSize.Level1)
+{
+    auto refPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    ASSERT_NE(refPattern, nullptr);
+    WeakPtr<Pattern> pattern = refPattern;
+    auto textSelectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    ASSERT_NE(textSelectController, nullptr);
+    textSelectController->contentController_ = AceType::MakeRefPtr<ContentController>(textSelectController->pattern_);
+    ASSERT_NE(textSelectController->contentController_, nullptr);
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    textSelectController->paragraph_ = mockParagraph;
+    ASSERT_NE(textSelectController->paragraph_, nullptr);
+    textSelectController->pattern_ = refPattern;
+    textSelectController->contentRect_ = RectF(5, 5, 100, 20);
+    refPattern->textRect_ = RectF(5, 5, 100, 20);
+
+    RectF resultRect = textSelectController->GetCaretRectByIndex(5, TextAffinity::DOWNSTREAM);
+    EXPECT_EQ(resultRect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+
+    textSelectController->contentController_->SetTextValueOnly(u"Hello World");
+    CaretMetricsF expectedCaretMetrics;
+    expectedCaretMetrics.offset = OffsetF(10.0f, 10.0f);
+    expectedCaretMetrics.height = 15.0f;
+    mockParagraph->caretMetrics_ = expectedCaretMetrics;
+    resultRect = textSelectController->GetCaretRectByIndex(5, TextAffinity::DOWNSTREAM);
+    mockParagraph->caretMetrics_.reset();
+    EXPECT_EQ(resultRect, RectF(15.0f, 15.0f, 2.0, 15.0f));
 }
 
 /**

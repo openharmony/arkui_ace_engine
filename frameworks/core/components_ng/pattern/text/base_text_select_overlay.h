@@ -326,6 +326,7 @@ public:
     }
     bool GetDragViewHandleRects(RectF& firstRect, RectF& secondRect);
     void UpdateIsSingleHandle(bool isSingleHandle);
+    void AddTaskAfterShowOverlay(std::function<void()>&& task);
 
 protected:
     RectF MergeSelectedBoxes(
@@ -411,6 +412,7 @@ protected:
     RectF ConvertWindowToScreenDomain(RectF rect);
     EdgeF ConvertWindowToScreenDomain(EdgeF edge);
     std::string GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom);
+    void FlushAfterOverlayShowTask();
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
@@ -447,6 +449,7 @@ private:
      */
     bool isHostNodeEnableSubWindowMenu_ = true;
     bool isSuperFoldDisplayDevice_ = false;
+    std::vector<std::function<void()>> afterShowTasks_;
 };
 
 } // namespace OHOS::Ace::NG
