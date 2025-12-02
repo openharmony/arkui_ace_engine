@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { getObservableTarget } from "./observable"
+import { getObservableTarget } from './observable'
 
 /*
     When decorating variables of complex types,
@@ -46,7 +46,7 @@ export function propDeepCopy<T>(sourceObject: T): T {
             .forEach((key) => {
                 const property = objectToCopyFrom[key as keyof Object]
 
-                if (typeof property === "function") {
+                if (typeof property === 'function') {
                     Reflect.set(copy, key, property)
                     copy[key] = copy[key].bind(copy)
                     return

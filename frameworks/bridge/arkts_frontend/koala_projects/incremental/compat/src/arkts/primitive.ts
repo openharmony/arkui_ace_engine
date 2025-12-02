@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,42 +12,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { float64, int32, float32, int64 } from "./types"
+import { float32, float64, int32, int64 } from './types';
 
-export function float32To64(value: float32): float64 {
-    return Float.toDouble(value)
+export function float32to64(value: float32): float64 {
+    return Float.toDouble(value);
+}
+export function float32toInt32(value: float32): int32 {
+    return Float.toInt(value);
+}
+export function float32toInt64(value: float32): int64 {
+    return Float.toLong(value);
 }
 
-export function float64To32(value: float64): float32 {
-    return Double.toFloat(value)
+export function float64to32(value: float64): float32 {
+    return Double.toFloat(value);
+}
+export function float64toInt32(value: float64): int32 {
+    return Double.toInt(value);
+}
+export function float64toInt64(value: float64): int64 {
+    return Double.toLong(value);
+}
+
+export function int32toFloat32(value: int32): float32 {
+    return Int.toFloat(value);
+}
+export function int32toFloat64(value: int32): float64 {
+    return Int.toDouble(value);
+}
+export function int32to64(value: int32): int64 {
+    return Int.toLong(value);
+}
+
+export function int64toFloat32(value: int64): float32 {
+    return Long.toFloat(value);
+}
+export function int64toFloat64(value: int64): float64 {
+    return Long.toDouble(value);
+}
+export function int64to32(value: int64): int32 {
+    return Long.toInt(value);
 }
 
 export function asFloat64(value: string): float64 {
-    return (new Number(value)).valueOf()
+    return new Number(value).valueOf();
 }
-
-export function asString(value: float64 | undefined): string | undefined {
-    if (value === undefined) return undefined
-    return (new Number(value)).toString()
-}
-
-export function float32FromBits(value: int32): float32 {
-    return Float.bitCastFromInt(value)
-}
-
-export function int32BitsFromFloat(value: float32): int32 {
-    return Float.bitCastToInt(value)
-}
-
-export function float64ToInt(value: float64): int32 {
-    return value.toInt()
-}
-
-export function float64ToLong(value: float64): int64 {
-    return value.toLong()
-}
-
-export function charToInt(value: char): int32 {
-    return value.toInt()
-}
-
