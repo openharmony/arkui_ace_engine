@@ -51,11 +51,13 @@ export class TabTitleBarTabItem {
   icon?: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
 }
+
 const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 const RESOURCE_TYPE_SYMBOL = 40000;
+
 class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
@@ -94,16 +96,13 @@ export struct TabTitleBar {
   @State currentIndex: number = 0;
   @State swiperCurrentIndex: int = 0;
   @State fontSize: number = 1;
-
   static readonly totalHeight: number = 56;
   static readonly correctionOffset: number = -40.0;
   static readonly gradientMaskWidth: number = 24;
   private static instanceCount: number = 0;
-
   private menuSectionWidth: number = 0;
   private tabOffsets: Array<number> = new Array<number>();
   private imageWidths: Array<number> = new Array<number>();
-
   private scroller: Scroller = new Scroller();
   private swiperController: SwiperController = new SwiperController();
   private settings: RenderingContextSettings = new RenderingContextSettings(true);
@@ -178,7 +177,7 @@ export struct TabTitleBar {
         alignItems: ItemAlign.Stretch
       }) {
         Stack({ alignContent: Alignment.End }) {
-          Stack({ alignContent: Alignment.Start }) { 1
+          Stack({ alignContent: Alignment.Start }) {
 
             Column() {
               List({ initialIndex: 0, scroller: this.scroller, space: 0 }) {
@@ -209,9 +208,11 @@ export struct TabTitleBar {
               .listDirection(Axis.Horizontal)
               .scrollBar(BarState.Off)
             }
+
             this.GradientMask(this.leftContext2D, 0, TabTitleBar.totalHeight / 2,
               TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2);
           }
+
           this.GradientMask(this.rightContext2D, TabTitleBar.gradientMaskWidth,
             TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2);
         }
@@ -246,7 +247,7 @@ export struct TabTitleBar {
         .height('100%')
         .curve(Curve.Friction)
         .onChange((index: int) => {
-          if(index < this.tabOffsets.length) {
+          if (index < this.tabOffsets.length) {
             const offset = this.tabOffsets[index] + TabTitleBar.correctionOffset;
             this.currentIndex = index;
             this.scroller.scrollTo({
@@ -270,10 +271,9 @@ export struct TabTitleBar {
 
 @Component
 export struct CollapsibleMenuSection {
-
   menuItems: Array<TabTitleBarMenuItem> = new Array<TabTitleBarMenuItem>();
   index: number = 0;
-  PUBLIC_MORE: Resource= $r('sys.symbol.dot_grid_2x2');
+  PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
   item: TabTitleBarMenuItem = {
     value: this.PUBLIC_MORE,
     symbolStyle: new SymbolGlyphModifier(this.PUBLIC_MORE) as SymbolGlyphModifier,
@@ -283,18 +283,15 @@ export struct CollapsibleMenuSection {
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
-
   static readonly maxCountOfVisibleItems: number = 1;
   private static readonly focusPadding: number = 4;
   private static readonly marginsNum: number = 2;
   private firstFocusableIndex: number = -1;
-
   @State isPopupShown: boolean = false;
   @State isMoreIconOnFocus: boolean = false;
   @State isMoreIconOnHover: boolean = false;
   @State isMoreIconOnClick: boolean = false;
   @PropRef @Watch('onFontSizeUpdated') fontSize: number = 1;
-
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: TabTitleBarDialog({
       cancel: () => {
@@ -309,7 +306,6 @@ export struct CollapsibleMenuSection {
     isModal: true,
     customStyle: true,
   });
-
   @Observed
   @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
@@ -418,7 +414,7 @@ export struct CollapsibleMenuSection {
           .onHover((isOn: boolean, event: HoverEvent) => {
             this.isMoreIconOnHover = isOn;
           })
-          .onKeyEvent((event: KeyEvent): boolean =>  {
+          .onKeyEvent((event: KeyEvent): boolean => {
             if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
               return false;
             }
@@ -498,14 +494,11 @@ struct TabContentItem {
   maxIndex: number = 0;
   onCustomClick?: (index: number) => void;
   onImageComplete?: (width: number) => void;
-
   @PropRef currentIndex: number;
-
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
   @State tabWidth: number = 0;
-
   @State imageWidth: number = 24;
   @State imageHeight: number = 24;
   static readonly imageSize: number = 24;
@@ -553,7 +546,6 @@ struct TabContentItem {
       this.getUIContext().px2vp(info?.componentWidth as int) + TabContentItem.paddingLeft + TabContentItem.paddingRight;
     this.onImageComplete?.(onImageCompleteValue);
   }
-
   private onErrorCallback: ImageErrorCallback | undefined = (event: ImageError) => {
     if (!this.onImageComplete) {
       return;
@@ -777,15 +769,13 @@ struct ImageMenuItem {
     value: ''
   } as TabTitleBarMenuItem;
   index: number = 0;
-
-  PUBLIC_MORE: Resource= $r('sys.symbol.dot_grid_2x2');
+  PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
   static readonly imageSize: number = 24;
   static readonly imageHotZoneWidth: number = 48;
   static readonly buttonBorderRadius: number = 8;
   static readonly focusBorderWidth: number = 2;
   static readonly disabledImageOpacity: number = 0.4;
   static readonly focusablePrefix: string = "Id-TabTitleBar-ImageMenuItem-";
-
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
@@ -812,9 +802,13 @@ struct ImageMenuItem {
     } else if (typeof resource === 'undefined') {
       return '' as string;
     } else {
-      let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-      getStringSync((this.item.accessibilityText as Resource).id as Long)
-      return str as string;
+      let accessibilityText: string = '';
+      let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+      if (uiContent) {
+        accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
+          .getStringSync((this.item.accessibilityText as Resource).id as Long)
+      }
+      return accessibilityText as string;
     }
   }
 
@@ -833,9 +827,13 @@ struct ImageMenuItem {
       } else if (typeof this.item.accessibilityText === 'undefined') {
         return '' as string;
       } else {
-        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((this.item.accessibilityText as Resource).id as Long)
-        return str as string;
+        let accessibilityText: string = '';
+        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        if (uiContent) {
+          accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
+            .getStringSync((this.item.accessibilityText as Resource).id as Long)
+        }
+        return accessibilityText as string;
       }
     } else if (this.item.label) {
       if (typeof this.item.label === 'string') {
@@ -843,9 +841,13 @@ struct ImageMenuItem {
       } else if (typeof this.item.label === 'undefined') {
         return '' as string;
       } else {
-        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((this.item.label as Resource).id as Long)
-        return str as string;
+        let label: string = '';
+        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        if (uiContent) {
+          label = (uiContent as common.UIAbilityContext).resourceManager
+            .getStringSync((this.item.label as Resource).id as Long)
+        }
+        return label as string;
       }
     }
     return ' ';

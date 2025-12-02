@@ -33,6 +33,7 @@ import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import resourceManager from '@ohos.resourceManager';
 import accessibility from '@ohos.accessibility'
+import { UIContext, Context } from "@ohos.arkui.UIContext";
 
 const IMAGE_NODE_HEIGHT: number = 24;
 const IMAGE_NODE_WIDTH: number = 24;
@@ -423,6 +424,7 @@ export class NodeInfo {
   private isModify: boolean = false;
   private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   public fontColor: ResourceColor = '';
+
   constructor(node: NodeItem, nodeParam: NodeParam) {
     this.node = node;
     this.nodeParam = nodeParam;
@@ -791,8 +793,8 @@ export enum TreeListenType {
 export class TreeListener {
   public _events: Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null> =
     new Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null>();
-  _once_events: Map<TreeListenType, (callbackParam: CallbackParam) => void> =
-    new Map<TreeListenType, (callbackParam: CallbackParam) => void>();
+  public _once_events: Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null> =
+    new Map<TreeListenType, ((callbackParam: CallbackParam) => void) | null>();
 
   constructor() {
   }
@@ -867,11 +869,20 @@ export class TreeListener {
    */
   public emit(event: TreeListenType, argument: CallbackParam) {
     if (this._events.get(event)) {
-      const callback: ((callbackParam: CallbackParam) => void) | undefined = this._events.get(event) as ((callbackParam: CallbackParam) => void) | undefined;
+      const callback: ((callbackParam: CallbackParam) => void) | undefined =
+        this._events.get(event) as ((callbackParam: CallbackParam) => void) | undefined;
       try {
         callback?.(argument);
       } catch (e) {
         throw new Error('on function callbacks error.');
+      }
+    } else if (this._once_events.get(event)) {
+      const callback: ((callbackParam: CallbackParam) => void) | undefined =
+        this._once_events.get(event) as ((callbackParam: CallbackParam) => void) | undefined;
+      try {
+        callback?.(argument);
+      } catch (e) {
+        throw new Error('once function callbacks error.');
       }
     }
   }
@@ -1019,6 +1030,7 @@ export struct TreeView {
     this.treeViewTheme.arrowIconColor = theme.colors.iconPrimary;
     this.treeController.treeViewTheme = this.treeViewTheme;
   }
+
   aboutToAppear(): void {
     if (this.treeController !== null) {
       this.listNodeDataSource = this.treeController.getListNodeDataSource();
@@ -1242,20 +1254,22 @@ export struct TreeView {
       );
     }
   }
+
   public sendAccessibility(textAnnouncedForAccessibility: string): void {
     const context = this.getUIContext().getHostContext();
     let bundleName: string = 'defaultBundle';
     if (context) {
       bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
     }
-    let eventInfo= new accessibility.EventInfo(
+    let eventInfo = new accessibility.EventInfo(
       'announceForAccessibility', // 表示主动播报的事件。
       bundleName as string, // 目标应用名；不可缺省。
-      'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+      'common',// 表示没有特定操作，用于主动聚焦、主动播报等场景。
     );
     eventInfo.textAnnouncedForAccessibility = textAnnouncedForAccessibility
     accessibility.sendAccessibilityEvent(eventInfo);
   }
+
   private clickInner(itemInner: NodeInfo) {
     this.viewLastIndex = this.listNodeDataSource.getLastIndex();
     let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
@@ -1305,7 +1319,7 @@ export struct TreeView {
             TreeViewInner({
               item: itemInner,
               listNodeDataSource: this.listNodeDataSource,
-              index: this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId()),
+              index: this.listNodeDataSource.findIndex(Number(itemInner.getNodeCurrentNodeId() + '')),
               listTreeViewMenu: this.builder,
               callBackClick: (): void => this.clickInner(itemInner),
             })
@@ -1320,7 +1334,7 @@ export struct TreeView {
           start: this.itemPadding.left,
           end: this.itemPadding.right
         } as LocalizedPadding)
-        .align(Alignment.Start)
+        // .align(Alignment.Start)
         .onDragStart((event: DragEvent, extraParams?: string) => {
           this.accessibilityNodeType = AccessibilityNodeType.LIFT;
           if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
@@ -1329,8 +1343,8 @@ export struct TreeView {
             };
           }
           let currentNodeIndex: number;
-          let selectedIndexInterface:SelectedIndexInterface = new  SelectedIndexInterface();
-          if(extraParams != null){
+          let selectedIndexInterface: SelectedIndexInterface = new SelectedIndexInterface();
+          if (extraParams != null) {
             const params = JSON.parse<SelectedIndexInterface>(extraParams.toString(), Type.of(selectedIndexInterface));
             if (params != null) {
               this.dropSelectedIndex = params.selectedIndex as number;
@@ -1338,7 +1352,7 @@ export struct TreeView {
             }
           }
           let currentNodeInfo: NodeInfo = this.listNodeDataSource.getData(currentNodeIndex as int) as NodeInfo;
-          let currentItemNodeId: number = itemInner.getNodeCurrentNodeId();
+          let currentItemNodeId: number = Number(itemInner.getNodeCurrentNodeId() + '');
           /* handle the situation of drag error, currentNodeIndex is not found in onDragStart. */
           if (currentNodeIndex >= this.listNodeDataSource.totalCount() || currentNodeIndex === undefined) {
             hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found in onDragStart');
@@ -1350,7 +1364,6 @@ export struct TreeView {
           this.listNodeDataSource.setCurrentNodeInfo(currentNodeInfo);
           this.listNodeDataSource.setDraggingCurrentNodeId(currentNodeInfo?.getNodeCurrentNodeId());
           this.listNodeDataSource.setDraggingParentNodeId(currentNodeInfo?.getNodeParentNodeId());
-
           /* set the opacity of the dragging node. */
           let draggingNodeOpacity: number = DRAG_OPACITY;
           this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
@@ -1366,7 +1379,6 @@ export struct TreeView {
             return () => {
             };
           }
-
           let primaryTitle = currentNodeInfo.getNodeInfoData()?.primaryTitle === undefined ? '' :
             currentNodeInfo.getNodeInfoData()?.primaryTitle;
           let secondaryTitle = currentNodeInfo.getNodeInfoData()?.secondaryTitle === undefined ? '' :
@@ -1376,7 +1388,6 @@ export struct TreeView {
           let title: string = `${primaryTitleText}, ${secondaryTitleText}`;
           this.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
             title));
-
           let allParentNode: number[] = [];
           for (let i: int = 0; i < this.listNodeDataSource.listNode.length; i++) {
             if (this.listNodeDataSource.listNode[i].getNodeParentNodeId() === -1) {
@@ -1387,7 +1398,8 @@ export struct TreeView {
           let bundleName: string | undefined = 'defaultBundle';
           let context = this.getUIContext().getHostContext()
           if (context) {
-            bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+            bundleName =
+              (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
           }
           let eventInfo = new accessibility.EventInfo('requestFocusForAccessibility', bundleName as string, 'common')
           eventInfo.customId = `treeView_node_lift${currentItemNodeId}`
@@ -1401,6 +1413,7 @@ export struct TreeView {
           return () => {
             this.draggingPopup(currentNodeInfo)
           };
+
         })
       }, (item: NodeInfo) => JSON.stringify(item))
     }
@@ -1412,7 +1425,6 @@ export struct TreeView {
         return;
       }
       let nodeHeight: number = LIST_ITEM_HEIGHT;
-
       /* flag the position of the focus on the node. */
       let flag: Flag = Math.floor(
         event.getWindowY() /
@@ -1421,8 +1433,8 @@ export struct TreeView {
 
       /* Record the node position to which the dragged node moves. */
       let index: number;
-      let insertIndexInterface:InsertIndexInterface =new  InsertIndexInterface();
-      if(extraParams != null ){
+      let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
+      if (extraParams != null) {
         let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
         if (params != null) {
           index = params.insertIndex;
@@ -1458,11 +1470,10 @@ export struct TreeView {
         }
       }
       this.listNodeDataSource.setLastPassIndex(index);
-
       /* Set the visibility of the flag line. */
       this.listNodeDataSource.setVisibility(flag, index - 1, isOverBorder, this.allParentNode);
       /* Automatically HighLight one second delay and expand after two second delay. */
-      if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.getDraggingCurrentNodeId()) {
+      if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.getDraggingCurrentNodeId() as int) {
         this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(currentNodeId),
           currentNodeId, index);
       }
@@ -1472,7 +1483,6 @@ export struct TreeView {
     .onDragEnter((event: DragEvent, extraParams?: string) => {
       if (this.listNodeDataSource.getIsInnerDrag()) {
         this.listNodeDataSource.setIsDrag(true);
-
         /* set the opacity of the dragging node. */
         let draggingNodeOpacity: number = DRAG_OPACITY;
         this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
@@ -1492,35 +1502,31 @@ export struct TreeView {
     /* DragEvent Drop. */
     .onDrop((event: DragEvent, extraParams?: string) => {
       let nodeInfo1: NodeInfo[] = [];
-      for(let  i =0 ;i< this.listNodeDataSource.listNode.length;i++){
+      for (let i = 0; i < this.listNodeDataSource.listNode.length; i++) {
         nodeInfo1.push(this.listNodeDataSource.listNode[i])
       }
       this.accessibilityNodeType = AccessibilityNodeType.PLACE;
-
       this.listNodeDataSource.clearLastTimeoutExpand();
       let draggingNodeOpacity: number = DRAG_OPACITY_NONE;
       this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
       let insertNodeIndex: number;
-      let insertIndexInterface:InsertIndexInterface = new  InsertIndexInterface();
-      if(extraParams != null){
+      let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
+      if (extraParams != null) {
         let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
         if (params != null) {
           insertNodeIndex = params.insertIndex
         }
       }
-      let currentNodeIndex: number = this.dropSelectedIndex ;
-
+      let currentNodeIndex: number = this.dropSelectedIndex;
       if (currentNodeIndex - 1 > this.listNodeDataSource.totalCount() || currentNodeIndex === undefined) {
         hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found');
         this.listNodeDataSource.setIsDrag(false);
         return;
       }
-
       if (insertNodeIndex === this.listNodeDataSource.totalCount()) {
         hilog.info(LOG_CODE, TAG, 'need to insert into the position of the last line');
         insertNodeIndex -= 1;
       }
-
       let insertNodeInfo: NodeInfo | undefined = this.listNodeDataSource.getData(insertNodeIndex as int);
       if (insertNodeInfo === undefined) {
         return;
@@ -1544,7 +1550,8 @@ export struct TreeView {
        * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId".
        * drag is fail.
        */
-      let isParentNodeOfInsertNode: boolean = this.listNodeDataSource.getIsParentOfInsertNode(insertNodeCurrentNodeId as int);
+      let isParentNodeOfInsertNode: boolean =
+        this.listNodeDataSource.getIsParentOfInsertNode(insertNodeCurrentNodeId as int);
       if (isParentNodeOfInsertNode) {
         this.listNodeDataSource.clearLastTimeoutHighLight();
         this.listNodeDataSource.setIsInnerDrag(false);
@@ -1565,7 +1572,6 @@ export struct TreeView {
           this.listNodeDataSource.findIndex(draggingCurrentNodeId));
       }
       let flag: boolean = false;
-
       /* Expand insert node. */
       if (this.listNodeDataSource.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === NodeStatus.COLLAPSE) {
         let currentIndex: number = this.listNodeDataSource.findIndex(insertNodeCurrentNodeId);
@@ -1576,6 +1582,7 @@ export struct TreeView {
       }
       /* alter dragNode. */
       this.listNodeDataSource.setLastDelayHighLightId();
+
       if (currentNodeInfo !== null && draggingCurrentNodeId !== insertNodeCurrentNodeId) {
         this.listNodeDataSource.alterDragNode(insertNodeParentNodeId, insertNodeCurrentNodeId,
           draggingParentNodeId, draggingCurrentNodeId, currentNodeInfo);
@@ -1599,8 +1606,7 @@ export struct TreeView {
       /* innerDrag is over. */
       this.listNodeDataSource.setIsInnerDrag(false);
       this.listNodeDataSource.notifyDataReload();
-
-      for(let  i =0 ;i< nodeInfo1.length;i++){
+      for (let i = 0; i < nodeInfo1.length; i++) {
         this.listNodeDataSource.listNode.push(nodeInfo1[i])
       }
       this.listNodeDataSource.listNode[currentFocusIndex.toInt()].fontColor =
@@ -1630,7 +1636,6 @@ export struct TreeView {
           .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
       }
       this.listNodeDataSource.lastIndex = currentFocusIndex;
-
       let parentNodeId: int | undefined = currentNodeInfo?.getNodeParentNodeId();
       this.listNodeDataSource.judgeImageCollapse(parentNodeId as int);
       const context = this.getUIContext().getHostContext();
@@ -1908,6 +1913,7 @@ export class TreeController {
   private initBuild: boolean = true;
   public treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   private nodeIdList: int[] = [];
+
   public getListNodeDataSource(): ListNodeDataSource {
     return this.listNodeDataSource;
   }
@@ -2051,8 +2057,7 @@ export class TreeController {
     if (nodeParam === undefined) {
       this.add(this.initBuild);
       return this;
-    }
-    else {
+    } else {
       for (let i: int = 0; i < this.nodeIdList.length; i++) {
         if (nodeParam.currentNodeId === this.nodeIdList[i]) {
           throw new Error('ListTreeNode[addNode]: ' +
@@ -2062,21 +2067,24 @@ export class TreeController {
       }
       let addNodeResult: boolean = false;
       let primaryTitle: string = "";
-      if(nodeParam.primaryTitle !== undefined){
+      if (nodeParam.primaryTitle !== undefined) {
         if (typeof nodeParam.primaryTitle === 'string') {
           primaryTitle = nodeParam.primaryTitle as string;
         } else {
-
-          primaryTitle = resourceManager.getSysResourceManager().getStringSync((nodeParam.primaryTitle as Resource).id as Long);
+          let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+          if (uiContent) {
+            primaryTitle =
+              (uiContent as common.UIAbilityContext).resourceManager.getStringSync((nodeParam.primaryTitle as Resource).id as Long)
+          }
         }
       }
-      if (nodeParam.primaryTitle !== undefined &&
-        !this.listNodeDataSource.checkMainTitleIsValid(nodeParam.primaryTitle as String)) {
+      if (primaryTitle !== undefined &&
+        !this.listNodeDataSource.checkMainTitleIsValid(primaryTitle as string)) {
         throw new Error('ListTreeNode[addNode]: ' +
           'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
         return this;
       }
-      if (nodeParam.primaryTitle === null && nodeParam.icon === null && nodeParam.symbolIconStyle === null) {
+      if (primaryTitle === null && nodeParam.icon === null && nodeParam.symbolIconStyle === null) {
         throw new Error('ListTreeNode[addNode]: ' +
           'The icon|symbolIconStyle and directory name cannot be empty at the same time.');
         return this;
@@ -2160,6 +2168,7 @@ export class TreeController {
     this.initBuild = false;
   }
 }
+
 export class BasicDataSource implements IDataSource<NodeInfo> {
   private listeners: DataChangeListener[] = []
 
@@ -2494,7 +2503,6 @@ export class ListNodeDataSource extends BasicDataSource {
       this.notifyDataReload();
       return;
     }
-    //
     let childNum: int[] | null = new Array<int>(this.listNode[thisIndex.toInt()].getChildNodeInfo().childNum);
     childNum[0] = thisIndex + 1;
     let index: int = 1;
@@ -3180,16 +3188,15 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public sendAccessibility(textAnnouncedForAccessibility: string): void {
-    // const context = this.getUIContext().getHostContext();
-    // let bundleName: string = 'defaultBundle';
-    // if (context) {
-    //   bundleName = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
-    // }
-    //
-    let eventInfo= new accessibility.EventInfo(
+    let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+    let bundleName: string = 'defaultBundle';
+    if (uiContent) {
+      bundleName = (uiContent as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
+    }
+    let eventInfo = new accessibility.EventInfo(
       'announceForAccessibility', // 表示主动播报的事件。
-      'defaultBundle', // 目标应用名；不可缺省。
-      'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+      bundleName, // 目标应用名；不可缺省。
+      'common',// 表示没有特定操作，用于主动聚焦、主动播报等场景。
     );
     eventInfo.textAnnouncedForAccessibility = textAnnouncedForAccessibility
     accessibility.sendAccessibilityEvent(eventInfo);
@@ -3201,7 +3208,11 @@ export class ListNodeDataSource extends BasicDataSource {
       if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
+        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        if (uiContent) {
+          resourceString =
+            (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long)
+        }
       }
     } catch (err) {
       let code: undefined | int = (err as ClassCastError)?.code;
@@ -3212,7 +3223,6 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public setVisibility(flag: Flag, index: number, isOverBorder: boolean, allParentNode: number[]): void {
-
     let isChanged: boolean = (this.thisPassIndex !== index || this.flag !== flag) ? true : false;
     this.thisPassIndex = index;
     if ((isChanged || isOverBorder) && this.isInnerDrag) {
@@ -3220,11 +3230,11 @@ export class ListNodeDataSource extends BasicDataSource {
       let currentNodeId: int | undefined = this.getData(index as int)?.getNodeCurrentNodeId();
       let currentNodeLevel: number | undefined = this.getData(index as int)?.getNodeLevel();
       if (currentNodeId !== undefined) {
-        currentNodeLevel = (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.EXPAND &&
+        currentNodeLevel = (this.expandAndCollapseInfo.get(Number(currentNodeId + "")) === NodeStatus.EXPAND &&
           this.flag === Flag.DOWN_FLAG) ? (currentNodeLevel ? currentNodeLevel + 1 : undefined) : currentNodeLevel;
-        if (this.lastPassId !== this.INITIAL_INVALID_VALUE &&
-        this.loadedNodeIdAndIndexMap.has(this.lastPassId as number)) {
-          let lastIndex: number = this.loadedNodeIdAndIndexMap.get(this.lastPassId as number) as number;
+        if (this.lastPassId !== this.INITIAL_INVALID_VALUE as int &&
+        this.loadedNodeIdAndIndexMap.has(Number(this.lastPassId + ""))) {
+          let lastIndex: number = this.loadedNodeIdAndIndexMap.get(Number(this.lastPassId + "")) as number;
           this.listNode.forEach((value) => {
             if (value.getNodeCurrentNodeId() === this.lastPassId) {
               value.setCanShowFlagLine(false);
@@ -3235,17 +3245,16 @@ export class ListNodeDataSource extends BasicDataSource {
         let insertNodeUpNodeId: int | undefined = this.getData(Double.toInt(index) - 1)?.getNodeCurrentNodeId();
         let insertNodeDownNodeId: int | undefined = this.getData(Double.toInt(index) + 2)?.getNodeCurrentNodeId();
         let insertNodeCurrentNodeId: int | undefined = this.getData(Double.toInt(index) + 1)?.getNodeCurrentNodeId();
-        let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
+        let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as int);
         if (this.flag === Flag.DOWN_FLAG && index < this.totalCount() - 1) {
-          this.getData(Double.toInt(index))?.setCanShowFlagLine(false);
-          this.getData(Double.toInt(index) + 1)?.setCanShowFlagLine(true);
-          this.getData(Double.toInt(index))?.setCanShowBottomFlagLine(false);
-          this.getData(Double.toInt(index) + 1)?.setFlagLineLeftMargin(currentNodeLevel);
+          this.getData(index as int)?.setCanShowFlagLine(false);
+          this.getData(index as int + 1)?.setCanShowFlagLine(true);
+          this.getData(index as int)?.setCanShowBottomFlagLine(false);
+          this.getData(index as int + 1)?.setFlagLineLeftMargin(currentNodeLevel);
           this.notifyDataChange(index);
           this.notifyDataChange(index + 1);
-          this.lastPassId = this.getData(Double.toInt(index) + 1)?.getNodeCurrentNodeId();
-
-          let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
+          this.lastPassId = this.getData(index as int + 1)?.getNodeCurrentNodeId();
+          let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as int);
           if (!nodeItem?.childNodeInfo.isHasChildNode) {
             this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeCurrentNodeId);
           } else {
@@ -3259,7 +3268,6 @@ export class ListNodeDataSource extends BasicDataSource {
           this.notifyDataChange(index);
           this.notifyDataChange(index + 1);
           this.lastPassId = this.getData(Double.toInt(index))?.getNodeCurrentNodeId();
-
           if (nodeItem?.childNodeInfo.isHasChildNode && nodeItem?.parentNodeId !== -1) {
             this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeCurrentNodeId);
           } else if (nodeItem?.childNodeInfo.isHasChildNode && nodeItem?.parentNodeId === -1) {
@@ -3277,6 +3285,8 @@ export class ListNodeDataSource extends BasicDataSource {
           this.notifyDataChange(index);
           this.lastPassId = this.getData(Double.toInt(index))?.getNodeCurrentNodeId();
         }
+
+
       }
     }
   }
@@ -3284,7 +3294,6 @@ export class ListNodeDataSource extends BasicDataSource {
   public delayHighLightAndExpandNode(currentIndex: number, currentNodeId: number, showIndex: number): void {
     let isChangIndex: boolean = currentIndex !== this.lastDelayExpandIndex ? true : false;
     let isOverBorder: boolean | undefined = this.getData(Double.toInt(showIndex))?.getIsOverBorder();
-    let insertNodeId: number = this.listNode[(currentIndex + 1).toInt()]!.getNodeCurrentNodeId();
     let insertNodeParentNodeId: number = this.findParentNodeId(currentNodeId);
     if (isOverBorder) {
       this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
@@ -3292,7 +3301,6 @@ export class ListNodeDataSource extends BasicDataSource {
       this.lastDelayExpandIndex = currentIndex;
     }
     if (isOverBorder || isChangIndex) {
-
       /* highLight node time-out. */
       let canDelayHighLight: boolean | undefined = !isOverBorder && (!this.isInnerDrag ||
         (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.COLLAPSE && this.isInnerDrag) ||
@@ -3320,7 +3328,6 @@ export class ListNodeDataSource extends BasicDataSource {
       }
       this.lastTimeoutHighLightId = this.timeoutHighLightId;
       this.lastDelayHighLightIndex = currentIndex;
-
       /* alter flagLine and expand node time-out. */
       if (!isOverBorder && this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.COLLAPSE) {
         let firstChildNodeId: number | undefined =
@@ -3376,7 +3383,8 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public hideLastLine(): void {
-    if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId as number)) {
+    if (this.lastPassId !== this.INITIAL_INVALID_VALUE as int &&
+    this.loadedNodeIdAndIndexMap.has(Number(this.lastPassId + ''))) {
       this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === this.lastPassId) {
           value.setCanShowFlagLine(false);
@@ -3384,7 +3392,7 @@ export class ListNodeDataSource extends BasicDataSource {
           return;
         }
       })
-      let index: number = this.loadedNodeIdAndIndexMap.get(this.lastPassId as number) as number;
+      let index: number = this.loadedNodeIdAndIndexMap.get(Number(this.lastPassId + '')) as number;
       this.notifyDataChange(index);
     }
   }
@@ -3411,7 +3419,20 @@ export class ListNodeDataSource extends BasicDataSource {
       if (typeof this.nodeIdAndSubtitleMap.get(currentNodeId) === 'number') {
         return this.nodeIdAndSubtitleMap.get(currentNodeId)?.toString();
       } else {
-        return this.nodeIdAndSubtitleMap.get(currentNodeId) as string;
+        let title: string = '';
+        if (this.nodeIdAndSubtitleMap.get(currentNodeId) !== undefined) {
+          if (typeof this.nodeIdAndSubtitleMap.get(currentNodeId) === 'string') {
+            return this.nodeIdAndSubtitleMap.get(currentNodeId) as string;
+          } else {
+            let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+            if (uiContent) {
+              title =
+                (uiContent as common.UIAbilityContext).resourceManager
+                  .getStringSync((this.nodeIdAndSubtitleMap.get(currentNodeId) as Resource).id as Long) as string
+            }
+          }
+        }
+        return title;
       }
     } else {
       return '';
@@ -3494,9 +3515,7 @@ export class ListNodeDataSource extends BasicDataSource {
     let isDownFlag: boolean = this.flag === Flag.DOWN_FLAG ? true : false;
 
     currentChildIndex = this.getChildIndex(dragParentNodeId, dragCurrentNodeId);
-
     insertChildIndex = this.getChildIndex(rearParentNodeId, rearCurrentNodeId) + 1;
-
     if (rearParentNodeId !== dragParentNodeId) {
       insertChildIndex = isDownFlag ? insertChildIndex + 1 : insertChildIndex;
     } else {
@@ -3506,7 +3525,6 @@ export class ListNodeDataSource extends BasicDataSource {
         insertChildIndex = isDownFlag ? insertChildIndex + 1 : insertChildIndex;
       }
     }
-
     for (let i: int = 0; i < this.listNode.length; i++) {
       if (this.listNode[i].getNodeCurrentNodeId() === rearCurrentNodeId) {
         isHighLight = this.listNode[i].getIsHighLight();
@@ -3531,13 +3549,11 @@ export class ListNodeDataSource extends BasicDataSource {
       parentNodeId: parentNodeId,
       childIndex: insertChildIndex as int,
     }
-
     /* export inner drag node Id. */
     this.appEventBus.emit(TreeListenType.NODE_MOVE, callbackParam);
 
     /* To store dragging node information by the array named 'dragNodeParam'. */
     dragNodeParam.push({ parentId: parentNodeId, currentId: currentNodeId, data: nodeParam });
-
     let callback: (node: NodeItem, listNode: NodeInfo[]) => boolean =
       (node: NodeItem, listNode: NodeInfo[]): boolean => {
         if (node) {
@@ -3601,7 +3617,7 @@ export class ListNodeDataSource extends BasicDataSource {
     /* Add remaining node. */
     for (let j: int = 1; j < dragNodeParam.length; j++) {
       let addNodeResult: boolean =
-        this.addNode(dragNodeParam[j].parentId as int, dragNodeParam[j].currentId  as int, dragNodeParam[j].data, false);
+        this.addNode(dragNodeParam[j].parentId as int, dragNodeParam[j].currentId as int, dragNodeParam[j].data, false);
       if (!addNodeResult) {
         return;
       }
@@ -4261,17 +4277,14 @@ export class ListNodeDataSource extends BasicDataSource {
     if (!found && currentNode) {
       found = callback(currentNode, listNode) === true;
       if (!found) {
-        if(currentNode.children.length > 0){
+        if (currentNode.children.length > 0) {
           stack.unshift(...currentNode.children);
-          if(stack.shift() !== undefined ){
+          if (stack.shift() !== undefined) {
             currentNode = stack.shift() as NodeItem;
           }
         }
       }
     }
-
-
-
   }
 
   private updateChildIndexOfParent(insertIndex: number, parent: NodeItem): void {
@@ -4351,6 +4364,7 @@ class ButtonGestureModifier implements GestureModifier {
   constructor(controller: CustomDialogController | null) {
     this.controller = controller;
   }
+
   applyGesture(event: UIGestureEvent): void {
     if (this.fontSize >= ButtonGestureModifier.minFontSize) {
       event.addGesture(
@@ -4386,10 +4400,12 @@ export struct TreeViewInner {
   @Consume clickButtonFlag: boolean;
   @Consume accessibilityNodeType: AccessibilityNodeType;
   @Consume isAccessibilityEnabled: boolean;
+
   @Builder
   defaultMenu() {
 
   }
+
   @BuilderParam private listTreeViewMenu: () => void = this.defaultMenu;
   callBackClick: () => void = () => {
 
@@ -4413,7 +4429,8 @@ export struct TreeViewInner {
     top: LengthMetrics.resource($r('sys.float.padding_level0')),
     bottom: LengthMetrics.resource($r('sys.float.padding_level0')),
   } as ItemPadding;
-  private inputFontSize: number = resourceManager.getSysResourceManager().getDoubleByName('ohos_id_text_size_body1');
+  private inputFontSize: number =
+    this.getUIContext().px2vp(resourceManager.getSysResourceManager().getDoubleByName('ohos_id_text_size_body1'));
 
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {
@@ -4570,7 +4587,7 @@ export struct TreeViewInner {
 
     this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
     this.listNodeDataSource.setClickIndex(this.index);
-    let currentId: number = this.item.getNodeCurrentNodeId();
+    let currentId: number = this.item.getNodeCurrentNodeId() as int;
     if (event.type === TouchType.Down) {
       this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
     } else if (event.type === TouchType.Up) {
@@ -4607,7 +4624,7 @@ export struct TreeViewInner {
         MenuOperation.COMMIT_NODE
       );
     }
-    this.lastIndex = this.index;
+    this.lastIndex = this.index as int;
     this.count--;
   }
 
@@ -4635,7 +4652,7 @@ export struct TreeViewInner {
     }
 
     this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
-    let callParam: CallbackParam = { currentNodeId: currentId as int};
+    let callParam: CallbackParam = { currentNodeId: currentId as int };
     this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
 
     this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
@@ -4677,7 +4694,6 @@ export struct TreeViewInner {
       }, ENTER_EXIT_DURATION)
     })
   }
-
 
   @Builder
   popupForShowTitle(text: ResourceStr | undefined, backgroundColor: undefined | ResourceColor,
@@ -4741,20 +4757,19 @@ export struct TreeViewInner {
   }
 
   @Builder
-  popupBuilder(){
+  popupBuilder() {
     this.popupForShowTitle(this.item.getPopUpInfo().popUpText,
       this.item.getPopUpInfo().popUpColor,
       this.item.getPopUpInfo().popUpTextColor)
   }
 
-  propColor( item: NodeInfo): undefined | Color | String | Resource | Long {
-    if(item.getPopUpInfo().popUpColor  === undefined){
+  propColor(item: NodeInfo): undefined | Color | String | Resource | Long {
+    if (item.getPopUpInfo().popUpColor === undefined) {
       return undefined;
-    }else{
+    } else {
       return item.getPopUpInfo().popUpColor as Resource
     }
   }
-
 
   build() {
     if (this.item.getNodeIsShow()) {
@@ -4763,8 +4778,7 @@ export struct TreeViewInner {
           Stack({ alignContent: Alignment.Bottom }) {
             Divider()
               .height(this.listNodeDataSource.getFlagLine().flagLineHeight)
-              .color(this.listNodeDataSource.getFlagLine()
-                .flagLineColor)
+              .color(this.listNodeDataSource.getFlagLine().flagLineColor)
               .visibility(this.listNodeDataSource.getVisibility(this.item))
               .lineCap(LineCapStyle.Round)
               .margin({ start: LengthMetrics.vp(this.item.getFlagLineLeftMargin()) } as LocalizedMargin)
@@ -4787,7 +4801,7 @@ export struct TreeViewInner {
                         .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
                     } else {
                       if (Util.isSymbolResource(this.item.imageSource)) {
-                        SymbolGlyph(this.item.imageSource  as Resource)
+                        SymbolGlyph(this.item.imageSource as Resource)
                           .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
                           this.decideSymbolFontScale(true)}vp`)
                           .fontColor([this.getLeftIconColor()])
@@ -4945,6 +4959,7 @@ export struct TreeViewInner {
             .width('100%')
             .height(this.item.getNodeHeight())
             .padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) } as LocalizedPadding)
+
             // .bindContextMenu(this.builder, ResponseType.RightClick)
           }.focusable(true)
         }
