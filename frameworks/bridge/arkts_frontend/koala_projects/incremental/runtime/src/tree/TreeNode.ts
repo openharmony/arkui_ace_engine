@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { className, float64, float64ToInt, int32, uint32 } from '@koalaui/common'
+import { className, float64, int32, uint32 } from '@koalaui/common'
 import { RuntimeProfiler } from '../common/RuntimeProfiler'
 import { Disposable } from '../states/Disposable'
 import { ReadonlyTreeNode } from './ReadonlyTreeNode'
@@ -60,13 +60,27 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
     }
 
     /**
+     * Returns the first child node contained in this node if it is exist.
+     */
+    get firstChild(): TreeNode | undefined {
+        return this.childAt(0)
+    }
+
+    /**
+     * @returns the next sibling of this node if it is exist
+     */
+    get nextSibling(): TreeNode | undefined {
+        return this.parent?.childAt(this.index + 1)
+    }
+
+    /**
      * Returns the depth of this node relative to the root node.
      * The root node returns 0.
      */
     get depth(): uint32 {
         let count: uint32 = 0
         let parent = this.myParent
-        while (parent !== undefined) {
+        while (parent) {
             parent = parent!.myParent
             count++
         }
@@ -77,7 +91,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Returns the number of children of this node.
      */
     get childrenCount(): uint32 {
-        return float64ToInt(this.myChildren.length)
+        return this.myChildren.length
     }
 
     /**
@@ -125,7 +139,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
         const length = children.length
         for (let i = 0; i < length; i++) {
             let value = valueOf(children[i], i)
-            if (value !== undefined) return value
+            if (value !== undefined) { return value }
         }
         return undefined
     }
@@ -158,7 +172,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Returns a child node at the specified index.
      */
     childAt(index: int32): TreeNode | undefined {
-        if (!this.accessible(index)) return undefined // index out of bounds
+        if (!this.accessible(index)) { return undefined } // index out of bounds
         return this.myChildren[index]
     }
 
@@ -173,8 +187,8 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Inserts the given node at the specified index if possible.
      */
     insertChildAt(index: int32, node: TreeNode): boolean {
-        if (!this.accessible(index, 0)) return false // index out of bounds
-        if (!this.insertable(node)) return false // cannot be inserted
+        if (!this.accessible(index, 0)) { return false } // index out of bounds
+        if (!this.insertable(node)) { return false } // cannot be inserted
         this.insertNodeAt(index, node)
         return true
     }
@@ -190,11 +204,11 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Inserts several nodes at the specified index if possible.
      */
     insertChildrenAt(index: int32, ...nodes: TreeNode[]): boolean {
-        if (!this.accessible(index, 0)) return false // index out of bounds
-        if (nodes.length < 1) return false // nothing to insert
+        if (!this.accessible(index, 0)) { return false } // index out of bounds
+        if (nodes.length < 1) { return false } // nothing to insert
         const length = nodes.length
         for (let i = 0; i < length; i++) {
-            if (!this.insertable(nodes[i])) return false // cannot be inserted
+            if (!this.insertable(nodes[i])) { return false } // cannot be inserted
         }
         for (let i = 0; i < length; i++) {
             this.insertNodeAt(index + i, nodes[i])
@@ -206,7 +220,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Removes a child node at the specified index if possible.
      */
     removeChildAt(index: int32): TreeNode | undefined {
-        if (!this.accessible(index)) return undefined // index out of bounds
+        if (!this.accessible(index)) { return undefined } // index out of bounds
         return this.removeNodes(index, 1)[0]
     }
 
@@ -214,8 +228,8 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Removes several nodes at the specified index if possible.
      */
     removeChildrenAt(index: int32, count?: uint32): Array<TreeNode> {
-        if (count === undefined) count = this.childrenCount - index
-        if (count < 1 || !this.accessible(index, count)) return new Array<TreeNode>() // index out of bounds
+        if (count === undefined) { count = this.childrenCount - index }
+        if (count < 1 || !this.accessible(index, count)) { return new Array<TreeNode>() } // index out of bounds
         return this.removeNodes(index, count)
     }
 
@@ -223,8 +237,8 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Removes a child node if possible.
      */
     removeChild(node: TreeNode): boolean {
-        if (node.myParent !== this) return false // not in hierarchy
-        const index: int32 = this.myIndicesValid ? node.index : float64ToInt(this.myChildren.indexOf(node))
+        if (node.myParent !== this) { return false } // not in hierarchy
+        const index: int32 = this.myIndicesValid ? node.index : this.myChildren.indexOf(node)
         return undefined !== this.removeChildAt(index)
     }
 
@@ -237,7 +251,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
 
     private removeNodes(index: int32, count: uint32): Array<TreeNode> {
         const nodes = this.myChildren.splice(index, count)
-        if (index < this.childrenCount) this.myIndicesValid = false
+        if (index < this.childrenCount) { this.myIndicesValid = false }
         const length = nodes.length
         for (let i = 0; i < length; i++) {
             const current = nodes[i]
@@ -251,7 +265,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
     private insertNodeAt(index: int32, node: TreeNode): void {
         node.myIndex = index
         node.myParent = this
-        if (index < this.childrenCount) this.myIndicesValid = false
+        if (index < this.childrenCount) { this.myIndicesValid = false }
         this.myChildren.splice(index, 0, node)
         this.onChildInserted?.(node, index)
     }
@@ -285,7 +299,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
     }
 
     collectParentsTo(array: Array<TreeNode>): void {
-        const index = float64ToInt(array.length)
+        const index = array.length
         let parent = this.myParent
         while (parent !== undefined) {
             array.splice(index, 0, parent!)

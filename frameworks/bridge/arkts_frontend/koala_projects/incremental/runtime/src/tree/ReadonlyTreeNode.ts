@@ -17,7 +17,19 @@ export interface ReadonlyTreeNode {
     /**
      * @returns a parent tree node if it is exist
      */
-    readonly parent: ReadonlyTreeNode|undefined
+    readonly parent: ReadonlyTreeNode | undefined
+    /**
+     * @returns the first child node contained in this node if it is exist
+     */
+    readonly firstChild: ReadonlyTreeNode | undefined
+    /**
+     * @returns the next sibling of this node if it is exist
+     */
+    readonly nextSibling: ReadonlyTreeNode | undefined
+    /**
+     * @returns text representation of the node used to generate a tree hierarchy
+     */
+    toString(): string
     /**
      * @returns text representation of a tree hierarchy starting from the tree node
      */

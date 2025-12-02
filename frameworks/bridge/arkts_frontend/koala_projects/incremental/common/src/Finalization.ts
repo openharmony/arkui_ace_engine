@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-import { finalizerRegister as finalizerRegisterCompat, finalizerUnregister as finalizerUnregisterCompat, Thunk } from "@koalaui/compat"
+import {
+    finalizerRegister as finalizerRegisterCompat,
+    finalizerUnregister as finalizerUnregisterCompat,
+    Thunk,
+} from '@koalaui/compat'
 
-export { Thunk } from "@koalaui/compat"
+export { Thunk } from '@koalaui/compat'
 
 export function finalizerRegister(target: object, thunk: Thunk) {
     finalizerRegisterCompat(target, thunk)
@@ -30,7 +34,7 @@ export function finalizerUnregister(target: object) {
 }
 
 class CleanerThunk implements Thunk {
-    private cleaner:  () => void
+    private cleaner: () => void
     constructor(cleaner: () => void) {
         this.cleaner = cleaner
     }
