@@ -41,11 +41,11 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 
 @ComponentV2
 export struct ProgressButtonV2 {
-  @Param @Require progress: double;
-  @Param content: ResourceStr = EMPTY_STRING as string;
+  @Param @Require progress: double | undefined;
+  @Param content: ResourceStr | undefined = EMPTY_STRING as string;
   @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
   @Param onClicked: ClickCallback = () => {};
-  @Param isEnabled: boolean = true;
+  @Param isEnabled: boolean | undefined = true;
   @Param colorOptions?: ProgressButtonV2Color | undefined = undefined;
   @Param progressButtonRadius?: LengthMetrics | undefined = undefined;
   @Local textProgress: string = EMPTY_STRING as string;
@@ -62,38 +62,45 @@ export struct ProgressButtonV2 {
     this.containerBackgroundColor = theme.colors.iconOnFourth;
   }
 
-  private getButtonProgress(): double {
-    if (this.progress < 0) {
-      return 0;
-    } else if (this.progress > MAX_PROGRESS) {
-      return MAX_PROGRESS;
+  private getButtonProgress():double {
+    if (this.progress === undefined) {
+      return 0.0;
     }
-    return this.progress;
+    const safeProgress: double = this.progress as double;
+    const minValue: double = Math.min(safeProgress, MAX_PROGRESS);
+    return Math.max(0.0, minValue);
   }
 
   @Monitor(['progress'])
-  private getProgressContext(monitor: IMonitor) {
-    if (this.progress < 0.0) {
+  private getProgressContext(monitor: IMonitor){
+    const safeProgress: double = this.progress === undefined || this.progress == null
+      ? 0.0
+      : this.progress as double;
+    if (safeProgress < 0.0) {
       this.isLoading = false;
       this.textProgress = MIN_PERCENTAGE;
-    } else if (this.progress >= MAX_PROGRESS) {
+    } else if (safeProgress >= MAX_PROGRESS) {
       this.isLoading = false;
       this.textProgress = MAX_PERCENTAGE;
     } else {
       this.isLoading = true;
-      this.textProgress = `${Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS)}%`;
+      const percentage: double = (safeProgress / MAX_PROGRESS) * 100.0;
+      this.textProgress = `${Math.floor(percentage)}%`;
     }
   }
 
   @Monitor(['isLoading'])
   private getLoadingProgress(monitor: IMonitor) {
+    const safeProgress: double = this.progress === undefined || this.progress == null
+      ? 0.0
+      : this.progress as double;
     if (this.isLoading) {
-      if (this.progress < 0.0) {
+      if (safeProgress < 0.0) {
         this.textProgress = MIN_PERCENTAGE;
-      } else if (this.progress >= MAX_PROGRESS) {
+      } else if (safeProgress >= MAX_PROGRESS) {
         this.textProgress = MAX_PERCENTAGE;
       } else {
-        this.textProgress = `${Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS)}%`;
+        this.textProgress = `${Math.floor(safeProgress / MAX_PROGRESS * MAX_PROGRESS)}%`;
       }
     }
   }
@@ -148,7 +155,7 @@ export struct ProgressButtonV2 {
               if (!newValue.height || newValue.height === this.textHeight) {
                 return;
               }
-              this.textHeight = (newValue.height as number) > (BUTTON_NORMARL_HEIGHT as number) ? 
+              this.textHeight = (newValue.height as number) > (BUTTON_NORMARL_HEIGHT as number) ?
                 newValue.height as number : BUTTON_NORMARL_HEIGHT;
               this.buttonBorderRadius = (Number(this.textHeight as number) / 2) as number;
             })
@@ -166,12 +173,12 @@ export struct ProgressButtonV2 {
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
           .borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
-          this.buttonBorderRadius)
+            this.buttonBorderRadius)
           .width('100%')
       }
     }
     .borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
-    this.buttonBorderRadius)
+      this.buttonBorderRadius)
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
@@ -184,11 +191,17 @@ export struct ProgressButtonV2 {
       BUTTON_NORMARL_WIDTH as number : this.toLengthString(this.progressButtonWidth) as string)
     .constraintSize({ minWidth: BUTTON_NORMARL_WIDTH })
     .stateEffect(this.isEnabled)
-    .onClick((event?: ClickEvent) => {
+    .onClick((event?: ClickEvent):void => {
+      const safeProgress: double = this.progress === undefined || this.progress == null
+        ? 0.0
+        : this.progress as double;
+      if (this.progress === undefined) {
+        return;
+      }
       if (!this.isEnabled) {
         return;
       }
-      if (this.progress < MAX_PROGRESS) {
+      if (safeProgress < MAX_PROGRESS) {
         this.isLoading = !this.isLoading;
       }
       this.onClicked();
@@ -248,3 +261,6 @@ export interface ProgressButtonV2ColorOptions {
   textColor?: ColorMetrics;
   backgroundColor?: ColorMetrics;
 }
+
+
+
