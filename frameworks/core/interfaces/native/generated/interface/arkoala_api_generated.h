@@ -1738,6 +1738,8 @@ typedef struct TextPickerEnterSelectedAreaCallback TextPickerEnterSelectedAreaCa
 typedef struct Opt_TextPickerEnterSelectedAreaCallback Opt_TextPickerEnterSelectedAreaCallback;
 typedef struct TextPickerScrollStopCallback TextPickerScrollStopCallback;
 typedef struct Opt_TextPickerScrollStopCallback Opt_TextPickerScrollStopCallback;
+typedef struct TextSelectionChangeCallback TextSelectionChangeCallback;
+typedef struct Opt_TextSelectionChangeCallback Opt_TextSelectionChangeCallback;
 typedef struct TextTimerModifierBuilder TextTimerModifierBuilder;
 typedef struct Opt_TextTimerModifierBuilder Opt_TextTimerModifierBuilder;
 typedef struct TimerCallback TimerCallback;
@@ -13194,6 +13196,16 @@ typedef struct Opt_TextPickerScrollStopCallback {
     Ark_Tag tag;
     TextPickerScrollStopCallback value;
 } Opt_TextPickerScrollStopCallback;
+typedef struct TextSelectionChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String selectionText);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String selectionText);
+} TextSelectionChangeCallback;
+typedef struct Opt_TextSelectionChangeCallback {
+    Ark_Tag tag;
+    TextSelectionChangeCallback value;
+} Opt_TextSelectionChangeCallback;
 typedef struct TextTimerModifierBuilder {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -25765,6 +25777,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                  const Opt_Boolean* value);
     void (*setEnableSelectedDataDetector)(Ark_NativePointer node,
                                           const Opt_Boolean* value);
+    void (*setOnTextSelectionChange)(Ark_NativePointer node,
+                                     const Opt_TextSelectionChangeCallback* value);
     void (*setEnableImageAnalyzer)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,

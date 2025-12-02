@@ -65,6 +65,8 @@ bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Bo
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnFullScreenExit(const CallbackHelper<Callback_Void>& arkCallback,

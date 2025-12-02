@@ -324,6 +324,7 @@ typedef enum CallbackKind {
     Kind_TextFieldValueCallback = 18061455,
     Kind_TextPickerEnterSelectedAreaCallback = -202014218,
     Kind_TextPickerScrollStopCallback = -1928298699,
+    Kind_TextSelectionChangeCallback = 230052384,
     Kind_TextTimerModifierBuilder = 505330174,
     Kind_TimerCallback = 938649756,
     Kind_ToggleModifierBuilder = -879751946,

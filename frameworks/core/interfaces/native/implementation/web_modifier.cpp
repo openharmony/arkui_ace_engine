@@ -2805,6 +2805,27 @@ void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 
+void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                  const Opt_TextSelectionChangeCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onTextSelectionChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> void {
+        OnTextSelectionChange(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnTextSelectionChange(frameNode, onTextSelectionChange);
+#endif // WEB_SUPPORTED
+}
+
 void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
 {
@@ -2957,6 +2978,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
         WebAttributeModifier::SetZoomControlAccessImpl,
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+        WebAttributeModifier::SetOnTextSelectionChangeImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,

@@ -2973,6 +2973,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnTextSelectionChangeAttribute(value: TextSelectionChangeCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnTextSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setEnableImageAnalyzerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3586,6 +3598,7 @@ export interface BlankScreenDetectionEventInfo {
     blankScreenDetails?: BlankScreenDetails;
 }
 export type OnDetectBlankScreenCallback = (event: BlankScreenDetectionEventInfo) => void;
+export type TextSelectionChangeCallback = (selectionText: string) => void;
 export enum BlankScreenDetectionMethod {
     DETECTION_CONTENTFUL_NODES_SEVENTEEN = 0
 }
@@ -4007,6 +4020,9 @@ export interface WebAttribute extends CommonMethod {
     enableSelectedDataDetector(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableSelectedDataDetector")
     }
+    onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onTextSelectionChange")
+    }
     enableImageAnalyzer(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableImageAnalyzer")
     }
@@ -4157,6 +4173,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     blankScreenDetectionConfig_value?: BlankScreenDetectionConfig | undefined
     zoomControlAccess_value?: boolean | undefined
     enableSelectedDataDetector_value?: boolean | undefined
+    onTextSelectionChange_value?: TextSelectionChangeCallback | undefined
     enableImageAnalyzer_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
     setWebOptions(value: WebOptions): this {
@@ -4568,6 +4585,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     enableSelectedDataDetector(value: boolean | undefined): this {
+        return this
+    }
+    onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
         return this
     }
     enableImageAnalyzer(value: boolean | undefined): this {
@@ -5706,6 +5726,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("enableSelectedDataDetector")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableSelectedDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
+        if (this.checkPriority("onTextSelectionChange")) {
+            const value_casted = value as (TextSelectionChangeCallback | undefined)
+            this.getPeer()?.setOnTextSelectionChangeAttribute(value_casted)
             return this
         }
         return this

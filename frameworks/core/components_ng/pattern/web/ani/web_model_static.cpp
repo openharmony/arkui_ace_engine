@@ -1442,6 +1442,20 @@ void WebModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, bool is
     webPatternStatic->UpdateEnableSelectedDataDetector(isEnabled);
 }
 
+void WebModelStatic::SetOnTextSelectionChange(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = callback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnTextSelectionChangeEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);

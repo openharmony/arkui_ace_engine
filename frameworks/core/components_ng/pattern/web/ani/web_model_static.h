@@ -234,6 +234,8 @@ public:
     static void SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId);
     static void SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOnTextSelectionChange(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkWebPeer, MixedMode, WebRotateEffect, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnOverrideErrorPageCallback, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
+import { ArkWebPeer, MixedMode, WebRotateEffect, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnOverrideErrorPageCallback, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, TextSelectionChangeCallback, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, KeyEvent, NestedScrollOptions } from "./component/common"
 import { CopyOptions } from "./component/enums"
@@ -312,6 +312,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _zoomControlAccess_0_0value?: boolean | undefined
     _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableSelectedDataDetector_0_0value?: boolean | undefined
+    _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onTextSelectionChange_0_0value?: TextSelectionChangeCallback | undefined
     _enableImageAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableImageAnalyzer_0_0value?: boolean | undefined
     _registerNativeEmbedRule_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2774,6 +2776,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._onTextSelectionChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onTextSelectionChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnTextSelectionChangeAttribute((this._onTextSelectionChange_0_0value as TextSelectionChangeCallback | undefined));
+                    this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnTextSelectionChangeAttribute((undefined as TextSelectionChangeCallback | undefined));
+                }
+            }
+        }
         if (this._enableImageAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._enableImageAnalyzer_0_flag) {
@@ -4600,6 +4620,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._onTextSelectionChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onTextSelectionChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onTextSelectionChange(modifier._onTextSelectionChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onTextSelectionChange((undefined as TextSelectionChangeCallback | undefined));
+                }
+            }
+        }
         if (modifier._enableImageAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._enableImageAnalyzer_0_flag) {
@@ -6133,6 +6166,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
+        if (((this._onTextSelectionChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onTextSelectionChange_0_0value = value
+        } else
+        {
+            this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
