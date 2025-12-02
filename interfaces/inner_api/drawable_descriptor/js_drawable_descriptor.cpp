@@ -529,12 +529,14 @@ napi_value JsDrawableDescriptor::SetBlendMode(napi_env env, napi_callback_info i
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value argv[1] = { 0 };
     napi_valuetype valueType = napi_undefined;
     if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_number)) {
         HILOGI("invalid number value for blendMode");
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     int32_t mode;
