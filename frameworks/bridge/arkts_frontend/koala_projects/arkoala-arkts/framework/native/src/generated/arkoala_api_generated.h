@@ -24293,6 +24293,8 @@ typedef struct GENERATED_ArkUISearchModifier {
                             const Opt_Callback_EditableTextChangeValue_Boolean* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
                                   const Opt_KeyboardAppearance* value);
+    void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
+                                        const Opt_Boolean* value);
     void (*setDividerColor)(Ark_NativePointer node,
                         const Opt_ColorMetrics* value);
     void (*setSearchButton)(Ark_NativePointer node,
@@ -24937,6 +24939,8 @@ typedef struct GENERATED_ArkUITextModifier {
                            const Opt_Boolean* value);
     void (*setEnableHapticFeedback)(Ark_NativePointer node,
                                     const Opt_Boolean* value);
+    void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
+                                          const Opt_Boolean* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -25072,6 +25076,8 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                             const Opt_Callback_EditableTextChangeValue_Boolean* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
                                   const Opt_KeyboardAppearance* value);
+    void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
+                                          const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);
@@ -25253,6 +25259,8 @@ typedef struct GENERATED_ArkUITextInputModifier {
                             const Opt_Callback_EditableTextChangeValue_Boolean* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
                                   const Opt_KeyboardAppearance* value);
+    void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
+                                          const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);

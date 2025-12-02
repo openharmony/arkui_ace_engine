@@ -540,6 +540,23 @@ class TextOptimizeTrailingSpaceModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textCompressLeadingPunctuation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().text.setCompressLeadingPunctuation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -1175,6 +1192,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   optimizeTrailingSpace(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, TextOptimizeTrailingSpaceModifier, value);
+    return this;
+  }
+  compressLeadingPunctuation(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity, TextCompressLeadingPunctuationModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {

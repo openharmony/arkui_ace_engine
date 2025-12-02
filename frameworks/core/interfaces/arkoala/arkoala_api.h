@@ -3395,6 +3395,9 @@ struct ArkUITextModifier {
     void (*setTextOptimizeTrailingSpace)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextOptimizeTrailingSpace)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextOptimizeTrailingSpace)(ArkUINodeHandle node);
+    void (*setTextCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextCompressLeadingPunctuation)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLineCount)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
@@ -5170,6 +5173,9 @@ struct ArkUITextAreaModifier {
     ArkUI_Uint32 (*getTextAreaStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*setTextAreaScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     ArkUI_Uint32 (*getTextAreaScrollBarColor)(ArkUINodeHandle node);
     void (*resetTextAreaScrollBarColor)(ArkUINodeHandle node);
@@ -5423,6 +5429,9 @@ struct ArkUITextInputModifier {
     ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setTextInputCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*resetTextInputOnSecurityStateChange)(ArkUINodeHandle node);
     void (*setTextInputOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnWillAttachIME)(ArkUINodeHandle node);
@@ -6505,6 +6514,9 @@ struct ArkUISearchModifier {
     void (*resetSearchStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setSearchCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetSearchCompressLeadingPunctuation)(ArkUINodeHandle node);
+    ArkUI_Bool (*getSearchCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*setSearchMargin)(ArkUINodeHandle node);
     void (*resetSearchMargin)(ArkUINodeHandle node);
     void (*setSearchCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);

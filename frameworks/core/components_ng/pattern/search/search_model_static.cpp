@@ -635,6 +635,11 @@ void SearchModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, std::optio
     SearchModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true));
 }
 
+void SearchModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& state)
+{
+    SearchModelNG::SetCompressLeadingPunctuation(frameNode, state.value_or(false));
+}
+
 void SearchModelStatic::SetOnChangeEvent(FrameNode* frameNode,
     std::function<void(const std::u16string&)>&& onChangeEvent)
 {

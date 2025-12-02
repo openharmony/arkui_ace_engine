@@ -382,4 +382,9 @@ void TextModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, const std::o
     TextModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true));
 }
 
+void TextModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
 } // namespace OHOS::Ace::NG

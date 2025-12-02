@@ -922,6 +922,18 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setKeyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setCompressLeadingPunctuation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setInputFilterAttribute(value: ResourceStr | undefined, error?: ((value: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1177,6 +1189,9 @@ export interface TextAreaAttribute extends CommonMethod {
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         throw new Error("Unimplemented method keyboardAppearance")
     }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method compressLeadingPunctuation")
+    }
     inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this {
         throw new Error("Unimplemented method inputFilter")
     }
@@ -1248,6 +1263,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
+    compressLeadingPunctuation_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined
     setTextAreaOptions(value?: TextAreaOptions): this {
         return this
@@ -1421,6 +1437,9 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
         return this
     }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
         return this
     }
     inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this {
@@ -1905,6 +1924,14 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         if (this.checkPriority("keyboardAppearance")) {
             const value_casted = value as (KeyboardAppearance | undefined)
             this.getPeer()?.setKeyboardAppearanceAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public compressLeadingPunctuation(value: boolean | undefined): this {
+        if (this.checkPriority("compressLeadingPunctuation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCompressLeadingPunctuationAttribute(value_casted)
             return this
         }
         return this

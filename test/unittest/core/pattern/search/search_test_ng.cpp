@@ -2803,4 +2803,40 @@ HWTEST_F(SearchTestNg, OnIconColorConfigrationUpdate002, TestSize.Level1)
     searchPattern->OnIconColorConfigrationUpdate(theme);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColorValue(Color()), Color::RED);
 }
+
+/**
+ * @tc.name: SearchCompressLeadingPunctuation
+ * @tc.desc: Test the enable or disable the CompressLeadingPunctuation attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchCompressLeadingPunctuation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    SearchModelNG searchModelNG;
+    searchModelNG.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    searchModelNG.SetCompressLeadingPunctuation(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get CompressLeadingPunctuation Value
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetCompressLeadingPunctuation(), true);
+    EXPECT_EQ(SearchModelNG::GetCompressLeadingPunctuation(frameNode), true);
+    /**
+     * @tc.expected: Set CompressLeadingPunctuation False
+     */
+    SearchModelNG::SetCompressLeadingPunctuation(frameNode, false);
+    /**
+     * @tc.expected: Get CompressLeadingPunctuation Value
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetCompressLeadingPunctuation(), false);
+    EXPECT_EQ(SearchModelNG::GetCompressLeadingPunctuation(frameNode), false);
+}
 } // namespace OHOS::Ace::NG

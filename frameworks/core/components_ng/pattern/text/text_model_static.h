@@ -63,7 +63,7 @@ public:
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state);
-
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
         std::function<void()>&& buildFunc, SelectMenuParam& menuParam);

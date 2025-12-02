@@ -146,6 +146,7 @@ struct TextStyleResult {
     std::vector<Shadow> textShadows;
     std::optional<TextBackgroundStyle> textBackgroundStyle;
     float lineThicknessScale = 1.0f;
+    bool compressLeadingPunctuation = false;
 };
 
 struct ImageStyleResult {

@@ -42,6 +42,7 @@ constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
+constexpr bool DEFAULT_LEADING_PUNCTUATION = false;
 const int32_t ERROR_INT_CODE = -1;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
@@ -1367,6 +1368,26 @@ void ResetSearchOnWillAttachIME(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetOnWillAttachIME(frameNode, nullptr);
 }
+void SetSearchCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCompressLeadingPunctuation(frameNode, enable);
+}
+
+ArkUI_Int32 GetSearchCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(SearchModelNG::GetCompressLeadingPunctuation(frameNode));
+}
+
+void ResetSearchCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetCompressLeadingPunctuation(frameNode, DEFAULT_LEADING_PUNCTUATION);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
@@ -1494,7 +1515,10 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSearchCustomKeyboard = SetSearchCustomKeyboard,
         .resetSearchCustomKeyboard = ResetSearchCustomKeyboard,
         .setSearchOnWillAttachIME = SetSearchOnWillAttachIME,
-        .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME
+        .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME,
+        .setSearchCompressLeadingPunctuation = SetSearchCompressLeadingPunctuation,
+        .getSearchCompressLeadingPunctuation = GetSearchCompressLeadingPunctuation,
+        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

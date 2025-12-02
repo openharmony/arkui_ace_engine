@@ -131,6 +131,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStylesAppend(const RefPtr<FrameNode>
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     textStyle.SetEnableAutoSpacing(textFieldLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetCompressLeadingPunctuation(textFieldLayoutProperty->GetCompressLeadingPunctuationValue(false));
     // use for modifier.
     auto contentModifier = pattern->GetContentModifier();
     CHECK_NULL_VOID(contentModifier);
@@ -876,6 +877,7 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderProperty(LayoutWrapper* la
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(PlaceholderItalicFontStyle, ItalicFontStyle);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(TextAlign, TextAlign);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(EnableAutoSpacing, EnableAutoSpacing);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(CompressLeadingPunctuation, CompressLeadingPunctuation);
     textLayoutProperty->UpdateLayoutDirection(direction_);
     if (!isInlineFocus_) {
         auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
@@ -1075,7 +1077,8 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
-        .enableAutoSpacing = textStyle.GetEnableAutoSpacing()
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation()
     };
 }
 
@@ -1120,7 +1123,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .textOverflow = style->GetTextOverflow(),
         .fontSize = paragraphData.fontSize,
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
-        .enableAutoSpacing = textStyle.GetEnableAutoSpacing() };
+        .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation() };
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = style->GetTextAlign();
     }

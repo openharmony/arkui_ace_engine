@@ -723,6 +723,14 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     SearchModelStatic::SetKeyboardAppearance(frameNode, convValue);
 }
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    SearchModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
 void SetDividerColorImpl(Ark_NativePointer node, const Opt_ColorMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -832,6 +840,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SetStopBackPressImpl,
         SearchAttributeModifier::SetOnWillChangeImpl,
         SearchAttributeModifier::SetKeyboardAppearanceImpl,
+        SearchAttributeModifier::SetCompressLeadingPunctuationImpl,
         SearchAttributeModifier::SetDividerColorImpl,
         SearchAttributeModifier::SetSearchButtonImpl,
         SearchAttributeModifier::SetInputFilterImpl,

@@ -1479,6 +1479,23 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaCompressLeadingPunctuation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetCompressLeadingPunctuation(node);
+    } else {
+      getUINativeModule().textArea.setCompressLeadingPunctuation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
   constructor(value: (client: IMEClient) => void) {
     super(value);

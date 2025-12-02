@@ -133,6 +133,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _compressLeadingPunctuation_0_0value?: boolean | undefined
     _dividerColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dividerColor_0_0value?: ColorMetrics | undefined
     _searchButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -958,6 +960,24 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (this._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._searchButton_0_flag) {
@@ -1601,6 +1621,19 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (modifier._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._compressLeadingPunctuation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.compressLeadingPunctuation(modifier._compressLeadingPunctuation_0_0value);
+                    break;
+                }
+                default: {
+                    this.compressLeadingPunctuation((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._searchButton_0_flag) {
@@ -2133,6 +2166,17 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         } else
         {
             this._dividerColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        if (((this._compressLeadingPunctuation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._compressLeadingPunctuation_0_0value) !== (value)))
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._compressLeadingPunctuation_0_0value = value
+        } else
+        {
+            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

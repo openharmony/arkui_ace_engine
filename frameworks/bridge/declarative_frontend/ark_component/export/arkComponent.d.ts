@@ -507,6 +507,7 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
     height(value: Length): this;
     strokeWidth(value: LengthMetrics): SearchAttribute;
     strokeColor(valeu: ResourceColor): SearchAttribute;
+    compressLeadingPunctuation(enable: boolean): SearchAttribute;
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     _changed: boolean;
@@ -759,6 +760,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     letterSpacing(value: number | string): TextAttribute;
     lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute;
     optimizeTrailingSpace(trim: boolean): TextAttribute;
+    compressLeadingPunctuation(enable: boolean): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -816,6 +818,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
     strokeWidth(value: LengthMetrics): TextAreaAttribute;
     strokeColor(value: ResourceColor): TextAreaAttribute;
+    compressLeadingPunctuation(enable: boolean): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -868,6 +871,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     ellipsisMode(value: EllipsisMode): TextInputAttribute;
     strokeWidth(value: LengthMetrics): TextInputAttribute;
     strokeColor(value: ResourceColor): TextInputAttribute;
+    compressLeadingPunctuation(enable: boolean): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

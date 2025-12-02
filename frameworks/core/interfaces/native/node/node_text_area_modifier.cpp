@@ -2581,6 +2581,27 @@ void TextAreaDeleteBackward(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::DeleteBackward(frameNode);
 }
+
+void SetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, trim);
+}
+
+ArkUI_Int32 GetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCompressLeadingPunctuation(frameNode));
+}
+
+void ResetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2782,6 +2803,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
         .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME,
         .textAreaDeleteBackward = TextAreaDeleteBackward,
+        .setTextAreaCompressLeadingPunctuation = SetTextAreaCompressLeadingPunctuation,
+        .getTextAreaCompressLeadingPunctuation = GetTextAreaCompressLeadingPunctuation,
+        .resetTextAreaCompressLeadingPunctuation = ResetTextAreaCompressLeadingPunctuation
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
