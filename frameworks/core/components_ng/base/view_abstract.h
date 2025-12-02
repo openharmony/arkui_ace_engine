@@ -480,6 +480,7 @@ public:
     static void SetOnDragEnd(
         FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
+    static bool GetMonopolizeEvents(FrameNode* frameNode);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
     static void EnableDropDisallowedBadge(bool enableDropDisallowedBadge);
     static int32_t CancelDataLoading(const std::string& key);
@@ -872,6 +873,7 @@ public:
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
+    static HoverEffectType GetHoverEffect(FrameNode* frameNode);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
@@ -1043,6 +1045,11 @@ public:
     static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
         bool arrowKeyStepOut);
+    static std::string GetFocusScopeId(FrameNode* frameNode);
+    static bool GetIsGroup(FrameNode* frameNode);
+    static bool GetArrowKeyStepOut(FrameNode* frameNode);
+    static uint32_t GetFocusScopePriority(FrameNode* frameNode);
+    static double GetClickDistance(FrameNode* frameNode);
     static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
         const uint32_t focusPriority);
     static void ResetResObj(FrameNode* frameNode, const std::string& key);

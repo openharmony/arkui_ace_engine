@@ -7650,6 +7650,88 @@ typedef enum {
      * @since 20
      */
     NODE_EMBEDDED_COMPONENT_OPTION,
+
+    /**
+     * @brief Defines the effect when the component is hovered. This attribute can be set, reset, and obtained as
+     * required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Hover effect of the component in hover state.
+     * The parameter type is {@link ArkUI_Hoverffect}. The default value is <b>ARKUI_HOVER_EFFECT_AUTO</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Hover effect of the component in hover state.
+     * The parameter type is {@link ArkUI_Hoverffect}. \n
+     *
+     * @since 23
+     */
+    NODE_HOVER_EFFECT = 112,
+
+    /**
+     * @brief Set container as a focus group with a specific identifier, supports attribute setting,
+     * attribute reset, and attribute acquisition interfaces.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} format:\n
+     * .string: The focus scope identifier.\n
+     * .value[0]?.i32：Whether this scope is a focus group, the default value is 0. The parameter type is 1 or 0.\n
+     * .value[1]?.i32：whether the arrow keys can move focus from inside the focus group to outside,
+     * only effective when isGroup is true, the default value is 1. The parameter type is 1 or 0.\n
+     * \n
+     * Attribute acquisition method return value {@link ArkUI_AttributeItem} format:\n
+     * .string: The focus scope identifier.\n
+     * .value[0]?.i32：Whether this scope is a focus group, the default value is 0. The parameter type is 1 or 0.\n
+     * .value[1]?.i32：whether the arrow keys can move focus from inside the focus group to outside,
+     * only effective when isGroup is true, the default value is 1. The parameter type is 1 or 0.\n
+     *
+     * @since 23
+     */
+    NODE_FOCUS_SCOPE_ID = 113,
+
+    /**
+     * @brief Set the focus priority of component in a specific focus scope, supports attribute setting,
+     * attribute reset, and attribute acquisition interfaces.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} format:\n
+     * .string: The focus scope identifier.\n
+     * .value[0]?.i32：The focus scope priority. The parameter type is {@link ArkUI_FocusPriority}.
+     * The default value is <b>ARKUI_FOCUS_PRIORITY_AUTO</b>.\n
+     * \n
+     * Attribute acquisition method return value {@link ArkUI_AttributeItem} format:\n
+     * .string: The focus scope identifier.\n
+     * .value[0]?.i32：The focus scope priority. The parameter type is {@link ArkUI_FocusPriority}.\n
+     *
+     * @since 23
+     */
+    NODE_FOCUS_SCOPE_PRIORITY = 114,
+
+    /**
+     * @brief Sets the distance threshold for on click events, supports attribute setting,
+     * attribute reset, and attribute acquisition interfaces.
+     *
+     * @note If the finger moves beyond the preset distance limit, on click event recognition fails.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: The distance threshold for on click events.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: The distance threshold for on click events.\n
+     *
+     * @since 23
+     */
+    NODE_ON_CLICK_EVENT_DISTANCE_THRESHOLD = 115,
+
+    /**
+     * @brief Defines the monopolize events attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is 1 or 0.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is 1 or 0.
+     *
+     * @since 23
+     */
+    NODE_MONOPOLIZE_EVENTS = 117,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12

@@ -2796,6 +2796,7 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityStateDescription)(ArkUINodeHandle node);
     void (*setHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetHoverEffect)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);
     void (*resetClickEffect)(ArkUINodeHandle node);
     void (*setKeyBoardShortCut)(
@@ -2841,6 +2842,7 @@ struct ArkUICommonModifier {
     void (*resetBlendMode)(ArkUINodeHandle node);
     void (*setMonopolizeEvents)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetMonopolizeEvents)(ArkUINodeHandle node);
+    ArkUI_Bool (*getMonopolizeEvents)(ArkUINodeHandle node);
     void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
     void (*resetConstraintSize)(ArkUINodeHandle node);
     void (*setOutlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 valuesSize, void* rawPtr);
@@ -2987,6 +2989,9 @@ struct ArkUICommonModifier {
     ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
     void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut);
     void (*resetFocusScopeId)(ArkUINodeHandle node);
+    void (*getFocusScopeId)(ArkUINodeHandle node, ArkUI_Bool (*values)[2], ArkUI_CharPtr *id);
+    void (*getFocusPriority)(ArkUINodeHandle node, ArkUI_Int32 (*values)[1], ArkUI_CharPtr *id);
+    ArkUI_Float32 (*getClickDistance)(ArkUINodeHandle node);
     void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);

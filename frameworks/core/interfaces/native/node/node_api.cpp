@@ -473,7 +473,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
     NodeModifier::SetOnHoverMove,
-    nullptr,
+    NodeModifier::SetOnSizeChange,
     NodeModifier::SetOnCoastingAxisEvent,
     NodeModifier::SetOnChildTouchTest,
 };
@@ -721,7 +721,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnClick,
     nullptr,
     NodeModifier::ResetOnHoverMove,
-    nullptr,
+    NodeModifier::ResetOnSizeChange,
     NodeModifier::ResetOnCoastingAxisEvent,
     NodeModifier::ResetOnChildTouchTest,
 };

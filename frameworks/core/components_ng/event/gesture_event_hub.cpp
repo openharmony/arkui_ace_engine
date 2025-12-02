@@ -601,6 +601,16 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double dista
     }
 }
 
+double GestureEventHub::GetClickDistance() const
+{
+    if (parallelCombineClick) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        return clickRecognizer->GetDistanceThreshold();
+    }
+    auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
+    return clickRecognizer->GetDistanceThreshold();
+}
+
 void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold)
 {
     CheckClickActuator();

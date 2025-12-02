@@ -2763,6 +2763,15 @@ void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
     gestureHub->SetNodeClickDistance(clickDistance);
 }
 
+double ViewAbstract::GetClickDistance(FrameNode* frameNode)
+{
+    auto defaultValue = std::numeric_limits<double>::infinity();
+    CHECK_NULL_RETURN(frameNode, defaultValue);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, defaultValue);
+    return gestureHub->GetClickDistance();
+}
+
 void ViewAbstract::SetDefaultFocus(bool isSet)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -8086,6 +8095,13 @@ void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEven
     gestureHub->SetMonopolizeEvents(monopolizeEvents);
 }
 
+bool ViewAbstract::GetMonopolizeEvents(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, false);
+    return gestureHub->GetMonopolizeEvents();
+}
+
 void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -8107,6 +8123,14 @@ void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEff
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEffect(hoverEffect);
+}
+
+HoverEffectType ViewAbstract::GetHoverEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::HoverEffectType::AUTO);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_RETURN(eventHub, OHOS::Ace::HoverEffectType::AUTO);
+    return eventHub->GetHoverEffect();
 }
 
 void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue)
@@ -9704,6 +9728,42 @@ void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focu
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
+}
+
+std::string ViewAbstract::GetFocusScopeId(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, "");
+    auto focusId = focusHub->GetFocusScopeId();
+    return focusId;
+}
+
+bool ViewAbstract::GetIsGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, 0);
+    auto isGroup = focusHub->GetIsFocusGroup();
+    return isGroup;
+}
+
+bool ViewAbstract::GetArrowKeyStepOut(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, 1);
+    auto arrowKeyStepOut = focusHub->GetArrowKeyStepOut();
+    return arrowKeyStepOut;
+}
+
+uint32_t ViewAbstract::GetFocusScopePriority(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, -1);
+    auto scopePriority = static_cast<uint32_t>(focusHub->GetFocusPriority());
+    return scopePriority;
 }
 
 void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,

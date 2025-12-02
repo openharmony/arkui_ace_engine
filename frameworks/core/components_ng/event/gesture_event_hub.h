@@ -205,6 +205,7 @@ public:
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
     void SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold);
+    double GetClickDistance() const;
     void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetFrameNodeCommonOnClick(GestureEventFunc&& clickEvent);

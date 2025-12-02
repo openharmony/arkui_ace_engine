@@ -2362,6 +2362,36 @@ typedef enum {
     ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE,
 } ArkUI_AnimationDirection;
 
+/**
+ * @brief Enumerates the effects when the component is hovered.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default effect. */
+    ARKUI_HOVER_EFFECT_AUTO = 0,
+    /** Zoom in and out effect. */
+    ARKUI_HOVER_EFFECT_SCALE,
+    /** Highlight effect. */
+    ARKUI_HOVER_EFFECT_HIGHLIGHT,
+    /** None effect. */
+    ARKUI_HOVER_EFFECT_NONE,
+} ArkUI_HoverEffect;
+
+/**
+ * @brief Enumerates the effects when the component is hovered.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default priority. */
+    ARKUI_FOCUS_PRIORITY_AUTO = 0,
+    /** Prior priority. */
+    ARKUI_FOCUS_PRIORITY_PRIOR = 2000,
+    /** Previous focus priority. */
+    ARKUI_FOCUS_PRIORITY_PREVIOUS = 3000,
+} ArkUI_FocusPriority;
+
 typedef enum {
     /** In the folded state, when the ListItem slides in the opposite direction to the main axis,
      * the operation item is hidden.*/

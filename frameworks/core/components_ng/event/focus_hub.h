@@ -834,6 +834,11 @@ public:
         return isGroup_;
     }
 
+    bool GetArrowKeyStepOut() const
+    {
+        return arrowKeyStepOut_;
+    }
+
     bool GetIsFocusScope() const
     {
         return isFocusScope_;

@@ -26,10 +26,12 @@
 #include "progress_option.h"
 #include "text_native_impl.h"
 #include "waterflow_section_option.h"
+#include "foundation/arkui/ace_engine/frameworks/core/event/mouse_event.h"
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -721,6 +723,20 @@ bool CheckAttributeIsKeyboardAppearance(int32_t value)
     int32_t minEnumValue = static_cast<int32_t>(ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
     int32_t maxEnumValue = static_cast<int32_t>(ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_DARK_IMMERSIVE);
     return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsHoverEffect(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_HoverEffect::ARKUI_HOVER_EFFECT_AUTO);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_HoverEffect::ARKUI_HOVER_EFFECT_NONE);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsFocusPriority(int32_t value)
+{
+    return value == static_cast<int32_t>(ArkUI_FocusPriority::ARKUI_FOCUS_PRIORITY_AUTO) ||
+           value == static_cast<int32_t>(ArkUI_FocusPriority::ARKUI_FOCUS_PRIORITY_PRIOR) ||
+           value == static_cast<int32_t>(ArkUI_FocusPriority::ARKUI_FOCUS_PRIORITY_PREVIOUS);
 }
 
 bool CheckAttributeString(const ArkUI_AttributeItem* item)
@@ -1581,6 +1597,217 @@ const ArkUI_AttributeItem* GetAllowForceDark(ArkUI_NodeHandle node)
 {
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAllowForceDark(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+int32_t SetMonopolizeEvents(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto fullImpl = GetFullImpl();
+    if (!item || !CheckAttributeIsBool(item->value[0].i32)) {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setMonopolizeEvents(node->uiNodeHandle, 0);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setMonopolizeEvents(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetMonopolizeEvents(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetMonopolizeEvents(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetMonopolizeEvents(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getMonopolizeEvents(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+HoverEffectType ConvertToHoverEffectType(int32_t hoverEffect)
+{
+    auto hoverValue = static_cast<ArkUI_HoverEffect>(hoverEffect);
+    switch (hoverValue) {
+        case ARKUI_HOVER_EFFECT_AUTO:
+            return HoverEffectType::AUTO;
+        case ARKUI_HOVER_EFFECT_SCALE:
+            return HoverEffectType::SCALE;
+        case ARKUI_HOVER_EFFECT_HIGHLIGHT:
+            return HoverEffectType::BOARD;
+        case ARKUI_HOVER_EFFECT_NONE:
+            return HoverEffectType::NONE;
+        default:
+            return HoverEffectType::AUTO;
+    }
+}
+
+ArkUI_Int32 ConvertToArkUIHoverEffectType(int32_t hoverEffect)
+{
+    auto hoverValue = static_cast<HoverEffectType>(hoverEffect);
+    switch (hoverValue) {
+        case HoverEffectType::AUTO:
+            return ARKUI_HOVER_EFFECT_AUTO;
+        case HoverEffectType::SCALE:
+            return ARKUI_HOVER_EFFECT_SCALE;
+        case HoverEffectType::BOARD:
+            return ARKUI_HOVER_EFFECT_HIGHLIGHT;
+        case HoverEffectType::NONE:
+            return ARKUI_HOVER_EFFECT_NONE;
+        default:
+            return ARKUI_HOVER_EFFECT_AUTO;
+    }
+}
+
+int32_t SetHoverEffect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!item || item->size != 1) {
+        auto defaulttype = ConvertToHoverEffectType(ARKUI_HOVER_EFFECT_AUTO);
+        auto defaultValue = static_cast<ArkUI_Int32>(defaulttype);
+        fullImpl->getNodeModifiers()->getCommonModifier()->setHoverEffect(node->uiNodeHandle, defaultValue);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!CheckAttributeIsHoverEffect(item->value[0].i32)) {
+        auto hoverEffectType = ConvertToHoverEffectType(item->value[0].i32);
+        auto hoverEffectTypeValue = static_cast<ArkUI_Int32>(hoverEffectType);
+        fullImpl->getNodeModifiers()->getCommonModifier()->setHoverEffect(node->uiNodeHandle, hoverEffectTypeValue);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto hoverEffectType = ConvertToHoverEffectType(item->value[0].i32);
+    auto hoverEffectTypeValue = static_cast<ArkUI_Int32>(hoverEffectType);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setHoverEffect(node->uiNodeHandle, hoverEffectTypeValue);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetHoverEffect(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetHoverEffect(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetHoverEffect(ArkUI_NodeHandle node)
+{
+    auto value = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getHoverEffect(node->uiNodeHandle);
+    auto resultValue = ConvertToArkUIHoverEffectType(value);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+int32_t SetFocusScopeId(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!item || !item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->size < NUM_0 || item->size > NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t isGroup = 0;
+    if (item->size >= NUM_1 && item->string) {
+        if (CheckAttributeIsBool(item->value[0].i32)) {
+            isGroup = item->value[0].i32;
+        } else {
+            fullImpl->getNodeModifiers()->getCommonModifier()->setFocusScopeId(node->uiNodeHandle, item->string, 0, 1);
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    int32_t arrowKeyStepOut = 1;
+    if (item->size >= NUM_2 && item->string) {
+        if (CheckAttributeIsBool(item->value[1].i32)) {
+            arrowKeyStepOut = item->value[1].i32;
+        } else {
+            fullImpl->getNodeModifiers()->getCommonModifier()->setFocusScopeId(node->uiNodeHandle, item->string, 0, 1);
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusScopeId(
+        node->uiNodeHandle, item->string, isGroup, arrowKeyStepOut);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetFocusScopeId(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusScopeId(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetFocusScopeId(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Bool focusScopeValue[NUM_2];
+    ArkUI_CharPtr id;
+    fullImpl->getNodeModifiers()->getCommonModifier()->getFocusScopeId(node->uiNodeHandle, &focusScopeValue, &id);
+    g_attributeItem.string = id;
+    g_numberValues[NUM_0].i32 = focusScopeValue[NUM_0];
+    g_numberValues[NUM_1].i32 = focusScopeValue[NUM_1];
+    return &g_attributeItem;
+}
+
+int32_t SetFocusScopePriority(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!item) {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setFocusScopePriority(
+            node->uiNodeHandle, "", ArkUI_FocusPriority::ARKUI_FOCUS_PRIORITY_AUTO);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!CheckAttributeIsFocusPriority(item->value[0].i32) || item->size < NUM_0 || item->size > NUM_1) {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setFocusScopePriority(
+            node->uiNodeHandle, item->string, ArkUI_FocusPriority::ARKUI_FOCUS_PRIORITY_AUTO);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    int32_t focusPriorityValue = ArkUI_FocusPriority::ARKUI_FOCUS_PRIORITY_AUTO;
+    if (item->size >= NUM_1 && item->string) {
+        focusPriorityValue = item->value[0].i32;
+    }
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusScopePriority(
+        node->uiNodeHandle, item->string, focusPriorityValue);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetFocusScopePriority(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusScopePriority(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetFocusPriority(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Int32 focusScopeValue[NUM_1];
+    ArkUI_CharPtr id;
+    fullImpl->getNodeModifiers()->getCommonModifier()->getFocusPriority(node->uiNodeHandle, &focusScopeValue, &id);
+    g_attributeItem.string = id;
+    g_numberValues[NUM_0].i32 = focusScopeValue[NUM_0];
+    return &g_attributeItem;
+}
+
+int32_t SetOnClickDistancethreshold(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto defaultValue = std::numeric_limits<double>::infinity();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (!item || actualSize != NUM_1 || item->value[NUM_0].f32 <= NUM_0) {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setClickDistance(node->uiNodeHandle, defaultValue);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setClickDistance(node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetOnClickDistancethreshold(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetClickDistance(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetOnClickDistancethreshold(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getClickDistance(node->uiNodeHandle);
+    g_numberValues[0].f32 = resultValue;
     return &g_attributeItem;
 }
 
@@ -17868,11 +18095,12 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetPixelRound,
         nullptr,
         nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
+        SetHoverEffect,
+        SetFocusScopeId,
+        SetFocusScopePriority,
+        SetOnClickDistancethreshold,
         SetResponseRegionList,
+        SetMonopolizeEvents,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -17996,11 +18224,12 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetPixelRound,
         nullptr,
         nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
+        GetHoverEffect,
+        GetFocusScopeId,
+        GetFocusPriority,
+        GetOnClickDistancethreshold,
         GetResponseRegionList,
+        GetMonopolizeEvents,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -18128,11 +18357,12 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetPixelRound,
         nullptr,
         nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
+        ResetHoverEffect,
+        ResetFocusScopeId,
+        ResetFocusScopePriority,
+        ResetOnClickDistancethreshold,
         ResetResponseRegionList,
+        ResetMonopolizeEvents,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
