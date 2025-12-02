@@ -86,15 +86,12 @@ HWTEST_F(TextTestNgFive, TextPaintMethodTest002, TestSize.Level1)
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
-
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
@@ -111,12 +108,14 @@ HWTEST_F(TextTestNgFive, TextPaintMethodTest002, TestSize.Level1)
     textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
     textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
+
     Shadow textShadow;
     textShadow.SetBlurRadius(BLURRADIUS_VALUE);
     textShadow.SetColor(TEXT_COLOR_VALUE);
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
+
     textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration({TextDecoration::OVERLINE});
@@ -146,20 +145,19 @@ HWTEST_F(TextTestNgFive, TextAccessibilityPropertyGetText001, TestSize.Level1)
     textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(CREATE_VALUE_W);
     EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
-
     auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(spanNode);
     textPattern->textForDisplay_ = TEXT_U16CONTENT;
-
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
 
@@ -174,8 +172,10 @@ HWTEST_F(TextTestNgFive, TextAccessibilityPropertyIsSelected001, TestSize.Level1
     textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
+
     EXPECT_FALSE(textAccessibilityProperty->IsSelected());
     textAccessibilityProperty->SetSelected(true);
     EXPECT_TRUE(textAccessibilityProperty->IsSelected());
