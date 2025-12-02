@@ -2379,8 +2379,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
-    JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChanged", &JSWeb::OnCameraCaptureStateChanged);
-    JSClass<JSWeb>::StaticMethod("onMicrophoneCaptureStateChanged", &JSWeb::OnMicrophoneCaptureStateChanged);
+    JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChange", &JSWeb::OnCameraCaptureStateChanged);
+    JSClass<JSWeb>::StaticMethod("onMicrophoneCaptureStateChange", &JSWeb::OnMicrophoneCaptureStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);

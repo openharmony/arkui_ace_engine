@@ -1595,11 +1595,11 @@ class WebBackToTopModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey<(OnCameraCaptureStateChangeCallback) => void> {
+class WebOnCameraCaptureStateChangeModifier extends ModifierWithKey<(OnCameraCaptureStateChangeCallback) => void> {
   constructor(value: (OnCameraCaptureStateChangeCallback) => void) {
     super(value);
   }
-  static identity: Symbol = Symbol('webOnCameraCaptureStateChangedModifier');
+  static identity: Symbol = Symbol('webOnCameraCaptureStateChangeModifier');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().web.resetOnCameraCaptureStateChanged(node);
@@ -1609,11 +1609,11 @@ class WebOnCameraCaptureStateChangedModifier extends ModifierWithKey<(OnCameraCa
   }
 }
 
-class WebOnMicrophoneCaptureStateChangedModifier extends ModifierWithKey<(OnMicrophoneCaptureStateChangeCallback) => void> {
+class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey<(OnMicrophoneCaptureStateChangeCallback) => void> {
   constructor(value: (OnMicrophoneCaptureStateChangeCallback) => void) {
     super(value);
   }
-  static identity: Symbol = Symbol('webOnMicrophoneCaptureStateChangedModifier');
+  static identity: Symbol = Symbol('webOnMicrophoneCaptureStateChangeModifier');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().web.resetOnMicrophoneCaptureStateChanged(node);
@@ -2171,12 +2171,12 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebBackToTopModifier.identity, WebBackToTopModifier, backToTop);
     return this;
   }
-  onCameraCaptureStateChanged(callback: OnCameraCaptureStateChangeCallback): this{
-    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangedModifier.identity, WebOnCameraCaptureStateChangedModifier, callback);
+  onCameraCaptureStateChange(callback: OnCameraCaptureStateChangeCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnCameraCaptureStateChangeModifier.identity, WebOnCameraCaptureStateChangeModifier, callback);
     return this;
   }
-  onMicrophoneCaptureStateChanged(callback: OnMicrophoneCaptureStateChangeCallback): this {
-    modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangedModifier.identity, WebOnMicrophoneCaptureStateChangedModifier, callback);
+  onMicrophoneCaptureStateChange(callback: OnMicrophoneCaptureStateChangeCallback): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnMicrophoneCaptureStateChangeModifier.identity, WebOnMicrophoneCaptureStateChangeModifier, callback);
     return this;
   }
 }
