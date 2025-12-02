@@ -7429,6 +7429,8 @@ typedef enum {
      */
     NODE_GRID_MULTI_SELECTABLE = 1013013,
 
+    NODE_GRID_SUPPORT_LAZY_LOADING_EMPTY_BRANCH = 1013014,
+
     /**
      * @brief Sets the style of the <b>GridItem</b> component.
      * This attribute can be set, reset, and obtained as required through APIs.

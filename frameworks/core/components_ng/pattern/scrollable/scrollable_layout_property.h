@@ -40,6 +40,7 @@ public:
         LayoutProperty::Reset();
         ResetContentStartOffset();
         ResetContentEndOffset();
+        ResetSupportLazyLoadingEmptyBranch();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -50,6 +51,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
     virtual void OnContentEndOffsetUpdate(float /* contentEndOffset */) const {}
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SupportLazyLoadingEmptyBranch, bool, PROPERTY_UPDATE_NORMAL);
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -57,6 +60,7 @@ protected:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propContentStartOffset_ = CloneContentStartOffset();
         value->propContentEndOffset_ = CloneContentEndOffset();
+        value->propSupportLazyLoadingEmptyBranch_ = CloneSupportLazyLoadingEmptyBranch();
     }
 
 private:

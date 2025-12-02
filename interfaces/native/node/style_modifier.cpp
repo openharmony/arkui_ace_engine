@@ -17370,6 +17370,19 @@ const ArkUI_AttributeItem* GetGridSupportAnimation(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetGridSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    bool supportLazyLoadingEmptyBranch = false;
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        supportLazyLoadingEmptyBranch = item->value[0].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setSupportLazyLoadingEmptyBranch(
+        node->uiNodeHandle, supportLazyLoadingEmptyBranch);
+    return ERROR_CODE_NO_ERROR;
+}
+
 int32_t SetGridItemOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
@@ -19453,7 +19466,7 @@ int32_t SetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     static Setter* setters[] = { SetGridColumnsTemplate, SetGridRowsTemplate, SetGridColumnsGap, SetGridRowsGap,
         SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode, SetGridSyncLoad, SetGridAlignItems,
         SetGridLayoutOptions, SetGridColumnTemplateItemFillPolicy, SetGridEditMode, SetGridSupportAnimation,
-        SetGridMultiSelectable };
+        SetGridMultiSelectable, SetGridSupportLazyLoadingEmptyBranch };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
