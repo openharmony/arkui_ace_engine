@@ -22,10 +22,17 @@
 #include "base/thread/task_executor.h"
 
 namespace OHOS::Ace::NG {
+struct EnvWithStatus {
+    napi_env env = nullptr;
+    std::mutex mutex;
+
+    explicit EnvWithStatus(napi_env setEnv): env(setEnv) {}
+};
 
 class UVTaskWrapperImpl : public TaskWrapper {
 public:
     explicit UVTaskWrapperImpl(napi_env env);
+    ~UVTaskWrapperImpl() override;
     bool WillRunOnCurrentThread() override;
     void Call(const TaskExecutor::Task& task,
         PriorityType priorityType = PriorityType::LOW) override;
@@ -35,7 +42,7 @@ public:
 
 private:
     pthread_t threadId_ = 0;
-    napi_env env_;
+    EnvWithStatus statusEnv_;
 };
 
 class UVWorkWrapper : public uv_work_t {
