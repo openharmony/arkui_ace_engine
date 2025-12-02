@@ -66,7 +66,9 @@ export interface AccessibilityOptions {
   accessibilityDescription?: ResourceStr;
 }
 
-export interface CloseOptions extends AccessibilityOptions {}
+export interface CloseOptions extends AccessibilityOptions {
+  fontSize?: Dimension;
+}
 
 export interface ChipSymbolGlyphOptions {
   normal?: SymbolGlyphModifier;
@@ -221,12 +223,35 @@ interface ChipOptions {
   accessibilitySelectedType?: AccessibilitySelectedType;
   accessibilityDescription?: ResourceStr;
   accessibilityLevel?: string;
-  onClose?: () => void
-  onClicked?: () => void
+  onClose?: () => void;
+  onClicked?: () => void;
+  maxFontScale?: number | Resource;
+  minFontScale?: number | Resource;
+  padding?: LocalizedPadding;
+  fontSize?: Dimension;
+}
+
+class LengthMetricsUtils {
+  private static instance?: LengthMetricsUtils;
+
+  private constructor() {
+  }
+
+  public static getInstance(): LengthMetricsUtils {
+    if (!LengthMetricsUtils.instance) {
+      LengthMetricsUtils.instance = new LengthMetricsUtils();
+    }
+    return LengthMetricsUtils.instance;
+  }
+
+  isNaturalNumber(metrics: LengthMetrics): boolean {
+    return metrics.value >= 0;
+  }
 }
 
 class LengthMetricsCache {
   private static _cache: Map<string, LengthMetrics> = new Map();
+
   public static get(key: string, defaultValue: LengthMetrics): LengthMetrics {
     if (LengthMetricsCache._cache.has(key)) {
       return LengthMetricsCache._cache.get(key)!;
@@ -271,6 +296,10 @@ export function Chip(options: ChipOptions) {
     chipAccessibilityLevel: options.accessibilityLevel,
     onClose: options.onClose,
     onClicked: options.onClicked,
+    maxFontScale: options.maxFontScale,
+    minFontScale: options.minFontScale,
+    chipPadding: options.padding,
+    chipFontSize: options.fontSize
   })
 }
 
@@ -348,10 +377,10 @@ export struct ChipComponent {
     defaultSymbol: {
       normalFontColor: [$r('sys.color.chip_usually_icon_color')],
       activatedFontColor: [$r('sys.color.chip_active_icon_color')],
-      normalSymbolFontSize: 
-        LengthMetricsCache.get('sys.float.chip_normal_icon_size', LengthMetrics.vp(16)).value as Length,
-      smallSymbolFontSize: 
-        LengthMetricsCache.get('sys.float.chip_small_icon_size', LengthMetrics.vp(16)).value as Length,
+      normalSymbolFontSize:
+      LengthMetricsCache.get('sys.float.chip_normal_icon_size', LengthMetrics.vp(16)).value as Length,
+      smallSymbolFontSize:
+      LengthMetricsCache.get('sys.float.chip_small_icon_size', LengthMetrics.vp(16)).value as Length,
       defaultEffect: -1,
     },
     chipNode: {
@@ -433,6 +462,10 @@ export struct ChipComponent {
   @Prop chipAccessibilitySelectedType?: AccessibilitySelectedType;
   @Prop chipAccessibilityDescription?: ResourceStr;
   @Prop chipAccessibilityLevel?: string;
+  @Prop maxFontScale?: number | Resource;
+  @Prop minFontScale?: number | Resource;
+  @Prop chipPadding?: LocalizedPadding;
+  @Prop chipFontSize?: Dimension;
   @State isChipExist: boolean = true;
   @State chipScale: ScaleOptions = { x: 1, y: 1 };
   @State chipOpacity: number = 1;
@@ -500,7 +533,7 @@ export struct ChipComponent {
       ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
     } catch (error) {
       console.error(`[Chip] failed to get ColorMetrics.resourceColor`);
-       return false;
+      return false;
     }
   }
 
@@ -513,7 +546,7 @@ export struct ChipComponent {
       ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
     } catch (error) {
       console.error(`[Chip] failed to get resourceColor`);
-       return false;
+      return false;
     }
   }
 
@@ -531,7 +564,9 @@ export struct ChipComponent {
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
         if (this.hasPrefixSymbol()) {
           SymbolGlyph()
-            .fontSize(this.defaultSymbolFontsize())
+            .fontSize(this.getFontSizeForSymbol())
+            .maxFontScale(this.maxFontScale)
+            .minFontScale(this.minFontScale)
             .fontColor(this.getDefaultSymbolColor(IconType.PREFIX_SYMBOL))
             .flexShrink(0)
             .attributeModifier(this.getPrefixSymbolModifier())
@@ -561,12 +596,16 @@ export struct ChipComponent {
           .fontColor(this.getLabelFontColor())
           .fontFamily(this.getLabelFontFamily())
           .fontWeight(this.getLabelFontWeight())
+          .maxFontScale(this.maxFontScale)
+          .minFontScale(this.minFontScale)
           .margin(this.getLabelMargin())
 
         if (this.hasSuffixSymbol()) {
           Button({ type: ButtonType.Normal }) {
             SymbolGlyph()
-              .fontSize(this.defaultSymbolFontsize())
+              .fontSize(this.getFontSizeForSymbol())
+              .maxFontScale(this.maxFontScale)
+              .minFontScale(this.minFontScale)
               .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_SYMBOL))
               .attributeModifier(this.getSuffixSymbolModifier())
               .effectStrategy(SymbolEffectStrategy.NONE)
@@ -608,7 +647,9 @@ export struct ChipComponent {
         } else if (this.isClosable()) {
           Button({ type: ButtonType.Normal }) {
             SymbolGlyph($r('sys.symbol.xmark'))
-              .fontSize(this.defaultSymbolFontsize())
+              .fontSize(this.getCloseOptionsFontsize())
+              .maxFontScale(this.maxFontScale)
+              .minFontScale(this.minFontScale)
               .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_SYMBOL))
           }
           .backgroundColor(Color.Transparent)
@@ -869,16 +910,16 @@ export struct ChipComponent {
 
   getDefaultSymbolColor(iconType: string): ResourceColor[] {
     return this.isChipActivated() ? this.getSymbolActiveColor(iconType) :
-    this.getSymbolFillColor(iconType);
+      this.getSymbolFillColor(iconType);
   }
 
   private getDefaultActiveIconColor(iconType: string): ResourceColor {
     if (iconType === IconType.PREFIX_ICON) {
       return this.chipNodeInFocus ? this.theme.prefixIcon.focusActivatedColor :
-      this.theme.prefixIcon.activatedFillColor;
+        this.theme.prefixIcon.activatedFillColor;
     } else {
       return this.chipNodeInFocus ? this.theme.suffixIcon.focusActivatedColor :
-      this.theme.suffixIcon.activatedFillColor;
+        this.theme.suffixIcon.activatedFillColor;
     }
   }
 
@@ -936,7 +977,7 @@ export struct ChipComponent {
         constraintSize.maxWidth = this.getChipMaxWidth();
       }
       if (typeof this.chipSize?.height === 'undefined' || !this.isValidLength(this.chipSize.height)) {
-        constraintSize.minHeight = 
+        constraintSize.minHeight =
           this.isChipActivated() ? this.theme.chipNode.activatedNormalHeight : this.theme.chipNode.normalHeight;
       }
     }
@@ -979,11 +1020,25 @@ export struct ChipComponent {
 
   getChipPadding(): Length | Padding | LocalizedPadding {
     let chipTheme = this.theme.chipNode;
+    let res: LocalizedPadding;
     if (this.isSmallChipSize()) {
-      return this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
+      res = this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
     } else {
-      return this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
+      res = this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
     }
+    if (this.chipPadding?.top && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.top)) {
+      res.top = this.chipPadding.top;
+    }
+    if (this.chipPadding?.bottom && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.bottom)) {
+      res.bottom = this.chipPadding.bottom;
+    }
+    if (this.chipPadding?.start && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.start)) {
+      res.start = this.chipPadding.start;
+    }
+    if (this.chipPadding?.end && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.end)) {
+      res.end = this.chipPadding.end;
+    }
+    return res;
   }
 
   getLabelMargin(): Length | Padding | LocalizedPadding {
@@ -1054,9 +1109,23 @@ export struct ChipComponent {
     return this.label?.fontFamily ?? this.theme.label.fontFamily;
   }
 
-  private defaultSymbolFontsize(): Length {
+  private getFontSizeForSymbol(): Length | Dimension {
+    if (!!this.chipFontSize && this.isValidLength(this.chipFontSize)) {
+      return this.chipFontSize;
+    }
     return this.isSmallChipSize() ? this.theme.defaultSymbol.smallSymbolFontSize :
-    this.theme.defaultSymbol.normalSymbolFontSize;
+      this.theme.defaultSymbol.normalSymbolFontSize;
+  }
+
+  private getCloseOptionsFontsize(): Length | Dimension {
+    if (!!this.closeOptions?.fontSize && this.isValidLength(this.closeOptions?.fontSize)) {
+      return this.closeOptions.fontSize;
+    }
+    if (!!this.chipFontSize && this.isValidLength(this.chipFontSize)) {
+      return this.chipFontSize;
+    }
+    return this.isSmallChipSize() ? this.theme.defaultSymbol.smallSymbolFontSize :
+      this.theme.defaultSymbol.normalSymbolFontSize;
   }
 
   private getActiveFontColor(): ResourceColor {
@@ -1087,6 +1156,9 @@ export struct ChipComponent {
   getLabelFontSize(): Dimension {
     if (typeof this.label.fontSize !== 'undefined' && this.isValidLength(this.label.fontSize)) {
       return this.label.fontSize;
+    }
+    if (!!this.chipFontSize && this.isValidLength(this.chipFontSize)) {
+      return this.chipFontSize;
     }
     if (this.isSmallChipSize()) {
       return this.theme.label.smallFontSize;
@@ -1171,10 +1243,10 @@ export struct ChipComponent {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
-      this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
+        this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
     }
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
-    this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
+      this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
   }
 
   getColor(color: ResourceColor | undefined, defaultColor: ResourceColor): ResourceColor {
@@ -1200,7 +1272,7 @@ export struct ChipComponent {
       console.error('[Chip] failed to get resourceManager');
       return null;
     }
-    
+
     switch (resource.type) {
       case RESOURCE_TYPE_FLOAT:
       case RESOURCE_TYPE_INTEGER:
@@ -1223,12 +1295,12 @@ export struct ChipComponent {
       console.error('[Chip] failed: resource get fail');
       return defaultValue;
     }
-    
+
     const result = this.getResourceNumber(resource);
     return result !== null ? result : defaultValue;
   }
 
-  isValidLength(length: Length): boolean {
+  isValidLength(length: Length | Dimension): boolean {
     if (typeof length === 'number') {
       return length >= 0;
     } else if (typeof length === 'string') {
@@ -1243,7 +1315,7 @@ export struct ChipComponent {
         }
         return this.isValidLengthString(resourceManager.getStringSync(resource));
       }
-      
+
       const result = this.getResourceNumber(resource);
       return result !== null && result >= 0;
     }
