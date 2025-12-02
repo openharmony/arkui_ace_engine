@@ -28,10 +28,10 @@ static RefPtr<NG::AppBarView> ObtainAppBar()
 namespace UIContextAtomicServiceBarAccessor {
 Ark_Frame GetBarRectImpl()
 {
-    auto appBar = ObtainAppBar();
-    CHECK_NULL_RETURN(appBar, {});
-    std::optional<NG::RectF> rectOpt = appBar->GetAppBarRect();
     NG::RectF barRect(0, 0, 0, 0);
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, Converter::ArkValue<Ark_Frame>(barRect));
+    std::optional<NG::RectF> rectOpt = appBar->GetAppBarRect();
     if (rectOpt) {
         const NG::RectF& rect = rectOpt.value();
         barRect.SetLeft(Dimension(rect.Left(), DimensionUnit::PX).ConvertToVp());

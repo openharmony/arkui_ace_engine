@@ -28,6 +28,19 @@ class UIContextAtomicServiceBarAccessorTest :
 };
 
 /**
+ * @tc.name: appBarNull
+ * @tc.desc: Test AppBarView
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextAtomicServiceBarAccessorTest, appBarNull, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getBarRect, nullptr);
+
+    auto rect = Converter::OptConvert<RectF>(accessor_->getBarRect());
+    ASSERT_TRUE(rect.has_value());
+}
+
+/**
  * @tc.name: getBarRect
  * @tc.desc: Test GetAppBarRect
  * @tc.type: FUNC
