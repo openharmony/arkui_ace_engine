@@ -16,6 +16,7 @@
 
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 namespace OHOS::Ace::NG {
 namespace {
 Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
@@ -218,5 +219,26 @@ bool ScrollableUtils::IsMainThreadBusy(const RefPtr<FrameNode>& frameNode)
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     return pipelineContext->GetIsRequestFrame();
+}
+
+bool ScrollableUtils::IsChildLazy(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    std::stack<RefPtr<UINode>> nodesStack;
+    nodesStack.push(frameNode);
+    while (!nodesStack.empty()) {
+        auto node = nodesStack.top();
+        nodesStack.pop();
+        for (const auto& child : node->GetChildren()) {
+            if (AceType::InstanceOf<FrameNode>(child)) {
+                continue;
+            }
+            if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+                return true;
+            }
+            nodesStack.push(child);
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

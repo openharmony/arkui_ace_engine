@@ -72,6 +72,9 @@ public:
         return measureInNextFrame_;
     }
 
+    static RefPtr<LayoutWrapper> GetGridItem(LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true,
+        bool isCache = false);
+
 protected:
     void AdjustChildrenHeight(LayoutWrapper* layoutWrapper);
 

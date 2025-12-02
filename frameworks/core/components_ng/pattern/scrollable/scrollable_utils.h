@@ -75,6 +75,14 @@ struct ScrollableUtils {
      * @brief get whether the main thread is busy.
      */
     static bool IsMainThreadBusy(const RefPtr<FrameNode>& frameNode);
+
+    /**
+     * @brief Check whether the child node is a lazy syntax node. This algorithm can be considered to be constant
+     *        time complexity O(1) because the depth and number of child nodes of a FrameNode are limited.
+     *
+     * @param frameNode The scrollable frame node.
+     */
+    static bool IsChildLazy(const RefPtr<FrameNode>& frameNode);
 };
 } // namespace OHOS::Ace::NG
 

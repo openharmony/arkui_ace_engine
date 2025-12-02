@@ -348,7 +348,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 offset.SetY(crossOffset);
             }
             auto wrapper = isCache ? layoutWrapper->GetChildByIndex(itemIdex, true)
-                                   : layoutWrapper->GetOrCreateChildByIndex(itemIdex);
+                                   : GetGridItem(layoutWrapper, itemIdex);
             if (!wrapper) {
                 continue;
             }
@@ -807,7 +807,7 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
             if (currentIndex >= childrenCount) {
                 break;
             }
-            auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+            auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
             if (!itemWrapper) {
                 break;
             }
@@ -989,7 +989,7 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
             if (currentIndex >= childrenCount) {
                 return;
             }
-            auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex, false);
+            auto currentWrapper = GetGridItem(layoutWrapper, currentIndex, false);
             CHECK_NULL_VOID(currentWrapper);
             auto layoutProperty = DynamicCast<GridItemLayoutProperty>(currentWrapper->GetLayoutProperty());
             CHECK_NULL_VOID(layoutProperty);
@@ -1257,7 +1257,7 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(
             // move from another grid
             continue;
         }
-        auto item = wrapper_->GetOrCreateChildByIndex(idx);
+        auto item = GetGridItem(wrapper_, idx);
         if (!item) {
             break;
         }
@@ -1475,7 +1475,7 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         currentIndex = itemIter->second;
 
         // Step1. Get wrapper of [GridItem]
-        auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+        auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
         if (!itemWrapper) {
             break;
         }
@@ -1521,7 +1521,7 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     auto endMainLineIndex = info_.endMainLineIndex_;
     auto endIndex = info_.endIndex_;
     auto firstItem = GetStartingItem(layoutWrapper, currentIndex - 1);
-    auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(firstItem);
+    auto itemWrapper = GetGridItem(layoutWrapper, firstItem);
     CHECK_NULL_VOID(itemWrapper);
     AdjustRowColSpan(itemWrapper, layoutWrapper, firstItem);
     auto mainSpan = info_.axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
@@ -1616,13 +1616,13 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         }
         if (currentIndex >= info_.GetChildrenCount()) {
             if (currentIndex == 0) {
-                layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+                GetGridItem(layoutWrapper, currentIndex);
                 TAG_LOGW(ACE_GRID, "total item count is 0");
             }
             break;
         }
         // Step1. Get wrapper of [GridItem]
-        auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+        auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
         if (!itemWrapper) {
             if (currentIndex < info_.GetChildrenCount()) {
                 TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
@@ -1673,7 +1673,7 @@ void GridScrollLayoutAlgorithm::LargeItemNextLineHeight(int32_t currentLineIndex
     if (gridMatrixIter != info_.gridMatrix_.end()) {
         for (auto itemIter = gridMatrixIter->second.rbegin(); itemIter != gridMatrixIter->second.rend(); ++itemIter) {
             currentIndex = itemIter->second;
-            auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+            auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
             if (!itemWrapper) {
                 break;
             }
@@ -1704,7 +1704,7 @@ int32_t GridScrollLayoutAlgorithm::CalculateLineIndexForLargeItem(
             continue;
         }
         currentIndex = gridItemRecord.second;
-        auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+        auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
         if (!itemWrapper) {
             break;
         }
@@ -1744,7 +1744,7 @@ void GridScrollLayoutAlgorithm::CalculateLineHeightForLargeItem(int32_t lineInde
                 continue;
             }
             currentIndex = itemIter->second;
-            auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+            auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
             if (!itemWrapper) {
                 break;
             }
@@ -2011,7 +2011,7 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
     auto index = currentIndex;
     if (info_.hasBigItem_) {
         while (index > 0) {
-            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            auto childLayoutWrapper = GetGridItem(layoutWrapper, index);
             if (!childLayoutWrapper) {
                 TAG_LOGW(AceLogTag::ACE_GRID, "item [%{public}d] does not exist, reload to [0]", index);
                 break;
@@ -2028,7 +2028,7 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
     } else {
         while (index > 0) {
             // need to obtain the item node in order and by step one
-            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            auto childLayoutWrapper = GetGridItem(layoutWrapper, index);
             if (!childLayoutWrapper) {
                 TAG_LOGW(AceLogTag::ACE_GRID, "item [%{public}d] does not exist, reload to [0]", index);
                 break;
@@ -2412,7 +2412,7 @@ void GridScrollLayoutAlgorithm::SyncPreload(
 bool GridScrollLayoutAlgorithm::PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param)
 {
     // build callback
-    auto wrapper = host.GetOrCreateChildByIndex(itemIdx, false, true);
+    auto wrapper = GetGridItem(&host, itemIdx, false, true);
     CHECK_NULL_RETURN(wrapper, false);
     auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(itemProperty, false);

@@ -467,7 +467,7 @@ bool GridScrollWithOptionsLayoutAlgorithm::PredictBuildItem(FrameNode& host, int
     const GridPredictLayoutParam& param, std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap)
 {
     // build callback
-    auto wrapper = host.GetOrCreateChildByIndex(itemIdx, false, true);
+    auto wrapper = GetGridItem(&host, itemIdx, false, true);
     CHECK_NULL_RETURN(wrapper, false);
     auto itemCross = itemCrossMap.find(itemIdx);
     if (itemCross == itemCrossMap.end()) {
@@ -490,7 +490,7 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::GetStartingItem(LayoutWrapper* lay
     currentIndex = currentIndex < info_.GetChildrenCount() ? currentIndex : info_.GetChildrenCount() - 1;
     auto index = currentIndex;
     while (index > 0) {
-        auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto childLayoutWrapper = GetGridItem(layoutWrapper, index);
         if (!childLayoutWrapper) {
             TAG_LOGW(AceLogTag::ACE_GRID, "item [%{public}d] does not exist, reload to [0]", index);
             break;

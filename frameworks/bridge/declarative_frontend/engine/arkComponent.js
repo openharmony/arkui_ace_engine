@@ -7552,7 +7552,7 @@ class ArkGridComponent extends ArkScrollable {
   }
   supportLazyLoadingEmptyBranch(value) {
     modifierWithKey(this._modifiersWithKeys, GridSupportLazyLoadingEmptyBranchModifier.identity, GridSupportLazyLoadingEmptyBranchModifier, value);
-    return this
+    return this;
   }
 }
 class GridScrollerModifier extends ModifierWithKey {
