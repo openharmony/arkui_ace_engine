@@ -104,7 +104,7 @@ interface CommonArcButtonOptions {
   /**
    * ArcButtonProgress属性
    */
-  progressOptions?: ArcButtonProgressOptions;
+  progressConfig?: ArcButtonProgressConfig;
 }
 
 
@@ -181,12 +181,12 @@ interface ArcButtonThemeInterface {
 }
 
 @ObservedV2
-export class ArcButtonProgressOptions {
+export class ArcButtonProgressConfig {
   @Trace public value: number;
   @Trace public total?:number;
   @Trace public color?: ColorMetrics;
 
-  constructor(options: ArcButtonProgressOptions) {
+  constructor(options: ArcButtonProgressConfig) {
     this.value = options.value;
     this.total = options.total;
     this.color = options.color;
@@ -211,7 +211,7 @@ export class ArcButtonOptions {
   @Trace public fontMargin: LocalizedMargin;
   @Trace public onTouch?: Callback<TouchEvent>;
   @Trace public onClick?: Callback<ClickEvent>;
-  @Trace public progressOptions?: ArcButtonProgressOptions;
+  @Trace public progressConfig?: ArcButtonProgressConfig;
 
   constructor(options: CommonArcButtonOptions) {
     this.position = options.position ?? ArcButtonPosition.BOTTOM_EDGE;
@@ -237,10 +237,10 @@ export class ArcButtonOptions {
     })
     this.onClick = options.onClick ?? (() => {
     })
-    if(options.progressOptions) {
-      this.progressOptions = new ArcButtonProgressOptions(options.progressOptions);
+    if(options.progressConfig) {
+      this.progressConfig = new ArcButtonProgressConfig(options.progressConfig);
     } else {
-      this.progressOptions = undefined;
+      this.progressConfig = undefined;
     }
   }
 }
@@ -287,16 +287,16 @@ export struct ArcButton {
     this.changeStatus()
   }
 
-  @Monitor('options.progressOptions', 'options.progressOptions.color', 'options.progressOptions.total',
-  'options.progressOptions.value')
+  @Monitor('options.progressConfig', 'options.progressConfig.color', 'options.progressConfig.total',
+  'options.progressConfig.value')
   progressOptionsChange(){
-    if(this.options.progressOptions) {
-      this.progressValue = this.options.progressOptions.value;
-      if(this.options.progressOptions.color) {
-        this.progressColor = this.options.progressOptions.color;
+    if(this.options.progressConfig) {
+      this.progressValue = this.options.progressConfig.value;
+      if(this.options.progressConfig.color) {
+        this.progressColor = this.options.progressConfig.color;
       }
-      if(this.options.progressOptions.total) {
-        this.progressTotal = this.options.progressOptions.total;
+      if(this.options.progressConfig.total) {
+        this.progressTotal = this.options.progressConfig.total;
       } else {
         this.progressTotal = 100;
       }
@@ -535,7 +535,7 @@ export struct ArcButton {
 
   build() {
     Stack({ alignContent: Alignment.Center }) {
-      if (this.options.progressOptions) {
+      if (this.options.progressConfig) {
         Progress({value: this.progressValue, total: this.progressTotal, type: ProgressType.Capsule})
           .width('100%')
           .height('100%')

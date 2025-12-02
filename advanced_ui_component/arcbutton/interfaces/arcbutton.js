@@ -84,26 +84,26 @@ Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR = '#C53C3E';
 Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR = '#4C0f10';
 Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
 Constants.DEFAULT_TRANSPARENCY = 0.4;
-let ArcButtonProgressOptions = class ArcButtonProgressOptions {
-    constructor(r4) {
-        this.value = r4.value;
-        this.total = r4.total;
-        this.color = r4.color;
+let ArcButtonProgressConfig = class ArcButtonProgressConfig {
+    constructor(d5) {
+        this.value = d5.value;
+        this.total = d5.total;
+        this.color = d5.color;
     }
 };
 __decorate([
     Trace
-], ArcButtonProgressOptions.prototype, "value", void 0);
+], ArcButtonProgressConfig.prototype, "value", void 0);
 __decorate([
     Trace
-], ArcButtonProgressOptions.prototype, "total", void 0);
+], ArcButtonProgressConfig.prototype, "total", void 0);
 __decorate([
     Trace
-], ArcButtonProgressOptions.prototype, "color", void 0);
-ArcButtonProgressOptions = __decorate([
+], ArcButtonProgressConfig.prototype, "color", void 0);
+ArcButtonProgressConfig = __decorate([
     ObservedV2
-], ArcButtonProgressOptions);
-export { ArcButtonProgressOptions };
+], ArcButtonProgressConfig);
+export { ArcButtonProgressConfig };
 let ArcButtonOptions = class ArcButtonOptions {
     constructor(q4) {
         this.position = q4.position ?? ArcButtonPosition.BOTTOM_EDGE;
@@ -129,11 +129,11 @@ let ArcButtonOptions = class ArcButtonOptions {
         });
         this.onClick = q4.onClick ?? (() => {
         });
-        if (q4.progressOptions) {
-            this.progressOptions = new ArcButtonProgressOptions(q4.progressOptions);
+        if (q4.progressConfig) {
+            this.progressConfig = new ArcButtonProgressConfig(q4.progressConfig);
         }
         else {
-            this.progressOptions = undefined;
+            this.progressConfig = undefined;
         }
     }
 };
@@ -187,7 +187,7 @@ __decorate([
 ], ArcButtonOptions.prototype, "onClick", void 0);
 __decorate([
     Trace
-], ArcButtonOptions.prototype, "progressOptions", void 0);
+], ArcButtonOptions.prototype, "progressConfig", void 0);
 ArcButtonOptions = __decorate([
     ObservedV2
 ], ArcButtonOptions);
@@ -252,13 +252,13 @@ export class ArcButton extends ViewV2 {
         this.changeStatus();
     }
     progressOptionsChange() {
-        if (this.options.progressOptions) {
-            this.progressValue = this.options.progressOptions.value;
-            if (this.options.progressOptions.color) {
-                this.progressColor = this.options.progressOptions.color;
+        if (this.options.progressConfig) {
+            this.progressValue = this.options.progressConfig.value;
+            if (this.options.progressConfig.color) {
+                this.progressColor = this.options.progressConfig.color;
             }
-            if (this.options.progressOptions.total) {
-                this.progressTotal = this.options.progressOptions.total;
+            if (this.options.progressConfig.total) {
+                this.progressTotal = this.options.progressConfig.total;
             }
             else {
                 this.progressTotal = 100;
@@ -492,7 +492,7 @@ export class ArcButton extends ViewV2 {
         }, Stack);
         this.observeComponentCreation2((u2, v2) => {
             If.create();
-            if (this.options.progressOptions) {
+            if (this.options.progressConfig) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((y2, z2) => {
                         Progress.create({ value: this.progressValue, total: this.progressTotal, type: ProgressType.Capsule });
@@ -624,7 +624,7 @@ __decorate([
     Monitor('options.label', 'options.type', 'options.fontSize', 'options.styleMode', 'options.status', 'options.backgroundColor', 'options.fontColor')
 ], ArcButton.prototype, "optionsChange", null);
 __decorate([
-    Monitor('options.progressOptions', 'options.progressOptions.color', 'options.progressOptions.total', 'options.progressOptions.value')
+    Monitor('options.progressConfig', 'options.progressConfig.color', 'options.progressConfig.total', 'options.progressConfig.value')
 ], ArcButton.prototype, "progressOptionsChange", null);
 class DataProcessUtil {
     constructor(n2) {
