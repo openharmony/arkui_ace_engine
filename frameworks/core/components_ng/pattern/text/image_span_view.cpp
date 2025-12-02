@@ -142,6 +142,7 @@ RefPtr<FrameNode> ImageSpanView::CreateFrameNode(int32_t nodeId)
     CHECK_NULL_RETURN(imageSpanNode, nullptr);
     auto layoutProperty = imageSpanNode->GetLayoutProperty<ImageLayoutProperty>();
     layoutProperty->UpdateHasPlaceHolderStyle(false);
+    layoutProperty->UpdateIsYUVDecode(false);
     return imageSpanNode;
 }
 

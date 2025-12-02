@@ -85,6 +85,16 @@ public:
         return imageDfxConfig_;
     }
 
+    void SetIsYUVDecode(bool isYUVDecode)
+    {
+        isYUVDecode_ = isYUVDecode;
+    }
+    
+    bool GetIsYUVDecode() const
+    {
+        return isYUVDecode_;
+    }
+
     virtual void MakeCanvasImage(
         const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
 
@@ -107,6 +117,7 @@ protected:
     size_t imageDataSize_ = 0; // size of image data in bytes
     int32_t frameCount_ = 1;
     ImageDfxConfig imageDfxConfig_;
+    bool isYUVDecode_ = false;
     // Mutex for controlling access to prepareImageData operations.
     // This is a timed mutex to prevent long blocking, allowing a maximum wait time of 1000ms for acquiring the lock.
     std::timed_mutex prepareImageDataMutex_;

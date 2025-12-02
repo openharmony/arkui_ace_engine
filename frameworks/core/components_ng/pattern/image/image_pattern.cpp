@@ -593,6 +593,7 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     // update rotate orientation before decoding
     UpdateOrientation();
+    PreprocessYUVDecodeFormat(host);
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -608,6 +609,19 @@ void ImagePattern::OnImageDataReady()
         isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
+}
+
+void ImagePattern::PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(loadingCtx_);
+    auto obj = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(obj);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
+    bool hasValidSlice = renderProperty && (renderProperty->HasImageResizableSlice() ||
+        renderProperty->HasImageResizableLattice());
+    bool isYUVDecode = layoutProperty->GetIsYUVDecode().value_or(false);
+    obj->SetIsYUVDecode(hasValidSlice? false : isYUVDecode);
 }
 
 // Update the necessary rotate orientation for drawing and measuring.

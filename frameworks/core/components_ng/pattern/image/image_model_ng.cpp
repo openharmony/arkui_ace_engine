@@ -105,6 +105,7 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
         ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
     }
     SetImageFillSetByUser(false);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, IsYUVDecode, true);
 }
 
 void ImageModelNG::ResetImage()
@@ -174,6 +175,7 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateImageSourceInfo(srcInfo);
+    layoutProperty->UpdateIsYUVDecode(true);
     return frameNode;
 }
 

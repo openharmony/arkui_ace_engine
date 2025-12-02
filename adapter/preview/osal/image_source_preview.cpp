@@ -98,4 +98,9 @@ std::vector<int32_t> ImageSourcePreview::GetDelayTime()
 {
     return {};
 }
+
+bool ImageSourcePreview::IsHeifWithoutAlpha()
+{
+    return false;
+}
 } // namespace OHOS::Ace
