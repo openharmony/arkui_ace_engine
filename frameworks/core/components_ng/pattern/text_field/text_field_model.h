@@ -442,6 +442,8 @@ public:
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;
     virtual void SetTextAreaScrollBarColor(const Color& value) {};
     virtual void ResetTextAreaScrollBarColor() {};
+    virtual void SetTextDirection(TextDirection value) {}
+    virtual void ResetTextDirection() {}
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

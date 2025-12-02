@@ -1510,13 +1510,13 @@ HWTEST_F(TextFieldModifyTest, CheckTextAlignByDirection, TestSize.Level1)
      */
     auto direction = TextDirection::RTL;
     auto textAlign = TextAlign::START;
-    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    textAlign = pattern_->CheckTextAlignByDirection(textAlign, direction);
     EXPECT_EQ(textAlign, TextAlign::END);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     textAlign = TextAlign::END;
-    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    textAlign = pattern_->CheckTextAlignByDirection(textAlign, direction);
     EXPECT_EQ(textAlign, TextAlign::START);
 }
 

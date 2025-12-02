@@ -47,6 +47,8 @@ public:
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
+    void SetTextDirection(TextDirection value) override;
+    void ResetTextDirection() override;
     void SetTextContentAlign(TextContentAlign value) override;
     void ReSetTextContentAlign() override;
     void SetTextOverflow(TextOverflow value) override;
@@ -122,6 +124,9 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextDirection(FrameNode* frameNode, TextDirection value);
+    static void ResetTextDirection(FrameNode* frameNode);
+    static TextDirection GetTextDirection(FrameNode* frameNode);
     static void SetTextContentAlign(FrameNode* frameNode, Ace::TextContentAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void ResetTextColor(FrameNode* frameNode);

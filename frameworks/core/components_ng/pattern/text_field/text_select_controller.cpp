@@ -62,10 +62,12 @@ RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
     rect.SetWidth(GreatNotEqual(width, 0.0f) ? width : caretInfo_.rect.Width());
     auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    textField->CheckTextAlignByDirection(textAlign, direction);
+    textAlign = TextBase::CheckTextAlignByDirection(textAlign, direction,
+        layoutProperty->GetTextDirectionValue(TextDirection::INHERIT));
 
     switch (textAlign) {
         case TextAlign::START:
+        case TextAlign::LEFT:
             rect.SetLeft(contentRect_.GetX());
             break;
         case TextAlign::CENTER:
@@ -78,6 +80,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
             }
             break;
         case TextAlign::END:
+        case TextAlign::RIGHT:
             rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
                          static_cast<float>(rect.Width()));
             break;

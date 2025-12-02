@@ -105,6 +105,7 @@ public:
     static void ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
         std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& leadingMarginObject);
+    static void ParseJsTextDirection(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     void GetTextAlign(const JSCallbackInfo& info);
     void SetTextAlign(const JSCallbackInfo& info);
     void GetTextVerticalAlign(const JSCallbackInfo& info);
@@ -123,6 +124,8 @@ public:
     void GetLeadingMarginSpan(const JSCallbackInfo& info);
     void GetParagraphSpacing(const JSCallbackInfo& info);
     void SetParagraphSpacing(const JSCallbackInfo& info);
+    void GetTextDirection(const JSCallbackInfo& info);
+    void SetTextDirection(const JSCallbackInfo& info);
 
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 

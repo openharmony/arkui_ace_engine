@@ -44,6 +44,7 @@ build_component("common") {
     "properties/ui_material.cpp",
 
     # layout
+    "layout/common_text_constants.cpp",
     "layout/grid_column_info.cpp",
     "layout/grid_container_info.cpp",
     "layout/grid_system_manager.cpp",

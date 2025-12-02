@@ -5198,12 +5198,6 @@ void TextPattern::DumpTextStyleInfo3()
                 .append(textLayoutProp->HasTextOverflow()
                             ? StringUtils::ToString(textLayoutProp->GetTextOverflowValue(TextOverflow::NONE))
                             : "Na"));
-        dumpLog.AddDesc(std::string("TextAlign: ")
-                            .append(StringUtils::ToString(textStyle_->GetTextAlign()))
-                            .append(" prop: ")
-                            .append(textLayoutProp->HasTextAlign()
-                                        ? StringUtils::ToString(textLayoutProp->GetTextAlignValue(TextAlign::START))
-                                        : "Na"));
     }
 }
 
@@ -5213,6 +5207,17 @@ void TextPattern::DumpTextStyleInfo4()
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("TextAlign: ")
+                .append(StringUtils::ToString(textStyle_->GetTextAlign()))
+                .append(" prop: ")
+                .append(textLayoutProp->HasTextAlign()
+                            ? StringUtils::ToString(textLayoutProp->GetTextAlignValue(TextAlign::START))
+                            : "Na")
+                .append(" TextDirection prop:")
+                .append(textLayoutProp->HasTextDirection()
+                            ? V2::ConvertTextDirectionToString(
+                                textLayoutProp->GetTextDirectionValue(TextDirection::INHERIT))
+                            : "Na"));
         dumpLog.AddDesc(std::string("WordBreak: ")
                             .append(StringUtils::ToString(textStyle_->GetWordBreak()))
                             .append(std::string(" TextCase: "))

@@ -26,6 +26,7 @@
 #include "advanced_text_style.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
+#include "ui/common/layout/constants.h"
 
 #include "base/geometry/dimension.h"
 #include "base/utils/linear_map.h"
@@ -214,6 +215,18 @@ inline std::string ToString(const TextFlipDirection& textFlipDirection)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), textFlipDirection);
     return iter != -1 ? table[iter].value : "";
 }
+
+inline std::string ToString(const TextDirection& textDirection)
+{
+    static const LinearEnumMapNode<TextDirection, std::string> table[] = {
+        { TextDirection::LTR, "LTR" },
+        { TextDirection::RTL, "RTL" },
+        { TextDirection::INHERIT, "DEFAULT" },
+        { TextDirection::AUTO, "AUTO" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDirection);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace StringUtils
 
 namespace StringUtils {
@@ -230,8 +243,6 @@ inline std::string ToString(const EllipsisMode& ellipsisMode)
 } // namespace StringUtils
 
 enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD, HYPHENATION };
-extern const std::vector<WordBreak> WORD_BREAK_TYPES;
-extern const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES;
 namespace StringUtils {
 inline std::string ToString(const WordBreak& wordBreak)
 {

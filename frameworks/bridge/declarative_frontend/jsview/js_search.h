@@ -42,6 +42,7 @@ public:
     static void SetMinFontScale(const JSCallbackInfo& info);
     static void SetMaxFontScale(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
+    static void SetTextDirection(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);

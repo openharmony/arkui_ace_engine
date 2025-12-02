@@ -32,9 +32,13 @@ namespace OHOS::Ace::NG {
 class ParagraphUtil {
 public:
     static TextDirection GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper);
+    static TextDirection GetTextOwnDirection(
+        const std::u16string& content, TextDirection direction, TextDirection textDirection);
     static TextDirection GetTextDirectionByContent(const std::u16string& content);
     static void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper,
-        const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
+        const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle, const std::list<RefPtr<SpanItem>>& spanGroup);
+    static TextDirection GetSpanTextDirection(LayoutWrapper* layoutWrapper, const std::u16string& spanContent,
+        const std::optional<TextDirection>& spanTextDirection, const std::list<RefPtr<SpanItem>>& spanGroup);
     static void SetDrawableLeadingMargin(ParagraphStyle& pStyle, const std::unique_ptr<TextLineStyle>& lineStyle);
     static void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans,
         std::vector<std::list<RefPtr<SpanItem>>>& spanGroupVec,
@@ -45,6 +49,10 @@ public:
     static ParagraphStyle GetParagraphStyle(const TextStyle& textStyle);
     static ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
     static PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign);
+private:
+    static TextDirection GetSpanParagraphDirection(LayoutWrapper* layoutWrapper, const std::u16string& spanContent,
+        TextDirection spanDirection, const std::list<RefPtr<SpanItem>>& spanGroup);
+    static TextDirection GetSpanTextDirectionForCompare(const std::u16string& content, TextDirection textDirection);
 };
 
 } // namespace OHOS::Ace::NG

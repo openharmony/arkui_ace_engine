@@ -269,7 +269,8 @@ public:
     static bool UpdateSelectedBlankLineRect(RectF& rect, float blankWidth, TextAlign textAlign, float longestLine);
     static void SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect,
         std::map<float, std::pair<RectF, std::vector<RectF>>>& lineGroup);
-    static TextAlign CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction);
+    static TextAlign CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction,
+        TextDirection textDirection = TextDirection::INHERIT);
 
     static void RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point);
     static bool HasRenderTransform(const RefPtr<FrameNode>& targetNode);

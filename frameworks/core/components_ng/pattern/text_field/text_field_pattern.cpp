@@ -8074,42 +8074,6 @@ void TextFieldPattern::ProcessRectPadding()
     textRect_.SetTop(top);
 }
 
-void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto theme = GetTheme();
-    CHECK_NULL_VOID(theme);
-    if (IsTextArea() && !contentController_->IsEmpty()) {
-        auto inputContentWidth = GetParagraph()->GetMaxIntrinsicWidth();
-        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-            case TextAlign::START:
-                if (inputContentWidth < contentRect_.Width()) {
-                    rect.SetWidth(inputContentWidth);
-                }
-                break;
-            case TextAlign::CENTER:
-                if (inputContentWidth < contentRect_.Width()) {
-                    rect.SetLeft(
-                        static_cast<float>(rect.GetX()) + contentRect_.Width() / 2.0f - inputContentWidth / 2.0f);
-                    rect.SetWidth(inputContentWidth);
-                }
-                break;
-            case TextAlign::END:
-                if (inputContentWidth < contentRect_.Width()) {
-                    rect.SetLeft(static_cast<float>(rect.GetX()) + contentRect_.Width() -
-                                 static_cast<float>(theme->GetCursorWidth().ConvertToPx()) - inputContentWidth);
-                    rect.SetWidth(inputContentWidth);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-}
-
 void TextFieldPattern::TextIsEmptyRect(RectF& rect)
 {
     rect = selectController_->CalculateEmptyValueCaretRect();
@@ -8126,11 +8090,13 @@ void TextFieldPattern::UpdateRectByTextAlign(RectF& rect)
     }
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
+        case TextAlign::LEFT:
             return;
         case TextAlign::CENTER:
             rect.SetLeft(rect.GetOffset().GetX() + (contentRect_.Width() - textRect_.Width()) * 0.5f);
             return;
         case TextAlign::END:
+        case TextAlign::RIGHT:
             rect.SetLeft(rect.GetOffset().GetX() + (contentRect_.Width() - textRect_.Width()));
             return;
         default:
@@ -8667,11 +8633,28 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("AutocapitalizationMode:").append(AutoCapTypeToString()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
+
+    DumpFontInfo(layoutProperty);
+    DumpInputConfigInfo(layoutProperty);
+    DumpPlaceHolderInfo();
+    DumpScaleInfo();
+    DumpTextEngineInfo();
+    DumpAdvanceInfo();
+}
+
+void TextFieldPattern::DumpFontInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty)
+{
+    auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
     dumpLog.AddDesc(std::string("fontWeight:").append(V2::ConvertWrapFontWeightToStirng(GetFontWeight())));
     dumpLog.AddDesc(std::string("fontFamily:").append(GetFontFamily()));
     auto flag = GetItalicFontStyle() == Ace::FontStyle::NORMAL;
     dumpLog.AddDesc(std::string("fontStyle:").append(flag ? "FontStyle.Normal" : "FontStyle.Italic"));
+}
+
+void TextFieldPattern::DumpInputConfigInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty)
+{
+    auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("InputFilter:").append(GetInputFilter()));
     auto lineHeight = layoutProperty->GetLineHeight().value_or(0.0_vp).ConvertToPx();
     dumpLog.AddDesc(std::string("lineHeight:").append(std::to_string(lineHeight)));
@@ -8681,7 +8664,11 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("showError:").append(GetErrorTextState() ?
         UtfUtils::Str16DebugToStr8(GetErrorTextString()) : "undefined"));
     dumpLog.AddDesc(std::string("CopyOption:").append(GetCopyOptionString()));
-    dumpLog.AddDesc(std::string("TextAlign:").append(V2::ConvertWrapTextAlignToString(GetTextAlign())));
+    dumpLog.AddDesc(
+        std::string("TextAlign:")
+            .append(V2::ConvertWrapTextAlignToString(GetTextAlign()))
+            .append(" TextDirection:")
+            .append(V2::ConvertTextDirectionToString(layoutProperty->GetTextDirectionValue(TextDirection::INHERIT))));
     dumpLog.AddDesc(std::string("CaretPosition:").append(std::to_string(GetCaretIndex())));
     dumpLog.AddDesc(std::string("type:").append(TextInputTypeToString()));
     dumpLog.AddDesc(std::string("enterKeyType:").append(TextInputActionToString()));
@@ -8701,10 +8688,6 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("HeightAdaptivePolicy: ").append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
         layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
-    DumpPlaceHolderInfo();
-    DumpScaleInfo();
-    DumpTextEngineInfo();
-    DumpAdvanceInfo();
 }
 
 void TextFieldPattern::DumpTextEngineInfo()
@@ -9730,17 +9713,6 @@ void TextFieldPattern::TriggerAvoidOnCaretChange()
     textFieldManager->TriggerAvoidOnCaretChange();
     auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
     SetLastCaretPos(caretPos);
-}
-
-void TextFieldPattern::CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction)
-{
-    if (direction == TextDirection::RTL) {
-        if (textAlign == TextAlign::START) {
-            textAlign = TextAlign::END;
-        } else if (textAlign == TextAlign::END) {
-            textAlign = TextAlign::START;
-        }
-    }
 }
 
 void TextFieldPattern::RequestKeyboardAfterLongPress()

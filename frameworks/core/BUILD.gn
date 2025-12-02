@@ -900,6 +900,7 @@ template("ace_core_ng_source_set") {
       "components/common/properties/ui_material.cpp",
 
       # layout
+      "components/common/layout/common_text_constants.cpp",
       "components/common/layout/grid_column_info.cpp",
       "components/common/layout/grid_container_info.cpp",
       "components/common/layout/grid_system_manager.cpp",

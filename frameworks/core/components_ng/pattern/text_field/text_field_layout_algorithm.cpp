@@ -24,6 +24,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -879,6 +880,7 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderProperty(LayoutWrapper* la
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(EnableAutoSpacing, EnableAutoSpacing);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(CompressLeadingPunctuation, CompressLeadingPunctuation);
     textLayoutProperty->UpdateLayoutDirection(direction_);
+    textLayoutProperty->UpdateTextDirection(textDirection_);
     if (!isInlineFocus_) {
         auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
         textLayoutProperty->UpdateLayoutPolicyProperty(widthPolicy, true);
@@ -1068,7 +1070,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
     const TextStyle& textStyle, const std::u16string& content, const float fontSize) const
 {
     return {
-        .direction = GetTextDirection(content, direction_),
+        .direction = GetTextDirection(content, direction_, textDirection_),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
@@ -1202,24 +1204,10 @@ void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyl
     paragraph_->Build();
 }
 
-TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::u16string& content, TextDirection direction)
+TextDirection TextFieldLayoutAlgorithm::GetTextDirection(
+    const std::u16string& content, TextDirection direction, TextDirection textDirection)
 {
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-
-    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
-    for (const auto& charOfShowingText : content) {
-        if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
-            return TextDirection::LTR;
-        }
-        if (TextLayoutadapter::IsRightToLeft(charOfShowingText) ||
-            TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
-            return TextDirection::RTL;
-        }
-    }
-    return textDirection;
+    return ParagraphUtil::GetTextOwnDirection(content, direction, textDirection);
 }
 
 RefPtr<Paragraph> TextFieldLayoutAlgorithm::GetParagraph() const

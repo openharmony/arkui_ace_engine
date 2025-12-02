@@ -1708,6 +1708,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextContentTransition));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextContentTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextContentTransition));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextDirection));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextDirection));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
@@ -1947,6 +1951,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnWillAttachIME));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillAttachIME"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnWillAttachIME));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetTextDirection));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetTextDirection));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -2647,6 +2655,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnWillAttachIME));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillAttachIME"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnWillAttachIME));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetTextDirection));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetTextDirection));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
     
     RegisterVideoAttributes(object, vm);
@@ -3078,6 +3090,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetOnWillAttachIME));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillAttachIME"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetOnWillAttachIME));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextDirection));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextDirection));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);

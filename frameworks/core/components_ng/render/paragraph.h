@@ -168,7 +168,8 @@ enum TextHeightBehavior {
 
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
-    TextAlign align = TextAlign::LEFT;
+    // 注意是否有不兼容变更
+    TextAlign align = TextAlign::START;
     TextVerticalAlign verticalAlign = TextVerticalAlign::BASELINE;
     uint32_t maxLines = UINT32_MAX;
     std::string fontLocale;

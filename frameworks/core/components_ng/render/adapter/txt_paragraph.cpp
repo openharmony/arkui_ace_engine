@@ -537,6 +537,10 @@ float TxtParagraph::MakeEmptyOffsetX(bool isLtr)
 {
     auto width = GetMaxWidth();
     switch (textAlign_) {
+        case TextAlign::LEFT:
+            return 0.0f;
+        case TextAlign::RIGHT:
+            return width;
         case TextAlign::CENTER:
             return width * 0.5f;
         case TextAlign::END:
