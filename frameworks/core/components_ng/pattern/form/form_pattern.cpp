@@ -783,6 +783,7 @@ void FormPattern::OnModifyDone()
     if (cardInfo_.width != info.width || cardInfo_.height != info.height || cardInfo_.borderWidth != info.borderWidth) {
         isBeenLayout_ = false;
     }
+    info.colorMode = formColorMode_;
     GetWantParam(info);
     HandleFormComponent(info);
 
@@ -819,6 +820,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     layoutProperty->UpdateRequestFormInfo(info);
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= formSpecialStyle_.IsForbidden() || formSpecialStyle_.IsLocked();
+    info.colorMode = formColorMode_;
     UpdateBackgroundColorWhenUnTrustForm();
     GetWantParam(info);
     HandleFormComponent(info);
@@ -1069,6 +1071,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
     }
     UpdateSpecialStyleCfg();
     UpdateConfiguration();
+    UpdateColorMode(info);
 }
 
 void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
@@ -2208,6 +2211,16 @@ void FormPattern::UpdateConfiguration()
     if (localeTag != localeTag_ && subContainer_) {
         localeTag_ = localeTag;
         subContainer_->UpdateConfiguration();
+    }
+}
+
+void FormPattern::UpdateColorMode(const RequestFormInfo& info)
+{
+    if (cardInfo_.colorMode != info.colorMode) {
+        cardInfo_.colorMode = info.colorMode;
+        if (formManagerBridge_) {
+            formManagerBridge_->SetColorMode(info.colorMode);
+        }
     }
 }
 

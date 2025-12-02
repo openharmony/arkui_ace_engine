@@ -44,6 +44,7 @@ struct RequestFormInfo {
     bool obscuredMode = false;
     int32_t shape = -1;
     bool exemptAppLock;
+    int32_t colorMode;
 
     std::string ToString() const
     {

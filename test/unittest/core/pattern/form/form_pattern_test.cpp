@@ -2215,4 +2215,21 @@ HWTEST_F(FormPatternTest, FormPatternTest_063, TestSize.Level0)
     pattern->OnLanguageConfigurationUpdate();
     EXPECT_FALSE(pattern->isTibetanLanguage_);
 }
+
+/**
+ * @tc.name: FormPatternTest_SetColorMode
+ * @tc.desc: SetColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_SetColorMode, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->formColorMode_, -1);
+ 
+    pattern->SetColorMode(0);
+    EXPECT_EQ(pattern->formColorMode_, 0);
+}
 } // namespace OHOS::Ace::NG

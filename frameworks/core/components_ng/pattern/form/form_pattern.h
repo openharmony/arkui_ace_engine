@@ -169,6 +169,11 @@ public:
         isFormObscured_ = isObscured;
     }
 
+    void SetColorMode(int32_t colorMode)
+    {
+        formColorMode_ = colorMode;
+    }
+
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
@@ -327,6 +332,7 @@ private:
         const std::string &formName, const int32_t dimension, const bool isDisablePolicy);
     void InitFormRenderDiedCallback();
     void RequestRender();
+    void UpdateColorMode(const RequestFormInfo& info);
 
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -367,6 +373,7 @@ private:
     std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
     std::atomic_bool accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
     float formViewScale_ = 1.0f;
+    int32_t formColorMode_ = -1;
     enum {
         VALUE_TYPE_INT = 5,
         VALUE_TYPE_DOUBLE = 8,

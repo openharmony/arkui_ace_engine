@@ -147,6 +147,7 @@ public:
     void OnFormUpdateDone(const int64_t formId);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
+    void SetColorMode(int32_t colorMode);
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs);
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);

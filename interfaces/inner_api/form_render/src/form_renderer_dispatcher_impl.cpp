@@ -17,6 +17,7 @@
 #include <transaction/rs_transaction.h>
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
+#include "configuration_convertor.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
@@ -232,6 +233,27 @@ void FormRendererDispatcherImpl::SetObscured(bool isObscured)
         }
         HILOG_INFO("Update ChangeSensitiveNodes: %{public}s", isObscured ? "true" : "false");
         uiContent->ChangeSensitiveNodes(isObscured);
+    });
+}
+
+void FormRendererDispatcherImpl::SetColorMode(int32_t colorMode)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostTask([content = uiContent_, colorMode]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        std::string colorModeStr = OHOS::AppExecFwk::GetColorModeStr(colorMode);
+        HILOG_INFO("Update colorMode: %{public}s", colorModeStr.c_str());
+        std::shared_ptr<OHOS::AppExecFwk::Configuration> config = std::make_shared<AppExecFwk::Configuration>();
+        config->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, colorModeStr);
+        uiContent->UpdateConfiguration(config);
     });
 }
 

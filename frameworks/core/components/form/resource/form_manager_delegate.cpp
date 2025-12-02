@@ -1004,6 +1004,13 @@ void FormManagerDelegate::SetObscured(bool isObscured)
     formRendererDispatcher->SetObscured(isObscured);
 }
 
+void FormManagerDelegate::SetColorMode(int32_t colorMode)
+{
+    auto formRendererDispatcher = GetFormRendererDispatcher();
+    CHECK_NULL_VOID(formRendererDispatcher);
+    formRendererDispatcher->SetColorMode(colorMode);
+}
+
 void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
     std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
@@ -1226,6 +1233,7 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
     }
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_COLOR_MODE_KEY, info.colorMode);
     auto pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         auto density = pipelineContext->GetDensity();

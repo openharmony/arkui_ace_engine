@@ -82,15 +82,37 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     uiContent_->SetFormViewScale(uiWidth, uiHeight, formViewScale_);
 }
 
-void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::SetUICotentProperty(const OHOS::AAFwk::Want &want)
 {
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
         uiContent_->SetFormRenderingMode(static_cast<int8_t>(renderingMode_));
     }
-    if (enableBlurBackground_) {
-        uiContent_->SetFormEnableBlurBackground(enableBlurBackground_);
+    if (enableBlurBackground_ || formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        uiContent_->SetFormEnableBlurBackground(true);
     }
+ 
+    backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_ ||
+        formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
+        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
+    } else if (!backgroundColor_.empty()) {
+        uiContent_->SetFormBackgroundColor(backgroundColor_);
+    }
+ 
+    HILOG_INFO("InitUIContent renderingMode_:%{public}d, enableBlurBackground_:%{public}d, formLocation_:%{public}d, "
+               "backgroundColor_:%{public}s",
+        static_cast<int32_t>(renderingMode_),
+        static_cast<int32_t>(enableBlurBackground_),
+        static_cast<int32_t>(formLocation_),
+        backgroundColor_.c_str());
+}
+
+void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    SetUICotentProperty(want);
     uiContent_->RunFormPage();
+
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (!backgroundColor_.empty()) {
         uiContent_->SetFormBackgroundColor(backgroundColor_);
@@ -122,15 +144,6 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
         uiContent_->SetFormLinkInfoUpdateHandler(formLinkInfoUpdateHandler);
     }
 
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        HILOG_ERROR("rsSurfaceNode is nullptr.");
-        return;
-    }
-    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
-        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
-        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
-    }
     HILOG_INFO("ChangeSensitiveNodes: %{public}s", obscurationMode_ ? "true" : "false");
     uiContent_->ChangeSensitiveNodes(obscurationMode_);
     uiContent_->Foreground();
@@ -142,7 +155,7 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
     RunFormPageInner(want, formJsInfo);
 }
 
-void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
+void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
 {
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
@@ -156,6 +169,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     borderWidth_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f);
     fontScaleFollowSystem_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, true);
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
+    formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
+        want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));
 }
 
 int32_t FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -537,6 +552,15 @@ void FormRenderer::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!uiContent_) {
         HILOG_ERROR("uiContent_ is null");
         return;
+    }
+    if (!config) {
+        HILOG_ERROR("config is null");
+        return;
+    }
+
+    std::string colorModeValue = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorModeValue.empty() && formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        config->RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     }
 
     uiContent_->UpdateConfiguration(config);
