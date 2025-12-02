@@ -2642,7 +2642,7 @@ ArkUINativeModuleValue WebBridge::SetOnWindowNew(ArkUIRuntimeCallInfo* runtimeCa
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weak);
-        const char* keys[] = { "isAlert", "isUserTrigger", "targeturl", "handler" };
+        const char* keys[] = { "isAlert", "isUserTrigger", "targetUrl", "handler" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateJSWindowNewHandler(event);
         Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, event.IsAlert()),
                                        panda::BooleanRef::New(vm, event.IsUserTrigger()),
