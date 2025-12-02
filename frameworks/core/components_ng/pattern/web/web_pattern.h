@@ -1056,6 +1056,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void CleanupWebPatternResource(int32_t webId);
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -1470,6 +1471,7 @@ private:
     bool isAttachedToMainTree_ = false;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
+    int32_t offlineWebNodeId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     TouchEventInfo touchEventInfo_{"touchEvent"};
