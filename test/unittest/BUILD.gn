@@ -26,6 +26,7 @@ group("unittest") {
       "adapter:adapter_unittest",
       "base:base_unittest",
       "bridge:bridge_unittest",
+      "capi:linux_capi_unittest",
       "core:core_unittest",
       "frameworks:frameworks_unittest",
       "interfaces:interfaces_unittest",

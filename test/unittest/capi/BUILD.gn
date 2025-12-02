@@ -206,6 +206,9 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "libxml2:static_libxml2",
     "runtime_core:ani",
   ]
+  if (current_os == "ohos") {
+    public_external_deps = [ "c_utils:utils" ]
+  }
 
   if (defined(plugin_components_support_for_test) &&
       plugin_components_support_for_test) {
