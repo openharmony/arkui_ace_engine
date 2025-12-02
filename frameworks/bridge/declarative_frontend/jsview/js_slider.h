@@ -42,6 +42,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetBlockColor(const JSCallbackInfo& info);
     static void SetTrackColor(const JSCallbackInfo& info);
+    static void SetTrackColorMetrics(const JSCallbackInfo& info);
     static void SetThickness(const JSCallbackInfo& info);
     static void SetSelectedColor(const JSCallbackInfo& info);
     static void SetMinLabel(const JSCallbackInfo& info);
@@ -72,6 +73,7 @@ public:
 private:
     static void ResetBlockStyle();
     static bool ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient);
+    static bool ConvertColorMetricsLinearGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "core/components_ng/base/frame_node.h"
@@ -60,6 +61,32 @@ bool ConvertSliderGradientColor(const EcmaVM* vm, const Local<JSValueRef>& value
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
         gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
+}
+
+bool ConvertSliderMetricsGradientColor(
+    const EcmaVM* vm, const Local<JSValueRef>& value, OHOS::Ace::NG::Gradient& gradient)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    Framework::JSColorMetricsLinearGradient* jsColorMetricsLinearGradient =
+        static_cast<Framework::JSColorMetricsLinearGradient*>(value->ToObject(vm)->GetNativePointerField(vm, 0));
+    if (!jsColorMetricsLinearGradient) {
+        return false;
+    }
+
+    size_t colorLength = jsColorMetricsLinearGradient->GetColorMetricsGradient().size();
+    if (colorLength == 0) {
+        return false;
+    }
+    for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(
+            LinearColor(jsColorMetricsLinearGradient->GetColorMetricsGradient().at(colorIndex).color));
+        gradientColor.SetDimension(jsColorMetricsLinearGradient->GetColorMetricsGradient().at(colorIndex).offset);
         gradient.AddColor(gradientColor);
     }
     return true;
@@ -413,6 +440,52 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
 }
 
 ArkUINativeModuleValue SliderBridge::ResetTrackBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::SetTrackColorMetrics(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Gradient gradient;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ConvertSliderMetricsGradientColor(vm, secondArg, gradient)) {
+        ArkUIGradientType gradientObj;
+        auto colorLength = gradient.GetColors().size();
+        std::vector<uint32_t> colorValues;
+        std::vector<ArkUILengthType> offsetValues;
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
+        if (colorLength <= 0) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        for (int32_t i = 0; i < static_cast<int32_t>(colorLength); i++) {
+            colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
+            offsetValues.push_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(gradient.GetColors()[i].GetDimension().Value()),
+                .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
+        }
+
+        gradientObj.color = &(*colorValues.begin());
+        gradientObj.offset = &(*offsetValues.begin());
+        GetArkUINodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
+            nativeNode, &gradientObj, colorLength);
+    } else {
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetTrackColorMetrics(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
