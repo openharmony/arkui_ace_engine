@@ -75,6 +75,7 @@ constexpr int32_t NODE_ID = 1;
 constexpr int32_t FRAMENODE_ID = 2;
 constexpr int32_t MUMBER_ONE = 1;
 constexpr int32_t MUMBER_TWO = 2;
+constexpr uint32_t COUNT = 10;
 constexpr float FLOAT_ZERO = 0.0f;
 constexpr float FLOAT_ONE = 1.0f;
 constexpr float FLOAT_FIVE = 5.0f;
@@ -1201,5 +1202,55 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest048, TestSize.Level1)
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockLinearGradientColor: #00000000 \n");
+}
+
+/**
+ * @tc.name: SliderPatternTwoTest049
+ * @tc.desc: Test AdjustStepAccessibilityVirtualNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node and set contentSize.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SLIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<SliderPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(FLOAT_FIFTY, FLOAT_FIFTY));
+    /**
+     * @tc.steps: step2. make start point is negative.
+     * @tc.expected: step2. the size of the pointSize will become smaller.
+     */
+    auto pointSize = SizeF(FLOAT_TEN, FLOAT_TEN);
+    auto negativePoint = PointF(-FLOAT_FIVE, -FLOAT_FIVE);
+    sliderPattern->AdjustStepAccessibilityVirtualNode(pointSize, negativePoint, COUNT, 0);
+    EXPECT_EQ(pointSize, SizeF(FLOAT_FIVE, FLOAT_FIVE));
+    /**
+     * @tc.steps: step3. make start point is positive.
+     * @tc.expected: step3. the size of the pointSize will not change.
+     */
+    pointSize = SizeF(FLOAT_TEN, FLOAT_TEN);
+    auto positivePoint = PointF(FLOAT_FIVE, FLOAT_FIVE);
+    sliderPattern->AdjustStepAccessibilityVirtualNode(pointSize, positivePoint, COUNT, 0);
+    EXPECT_EQ(pointSize, SizeF(FLOAT_TEN, FLOAT_TEN));
+    /**
+     * @tc.steps: step4. make end point is enough.
+     * @tc.expected: step4. the size of the pointSize will not change.
+     */
+    auto enoughPoint = PointF(FLOAT_FIFTY - FLOAT_TEN, FLOAT_FIFTY - FLOAT_TEN);
+    sliderPattern->AdjustStepAccessibilityVirtualNode(pointSize, enoughPoint, COUNT, COUNT - 1);
+    EXPECT_EQ(pointSize, SizeF(FLOAT_TEN, FLOAT_TEN));
+    /**
+     * @tc.steps: step5. make end point is exceeded.
+     * @tc.expected: step5. the size of the pointSize will become smaller.
+     */
+    auto exceededPoint = PointF(FLOAT_FIFTY - FLOAT_FIVE, FLOAT_FIFTY - FLOAT_FIVE);
+    sliderPattern->AdjustStepAccessibilityVirtualNode(pointSize, exceededPoint, COUNT, COUNT - 1);
+    EXPECT_EQ(pointSize, SizeF(FLOAT_FIVE, FLOAT_FIVE));
 }
 } // namespace OHOS::Ace::NG
