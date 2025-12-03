@@ -55,7 +55,7 @@ public:
 
 protected:
     void OnAttachToFrameNode() override;
-    void SetWindowSyncLoad(const RefPtr<FrameNode>& window);
+    void SetImagePatternSyncLoad(const RefPtr<FrameNode>& window);
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
