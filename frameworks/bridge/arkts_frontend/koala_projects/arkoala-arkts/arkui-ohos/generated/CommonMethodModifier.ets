@@ -31,7 +31,7 @@ import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { FocusBoxStyle, FocusPriority } from "./component/focus"
 import { default as matrix4 } from "@ohos.matrix4"
-import { CustomBuilder } from "./component/builder"
+import { CustomBuilder, CustomBuilderT } from "./component/builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer } from "./component/gesture"
@@ -280,9 +280,11 @@ export class CommonMethodModifier implements CommonMethod {
     _bindContextMenu_0_0value?: CustomBuilder | undefined
     _bindContextMenu_0_1value?: ResponseType | undefined
     _bindContextMenu_0_2value?: ContextMenuOptions | undefined
-    _bindContextMenu_1_0value?: boolean | undefined
-    _bindContextMenu_1_1value?: CustomBuilder | undefined
-    _bindContextMenu_1_2value?: ContextMenuOptions | undefined
+    _bindContextMenu_1_0value?: CustomBuilderT<ResponseType> | undefined
+    _bindContextMenu_1_1value?: ContextMenuOptions | undefined
+    _bindContextMenu_2_0value?: boolean | undefined
+    _bindContextMenu_2_1value?: CustomBuilder | undefined
+    _bindContextMenu_2_2value?: ContextMenuOptions | undefined
     _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
     _bindContentCover_0_1value?: CustomBuilder | undefined
     _bindContentCover_0_2value?: ModalTransition | undefined
@@ -3796,7 +3798,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[193] as int32) {
                 case 1: {
-                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenu_1_1value as ContextMenuOptions | undefined));
                     flagArray[193] = 2;
                     break;
                 }
@@ -3806,7 +3808,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[193] = 0;
-                    peer.setBindContextMenu1Attribute((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -3814,7 +3816,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[194] as int32) {
                 case 1: {
-                    peer.setBindContentCover0Attribute((this._bindContentCover_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_0_1value as CustomBuilder | undefined), (this._bindContentCover_0_2value as ModalTransition | undefined | undefined));
+                    peer.setBindContextMenu2Attribute((this._bindContextMenu_2_0value as boolean | undefined), (this._bindContextMenu_2_1value as CustomBuilder | undefined), (this._bindContextMenu_2_2value as ContextMenuOptions | undefined | undefined));
                     flagArray[194] = 2;
                     break;
                 }
@@ -3824,7 +3826,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[194] = 0;
-                    peer.setBindContentCover0Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined | undefined));
+                    peer.setBindContextMenu2Attribute((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -3832,7 +3834,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[195] as int32) {
                 case 1: {
-                    peer.setBindContentCover1Attribute((this._bindContentCover_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_1_1value as CustomBuilder | undefined), (this._bindContentCover_1_2value as ContentCoverOptions | undefined | undefined));
+                    peer.setBindContentCover0Attribute((this._bindContentCover_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_0_1value as CustomBuilder | undefined), (this._bindContentCover_0_2value as ModalTransition | undefined | undefined));
                     flagArray[195] = 2;
                     break;
                 }
@@ -3842,7 +3844,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[195] = 0;
-                    peer.setBindContentCover1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined | undefined));
+                    peer.setBindContentCover0Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined | undefined));
                 }
             }
         }
@@ -3850,7 +3852,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[196] as int32) {
                 case 1: {
-                    peer.setBindSheetAttribute((this._bindSheet_0_0value as boolean | Bindable<boolean> | undefined), (this._bindSheet_0_1value as CustomBuilder | undefined), (this._bindSheet_0_2value as SheetOptions | undefined | undefined));
+                    peer.setBindContentCover1Attribute((this._bindContentCover_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_1_1value as CustomBuilder | undefined), (this._bindContentCover_1_2value as ContentCoverOptions | undefined | undefined));
                     flagArray[196] = 2;
                     break;
                 }
@@ -3860,7 +3862,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[196] = 0;
-                    peer.setBindSheetAttribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined | undefined));
+                    peer.setBindContentCover1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined | undefined));
                 }
             }
         }
@@ -3868,7 +3870,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[197] as int32) {
                 case 1: {
-                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setBindSheetAttribute((this._bindSheet_0_0value as boolean | Bindable<boolean> | undefined), (this._bindSheet_0_1value as CustomBuilder | undefined), (this._bindSheet_0_2value as SheetOptions | undefined | undefined));
                     flagArray[197] = 2;
                     break;
                 }
@@ -3878,7 +3880,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[197] = 0;
-                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setBindSheetAttribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined | undefined));
                 }
             }
         }
@@ -3886,7 +3888,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[198] as int32) {
                 case 1: {
-                    peer.setOnVisibleAreaApproximateChangeAttribute((this._onVisibleAreaApproximateChange_0_0value as VisibleAreaEventOptions | undefined), (this._onVisibleAreaApproximateChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
                     flagArray[198] = 2;
                     break;
                 }
@@ -3896,7 +3898,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[198] = 0;
-                    peer.setOnVisibleAreaApproximateChangeAttribute((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
@@ -3904,7 +3906,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[199] as int32) {
                 case 1: {
-                    peer.setKeyboardShortcutAttribute((this._keyboardShortcut_0_0value as string | FunctionKey | undefined), (this._keyboardShortcut_0_1value as Array<ModifierKey> | undefined), (this._keyboardShortcut_0_2value as (() => void) | undefined | undefined));
+                    peer.setOnVisibleAreaApproximateChangeAttribute((this._onVisibleAreaApproximateChange_0_0value as VisibleAreaEventOptions | undefined), (this._onVisibleAreaApproximateChange_0_1value as VisibleAreaChangeCallback | undefined));
                     flagArray[199] = 2;
                     break;
                 }
@@ -3914,17 +3916,15 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[199] = 0;
-                    peer.setKeyboardShortcutAttribute((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined | undefined));
+                    peer.setOnVisibleAreaApproximateChangeAttribute((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
-    }
-    applyModifierPatch10(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
         if (flagArray[200] != 0)
         {
             switch (flagArray[200] as int32) {
                 case 1: {
-                    peer.setAccessibilityGroupWithConfigAttribute((this._accessibilityGroup_1_0value as boolean | undefined), (this._accessibilityGroup_1_1value as AccessibilityOptions | undefined));
+                    peer.setKeyboardShortcutAttribute((this._keyboardShortcut_0_0value as string | FunctionKey | undefined), (this._keyboardShortcut_0_1value as Array<ModifierKey> | undefined), (this._keyboardShortcut_0_2value as (() => void) | undefined | undefined));
                     flagArray[200] = 2;
                     break;
                 }
@@ -3934,15 +3934,17 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[200] = 0;
-                    peer.setAccessibilityGroupWithConfigAttribute((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
+                    peer.setKeyboardShortcutAttribute((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined | undefined));
                 }
             }
         }
+    }
+    applyModifierPatch10(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
         if (flagArray[201] != 0)
         {
             switch (flagArray[201] as int32) {
                 case 1: {
-                    peer.setOnGestureRecognizerJudgeBegin1Attribute((this._onGestureRecognizerJudgeBegin_1_0value as GestureRecognizerJudgeBeginCallback | undefined), (this._onGestureRecognizerJudgeBegin_1_1value as boolean | undefined));
+                    peer.setAccessibilityGroupWithConfigAttribute((this._accessibilityGroup_1_0value as boolean | undefined), (this._accessibilityGroup_1_1value as AccessibilityOptions | undefined));
                     flagArray[201] = 2;
                     break;
                 }
@@ -3952,6 +3954,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[201] = 0;
+                    peer.setAccessibilityGroupWithConfigAttribute((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[202] != 0)
+        {
+            switch (flagArray[202] as int32) {
+                case 1: {
+                    peer.setOnGestureRecognizerJudgeBegin1Attribute((this._onGestureRecognizerJudgeBegin_1_0value as GestureRecognizerJudgeBeginCallback | undefined), (this._onGestureRecognizerJudgeBegin_1_1value as boolean | undefined));
+                    flagArray[202] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[202] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[202] = 0;
                     peer.setOnGestureRecognizerJudgeBegin1Attribute((undefined as GestureRecognizerJudgeBeginCallback | undefined), (undefined as boolean | undefined));
                 }
             }
@@ -6497,7 +6517,20 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[193] as int32) {
                 case 1:
                 case 3: {
-                    this.bindContextMenu(modifier._bindContextMenu_1_0value, modifier._bindContextMenu_1_1value, modifier._bindContextMenu_1_2value);
+                    this.bindContextMenu(modifier._bindContextMenu_1_0value, modifier._bindContextMenu_1_1value);
+                    break;
+                }
+                default: {
+                    this.bindContextMenu((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[194] != 0)
+        {
+            switch (flagArray[194] as int32) {
+                case 1:
+                case 3: {
+                    this.bindContextMenu(modifier._bindContextMenu_2_0value, modifier._bindContextMenu_2_1value, modifier._bindContextMenu_2_2value);
                     break;
                 }
                 default: {
@@ -6505,9 +6538,9 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[194] != 0)
+        if (flagArray[195] != 0)
         {
-            switch (flagArray[194] as int32) {
+            switch (flagArray[195] as int32) {
                 case 1:
                 case 3: {
                     this.bindContentCover(modifier._bindContentCover_0_0value, modifier._bindContentCover_0_1value, modifier._bindContentCover_0_2value);
@@ -6518,9 +6551,9 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[195] != 0)
+        if (flagArray[196] != 0)
         {
-            switch (flagArray[195] as int32) {
+            switch (flagArray[196] as int32) {
                 case 1:
                 case 3: {
                     this.bindContentCover(modifier._bindContentCover_1_0value, modifier._bindContentCover_1_1value, modifier._bindContentCover_1_2value);
@@ -6531,9 +6564,9 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[196] != 0)
+        if (flagArray[197] != 0)
         {
-            switch (flagArray[196] as int32) {
+            switch (flagArray[197] as int32) {
                 case 1:
                 case 3: {
                     this.bindSheet(modifier._bindSheet_0_0value, modifier._bindSheet_0_1value, modifier._bindSheet_0_2value);
@@ -6544,9 +6577,9 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[197] != 0)
+        if (flagArray[198] != 0)
         {
-            switch (flagArray[197] as int32) {
+            switch (flagArray[198] as int32) {
                 case 1:
                 case 3: {
                     this.onVisibleAreaChange(modifier._onVisibleAreaChange_0_0value, modifier._onVisibleAreaChange_0_1value);
@@ -6557,9 +6590,9 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[198] != 0)
+        if (flagArray[199] != 0)
         {
-            switch (flagArray[198] as int32) {
+            switch (flagArray[199] as int32) {
                 case 1:
                 case 3: {
                     this.onVisibleAreaApproximateChange(modifier._onVisibleAreaApproximateChange_0_0value, modifier._onVisibleAreaApproximateChange_0_1value);
@@ -6570,9 +6603,9 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[199] != 0)
+        if (flagArray[200] != 0)
         {
-            switch (flagArray[199] as int32) {
+            switch (flagArray[200] as int32) {
                 case 1:
                 case 3: {
                     this.keyboardShortcut(modifier._keyboardShortcut_0_0value, modifier._keyboardShortcut_0_1value, modifier._keyboardShortcut_0_2value);
@@ -6585,9 +6618,9 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier10(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[200] != 0)
+        if (flagArray[201] != 0)
         {
-            switch (flagArray[200] as int32) {
+            switch (flagArray[201] as int32) {
                 case 1:
                 case 3: {
                     this.accessibilityGroup(modifier._accessibilityGroup_1_0value, modifier._accessibilityGroup_1_1value);
@@ -6598,9 +6631,9 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[201] != 0)
+        if (flagArray[202] != 0)
         {
-            switch (flagArray[201] as int32) {
+            switch (flagArray[202] as int32) {
                 case 1:
                 case 3: {
                     this.onGestureRecognizerJudgeBegin(modifier._onGestureRecognizerJudgeBegin_1_0value, modifier._onGestureRecognizerJudgeBegin_1_1value);
@@ -8987,13 +9020,12 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
-        if (((this._flagArray[193]) == (0)) || ((this._bindContextMenu_1_0value) !== (isShown)) || (true) || (true))
+    bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[193]) == (0)) || (true) || (true))
         {
             this._flagArray[193] = 1
-            this._bindContextMenu_1_0value = isShown
-            this._bindContextMenu_1_1value = content
-            this._bindContextMenu_1_2value = options
+            this._bindContextMenu_1_0value = content
+            this._bindContextMenu_1_1value = options
             this._state.fireChange()
         } else
         {
@@ -9001,13 +9033,13 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
-        if (((this._flagArray[194]) == (0)) || (true) || (true) || (true))
+    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[194]) == (0)) || ((this._bindContextMenu_2_0value) !== (isShown)) || (true) || (true))
         {
             this._flagArray[194] = 1
-            this._bindContentCover_0_0value = isShow
-            this._bindContentCover_0_1value = builder
-            this._bindContentCover_0_2value = type
+            this._bindContextMenu_2_0value = isShown
+            this._bindContextMenu_2_1value = content
+            this._bindContextMenu_2_2value = options
             this._state.fireChange()
         } else
         {
@@ -9015,13 +9047,13 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
+    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
         if (((this._flagArray[195]) == (0)) || (true) || (true) || (true))
         {
             this._flagArray[195] = 1
-            this._bindContentCover_1_0value = isShow
-            this._bindContentCover_1_1value = builder
-            this._bindContentCover_1_2value = options
+            this._bindContentCover_0_0value = isShow
+            this._bindContentCover_0_1value = builder
+            this._bindContentCover_0_2value = type
             this._state.fireChange()
         } else
         {
@@ -9029,13 +9061,13 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
         if (((this._flagArray[196]) == (0)) || (true) || (true) || (true))
         {
             this._flagArray[196] = 1
-            this._bindSheet_0_0value = isShow
-            this._bindSheet_0_1value = builder
-            this._bindSheet_0_2value = options
+            this._bindContentCover_1_0value = isShow
+            this._bindContentCover_1_1value = builder
+            this._bindContentCover_1_2value = options
             this._state.fireChange()
         } else
         {
@@ -9043,12 +9075,13 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
-        if (((this._flagArray[197]) == (0)) || ((this._onVisibleAreaChange_0_0value) !== (ratios)) || (true))
+    bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+        if (((this._flagArray[197]) == (0)) || (true) || (true) || (true))
         {
             this._flagArray[197] = 1
-            this._onVisibleAreaChange_0_0value = ratios
-            this._onVisibleAreaChange_0_1value = event
+            this._bindSheet_0_0value = isShow
+            this._bindSheet_0_1value = builder
+            this._bindSheet_0_2value = options
             this._state.fireChange()
         } else
         {
@@ -9056,12 +9089,12 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
-        if (((this._flagArray[198]) == (0)) || (true) || (true))
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        if (((this._flagArray[198]) == (0)) || ((this._onVisibleAreaChange_0_0value) !== (ratios)) || (true))
         {
             this._flagArray[198] = 1
-            this._onVisibleAreaApproximateChange_0_0value = options
-            this._onVisibleAreaApproximateChange_0_1value = event
+            this._onVisibleAreaChange_0_0value = ratios
+            this._onVisibleAreaChange_0_1value = event
             this._state.fireChange()
         } else
         {
@@ -9069,13 +9102,12 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
-        if (((this._flagArray[199]) == (0)) || (true) || (true) || (true))
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        if (((this._flagArray[199]) == (0)) || (true) || (true))
         {
             this._flagArray[199] = 1
-            this._keyboardShortcut_0_0value = value
-            this._keyboardShortcut_0_1value = keys
-            this._keyboardShortcut_0_2value = action
+            this._onVisibleAreaApproximateChange_0_0value = options
+            this._onVisibleAreaApproximateChange_0_1value = event
             this._state.fireChange()
         } else
         {
@@ -9083,12 +9115,13 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    accessibilityGroup(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
-        if (((this._flagArray[200]) == (0)) || ((this._accessibilityGroup_1_0value) !== (isGroup)) || (true))
+    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
+        if (((this._flagArray[200]) == (0)) || (true) || (true) || (true))
         {
             this._flagArray[200] = 1
-            this._accessibilityGroup_1_0value = isGroup
-            this._accessibilityGroup_1_1value = config
+            this._keyboardShortcut_0_0value = value
+            this._keyboardShortcut_0_1value = keys
+            this._keyboardShortcut_0_2value = action
             this._state.fireChange()
         } else
         {
@@ -9096,16 +9129,29 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
-        if (((this._flagArray[201]) == (0)) || (true) || ((this._onGestureRecognizerJudgeBegin_1_1value) !== (exposeInnerGesture)))
+    accessibilityGroup(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
+        if (((this._flagArray[201]) == (0)) || ((this._accessibilityGroup_1_0value) !== (isGroup)) || (true))
         {
             this._flagArray[201] = 1
+            this._accessibilityGroup_1_0value = isGroup
+            this._accessibilityGroup_1_1value = config
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[201] = 3
+        }
+        return this
+    }
+    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
+        if (((this._flagArray[202]) == (0)) || (true) || ((this._onGestureRecognizerJudgeBegin_1_1value) !== (exposeInnerGesture)))
+        {
+            this._flagArray[202] = 1
             this._onGestureRecognizerJudgeBegin_1_0value = callback_
             this._onGestureRecognizerJudgeBegin_1_1value = exposeInnerGesture
             this._state.fireChange()
         } else
         {
-            this._flagArray[201] = 3
+            this._flagArray[202] = 3
         }
         return this
     }

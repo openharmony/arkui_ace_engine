@@ -5377,6 +5377,26 @@ KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu0, Ark_NativePointer, KSe
 void impl_CommonMethod_setBindContextMenu1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto contentValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType contentValueTempTmpBuf = {};
+        contentValueTempTmpBuf.tag = contentValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((contentValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            contentValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_ResponseType t, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_ResponseType t, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomBuilderT_Arkui_Component_Enums_ResponseType))))};
+        }
+        Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType contentValueTemp = contentValueTempTmpBuf;;
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ContextMenuOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = ContextMenuOptions_serializer::read(thisDeserializer);
+        }
+        Opt_ContextMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu1(self, static_cast<Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu1, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setBindContextMenu2(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto isShownValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Boolean isShownValueTempTmpBuf = {};
         isShownValueTempTmpBuf.tag = isShownValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -5398,9 +5418,9 @@ void impl_CommonMethod_setBindContextMenu1(Ark_NativePointer thisPtr, KSerialize
             optionsValueTempTmpBuf.value = ContextMenuOptions_serializer::read(thisDeserializer);
         }
         Opt_ContextMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu1(self, static_cast<Opt_Boolean*>(&isShownValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu2(self, static_cast<Opt_Boolean*>(&isShownValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu1, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu2, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBindContentCover0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

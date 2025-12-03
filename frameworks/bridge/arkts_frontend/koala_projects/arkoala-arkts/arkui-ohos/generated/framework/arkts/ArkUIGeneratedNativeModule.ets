@@ -613,6 +613,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setBindContextMenu1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setBindContextMenu2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setBindContentCover0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setBindContentCover1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
