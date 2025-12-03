@@ -10764,9 +10764,8 @@ ArkUINativeModuleValue CommonBridge::ResetNextFocus(ArkUIRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info)
+static void FillAxisMap(EcmaVM* vm, Local<panda::MapRef>& axisMap, const NG::FocusAxisEventInfo& info)
 {
-    auto axisMap = panda::MapRef::New(vm);
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_X)),
         panda::NumberRef::New(vm, info.GetAbsXValue()));
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_Y)),
@@ -10783,6 +10782,34 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, info.GetAbsHat0XValue()));
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT0Y)),
         panda::NumberRef::New(vm, info.GetAbsHat0YValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_RX)),
+        panda::NumberRef::New(vm, info.GetAbsRxValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_RY)),
+        panda::NumberRef::New(vm, info.GetAbsRyValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_THROTTLE)),
+        panda::NumberRef::New(vm, info.GetAbsThrottleValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_RUDDER)),
+        panda::NumberRef::New(vm, info.GetAbsRudderValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_WHEEL)),
+        panda::NumberRef::New(vm, info.GetAbsWheelValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT1X)),
+        panda::NumberRef::New(vm, info.GetAbsHat1XValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT1Y)),
+        panda::NumberRef::New(vm, info.GetAbsHat1YValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT2X)),
+        panda::NumberRef::New(vm, info.GetAbsHat2XValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT2Y)),
+        panda::NumberRef::New(vm, info.GetAbsHat2YValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT3X)),
+        panda::NumberRef::New(vm, info.GetAbsHat3XValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT3Y)),
+        panda::NumberRef::New(vm, info.GetAbsHat3YValue()));
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info)
+{
+    auto axisMap = panda::MapRef::New(vm);
+    FillAxisMap(vm, axisMap, info);
     const char* keys[] = { "axisMap", "target", "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool",
         "deviceId", "getModifierKeyState", "stopPropagation", "targetDisplayId" };
     Local<JSValueRef> values[] = { axisMap, FrameNodeBridge::CreateEventTargetObject(vm, info),

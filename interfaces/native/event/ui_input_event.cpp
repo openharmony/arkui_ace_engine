@@ -2871,25 +2871,30 @@ double OH_ArkUI_FocusAxisEvent_GetAxisValue(const ArkUI_UIInputEvent* event, int
     if (!focusAxisEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    switch (axis) {
-        case UI_FOCUS_AXIS_EVENT_ABS_X:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absXValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_Y:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absYValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_Z:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absZValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_RZ:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absRzValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_GAS:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absGasValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_BRAKE:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absBrakeValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_HAT0X:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absHat0XValue, ARKUI_ERROR_CODE_NO_ERROR);
-        case UI_FOCUS_AXIS_EVENT_ABS_HAT0Y:
-            RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->absHat0YValue, ARKUI_ERROR_CODE_NO_ERROR);
-        default:
-            RETURN_RET_WITH_STATUS_CHECK(0.0, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    static const std::unordered_map<int32_t, double ArkUIFocusAxisEvent::*> axisMapper = {
+        { UI_FOCUS_AXIS_EVENT_ABS_X, &ArkUIFocusAxisEvent::absXValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_Y, &ArkUIFocusAxisEvent::absYValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_Z, &ArkUIFocusAxisEvent::absZValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RZ, &ArkUIFocusAxisEvent::absRzValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_GAS, &ArkUIFocusAxisEvent::absGasValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_BRAKE, &ArkUIFocusAxisEvent::absBrakeValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT0X, &ArkUIFocusAxisEvent::absHat0XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT0Y, &ArkUIFocusAxisEvent::absHat0YValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RX, &ArkUIFocusAxisEvent::absRxValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RY, &ArkUIFocusAxisEvent::absRyValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_THROTTLE, &ArkUIFocusAxisEvent::absThrottleValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_RUDDER, &ArkUIFocusAxisEvent::absRudderValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_WHEEL, &ArkUIFocusAxisEvent::absWheelValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT1X, &ArkUIFocusAxisEvent::absHat1XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT1Y, &ArkUIFocusAxisEvent::absHat1YValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT2X, &ArkUIFocusAxisEvent::absHat2XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT2Y, &ArkUIFocusAxisEvent::absHat2YValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT3X, &ArkUIFocusAxisEvent::absHat3XValue },
+        { UI_FOCUS_AXIS_EVENT_ABS_HAT3Y, &ArkUIFocusAxisEvent::absHat3YValue },
+    };
+    auto iter = axisMapper.find(axis);
+    if (iter != axisMapper.end()) {
+        RETURN_RET_WITH_STATUS_CHECK(focusAxisEvent->*(iter->second), ARKUI_ERROR_CODE_NO_ERROR);
     }
     RETURN_RET_WITH_STATUS_CHECK(0.0, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }

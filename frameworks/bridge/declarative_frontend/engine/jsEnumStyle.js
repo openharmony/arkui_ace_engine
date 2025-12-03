@@ -4790,6 +4790,17 @@ let AxisModel;
   AxisModel[AxisModel.ABS_BRAKE = 5] = 'ABS_BRAKE';
   AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
+  AxisModel[AxisModel.ABS_RX = 8] = 'ABS_RX';
+  AxisModel[AxisModel.ABS_RY = 9] = 'ABS_RY';
+  AxisModel[AxisModel.ABS_THROTTLE = 10] = 'ABS_THROTTLE';
+  AxisModel[AxisModel.ABS_RUDDER = 11] = 'ABS_RUDDER';
+  AxisModel[AxisModel.ABS_WHEEL = 12] = 'ABS_WHEEL';
+  AxisModel[AxisModel.ABS_HAT1X = 13] = 'ABS_HAT1X';
+  AxisModel[AxisModel.ABS_HAT1Y = 14] = 'ABS_HAT1Y';
+  AxisModel[AxisModel.ABS_HAT2X = 15] = 'ABS_HAT2X';
+  AxisModel[AxisModel.ABS_HAT2Y = 16] = 'ABS_HAT2Y';
+  AxisModel[AxisModel.ABS_HAT3X = 17] = 'ABS_HAT3X';
+  AxisModel[AxisModel.ABS_HAT3Y = 18] = 'ABS_HAT3Y';
 })(AxisModel || (AxisModel = {}));
 
 let CrownSensitivity;

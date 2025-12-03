@@ -27,6 +27,17 @@ void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src)
         case AxisModel::ABS_BRAKE: dst = ARK_AXIS_MODEL_ABS_BRAKE; break;
         case AxisModel::ABS_HAT0X: dst = ARK_AXIS_MODEL_ABS_HAT0X; break;
         case AxisModel::ABS_HAT0Y: dst = ARK_AXIS_MODEL_ABS_HAT0Y; break;
+        case AxisModel::ABS_RX: dst = ARK_AXIS_MODEL_ABS_RX; break;
+        case AxisModel::ABS_RY: dst = ARK_AXIS_MODEL_ABS_RY; break;
+        case AxisModel::ABS_THROTTLE: dst = ARK_AXIS_MODEL_ABS_THROTTLE; break;
+        case AxisModel::ABS_RUDDER: dst = ARK_AXIS_MODEL_ABS_RUDDER; break;
+        case AxisModel::ABS_WHEEL: dst = ARK_AXIS_MODEL_ABS_WHEEL; break;
+        case AxisModel::ABS_HAT1X: dst = ARK_AXIS_MODEL_ABS_HAT1X; break;
+        case AxisModel::ABS_HAT1Y: dst = ARK_AXIS_MODEL_ABS_HAT1Y; break;
+        case AxisModel::ABS_HAT2X: dst = ARK_AXIS_MODEL_ABS_HAT2X; break;
+        case AxisModel::ABS_HAT2Y: dst = ARK_AXIS_MODEL_ABS_HAT2Y; break;
+        case AxisModel::ABS_HAT3X: dst = ARK_AXIS_MODEL_ABS_HAT3X; break;
+        case AxisModel::ABS_HAT3Y: dst = ARK_AXIS_MODEL_ABS_HAT3Y; break;
         default: {
             dst = INVALID_ENUM_VAL<Ark_AxisModel>;
             LOGE("Unexpected enum value in AxisModel: %{public}d", src);

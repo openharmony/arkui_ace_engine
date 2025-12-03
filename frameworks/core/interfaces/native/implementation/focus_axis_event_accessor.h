@@ -27,15 +27,15 @@
 namespace OHOS::Ace::NG::GeneratedModifier::FocusAxisEventAccessor {
 inline std::map<AxisModel, float> getAxisMapFromInfo(const FocusAxisEventInfo& info)
 {
-    return {
-        { AxisModel::ABS_X, info.GetAbsXValue() },
-        { AxisModel::ABS_Y, info.GetAbsYValue() },
-        { AxisModel::ABS_Z, info.GetAbsZValue() },
-        { AxisModel::ABS_RZ, info.GetAbsRzValue() },
-        { AxisModel::ABS_GAS, info.GetAbsGasValue() },
-        { AxisModel::ABS_BRAKE, info.GetAbsBrakeValue() },
-        { AxisModel::ABS_HAT0X, info.GetAbsHat0XValue() },
-        { AxisModel::ABS_HAT0Y, info.GetAbsHat0YValue() },
-    };
+    return { { AxisModel::ABS_X, info.GetAbsXValue() }, { AxisModel::ABS_Y, info.GetAbsYValue() },
+        { AxisModel::ABS_Z, info.GetAbsZValue() }, { AxisModel::ABS_RZ, info.GetAbsRzValue() },
+        { AxisModel::ABS_GAS, info.GetAbsGasValue() }, { AxisModel::ABS_BRAKE, info.GetAbsBrakeValue() },
+        { AxisModel::ABS_HAT0X, info.GetAbsHat0XValue() }, { AxisModel::ABS_HAT0Y, info.GetAbsHat0YValue() },
+        { AxisModel::ABS_RX, info.GetAbsRxValue() }, { AxisModel::ABS_RY, info.GetAbsRyValue() },
+        { AxisModel::ABS_THROTTLE, info.GetAbsThrottleValue() }, { AxisModel::ABS_RUDDER, info.GetAbsRudderValue() },
+        { AxisModel::ABS_WHEEL, info.GetAbsWheelValue() }, { AxisModel::ABS_HAT1X, info.GetAbsHat1XValue() },
+        { AxisModel::ABS_HAT1Y, info.GetAbsHat1YValue() }, { AxisModel::ABS_HAT2X, info.GetAbsHat2XValue() },
+        { AxisModel::ABS_HAT2Y, info.GetAbsHat2YValue() }, { AxisModel::ABS_HAT3X, info.GetAbsHat3XValue() },
+        { AxisModel::ABS_HAT3Y, info.GetAbsHat3YValue() } };
 }
 } // namespace OHOS::Ace::NG::FocusAxisEventAccessor
