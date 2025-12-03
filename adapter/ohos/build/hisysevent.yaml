@@ -233,7 +233,7 @@ SCROLLABLE_ERROR:
   NODE_TYPE: {type: STRING, desc: node type}
   ERROR_TYPE: {type: INT32, desc: error type}
   SUB_ERROR_TYPE: {type: STRING, desc: sub error type}
-  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  BUNDLE_NAME: {type: STRING, desc: package name}
   TARGET_API_VERSION: {type: INT32, desc: target api version}
   VERSION_CODE: {type: INT32, desc: version code}
   VERSION_NAME: {type: STRING, desc: version name}
