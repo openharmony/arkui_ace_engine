@@ -56,6 +56,8 @@ let TextAlign;
   TextAlign[TextAlign.End = 2] = 'End';
   TextAlign[TextAlign.Justify = 3] = 'Justify';
   TextAlign[TextAlign.JUSTIFY = 3] = 'JUSTIFY';
+  TextAlign[TextAlign.LEFT = 4] = 'LEFT';
+  TextAlign[TextAlign.RIGHT = 5] = 'RIGHT';
 })(TextAlign || (TextAlign = {}));
 
 let TextVerticalAlign;
@@ -4522,6 +4524,8 @@ let TextDirection;
 (function (TextDirection) {
   TextDirection[TextDirection.LTR = 0] = 'LTR';
   TextDirection[TextDirection.RTL = 1] = 'RTL';
+  TextDirection[TextDirection.DEFAULT = 2] = 'DEFAULT';
+  TextDirection[TextDirection.AUTO = 3] = 'AUTO';
 })(TextDirection || (TextDirection = {}));
 
 let FocusPriority;

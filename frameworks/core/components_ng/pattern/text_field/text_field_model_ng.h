@@ -164,6 +164,8 @@ public:
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetTextAreaScrollBarColor(const Color& value) override;
     void ResetTextAreaScrollBarColor() override;
+    void SetTextDirection(TextDirection value) override;
+    void ResetTextDirection() override;
 
     static void ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
@@ -386,6 +388,9 @@ public:
     static void ResetTextAreaScrollBarColor(FrameNode* frameNode);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     static void DeleteBackward(FrameNode* frameNode);
+    static void SetTextDirection(FrameNode* frameNode, TextDirection value);
+    static void ResetTextDirection(FrameNode* frameNode);
+    static TextDirection GetTextDirection(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

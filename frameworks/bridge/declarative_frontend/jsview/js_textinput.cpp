@@ -71,6 +71,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
     JSClass<JSTextInput>::StaticMethod("showPasswordIcon", &JSTextField::SetShowPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("textAlign", &JSTextField::SetTextAlign);
+    JSClass<JSTextInput>::StaticMethod("textDirection", &JSTextField::SetTextDirection);
     JSClass<JSTextInput>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextInput>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextInput>::StaticMethod("copyOption", &JSTextField::SetCopyOption);

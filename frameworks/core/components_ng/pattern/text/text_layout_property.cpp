@@ -162,6 +162,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         std::to_string(static_cast<int32_t>(GetBaselineOffset().value_or(0.0_vp).Value())).c_str(), filter);
     json->PutExtAttr("textAlign",
         V2::ConvertWrapTextAlignToString(GetTextAlign().value_or(TextAlign::START)).c_str(), filter);
+    json->PutExtAttr(
+        "textDirection", StringUtils::ToString(GetTextDirection().value_or(TextDirection::INHERIT)).c_str(), filter);
     json->PutExtAttr("textVerticalAlign", V2::ConvertWrapTextVerticalAlignToString(
         GetTextVerticalAlign().value_or(TextVerticalAlign::BASELINE)).c_str(), filter);
     json->PutExtAttr("textOverflow",

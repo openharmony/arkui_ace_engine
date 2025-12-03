@@ -983,6 +983,10 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
     if (paragraphStyle_.paragraphSpacing.has_value()) {
         spanItem->textLineStyle->UpdateParagraphSpacing(paragraphStyle_.paragraphSpacing.value());
     }
+
+    if (paragraphStyle_.textDirection.has_value()) {
+        spanItem->textLineStyle->UpdateTextDirection(paragraphStyle_.textDirection.value());
+    }
 }
 
 void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
@@ -996,6 +1000,7 @@ void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanIt
     spanItem->textLineStyle->ResetWordBreak();
     spanItem->textLineStyle->ResetTextIndent();
     spanItem->textLineStyle->ResetParagraphSpacing();
+    spanItem->textLineStyle->ResetTextDirection();
 }
 
 bool ParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const

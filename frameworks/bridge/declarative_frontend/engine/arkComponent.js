@@ -12143,6 +12143,24 @@ class SearchOnWillAttachIMEModifier extends ModifierWithKey {
 }
 SearchOnWillAttachIMEModifier.identity = Symbol('searchOnWillAttachIME');
 
+class SearchTextDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().search.setTextDirection(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+SearchTextDirectionModifier.identity = Symbol('searchTextDirection');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -12445,6 +12463,10 @@ class ArkSearchComponent extends ArkComponent {
   onWillAttachIME(callback) {
     modifierWithKey(this._modifiersWithKeys, SearchOnWillAttachIMEModifier.identity,
       SearchOnWillAttachIMEModifier, callback);
+    return this;
+  }
+  textDirection(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchTextDirectionModifier.identity, SearchTextDirectionModifier, value);
     return this;
   }
 }
@@ -14927,6 +14949,24 @@ class TextContentTransitionModifier extends ModifierWithKey {
 }
 TextContentTransitionModifier.identity = Symbol('textContentTransition');
 
+class TextDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().text.setTextDirection(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextDirectionModifier.identity = Symbol('textDirection');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15207,6 +15247,10 @@ class ArkTextComponent extends ArkComponent {
   }
   contentTransition(value) {
     modifierWithKey(this._modifiersWithKeys, TextContentTransitionModifier.identity, TextContentTransitionModifier, value);
+    return this;
+  }
+  textDirection(value) {
+    modifierWithKey(this._modifiersWithKeys, TextDirectionModifier.identity, TextDirectionModifier, value);
     return this;
   }
 }
@@ -16637,6 +16681,23 @@ class TextAreaOnWillAttachIMEModifier extends ModifierWithKey {
   }
 }
 TextAreaOnWillAttachIMEModifier.identity = Symbol('textAreaOnWillAttachIME');
+class TextAreaTextDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().textArea.setTextDirection(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaTextDirectionModifier.identity = Symbol('textAreaTextDirection');
 
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -17038,6 +17099,10 @@ class ArkTextAreaComponent extends ArkComponent {
   onWillAttachIME(callback) {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnWillAttachIMEModifier.identity,
       TextAreaOnWillAttachIMEModifier, callback);
+    return this;
+  }
+  textDirection(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextDirectionModifier.identity, TextAreaTextDirectionModifier, value);
     return this;
   }
 }
@@ -18680,6 +18745,24 @@ class TextInputOnWillAttachIMEModifier extends ModifierWithKey {
 }
 TextInputOnWillAttachIMEModifier.identity = Symbol('textInputOnWillAttachIME');
 
+class TextInputTextDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().textInput.setTextDirection(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputTextDirectionModifier.identity = Symbol('textInputTextDirection');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -19130,6 +19213,10 @@ class ArkTextInputComponent extends ArkComponent {
   onWillAttachIME(callback) {
     modifierWithKey(this._modifiersWithKeys, TextInputOnWillAttachIMEModifier.identity,
       TextInputOnWillAttachIMEModifier, callback);
+    return this;
+  }
+  textDirection(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextDirectionModifier.identity, TextInputTextDirectionModifier, value);
     return this;
   }
 }

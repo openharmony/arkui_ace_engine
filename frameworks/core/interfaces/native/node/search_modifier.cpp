@@ -18,6 +18,7 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -178,6 +179,32 @@ void ResetSearchTextAlign(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextAlign(frameNode, TextAlign::START);
+}
+
+void SetSearchDirection(ArkUINodeHandle node, ArkUI_Uint32 textDirection)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (textDirection < 0 || textDirection >= TEXT_DIRECTIONS.size()) {
+        SearchModelNG::ResetTextDirection(frameNode);
+        return;
+    }
+    SearchModelNG::SetTextDirection(frameNode, TEXT_DIRECTIONS[textDirection]);
+}
+
+int32_t GetSearchDirection(ArkUINodeHandle node)
+{
+    auto defaultTextDirection = static_cast<int32_t>(OHOS::Ace::TextDirection::INHERIT);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextDirection);
+    return static_cast<int32_t>(SearchModelNG::GetTextDirection(frameNode));
+}
+
+void ResetSearchDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetTextDirection(frameNode);
 }
 
 void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
@@ -1518,7 +1545,10 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME,
         .setSearchCompressLeadingPunctuation = SetSearchCompressLeadingPunctuation,
         .getSearchCompressLeadingPunctuation = GetSearchCompressLeadingPunctuation,
-        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation
+        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation,
+        .setSearchDirection = SetSearchDirection,
+        .getSearchDirection = GetSearchDirection,
+        .resetSearchDirection = ResetSearchDirection,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

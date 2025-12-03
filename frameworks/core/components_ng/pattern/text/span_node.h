@@ -910,6 +910,7 @@ public:
     virtual bool UpdatePlaceholderRun(PlaceholderStyle placeholderStyle);
 
     void DumpInfo() const;
+    void DumpTextStyleInfo() const;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 
     void SetCustomNode(const RefPtr<UINode>& customNode)

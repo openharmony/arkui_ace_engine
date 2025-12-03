@@ -3443,6 +3443,9 @@ struct ArkUITextModifier {
     void (*resetTextEditMenuOptions)(ArkUINodeHandle node);
     void (*setTextBindSelectionMenu)(ArkUINodeHandle node, ArkUITextBindMenuParam* menuParam);
     void (*resetTextBindSelectionMenu)(ArkUINodeHandle node);
+    void (*setTextDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
+    ArkUI_Int32 (*getTextDirection)(ArkUINodeHandle node);
+    void (*resetTextDirection)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -5211,6 +5214,9 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnWillAttachIME)(ArkUINodeHandle node);
     void (*textAreaDeleteBackward)(ArkUINodeHandle node);
+    void (*setTextAreaDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
+    ArkUI_Int32 (*getTextAreaDirection)(ArkUINodeHandle node);
+    void (*resetTextAreaDirection)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -5462,6 +5468,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnWillAttachIME)(ArkUINodeHandle node);
     void (*textInputDeleteBackward)(ArkUINodeHandle node);
+    void (*setTextInputDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
+    ArkUI_Int32 (*getTextInputDirection)(ArkUINodeHandle node);
+    void (*resetTextInputDirection)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -6551,6 +6560,9 @@ struct ArkUISearchModifier {
     void (*resetSearchCustomKeyboard)(ArkUINodeHandle node);
     void (*setSearchOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetSearchOnWillAttachIME)(ArkUINodeHandle node);
+    void (*setSearchDirection)(ArkUINodeHandle node, ArkUI_Uint32 textDirection);
+    ArkUI_Int32 (*getSearchDirection)(ArkUINodeHandle node);
+    void (*resetSearchDirection)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

@@ -1258,7 +1258,6 @@ public:
     bool IsNormalInlineState() const;
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
-    void TextAreaInputRectUpdate(RectF& rect);
     void UpdateRectByTextAlign(RectF& rect);
 
     void EditingValueFilterChange();
@@ -1280,6 +1279,8 @@ public:
     void DumpPlaceHolderInfo();
     void DumpTextEngineInfo();
     void DumpScaleInfo();
+    void DumpFontInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty);
+    void DumpInputConfigInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty);
     std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
@@ -1386,8 +1387,6 @@ public:
     {
         return lastClickTimeStamp_;
     }
-
-    void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
 
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;

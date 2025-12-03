@@ -256,6 +256,7 @@ private:
     const TimeStamp& GetLastClickTime() const;
     void UpdateCaretOriginalRect(const OffsetF& offset);
     void SetCaretRectAtEmptyValue();
+    void ProcessTextAlignment(RectF& rect, const RefPtr<TextFieldLayoutProperty>& layoutProperty);
     NG::SizeF GetAlignParentSize() const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);

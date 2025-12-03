@@ -440,6 +440,14 @@ typedef enum {
     ARKUI_TEXT_ALIGNMENT_END,
     /** Aligned with both margins. */
     ARKUI_TEXT_ALIGNMENT_JUSTIFY,
+    /** Aligned with left to right.
+     * @since 23
+     */
+    ARKUI_TEXT_ALIGNMENT_LEFT_TO_RIGHT = 4,
+    /** Aligned with right to left.
+     * @since 23
+     */
+    ARKUI_TEXT_ALIGNMENT_RIGHT_TO_LEFT = 5,
 } ArkUI_TextAlignment;
 
 /**
@@ -471,6 +479,22 @@ typedef enum {
     /** 底部对齐。 */
     ARKUI_TEXT_CONTENT_ALIGN_BOTTOM,
 } ArkUI_TextContentAlign;
+
+/**
+ * @brief Enumerates the text text direction.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The text direction is left to right. */
+    ARKUI_TEXT_DIRECTION_LTR = 0,
+    /** The text direction is right to left. */
+    ARKUI_TEXT_DIRECTION_RTL = 1,
+    /** The text direction follows the component layout. */
+    ARKUI_TEXT_DIRECTION_DEFAULT = 2,
+    /** The text direction follows the actual text. */
+    ARKUI_TEXT_DIRECTION_AUTO = 3,
+} ArkUI_TextDirection;
 
 /**
  * @brief Enumerates the types of the Enter key for a single-line text box.

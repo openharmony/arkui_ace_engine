@@ -31,7 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -63,7 +63,6 @@ SearchModel* SearchModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -105,6 +104,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
     JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
     JSClass<JSSearch>::StaticMethod("textAlign", &JSSearch::SetTextAlign, opt);
+    JSClass<JSSearch>::StaticMethod("textDirection", &JSSearch::SetTextDirection, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
     JSClass<JSSearch>::StaticMethod("onTextSelectionChange", &JSSearch::SetOnTextSelectionChange);
@@ -917,9 +917,26 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
 
 void JSSearch::SetTextAlign(int32_t value)
 {
-    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size()) &&
+        value != static_cast<int32_t>(TextAlign::JUSTIFY)) {
         SearchModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     }
+}
+
+void JSSearch::SetTextDirection(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        SearchModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    int32_t index = args->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    if (!isNormalValue) {
+        SearchModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    SearchModel::GetInstance()->SetTextDirection(TEXT_DIRECTIONS[index]);
 }
 
 void JSSearch::JsBorder(const JSCallbackInfo& info)

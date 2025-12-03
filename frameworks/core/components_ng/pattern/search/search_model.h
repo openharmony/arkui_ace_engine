@@ -127,6 +127,8 @@ public:
     virtual void SetUserMargin() {};
     virtual void SetSelectDetectEnable(bool value) = 0;
     virtual void ResetSelectDetectEnable() = 0;
+    virtual void SetTextDirection(TextDirection value) {}
+    virtual void ResetTextDirection() {}
 
 private:
     static std::unique_ptr<SearchModel> instance_;

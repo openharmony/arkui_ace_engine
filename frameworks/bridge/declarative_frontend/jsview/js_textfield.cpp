@@ -43,7 +43,7 @@
 #include "core/common/container.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -84,17 +84,6 @@ TextFieldModel* TextFieldModel::GetInstance()
 namespace OHOS::Ace::Framework {
 
 namespace {
-
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
-const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
-    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
-    WordBreak::HYPHENATION };
-const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
-const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -107,9 +96,9 @@ const char* TOP_START_PROPERTY = "topStart";
 const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
-const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
-    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
 
 bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
 {
@@ -449,6 +438,22 @@ void JSTextField::SetTextAlign(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
         TextFieldModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     }
+}
+
+void JSTextField::SetTextDirection(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextFieldModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    int32_t index = args->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    if (!isNormalValue) {
+        TextFieldModel::GetInstance()->ResetTextDirection();
+        return;
+    }
+    TextFieldModel::GetInstance()->SetTextDirection(TEXT_DIRECTIONS[index]);
 }
 
 void JSTextField::SetSelectDetectEnable(const JSCallbackInfo& info)
@@ -2264,11 +2269,11 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
             overflow = DEFAULT_OVERFLOW;
         } else if (tmpInfo->IsNumber()) {
             overflow = tmpInfo->ToNumber<int32_t>();
-            if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+            if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS_INPUT.size())) {
                 overflow = DEFAULT_OVERFLOW;
             }
         }
-        TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
+        TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS_INPUT[overflow]);
     } while (false);
 
     info.SetReturnValue(info.This());
@@ -2406,8 +2411,8 @@ void JSTextField::SetEllipsisMode(const JSCallbackInfo& info)
         return;
     }
     uint32_t index = args->ToNumber<uint32_t>();
-    if (index < ELLIPSIS_MODALS.size()) {
-        TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
+    if (index < ELLIPSIS_MODES.size()) {
+        TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODES[index]);
     }
 }
 

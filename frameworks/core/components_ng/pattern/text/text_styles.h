@@ -302,6 +302,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CompressLeadingPunctuation, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextContentAlign, TextContentAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
 };
 
 struct HandleInfoNG {

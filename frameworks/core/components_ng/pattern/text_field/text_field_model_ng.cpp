@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -1183,6 +1184,34 @@ void TextFieldModelNG::SetTextOverflow(Ace::TextOverflow value)
 void TextFieldModelNG::SetTextIndent(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value);
+}
+
+void TextFieldModelNG::SetTextDirection(TextDirection value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDirection, value);
+}
+
+void TextFieldModelNG::ResetTextDirection()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextFieldModelNG::SetTextDirection(FrameNode* frameNode, TextDirection value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDirection, value, frameNode);
+}
+
+void TextFieldModelNG::ResetTextDirection(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+}
+
+TextDirection TextFieldModelNG::GetTextDirection(FrameNode* frameNode)
+{
+    TextDirection value = TextDirection::INHERIT;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextDirection, value, frameNode, value);
+    return value;
 }
 
 void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)

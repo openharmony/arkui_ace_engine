@@ -27,6 +27,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/box/drag_drop_event.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -249,6 +250,8 @@ public:
     virtual void SetLineHeightMultiply(double value) {};
     virtual void SetMinimumLineHeight(const Dimension& value) {};
     virtual void SetMaximumLineHeight(const Dimension& value) {};
+    virtual void SetTextDirection(TextDirection value) {}
+    virtual void ResetTextDirection() {}
 
 private:
     static std::unique_ptr<TextModel> instance_;

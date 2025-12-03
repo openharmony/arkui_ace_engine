@@ -39,6 +39,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
 
+    textDirection_ = textFieldLayoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
     // Construct text style.
     TextStyle textStyle;
     ConstructTextStyles(layoutWrapper, textStyle, textContent_, showPlaceHolder_);
