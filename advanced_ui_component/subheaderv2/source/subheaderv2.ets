@@ -68,6 +68,7 @@ export interface SubHeaderV2TitleOptions {
   primaryTitleModifier?: TextModifier;
   secondaryTitle?: ResourceStr;
   secondaryTitleModifier?: TextModifier;
+  titleAccessibilityText?:ResourceStr;
 }
 
 @ObservedV2
@@ -80,12 +81,15 @@ export class SubHeaderV2Title {
   public secondaryTitle?: ResourceStr;
   @Trace
   public secondaryTitleModifier?: TextModifier;
+  @Trace
+  public titleAccessibilityText?: ResourceStr;
 
   constructor(options: SubHeaderV2TitleOptions) {
     this.primaryTitle = options.primaryTitle;
     this.primaryTitleModifier = options.primaryTitleModifier;
     this.secondaryTitle = options.secondaryTitle;
     this.secondaryTitleModifier = options.secondaryTitleModifier;
+    this.titleAccessibilityText = options.titleAccessibilityText;
   }
 }
 
@@ -597,7 +601,7 @@ export struct SubHeaderV2 {
     .flexShrink(0)
     .accessibilityLevel(this.operationType === SubHeaderV2OperationType.BUTTON ||
       this.operationType === SubHeaderV2OperationType.TEXT_ARROW ?
-    this.getRightAreaAccessibilityLevel() : 'no')
+      this.getRightAreaAccessibilityLevel() : 'no')
   }
 
   private getAccessibilityDescription(): string | undefined {
@@ -616,8 +620,8 @@ export struct SubHeaderV2 {
     }
     if (this.icon && Util.isSymbolResource(this.icon)) {
       return this.ageing ?
-      LengthMetrics.vp(this.symbolWidth) :
-      LengthMetrics.vp(0);
+        LengthMetrics.vp(this.symbolWidth) :
+        LengthMetrics.vp(0);
     } else {
       return (this.ageing && this.icon) ? LengthMetrics.vp(LEFT_ICON_SIZE_NUMBER +
         LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
@@ -670,14 +674,14 @@ export struct SubHeaderV2 {
       })
       .margin({
         start: this.ageing ?
-        LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
-        this.leftIconMargin().value) :
-        LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_margin_start')).value +
-        this.leftIconMargin().value),
+          LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.padding_level0')).value +
+          this.leftIconMargin().value) :
+          LengthMetrics.vp(LengthMetrics.vp(getResourceValue('sys.float.subheader_right_button_margin_start')).value +
+          this.leftIconMargin().value),
         bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-          (this.secondaryTitle && this.primaryTitle ?
-          getResourceValue('sys.float.subheader_right_button_margin_bottom') :
-          getResourceValue('sys.float.subheader_single_right_button_margin_bottom'))),
+          (this.title?.secondaryTitle && this.title?.primaryTitle ?
+            getResourceValue('sys.float.subheader_right_button_margin_bottom') :
+            getResourceValue('sys.float.subheader_single_right_button_margin_bottom'))),
       })
       .backgroundColor(this.buttonBgColor)
       .constraintSize({ minHeight: OPERATE_ITEM_LENGTH() })
@@ -745,9 +749,9 @@ export struct SubHeaderV2 {
     .padding({
       start: this.getTextArrowPaddingLeft(),
       top: this.ageing ? LengthMetrics.vp(0) :
-      LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
+        LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
       bottom: this.ageing ? LengthMetrics.vp(0) :
-      LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
+        LengthMetrics.vp(getResourceValue('sys.float.subheader_right_text_padding_vertical')),
     })
   }
 
@@ -819,11 +823,11 @@ export struct SubHeaderV2 {
       .align(this.ageing ? Alignment.Start : Alignment.End)
       .margin({
         start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-        getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
+          getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
         bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-          (this.secondaryTitle && this.primaryTitle ?
-          getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
-          getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
+          (this.title?.secondaryTitle && this.title?.primaryTitle ?
+            getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
+            getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
       })
     } else {
       Row() {
@@ -867,11 +871,11 @@ export struct SubHeaderV2 {
         .focusable(true)
         .margin({
           start: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-          getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
+            getResourceValue('sys.float.subheader_right_text_arrow_margin_start')),
           bottom: LengthMetrics.vp(this.ageing ? getResourceValue('sys.float.padding_level0') :
-            (this.secondaryTitle && this.primaryTitle ?
-            getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
-            getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
+            (this.title?.secondaryTitle && this.title?.primaryTitle ?
+              getResourceValue('sys.float.subheader_right_text_arrow_margin_bottom') :
+              getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
         })
       }
       .margin({ bottom: getResourceValue('sys.float.subheader_right_only_arrow_margin_bottom')})
@@ -899,9 +903,9 @@ export struct SubHeaderV2 {
           })
             .margin({
               start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_icon_group_padding_start')),
-              bottom: LengthMetrics.vp(this.secondaryTitle && this.primaryTitle ?
-              getResourceValue('sys.float.subheader_right_icon_group_margin_bottom') :
-              getResourceValue('sys.float.subheader_single_right_icon_group_margin_bottom')),
+              bottom: LengthMetrics.vp(this.title?.secondaryTitle && this.title?.primaryTitle ?
+                getResourceValue('sys.float.subheader_right_icon_group_margin_bottom') :
+                getResourceValue('sys.float.subheader_single_right_icon_group_margin_bottom')),
             })
             .offset({ x: getResourceValue('sys.float.subheader_right_icon_group_x_offset') })
         } else {
@@ -1053,6 +1057,16 @@ export struct SubHeaderV2 {
     return padding;
   }
 
+  private getTitleAccessibilityText(): string | undefined {
+    if (this.title?.titleAccessibilityText === undefined) {
+      return '';
+    }
+    if (!this.select && this.title?.titleAccessibilityText) {
+      return this.title?.titleAccessibilityText as string;
+    }
+    return '';
+  }
+
   build() {
     if (this.isSuitableAging()) {
       Column() {
@@ -1069,7 +1083,8 @@ export struct SubHeaderV2 {
         })
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.title ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -1090,7 +1105,8 @@ export struct SubHeaderV2 {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.title ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -1120,9 +1136,9 @@ export struct SubHeaderV2 {
     .justifyContent(FlexAlign.End)
     .padding({
       top: getResourceValue('sys.float.padding_level2'),
-      bottom: this.secondaryTitle && this.primaryTitle ?
-      getResourceValue('sys.float.subheader_right_loading_padding_bottom') :
-      getResourceValue('sys.float.subheader_single_right_loading_padding_bottom'),
+      bottom: this.title?.secondaryTitle && this.title?.primaryTitle ?
+        getResourceValue('sys.float.subheader_right_loading_padding_bottom') :
+        getResourceValue('sys.float.subheader_single_right_loading_padding_bottom'),
     })
     .margin({
       start: LengthMetrics.vp(getResourceValue('sys.float.subheader_right_loading_margin_start')),
