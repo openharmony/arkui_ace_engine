@@ -35,6 +35,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/text_style.h"
@@ -62,6 +63,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/drawable/drawable_descriptor.h"
 #include "core/gestures/gesture_info.h"
@@ -608,6 +610,8 @@ namespace Converter {
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> MenuOptionsParam Convert(const Ark_TextMenuItem& src);
+    template<> MenuPreviewAnimationOptions Convert(const Ark_AnimationNumberRange& options);
+    template<> NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options);
     template<> NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src);
     template<> NG::NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
