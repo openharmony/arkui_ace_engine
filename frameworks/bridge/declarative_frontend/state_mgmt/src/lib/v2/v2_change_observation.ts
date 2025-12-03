@@ -60,6 +60,7 @@ class ObserveV2 {
   public static readonly ID_REFS = Symbol('__id_refs__');
   public static readonly MONITOR_REFS = Symbol('___monitor_refs_');
   public static readonly ADD_MONITOR_REFS = Symbol('___add_monitor_refs_');
+  public static readonly SYNC_MONITOR_REFS = Symbol('___sync_monitor_refs_');
   public static readonly COMPUTED_REFS = Symbol('___computed_refs_');
 
   public static readonly SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
@@ -579,7 +580,12 @@ class ObserveV2 {
     if (targetSymbolRefs[attrName] != undefined) {
       changedIdSet = targetSymbolRefs[attrName];
     }
-    if (targetSymbolRefs[MonitorV2.OB_ANY] !== undefined) {
+    // Ignore for SynMonitor
+    // Map/Set always fire in pairs SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY and  ObserveV2.OB_LENGTH
+    // Condition below will ignore all attrs for Map and Set with the exception OB_LENGTH
+    // For Map and Set we trigger SyncMonitors only for attribure - ObserveV2.OB_LENGTH
+    if ((targetSymbolRefs[MonitorV2.OB_ANY] !== undefined) &&
+      (attrName === ObserveV2.OB_LENGTH || (!(target instanceof Map) && !(target instanceof Set)))) {
       if (changedIdSet === undefined) {
         changedIdSet = new Set<number>();
       }
@@ -639,7 +645,7 @@ class ObserveV2 {
     // execute the AddMonitor synchronous function
     while (this.monitorSyncIdsChangedForAddMonitor_.size + this.monitorFuncsToRun_.size > 0) {
       if (this.monitorSyncIdsChangedForAddMonitor_.size) {
-        stateMgmtConsole.debug(`AddMonitor API monitorSyncIdsChangedForAddMonitor_ ${this.monitorSyncIdsChangedForAddMonitor_.size}`)
+        stateMgmtConsole.debug(`AddMonitor API/@SyncMonitor monitorSyncIdsChangedForAddMonitor_ ${this.monitorSyncIdsChangedForAddMonitor_.size}`)
         const monitorId: Set<number> = this.monitorSyncIdsChangedForAddMonitor_;
         this.monitorSyncIdsChangedForAddMonitor_ = new Set<number>();
         // update the value and dependency for each path and get the MonitorV2 id needs to be execute
@@ -978,7 +984,7 @@ class ObserveV2 {
   }
 
   public runMonitorFunctionsForAddMonitor(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}. AddMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    stateMgmtConsole.debug(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}. AddMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
     aceDebugTrace.begin(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}`);
 
     let monitor: MonitorV2 | undefined;
@@ -994,8 +1000,8 @@ class ObserveV2 {
 
 
   public updateDirtyMonitorPath(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPath: ${monitors.size} addMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitors.size} addMonitor`);
+    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPath: ${monitors.size} addMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitors.size} addMonitor/@SyncMonitor`);
 
     let ret: number = 0;
     monitors.forEach((monitorId) => {
@@ -1138,12 +1144,14 @@ class ObserveV2 {
   public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions,
     decorator: boolean = false, owningObjectName: string = ''): void {
     const funcName = monitorFunc.name;
-    const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
-    let monitor = refs[funcName] as MonitorV2;
     const pathsUniqueString = Array.isArray(path) ? path.join(' ') : path;
     const isSync: boolean = options ? options.isSynchronous : false;
     const paths = Array.isArray(path) ? path : [path];
+    const refs_sym = (isSync && decorator) ? ObserveV2.SYNC_MONITOR_REFS : ObserveV2.ADD_MONITOR_REFS;
+    const refs = target[refs_sym] ??= {};
+    let monitor = refs[funcName] as MonitorV2;
 
+    // 'monitor' is a @SyncMonitor MonitorV2
     if (monitor && monitor instanceof MonitorV2 && monitor.isSyncDecorator()) {
       if (!decorator) {
         // Attempt to redefine @SyncMonitor vai API addMonitor call, ignore
@@ -1155,10 +1163,11 @@ class ObserveV2 {
       ObserveV2.getObserve().clearWatch(monitor.getWatchId());
       delete refs[funcName];
       monitor = undefined;
-      stateMgmtConsole.warn(`@Monitor ${monitorFunc.name} ${path} in ${owningObjectName} instance with same name already exists.
+      stateMgmtConsole.warn(`@SyncMonitor ${monitorFunc.name} ${path} in ${owningObjectName} instance with same name already exists.
         The new ${funcName} will override the previous one, and the old one will no longer take effect.`);
     }
 
+    // 'monitor' is a AddMonitor API created MonitorV2
     if (monitor && monitor instanceof MonitorV2) {
       if (isSync !== monitor.isSync()) {
         stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSync()? `sync`: `async`}, cannot change to ${isSync? `sync`: `async`} anymore`);
@@ -1191,11 +1200,6 @@ class ObserveV2 {
       const funcName = monitorFunc.name;
       let monitor = refs[funcName];
       if (monitor && monitor instanceof MonitorV2) {
-        if(monitor.isSyncDecorator()) {
-          stateMgmtConsole.applicationError(
-            `cannot clear path ${paths} of ${funcName} for '@SyncMonitor'`);
-          return;
-        }
         paths.forEach(item => {
           if (!monitor.removePath(item)) {
             stateMgmtConsole.applicationError(
@@ -1217,9 +1221,6 @@ class ObserveV2 {
     paths.forEach(item => {
       let res = false;
       monitors.forEach(monitor => {
-        if (monitor.isSyncDecorator()) {
-          return;
-        }
         if (monitor.removePath(item)) {
           res = true;
         }
@@ -1262,7 +1263,7 @@ class ObserveV2 {
       this.clearBinding(id);
       return;
     }
-    // addMonitor
+    // addMonitor, @SyncMonitor
     const monitor: MonitorV2 = this.id2Others_[id]?.deref();
     if (monitor instanceof MonitorV2) {
       monitor.getValues().forEach((monitorValueV2: MonitorValueV2<unknown>) => {
