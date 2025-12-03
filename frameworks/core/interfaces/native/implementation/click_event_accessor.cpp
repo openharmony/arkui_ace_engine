@@ -60,7 +60,7 @@ void SetDisplayXImpl(Ark_ClickEvent peer, Ark_Float64 displayX)
     CHECK_NULL_VOID(info);
     Offset offset = info->GetScreenLocation();
     const auto animation = offset.GetXAnimationOption();
-    const auto convWindowsX = Converter::Convert<float>(displayX);
+    const auto convWindowsX = Converter::Convert<double>(displayX);
     const auto x = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
     offset.SetX(x, animation);
     info->SetScreenLocation(offset);
@@ -82,7 +82,7 @@ void SetDisplayYImpl(Ark_ClickEvent peer, Ark_Float64 displayY)
     CHECK_NULL_VOID(info);
     Offset offset = info->GetScreenLocation();
     const auto animation = offset.GetYAnimationOption();
-    const auto convWindowsY = Converter::Convert<float>(displayY);
+    const auto convWindowsY = Converter::Convert<double>(displayY);
     const auto y = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
     offset.SetY(y, animation);
     info->SetScreenLocation(offset);
@@ -104,7 +104,7 @@ void SetWindowXImpl(Ark_ClickEvent peer, Ark_Float64 windowX)
     CHECK_NULL_VOID(info);
     Offset offset = info->GetGlobalLocation();
     const auto animation = offset.GetXAnimationOption();
-    const auto convWindowsX = Converter::Convert<float>(windowX);
+    const auto convWindowsX = Converter::Convert<double>(windowX);
     const auto x = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
     offset.SetX(x, animation);
     info->SetGlobalLocation(offset);
@@ -126,7 +126,7 @@ void SetWindowYImpl(Ark_ClickEvent peer, Ark_Float64 windowY)
     CHECK_NULL_VOID(info);
     Offset offset = info->GetGlobalLocation();
     const auto animation = offset.GetYAnimationOption();
-    const auto convWindowsY = Converter::Convert<float>(windowY);
+    const auto convWindowsY = Converter::Convert<double>(windowY);
     const auto y = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
     offset.SetY(y, animation);
     info->SetGlobalLocation(offset);
@@ -148,7 +148,7 @@ void SetXImpl(Ark_ClickEvent peer, Ark_Float64 x)
     CHECK_NULL_VOID(info);
     Offset offset = info->GetLocalLocation();
     const auto animation = offset.GetXAnimationOption();
-    const auto convWindowsX = Converter::Convert<float>(x);
+    const auto convWindowsX = Converter::Convert<double>(x);
     const auto newX = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
     offset.SetX(newX, animation);
     info->SetLocalLocation(offset);
@@ -170,7 +170,7 @@ void SetYImpl(Ark_ClickEvent peer, Ark_Float64 y)
     CHECK_NULL_VOID(info);
     Offset offset = info->GetLocalLocation();
     const auto animation = offset.GetYAnimationOption();
-    const auto convWindowsY = Converter::Convert<float>(y);
+    const auto convWindowsY = Converter::Convert<double>(y);
     const auto newY = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
     offset.SetY(newY, animation);
     info->SetLocalLocation(offset);
