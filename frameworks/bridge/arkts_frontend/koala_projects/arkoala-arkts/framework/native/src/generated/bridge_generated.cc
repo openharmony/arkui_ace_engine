@@ -39183,6 +39183,11 @@ void impl_WebContextMenuResult_pasteAndMatchStyle(Ark_NativePointer thisPtr) {
         GetAccessors()->getWebContextMenuResultAccessor()->pasteAndMatchStyle(self);
 }
 KOALA_INTEROP_DIRECT_V1(WebContextMenuResult_pasteAndMatchStyle, Ark_NativePointer)
+void impl_WebContextMenuResult_requestPasswordAutoFill(Ark_NativePointer thisPtr) {
+        Ark_WebContextMenuResult self = reinterpret_cast<Ark_WebContextMenuResult>(thisPtr);
+        GetAccessors()->getWebContextMenuResultAccessor()->requestPasswordAutoFill(self);
+}
+KOALA_INTEROP_DIRECT_V1(WebContextMenuResult_requestPasswordAutoFill, Ark_NativePointer)
 Ark_NativePointer impl_WebKeyboardController_construct() {
         return GetAccessors()->getWebKeyboardControllerAccessor()->construct();
 }

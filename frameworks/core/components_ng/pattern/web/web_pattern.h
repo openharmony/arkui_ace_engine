@@ -117,6 +117,12 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
+enum class WebMenuType : int32_t {
+    TYPE_CONTEXTMENU,
+    TYPE_QUICKMENU,
+    TYPE_UNKNOWN_MENU
+};
+
 struct PipInfo {
     int32_t nodeId;
     uint32_t mainWindowId;
@@ -695,10 +701,13 @@ public:
     bool HandleAutoFillEvent();
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
-    bool RequestAutoFill(AceAutoFillType autoFillType);
-    bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos);
+    bool RequestAutoFill(AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     bool RequestAutoFill(bool& isPopup, bool isNewPassWord, const AceAutoFillTriggerType& triggerType);
     bool RequestAutoSave();
+    void RequestPasswordAutoFill(WebMenuType menuType);
     bool UpdateAutoFillPopup();
     bool CloseAutoFillPopup();
     void OnCompleteSwapWithNewSize();
@@ -1340,6 +1349,8 @@ private:
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
 
+    void ShiftFocusAfterAutoFill(AceAutoFillType focusType);
+
     void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
     std::u16string GetSelectedValue(int32_t startIndex, int32_t endIndex);
@@ -1521,6 +1532,8 @@ private:
     uint32_t windowId_ = 0;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
+    bool isEditableOnContextMenu_ = false;
+    WebMenuType autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     std::shared_ptr<ViewDataCommon> viewDataCommon_;

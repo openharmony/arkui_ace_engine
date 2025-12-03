@@ -1757,6 +1757,7 @@ public:
     virtual void Undo() const = 0;
     virtual void Redo() const = 0;
     virtual void PasteAndMatchStyle() const = 0;
+    virtual void RequestPasswordAutoFill() const = 0;
 };
 
 class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {

@@ -719,7 +719,7 @@ bool WebClientImpl::RunContextMenu(
     ContainerScope scope(delegate->GetInstanceId());
     bool jsResult = false;
     auto param = std::make_shared<ContextMenuEvent>(AceType::MakeRefPtr<ContextMenuParamOhos>(params),
-        AceType::MakeRefPtr<ContextMenuResultOhos>(callback));
+        AceType::MakeRefPtr<ContextMenuResultOhos>(callback, webDelegate_));
     auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;

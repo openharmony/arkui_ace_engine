@@ -904,6 +904,10 @@ export class WebContextMenuResult implements MaterializedBase {
         this.pasteAndMatchStyle_serialize()
         return
     }
+    public requestPasswordAutoFill(): void {
+        this.requestPasswordAutoFill_serialize()
+        return
+    }
     closeContextMenu_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_closeContextMenu(this.peer!.ptr)
     }
@@ -930,6 +934,9 @@ export class WebContextMenuResult implements MaterializedBase {
     }
     pasteAndMatchStyle_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_pasteAndMatchStyle(this.peer!.ptr)
+    }
+    requestPasswordAutoFill_serialize(): void {
+        ArkUIGeneratedNativeModule._WebContextMenuResult_requestPasswordAutoFill(this.peer!.ptr)
     }
 }
 export class WebKeyboardControllerInternal {

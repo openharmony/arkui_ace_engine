@@ -73,6 +73,7 @@ public:
     MOCK_METHOD(void, Undo, (), (const, override));
     MOCK_METHOD(void, Redo, (), (const, override));
     MOCK_METHOD(void, PasteAndMatchStyle, (), (const, override));
+    MOCK_METHOD(void, RequestPasswordAutoFill, (), (const, override));
 };
 class WebPatternTestNgSupplement : public testing::Test {
 public:

@@ -3156,6 +3156,43 @@ HWTEST_F(WebSelectOverlayTest, ComputeTouchHandleRectTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsShowMenuOfAutoFill_001
+ * @tc.desc: IsShowMenuOfAutoFill.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, IsShowMenuOfAutoFill_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("");
+    WebSelectOverlay overlay(webPattern);
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    overlay.SetMenuOptions(selectInfo, params, callback);
+    uint32_t flags = 0;
+    bool isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
+    EXPECT_EQ(isShow, false);
+    flags = 87;
+    selectInfo.isSingleHandle = true;
+    isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
+    EXPECT_EQ(isShow, true);
+#endif
+}
+
+/**
  * @tc.name: SetMenuOptions_001
  * @tc.desc: SetMenuOptions.
  * @tc.type: FUNC
@@ -3488,6 +3525,10 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemAction_002, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     overlay.SetMenuOptions(selectInfo, params, callback);
     overlay.OnMenuItemAction(OptionMenuActionId::CUT, OptionMenuType::TOUCH_MENU);
+    overlay.OnMenuItemAction(OptionMenuActionId::AUTO_FILL, OptionMenuType::TOUCH_MENU);
+    EXPECT_EQ(selectInfo.menuInfo.showAutoFill, false);
+    overlay.OnMenuItemAction(OptionMenuActionId::PASSWORD_VAULT, OptionMenuType::TOUCH_MENU);
+    EXPECT_EQ(selectInfo.menuInfo.showAutoFill, false);
 #endif
 }
 

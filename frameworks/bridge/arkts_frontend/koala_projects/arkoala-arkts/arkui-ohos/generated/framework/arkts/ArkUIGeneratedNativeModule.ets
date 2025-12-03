@@ -6271,6 +6271,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebContextMenuResult_pasteAndMatchStyle(ptr: KPointer): void
     @ani.unsafe.Direct
+    native static _WebContextMenuResult_requestPasswordAutoFill(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _WebKeyboardController_construct(): KPointer
     @ani.unsafe.Direct
     native static _WebKeyboardController_getFinalizer(): KPointer

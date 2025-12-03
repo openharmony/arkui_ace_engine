@@ -19074,6 +19074,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PasteAndMatchStyleImpl(Ark_WebContextMenuResult peer)
     {
     }
+    void RequestPasswordAutoFillImpl(Ark_WebContextMenuResult peer)
+    {
+    }
     } // WebContextMenuResultAccessor
     namespace WebKeyboardControllerAccessor {
     void DestroyPeerImpl(Ark_WebKeyboardController peer)
