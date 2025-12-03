@@ -110,11 +110,11 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     }
 
     JSRef<JSFunc> setOrCreate = JSRef<JSFunc>::Cast(setOrCreateVal);
-    auto id = ContainerScope::CurrentId();
-    auto callback = [storage, setOrCreate, id](const std::string& data) {
+    auto callback = [storage, setOrCreate, id = ContainerScope::CurrentId()](const std::string& data) {
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
+        LocalScope localScope(vm);
         TAG_LOGI(AceLogTag::ACE_FORM, "setOrCreate, dataList length: %{public}zu", data.length());
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
@@ -1670,7 +1670,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (!windowConfig.autoDesignWidth) {
         windowConfig.UpdateDesignWidthScale(width);
     }
-    
+
     double pxValue = firstArg->ToNumber(vm)->Value();
     double lpxValue = pxValue / windowConfig.designWidthScale;
     return panda::NumberRef::New(vm, lpxValue);
