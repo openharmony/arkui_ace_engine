@@ -3064,8 +3064,15 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
     if (setWebDetachFunction->IsFunction()) {
         setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
                                     int32_t webId) {
+            napi_env env = GetNapiEnv();
+            if (!env) {
+                return;
+            }
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
+            napi_close_handle_scope(env, scope);
         };
     }
 
@@ -3293,8 +3300,15 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (setWebIdFunction->IsFunction()) {
         auto setIdCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebIdFunction)](
                                  int32_t webId) {
+            napi_env env = GetNapiEnv();
+            if (!env) {
+                return;
+            }
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
+            napi_close_handle_scope(env, scope);
         };
 
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
@@ -3302,8 +3316,15 @@ void JSWeb::Create(const JSCallbackInfo& info)
         if (setHapPathFunction->IsFunction()) {
             setHapPathCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setHapPathFunction)](
                                         const std::string& hapPath) {
+                napi_env env = GetNapiEnv();
+                if (!env) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(env, &scope);
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
                 func->Call(webviewController, 1, argv);
+                napi_close_handle_scope(env, scope);
             };
         }
 
@@ -3328,8 +3349,15 @@ void JSWeb::Create(const JSCallbackInfo& info)
         if (updateInstanceIdFunction->IsFunction()) {
             std::function<void(int32_t)> updateInstanceIdCallback = [webviewController = controller,
                 func = JSRef<JSFunc>::Cast(updateInstanceIdFunction)](int32_t newId) {
+                napi_env env = GetNapiEnv();
+                if (!env) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(env, &scope);
                 auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
                 auto result = func->Call(webviewController, 1, &newIdVal);
+                napi_close_handle_scope(env, scope);
             };
             NG::WebModelNG::GetInstance()->SetUpdateInstanceIdCallback(std::move(updateInstanceIdCallback));
         }
@@ -5145,6 +5173,12 @@ void JSWeb::PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
 
 JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
 {
+    napi_env env = GetNapiEnv();
+    if (!env) {
+        return JSRef<JSVal>();
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("isAlert", eventInfo.IsAlert());
     obj->SetProperty("isUserTrigger", eventInfo.IsUserTrigger());
@@ -5154,6 +5188,7 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     handler->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void *>(handler.GetRawPtr()));
     obj->SetPropertyObject("handler", handlerObj);
+    napi_close_handle_scope(env, scope);
     return JSRef<JSVal>::Cast(obj);
 }
 
