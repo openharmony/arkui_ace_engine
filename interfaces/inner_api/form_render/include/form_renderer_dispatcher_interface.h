@@ -78,7 +78,8 @@ public:
         ACCESSIBILITY_TRANSFER_HOVER_EVENT,
         NOTIFY_DUMP_INFO,
         SET_MULTI_INSTANCE_ENABLED,
-        SET_COLOR_MODE
+        SET_COLOR_MODE,
+        MESSAGE_END
     };
 };
 }  // namespace Ace
