@@ -29,6 +29,7 @@ import { int32 } from '@koalaui/common';
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
     private peer?: PeerNode
+    protected initializers?: () => T_Options
 
     private themeScopeId?: int32
 
@@ -37,6 +38,10 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     }
     getPeer(): PeerNode | undefined {
         return this. peer
+    }
+
+    setInitializers(initializers?: () => T_Options): void {
+        this.initializers = initializers
     }
 
     setThemeScopeId(themeScopeId: int32): void {
@@ -55,6 +60,8 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
 
     aboutToReuse(param: RecordData, initializers?: T_Options): void { }
     aboutToRecycle(): void {}
+    __aboutToReuse_Internal(param?: RecordData): void { }
+    __aboutToRecycle_Internal(): void { }
 
     // Can be overridden as an effect of @Prop, @Watch etc
     protected __updateStruct(initializers?: T_Options): void { }
@@ -74,6 +81,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         const receiver = remember(() => {
             const instance = factory();
             instance.__initializeStruct(content, initializers?.());
+            instance.setInitializers(initializers);
             return instance;
         });
         receiver._buildWrapper(content, initializers);
@@ -120,14 +128,13 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 })
             });
             node.setOnRecycle(() =>
-                this.aboutToRecycle()
+                this.__aboutToRecycle_Internal()
             )
             node.setOnReuse(
                 (param?: RecordData) => {
-                    this.aboutToReuse(param, initializers?.())
+                    this.__aboutToReuse_Internal(param)
                 }
             )
-
         })
     }
 
@@ -165,15 +172,16 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 const instance = factory()
                 instance.__initializeStruct(content, initializers?.());
                 node.setOnRecycle(() =>
-                    instance.aboutToRecycle()
+                    instance.__aboutToRecycle_Internal()
                 )
                 return instance
             });
             node.setOnReuse(
                 (param?: RecordData) => {
-                    component.aboutToReuse(param, initializers?.())
+                    component.__aboutToReuse_Internal(param)
                 }
             )
+            component.setInitializers(initializers);
             component._buildWrapper(content, initializers);
         }, reuseId)
     }
