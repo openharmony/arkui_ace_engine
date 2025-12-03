@@ -130,6 +130,7 @@ let ArcButtonOptions = class ArcButtonOptions {
         this.onClick = q4.onClick ?? (() => {
         });
         if (q4.progressConfig) {
+            this.backgroundColor = q4.backgroundColor ?? ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
             this.progressConfig = new ArcButtonProgressConfig(q4.progressConfig);
         }
         else {
@@ -209,7 +210,7 @@ export class ArcButton extends ViewV2 {
         this.fontSize = '';
         this.progressValue = 0;
         this.progressTotal = 100;
-        this.progressColor = ColorMetrics.resourceColor(Color.White);
+        this.progressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
         this.btnNormalColor = ColorMetrics.resourceColor(Color.Black);
         this.btnPressColor = ColorMetrics.resourceColor(Color.Black);
         this.btnDisableColor = ColorMetrics.resourceColor(Color.Black);
@@ -243,7 +244,7 @@ export class ArcButton extends ViewV2 {
         this.fontSize = '';
         this.progressValue = 0;
         this.progressTotal = 100;
-        this.progressColor = ColorMetrics.resourceColor(Color.White);
+        this.progressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
         this.resetMonitorsOnReuse();
     }
     optionsChange() {
@@ -255,7 +256,13 @@ export class ArcButton extends ViewV2 {
         if (this.options.progressConfig) {
             this.progressValue = this.options.progressConfig.value;
             if (this.options.progressConfig.color) {
-                this.progressColor = this.options.progressConfig.color;
+                this.progressColor = ColorMetrics.resourceColor(this.options.progressConfig.color);
+            }
+            else if (this.options.backgroundColor !== undefined) {
+                this.progressColor = this.options.backgroundColor;
+            }
+            else {
+                this.progressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
             }
             if (this.options.progressConfig.total) {
                 this.progressTotal = this.options.progressConfig.total;
@@ -498,10 +505,10 @@ export class ArcButton extends ViewV2 {
                         Progress.create({ value: this.progressValue, total: this.progressTotal, type: ProgressType.Capsule });
                         Progress.width('100%');
                         Progress.height('100%');
-                        Progress.rotate({ angle: !this.isUp ? 0 : 180 });
+                        Progress.rotate({ angleX: !this.isUp ? 0 : 180 });
                         Progress.clipShape(new Path({ commands: this.pathString }));
-                        Progress.backgroundColor(this.btnColor.color);
-                        Progress.color(this.progressColor?.color);
+                        Progress.backgroundColor(ColorMetrics.rgba(this.progressColor.red, this.progressColor.green, this.progressColor.blue, 0.25));
+                        Progress.color(this.progressColor.color);
                         Progress.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true });
                         Progress.shadow(this.getShadow());
                     }, Progress);
