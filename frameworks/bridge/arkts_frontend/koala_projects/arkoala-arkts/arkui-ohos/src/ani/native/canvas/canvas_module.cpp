@@ -138,7 +138,7 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
     static ani_ref gUint8ClampedArray = {};
     static ani_method gUint8ClampedArrayCtor = {};
     if (!gUint8ClampedArray) {
-        static const char* className = "escompat.Uint8ClampedArray";
+        static const char* className = "std.core.Uint8ClampedArray";
         ani_class cls;
         if (ANI_OK != env->FindClass(className, &cls) ||
             ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(cls), &gUint8ClampedArray)) {
@@ -147,7 +147,7 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
     }
     if (!gUint8ClampedArrayCtor) {
         arkts::ani_signature::SignatureBuilder signatureBuilder {};
-        signatureBuilder.AddClass("escompat.ArrayBuffer").AddInt();
+        signatureBuilder.AddClass("std.core.ArrayBuffer").AddInt();
         if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gUint8ClampedArray), "<ctor>",
             signatureBuilder.BuildSignatureDescriptor().c_str(), &gUint8ClampedArrayCtor)) {
             return nullptr;
@@ -235,7 +235,7 @@ ani_object CanvasModule::GetDrawingCanvas(ani_env* env, [[maybe_unused]] ani_obj
     ani_ref aniRef;
     env->GetUndefined(&aniRef);
     ani_object undefined = static_cast<ani_object>(aniRef);
-    
+
     auto* peer = reinterpret_cast<ArkUIDrawingRenderingContext>(peerPtr);
     CHECK_NULL_RETURN(peer, undefined);
     const auto* modifier = GetNodeAniModifier();
