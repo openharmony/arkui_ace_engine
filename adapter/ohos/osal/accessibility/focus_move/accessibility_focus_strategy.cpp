@@ -125,6 +125,8 @@ bool CheckNodeAvailable(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
     return isAvailable;
 }
 
+// 1.If brotherNode is header and currentNode is obstructed by brotherNode, should scroll to display currentNode.
+// 2.The parentCanScroll means parentNode has hidden items, should scroll to display items.
 bool CanScroll(const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     const std::shared_ptr<FocusRulesCheckNode>& brotherNode,
     bool parentCanScroll = false)
