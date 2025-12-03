@@ -27,6 +27,7 @@
 
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/inner_api/ace/node_module_inner.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -64,10 +65,6 @@ struct ArkUI_Node {
     void* commonEventListeners = nullptr;
     void* extraCommonData = nullptr;
     void* gridLayoutOptions =  nullptr;
-};
-
-struct ArkUI_Context {
-    int32_t id;
 };
 
 constexpr int BASIC_COMPONENT_NUM = 22;
