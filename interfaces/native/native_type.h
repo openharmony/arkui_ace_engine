@@ -2983,6 +2983,77 @@ typedef enum {
 } ArkUI_GridItemStyle;
 
 /**
+ * @brief Define the types for expanding the safe area in layout.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Default non-safe area of the system, including the status bar and navigation bar. */
+    ARKUI_LAYOUT_SAFE_AREA_TYPE_SYSTEM = 1,
+} ArkUI_LayoutSafeAreaType;
+/**
+ * @brief Define the edges for expanding the safe area in layout.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Top edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP = 1,
+    /** Bottom edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
+    /** Start edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_START = 1 << 2,
+    /** End edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_END = 1 << 3,
+    /** Vertical edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP | ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+    /** Horizontal edge of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_START | ARKUI_LAYOUT_SAFE_AREA_EDGE_END,
+    /** All edges of the safe area. */
+    ARKUI_LAYOUT_SAFE_AREA_EDGE_ALL = ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL | ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+} ArkUI_LayoutSafeAreaEdge;
+
+/**
+ * @brief Enumerates the localizedAlignment modes.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Top start. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP_START = 0,
+    /** Top center. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP,
+    /** Top end. */
+    ARKUI_LOCALIZED_ALIGNMENT_TOP_END,
+    /** Vertically centered start. */
+    ARKUI_LOCALIZED_ALIGNMENT_START,
+    /** Horizontally and vertically centered. */
+    ARKUI_LOCALIZED_ALIGNMENT_CENTER,
+    /** Vertically centered end. */
+    ARKUI_LOCALIZED_ALIGNMENT_END,
+    /** Bottom start. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_START,
+    /** Horizontally centered on the bottom. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM,
+    /** Bottom end. */
+    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_END,
+} ArkUI_LocalizedAlignment;
+/**
+ * @brief Enumerates the graphics rendering strategy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** The current component and its child components will be drawn directly onto the screen canvas. */
+    ARKUI_RENDERSTRATEGY_FAST = 0,
+    /**
+    * The current component and its child components will first be drawn onto an off-screen canvas,
+    *     then undergo some graphic rendering operations, and finally be drawn onto the main canvas.
+    */
+    ARKUI_RENDERSTRATEGY_OFFSCREEN,
+} ArkUI_RenderStrategy;
+
+/**
  * @brief defines the measure info of the custom span.
  *
  * @since 12

@@ -10339,4 +10339,60 @@ void ViewAbstract::CheckMainThread()
     }
 }
 
+ChainWeightPair ViewAbstract::GetChainWeight(FrameNode* frameNode)
+{
+    ChainWeightPair chainWeightPair(0.0f, 0.0f);
+    CHECK_NULL_RETURN(frameNode, chainWeightPair);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, chainWeightPair);
+    const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(flexItemProperty, chainWeightPair);
+    chainWeightPair = flexItemProperty->GetChainWeight().value_or(chainWeightPair);
+    return chainWeightPair;
+}
+
+Alignment ViewAbstract::GetLayoutGravity(FrameNode* frameNode)
+{
+    Alignment value = Alignment::CENTER;
+    CHECK_NULL_RETURN(frameNode, value);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetPositionProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetLayoutGravity();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+BorderWidthProperty ViewAbstract::GetDashGap(FrameNode* frameNode)
+{
+    Dimension defaultDimension(-1);
+    BorderWidthProperty dashGap = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt };
+    CHECK_NULL_RETURN(frameNode, dashGap);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, dashGap);
+    return target->GetDashGapValue(dashGap);
+}
+
+BorderWidthProperty ViewAbstract::GetDashWidth(FrameNode* frameNode)
+{
+    Dimension defaultDimension(-1);
+    BorderWidthProperty dashWidth = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt };
+    CHECK_NULL_RETURN(frameNode, dashWidth);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, dashWidth);
+    return target->GetDashWidthValue(dashWidth);
+}
+
+RenderStrategy ViewAbstract::GetRenderStrategy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RenderStrategy::FAST);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, RenderStrategy::FAST);
+    return target->GetRenderStrategyValue(RenderStrategy::FAST);
+}
 } // namespace OHOS::Ace::NG

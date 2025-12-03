@@ -110,6 +110,20 @@ void ResetColumnReverse(ArkUINodeHandle node)
     ColumnModelNG::SetIsReverse(frameNode, false);
 }
 
+ArkUI_Float32 GetColumnSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return static_cast<ArkUI_Float32>(ColumnModelNG::GetSpace(frameNode));
+}
+
+ArkUI_Int32 GetColumnReverse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ColumnModelNG::GetIsReverse(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier()
 {
@@ -125,6 +139,8 @@ const ArkUIColumnModifier* GetColumnModifier()
         .resetColumnSpace = ResetColumnSpace,
         .setColumnReverse = SetColumnReverse,
         .resetColumnReverse = ResetColumnReverse,
+        .getColumnSpace = GetColumnSpace,
+        .getColumnReverse = GetColumnReverse,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

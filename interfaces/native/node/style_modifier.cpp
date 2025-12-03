@@ -263,6 +263,7 @@ constexpr uint32_t DEFAULT_PICKER_STYLE_COLOR = 0xFF182431;
 constexpr uint32_t DEFAULT_PICKER_SELECTED_COLOR = 0xFF007DFF;
 constexpr uint32_t DEFAULT_PICKER_SELECTED_BACKGROUND_COLOR = 0x0C182431;
 constexpr int32_t CONTENT_TRANSITION_EFFECT_OPACITY = 1;
+constexpr float DEFAULT_DASH_GAP = -1.0f;
 const std::string EMPTY_STR = "";
 const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no", "no-hide-descendants" };
 std::map<std::string, int32_t> ACCESSIBILITY_LEVEL_MAP = { { "auto", 0 }, { "yes", 1 }, { "no", 2 },
@@ -17976,6 +17977,387 @@ void ResetSliderTrackLinearGradientColor(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getSliderModifier()->resetLinearTrackBackgroundColor(node->uiNodeHandle);
 }
 
+int32_t SetChainWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size <= NUM_0 || item->size > NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setChainWeight(
+        node->uiNodeHandle, item->value[0].f32, item->value[1].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetChainWeight(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetChainWeight(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetChainWeight(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 size[NUM_2] = { 0.0f, 0.0f };
+    fullImpl->getNodeModifiers()->getCommonModifier()->getChainWeight(node->uiNodeHandle, &size);
+    g_numberValues[NUM_0].f32 = size[NUM_0];
+    g_numberValues[NUM_1].f32 = size[NUM_1];
+    return &g_attributeItem;
+}
+
+ArkUI_CharPtr MapAlignmentToLocalized(int32_t alignment)
+{
+    static const std::unordered_map<int32_t, std::string> alignmentMap = { { 0, "top_start" }, { 1, "top" },
+        { 2, "top_end" }, { 3, "start" }, { 4, "center" }, { 5, "end" }, { 6, "bottom_start" }, { 7, "bottom" },
+        { 8, "bottom_end" } };
+
+    auto it = alignmentMap.find(alignment);
+    if (it != alignmentMap.end()) {
+        return it->second.c_str();
+    }
+    return "center";
+}
+
+int32_t SetLayoutGravity(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    auto attrVal = MapAlignmentToLocalized(item->value[NUM_0].i32);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setLayoutGravity(node->uiNodeHandle, attrVal);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetLayoutGravity(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getLayoutGravity(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    if (g_numberValues[0].i32 < NUM_0 || g_numberValues[0].i32 > NUM_8) {
+        return nullptr;
+    }
+    return &g_attributeItem;
+}
+
+void ResetLayoutGravity(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetLayoutGravity(node->uiNodeHandle);
+}
+
+int32_t SetIgnoreLayoutSafeArea(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Uint32 layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    ArkUI_Uint32 layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+    if (item->size > 0 && item->value[0].u32 == 1) {
+        layoutSafeAreaType = item->value[0].u32;
+    }
+    if (item->size > NUM_1 && InRegion(NUM_0, NUM_15, item->value[NUM_1].u32)) {
+        layoutSafeAreaEdge = item->value[1].u32;
+    }
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->setIgnoreLayoutSafeArea(
+        node->uiNodeHandle, layoutSafeAreaType, layoutSafeAreaEdge);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetIgnoreLayoutSafeArea(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetIgnoreLayoutSafeArea(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetIgnoreLayoutSafeArea(ArkUI_NodeHandle node)
+{
+    auto resultValue =
+        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getIgnoreLayoutSafeArea(node->uiNodeHandle);
+    g_numberValues[NUM_0].u32 = resultValue.type;
+    g_numberValues[NUM_1].u32 = resultValue.edges;
+    return &g_attributeItem;
+}
+
+void FillVecFromDashParams(
+    std::vector<ArkUI_Float32>& vec, const ArkUI_Float32 isSet, const ArkUI_Float32& edge, const ArkUI_Float32& unit)
+{
+    vec.emplace_back(isSet);
+    vec.emplace_back(edge);
+    vec.emplace_back(unit);
+}
+
+int32_t SetDashGap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    std::vector<ArkUI_Float32> gapVals;
+    auto* fullImpl = GetFullImpl();
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    auto dashGap = DEFAULT_DASH_GAP;
+    if (item->size == ALLOW_SIZE_4) {
+        int32_t backToFront[NUM_4] = { NUM_3, NUM_1, NUM_0, NUM_2 };
+        for (int32_t back = 0; back < ALLOW_SIZE_4; ++back) {
+            int32_t frontIndex = backToFront[back];
+            if (LessNotEqual(item->value[frontIndex].f32, 0.0f)) {
+                FillVecFromDashParams(gapVals, NUM_1, dashGap, static_cast<ArkUI_Float32>(unit));
+            } else {
+                FillVecFromDashParams(gapVals, NUM_1, item->value[frontIndex].f32, static_cast<ArkUI_Float32>(unit));
+            }
+        }
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    FillVecFromDashParams(gapVals, NUM_0, 0.0, static_cast<ArkUI_Float32>(unit));
+    FillVecFromDashParams(gapVals, NUM_0, 0.0, static_cast<ArkUI_Float32>(unit));
+    fullImpl->getNodeModifiers()->getCommonModifier()->setDashGap(
+        node->uiNodeHandle, gapVals.data(), gapVals.size(), nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetDashGap(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetDashGap(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetDashGap(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 dashGap[NUM_4];
+    auto unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getDashGap(node->uiNodeHandle, &dashGap, unit);
+    g_numberValues[NUM_0].f32 = dashGap[NUM_0];
+    g_numberValues[NUM_1].f32 = dashGap[NUM_1];
+    g_numberValues[NUM_2].f32 = dashGap[NUM_2];
+    g_numberValues[NUM_3].f32 = dashGap[NUM_3];
+    return &g_attributeItem;
+}
+
+int32_t SetDashWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    std::vector<ArkUI_Float32> widthVals;
+    auto* fullImpl = GetFullImpl();
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    auto dashWidth = DEFAULT_DASH_GAP;
+    if (item->size == ALLOW_SIZE_4) {
+        int32_t backToFront[NUM_4] = { NUM_3, NUM_1, NUM_0, NUM_2 };
+        for (int32_t back = 0; back < ALLOW_SIZE_4; ++back) {
+            int32_t frontIndex = backToFront[back];
+            if (LessNotEqual(item->value[frontIndex].f32, 0.0f)) {
+                FillVecFromDashParams(widthVals, NUM_1, dashWidth, static_cast<ArkUI_Float32>(unit));
+            } else {
+                FillVecFromDashParams(widthVals, NUM_1, item->value[frontIndex].f32, static_cast<ArkUI_Float32>(unit));
+            }
+        }
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    FillVecFromDashParams(widthVals, NUM_0, 0.0, static_cast<ArkUI_Float32>(unit));
+    FillVecFromDashParams(widthVals, NUM_0, 0.0, static_cast<ArkUI_Float32>(unit));
+    fullImpl->getNodeModifiers()->getCommonModifier()->setDashWidth(
+        node->uiNodeHandle, widthVals.data(), widthVals.size(), nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetDashWidth(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetDashWidth(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetDashWidth(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 dashWidth[NUM_4];
+    auto unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getDashWidth(node->uiNodeHandle, &dashWidth, unit);
+    g_numberValues[NUM_0].f32 = dashWidth[NUM_0];
+    g_numberValues[NUM_1].f32 = dashWidth[NUM_1];
+    g_numberValues[NUM_2].f32 = dashWidth[NUM_2];
+    g_numberValues[NUM_3].f32 = dashWidth[NUM_3];
+    return &g_attributeItem;
+}
+
+int32_t SetBorderRadiusType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize != NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto type = static_cast<ArkUI_Int32>(RenderStrategy::FAST);
+    if (InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        type = item->value[NUM_0].i32;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadiusType(node->uiNodeHandle, type);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetBorderRadiusType(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetBorderRadiusType(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetBorderRadiusType(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getCommonModifier()->getBorderRadiusType(node->uiNodeHandle);
+    if (g_numberValues[0].i32 < 0 || g_numberValues[0].i32 > 1) {
+        return nullptr;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetLinearSpace(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size <= NUM_0 || item->size > NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    auto space = 0.0;
+    if (!LessNotEqual(item->value[0].f32, 0.0f)) {
+        space = item->value[0].f32;
+    }
+    switch (node->type) {
+        case ARKUI_NODE_COLUMN:
+            fullImpl->getNodeModifiers()->getColumnModifier()->setColumnSpace(node->uiNodeHandle, space, unit, nullptr);
+            break;
+        case ARKUI_NODE_ROW:
+            fullImpl->getNodeModifiers()->getRowModifier()->setRowSpace(node->uiNodeHandle, space, unit, nullptr);
+            break;
+        default:
+            break;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetLinearSpace(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_COLUMN:
+            fullImpl->getNodeModifiers()->getColumnModifier()->resetColumnSpace(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_ROW:
+            fullImpl->getNodeModifiers()->getRowModifier()->resetRowSpace(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+}
+
+const ArkUI_AttributeItem* GetLinearSpace(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_COLUMN:
+            g_numberValues[0].f32 =
+                fullImpl->getNodeModifiers()->getColumnModifier()->getColumnSpace(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_ROW:
+            g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getRowModifier()->getRowSpace(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetLinearReverse(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || item->value[NUM_0].i32 < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_COLUMN:
+            fullImpl->getNodeModifiers()->getColumnModifier()->setColumnReverse(
+                node->uiNodeHandle, item->value[NUM_0].i32);
+            break;
+        case ARKUI_NODE_ROW:
+            fullImpl->getNodeModifiers()->getRowModifier()->setRowReverse(node->uiNodeHandle, item->value[NUM_0].i32);
+            break;
+        default:
+            break;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetLinearReverse(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_COLUMN:
+            fullImpl->getNodeModifiers()->getColumnModifier()->resetColumnReverse(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_ROW:
+            fullImpl->getNodeModifiers()->getRowModifier()->resetRowReverse(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+}
+
+const ArkUI_AttributeItem* GetLinearReverse(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_COLUMN:
+            g_numberValues[0].i32 =
+                fullImpl->getNodeModifiers()->getColumnModifier()->getColumnReverse(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_ROW:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getRowModifier()->getRowReverse(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetFlexSpace(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size <= NUM_0 || item->size > NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    auto main = 0.0;
+    auto cross = 0.0;
+    if (!LessNotEqual(item->value[0].f32, 0.0f)) {
+        main = item->value[0].f32;
+    }
+    if (!LessNotEqual(item->value[1].f32, 0.0f)) {
+        cross = item->value[1].f32;
+    }
+    fullImpl->getNodeModifiers()->getFlexModifier()->setFlexMainSpace(node->uiNodeHandle, main, unit);
+    fullImpl->getNodeModifiers()->getFlexModifier()->setFlexCrossSpace(node->uiNodeHandle, cross, unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetFlexSpace(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getFlexModifier()->resetFlexSpace(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetFlexSpace(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 space[NUM_2];
+    fullImpl->getNodeModifiers()->getFlexModifier()->getFlexSpace(node->uiNodeHandle, &space);
+    g_numberValues[NUM_0].f32 = space[NUM_0];
+    g_numberValues[NUM_1].f32 = space[NUM_1];
+    return &g_attributeItem;
+}
+
 using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
 using Getter = const ArkUI_AttributeItem*(ArkUI_NodeHandle node);
 using Resetter = void(ArkUI_NodeHandle node);
@@ -18101,6 +18483,12 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetOnClickDistancethreshold,
         SetResponseRegionList,
         SetMonopolizeEvents,
+        SetChainWeight,
+        SetIgnoreLayoutSafeArea,
+        SetDashWidth,
+        SetDashGap,
+        SetLayoutGravity,
+        SetBorderRadiusType,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -18230,6 +18618,12 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetOnClickDistancethreshold,
         GetResponseRegionList,
         GetMonopolizeEvents,
+        GetChainWeight,
+        GetIgnoreLayoutSafeArea,
+        GetDashWidth,
+        GetDashGap,
+        GetLayoutGravity,
+        GetBorderRadiusType,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -18363,6 +18757,12 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetOnClickDistancethreshold,
         ResetResponseRegionList,
         ResetMonopolizeEvents,
+        ResetChainWeight,
+        ResetIgnoreLayoutSafeArea,
+        ResetDashWidth,
+        ResetDashGap,
+        ResetLayoutGravity,
+        ResetBorderRadiusType,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -19557,7 +19957,7 @@ const ArkUI_AttributeItem* GetListItemGroupAttribute(ArkUI_NodeHandle node, int3
 
 int32_t SetColumnAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetAlignItems, SetJustifyContent };
+    static Setter* setters[] = { SetAlignItems, SetJustifyContent, SetLinearSpace, SetLinearReverse };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "column node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19567,7 +19967,7 @@ int32_t SetColumnAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
 
 void ResetColumnAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetAlignItems, ResetJustifyContent };
+    static Resetter* resetters[] = { ResetAlignItems, ResetJustifyContent, ResetLinearSpace, ResetLinearReverse };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "column node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19577,7 +19977,7 @@ void ResetColumnAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 const ArkUI_AttributeItem* GetColumnAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetAlignItems, GetJustifyContent };
+    static Getter* getters[] = { GetAlignItems, GetJustifyContent, GetLinearSpace, GetLinearReverse };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "column node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19588,7 +19988,7 @@ const ArkUI_AttributeItem* GetColumnAttribute(ArkUI_NodeHandle node, int32_t sub
 
 int32_t SetRowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetAlignItems, SetJustifyContent };
+    static Setter* setters[] = { SetAlignItems, SetJustifyContent, SetLinearSpace, SetLinearReverse };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "row node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19598,7 +19998,7 @@ int32_t SetRowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_At
 
 void ResetRowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetAlignItems, ResetJustifyContent };
+    static Resetter* resetters[] = { ResetAlignItems, ResetJustifyContent, ResetLinearSpace, ResetLinearReverse };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "row node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19608,7 +20008,7 @@ void ResetRowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 const ArkUI_AttributeItem* GetRowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetAlignItems, GetJustifyContent };
+    static Getter* getters[] = { GetAlignItems, GetJustifyContent, GetLinearSpace, GetLinearReverse };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "row node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19619,7 +20019,7 @@ const ArkUI_AttributeItem* GetRowAttribute(ArkUI_NodeHandle node, int32_t subTyp
 
 int32_t SetFlexAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetFlexOptions };
+    static Setter* setters[] = { SetFlexOptions, SetFlexSpace };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "flex node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19629,7 +20029,7 @@ int32_t SetFlexAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 
 void ResetFlexAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetFlexOptions };
+    static Resetter* resetters[] = { ResetFlexOptions, ResetFlexSpace };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "flex node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19639,7 +20039,7 @@ void ResetFlexAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 const ArkUI_AttributeItem* GetFlexAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetFlexOptions };
+    static Getter* getters[] = { GetFlexOptions, GetFlexSpace };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "flex node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

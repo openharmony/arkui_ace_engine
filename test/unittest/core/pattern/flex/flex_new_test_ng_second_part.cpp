@@ -747,4 +747,25 @@ HWTEST_F(FlexNewTestNG, WrapAndFixTest002, TestSize.Level0)
     auto textOffset = textGeometryNode->GetFrameOffset();
     EXPECT_EQ(textOffset, OffsetF(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: FlexSpace001
+ * @tc.desc: test flex space
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexSpace001, TestSize.Level0)
+{
+    auto flexNode = CreateFlexRow([this](FlexModelNG model) { CreateText(u"text1", [this](TextModelNG model) {}); });
+    FlexModelNG model;
+    ASSERT_NE(flexNode, nullptr);
+    auto layoutProperty = flexNode->GetLayoutPropertyPtr<FlexLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(model.GetFlexMainSpace(AceType::RawPtr(flexNode)), 0.0);
+    EXPECT_EQ(model.GetFlexCrossSpace(AceType::RawPtr(flexNode)), 0.0);
+    auto space = CalcDimension(10.0, DimensionUnit::VP);
+    layoutProperty->UpdateSpace(space);
+    layoutProperty->UpdateCrossSpace(space);
+    EXPECT_EQ(model.GetFlexMainSpace(AceType::RawPtr(flexNode)), 10.0);
+    EXPECT_EQ(model.GetFlexCrossSpace(AceType::RawPtr(flexNode)), 10.0);
+}
 } // namespace OHOS::Ace::NG

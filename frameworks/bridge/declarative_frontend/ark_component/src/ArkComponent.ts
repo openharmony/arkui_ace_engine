@@ -4111,6 +4111,20 @@ class SystemMaterialModifier extends ModifierWithKey<SystemUiMaterial | undefine
   }
 }
 
+class ChainWeightModifier extends ModifierWithKey<ChainWeightOptions> {
+  constructor(chainWeight: ChainWeightOptions) {
+    super(chainWeight);
+  }
+  static identity: Symbol = Symbol('chainWeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetChainWeight(node);
+    } else {
+      getUINativeModule().common.setChainWeight(node, this.value!);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -5990,6 +6004,21 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   systemMaterial(material: SystemUiMaterial | undefined) {
     modifierWithKey(this._modifiersWithKeys, SystemMaterialModifier.identity, SystemMaterialModifier, material);
+    return this;
+  }
+  chainWeight(chainWeight: ChainWeightOptions): this {
+    let weight = new ArkChainWeight();
+    if (!isUndefined(chainWeight?.horizontal) && chainWeight?.horizontal !== null) {
+      if (isNumber(chainWeight.horizontal)) {
+        weight.horizontal = chainWeight.horizontal;
+      }  
+    }
+    if (!isUndefined(chainWeight?.vertical) && chainWeight?.vertical !== null) {
+      if (isNumber(chainWeight.vertical)) {
+        weight.vertical = chainWeight.vertical;
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, ChainWeightModifier.identity, ChainWeightModifier, weight);
     return this;
   }
 }

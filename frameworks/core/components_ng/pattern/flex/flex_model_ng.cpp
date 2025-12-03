@@ -312,4 +312,20 @@ void FlexModelNG::SetCrossSpace(FrameNode* frameNode, const std::optional<Dimens
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossSpace, space.value(), frameNode);
     }
 }
+
+double FlexModelNG::GetFlexMainSpace(FrameNode* frameNode)
+{
+    auto space = CalcDimension(0.0, DimensionUnit::VP);
+    CHECK_NULL_RETURN(frameNode, space.Value());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, Space, space, frameNode, space);
+    return space.Value();
+}
+
+double FlexModelNG::GetFlexCrossSpace(FrameNode* frameNode)
+{
+    auto space = CalcDimension(0.0, DimensionUnit::VP);
+    CHECK_NULL_RETURN(frameNode, space.Value());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, CrossSpace, space, frameNode, space);
+    return space.Value();
+}
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -747,5 +748,73 @@ HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea004, TestSize.Level0)
     EXPECT_EQ(column1->GetGeometryNode()->GetFrameOffset(), OffsetF(200.0f, 190.0f));
     EXPECT_EQ(column2->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0f));
     EXPECT_EQ(column2->GetGeometryNode()->GetFrameOffset(), OffsetF(190.0f, 240.0f));
+}
+
+/**
+ * @tc.name: LinearSpace001
+ * @tc.desc: test column space
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearSpace001, TestSize.Level0)
+{
+    ColumnModelNG model;
+    model.Create(CalcDimension(10.0, DimensionUnit::VP), nullptr, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<LinearLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(model.GetSpace(frameNode), 10.0);
+}
+
+/**
+ * @tc.name: LinearSpace002
+ * @tc.desc: test row space
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearSpace002, TestSize.Level0)
+{
+    RowModelNG model;
+    model.Create(CalcDimension(10.0, DimensionUnit::VP), nullptr, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<LinearLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(model.GetSpace(frameNode), 10.0);
+}
+
+/**
+ * @tc.name: LinearReverse001
+ * @tc.desc: test column reverse
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearReverse001, TestSize.Level0)
+{
+    ColumnModelNG model;
+    model.Create(CalcDimension(10.0, DimensionUnit::VP), nullptr, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<FlexLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(model.GetIsReverse(frameNode), false);
+    layoutProperty->UpdateIsReverse(true);
+    EXPECT_EQ(model.GetIsReverse(frameNode), true);
+}
+
+/**
+ * @tc.name: LinearReverse002
+ * @tc.desc: test row reverse
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutNewTestNG, LinearReverse002, TestSize.Level0)
+{
+    RowModelNG model;
+    model.Create(CalcDimension(10.0, DimensionUnit::VP), nullptr, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<FlexLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(model.GetIsReverse(frameNode), false);
+    layoutProperty->UpdateIsReverse(true);
+    EXPECT_EQ(model.GetIsReverse(frameNode), true);
 }
 } // namespace OHOS::Ace::NG
