@@ -101,10 +101,6 @@ interface CommonArcButtonOptions {
    * ClickEvent
    */
   onClick?: Callback<ClickEvent>
-  /**
-   * ArcButtonProgress属性
-   */
-  progressConfig?: ArcButtonProgressConfig;
 }
 
 
@@ -181,19 +177,6 @@ interface ArcButtonThemeInterface {
 }
 
 @ObservedV2
-export class ArcButtonProgressConfig {
-  @Trace public value: number;
-  @Trace public total?:number;
-  @Trace public color?: ColorMetrics;
-
-  constructor(options: ArcButtonProgressConfig) {
-    this.value = options.value;
-    this.total = options.total;
-    this.color = options.color;
-  }
-}
-
-@ObservedV2
 export class ArcButtonOptions {
   @Trace public position: ArcButtonPosition;
   @Trace public styleMode: ArcButtonStyleMode;
@@ -211,7 +194,6 @@ export class ArcButtonOptions {
   @Trace public fontMargin: LocalizedMargin;
   @Trace public onTouch?: Callback<TouchEvent>;
   @Trace public onClick?: Callback<ClickEvent>;
-  @Trace public progressConfig?: ArcButtonProgressConfig;
 
   constructor(options: CommonArcButtonOptions) {
     this.position = options.position ?? ArcButtonPosition.BOTTOM_EDGE;
@@ -222,7 +204,7 @@ export class ArcButtonOptions {
     this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(Color.Black);
     this.shadowColor = options.shadowColor ?? ColorMetrics.resourceColor('#000000');
     this.shadowEnabled = options.shadowEnabled ?? false;
-    this.fontSize = options.fontSize!;
+    this.fontSize = options.fontSize;
     this.fontColor = options.fontColor ?? ColorMetrics.resourceColor(Color.White);
     this.pressedFontColor = options.pressedFontColor ?? ColorMetrics.resourceColor(Color.White);
     this.fontStyle = options.fontStyle ?? FontStyle.Normal;
@@ -237,11 +219,6 @@ export class ArcButtonOptions {
     })
     this.onClick = options.onClick ?? (() => {
     })
-    if(options.progressConfig) {
-      this.progressConfig = new ArcButtonProgressConfig(options.progressConfig);
-    } else {
-      this.progressConfig = undefined;
-    }
   }
 }
 
@@ -258,10 +235,7 @@ export struct ArcButton {
   @Local private fontColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
   @Local private isExceed: boolean = false;
   @Local private pathString: string = '';
-  @Local private fontSize: string = '';
-  @Local private progressValue:number = 0;
-  @Local private progressTotal:number = 100;
-  @Local private progressColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
+  @Local private fontSize: string = ''
   private btnNormalColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
   private btnPressColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
   private btnDisableColor: ColorMetrics = ColorMetrics.resourceColor(Color.Black);
@@ -285,22 +259,6 @@ export struct ArcButton {
     this.fontSize = this.cover(this.options.fontSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE))
     this.judgeTextWidth()
     this.changeStatus()
-  }
-
-  @Monitor('options.progressConfig', 'options.progressConfig.color', 'options.progressConfig.total',
-  'options.progressConfig.value')
-  progressOptionsChange(){
-    if(this.options.progressConfig) {
-      this.progressValue = this.options.progressConfig.value;
-      if(this.options.progressConfig.color) {
-        this.progressColor = this.options.progressConfig.color;
-      }
-      if(this.options.progressConfig.total) {
-        this.progressTotal = this.options.progressConfig.total;
-      } else {
-        this.progressTotal = 100;
-      }
-    }
   }
 
   changeStatus() {
@@ -366,7 +324,6 @@ export struct ArcButton {
     this.fontColor = this.options.fontColor;
     this.curves = Curves.interpolatingSpring(10, 1, 350, 35);
     this.scaleValue = 0.95;
-    this.progressOptionsChange();
     this.changeStatus();
   }
 
@@ -535,27 +492,14 @@ export struct ArcButton {
 
   build() {
     Stack({ alignContent: Alignment.Center }) {
-      if (this.options.progressConfig) {
-        Progress({value: this.progressValue, total: this.progressTotal, type: ProgressType.Capsule})
-          .width('100%')
-          .height('100%')
-          .rotate({ angle: !this.isUp ? 0 : 180 })
-          .clipShape(new Path({ commands: this.pathString }))
-          .backgroundColor(this.btnColor.color)
-          .color(this.progressColor?.color)
-          .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
-          .shadow(this.getShadow())
-      } else  {
-        Button({ type: ButtonType.Normal, stateEffect: true })
-          .width('100%')
-          .height('100%')
-          .rotate({ angle: !this.isUp ? 0 : 180 })
-          .clipShape(new Path({ commands: this.pathString }))
-          .backgroundColor(this.btnColor.color)
-          .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
-          .shadow(this.getShadow())
-      }
-
+      Button({ type: ButtonType.Normal, stateEffect: true })
+        .width('100%')
+        .height('100%')
+        .rotate({ angle: !this.isUp ? 0 : 180 })
+        .clipShape(new Path({ commands: this.pathString }))
+        .backgroundColor(this.btnColor.color)
+        .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
+        .shadow(this.getShadow())
       if (this.isExceed) {
         this.TextBuilderIsExceed()
       } else {
