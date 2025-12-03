@@ -131,7 +131,7 @@ double OffscreenCanvasPeer::OnGetWidth(double errValue)
         return errValue;
     }
     fWidth /= density;
-    return fWidth / density;
+    return fWidth;
 }
 void OffscreenCanvasPeer::OnSetWidth(double value)
 {
