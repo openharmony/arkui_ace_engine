@@ -143,10 +143,11 @@ public:
         ViewAbstract::SetChainWeight(frameNode, value);
     }
 
-    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+    static void BindPopup(const RefPtr<FrameNode>& targetNode,
+        const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
     {
         CHECK_NULL_VOID(targetNode);
-        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+        ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
     static void BindTips(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
