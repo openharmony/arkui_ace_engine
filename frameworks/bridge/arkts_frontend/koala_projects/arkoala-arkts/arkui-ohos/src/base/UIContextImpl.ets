@@ -1200,7 +1200,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1222,7 +1222,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
@@ -1243,7 +1243,7 @@ export class DetachedRootEntryManager {
         if (manager === undefined) {
             manager = GlobalStateManager.instance;
         }
-        const node = manager.updatableNode<IncrementalNode>(nodeFactory(), (context: StateContext) => {
+        const node = manager.updatableNodeEx<IncrementalNode>(nodeFactory(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())

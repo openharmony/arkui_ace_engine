@@ -719,6 +719,32 @@ bool ACE_FORCE_EXPORT ParseDimension(
     return false;
 }
 
+class ScrollerDataNapi :  public ScrollerImpl::ScrollerData {
+    DECLARE_ACE_TYPE(ScrollerDataNapi, ScrollerImpl::ScrollerData);
+public:
+    ScrollerDataNapi(const RefPtr<Framework::JSScroller>& jsScroller) : jsScroller_(jsScroller) {}
+    bool operator==(const Ace::RefPtr<ScrollerImpl::ScrollerData>& other) const override
+    {
+        auto impl = AceType::DynamicCast<ScrollerDataNapi>(other);
+        CHECK_NULL_RETURN(impl, false);
+        return jsScroller_ == impl->jsScroller_;
+    }
+    const WeakPtr<ScrollControllerBase>& GetController() const override
+    {
+        return jsScroller_->GetController();
+    }
+    void AddObserver(const ScrollerObserver& observer, int32_t id) override
+    {
+        jsScroller_->AddObserver(observer, id);
+    }
+    void RemoveObserver(int32_t id) override
+    {
+        jsScroller_->RemoveObserver(id);
+    }
+private:
+    RefPtr<Framework::JSScroller> jsScroller_;
+};
+
 RefPtr<Scroller> ACE_FORCE_EXPORT ParseScroller(napi_env env, napi_value value)
 {
     napi_valuetype valueType = napi_undefined;
@@ -732,7 +758,7 @@ RefPtr<Scroller> ACE_FORCE_EXPORT ParseScroller(napi_env env, napi_value value)
         return nullptr;
     }
     Framework::JSScroller* scroller = (Framework::JSScroller*)scrollerObject->GetNativePointerField(vm, 0);
-    return AceType::MakeRefPtr<ScrollerImpl>(AceType::Claim(scroller));
+    return AceType::MakeRefPtr<ScrollerImpl>(AceType::MakeRefPtr<ScrollerDataNapi>(AceType::Claim(scroller)));
 }
 
 } // namespace OHOS::Ace::Kit

@@ -17,7 +17,8 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_SRC_VIEW_SCROLLER_IMPL_H
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/scroller.h"
-#include "bridge/declarative_frontend/jsview/js_scroller.h"
+#include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -25,7 +26,16 @@ class ScrollerImpl : public Scroller {
     DECLARE_ACE_TYPE(ScrollerImpl, Scroller);
 
 public:
-    ScrollerImpl(const RefPtr<Framework::JSScroller>& jsScroller);
+    class ScrollerData : public AceType {
+        DECLARE_ACE_TYPE(ScrollerData, AceType);
+    public:
+        virtual bool operator==(const Ace::RefPtr<ScrollerData>& other) const = 0;
+        virtual const WeakPtr<ScrollControllerBase>& GetController() const = 0;
+        virtual void AddObserver(const ScrollerObserver& observer, int32_t id) = 0;
+        virtual void RemoveObserver(int32_t id) = 0;
+    };
+
+    ScrollerImpl(const RefPtr<ScrollerData>& scrollerData);
     ~ScrollerImpl() = default;
 
     void AddObserver(const Observer& observer, int32_t id) override;
@@ -44,7 +54,7 @@ public:
     void SetCanOverScroll(bool canOverScroll) override;
 
 private:
-    RefPtr<Framework::JSScroller> jsScroller_;
+    RefPtr<ScrollerData> scrollerData_;
 };
 } // namespace OHOS::Ace::Kit
 
