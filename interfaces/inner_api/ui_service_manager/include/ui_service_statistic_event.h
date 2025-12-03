@@ -27,20 +27,12 @@ namespace OHOS::Ace {
 class AppInfoParcel : public Parcelable {
 public:
     AppInfoParcel() = default;
-    AppInfoParcel(const std::string& bundleName, const std::string& abilityName,
-        const std::string& versionName, const std::string& versionCode);
+    AppInfoParcel(const std::string& bundleName);
     bool Marshalling(Parcel& parcel) const override;
     static AppInfoParcel *Unmarshalling(Parcel& parcel);
     const std::string& GetBundleName() const;
-    const std::string& GetAbilityName() const;
-    const std::string& GetVersionName() const;
-    const std::string& GetVersionCode() const;
-    bool EqualTo(const AppInfoParcel& appInfo);
 private:
     std::string bundleName_;
-    std::string abilityName_;
-    std::string versionName_;
-    std::string versionCode_;
 };
 
 struct StatisticEventInfoParcel : public Parcelable {

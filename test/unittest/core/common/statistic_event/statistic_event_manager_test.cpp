@@ -47,21 +47,18 @@ void StatisticEventManagerTest::TearDownTestSuite()
  */
 HWTEST_F(StatisticEventManagerTest, AggregateEvent001, TestSize.Level1)
 {
-    std::vector<StatisticEvent> events;
-    std::string bundleName = "";
-    std::string abilityName = "";
-    std::string versionName = "";
-    std::string versionCode = "";
-    AppInfoParcel newAppInfo(bundleName, abilityName, versionName, versionCode);
+    StatisticEvent event;
+    std::string bundleName = "com.example.test";
+    AppInfoParcel newAppInfo(bundleName);
     std::string eventName = "";
     StatisticEventInfoParcel newEventInfo(eventName, 1);
     DelayedSingleton<StatisticEventManager>::GetInstance()->AggregateEvent(
-        events, newAppInfo, newEventInfo);
-    EXPECT_EQ(events.size(), 1);
+        event, newAppInfo, newEventInfo);
+    EXPECT_EQ(event.bundleNames.size(), 1);
 
     DelayedSingleton<StatisticEventManager>::GetInstance()->AggregateEvent(
-        events, newAppInfo, newEventInfo);
-    EXPECT_EQ(events.size(), 1);
+        event, newAppInfo, newEventInfo);
+    EXPECT_EQ(event.bundleNames.size(), 1);
 }
 
 /**
@@ -74,10 +71,7 @@ HWTEST_F(StatisticEventManagerTest, SendStatisticEvents001, TestSize.Level1)
     DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.clear();
     
     std::string bundleName = "";
-    std::string abilityName = "";
-    std::string versionName = "";
-    std::string versionCode = "";
-    AppInfoParcel newAppInfo(bundleName, abilityName, versionName, versionCode);
+    AppInfoParcel newAppInfo(bundleName);
     std::string eventName = "";
     StatisticEventInfoParcel newEventInfo(eventName, 1);
     std::vector<StatisticEventInfoParcel> eventInfos;
@@ -104,10 +98,7 @@ HWTEST_F(StatisticEventManagerTest, ReportTimedStatisticEvent001, TestSize.Level
     DelayedSingleton<StatisticEventManager>::GetInstance()->InitReporter();
     
     std::string bundleName = "";
-    std::string abilityName = "";
-    std::string versionName = "";
-    std::string versionCode = "";
-    AppInfoParcel newAppInfo(bundleName, abilityName, versionName, versionCode);
+    AppInfoParcel newAppInfo(bundleName);
     std::string eventName = "FA_APP_START";
     StatisticEventInfoParcel newEventInfo(eventName, 1);
     std::vector<StatisticEventInfoParcel> eventInfos;

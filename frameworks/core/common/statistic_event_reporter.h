@@ -29,9 +29,6 @@ enum class StatisticEventType {
 
 struct StatisticAppInfo {
     std::string bundleName;
-    std::string abilityName;
-    std::string versionName;
-    std::string versionCode;
 };
 
 struct StatisticEventInfo {
