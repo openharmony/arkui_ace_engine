@@ -301,7 +301,7 @@ public:
         INTEROP_FATAL("Cannot allocate memory");
         return;
       }
-      interop_memory_set(value, length * sizeof(E), 0, length * sizeof(E));
+            interop_memory_set(value, length * sizeof(E), 0, length * sizeof(E));
       toClean.push_back(value);
     }
     array->length = length;
@@ -319,14 +319,14 @@ public:
       if (!keys) {
         INTEROP_FATAL("Cannot allocate memory");
       }
-      interop_memory_set(keys, length * sizeof(K), 0, length * sizeof(K));
+            interop_memory_set(keys, length * sizeof(K), 0, length * sizeof(K));
       toClean.push_back(keys);
 
       values = malloc(length * sizeof(V));
       if (!values) {
         INTEROP_FATAL("Cannot allocate memory");
       }
-      interop_memory_set(values, length * sizeof(V), 0, length * sizeof(V));
+        interop_memory_set(values, length * sizeof(V), 0, length * sizeof(V));
       toClean.push_back(values);
     }
     map->size = length;
