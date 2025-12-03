@@ -37,6 +37,14 @@ class stateMgmtDFX {
     };
   }
 
+  public static unwrapRawValue<T>(prop: T | ObservedPropertyAbstractPU<T>): T {
+    if (prop instanceof ObservedPropertyAbstract) {
+      const wrappedValue = prop.getUnmonitored();
+      return ObservedObject.GetRawObject(wrappedValue);
+    }
+    return ObserveV2.IsProxiedObservedV2(prop) ? prop[ObserveV2.SYMBOL_PROXY_GET_TARGET] : prop;
+  }
+
   public static reportStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>): void {
     const stateInfo: DumpInfo = new DumpInfo();
     try {
@@ -310,6 +318,41 @@ declare function _arkUIUncaughtPromiseError(error: any);
 function setAceDebugMode(): void {
   stateMgmtDFX.enableDebug = true;
 }
+
+function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath: string): Array<string | undefined> {
+  const result = [];
+  for (const id of nodeIds) {
+    let value = undefined;
+    let view = findViewById(id);
+    if (!view) {
+      const rootId = id + 1;
+      const rootView = findViewById(rootId);
+      if (rootView && rootView.__isEntry__Internal()) {
+        view = rootView;
+      }
+    }
+    if (view) {
+      value = view.__getPathValueFromJson__Internal(propertyName, jsonPath);
+    }
+    result.push(value);
+  }
+  return result;
+}
+
+function findViewById(id: number): ViewPU | ViewV2 | undefined {
+  if (SubscriberManager.Has(id)) { // v1
+    const view = SubscriberManager.Find(id);
+    if (view instanceof ViewPU) {
+      return view;
+    }
+  } else if (id in ObserveV2.getObserve().id2cmp_) { // v2
+    const view = ObserveV2.getObserve().id2cmp_[id].deref();
+    if (view instanceof ViewV2) {
+      return view;
+    }
+  }
+  return undefined;
+};
 
 class aceDebugTrace {
   public static begin(...args: any): void {

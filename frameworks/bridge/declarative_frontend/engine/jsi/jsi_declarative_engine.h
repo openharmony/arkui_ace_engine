@@ -229,6 +229,8 @@ public:
     void CallRemoveAvailableInstanceIdFunc(
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs);
+    std::vector<std::optional<std::string>> CallGetStateMgmtInfo(const std::vector<int32_t>& nodeIds,
+        const std::string& propertyName, const std::string& jsonPath);
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -280,6 +282,7 @@ private:
     static shared_ptr<JsRuntime> globalRuntime_;
     shared_ptr<JsValue> uiContext_;
     shared_ptr<JsValue> uiNodeCleanUpIdleFunc_;
+    shared_ptr<JsValue> getStateMgmtInfoFunc_;
     static std::shared_mutex globalRuntimeMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
@@ -467,6 +470,12 @@ public:
     void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override
     {
         engineInstance_->CallStateMgmtCleanUpIdleTaskFunc(maxTimeInNs);
+    }
+
+    std::vector<std::optional<std::string>> CallGetStateMgmtInfo(const std::vector<int32_t>& nodeIds,
+        const std::string& propertyName, const std::string& jsonPath) override
+    {
+        return engineInstance_->CallGetStateMgmtInfo(nodeIds, propertyName, jsonPath);
     }
 
     void JsStateProfilerResgiter();

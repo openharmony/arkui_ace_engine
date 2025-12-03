@@ -1242,5 +1242,26 @@ abstract class ViewPU extends PUV2ViewBase
         If.pop();
     }, If);
   }
+
+  public __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined {
+    const fieldName = `__${propertyName}`;
+    if (!Object.prototype.hasOwnProperty.call(this, fieldName)) {
+      return undefined;
+    }
+    const prop = Reflect.get(this, fieldName);
+    let value = stateMgmtDFX.unwrapRawValue(prop);
+    if (typeof value === 'string') {
+      try {
+        value = JSON.parse(value);
+      } catch {
+        stateMgmtConsole.warn('Invalid json string');
+        return undefined;
+      }
+    }
+    if (value === null || value === undefined || typeof value !== 'object') {
+      return undefined;
+    }
+    return this.__findPathValueInJson__Internal(value, jsonPath);
+  }
 } // class ViewPU
 
