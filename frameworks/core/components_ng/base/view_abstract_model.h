@@ -475,7 +475,9 @@ public:
     virtual int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
-    virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
+    virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,

@@ -1607,7 +1607,7 @@ void ViewAbstractModelImpl::BindMenu(
 }
 
 void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
-    const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+    NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
