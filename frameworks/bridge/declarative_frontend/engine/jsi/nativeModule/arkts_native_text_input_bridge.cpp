@@ -1928,14 +1928,16 @@ void TextInputBridge::ParseCounterTextColor(ArkUIRuntimeCallInfo* runtimeCallInf
     Color counterTextColor;
     Color counterTextOverflowColor;
     if (!ArkTSUtils::ParseColorMetricsToColor(vm, counterTextColorArg, counterTextColor, resourceObjectTextColor)) {
-        showCountOptions->counterTextColor = -1;
+        showCountOptions->counterTextColorIsSet = false;
     } else {
+        showCountOptions->counterTextColorIsSet = true;
         showCountOptions->counterTextColor = counterTextColor.GetValue();
     }
     if (!ArkTSUtils::ParseColorMetricsToColor(
         vm, counterTextOverflowColorArg, counterTextOverflowColor, resourceObjectTextOverflowColor)) {
-        showCountOptions->counterTextOverflowColor = -1;
+        showCountOptions->counterTextOverflowColorIsSet = false;
     } else {
+        showCountOptions->counterTextOverflowColorIsSet = true;
         showCountOptions->counterTextOverflowColor = counterTextOverflowColor.GetValue();
     }
 }

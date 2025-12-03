@@ -844,12 +844,12 @@ void SetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* 
     TextFieldModelNG::SetShowCounter(frameNode, showCountOptions->open);
     TextFieldModelNG::SetCounterType(frameNode, showCountOptions->thresholdPercentage);
     TextFieldModelNG::SetShowCounterBorder(frameNode, showCountOptions->highlightBorder);
-    if (showCountOptions->counterTextColor != -1) {
+    if (showCountOptions->counterTextColorIsSet) {
         TextFieldModelNG::SetCounterTextColor(frameNode, Color(showCountOptions->counterTextColor));
     } else {
         TextFieldModelNG::ResetCounterTextColor(frameNode);
     }
-    if (showCountOptions->counterTextOverflowColor != -1) {
+    if (showCountOptions->counterTextOverflowColorIsSet) {
         TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color(showCountOptions->counterTextOverflowColor));
     } else {
         TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
